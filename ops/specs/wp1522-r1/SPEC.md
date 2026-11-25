@@ -1,6 +1,6 @@
-# wp1522 r2 — nợ B1a: khoanh lời hứa toàn phần của lệnh thu (biên ngoài cùng) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
+# wp1522 r3 — nợ B1a: bỏ lời hứa toàn phần của lệnh thu (chỉ giữ tính chất an toàn) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
 packet_id: wp1522
-revision: 2
+revision: 3
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
@@ -11,53 +11,40 @@ review_class: sensitive
 executor: claude
 environment: cloud (Linux)
 
-Trạng thái: r2, thay r1 (`ops/wp1522-r1@2669618`, sha256 `fe10053a…`, chưa từng được duyệt). Review đặc tả Codex lượt 1 trên r1 trả `blocked` với 2 finding P2: N1-01 `v1-not-fully-specified` (lần tái diễn thứ 5 của lớp này, đếm theo L4) và N1-02 `mutant-oracles-non-discriminating`. r2 viết lại §1 thành lời hứa có khoảng phủ, danh sách loại trừ đóng và trạng thái tệp cuối xác định; sửa fixture để mỗi luật mới có ca phân biệt riêng. Chưa duyệt băm, chưa có lease.
+Trạng thái: r3, lượt soạn cuối (3/3). Thay r2 (`ops/wp1522-r1@5826c84`, sha256 `07f7cf25…`). Review lượt 2 trên r2 trả `blocked`: N1-02 ĐÃ VÁ THẬT; N1-01 VÁ SINH LỖI MỚI; finding mới N1-03 P2 thuộc lớp `v1-not-fully-specified`, lần tái diễn thứ 6. Checkpoint §12: không vá tiếp; chủ kho chọn bỏ lời hứa toàn phần. r3 viết lại §1 thành MỘT tính chất an toàn, bỏ biên ngoài cùng và bản dự phòng. K2, K4 và hiện vật v2 không đổi byte. Chưa duyệt băm, chưa có lease.
 
 ## Mục tiêu
-Đóng ba khoản nợ của B1a #1460: khoản 1, 2 và 4 trong mục `no_ngoai_pham_vi` của `ops/land/pr1516-wp1460-land-evidence.yaml`. Lớp `v1-not-fully-specified` đã tái diễn bốn lần (B1-04 ở review đặc tả, F02, F02-R2, F02-R3 ở review mã PR #1516). Theo L4 của skill soạn spec, số đếm hình dạng lỗi chép sang packet này là **4**. Packet này đổi cách xử lý từ vá từng nơi tiêu dùng sang hai việc:
-- **K1** — một biên bắt lỗi NGOÀI CÙNG trong lệnh thu, và một lời hứa viết lại có khoanh rõ.
-- **K2** — tài liệu mà chính parser từ chối (kể cả vì độ sâu) được khai thẳng là «không đọc được», nằm TRONG lời hứa đã khoanh.
+Đóng ba khoản nợ của B1a #1460: khoản 1, 2 và 4 trong mục `no_ngoai_pham_vi` của `ops/land/pr1516-wp1460-land-evidence.yaml`. Lớp `v1-not-fully-specified` đã tái diễn sáu lần: B1-04 ở review đặc tả wp1460; F02, F02-R2, F02-R3 ở review mã PR #1516; N1-01, N1-03 ở review đặc tả của chính packet này. Theo L4 của skill soạn spec, số đếm hình dạng lỗi chép sang là **6**. Packet này làm ba việc:
+- **K1** — bỏ lời hứa toàn phần; chỉ giữ tính chất AN TOÀN «tệp đã ghi thì hợp lệ, mã 0 ⇔ đã ghi biên nhận xanh» (quyết định chủ kho, phương án (b) của checkpoint §12).
+- **K2** — tài liệu mà chính parser từ chối (kể cả vì độ sâu) được khai thẳng là «không đọc được». Đây là hành vi của chốt hẹp `_doc_json_du`, kiểm bằng ca.
 - **K4** — oracle «Lệnh kiểm» v2: không ném ở năm 0001, định dạng mốc không phụ thuộc nền, thêm luật đối chiếu chéo `jobs[].run_id`. Bên thu thêm điều kiện tương ứng ở X1.
 
 Hình biên nhận `bien_nhan_audit.v1` (schema) KHÔNG đổi một byte.
 
 ## Hợp đồng
 
-### 1. Lời hứa của lệnh thu (thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một biên nhận hợp lệ theo schema rồi mới thoát» ở wp1460 r9 §3)
-- **1a. Khoảng được phủ.** Từ lúc `doi_so_thu` trả về một context hợp lệ tới lúc `lenh_thu_bien_nhan_audit` trả mã thoát. Mọi bước trong khoảng này, gồm cả bước chuẩn bị bản dự phòng ở 1d, nằm TRONG biên ngoài cùng.
-- **1b. Lời hứa.** Trong khoảng 1a, trừ đúng các trường hợp liệt kê ở 1c, kết cục là đúng MỘT trong hai:
-  - (i) đường dẫn `ra` chứa đúng một biên nhận do CHÍNH lượt này ghi, hợp lệ theo schema đóng băng, và mã thoát là 0 khi biên nhận xanh, 1 khi không xanh;
-  - (ii) đường dẫn `ra` KHÔNG tồn tại và mã thoát là 1. Kết cục (ii) chỉ được phép khi mọi lần ghi ở 1e đều lỗi I/O.
+### 1. Lời hứa của lệnh thu: bỏ tính toàn phần, chỉ giữ tính chất AN TOÀN
 
-  Lời hứa KHÔNG đặt điều kiện «nếu hàm trả về». Một lỗi lập trình bất kỳ (`Exception` không thuộc 1c) phải rơi vào (i).
-- **1c. NGOÀI lời hứa (danh sách đóng; thêm mục mới phải qua revision):**
-  - tiến trình bị giết (tín hiệu, hết `timeout-minutes`);
-  - `KeyboardInterrupt`, `SystemExit` và mọi `BaseException` không phải `Exception`: không bị bắt, vẫn lan ra;
-  - `MemoryError` hoặc `RecursionError` xảy ra lại TRONG chính bước 1e(c) sau khi đã thất bại một lần ở bước chính;
-  - lỗi I/O (`OSError`) khi xoá, ghi hoặc thay tệp ở `ra`: kết cục (ii) nếu xoá được, còn không thì trạng thái `ra` không bảo đảm, kèm dòng chẩn đoán làm hết sức;
-  - không nạp được schema hoặc `jsonschema` ghim. Khi đó vẫn ghi biên nhận không xanh như tại base, nhưng không kiểm được tính hợp lệ; (i) chỉ còn đúng về hình, không còn đúng về kiểm.
-- **1d. Bản dự phòng (dựng TRƯỚC bước chính, bên trong biên).** Là hình không xanh của schema đóng băng, gồm ĐỦ các trường mà hình ấy bắt buộc. Mỗi trường lấy như sau:
-  - `schema`, `kho`, `kho_id`, `workflow.duong_dan`, `workflow.workflow_ref`, `luot.run_id`, `luot.run_attempt`, `su_kien.ten`, `su_kien.sha`, `su_kien.ref`: từ context đã kiểm;
-  - `su_kien.cron`: từ context, chuỗi rỗng ⇒ `null`;
-  - `su_kien.khung_danh_nghia_utc` và `su_kien.run_created_at`: `null`. Không trường mốc nào khác được `null`;
-  - `tao_luc`: giờ lúc chuẩn bị, cùng hàm và định dạng mà bên thu đang dùng (`_iso(_gio_utc())`). Đây là giờ tạo biên nhận, không phải mốc của lượt, nên không trái luật "không bịa mốc";
-  - `cong_cu`: cùng nguồn với bên thu (đường dẫn cố định, sha256 của bytes tệp đang chạy);
-  - `ok`: `false`;
-  - `ly_do`: đúng `["LỖI BẤT NGỜ trong lệnh thu"]`. Bản dự phòng KHÔNG mang tên lớp ngoại lệ.
+Mục này thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một biên nhận hợp lệ theo schema rồi mới thoát» ở wp1460 r9 §3. Quyết định chủ kho «(b) Bỏ lời hứa toàn phần» được đưa ra sau checkpoint §12, khi lớp `v1-not-fully-specified` tái diễn lần thứ 6; bảng các lần tái diễn ở #1522.
 
-  Bản dự phòng được kiểm theo schema khi bộ kiểm nạp được, rồi mã hoá thành bytes theo đúng cách mã hoá của bên thu. Bước chuẩn bị nào lỗi (một `Exception`) thì bản dự phòng = vắng. Lượt vẫn chạy bước chính, và nếu bước chính cũng lỗi thì đi tiếp theo 1e(c)–(d).
-- **1e. Thứ tự:**
-  - (a) Xoá `ra` nếu tồn tại. Lệnh thu SỞ HỮU đường dẫn này: một biên nhận cũ ở đó không bao giờ được sống sót qua lượt.
-  - (b) Bước chính: `thu_bien_nhan_audit`. Mọi lần ghi `ra`, ở đây và ở (c)–(d), đi qua MỘT hàm ghi nguyên tử: tệp tạm cùng thư mục, `fsync`, rồi `os.replace`. Ghi dở không bao giờ hiện ở `ra`.
-  - (c) Bước chính ném `Exception` ⇒ dựng biên nhận không xanh làm giàu: các trường như 1d, cộng `ly_do` = `["LỖI BẤT NGỜ: <tên lớp ngoại lệ>"]`. Không có `repr`/`str` của ngoại lệ hay của đầu vào. Kiểm schema, ghi nguyên tử, trả 1.
-  - (d) (c) lỗi vì bất kỳ `Exception` nào, kể cả không hợp schema ⇒ ghi nguyên tử bytes dự phòng của 1d (nếu có), trả 1.
-  - (e) Không còn gì để ghi, hoặc ghi lỗi ⇒ xoá `ra` (làm hết sức), in một dòng chẩn đoán lên stderr trong `try/except OSError`, trả 1.
-  - Ngoại lệ xảy ra SAU khi (b) đã ghi một biên nhận xanh ⇒ (c) thay tệp bằng biên nhận không xanh và trả 1. Fail-close, có chủ đích.
-  - Các chốt hẹp hiện có giữ nguyên: F02-R2, F02-R3 (sáu lớp lỗi YAML), `_hop_le_du`, `_doc_json_du`, `_gt_du`, kiểm UTF-8 tên. Chúng cho `ly_do` cụ thể hơn; biên ngoài cùng chỉ là lưới cuối.
-- **1f. Ranh giới đối số giữ nguyên.** Lỗi đối số ⇒ thoát 2, không ghi, KHÔNG xoá `ra`. Biên ngoài cùng không bọc `doi_so_thu`.
+- **1a. Lời hứa duy nhất.** Mọi tệp mà lệnh thu ghi ở đường dẫn `ra` đều là biên nhận hợp lệ theo schema đóng băng. Chi tiết:
+  - Biên nhận được kiểm bằng bộ kiểm của schema ngay TRƯỚC lần ghi, trên đúng đối tượng sắp mã hoá.
+  - Ghi đi qua MỘT hàm ghi nguyên tử: tệp tạm cùng thư mục, `fsync`, rồi `os.replace`.
+  - Kiểm không đạt, hoặc bộ kiểm không nạp được ⇒ KHÔNG ghi tệp ấy.
+  - Không có trạng thái nào mà `ra` chứa bytes dở hay một tệp không hợp schema do lượt này để lại.
+- **1b. Mã thoát.**
+  - 0 ⇔ lượt này đã ghi xong một biên nhận `ok: true` ở `ra`.
+  - 1 khi đã ghi xong một biên nhận `ok: false`.
+  - Mọi kết cục khác — lỗi đối số (2, như cũ), ngoại lệ bất kỳ lan ra, không ghi được — cho mã khác 0, và `ra` có thể vắng.
+  - Mã 0 không bao giờ xuất hiện khi chưa ghi biên nhận xanh.
+- **1c. Không còn lời hứa «luôn có biên nhận».** Lệnh thu KHÔNG bắt chung mọi ngoại lệ. Không có biên ngoài cùng, không có bản dự phòng. Một ngoại lệ bất ngờ lan ra, để traceback trong log job, và làm bước thu — tức job thu — đỏ.
+  - Bước tải biên nhận lên có `if-no-files-found: error`, nên vắng tệp cũng làm job đỏ.
+  - Bên tiêu dùng thấy job thu đỏ ⇒ từ chối lượt ấy theo C2. B2 phán `khong_do_duoc` cho lượt không có biên nhận, như hợp đồng B2 đã có.
+- **1d. Không để biên nhận cũ sống sót.** Ngay sau khi `doi_so_thu` trả về hợp lệ, lệnh thu xoá `ra` nếu có. Xoá lỗi ⇒ ngoại lệ lan ra, mã khác 0. Lỗi đối số ⇒ KHÔNG xoá.
+- **1e. Các chốt hẹp hiện có GIỮ nguyên:** F02-R2; F02-R3 (sáu lớp lỗi YAML); `_hop_le_du`; `_doc_json_du`; `_gt_du`; kiểm UTF-8 tên. Các ca hiện có của chúng (đầu vào hỏng ⇒ biên nhận không xanh) vẫn phải đạt. Từ đây chúng là HÀNH VI được kiểm bằng ca, KHÔNG phải một phần của lời hứa. Một đường hỏng mới mà không có chốt hẹp nào bắt thì cho kết cục ở 1c, và đó không phải vi phạm hợp đồng.
 
 ### 2. Tài liệu parser từ chối (K2)
-- `_doc_json_du` coi mọi tài liệu mà `json.loads` không trả về được (gồm `RecursionError` vì độ sâu) là «không đọc được». Ở REST và ở mảnh ⇒ không xanh; ở definition ⇒ `not_measured`. Đây là hành vi hiện tại và TRONG lời hứa 1a: vẫn có biên nhận hợp lệ.
+- `_doc_json_du` coi mọi tài liệu mà `json.loads` không trả về được (gồm `RecursionError` vì độ sâu) là «không đọc được». Ở REST và ở mảnh ⇒ không xanh; ở definition ⇒ `not_measured`. Đây là hành vi hiện tại của chốt hẹp (1e), kiểm bằng ca ở Nghiệm thu 3. Nó không phải một lời hứa toàn phần.
 - **Không mục tiêu**: đọc được tài liệu sâu hơn giới hạn parser. Không thêm parser phi đệ quy, không thêm trần độ sâu nào. Trần 64 của H3 đã bị F02-R3 bác.
 
 ### 3. Oracle «Lệnh kiểm» v2 và fixture v2 (K4) — hiện vật đóng băng
@@ -105,39 +92,30 @@ Hình biên nhận `bien_nhan_audit.v1` (schema) KHÔNG đổi một byte.
 
 ## Nghiệm thu
 1. **Hợp đồng máy.** Lưu khối «Lệnh kiểm» ra tệp ngoài kho, chạy `python3 -B <tệp> ops/specs/wp1522-r1/hop_dong --dot-bien` với `jsonschema==4.26.0` ⇒ đúng ba dòng ở mục 3, mã thoát 0. sha256 của ba hiện vật bằng bảng mục 3, trên nhánh đặc tả và trong PR.
-2. **Biên ngoài cùng (K1).** Viết ca tiến trình con theo kiểu `CON_1460`, tiêm lỗi bằng cách thay MỘT hàm nội bộ trong bản nạp; không thêm móc vào mã sản xuất. Mỗi ca chạy hai lần: với `ra` vắng, và với `ra` đã chứa sẵn một biên nhận `ok: true` của lượt khác. Kỳ vọng từng ca:
-   - **(a)–(c)** `RecursionError` từ giữa X2, `KeyError` từ giữa X4, `MemoryError` từ giữa X5: rc 1, `ra` là biên nhận không xanh hợp schema, `ly_do == ["LỖI BẤT NGỜ: <lớp>"]`.
-   - **(d)** Thông điệp ngoại lệ mang dấu `@BI_MAT_GIA@`: dấu ấy KHÔNG có trong `ra`, kể cả trong `ly_do`.
-   - **(e)** Bước (c) lỗi: `ra` TRÙNG BYTE bytes dự phòng, `ly_do == ["LỖI BẤT NGỜ trong lệnh thu"]`, rc 1.
-   - **(f)** Ngoại lệ ném sau khi (b) đã ghi xanh: `ra` là biên nhận không xanh, rc 1.
-   - **(g)** Bước chuẩn bị 1d lỗi, bước chính chạy bình thường: kết quả TRÙNG BYTE với lượt không tiêm lỗi, trừ `tao_luc`.
-   - **(h)** Bước chuẩn bị lỗi VÀ bước chính lỗi: rc 1. `ra` là biên nhận làm giàu của (c); nếu (c) cũng lỗi thì `ra` vắng và stderr có một dòng chẩn đoán.
-   - **(i)** Mọi lần ghi lỗi `OSError`: rc 1, `ra` vắng (biên nhận cũ ĐÃ bị xoá), một dòng stderr. Khi chính stderr cũng ném `BrokenPipeError`: rc 1, không ngoại lệ lan ra.
-   - **(j)** Ghi dở (tiêm lỗi giữa chừng trong hàm ghi nguyên tử): `ra` hoặc vắng, hoặc là một biên nhận hợp lệ trọn vẹn; không bao giờ là bytes dở.
-   - **(k)** `KeyboardInterrupt` lan ra, không bị nuốt.
-   - **(l)** Lỗi đối số: rc 2, KHÔNG có tệp mới, và biên nhận cũ ở `ra` (nếu có) KHÔNG bị xoá.
-   - **(m)** Biên nhận dự phòng và biên nhận làm giàu đều có ĐỦ trường bắt buộc của hình không xanh (so tập khoá với schema). Chỉ hai mốc của 1d là `null`.
+2. **Tính chất an toàn (K1).** Ca tiến trình con kiểu `CON_1460`, tiêm lỗi bằng cách thay MỘT hàm nội bộ trong bản nạp. Không thêm móc vào mã sản xuất. Mỗi ca chạy hai lần: với `ra` vắng, và với `ra` đã chứa sẵn một biên nhận `ok: true` của lượt khác.
+   - **(a)** Ngoại lệ (`RecursionError` / `KeyError` / `MemoryError`) từ giữa X2 / X4 / X5 ⇒ mã khác 0 và `ra` VẮNG, kể cả khi trước đó có biên nhận xanh cũ.
+   - **(b)** Biên nhận dựng ra không hợp schema ở lần kiểm cuối ⇒ không ghi, mã khác 0, `ra` vắng. Tiêm lỗi bằng cách làm hỏng một trường của đối tượng ngay trước lần kiểm cuối.
+   - **(c)** Tiêm lỗi giữa chừng trong hàm ghi nguyên tử, sau khi đã ghi một phần tệp tạm ⇒ `ra` vắng. Không còn tệp tạm nào trong thư mục, hoặc nếu còn thì tên của nó không trùng `ra`.
+   - **(d)** Bộ kiểm schema không nạp được ⇒ không ghi, mã khác 0.
+   - **(e)** Mã 0 ⇔ `ra` là biên nhận `ok: true` hợp schema. Kiểm trên MỌI ca dương và âm hiện có.
+   - **(f)** Lỗi đối số ⇒ mã 2, và biên nhận cũ ở `ra` KHÔNG bị xoá.
+   - **(g)** Mọi ca hiện có của wp1460 vẫn đạt, gồm các ca «đầu vào hỏng ⇒ biên nhận không xanh».
 3. **K2.** Hai ca hiện có ở biên parser (dấu job sâu, `started_at`/`completed_at` sâu) vẫn đạt. Thêm một ca: trường KHÔNG dùng của `rest/run.json` sâu hơn giới hạn parser đo trên chính nền (tìm nhị phân như `quet_bien`) ⇒ rc 1, biên nhận không xanh hợp schema, `ly_do` nêu `rest/run.json`.
 4. **K4 bên thu.** Ca âm: một bản ghi `jobs` có `run_id` = lượt + 1 ⇒ rc 1, không xanh. Ca âm: `run_id` vắng ⇒ không xanh. Ba ca dương hiện có (lượt khoẻ, chạy lại job thu, chạy lại một mảnh) vẫn xanh, và `tieu_dung` v2 trên đầu vào của ca cho tập vi phạm rỗng.
 5. **Hồi quy.** Mọi ca hiện có của wp1460 đạt. Dựng A/B base/head trong MỘT lệnh; mọi chênh lệch số ca phải giải thích được bằng ca thêm hoặc bỏ có tên.
 6. **Đột biến riêng cho MỖI chốt mới.** Chạy trên BẢN SAO tạm, tên tệp riêng, tắt bytecode; phân hạng bằng lớp ngoại lệ riêng của ca đích, neo tên ca; chết vì lỗi vô can ⇒ tín dụng giả. Tối thiểu:
-   - (i) gỡ biên ngoài cùng;
-   - (ii) bắt `BaseException`;
-   - (iii) `ly_do` mang `repr(e)`;
-   - (iv) bỏ bước kiểm schema của bản dự phòng;
-   - (v) dựng bản dự phòng SAU khi gọi bước chính;
-   - (vi) bọc cả `doi_so_thu` trong biên;
-   - (vii) bước chuẩn bị 1d nằm NGOÀI biên;
-   - (viii) bản dự phòng dùng `ly_do` làm giàu;
-   - (ix) bỏ bước xoá `ra` ở 1e(a);
-   - (x) ghi trực tiếp, không qua tệp tạm + `os.replace`;
-   - (xi) xoá `ra` cả khi lỗi đối số;
-   - (xii) bỏ `try/except OSError` quanh dòng chẩn đoán;
-   - (xiii) bỏ X1 `run_id`;
-   - (xiv) X1 chấp nhận `run_id` kiểu `float` bằng giá trị;
-   - (xv) `_khung_du` dùng lại `strftime`.
+   - (i) bỏ lần kiểm schema cuối trước khi ghi;
+   - (ii) ghi trực tiếp, không qua tệp tạm + `os.replace`;
+   - (iii) bỏ bước xoá `ra` ở 1d;
+   - (iv) xoá `ra` cả khi lỗi đối số;
+   - (v) trả 0 khi biên nhận đã ghi là `ok: false`;
+   - (vi) bắt chung `Exception` quanh bước chính và trả 0 hoặc 1 mà không ghi biên nhận;
+   - (vii) bộ kiểm không nạp được mà vẫn ghi;
+   - (viii) bỏ X1 `run_id`;
+   - (ix) X1 chấp nhận `run_id` kiểu `float` bằng giá trị;
+   - (x) `_khung_du` dùng lại `strftime`.
 
-   Mỗi đột biến neo đúng ca đích ở mục 2 hoặc mục 4. Riêng đột biến (i) phải làm ĐỎ cả ba ca 2(a)–(c).
+   Mỗi đột biến neo đúng ca đích ở mục 2 hoặc mục 4.
    Đòi `n/n` giết thật.
 7. **Cổng kho.** `python .claude/dev/ci_dang_ky_test.py --chay` N/N; Ruff F delta = 0 trên mọi `.py` đổi; numstat trong trần; CI PR Ubuntu xanh.
 
@@ -439,7 +417,7 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp và �
 
 ## Sổ quyết định (chủ kho, công cụ hỏi đáp trong phiên điều phối nợ, 2026-11-25 ~07:4xZ)
 - Gom: «2 packet»: N1 #1522 gồm khoản 1, 2, 4; N2 #1521 gồm khoản 3, 5.
-- Lời hứa: «Biên ngoài cùng + khoanh chữ».
+- Lời hứa (vòng 1): «Biên ngoài cùng + khoanh chữ». Quyết định này bị THAY ở checkpoint §12 sau review lượt 2: chủ kho chọn «(b) Bỏ lời hứa toàn phần (Recommended)» qua công cụ hỏi đáp ngày 2026-11-25 ~08:3xZ. Bảng tái diễn và các hướng đã nêu ở https://github.com/ducthangho/tra-luat/issues/1522#issuecomment-7156987442.
 - Thẩm quyền gốc của nợ: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7137001118 (phương án b). Ứng viên biên ngoài cùng lấy từ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7137108788.
 - Người soạn tự chọn, đưa vào lời xin duyệt băm để chủ kho bác nếu muốn:
   - hiện vật v2 đặt ở thư mục MỚI, giữ nguyên hai tệp v1 để không làm lệch GHIM-B1A của B2;
@@ -461,4 +439,5 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp và �
 | revision | thay đổi |
 |---|---|
 | r1 | bản đầu |
+| r3 | Checkpoint §12 sau N1-03 (`v1-not-fully-specified`, lần thứ 6). Quyết định chủ kho (b): §1 chỉ còn tính chất an toàn (1a–1e); bỏ biên ngoài cùng, bản dự phòng và lời hứa «luôn có biên nhận». Nghiệm thu 2 và bảng đột biến viết lại. Hiện vật `hop_dong/` và khối «Lệnh kiểm» không đổi. |
 | r2 | Review lượt 1, 2 finding P2.<br>• `v1-not-fully-specified` (N1-01; lần tái diễn thứ 5): §1 viết lại — khoảng phủ 1a; lời hứa 1b không đặt điều kiện «hàm trả về»; danh sách loại trừ đóng 1c; bản dự phòng đủ trường bắt buộc, chỉ hai mốc `null` (1d); thứ tự gồm xoá `ra`, ghi nguyên tử, dự phòng, chẩn đoán làm hết sức (1e); lỗi đối số không xoá `ra` (1f). Nghiệm thu 2 viết lại thành 13 ca, mỗi ca chạy với `ra` vắng và với `ra` chứa sẵn biên nhận xanh; đột biến 15 mục.<br>• `mutant-oracles-non-discriminating` (N1-02): sửa ca 0999 cho khung đúng lịch; thêm ca `run_id` float và ca thiếu `run_id`; thêm hai đột biến đích, đã đo là bị giết; X1 dùng cùng miền kiểu. |

@@ -38,6 +38,9 @@
 - r14 (sau cross-review lượt 13, đặc tả `ops/specs/llm-khoan-docx-r14.md`): đổi sang CẤM TIỀN TỐ — mọi đoạn trong thân mở bằng
   `Điều <số>` ⇒ chặn (kể cả dẫn chiếu đầu đoạn); ID danh sách chuẩn hoá bằng chuỗi (ID quá dài ở định nghĩa không dùng không còn
   làm hỏng lần đọc); khối/wrapper ngoài namespace Word ⇒ khối lạ.
+- r15 (sau cross-review lượt 14, đặc tả `ops/specs/llm-khoan-docx-r15.md`): một bản chiếu ký tự cho mọi tiền tố cấu trúc (NFC, bỏ
+  ký tự định dạng vô hình, ký tự không phải chữ/số thành khoảng trắng) — ký tự vô hình và gạch dưới không còn che tiêu đề hay số
+  gõ tay; hướng dẫn bỏ lời khuyên sửa câu chữ nguồn để lách chốt.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

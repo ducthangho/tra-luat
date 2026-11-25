@@ -398,7 +398,8 @@ biến môi trường của environment.
   tự động, đánh số qua style (kể cả style chỉ mang `ilvl`), nhãn cấp (`lvlText`, trừ định dạng `bullet` luôn thành `-`) ngoài
   `%N` + dấu `.` `)` `(` `-` `–` + khoảng trắng, phần tử tương thích `mc:` ở bất kỳ đâu, MỌI đoạn trong thân mở bằng
   `Điều <số>` (mọi hình dạng: `Điều 4 Phạm vi`, `Điều4`, `Điều 4_…`, sau nháy/ký hiệu đầu đoạn — kể cả điểm/khoản MỞ BẰNG dẫn
-  chiếu `Điều 5 của Luật này;`: viết lại thành `quy định tại Điều 5 …`), khối/wrapper ngoài namespace Word, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
+  chiếu `Điều 5 của Luật này;` — KHÔNG sửa câu chữ văn bản nguồn để lách chốt (nguyên văn phải đúng bản đã ban hành): Điều có
+  điểm/khoản như vậy phải tách khái niệm thủ công), khối/wrapper ngoài namespace Word, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
   `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
   không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
   `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột

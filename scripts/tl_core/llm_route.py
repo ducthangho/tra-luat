@@ -534,13 +534,21 @@ _RE_RANH_GIOI_LON = re.compile(
 # thì lộ hình dạng khác (dấu cuối, dấu giữa tên, gạch dưới…). Đổi từ "nhận diện tiêu đề" sang "cấm tiền tố": trong thân Điều,
 # MỌI đoạn mà (sau khi bỏ ký tự không phải chữ/số ở đầu, chuẩn hoá NFC) mở bằng `Điều` + số ⇒ chặn, bất kể ký tự sau số hay dấu câu
 # cuối đoạn. Cái giá đã khai: điểm/khoản MỞ BẰNG dẫn chiếu `Điều 5 …` cũng bị chặn (rc 2, không ghép sai).
+# r15 (lượt 14 Q1): MỘT bản chiếu ký tự cho mọi tiền tố cấu trúc — biên ký tự là thứ đã lọt qua mỗi lượt (gạch dưới là `\w`,
+# ký tự định dạng vô hình nằm giữa chữ và số). Bản chiếu: NFC → bỏ ký tự định dạng (Unicode `Cf`: zero-width, soft hyphen…) → mọi
+# ký tự không phải chữ/số thành khoảng trắng → gộp khoảng trắng. Sau đó các mẫu chỉ còn thấy chữ, số và một dấu cách.
+# CHỈ dùng để DÒ; nguyên văn đưa model và phép so vẫn là chữ gốc.
 _RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\s*\d", re.IGNORECASE)
-_RE_DAU_KHONG_CHU = re.compile(r"^[\W_]+")
+
+
+def _bo_vo_hinh(chu):
+    """r15 (lượt 14 Q1): NFC + bỏ ký tự định dạng vô hình (Unicode `Cf`)."""
+    return "".join(c for c in unicodedata.normalize("NFC", chu) if unicodedata.category(c) != "Cf")
 
 
 def _dau_doan(chu):
-    """r14 (lượt 13 N1): đầu đoạn để dò tiền tố cấu trúc — chuẩn hoá NFC, bỏ ký tự không phải chữ/số ở đầu (nháy, gạch dưới…)."""
-    return _RE_DAU_KHONG_CHU.sub("", unicodedata.normalize("NFC", chu))
+    """r14 (lượt 13 N1) → r15 (lượt 14 Q1): bản chiếu để dò tiền tố cấu trúc — chỉ chữ/số, mọi ký tự khác thành một dấu cách."""
+    return " ".join("".join(c if c.isalnum() else " " for c in _bo_vo_hinh(chu)).split())
 
 
 def _mo_bang_dieu(chu):
@@ -1122,7 +1130,7 @@ def doc_dieu_docx(nguon, dieu):
                 raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")
             continue
         nid, il = d["so"]
-        if _RE_SO_GO_TAY_DOCX.match(chu):
+        if _RE_SO_GO_TAY_DOCX.match(_bo_vo_hinh(chu).lstrip()):   # r15 (lượt 14 Q1): ký tự vô hình không che số gõ tay
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
             khoan.append([d["dem"][cap0], chu, chu])

@@ -1521,6 +1521,10 @@ def ca_cau_truc_docx_chan(m):
               "Ðiều 4 Phạm vi", "Điều 5 của Luật này.", "Điều 5 của Luật này quy định: “bản chính.”"):
         chan(lam_docx(H, p_docx("Hồ sơ là tài liệu theo:", 1), p_docx(t, 1, 1)), f"doan mo bang Dieu + so: {t!r}")
     chan(lam_docx(H, A, p_docx("_Chương II", 1, 1)), "tieu de Chuong sau ky hieu dau doan")
+    # r15 Q1: biên ký tự — ký tự định dạng vô hình giữa chữ và số / giữa chữ; gạch dưới sát số thứ tự Chương/Mục/Phần.
+    for t in ("Điều\u200b4 Phạm vi", "Đi\u200bều 4 Phạm vi", "Chương II_Quy định chung", "Mục 2_Hồ sơ", "Phần\u00ad thứ hai"):
+        chan(lam_docx(H, p_docx("Hồ sơ là tài liệu theo:", 1), p_docx(t, 1, 1)), f"tien to cau truc qua bien ky tu: {t!r}")
+    chan(lam_docx(H, p_docx("\u200b1. Hồ sơ là tài liệu.", 1), B), "so go tay sau ky tu vo hinh")
     # r14 N3: khối trùng tên cục bộ `p`/`sdt`/`customXml` nhưng NGOÀI namespace Word ⇒ khối lạ (trước và trong Điều).
     npr = '<w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>Dữ liệu là thông tin.</w:t></w:r>'
     chan(lam_docx(H, A, f'<x:p xmlns:x="urn:la">{npr}</x:p>'), "khoi p ngoai namespace Word (trong Dieu)")
@@ -1698,7 +1702,7 @@ DOT_BIEN = [
     ('wp1525_nhan_style_trong_dieu', ('    if any(d["so_tu_style"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_style_danh_so', ('    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)', '    nid, il = None, None'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_khong_danh_so', ('        raise ValueError(f"Dieu {dieu} khong co doan danh so tu dong', '        raise IndexError(f"Dieu {dieu} khong co doan danh so tu dong'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(_bo_vo_hinh(chu).lstrip()):', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_so_go_tay_nuot_thap_phan', ('_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)](?!\\d)")', '_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)]")'), 'ca_cau_truc_docx_dat'),
     ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_lien_tuc', ('    if [so for so, _, _ in khoan] != list(range(1, len(khoan) + 1)):', '    if False:'), 'ca_cau_truc_docx_chan'),
@@ -1749,8 +1753,10 @@ DOT_BIEN = [
     ('wp1525_dieu_phan_biet_hoa', ('_RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\\s*\\d", re.IGNORECASE)', '_RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\\s*\\d")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dieu_doi_khoang_trang', ('r"^[ĐÐ]iều\\s*\\d"', 'r"^[ĐÐ]iều\\s+\\d"'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dieu_bo_eth', ('r"^[ĐÐ]iều\\s*\\d"', 'r"^Điều\\s*\\d"'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_dau_doan_giu_ky_hieu', ('    return _RE_DAU_KHONG_CHU.sub("", unicodedata.normalize("NFC", chu))', '    return unicodedata.normalize("NFC", chu)'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_dau_doan_bo_nfc', ('    return _RE_DAU_KHONG_CHU.sub("", unicodedata.normalize("NFC", chu))', '    return _RE_DAU_KHONG_CHU.sub("", chu)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_dau_doan_giu_ky_hieu', ('"".join(c if c.isalnum() else " " for c in _bo_vo_hinh(chu))', '_bo_vo_hinh(chu)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_dau_doan_bo_nfc', ('    return "".join(c for c in unicodedata.normalize("NFC", chu) if unicodedata.category(c) != "Cf")', '    return "".join(c for c in chu if unicodedata.category(c) != "Cf")'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_giu_ky_tu_vo_hinh', ('    return "".join(c for c in unicodedata.normalize("NFC", chu) if unicodedata.category(c) != "Cf")', '    return unicodedata.normalize("NFC", chu)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_so_go_tay_tho', ('        if _RE_SO_GO_TAY_DOCX.match(_bo_vo_hinh(chu).lstrip()):', '        if _RE_SO_GO_TAY_DOCX.match(chu):'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ranh_gioi_lon_tho', ('_RE_RANH_GIOI_LON.match(_dau_doan(d["chu"]))', '_RE_RANH_GIOI_LON.match(d["chu"])'), 'ca_cau_truc_docx_chan'),
     ('wp1525_khoi_ten_cuc_bo', ('        ten = el.tag[len(_W):] if isinstance(el.tag, str) and el.tag.startswith(_W) else None', '        ten = el.tag.split("}")[-1]'), 'ca_cau_truc_docx_chan'),
     ('wp1525_phan_chinh_mac_dinh', ('        chinh = _phan_chinh(z, doc_gioi_han)', '        chinh = "word/document.xml"'), 'ca_cau_truc_docx_dat'),

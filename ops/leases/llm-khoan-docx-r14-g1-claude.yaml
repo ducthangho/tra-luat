@@ -120,3 +120,5 @@ revision_ly_do: 'Cross-review luot 13 (N1 P1, N2 P2, N3 P1); Review Rescue Check
 review_calls_limit: 14
 review_calls_used_truoc: 13
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r15-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 14 (Q1-Q2); revision r15 (ops/specs/llm-khoan-docx-r15.md), tran 15.'

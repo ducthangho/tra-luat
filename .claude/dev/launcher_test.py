@@ -16197,7 +16197,7 @@ def r1511_doctor_khong_snapshot_van_noi_ly_do_acl():
 DOT_BIEN = [
     ("r1511_nuot_ly_do_khong_snapshot", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return _CHO_SNAPSHOT'),
      ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
-    ("r1511_doctor_bo_ly_do", ('        return ("CHUA_XAC_THUC", ly_do_cho)', '        return ("CHUA_XAC_THUC", _CHO_SNAPSHOT)'),
+    ("r1511_doctor_bo_ly_do", ('        return ("CHUA_XAC_THUC", _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)', '        return ("CHUA_XAC_THUC", _CHO_SNAPSHOT)'),
      ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
     ("r1511_loi_doc_kho_thanh_tha", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return None'),
      ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),

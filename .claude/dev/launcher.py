@@ -4651,9 +4651,8 @@ def _do_codex(kiem_song: bool = False,
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
-    ly_do_cho = _ly_do_cho_snapshot(_codex_home_hieu_luc())
-    if ly_do_cho is not None:
-        return ("CHUA_XAC_THUC", ly_do_cho)
+    if _dang_cho_snapshot(_codex_home_hieu_luc()):   # cổng boolean giữ nguyên (ca cũ thay nó bằng giả)
+        return ("CHUA_XAC_THUC", _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)
     try:
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy

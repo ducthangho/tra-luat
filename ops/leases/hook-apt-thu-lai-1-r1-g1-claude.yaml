@@ -1,0 +1,47 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1523
+packet_id: hook-apt-thu-lai-1
+revision: 1
+generation: 1
+lease_id: hook-apt-thu-lai-1-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 437257a3cad68bdec7c646aa99ccd4f5fd4256da
+spec_path: ops/specs/hook-apt-thu-lai-1-r1.md
+spec_hash: 2e18c2b0368b4df0faa038bd910cdd36523a537866f3c83afb761c61757ea584
+write_set:
+- .claude/hooks/session-start.sh
+- ops/acceptance/hook-apt-thu-lai-1/r1/VERDICT.md
+- ops/cloud_agent_creds_test.py
+- ops/leases/hook-apt-thu-lai-1-r1-g1-claude.yaml
+- ops/specs/hook-apt-thu-lai-1-r1.md
+write_set_hash: 28498acaa53373a71b480946beab5915d8a4abd78656349e0454ed9c87195704
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Co y KHONG gom .claude/dev/launcher_test.py (lease wp1511-r2-g2-claude giu toi 2026-11-26T16:30Z); test dat o ops/cloud_agent_creds_test.py canh cac ca h1-h3.'
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 437257a3cad68bdec7c646aa99ccd4f5fd4256da
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25/11 trong phien dispatcher: chon "Hook: bot thu lai apt (Recommended)"'
+recorded_by: 'phiên điều phối session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-25T07:54:32Z'
+heartbeat_at: '2026-11-25T08:22:57Z'
+lease_until: '2026-11-25T08:22:57Z'
+lease_expires_at_utc: '2026-11-25T08:22:57Z'
+max_lease_hours: 8
+review_calls_limit: 2
+inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-25T08:22:57Z'
+withdrawn_by: 'phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: hook + test, review Codex offline 1/2 approve (P3 da khoa bang 2 ve + 2 dot bien); ops/acceptance/hook-apt-thu-lai-1/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

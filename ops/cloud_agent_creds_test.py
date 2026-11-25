@@ -332,6 +332,42 @@ def h3_ten_nang_luc():
                for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
     bang({"agent-creds-bootstrap", "agy-ghim"} <= moi, f"thiếu tên năng lực mới: {moi}")
     bang(cu <= moi, f"mất tên cũ: {cu - moi}")
+# ---------- H4 (#1523, spec ops/specs/hook-apt-thu-lai-1-r1.md §3): khối `cong-cu-ban-ke` gọi trình cài với 1 lần thử lại apt ----------
+MO_CC, DONG_CC = "# >>> cong-cu-ban-ke (wp1474)", "# <<< cong-cu-ban-ke (wp1474)"
+def _h4_chay(t, env_them):
+    """Chạy RIÊNG khối: một công cụ `chuan_bi` thiếu; `cai_cong_cu.sh` giả GHI biến `CAI_CONG_CU_THU_LAI` nó nhận rồi đặt DAT; `PY` giả
+    bắt `-m ruff`/`-m pip` (không cài gì thật). Trả (rc, stdout, các giá trị trình cài nhận)."""
+    bash = bash_nen.tim_bash()[0]
+    bang(bash, "POSIX mà không có bash dùng được — không được bỏ qua")
+    than = HOOK.read_text(encoding="utf-8")
+    i, j, co = than.find(MO_CC), than.find(DONG_CC), re.search(r"^co\(\) \{.*\}$", than, re.M)
+    bang(0 <= i < j and co, "không tách được khối cong-cu-ban-ke (hoặc hàm co) của hook")
+    g = Path(t)
+    (g / "ops").mkdir(); (g / ".github" / "workflows").mkdir(parents=True)
+    tt, nhan = g / "tt", g / "nhan"
+    _ghi(tt, "THIEU")
+    _ghi(g / "ops" / "cong_cu.yaml", '{"cong_cu": {"sc": {"bat_buoc": false, "chuan_bi": true}}}')
+    _ghi(g / "ops" / "cong_cu.py", f"import json\nprint(json.dumps({{'cong_cu': [{{'ten': 'sc', 'trang_thai': open({str(tt)!r}).read()}}]}}))\n")
+    _ghi(g / "ops" / "cai_cong_cu.sh", f'#!/bin/sh\nprintf "%s\\n" "${{CAI_CONG_CU_THU_LAI-VANG}}" >> \'{nhan}\'\nprintf DAT > \'{tt}\'\n', True)
+    _ghi(g / ".github" / "workflows" / "ci.yml", "      - run: python -m pip install --quiet ruff==0.15.15\n")
+    _ghi(py := g / "pygia", f'#!/bin/sh\n[ "$1" = -m ] && [ "$2" = ruff ] && {{ echo "ruff 0.15.15"; exit 0; }}\n[ "$1" = -m ] && [ "$2" = pip ] && exit 0\nexec {sys.executable!r} "$@"\n', True)
+    kich = ('set -euo pipefail; PY="$1"; GOC="$2"; PATH_GOC="$PATH"\n' + co.group(0) + "\n" + than[i:j + len(DONG_CC)]
+            + '\necho "SAU=${CAI_CONG_CU_THU_LAI-VANG}"\n')
+    env = {k: v for k, v in os.environ.items() if k not in ("BASH_ENV", "ENV", "CAI_CONG_CU_THU_LAI") and not k.startswith("BASH_FUNC_")}
+    r = subprocess.run([bash, "-c", kich, "h4", str(py), t], capture_output=True, text=True, timeout=120, env={**env, **env_them})
+    return r.returncode, r.stdout, (nhan.read_text(encoding="utf-8").split() if nhan.exists() else [])
+def h4_cong_cu_ban_ke_thu_lai_apt_mot_lan():
+    _posix()
+    for env_them, mong, sau in (({}, ["1"], "SAU=VANG"), ({"CAI_CONG_CU_THU_LAI": "3"}, ["3"], "SAU=3"),
+                                ({"CAI_CONG_CU_THU_LAI": "0"}, ["0"], "SAU=0"),
+                                # Codex lượt 1 F1523-01: rỗng ⇒ `:-1` cho 1, cha vẫn rỗng; không phải số ⇒ chuyển NGUYÊN VĂN (trình cài tự lo)
+                                ({"CAI_CONG_CU_THU_LAI": ""}, ["1"], "SAU="), ({"CAI_CONG_CU_THU_LAI": "abc"}, ["abc"], "SAU=abc")):
+        with tempfile.TemporaryDirectory() as t:
+            rc, ra, nhan = _h4_chay(t, env_them)
+        bang(rc == 0 and nhan == mong and "cong-cu-ban-ke: DAT (1 cong cu)" in ra and sau in ra.split("\n"),
+             f"{env_them}: rc={rc} trinh cai nhan {nhan} (mong {mong}), {sau!r} | {ra[-400:]!r}")
+    dong = next(x for x in HOOK.read_text(encoding="utf-8").splitlines() if x.startswith("# hook-nang-luc:"))
+    bang("cong-cu-apt-thu-lai-1" in dong.split()[2:], "dòng hook-nang-luc thiếu tên cong-cu-apt-thu-lai-1")
 # ---------- P3 (#1089): `ghi-nguoc` — A/C in-process, Drive giả GIỮ TRẠNG THÁI ----------
 SEN_KHOA, SEN_RT, SEN_ENV = "SENTINEL-khoa-p3-abcdefghijklmnop", "SENTINEL-refresh-p3-77c1", "SENTINEL-env-p3-claude"
 LR_CU, LR_MOI, TEN_DAU, TIEN_TO = "2026-10-27T11:35:54.511Z", "2026-11-01T02:00:00.000Z", ".tra-luat-agent-creds-dau.json", "agent_creds_ghi_nguoc: "
@@ -762,6 +798,13 @@ DOT_BIEN = (
     ("H2_gop_doi_so", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_va_cham_ngoac", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py][nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_bo_qua_nap", "hook", 'MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap', 'MA_AC=0; : "$PY" "$GOC/ops/cloud_agent_creds.py" nap', "h2_khoi_song_sot_set_e"),
+    ("H4_bo_env_thu_lai", "hook", 'env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash', 'bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_ep_cung_1", "hook", 'CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash', 'CAI_CONG_CU_THU_LAI=1 bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_export_ra_hook", "hook", '    ma=0; _cc_chay_tran "$con" env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash',
+     '    export CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}"; ma=0; _cc_chay_tran "$con" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_rong_khong_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"${CAI_CONG_CU_THU_LAI-1}" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_ep_khong_phai_so_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"$(case "${CAI_CONG_CU_THU_LAI:-1}" in *[!0-9]*) echo 1;; *) echo "${CAI_CONG_CU_THU_LAI:-1}";; esac)" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_xoa_ten_nang_luc", "hook", " cong-cu-apt-thu-lai-1\n", "\n", "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
     ("P3A1_bo_kiem_remote", "ma", '    if env.get("CLAUDE_CODE_REMOTE") != "true":\n        kq["v"] = ("BỎ QUA", "không phải phiên cloud")\n    elif', "    if", "p3a1_khong_phai_cloud"),
     ("P3A2_nguong_31", "ma", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN or", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN - 1 or", "p3a2_khoa_yeu"),

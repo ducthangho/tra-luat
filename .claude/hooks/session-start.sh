@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim cong-cu-ban-ke ruff-ban-ghim-ci
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim cong-cu-ban-ke ruff-ban-ghim-ci cong-cu-apt-thu-lai-1
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -568,7 +568,9 @@ cai_cong_cu_ban_ke() {
       continue
     fi
     [ "$con" -lt "$CC_TRAN_CAI" ] || con="$CC_TRAN_CAI"
-    ma=0; _cc_chay_tran "$con" bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
+    # wp1523: phien tuong tac can mo nhanh => MOT lan thu lai apt (cho 15s) thay vi 3 lan/105s cua CI (#1479); bien da dat
+    # san (ke ca 0) thi giu nguyen. Chi ap cho loi goi nay (`env`), khong export ra phan con lai cua hook.
+    ma=0; _cc_chay_tran "$con" env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
     echo "[session-start] cong-cu-ban-ke: cai $t — trinh cai rc=$ma (ket luan theo lan do lai)"
   done
   if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then

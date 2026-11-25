@@ -63,8 +63,8 @@
   "recorded_by": "Claude Code packet-coordinator session 015Gtxrarp2Zu1TdWDHorvE6 for wp1460; not executor, not reviewer",
   "recorder_is_executor": false,
   "leased_at_utc": "2026-11-24T16:02:26Z",
-  "lease_until": "2026-11-26T16:30:00Z",
-  "lease_expires_at_utc": "2026-11-26T16:30:00Z",
+  "lease_until": "2026-11-25T06:15:00Z",
+  "lease_expires_at_utc": "2026-11-25T06:15:00Z",
   "heartbeat_required_minutes": 360,
   "heartbeat_at": null,
   "limits": {
@@ -97,7 +97,7 @@
     "ruleset_change",
     "push_before_owner_exact_head_audit"
   ],
-  "current_head": "d1c28891acec4f861a9f26e092d92b71bd08af9d",
+  "current_head": "f5af7469c03e7fe421a3704c731f390842260304",
   "attempts_used": 5,
   "start_from_tree": "0e44eaf4a22f66d5c04d243f691f252695e64889",
   "start_from_note": "H3 of lease wp1460-r9-g3-claude (attempt 5), reviewed by Codex source review 3 (run c8a3bf7e, changes_requested, 1 P2 F02-R3); local only, never pushed; base unchanged",
@@ -124,5 +124,11 @@
   },
   "debt": [
     "phuong-an-b: spec revision bounding the collector totality promise (class v1-not-fully-specified recurred 4 times: B1-04, F02, F02-R2, F02-R3); owner decision 7137001118: handle later"
-  ]
+  ],
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-26T16:30:00Z",
+    "han_moi_utc": "2026-11-25T06:15:00Z",
+    "chi_thi": "Chỉ thị điều phối Mission (phiên 015Gtxrb3cuZ7Nm935R8yA5W) bước 5: sau merge rút hạn lease kèm thu_hoi_bang_rut_han, rồi ai-dang-giu sau hạn, M8, đóng Issue.",
+    "ly_do": "Packet #1460 B1a đã MERGE: PR #1516, merge commit b4b79bf0cd301bb067a22c5245505d9a8ab232cb lúc 2026-11-25T05:36:54Z (merged_by ducthangho), H f5af7469c03e7fe421a3704c731f390842260304 (tree 3f977dc24ae10e4d5007845584469ba3247b9c1d); kiem-merge rc 0 trên H. Không còn việc ghi nào trên write set."
+  }
 }

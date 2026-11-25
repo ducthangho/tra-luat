@@ -1,0 +1,42 @@
+{
+  "count": 219,
+  "classifications": {
+    "GIET": 216,
+    "SONG": 3
+  },
+  "baseline_cases": [
+    "cong_d2b_c1_passed_dat",
+    "cong_d2b_c2_thieu_nguon",
+    "cong_d2b_c3_attempt_kieu",
+    "cong_d2b_c3_neo",
+    "cong_d2b_c4_kiem_tep",
+    "cong_d2b_c4_symlink",
+    "cong_d2b_c5_duong_dan",
+    "cong_d2b_c5_mien_ky_tu",
+    "cong_d2b_c5_mode",
+    "cong_d2b_c6_mien",
+    "cong_d2b_c7_module_vang",
+    "cong_d2b_c7_module_khong_nap",
+    "cong_d2b_c7_module_nem",
+    "cong_d2b_c7_git_loi",
+    "cong_d2b_c9_oid",
+    "cong_d2b_c9_oid_khong_phai_commit"
+  ],
+  "neo": {
+    "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+    "test": "18d9acfc31d0b0e5cb6e41165fe11b35da17ca0d386c0a068b9042dd74c4cea5",
+    "goc": "09ffb58e938d9fb98219e2217b1cf570d41ddc4d4032576a68fb9beb5a4c2f19",
+    "manifest": "9f67932cbf8d3973476dd09ba4ef15434aa45b6b4b0fdb1019ccbf9b8af1ef0f",
+    "python": "3.13.18",
+    "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "manifest_byte_equal_executor": true,
+  "targets_and_classifications_equal_executor": true,
+  "survivors": [
+    "g:_d2b_kiem:44:49",
+    "i7:_d2b_kiem:30:90",
+    "j1:_d2b_kiem:31:23"
+  ],
+  "ledger_rc": 0,
+  "ledger_stdout": "LEDGER 219 ID · GIET 216 · TUONG_DUONG 3 · neo goc=09ffb58e938d manifest=9f67932cbf8d\n"
+}

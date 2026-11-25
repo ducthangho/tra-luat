@@ -1,0 +1,16 @@
+{
+  "reviewed_sha": "dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+  "product_sha256": "cde2c71274b7c3fc641f2c71468ea39102ab43701286d1b32b7a01609fea30f4",
+  "linux_control": {
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')\n"
+  },
+  "case_insensitive_simulation": {
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')\n",
+    "scope": "Only archive name and path lookup case folding; all Git operations, bytes, schema, D1-D4, module and D2b code are real."
+  },
+  "tree": "040000 tree aaf84432a758ca895bb36e1b42ac7a17df81ecc1\tops\n040000 tree 4b8ca8ea9a1f4061f7bf1952e3afe25860ab6d86\tops/land\n040000 tree 9feeb0807742734234348a92366cdddeee3d551e\tops/land/pr1440-wp1319-provenance\n040000 tree 684edb2731dd47859a9c6d66a5aaa70bc005dcee\tops/land/pr1440-wp1319-provenance/A\n100644 blob 519dd581e50e5b45d3b3c76c3172e9c3ec293488\tops/land/pr1440-wp1319-provenance/A/note.txt\n040000 tree 8ec3635c2e769464f778715273a0a29e4083a990\tops/land/pr1440-wp1319-provenance/a\n100644 blob 7e3dac10b9792d39491af27e3a33011214cc89e9\tops/land/pr1440-wp1319-provenance/a/readback-wp-issuecomment-7.json"
+}

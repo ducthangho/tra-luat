@@ -1,0 +1,98 @@
+[
+  {
+    "mutant": "d2b_danh_muc_chi_chieu_git",
+    "version": "original",
+    "branch": "passed",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp danh mục cây của oid')\n"
+  },
+  {
+    "mutant": "d2b_danh_muc_chi_chieu_git",
+    "version": "original",
+    "branch": "owner_waived",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp danh mục cây của oid')\n"
+  },
+  {
+    "mutant": "d2b_danh_muc_chi_chieu_git",
+    "version": "mutant",
+    "branch": "passed",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@4e24d323d6d450847b6a8c085db132919d6352ae\nĐÓNG ĐƯỢC WP P — merge ac7b70ea3bd9fed253a41931ff078f60f16e21a9\n",
+    "stderr": ""
+  },
+  {
+    "mutant": "d2b_danh_muc_chi_chieu_git",
+    "version": "mutant",
+    "branch": "owner_waived",
+    "rc": 0,
+    "stdout": "D2b ĐẠT mien ops/land/pr1440-wp1319-provenance@4e24d323d6d450847b6a8c085db132919d6352ae\nĐÓNG ĐƯỢC WP P — merge ac7b70ea3bd9fed253a41931ff078f60f16e21a9\n",
+    "stderr": ""
+  },
+  {
+    "mutant": "d2b_bo_dich_symlink",
+    "version": "original",
+    "branch": "passed",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "mutant": "d2b_bo_dich_symlink",
+    "version": "original",
+    "branch": "owner_waived",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "mutant": "d2b_bo_dich_symlink",
+    "version": "mutant",
+    "branch": "passed",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/lk5-provenance/danh-gia-gate-output-44669622916.txt@4e24d323d6d450847b6a8c085db132919d6352ae\nĐÓNG ĐƯỢC WP P — merge ac7b70ea3bd9fed253a41931ff078f60f16e21a9\n",
+    "stderr": ""
+  },
+  {
+    "mutant": "d2b_bo_dich_symlink",
+    "version": "mutant",
+    "branch": "owner_waived",
+    "rc": 0,
+    "stdout": "D2b ĐẠT mien ops/land/lk5-provenance@4e24d323d6d450847b6a8c085db132919d6352ae\nĐÓNG ĐƯỢC WP P — merge ac7b70ea3bd9fed253a41931ff078f60f16e21a9\n",
+    "stderr": ""
+  },
+  {
+    "mutant": "d2b_trung_khoa_chi_cung_loai",
+    "version": "original",
+    "branch": "passed",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')\n"
+  },
+  {
+    "mutant": "d2b_trung_khoa_chi_cung_loai",
+    "version": "original",
+    "branch": "owner_waived",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')\n"
+  },
+  {
+    "mutant": "d2b_trung_khoa_chi_cung_loai",
+    "version": "mutant",
+    "branch": "passed",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@1297d679b61a432a9783d537796d4a91738e7935\nĐÓNG ĐƯỢC WP P — merge e34625d94211cb2cb35eab3278eaf214c21da9d5\n",
+    "stderr": ""
+  },
+  {
+    "mutant": "d2b_trung_khoa_chi_cung_loai",
+    "version": "mutant",
+    "branch": "owner_waived",
+    "rc": 0,
+    "stdout": "D2b ĐẠT mien ops/land/pr1440-wp1319-provenance@1297d679b61a432a9783d537796d4a91738e7935\nĐÓNG ĐƯỢC WP P — merge e34625d94211cb2cb35eab3278eaf214c21da9d5\n",
+    "stderr": ""
+  }
+]

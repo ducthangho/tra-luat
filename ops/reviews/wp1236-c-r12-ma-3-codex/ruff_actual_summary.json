@@ -1,0 +1,46 @@
+{
+  "commands": [
+    {
+      "side": "head",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "--output-format",
+        "json",
+        ".claude/dev/packet_loop.py",
+        ".claude/dev/packet_loop_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c3-3-codex/repo",
+      "rc": 1,
+      "count": 16,
+      "stderr": ""
+    },
+    {
+      "side": "base",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "--output-format",
+        "json",
+        ".claude/dev/packet_loop.py",
+        ".claude/dev/packet_loop_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c3-3-codex/work/rig/base",
+      "rc": 1,
+      "count": 16,
+      "stderr": ""
+    }
+  ],
+  "new": [],
+  "removed": []
+}

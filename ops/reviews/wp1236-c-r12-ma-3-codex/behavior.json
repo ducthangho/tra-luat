@@ -1,0 +1,70 @@
+[
+  {
+    "label": "baseline",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@15e0c1a523c80b9ad8634fd3f4a40af183e980e7\nĐÓNG ĐƯỢC WP P — merge a9689d53604f0619a07ac1dc3afb5a7764d0e7da\n",
+    "stderr": ""
+  },
+  {
+    "label": "existing_yaml_symlink_with_regular_provenance",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "label": "same_tree_direct_validator",
+    "result": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "mode": "120000 blob 2907330bc9e39ff0262346dbb11d97194374edfc\tops/land/lk2-provenance/p.yaml"
+  },
+  {
+    "label": "newline_passed",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b duong_dan_sai\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "label": "newline_waived",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b duong_dan_sai\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "label": "fixture_equivalence",
+    "path": "ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt",
+    "original": [
+      "passed",
+      []
+    ],
+    "adapted": [
+      "passed",
+      []
+    ],
+    "header": "44f93adbdbba12f89b6b9728ceacd91159f1150d",
+    "merge": "44f93adbdbba12f89b6b9728ceacd91159f1150d"
+  },
+  {
+    "label": "fixture_equivalence",
+    "path": "ops/land/pr1453-wp433-provenance/danh-gia-gate-output-44711337223.txt",
+    "original": [
+      "failed",
+      []
+    ],
+    "adapted": [
+      "failed",
+      []
+    ],
+    "header": "44f93adbdbba12f89b6b9728ceacd91159f1150d",
+    "merge": "44f93adbdbba12f89b6b9728ceacd91159f1150d"
+  },
+  {
+    "label": "C4_exact",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:failed:-\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  }
+]

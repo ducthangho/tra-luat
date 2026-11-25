@@ -105,3 +105,5 @@ revision_ly_do: 'Cross-review luot 10 (K1-K2 P1, K3-K4 P2). Tran review tinh chu
 review_calls_limit: 11
 review_calls_used_truoc: 10
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r12-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 11 (L1-L6); revision r12 (ops/specs/llm-khoan-docx-r12.md), tran 13.'

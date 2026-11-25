@@ -1344,6 +1344,32 @@ def ca_cau_truc_docx_dat(m):
     chinh = f'<w:document {_WNS}><w:body>{H}{p_docx("Dữ liệu là thông tin.", 1)}</w:body></w:document>'
     _, cap22, _ = _doc_hop_le(m, lam_docx(H, A, them={"_rels/.rels": goc_rels, "word/chinh.xml": chinh}))
     bang(cap22 == [(1, "Dữ liệu là thông tin.")], f"doc nham part chinh cu: {cap22}")
+    # r12 L3 đối chứng: thuật ngữ mở bằng "Mục vi …", "Phần thứ cấp" không phải tiêu đề.
+    _, cap25, _ = _doc_hop_le(m, lam_docx(H, p_docx("Mục vi phạm là mục ghi lỗi.", 1), p_docx("Phần thứ cấp là phần phụ.", 1)))
+    bang(cap25 == [(1, "Mục vi phạm là mục ghi lỗi."), (2, "Phần thứ cấp là phần phụ.")], f"thuat ngu bi nhan nham tieu de: {cap25}")
+    # r12 L2 đối chứng: điểm dẫn chiếu "Điều 5 …" có dấu câu cuối không phải tiêu đề.
+    _, cap26, _ = _doc_hop_le(m, lam_docx(H, p_docx("Hồ sơ là tài liệu theo:", 1), p_docx("Điều 5 của Luật này.", 1, 1)))
+    bang(cap26 == [(1, "Hồ sơ là tài liệu theo:\na) Điều 5 của Luật này.")], f"dan chieu Dieu trong diem bi chan oan: {cap26}")
+    # r12 L1: quan hệ MỞ RỘNG trùng hậu tố `/styles` không được nhận làm styles.
+    rels_mr = ('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+               '<Relationship Id="r1" Type="http://example.com/ext/styles" Target="ngoai.xml"/>'
+               '<Relationship Id="r2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" '
+               'Target="numbering.xml"/></Relationships>')
+    kng = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    _, cap27, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr>'
+                                                '<w:t> Thêm.</w:t></w:r>'),
+                                          them={"word/_rels/document.xml.rels": rels_mr, "word/ngoai.xml": kng}))
+    bang(cap27 == [(1, "Hồ sơ là tài liệu. Thêm.")], f"quan he mo rong bi nhan lam styles: {cap27}")
+    # r12 L5: part chính mã hoá UTF-16 có khai báo — parser tự đọc.
+    import io as _io5
+    import zipfile as _zip5
+    _b5 = _io5.BytesIO()
+    with _zip5.ZipFile(_b5, "w") as _z5:
+        _z5.writestr("word/document.xml", ('<?xml version="1.0" encoding="UTF-16"?>'
+                                            f'<w:document {_WNS}><w:body>{H}{A}</w:body></w:document>').encode("utf-16"))
+        _z5.writestr("word/numbering.xml", _NUMBERING_CHUAN)
+    _, cap28, _ = _doc_hop_le(m, _b5.getvalue())
+    bang(cap28 == [(1, "Hồ sơ là tài liệu.")], f"part chinh UTF-16 sai: {cap28}")
     # r11 K2 đối chứng: khoản mở bằng "Mục tiêu" (không phải tiêu đề) đạt.
     _, cap24, _ = _doc_hop_le(m, lam_docx(H, p_docx("Mục tiêu là đích cần đạt.", 1)))
     bang(cap24 == [(1, "Mục tiêu là đích cần đạt.")], f"khoan 'Muc tieu' bi chan oan: {cap24}")
@@ -1467,6 +1493,11 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(H, A, numbering=nmc), "mc trong numbering")
     # r11 K2: tiêu đề Phần với số thứ tự viết bằng chữ ở cấp con.
     chan(lam_docx(H, A, p_docx("Phần thứ hai", 1, 1)), "tieu de 'Phan thu hai' o cap con")
+    # r12 L2: tiêu đề Điều THIẾU dấu sau số ở cấp con.
+    chan(lam_docx(H, A, p_docx("Điều 4 Phạm vi", 1, 1)), "tieu de Dieu thieu dau o cap con")
+    # r12 L4: thiếu `w:val` ở lvlText / start ⇒ ValueError có kiểm soát (không TypeError).
+    chan(lam_docx(H, A, numbering=_NUMBERING_CHUAN.replace('<w:lvlText w:val="%1."/>', '<w:lvlText/>')), "lvlText thieu val")
+    chan(lam_docx(H, A, numbering=_NUMBERING_CHUAN.replace('<w:start w:val="1"/>', '<w:start/>', 1)), "start thieu val")
     # r11 K3: lvlText ngoài danh sách cho phép (chữ số trần, `%` lẻ).
     for lt in ("1.", "%2%"):
         chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "decimal", lt))),
@@ -1609,7 +1640,6 @@ DOT_BIEN = [
     ('wp1525_customxmlpr_la', ('"commentRangeEnd", "customXmlPr", "sdtPr", "sdtEndPr",', '"commentRangeEnd", "sdtPr", "sdtEndPr",'), 'ca_cau_truc_docx_dat'),
     ('wp1525_khoi_la_bo_qua', ('        elif ten not in _KHOI_BO_QUA:\n            yield ("la", el, trong_bang)', '        elif False:\n            yield ("la", el, trong_bang)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_noi_dung_truoc_tieu_de', ('    if not re_dau.match(doan[i0]["chu"]):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_them_tieu_de', ('    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_tieu_de_danh_so', ('        raise ValueError("doan tieu de Dieu duoc danh so tu dong")', '        pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_tieu_de_ngat_mem', ('    if doan[i0]["ngat"]:\n', '    if False:\n'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_tieu_de_dinh_than', ('    if not _RE_TIEU_DE_TRON.match(doan[i0]["chu"]):', '    if False:'), 'ca_cau_truc_docx_chan'),
@@ -1636,7 +1666,6 @@ DOT_BIEN = [
     ('wp1525_nhan_restart_section', ('            loi = "abstractNum restartNumberingAfterBreak (danh so lai sau ngat section) khong ho tro"   # r5 (lượt 4 D2)', '            pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_fmt_cap_con', ('    if fmt not in ("decimal", "lowerLetter", "upperLetter"):\n        raise ValueError(f"numFmt {fmt!r} khong ho tro")', '    if False:\n        raise ValueError(f"numFmt {fmt!r} khong ho tro")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_override_la', ('                loi = loi or f"lvlOverride cap {il} ngoai startOverride"\n', ''), 'ca_cau_truc_docx_chan'),
-    ('wp1525_bo_qua_start_override', ('            muc[il] = (fmt, txt, int(ov.find(_W + "startOverride").get(_W + "val")))', '            pass'), 'ca_cau_truc_docx_dat'),
     ('wp1525_ilvl_ngoai_mien', ('            if not 0 <= il <= 8:   # r6 (lượt 5 E6): miền cấp OOXML 0–8', '            if False:   # r6 (lượt 5 E6): miền cấp OOXML 0–8'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ilvl_override_ngoai_mien', ('                loi = loi or f"lvlOverride ilvl {il} ngoai mien 0-8"', '                pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dem_vuot_tran', ('                if dem[il] > _TRAN_SO:', '                if False:'), 'ca_cau_truc_docx_chan'),
@@ -1651,7 +1680,6 @@ DOT_BIEN = [
     ('wp1525_mat_ptab', ('_CON_RUN_CHU = {"t": None, "tab": " ", "ptab": " ", "noBreakHyphen": "-", "softHyphen": ""}', '_CON_RUN_CHU = {"t": None, "tab": " ", "noBreakHyphen": "-", "softHyphen": ""}'), 'ca_cau_truc_docx_dat'),
     ('wp1525_mat_noi_khong_ngat', ('_CON_RUN_CHU = {"t": None, "tab": " ", "ptab": " ", "noBreakHyphen": "-", "softHyphen": ""}', '_CON_RUN_CHU = {"t": None, "tab": " ", "ptab": " ", "softHyphen": ""}'), 'ca_cau_truc_docx_dat'),
     ('wp1525_moc_move_la', ('"commentRangeEnd"} | _MOC_MOVE', '"commentRangeEnd"}'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_loc_bang_regex', ('    goc_cay = ET.fromstring(goc_xml)', '    _nap_doc_gioi_han()\n    import docx_markup as _dmx\n    goc_cay = ET.fromstring(_dmx.strip_markup(goc_xml, "strip")[0])'), 'ca_cau_truc_docx_dat'),
     ('wp1525_doc_chu_movefrom', ('_CON_DOAN_DI_VAO = {"ins", "moveTo", "hyperlink", "smartTag", "customXml"}', '_CON_DOAN_DI_VAO = {"ins", "moveTo", "moveFrom", "hyperlink", "smartTag", "customXml"}'), 'ca_cau_truc_docx_dat'),
     ('wp1525_sdt_noi_dong_la', ('            elif ten == "sdt":   # r4 (lượt 3 C5)', '            elif ten == "khong_co":   # r4 (lượt 3 C5)'), 'ca_cau_truc_docx_dat'),
     ('wp1525_nhan_strict', ('    if goc_cay.tag != _W + "document":', '    if False:'), 'ca_cau_truc_docx_dat'),
@@ -1678,8 +1706,17 @@ DOT_BIEN = [
     ('wp1525_rels_part_chinh_mac_dinh', ('    thu_muc, ten_chinh = posixpath.split(chinh)', '    thu_muc, ten_chinh = posixpath.split("word/document.xml")'), 'ca_cau_truc_docx_rels_part_chinh'),
     ('wp1525_gach_sau_ngat_la_ngat', ('                    chu_sau_ngat = True   # r9', '                    kq["ngat"] = True   # r9'), 'ca_cau_truc_docx_dat'),
     ('wp1525_mc_bo_qua', ('    if any(str(e.tag).startswith(_MC) for e in goc.iter()):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_ranh_gioi_lon_chi_so', ('_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\\s+(?:[IVXLCDM]+|\\d+|thứ\\s+\\w+|[A-ZĐ])\\b", re.IGNORECASE)', '_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\\s+[IVXLCDM\\d]+\\b", re.IGNORECASE)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_lvltext_tu_do', ('    if not re.fullmatch(r"(?:%[1-9]|[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*", txt):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_them_tieu_de', ('    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_DIEU_KHONG_DAU.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_tieu_de_thieu_dau_bo_qua', (' or _RE_DIEU_KHONG_DAU.match(d["chu"]) or _RE_RANH_GIOI_LON', ' or _RE_RANH_GIOI_LON'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_bo_qua_start_override', ('            muc[il] = (fmt, txt, _so_nguyen(ov.find(_W + "startOverride").get(_W + "val")))', '            pass'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_loc_bang_regex', ('    goc_cay = ET.fromstring(goc_xml)', '    _nap_doc_gioi_han()\n    import docx_markup as _dmx\n    goc_cay = ET.fromstring(_dmx.strip_markup(goc_xml.decode("utf-8"), "strip")[0])'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_ranh_gioi_lon_chi_so', ('(?:[IVXLCDM]+|\\d+|(?i:thứ\\s+(?:nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười)(?!\\w))|[A-ZĐ])', '(?:[IVXLCDM]+|\\d+)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_la_ma_khong_phan_biet_hoa', ('(?:[IVXLCDM]+|\\d+|(?i:thứ', '(?:(?i:[IVXLCDM]+)|\\d+|(?i:thứ'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_quan_he_hau_to', ('    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).strip() == uri]', '    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).endswith("/" + loai)]'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_so_nguyen_tho', ('    if v is None or not re.fullmatch(r"-?[0-9]+", str(v).strip()):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_lvltext_none', ('                       (txt.get(_W + "val") or "") if txt is not None else "",', '                       txt.get(_W + "val") if txt is not None else "",'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_ep_utf8', ('        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han)   # r12', '        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han).decode("utf-8")   # r12'), 'ca_cau_truc_docx_dat'),
     # #1525: đường thô không nhận dòng điểm.
     ('wp1525_tho_nhan_diem', ('        elif _RE_DIEM.match(ln):\n            # #1525', '        elif False:\n            # #1525'), 'ca_wp1514_luot9'),
     # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.

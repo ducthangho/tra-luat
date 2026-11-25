@@ -31,6 +31,8 @@
   `mc:AlternateContent` trong định dạng ⇒ chặn; `lvlText` có chữ ⇒ chặn; chữ gạch sau ngắt trang không còn làm chặn oan.
 - r11 (sau cross-review lượt 10, đặc tả `ops/specs/llm-khoan-docx-r11.md`): phần tử `mc:` ở bất kỳ part nào ⇒ chặn; tiêu đề
   `Phần thứ …` nhận diện được; `lvlText` theo danh sách cho phép toàn chuỗi.
+- r12 (sau cross-review lượt 11, đặc tả `ops/specs/llm-khoan-docx-r12.md`): quan hệ OOXML so URI đầy đủ; tiêu đề Điều thiếu dấu
+  ⇒ chặn; số thứ tự chữ/La Mã chặt hơn (không nuốt thuật ngữ); giá trị số thiếu ⇒ lỗi có kiểm soát; part chính đọc theo mã hoá khai.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

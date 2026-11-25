@@ -523,7 +523,13 @@ _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_mem
 # Tiêu đề Điều / ranh giới cấu trúc lớn: chỉ xét ở ĐẦU đoạn (sau khi gộp khoảng trắng).
 _RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]", re.IGNORECASE)   # r9 (lượt 8 H1): như tiêu đề đích
 # r11 (lượt 10 K2): số thứ tự của tiêu đề cấu trúc còn có dạng viết bằng chữ (`Phần thứ nhất`) và chữ cái đơn.
-_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\s+(?:[IVXLCDM]+|\d+|thứ\s+\w+|[A-ZĐ])\b", re.IGNORECASE)
+# r12 (lượt 11 L3): số thứ tự viết bằng chữ chỉ là TỪ SỐ (`thứ nhất`…`thứ mười…`); La Mã và chữ cái đơn phải VIẾT HOA (không
+# nuốt `Mục vi phạm`, `Phần thứ cấp`).
+_RE_RANH_GIOI_LON = re.compile(
+    r"^(?i:chương|mục|phần)\s+(?:[IVXLCDM]+|\d+|(?i:thứ\s+(?:nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười)(?!\w))|[A-ZĐ])(?!\w)")
+# r12 (lượt 11 L2): tiêu đề Điều THIẾU dấu sau số (`Điều 4 Phạm vi`) — nhận khi CẢ đoạn không kết bằng dấu câu (tiêu đề không có
+# dấu câu cuối; dẫn chiếu trong thân điểm/khoản kết bằng `;` `.` …).
+_RE_DIEU_KHONG_DAU = re.compile(r"^Điều\s+\d+[a-zđ]?(?:\s+[^.;:,!?]*)?$", re.IGNORECASE)
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
 _RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)](?!\d)")
@@ -587,6 +593,13 @@ def _so_id(v):
     return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None
 
 
+def _so_nguyen(v):
+    """r12 (lượt 11 L4): giá trị số nguyên OOXML; vắng hay sai dạng ⇒ ValueError (không để `TypeError` thoát ra)."""
+    if v is None or not re.fullmatch(r"-?[0-9]+", str(v).strip()):
+        raise ValueError(f"gia tri so nguyen OOXML khong hop le: {v!r}")
+    return int(v)
+
+
 _TRAN_SO = 999   # r7 (lượt 6 F4): trần SỐ THỨ TỰ (bộ đếm ≥ giá trị bắt đầu nên phủ cả `start`) — chặn nhãn chữ dài vô hạn
 
 
@@ -598,7 +611,9 @@ def _giai_quan_he(z, doc_gioi_han, tep_rels, thu_muc, loai, mac_dinh):
     except KeyError:
         return mac_dinh
     ns = "{http://schemas.openxmlformats.org/package/2006/relationships}"
-    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).endswith("/" + loai)]
+    # r12 (lượt 11 L1): so URI kiểu quan hệ ĐẦY ĐỦ (Transitional), không so hậu tố — quan hệ mở rộng trùng hậu tố bị bỏ qua.
+    uri = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/" + loai
+    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).strip() == uri]
     if not dich:
         return None
     if len(dich) > 1 or dich[0].get("TargetMode") == "External":
@@ -665,8 +680,8 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             if lvl.find(_W + "pStyle") is not None:   # r3 (lượt 2 B2): cấp gắn style chọn cấp hiển thị — chưa hỗ trợ
                 loi = loi or f"cap {il}: lvl gan pStyle khong ho tro"
             muc[il] = (fmt.get(_W + "val") if fmt is not None else "decimal",
-                       txt.get(_W + "val") if txt is not None else "",
-                       int(st.get(_W + "val")) if st is not None else 0)
+                       (txt.get(_W + "val") or "") if txt is not None else "",
+                       _so_nguyen(st.get(_W + "val")) if st is not None else 0)
         aid_an = _so_id(an.get(_W + "abstractNumId"))
         if aid_an is None:
             continue   # r8 (lượt 7 G1): abstractNumId không hợp lệ ⇒ không ghép được ⇒ danh sách trỏ tới nó bị chặn
@@ -696,7 +711,7 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
                 loi = loi or f"lvlOverride cap {il} ngoai startOverride"
                 continue
             fmt, txt, _ = muc.get(il, ("decimal", "", 0))
-            muc[il] = (fmt, txt, int(ov.find(_W + "startOverride").get(_W + "val")))
+            muc[il] = (fmt, txt, _so_nguyen(ov.find(_W + "startOverride").get(_W + "val")))
         kq[nid] = {"muc": muc, "loi": loi}
     return kq
 
@@ -945,7 +960,7 @@ def doc_dieu_docx(nguon, dieu):
     import io
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
         chinh = _phan_chinh(z, doc_gioi_han)
-        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han).decode("utf-8", errors="strict")
+        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han)   # r12 (lượt 11 L5): BYTES — parser tự đọc khai báo mã hoá
         danh_so = _doc_danh_so(z, doc_gioi_han, chinh)
         kieu = _doc_kieu(z, doc_gioi_han, chinh)
     goc_cay = ET.fromstring(goc_xml)
@@ -1018,7 +1033,7 @@ def doc_dieu_docx(nguon, dieu):
     if doan[i0]["la"]:
         raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     vung = doan[i0 + 1:]
-    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):
+    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_DIEU_KHONG_DAU.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):
         raise ValueError("tep chua them tieu de Dieu/Chuong/Muc/Phan — chi de dung Dieu can doc trong tep")
     if any(d["la"] for d in vung):
         raise ValueError("Dieu co phan tu khong ho tro (ky hieu, truong, hinh, chu thich…) — khong biet chu that")

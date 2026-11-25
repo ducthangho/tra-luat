@@ -64,3 +64,5 @@ max_lease_hours: 8
 review_calls_limit: 5
 review_calls_used_truoc: 2
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r3-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 3 (C1, C2) can sua luat dong bang o r2; revision r3 (ops/specs/llm-ranh-gioi-khoan-r3.md).'

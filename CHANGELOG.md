@@ -10,6 +10,9 @@
 - r2 (sau cross-review lượt 2, đặc tả `ops/specs/llm-ranh-gioi-khoan-r2.md`): `;` không kết khoản (A2a); thân khoản có
   đánh số nội dòng ⇒ mơ hồ (A2b); tiêu đề Điều có chữ "là" ⇒ mơ hồ (A2c). Cùng lượt: câu dẫn có từ nối không bị bỏ
   (A1); bỏ cả dải đuôi khoảng trắng + dấu đóng khi xét kết câu (A3); test Điều 3 THẬT 8 khoản + ba kết quả đã lưu (A4).
+- r3 (sau cross-review lượt 3, đặc tả `ops/specs/llm-ranh-gioi-khoan-r3.md`): dòng tiêu đề chỉ được bỏ khi cả dòng đúng hình
+  dạng `Điều N.` / `Điều N. Giải thích từ ngữ` — danh sách cho phép thay cho dò chữ "là" (C1); chốt đánh số nội dòng chỉ xét trong
+  một dòng (C2).
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

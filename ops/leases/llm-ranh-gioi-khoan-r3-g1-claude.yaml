@@ -1,0 +1,68 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1514
+packet_id: llm-ranh-gioi-khoan
+revision: 3
+generation: 1
+lease_id: llm-ranh-gioi-khoan-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+spec_path: ops/specs/llm-ranh-gioi-khoan-r3.md
+spec_hash: c3af3b110d2880a26aed97411192328e8788f5cc1b613a424a65e5d66c8b17ad
+write_set:
+- CHANGELOG.md
+- RELEASE_MANIFEST.json
+- docs/GOI_AGENT_DA_NEN.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/run.json
+- ops/leases/llm-ranh-gioi-khoan-r1-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r2-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r3-g1-claude.yaml
+- ops/specs/llm-ranh-gioi-khoan-r1.md
+- ops/specs/llm-ranh-gioi-khoan-r2.md
+- ops/specs/llm-ranh-gioi-khoan-r3.md
+- scripts/tl_core/llm_route.py
+- scripts/tl_core/llm_route_test.py
+write_set_hash: c0eef20a24e6221f63a2883b4962a2d66d3a304291c49638ab4101b06a5b39fb
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Ho so review Codex dat trong ops/acceptance/llm-ranh-gioi-khoan/r1/review-N-codex/ (N<=5, dung tran). Khong sua ops_misc.py, command_registry.py, tl.py, tl_selftest.py, ci.yml, launcher.py. ai-dang-giu tren clone phan chieu 339/339 nhanh (25-11-2026): 5 tep ma/tai lieu NGUOI_GIU 0.'
+branch: ccr-89c0d2e2-inanqb
+base_sha: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25/11 trong phien session_015GtxrZQYT3Vt8PJdXrjEKg: "Xu ly cac no trong packet rieng di"; chon "Chan bao thu tren van ban tho" va tran review Codex 5'
+recorded_by: 'phien session_015GtxrZQYT3Vt8PJdXrjEKg'
+revision_ly_do: 'Cross-review luot 3 (C1 P1, C2 P2) can sua luat da dong bang o r2 (A2c, A2b); r3 them §2.6. Cung chi thi chu kho 25/11; tran review tinh chung (da dung 3/5).'
+thay_the_cho: llm-ranh-gioi-khoan-r2-g1-claude
+leased_at_utc: '2026-11-25T03:40:00Z'
+heartbeat_at: '2026-11-25T03:40:00Z'
+lease_until: '2026-11-25T11:40:00Z'
+lease_expires_at_utc: '2026-11-25T11:40:00Z'
+max_lease_hours: 8
+review_calls_limit: 5
+review_calls_used_truoc: 3
+inference_calls_limit: 0

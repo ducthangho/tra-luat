@@ -67,6 +67,9 @@ MAU_CAP_EXTRACT = "độ dài chạm CAP export"   # dấu riêng của cảnh b
 # Tiêu đề Điều: số Điều phải đi ngay với dấu "." hoặc ":" (lượt 6 S2: dòng "Điều 3 của quy chế là …" của tệp KHÔNG
 # tiêu đề từng bị nhận là tiêu đề, khoản đầu bị bỏ). Dùng CHUNG cho metadata và cho phân đoạn khoản.
 _RE_TIEU_DE_DIEU = re.compile(r"^\s*Điều\s+(\d+[a-zđ]?)\s*[.:]")
+# r3 (lượt 3 C1): dòng tiêu đề chỉ được BỎ khi CẢ dòng đúng là tiêu đề — `Điều N.` (hoặc `:`), kèm hoặc không kèm tên
+# "Giải thích từ ngữ". Tiêu đề có phần dư khác ⇒ có thể dính khoản đầu (kể cả khoản dùng từ nối khác "là") ⇒ mơ hồ.
+_RE_TIEU_DE_TRON = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]\s*(?:Giải thích từ ngữ\s*\.?)?$", re.IGNORECASE)
 
 
 def so_dieu_tu_tieu_de(van_ban):
@@ -492,7 +495,9 @@ _RE_CAU_DAN = re.compile(r"(?:được hiểu|được giải thích)\s+như\s+s
 # r2 (lượt 2 A2): `;` KHÔNG kết khoản — ngắt dòng sau `;` giữa một định nghĩa dài từng tạo hai khoản đều qua kiểm.
 _DAU_CAU_KET = frozenset(".!?")
 # r2 (lượt 2 A2): đánh số NỘI DÒNG trong thân khoản (`… 1) …`, `… 2. …`) — tiểu mục, ranh giới khoản không tin được.
-_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")
+# r3 (lượt 3 C2): khoảng trắng hai bên CHỈ trong phạm vi một dòng (`[ \t]`, không `\s`) — số điều ở cuối một dòng điểm, theo sau
+# là xuống dòng, không phải số thứ tự nội dòng.
+_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
@@ -517,9 +522,9 @@ def tach_khoan(van_ban):
     if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
         return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
-        if _RE_LA.search(dong[0]):
-            # lượt 11 X3 + r2 (lượt 2 A2): tiêu đề Điều có chữ "là" ⇒ có thể DÍNH khoản đầu ⇒ bỏ dòng là bỏ luôn khoản.
-            # Dò `_RE_LA` trên CẢ dòng: `_tu_noi` dừng ở dấu `:` của `Điều 3: …` nên từng bỏ sót.
+        if not _RE_TIEU_DE_TRON.match(" ".join(dong[0].split())):
+            # lượt 11 X3 → r2 A2c → r3 C1: tiêu đề có phần dư ⇒ có thể DÍNH khoản đầu ⇒ bỏ dòng là bỏ luôn khoản ⇒ mơ hồ.
+            # Danh sách CHO PHÉP hình dạng tiêu đề, thay cho dò chữ "là" (bỏ sót khoản dùng từ nối khác và "là" sát dấu câu).
             return None
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)

@@ -1,0 +1,53 @@
+# HO SO LAND — PR #1510 (r1509, ACL ~/.codex tha ACE CodexSandboxUsers chi-doc tren THU MUC). Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml.
+# Ghi boi packet wp1511 (Issue #1511, lease wp1511-r2-g2-claude) — khoan no K3. Ban truoc chi nam o comment PR #1510
+# (issuecomment-7135151572, -7136321878, -7136753379); tep nay thay cac comment ay lam nguon.
+# NHAN: measured = do trong phien ghi so (tep nguon kem); loi_khai_co_neo; not_measured.
+# Moi phep do: gh (REST + GraphQL) tu may chu kho (Windows), 2026-11-24. Readback tho: ops/land/pr1510-r1509-acl-codex-provenance/.
+
+schema_version: 1
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+input_packet_generations: []
+input_packet_ghi_chu: 'r1509 land KHONG qua Issue/lease; ghi nhan hoi to o #1511 issuecomment-7137707977.'
+authorized_head_sha: 3ff6eda733ad0057e17475a9a8e37d59a0dcd2fe
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1510
+authorization_ghi_chu: 'measured — readback-pr-1510.json: merged_by ducthangho, head.sha 3ff6eda. Chu kho dong y merge trong chat (khong ben). Uy quyen bang hanh dong merge.'
+merge_method: merge
+merge_commit: a03a28ef076503c7fe93c208a4998c32590a977f
+merge_commit_tree: 1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe
+merge_commit_parents: [5259239d763c9ffc1677f033bd9a9cf23ede9299, 3ff6eda733ad0057e17475a9a8e37d59a0dcd2fe]
+merge_commit_nguon: 'measured — merge-commit-a03a28e.txt (git log -1 --format=%H %T %P).'
+pre_merge_checks:
+  - {name: 'Codex connector', sha: 3ff6eda733ad0057e17475a9a8e37d59a0dcd2fe, conclusion: 'completed, has_any_findings false', nguon: readback-comments-1510.json, ghi_chu: 'measured — readback-comments-1510.json: comment 7131904521 codex-review-state commit_sha 3ff6eda. Khong co luot cross-review theo skill (thieu, khong bu).'}
+post_merge_checks:
+  - name: 'launcher-windows.yml push master — DUNG merge SHA'
+    run_id: 45418608259
+    sha: a03a28ef076503c7fe93c208a4998c32590a977f
+    conclusion: success
+    jobs: '2/2 success, nhan windows-latest + ubuntu-latest, runner_id khac 0'
+    nguon: [readback-run-45418608259.json, readback-jobs-45418608259.json]
+  - name: 'ci.yml push master — DUNG merge SHA'
+    run_id: 45418608352
+    sha: a03a28ef076503c7fe93c208a4998c32590a977f
+    conclusion: success
+    jobs: '39/39 success, nhan ubuntu-latest, runner_id khac 0'
+    nguon: [readback-run-45418608352.json, readback-jobs-45418608352.json, readback-check-runs-a03a28e-all.json]
+provenance_10_2_2:
+  run: {trang_thai: measured, nguon: [readback-run-45418608259.json, readback-run-45418608352.json, readback-jobs-45418608259.json, readback-jobs-45418608352.json], ghi_chu: 'REST head_sha a03a28e, event push, conclusion success.'}
+  checkout: {trang_thai: measured, nguon: log-markers-a03a28e.txt, ghi_chu: 'log 41/41 job tai ve (0 rong, sha256 tung log ghi trong tep); 58 dong marker chua a03a28ef… (checkout/rev-parse).'}
+  workflow_definition:
+    trang_thai: measured
+    nguon: [graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj2gw.json, graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj24A.json, readback-contents-launcher-windows.yml-a03a28e.json, readback-contents-ci.yml-a03a28e.json, git-rev-parse-blob-a03a28e.txt]
+    ghi_chu: 'WorkflowRun.file.path + checkSuite.commit.oid = a03a28e cho ca hai run; blob REST = git rev-parse: launcher-windows.yml 0a0f77ff…, ci.yml a1db88d9….'
+  gate_output: {trang_thai: measured, nguon: log-markers-a03a28e.txt, ghi_chu: 'marker duong: launcher DOT BIEN 596/596 (windows) va 786/786 (ubuntu); "ok": true / TONG: DAT; 0 dong exit code khac 0 tren 41 log.'}
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: 'Du bon moc §10.2.2 tren DUNG a03a28e (provenance_10_2_2). Thieu ghi nhan: khong lease (hoi to #1511), khong cross-review skill — ghi ro, khong chan land theo quyet dinh chu kho khi merge.'
+bookkeeping:
+  - {item: 'ho so land tu comment PR #1510 vao ops/land/', ket_qua: 'tep nay + thu muc provenance; packet wp1511 K3'}
+  - {item: 'ghi nhan hoi to Issue/lease r1509', ket_qua: '#1511 issuecomment-7137707977 (K1)'}

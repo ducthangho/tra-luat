@@ -1,0 +1,176 @@
+== job 138531601354 sha256=296a1786985c610799fb3bdd2e41c3fbbb304624429ed58acf6be64ecc29acce bytes=197213
+      1 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a03a28ef076503c7fe93c208a4998c32590a977f:refs/remotes/origin/master
+      1 DOT BIEN: 596/596 dat  (197 khong do duoc tren nen nay)
+      1  * [new ref]           a03a28ef076503c7fe93c208a4998c32590a977f -> origin/master
+      1   r1509_tha_quyen_ghi          OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_moi_ten            OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_moi_mien           OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_ca_tep             OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+== job 138531601956 sha256=15fa68dcb41ad382c7ea996faa280c0ec8c07ee5b2c9b945b583ad1aebf106f6 bytes=139627
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 BONG_PHAN_LOAI: cu=day_du moi=khong_do_duoc goc_su_kien=5259239d763c9ffc1677f033bd9a9cf23ede9299 goc_so=- dau=a03a28ef076503c7fe93c208a4998c32590a977f hop=a03a28ef076503c7fe93c208a4998c32590a977f ly_do=su_kien_khong_phai_pull_request cu_do=do_duoc kiem_moi=- run=45418608352/1 su_kien=push
+      1 BONG_CONG_CU: chay ly_do=push run=45418608352/1 head=a03a28ef076503c7fe93c208a4998c32590a977f duong_dan=chay van_tay=- su_kien=push che_do=day_du
+      1  * [new branch]          claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+      1   CI_DUONG_NHANH_MERGE: a03a28ef076503c7fe93c208a4998c32590a977f
+== job 138531602042 sha256=22842c3b37d6dfe2a1e5931327ddb4e6070356d139202606b08ab68a0df1b250 bytes=160500
+      1 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a03a28ef076503c7fe93c208a4998c32590a977f:refs/remotes/origin/master
+      1 DOT BIEN: 786/786 dat  (7 khong do duoc tren nen nay)
+      1  * [new ref]           a03a28ef076503c7fe93c208a4998c32590a977f -> origin/master
+      1   r1509_tha_quyen_ghi          OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_moi_ten            OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_moi_mien           OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+      1   r1509_tha_ca_tep             OK  giet 1/1: r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc
+== job 138531804850 sha256=74f658fabda0c5059614cde985f6e85dd4b364616e77d83546c27cdc28abaede bytes=737116
+     93       "ok": true,
+     20           "ok": true,
+      9   "ok": true,
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      2 TỔNG: ĐẠT
+      1 {"ok": true, "status": "pass", "name": "tl-selftest", "returncode": 0, "duration_seconds": 315.339956, "evidence": "/home/runner/work/tra-luat/tra-luat/scripts/.tl_state/gate/tl-selftest-Linux.json"}
+      1 head_sha = a03a28ef076503c7fe93c208a4998c32590a977f
+      1 base_sha = a03a28ef076503c7fe93c208a4998c32590a977f
+      1 [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+      1 [wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=1 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=2 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+== job 138531804901 sha256=8af33e56fa9937e9b3a161949e249cd7814d9af0324f3f6f69d218bc63040386 bytes=187332
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804923 sha256=8560bcd8bb2f9b9d89bb107deccfe7319381897e929f8a6e408f3eee7ad44550 bytes=186719
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804939 sha256=35db2eaebddac5a94d997318b1c9a0d3a30df35e79ed8870093b2a84e55f74d9 bytes=187366
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804973 sha256=f8cc689964da0a390ea547522696a8241c898abe528e95249e61d0f2d99aa1ca bytes=184930
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804985 sha256=aedd01424f57bac9198ef11bbe71f5e2750c076976b493f6bbc0aee59dbc4ab7 bytes=185253
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804990 sha256=b6ad7e2be1f7f496beb27bda5cfd6a6a92c2be224e5985571016e164d6a167a8 bytes=151450
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531804991 sha256=ef3fd538fd6dfb74156c94225c6ab987076e91d4b2f6bbdc3e9a1e0e9e9d921d bytes=185590
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805009 sha256=8a66c8a376fb7a105c2754c7d0f46098df076688bc06e7cf40af749f6f795053 bytes=185147
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805059 sha256=51a4cf60494a7645d21e22305af13d8cea6dd632562b4bdda2b2a41262c17eb5 bytes=149045
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805105 sha256=0eec3dfdfdfaa22fc4633155b25a085658e78c64988b594185b63500d2bdee4d bytes=149163
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805123 sha256=9aa265082f59847e3934bdb03f5d1914789aacce5c0b9575283fd65d9538d71e bytes=185356
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805129 sha256=bdd90375d01b6c58eb8295c8823a925a3338437f791f098aac6a3aa35cfbd7d3 bytes=149252
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805209 sha256=2df31ecb8a028e011bd366126c1cd01abf4affff36fabc8911a8203bdf02c306 bytes=534102
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1 DOT BIEN: 527/527 bi giet dung ly do
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805230 sha256=8d82bb1881c79ca32679ba7a8ba8d37efdd54edfacff1ccc7302c3092b7c7388 bytes=149861
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805272 sha256=866da7b1fbdebd6382c9734f17651de1618f4ce78f7eea34e5bca3cfed41794d bytes=150162
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805338 sha256=c5c7da1fa167b99b0337db35863e8aed797ba9a95251c77964aaab9ab09c8abc bytes=153876
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805344 sha256=4a0283122e708ac9d1413af811c943a44772af7ae214751b03c414ebcbb3d2a1 bytes=154366
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805368 sha256=5f27c8816df38c1f26d3a50f7696578fe11bec52a859cd8090608abff878b63b bytes=149358
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805431 sha256=680eedf8568e6795da32dada3c0f1415c2fbac80f686c29f15f30ea51d94631e bytes=155677
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805434 sha256=11f415285523d5a09e5f3089a0ba6776e082cce95bfef9e64739a0544769c877 bytes=155483
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805437 sha256=af0e54214c9ef975b347bcc06622edc6e5eb5545f6a7e757c7026f58da0136d3 bytes=155308
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805455 sha256=cacc78d0c131abcb60819fdfe1cd1a2e416b550c5cd6e20ac9972121caf6cb7f bytes=154427
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805466 sha256=44aeea79d86f4e719c9bd2fa6aba09b1936bb51bcb445f3eed1ea1c24214e8d8 bytes=153898
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805491 sha256=2f119bd41dd5d31b2a0f2c8d7d4defc7860e2c21f55bb5c5f3580401731091af bytes=155998
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 {"test": "own_r2", "original_source_oid": "a03a28ef076503c7fe93c208a4998c32590a977f", "fixture_source_oid": "0337c147e1ff2f4b5d3a8149dfa28ad3d5c687ce", "source_path": "ops/specs/PR1184-MERGE-CONTRACT-r2.md", "sha256": "975c5d31be6ec4f26145f14893b5c8f7063e5921d1c6dafdca020f50e795299d", "rc": 0, "at_head": true, "policy_graph": "synthetic rollout; not canonical rollout authority"}
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805511 sha256=1ed5d63974d53ea83a06fdc2dd8adc5b50d19f8b3470641aa202d43ec6a0fe2f bytes=174118
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 WP1174_NATIVE_REPORT_V1 {"actual_os": "Linux", "checkout_sha": "a03a28ef076503c7fe93c208a4998c32590a977f", "checkout_tree": "1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe", "executed_sha": "a03a28ef076503c7fe93c208a4998c32590a977f", "executed_tree": "1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe", "expected_head": "a03a28ef076503c7fe93c208a4998c32590a977f", "expected_tree": "1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe", "job": "gate-packet-loop-manh", "native_probe": {"checks": {"cloexec": true, "fsync_dir": true, "fsync_file": true, "link_noreplace": true, "lock_process": true, "mount": true, "readback": true, "replace": true, "same_mount": true, "statfs": true, "tripwire": true}, "raw": {"facts": {"device": "8:1", "filesystem": "ext4", "magic": 61267, "mount_id": "28", "mountpoint": "/", "st_dev": 2049}, "native_seam_used": false, "outcomes": {"cloexec": true, "file_fsync_directory_fsync_readback": true, "fixed_lock_retained": true, "link_no_replace_eexist": true, "lock_contention_process": true, "mount_identity": true, "replace": true, "tripwire": true}}, "status": "passed"}, "native_seam": false, "outcomes": {"wp1174_activity_accept_roundtrip": "passed", "wp1174_activity_accept_snapshot_drift": "passed", "wp1174_activity_budget_bytes_cumulative": "passed", "wp1174_activity_budget_overflow_unreported": "passed", "wp1174_activity_budget_pages_cumulative": "passed", "wp1174_activity_cursor_foreign": "passed", "wp1174_activity_deadline_processing": "passed", "wp1174_activity_deletion_preaudit": "passed", "wp1174_activity_deletion_unexplained": "passed", "wp1174_activity_fetch_timeout_group": "passed", "wp1174_activity_force_push_preimage": "passed", "wp1174_activity_intro_kinds": "passed", "wp1174_activity_matching_refs_unpaginated": "passed", "wp1174_activity_multipage_anchor": "passed", "wp1174_activity_no_anchor": "passed", "wp1174_activity_object_unfetchable": "passed", "wp1174_activity_older_page_fail": "passed", "wp1174_activity_pr_foreign_head": "passed", "wp1174_activity_receipt_residuals": "passed", "wp1174_activity_receipt_v1": "passed", "wp1174_activity_reduced_payload": "passed", "wp1174_activity_same_timestamp_fail": "passed", "wp1174_activity_tag_coverage": "passed", "wp1174_activity_tip_non_commit": "passed", "wp1174_admission_candidate_root": "passed", "wp1174_admission_expired_revoked": "passed", "wp1174_admission_file_bytes": "passed", "wp1174_admission_oid_path_hash": "passed", "wp1174_admission_unresolved": "passed", "wp1174_admission_valid": "passed", "wp1174_admission_wrong_scope": "passed", "wp1174_adopt_abandon_cutover": "passed", "wp1174_adopt_abandon_prepare": "passed", "wp1174_adopt_entry_preflight": "passed", "wp1174_adopt_finalize_replay": "passed", "wp1174_adopt_fresh_reserved_adopt": "passed", "wp1174_adopt_import_first": "passed", "wp1174_adopt_intent_cutover": "passed", "wp1174_adopt_postimage_all": "passed", "wp1174_adopt_resume_no_target": "passed", "wp1174_adopt_retry": "passed", "wp1174_durability_cached_writer": "passed", "wp1174_durability_fsync_readback": "passed", "wp1174_durability_legacy_tombstone": "passed", "wp1174_durability_ordinary_pair": "passed", "wp1174_durability_publish_noreplace": "passed", "wp1174_gate_evidence_schema": "passed", "wp1174_gate_required_skip": "passed", "wp1174_init_fresh": "passed", "wp1174_init_preflight": "passed", "wp1174_init_resume_absent": "passed", "wp1174_init_resume_full": "passed", "wp1174_init_resume_mismatch": "passed", "wp1174_lifecycle_budget_replay": "passed", "wp1174_lifecycle_first_publication": "passed", "wp1174_lifecycle_guard_readonly": "passed", "wp1174_lifecycle_human_negative": "passed", "wp1174_lifecycle_human_valid": "passed", "wp1174_lifecycle_identity_advisory": "passed", "wp1174_lifecycle_legacy_unchanged": "passed", "wp1174_lifecycle_scoped_lifecycle": "passed", "wp1174_profile_native_linux": "passed", "wp1174_profile_unsupported": "passed", "wp1174_race_accept": "passed", "wp1174_race_adopt_state": "passed", "wp1174_race_begin_attempt": "passed", "wp1174_race_chu_kho_duyet": "passed", "wp1174_race_init": "passed", "wp1174_race_mo_lai": "passed", "wp1174_race_nang_tran": "passed", "wp1174_race_record_codex_call": "passed", "wp1174_race_record_lease": "passed", "wp1174_race_record_post": "passed", "wp1174_race_record_rescue": "passed", "wp1174_race_record_review": "passed", "wp1174_race_transition": "passed", "wp1174_race_void_attempt": "passed", "wp1174_receipt_agree_unit": "passed", "wp1174_source_active_positive": "passed", "wp1174_source_ahead": "passed", "wp1174_source_backup": "passed", "wp1174_source_foreign_path": "passed", "wp1174_source_generation_revision": "passed", "wp1174_source_legacy_branch": "passed", "wp1174_source_recovery_snapshot": "passed", "wp1174_status_closed": "passed", "wp1174_witness_active_pending": "passed", "wp1174_witness_enum_hash": "passed", "wp1174_witness_fresh_reserved": "passed", "wp1174_witness_import_retry": "passed", "wp1174_witness_int_bool": "passed", "wp1174_witness_json_bytes": "passed", "wp1174_witness_keyset": "passed", "wp1174_witness_suspended": "passed", "wp1174_witness_valid": "passed", "wp1174_writer_accept": "passed", "wp1174_writer_adopt_state": "passed", "wp1174_writer_begin_attempt": "passed", "wp1174_writer_chu_kho_duyet": "passed", "wp1174_writer_init": "passed", "wp1174_writer_mo_lai": "passed", "wp1174_writer_nang_tran": "passed", "wp1174_writer_record_codex_call": "passed", "wp1174_writer_record_lease": "passed", "wp1174_writer_record_post": "passed", "wp1174_writer_record_rescue": "passed", "wp1174_writer_record_review": "passed", "wp1174_writer_transition": "passed", "wp1174_writer_void_attempt": "passed"}, "overall_status": "passed", "path_hashes": {}, "pr": null, "producer_after": {"product": "8251a4454fd26657d2258e2ffb4869651dc74f168fcc1944d92f037c86c44a18", "test": "e76787cf57913d721faffe6bc37ba372bbe448b5f3544693d4e7b0263f0cf359"}, "producer_digests": {"product": "8251a4454fd26657d2258e2ffb4869651dc74f168fcc1944d92f037c86c44a18", "test": "e76787cf57913d721faffe6bc37ba372bbe448b5f3544693d4e7b0263f0cf359"}, "profiles": {"wp1174_activity_accept_roundtrip": "fixture_or_pure", "wp1174_activity_accept_snapshot_drift": "fixture_or_pure", "wp1174_activity_budget_bytes_cumulative": "fixture_or_pure", "wp1174_activity_budget_overflow_unreported": "fixture_or_pure", "wp1174_activity_budget_pages_cumulative": "fixture_or_pure", "wp1174_activity_cursor_foreign": "fixture_or_pure", "wp1174_activity_deadline_processing": "fixture_or_pure", "wp1174_activity_deletion_preaudit": "fixture_or_pure", "wp1174_activity_deletion_unexplained": "fixture_or_pure", "wp1174_activity_fetch_timeout_group": "fixture_or_pure", "wp1174_activity_force_push_preimage": "fixture_or_pure", "wp1174_activity_intro_kinds": "fixture_or_pure", "wp1174_activity_matching_refs_unpaginated": "fixture_or_pure", "wp1174_activity_multipage_anchor": "fixture_or_pure", "wp1174_activity_no_anchor": "fixture_or_pure", "wp1174_activity_object_unfetchable": "fixture_or_pure", "wp1174_activity_older_page_fail": "fixture_or_pure", "wp1174_activity_pr_foreign_head": "fixture_or_pure", "wp1174_activity_receipt_residuals": "fixture_or_pure", "wp1174_activity_receipt_v1": "fixture_or_pure", "wp1174_activity_reduced_payload": "fixture_or_pure", "wp1174_activity_same_timestamp_fail": "fixture_or_pure", "wp1174_activity_tag_coverage": "fixture_or_pure", "wp1174_activity_tip_non_commit": "fixture_or_pure", "wp1174_admission_candidate_root": "fixture_or_pure", "wp1174_admission_expired_revoked": "fixture_or_pure", "wp1174_admission_file_bytes": "fixture_or_pure", "wp1174_admission_oid_path_hash": "fixture_or_pure", "wp1174_admission_unresolved": "fixture_or_pure", "wp1174_admission_valid": "fixture_or_pure", "wp1174_admission_wrong_scope": "fixture_or_pure", "wp1174_adopt_abandon_cutover": "fixture_or_pure", "wp1174_adopt_abandon_prepare": "fixture_or_pure", "wp1174_adopt_entry_preflight": "fixture_or_pure", "wp1174_adopt_finalize_replay": "fixture_or_pure", "wp1174_adopt_fresh_reserved_adopt": "fixture_or_pure", "wp1174_adopt_import_first": "fixture_or_pure", "wp1174_adopt_intent_cutover": "fixture_or_pure", "wp1174_adopt_postimage_all": "fixture_or_pure", "wp1174_adopt_resume_no_target": "fixture_or_pure", "wp1174_adopt_retry": "fixture_or_pure", "wp1174_durability_cached_writer": "fixture_or_pure", "wp1174_durability_fsync_readback": "fixture_or_pure", "wp1174_durability_legacy_tombstone": "fixture_or_pure", "wp1174_durability_ordinary_pair": "fixture_or_pure", "wp1174_durability_publish_noreplace": "fixture_or_pure", "wp1174_gate_evidence_schema": "fixture_or_pure", "wp1174_gate_required_skip": "fixture_or_pure", "wp1174_init_fresh": "fixture_or_pure", "wp1174_init_preflight": "fixture_or_pure", "wp1174_init_resume_absent": "fixture_or_pure", "wp1174_init_resume_full": "fixture_or_pure", "wp1174_init_resume_mismatch": "fixture_or_pure", "wp1174_lifecycle_budget_replay": "fixture_or_pure", "wp1174_lifecycle_first_publication": "fixture_or_pure", "wp1174_lifecycle_guard_readonly": "fixture_or_pure", "wp1174_lifecycle_human_negative": "fixture_or_pure", "wp1174_lifecycle_human_valid": "fixture_or_pure", "wp1174_lifecycle_identity_advisory": "fixture_or_pure", "wp1174_lifecycle_legacy_unchanged": "fixture_or_pure", "wp1174_lifecycle_scoped_lifecycle": "fixture_or_pure", "wp1174_profile_native_linux": "native_required", "wp1174_profile_unsupported": "fixture_or_pure", "wp1174_race_accept": "fixture_or_pure", "wp1174_race_adopt_state": "fixture_or_pure", "wp1174_race_begin_attempt": "fixture_or_pure", "wp1174_race_chu_kho_duyet": "fixture_or_pure", "wp1174_race_init": "fixture_or_pure", "wp1174_race_mo_lai": "fixture_or_pure", "wp1174_race_nang_tran": "fixture_or_pure", "wp1174_race_record_codex_call": "fixture_or_pure", "wp1174_race_record_lease": "fixture_or_pure", "wp1174_race_record_post": "fixture_or_pure", "wp1174_race_record_rescue": "fixture_or_pure", "wp1174_race_record_review": "fixture_or_pure", "wp1174_race_transition": "fixture_or_pure", "wp1174_race_void_attempt": "fixture_or_pure", "wp1174_receipt_agree_unit": "fixture_or_pure", "wp1174_source_active_positive": "fixture_or_pure", "wp1174_source_ahead": "fixture_or_pure", "wp1174_source_backup": "fixture_or_pure", "wp1174_source_foreign_path": "fixture_or_pure", "wp1174_source_generation_revision": "fixture_or_pure", "wp1174_source_legacy_branch": "fixture_or_pure", "wp1174_source_recovery_snapshot": "fixture_or_pure", "wp1174_status_closed": "fixture_or_pure", "wp1174_witness_active_pending": "fixture_or_pure", "wp1174_witness_enum_hash": "fixture_or_pure", "wp1174_witness_fresh_reserved": "fixture_or_pure", "wp1174_witness_import_retry": "fixture_or_pure", "wp1174_witness_int_bool": "fixture_or_pure", "wp1174_witness_json_bytes": "fixture_or_pure", "wp1174_witness_keyset": "fixture_or_pure", "wp1174_witness_suspended": "fixture_or_pure", "wp1174_witness_valid": "fixture_or_pure", "wp1174_writer_accept": "fixture_or_pure", "wp1174_writer_adopt_state": "fixture_or_pure", "wp1174_writer_begin_attempt": "fixture_or_pure", "wp1174_writer_chu_kho_duyet": "fixture_or_pure", "wp1174_writer_init": "fixture_or_pure", "wp1174_writer_mo_lai": "fixture_or_pure", "wp1174_writer_nang_tran": "fixture_or_pure", "wp1174_writer_record_codex_call": "fixture_or_pure", "wp1174_writer_record_lease": "fixture_or_pure", "wp1174_writer_record_post": "fixture_or_pure", "wp1174_writer_record_rescue": "fixture_or_pure", "wp1174_writer_record_review": "fixture_or_pure", "wp1174_writer_transition": "fixture_or_pure", "wp1174_writer_void_attempt": "fixture_or_pure"}, "proof_eligible": false, "repo": "ducthangho/tra-luat", "required_count": 109, "required_ids": ["wp1174_activity_accept_roundtrip", "wp1174_activity_accept_snapshot_drift", "wp1174_activity_budget_bytes_cumulative", "wp1174_activity_budget_overflow_unreported", "wp1174_activity_budget_pages_cumulative", "wp1174_activity_cursor_foreign", "wp1174_activity_deadline_processing", "wp1174_activity_deletion_preaudit", "wp1174_activity_deletion_unexplained", "wp1174_activity_fetch_timeout_group", "wp1174_activity_force_push_preimage", "wp1174_activity_intro_kinds", "wp1174_activity_matching_refs_unpaginated", "wp1174_activity_multipage_anchor", "wp1174_activity_no_anchor", "wp1174_activity_object_unfetchable", "wp1174_activity_older_page_fail", "wp1174_activity_pr_foreign_head", "wp1174_activity_receipt_residuals", "wp1174_activity_receipt_v1", "wp1174_activity_reduced_payload", "wp1174_activity_same_timestamp_fail", "wp1174_activity_tag_coverage", "wp1174_activity_tip_non_commit", "wp1174_admission_candidate_root", "wp1174_admission_expired_revoked", "wp1174_admission_file_bytes", "wp1174_admission_oid_path_hash", "wp1174_admission_unresolved", "wp1174_admission_valid", "wp1174_admission_wrong_scope", "wp1174_adopt_abandon_cutover", "wp1174_adopt_abandon_prepare", "wp1174_adopt_entry_preflight", "wp1174_adopt_finalize_replay", "wp1174_adopt_fresh_reserved_adopt", "wp1174_adopt_import_first", "wp1174_adopt_intent_cutover", "wp1174_adopt_postimage_all", "wp1174_adopt_resume_no_target", "wp1174_adopt_retry", "wp1174_durability_cached_writer", "wp1174_durability_fsync_readback", "wp1174_durability_legacy_tombstone", "wp1174_durability_ordinary_pair", "wp1174_durability_publish_noreplace", "wp1174_gate_evidence_schema", "wp1174_gate_required_skip", "wp1174_init_fresh", "wp1174_init_preflight", "wp1174_init_resume_absent", "wp1174_init_resume_full", "wp1174_init_resume_mismatch", "wp1174_lifecycle_budget_replay", "wp1174_lifecycle_first_publication", "wp1174_lifecycle_guard_readonly", "wp1174_lifecycle_human_negative", "wp1174_lifecycle_human_valid", "wp1174_lifecycle_identity_advisory", "wp1174_lifecycle_legacy_unchanged", "wp1174_lifecycle_scoped_lifecycle", "wp1174_profile_native_linux", "wp1174_profile_unsupported", "wp1174_race_accept", "wp1174_race_adopt_state", "wp1174_race_begin_attempt", "wp1174_race_chu_kho_duyet", "wp1174_race_init", "wp1174_race_mo_lai", "wp1174_race_nang_tran", "wp1174_race_record_codex_call", "wp1174_race_record_lease", "wp1174_race_record_post", "wp1174_race_record_rescue", "wp1174_race_record_review", "wp1174_race_transition", "wp1174_race_void_attempt", "wp1174_receipt_agree_unit", "wp1174_source_active_positive", "wp1174_source_ahead", "wp1174_source_backup", "wp1174_source_foreign_path", "wp1174_source_generation_revision", "wp1174_source_legacy_branch", "wp1174_source_recovery_snapshot", "wp1174_status_closed", "wp1174_witness_active_pending", "wp1174_witness_enum_hash", "wp1174_witness_fresh_reserved", "wp1174_witness_import_retry", "wp1174_witness_int_bool", "wp1174_witness_json_bytes", "wp1174_witness_keyset", "wp1174_witness_suspended", "wp1174_witness_valid", "wp1174_writer_accept", "wp1174_writer_adopt_state", "wp1174_writer_begin_attempt", "wp1174_writer_chu_kho_duyet", "wp1174_writer_init", "wp1174_writer_mo_lai", "wp1174_writer_nang_tran", "wp1174_writer_record_codex_call", "wp1174_writer_record_lease", "wp1174_writer_record_post", "wp1174_writer_record_rescue", "wp1174_writer_record_review", "wp1174_writer_transition", "wp1174_writer_void_attempt"], "run_attempt": "1", "run_id": "45418608352", "schema": "wp1174_native_report.v1", "scope": "ci_push_snapshot", "snapshot_after": {"content_sha256": "6d478f4c2c7e0f2239ed7abcc7457c58902e59c98e65fe359f90d3340556fa86", "file_count": 19400, "head": "a03a28ef076503c7fe93c208a4998c32590a977f", "index_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "status": "", "tree": "1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe", "work_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}, "snapshot_before": {"content_sha256": "6d478f4c2c7e0f2239ed7abcc7457c58902e59c98e65fe359f90d3340556fa86", "file_count": 19400, "head": "a03a28ef076503c7fe93c208a4998c32590a977f", "index_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "status": "", "tree": "1c3dfd0b5363745cb27ca976cb37ae865aeb2ebe", "work_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}, "source_pr": 1275, "windows_oracle": "not_run_platform; deferred_to_windows_focused"}
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805513 sha256=409d67681d484c411885fb414a340617b18443176b854488d74074e563ff3af1 bytes=156311
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805517 sha256=91fe4a43aee7452b64d69fc1c605de7f3c779ad23d469d3936de0439d7a3e1c5 bytes=149919
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805526 sha256=9ab3cda1e44b6923a2798f98f6303bd834b26fb4996799fc77132334b76df221 bytes=155212
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805544 sha256=9fb77d79f18d70bd2838e477be2f20595b22b99c67e3edd63000116c822ab9ea bytes=154623
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805546 sha256=e48083bbc50206d52b1a9f1dce2e9adc1633fc7c2f08a96e52afc4023724900b bytes=155548
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805565 sha256=d84810ce3c290a067b137a0b191149d43887f8acbb2135f1704941bde1d9ee5b bytes=155447
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531805669 sha256=091e9904470a17622e10aea3ca8e4ed5ba289537d6051a470e602c0b13e5eb68 bytes=155098
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138531806429 sha256=1ff984fb67683d5ede62b09f70c1d87545271efcf27d5fb8444c23e73b996c3b bytes=155352
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 TỔNG: ĐẠT
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138532869113 sha256=f0d48ac4659a56fdd714927abedbe1519610811f5ce4e33b0648914b6be8cc93 bytes=145384
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 targeted_mutant_gate GOP 8/8 manh · head a03a28ef076503c7fe93c208a4998c32590a977f
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+== job 138533107246 sha256=e62edb1d105c67ec4fdb54fd99f7cd35d8cbf1a1ba67a32745d5b3566ae01a39 bytes=290663
+      4 TỔNG: ĐẠT
+      2 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 DOT BIEN: 91/91 bi giet dung ly do
+      1 DOT BIEN: 485/485 bi giet dung ly do
+      1 DOT BIEN: 158/158 bi giet dung ly do
+      1 DOT BIEN: 13/13 bi giet dung ly do
+      1 DOT BIEN: 116/116 bi giet dung ly do
+      1  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+      1   CI_DANG_KY_DAU: a03a28ef076503c7fe93c208a4998c32590a977f
+== job 138535999637 sha256=d972bae2dc2085f2642b34ecb8796ad33439f505d54b2a31b7278f1030c645c6 bytes=29771
+      1 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a03a28ef076503c7fe93c208a4998c32590a977f:refs/remotes/origin/master
+      1  * [new ref]         a03a28ef076503c7fe93c208a4998c32590a977f -> origin/master
+== job 138547509625 sha256=0f0cf4977afa8074d4ad770938e619dceb5e52830f2a0f2133bccc6785b3b487 bytes=99647
+      1 a03a28ef076503c7fe93c208a4998c32590a977f
+      1 [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a03a28ef076503c7fe93c208a4998c32590a977f:refs/remotes/origin/master
+      1  * [new ref]         a03a28ef076503c7fe93c208a4998c32590a977f -> origin/master

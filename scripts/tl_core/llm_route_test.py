@@ -633,7 +633,10 @@ def ca_khoan_mat_so_co_diem_dat(m):
     vb = "Điều 3.\nTrong Luật này, các từ ngữ dưới đây được hiểu như sau:\nChủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.\nHồ sơ là tài liệu."
     kn = [{"stt": 1, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."},
           {"stt": 2, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu."}]
-    bang(m.lech_nguyen_van(kn, vb) == [], f"khoan mat so co diem a, b bi chan oan: {m.tach_khoan(vb)}")
+    # r9 (lượt 9 J1): nguồn mất số có dòng điểm ⇒ chặn (không phân biệt được khoản có điểm với lời dẫn nhóm); cùng nội dung CÓ số ⇒ đạt.
+    bang(m.tach_khoan(vb) is None, f"r9: nguon mat so co diem phai bi chan: {m.tach_khoan(vb)}")
+    vb_so = vb.replace("Chủ thể là", "1. Chủ thể là").replace("Hồ sơ l", "2. Hồ sơ l")
+    bang(m.lech_nguyen_van(kn, vb_so) == [], f"khoan CO so co diem a, b bi chan oan: {m.tach_khoan(vb_so)}")
 
 
 def ca_bom_tieu_de(m):
@@ -1133,10 +1136,22 @@ def ca_wp1514_luot7(m):
     for ket in ("\uff1a", " như sau", ";"):
         h1 = f"Điều 3.\nCác từ ngữ là các khái niệm sau{ket}\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin."
         bang(m.tach_khoan(h1) is None, f"H1: dong dau {ket!r} co diem noi vao phai mo ho: {m.tach_khoan(h1)}")
-    # Đối chứng: cùng khối đứng SAU câu dẫn chuẩn là khoản thật có điểm ⇒ vẫn đạt.
-    vb = f"Điều 3.\n{CD}\nChủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."
+    # Đối chứng: khoản thật có điểm ở nguồn CÓ số ⇒ vẫn đạt (r9: nguồn mất số có điểm bị chặn cả khi có câu dẫn chuẩn).
+    vb = f"Điều 3.\n{CD}\n1. Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."
     bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")), vb) == [],
          "G1 doi chung: khoan that co diem sau cau dan chuan bi chan oan")
+
+
+def ca_wp1514_luot9(m):
+    """r9 (lượt 9 J1): nguồn mất số có dòng điểm ⇒ chặn — lời dẫn nhóm ở GIỮA nguồn, sau câu dẫn chuẩn và sau một khoản thật."""
+    CD = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+    for vb in (f"Điều 3.\n{CD}\nNhóm dữ liệu là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin.",
+               f"Điều 3.\n{CD}\nTổ chức là đơn vị.\nNhóm dữ liệu là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin.",
+               "Điều 3.\nTổ chức là đơn vị.\nNhóm dữ liệu là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin."):
+        bang(m.tach_khoan(vb) is None, f"J1: nguon mat so co diem phai bi chan: {m.tach_khoan(vb)}")
+    # Đối chứng: nguồn mất số mỗi khoản một dòng vẫn đạt.
+    bang(m.tach_khoan(f"Điều 3.\n{CD}\nTổ chức là đơn vị.\nHồ sơ là tài liệu.") == [(None, "Tổ chức là đơn vị."), (None, "Hồ sơ là tài liệu.")],
+         "J1 doi chung: nguon mat so mot dong mot khoan bi chan oan")
 
 
 def ca_usage_thieu_truong(m):
@@ -1155,7 +1170,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1177,9 +1192,8 @@ DOT_BIEN = [
     # r6 (lượt 6 F1/F2).
     ('wp1514_l6_so_lieu_ke_dang_sau', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\\S\\n])\\(?\\d+[.)](?=[^\\S\\n]|[^\\W\\d_])")'), 'ca_wp1514_luot6'),
     ('wp1514_l6_cau_dan_mo_rong_chu_ngu', ('r"(?:Trong|Tại) (?:Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư liên tịch|Quyết định) này, "', 'r".*"'), 'ca_wp1514_luot6'),
-    # r8 (lượt 7 G1 · lượt 8 H1): chốt vai trò dòng đầu ở nguồn mất số.
-    ('wp1514_l8_bo_chot_vai_tro', ('            if not co_so and not bo_cau_dan and len(khoan) == 1:\n', '            if False and not co_so and not bo_cau_dan and len(khoan) == 1:\n'), 'ca_wp1514_luot7'),
-    ('wp1514_l8_vai_tro_bo_qua_cau_dan', ('            if not co_so and not bo_cau_dan and len(khoan) == 1:\n', '            if not co_so and len(khoan) == 1:\n'), 'ca_wp1514_luot7'),
+    # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.
+    ('wp1514_l9_cho_diem_nguon_mat_so', ('            if not co_so:\n                # r9', '            if False:\n                # r9'), 'ca_wp1514_luot9'),
     ('wp1514_l4_cau_dan_moi_vi_tri', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):'), 'ca_wp1514_luot4'),
     ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
@@ -1224,7 +1238,7 @@ DOT_BIEN = [
      "ca_tron_co_so_va_mat_so"),
     ("bo_so_lien_tuc", ("    if co_so and [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):\n        return None\n", ""),
      "ca_tron_co_so_va_mat_so"),
-    ("diem_thanh_khoan", ('        elif _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            if not co_so and not bo_cau_dan and len(khoan) == 1:\n                # r8 (lượt 8 H1, thay chốt r7 G1 theo dấu `:`): nguồn mất số KHÔNG có câu dẫn chuẩn ⇒ dòng đầu có thể là câu dẫn lạ;\n                # gom dòng điểm vào nó là đoán ranh giới. Chặn theo VAI TRÒ (có điểm nối vào) thay vì theo ký tự kết dòng — r7 chỉ\n                # nhận `:` ASCII nên `：` (U+FF1A) hay dấu khác lọt.\n                return None\n            khoan[-1][1] += "\\n" + ln\n', ""),
+    ("diem_thanh_khoan", ('        elif _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            if not co_so:\n                # r9 (lượt 9 J1; thay r7 G1 theo dấu `:` và r8 H1 theo vị trí): ở nguồn mất số, dòng mở một khối có điểm có thể là\n                # khoản thật (`X là … sau:` + điểm) hoặc lời dẫn nhóm mà các điểm là định nghĩa riêng — văn bản thô không phân biệt\n                # được. Nên nguồn mất số KHÔNG được có dòng điểm: mỗi khoản đúng một dòng, không có nhánh gom nào để đoán sai.\n                return None\n            khoan[-1][1] += "\\n" + ln\n', ""),
      "ca_khoan_mat_so_co_diem_dat"),
     ("nguon_mat_so_khong_tach", ("        elif not co_so:\n            khoan.append([None, ln])\n", ""), "ca_khoan_co_so_va_diem_dat"),
     # Lượt 6 S2.

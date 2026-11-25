@@ -372,7 +372,7 @@ biến môi trường của environment.
   đã biết của #1512 được chặn bảo thủ ở packet #1514 (xem gạch dưới); cờ `can_nguoi_duyet` vẫn giữ.
 - **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
   số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
-  thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản. Nguồn có BẤT KỲ dòng nào mà
+  thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản và không được có dòng điểm. Nguồn có BẤT KỲ dòng nào mà
   ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
   nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`
@@ -382,8 +382,8 @@ biến môi trường của environment.
   từ ngữ` (tiêu đề tên khác, tiền tố viết HOA `ĐIỀU 3.`, hay tên xuống dòng riêng đều bị chặn); câu dẫn chỉ được bỏ khi
   nằm ở dòng ĐẦU và CẢ dòng đúng câu dẫn chuẩn `Trong|Tại <Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư
   liên tịch|Quyết định> này, <các|những> <từ ngữ|thuật ngữ> <dưới đây|sau đây> được <hiểu|giải thích> như sau:` (phân biệt hoa
-  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; ở nguồn mất số không có câu dẫn chuẩn, dòng đầu có dòng
-  điểm nối vào ⇒ chặn cả nguồn, bất kể dấu kết dòng); phép so giữ nguyên xuống dòng của
+  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; nguồn mất số có BẤT KỲ dòng điểm nào (`a)`, `-`)
+  ⇒ chặn cả nguồn — mỗi khoản phải đúng một dòng; khoản có điểm cần nguồn có số khoản); phép so giữ nguyên xuống dòng của
   các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.

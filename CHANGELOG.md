@@ -24,6 +24,8 @@
   dẫn chuẩn ⇒ chặn cả nguồn, không gom các dòng điểm vào nó (G1).
 - r8 (sau cross-review lượt 8, đặc tả `ops/specs/llm-ranh-gioi-khoan-r8.md`): thay chốt theo dấu `:` của r7 bằng chốt VAI TRÒ —
   nguồn mất số không có câu dẫn chuẩn mà dòng đầu có dòng điểm nối vào ⇒ chặn, bất kể dấu kết dòng (H1: `：` U+FF1A lọt chốt r7).
+- r9 (sau cross-review lượt 9, đặc tả `ops/specs/llm-ranh-gioi-khoan-r9.md`): nguồn mất số có BẤT KỲ dòng điểm nào ⇒ chặn — lời dẫn
+  nhóm và khoản có điểm cùng hình dạng trong văn bản thô (J1); khoản có điểm cần nguồn có số khoản.
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

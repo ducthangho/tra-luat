@@ -89,3 +89,5 @@ max_lease_hours: 8
 review_calls_limit: 9
 review_calls_used_truoc: 8
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r9-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 9 (J1 P2); revision r9 nguon mat so khong co diem (ops/specs/llm-ranh-gioi-khoan-r9.md).'

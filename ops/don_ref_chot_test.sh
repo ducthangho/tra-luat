@@ -396,7 +396,13 @@ case "$DONG" in
       ST="${GIA_REF_STATE:-/dev/null}"
       hien=$(awk -v k="$dich" '$1==k{print $2}' "$ST" 2>/dev/null | tail -1)
       if [ -z "$hien" ]; then
-        printf ' ! [remote rejected] (delete) -> %s (no such ref)\n' "${dich##*/}" >&2; exit 1
+        # G1 luot 2: khop git THAT (do 2.43.0, remote bare cuc bo). Lease cung ten voi dich
+        # ma dich khong ton tai => old-oid lech => `stale info`, rc=1. Lease ten KHAC thi git
+        # chi canh bao `deleting a non-existent ref` va tra THANH CONG, khong doi gi.
+        if [ "${lease%%:*}" = "$dich" ]; then
+          printf ' ! [rejected] (delete) -> %s (stale info)\n' "${dich##*/}" >&2; exit 1
+        fi
+        printf 'warning: deleting a non-existent ref\n' >&2; exit 0
       fi
       ref="$dich"
       if [ "$lease" != "${lease%%:*}" ] && [ "${lease%%:*}" = "$dich" ] && [ "$hien" != "$mong" ]; then
@@ -406,7 +412,9 @@ case "$DONG" in
       # Khoa phep "DO LAI sau khi xoa" — khong co no thi mot lenh xoa im lang vo hieu
       # van cho cong xanh.
       if [ "${GIA_PUSH_KHONG_AN_GI:-0}" != 1 ]; then
-        grep -v "^$ref " "$ST" > "$ST.tmp" 2>/dev/null; mv "$ST.tmp" "$ST" 2>/dev/null
+        # So KHOP NGUYEN TEN (awk `!=`), khong `grep` regex: dau `.` trong ten ref la ky tu
+        # dai dien cua regex, nen xoa `dot.x` tung xoa luon `dotax` (G1 luot 2).
+        awk -v k="$ref" '$1 != k' "$ST" > "$ST.tmp" 2>/dev/null; mv "$ST.tmp" "$ST" 2>/dev/null
         printf '%s\n' "${ref#refs/}" >> "${GIA_LOG}.daxoa"
       fi
       printf ' - [deleted]         %s\n' "${ref##*/}"
@@ -474,6 +482,16 @@ doi_log "xoá: lease neo ĐÚNG refs/heads/a" "force-with-lease=refs/heads/a:" 1
 lam "xoá: tiền tố ngoài danh sách (coord/x)" 0 xoa-nhanh coord/x "" false
 doi_log "…và ĐÚNG MỘT push có lease neo refs/heads/coord/x" "force-with-lease=refs/heads/coord/x:" 1
 doi_log "…và refspec xoá trỏ ĐÚNG đích refs/heads/coord/x" "origin :refs/heads/coord/x$" 1
+# G1 lượt 2: đồ giả xoá theo NGUYÊN TÊN. Tên ref có dấu `.` không được kéo theo ref khác
+# mà regex `.` khớp (`dot.x` không được xoá mất `dotax`).
+printf 'refs/heads/dot.x %s\nrefs/heads/dotax %s\n' "$S1" "$S1" > "$TAM/rs_cham"
+printf 'dot.x %s\n' "$S1" > "$TAM/neo_cham"
+lam "xoá ref có dấu chấm: chỉ xoá đúng ref ấy" 0 xoa-nhanh dot.x "" false GIA_REF_STATE="$TAM/rs_cham" NEO_TEP="$TAM/neo_cham"
+if grep -qxF "refs/heads/dotax $S1" "$TAM/rs_cham" && ! grep -q '^refs/heads/dot\.x ' "$TAM/rs_cham"; then
+  QUA=$((QUA+1)); printf '  QUA   %s\n' "…và dotax CÒN, dot.x MẤT"
+else
+  HONG=$((HONG+1)); printf '  ĐỎ    %s\n' "…và dotax CÒN, dot.x MẤT"; sed 's/^/          /' "$TAM/rs_cham"
+fi
 lam "xoá HAI ref -> hai lệnh push"        0 xoa-nhanh 'a,b' "" false
 doi_log "xoá hai: đếm push có lease = 2"  "force-with-lease" 2
 

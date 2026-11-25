@@ -33,8 +33,18 @@ recorded_by: 'phien executor (vai executor cua packet px-loc-markup)'
 thay_the_cho: []
 leased_at_utc: '2026-11-25T18:45:09Z'
 heartbeat_at: '2026-11-25T18:45:09Z'
-lease_until: '2026-11-25T22:45:09Z'
-lease_expires_at_utc: '2026-11-25T22:45:09Z'
+lease_until: '2026-11-25T19:25:58Z'
+lease_expires_at_utc: '2026-11-25T19:25:58Z'
 max_lease_hours: 4
 native_runs_limit_per_host: 0
 inference_calls_limit_per_host: 0
+lease_until_ghi_chu: 'Gốc 2026-11-25T22:45:09Z. RÚT NGẮN về 2026-11-25T19:25:58Z — xem thu_hoi_bang_rut_han.'
+lease_sua_lan_cuoi: '2026-11-25T19:23:58Z'
+lease_sua_ghi_chu: 'Lần 1: rút ngắn lease_until/lease_expires_at_utc (thu_hoi_bang_rut_han). Không đổi write set, spec, branch.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-25T22:45:09Z'
+  han_moi_utc: '2026-11-25T19:25:58Z'
+  chi_thi: 'Chủ kho trong phiên chat 25-11-2026: "rút hạn lease đi". Ghi hộ https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7172238820.'
+  ly_do: 'Việc của r1 đã xong (ứng viên 8a33ddb đã review lượt 1); packet chuyển sang đặc tả r2 (duyệt issuecomment-7172132991), lease r2 cần write set trùng.'
+  vi_sao_khong_dung_so: 'Rút hạn dùng cơ chế đã cài (phân loại lease theo hạn), tiền lệ 304b0bb. Lease này chưa từng push nên không có lượt đăng nào cần thấy nó sống.'
+  gioi_han: 'Ref mang lease này: nhánh cục bộ ops/px-loc-markup-r1. Nghiệm thu: ai-dang-giu cho 8 đường dẫn write set r2 ra NGƯỜI_GIỮ 0 sau han_moi_utc.'

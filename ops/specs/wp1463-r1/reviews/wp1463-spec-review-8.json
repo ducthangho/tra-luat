@@ -1,0 +1,1585 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "mission_id": "gh-1172",
+  "revision": 7,
+  "generation": null,
+  "round": 8,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "1f5be5d8-wp1463-spec-review-8",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "1f5be5d8-wp1463-spec-review-8",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "evidence": "Independent user-assigned context. /proc ancestry of local tool shows codex executable; codex-cli0.172.0. Current launcher run.json serving-model/effort fields absent. No executor context fork or delegated subagent. Provider-family inference follows ADR0065; no GitHub actor used for model identity."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+  "reviewed_tree": "20fe44198b541a156c74b54ccad485781785c34d",
+  "anchors": {
+    "spec_comparison_baseline": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+    "product_drafting_baseline": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+    "measurement_base": "434846a154ef42711e79d0c9b376b1cb15b21180",
+    "approved_execution_base": null,
+    "reviewed_candidate": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c"
+  },
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "54ad219100ab3d34f413bf9d0bd1f34fd97ff2e87f5d1883f00010939699f1c1",
+  "measurement_master_sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+  "measurement_master_tree": "9bcedf11514e5a3a9ae33a0f794440a166ba121d",
+  "current_master_sha": "d0868dbf7f6324755aa4ed0f3e02d4efa84866f0",
+  "current_master_tree": null,
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "review_class": "sensitive",
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_note": "Review completed independently; no approval/accepted assurance is granted because findings remain. This enum value does not imply that no review work occurred. Executor lineage is documented Claude Opus5.5 in the exact spec commit; reviewer serving model/effort are not machine measured. No lease, CI, owner hash approval or land authorization is inferred.",
+  "evidence_url": null,
+  "tests": [
+    {
+      "name": "Exact object, spec hash and remote freshness",
+      "command": "git rev-parse; SHA-256 of git show exact object; GitHub fetch_commit(master/ops/wp1463-r1)",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "HEAD 49f75f74ded2eb06dedd6b981ea39a58f62aa84c, tree 20fe44198b541a156c74b54ccad485781785c34d and requested spec hash match. Initial GitHub refs matched local refs; final spec ref is unchanged, while master advanced from434846a to d0868db (two unrelated modified files; see freshness)."
+    },
+    {
+      "name": "All frozen rows and deletion controls",
+      "command": "python3 -B /tmp/wp1463-r8-audit/measure.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "30/30 rows agree in oracle and real ke_hoach with four changes injected; expected hash; 7/7 separate removal mutants detected."
+    },
+    {
+      "name": "Real phan_chung three loads",
+      "command": "python3 -B /tmp/wp1463-r8-audit/run_pc.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "nguyen/bon/go each True, 1677/1677, seven tracked files, ci.yml witness, no observed outside-Z file; bon probe itself checks 29/29, independent measure.py checks all 30."
+    },
+    {
+      "name": "Descendant-inclusive three-load audit",
+      "command": "python3 -B /tmp/wp1463-r8-audit/run_pc_deep.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Original probe plus inherited sitecustomize in all Python descendants. All three real runs complete 1677/1677; each seven-file tracked intersection agrees. Does not cure or disprove the dir_fd blind spot."
+    },
+    {
+      "name": "Full current-master suite with original audit hook",
+      "command": "PYTHONPATH=<source>/do-chuan-bi/hook AUDIT_OPEN_LOG=/tmp/wp1463-r8-audit/full-open.log python3 -B ops/ci_provenance_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": {
+        "base_sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "tracked_count": 18608,
+        "tracked_source": "git ls-files -z in exact-master scratch clone",
+        "bo_day_du": [
+          ".claude/dev/ci_dang_ky_test.py",
+          ".github/workflows/ops-do-workflow-definition.yml",
+          "ops/bash_nen.py",
+          "ops/ci_provenance.py",
+          "ops/ci_provenance_test.py"
+        ],
+        "witness": true,
+        "outside": [],
+        "rc": 0,
+        "wall_seconds": 1378.1670120429999,
+        "summary": [
+          "TIEN TRINH: 4",
+          "CA: 77/77 dat",
+          "DOT BIEN: 485/485 bi giet dung ly do",
+          "TU KIEM PHAN HANG: DAT (2 dot bien)",
+          "TONG: DAT"
+        ]
+      }
+    },
+    {
+      "name": "Historical drafting-base probe",
+      "command": "probe_pc.py /tmp/wp1463-r8-audit/draft-base nguyen /tmp/wp1463-r8-audit/old-tracked",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "1226/1226; four tracked paths; witness true; 10.061891486000036 seconds."
+    },
+    {
+      "name": "Pre-lease fail-closed contract",
+      "command": "python3 -B /tmp/wp1463-r8-audit/fault_probe.py; python3 -B /tmp/wp1463-r8-audit/shell_faults.py",
+      "status": "failed",
+      "exit_code": 0,
+      "evidence": "Harnesses exit 0 after recording counterexamples: production driver exits 0 for child rc42 and silent hook; original oracle accepts empty/witness-free sets. Content failure, not harness failure; PR2-S11."
+    },
+    {
+      "name": "Open observer completeness contract",
+      "command": "fault_probe.py and original-sitecustomize direct/dir_fd controls",
+      "status": "failed",
+      "exit_code": 0,
+      "evidence": "Successful tracked child and descriptor-relative reads disappear while ci.yml witness remains; direct-read control detects same sentinel. PR2-S13."
+    },
+    {
+      "name": "Rollback existing predicates",
+      "command": "python3 -B /tmp/wp1463-r8-audit/rollback.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": [
+        {
+          "case": "all-four",
+          "real_predicates": {
+            "p643-A1-chi-bo-trong-NHE": true,
+            "p647-M2-mau-nhe-chi-cho-bo-trong-NHE": true
+          },
+          "default_mode": "day_du"
+        },
+        {
+          "case": "only-NHE",
+          "real_predicates": {
+            "p643-A1-chi-bo-trong-NHE": false,
+            "p647-M2-mau-nhe-chi-cho-bo-trong-NHE": false
+          },
+          "default_mode": "day_du"
+        },
+        {
+          "case": "NHE-and-MAU_NHE",
+          "real_predicates": {
+            "p643-A1-chi-bo-trong-NHE": false,
+            "p647-M2-mau-nhe-chi-cho-bo-trong-NHE": true
+          },
+          "default_mode": "day_du"
+        }
+      ]
+    },
+    {
+      "name": "R7 consistency and quantitative AST claim",
+      "command": "measure.py; consistency.json scan; GitHub owner grant readback",
+      "status": "failed",
+      "exit_code": 0,
+      "evidence": "K6 five vs seven; active budget revision6 counters vs current 8/9 caps; MOI dictionary changed, only 11/12 full ASTs identical. PR2-S14/S08/S15."
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "command": "loi_ruff_ci() on exact-master registry",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "([],3), independently from lint."
+    },
+    {
+      "name": "Bare Ruff lint",
+      "command": "python3 -m ruff check --no-cache --select F ops/ci_provenance_test.py .claude/dev/ci_dang_ky_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Ruff 0.15.15: All checks passed! Scope: current-master test and registry files, no-cache."
+    },
+    {
+      "name": "Exact all-in-one script network bootstrap",
+      "command": [
+        "bash",
+        "/tmp/claude-0/-home-user-tra-luat/c4f557a5-3dc1-52de-8f7c-efef0dc5741c/scratchpad/rv8/kho/ops/specs/wp1463-r1/do-chuan-bi/do_vung_pr2.sh",
+        "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "/tmp/wp1463-r8-audit/exact-script-attempt",
+        "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+        "ops/specs/wp1460-r1/hop_dong/fixture.json"
+      ],
+      "status": "failed",
+      "exit_code": 128,
+      "evidence": "Configured proxy unavailable. No bypass; local full clone at API-confirmed exact master used for independent equivalent measurements. This failed invocation is not a passing gate."
+    },
+    {
+      "name": "Initial shell fault harness setup",
+      "command": "initial shell_faults.py",
+      "status": "failed",
+      "exit_code": 0,
+      "evidence": "Initial git shim used env python3 and accidentally invoked the Python fault shim; healthy control failed to create clone directory. Discarded as setup evidence, preserved in shell-fault-initial-setup-error.json. Corrected absolute interpreter and reran controls."
+    },
+    {
+      "name": "Assigned checkout integrity and generated-cache cleanup",
+      "command": "snapshot-before.json vs snapshot-after.json; git diff --check r6 r7 -- SPEC.md",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "After cleanup, HEAD/tree/status/index/diff and tracked/untracked/ignored listings match start; spec bytes/hash unchanged. Before cleanup, one generated ignored sitecustomize.pyc was found. See cache-incident.json and preserved snapshot-after-before-cache-cleanup.json. No claim of zero transient writes."
+    },
+    {
+      "name": "Future implementation/CI/Windows/lease/land gates",
+      "command": "Future do_pr2.py and worker/land gates",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Spec review only; no implementation lease, workflow dispatch, GitHub writes or Windows/LIVE execution. No skipped or absent required check relabelled passed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR2-S11",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 303,
+        "related": [
+          "SPEC.md:224",
+          "do-chuan-bi/do_vung_pr2.sh:21-28",
+          "do-chuan-bi/probe_pc.py:25-30,47-48,63-67"
+        ]
+      },
+      "claim": "The new pre-lease gate does not distinguish a completed clean measurement from a failed or unobserved run. It accepts an empty full-suite observation and discards the suite exit status; probe truth, row mismatches and missing witnesses are only printed. The explicit revision-7 stop rule therefore lacks a reliable KHÔNG ĐO ĐƯỢC path and does not implement Acceptance 4 liveness.",
+      "manifestations": [
+        "S11-r8-a: --oracle on an empty or witness-free set exits 0 with NGOAI_VUNG [].",
+        "S11-r8-b: a full-suite infrastructure exit 42 is printed but the unchanged driver exits 0 with NGOAI_VUNG [] and no KHÔNG ĐO ĐƯỢC.",
+        "S11-r8-c: phan_chung False or a missing probe witness does not fail probe_pc.py.",
+        "S11-r8-d: probe reports 19/29 selector rows and exits0 without an unknown marker."
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r8-audit/fault_probe.py",
+          "exit_code": 0,
+          "observed_output": "oracle-empty: rc=0, bo_day_du [], NGOAI_VUNG []; oracle-missing-witness: rc=0, bo_day_du [ops/bash_nen.py], NGOAI_VUNG []; false-with-witness: rc=0, phan_chung False, NHAN_CHUNG_ci_yml True NGOAI_VUNG [].",
+          "scope": "Unmodified probe_pc.py; synthetic tracked fixture is indexed in an external /tmp Git repository."
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r8-audit/shell_faults.py",
+          "exit_code": 0,
+          "observed_output": "Healthy: driver rc=0, witness present. suite-failed: inner rc 42, driver rc=0, bo_day_du [], NGOAI_VUNG []. hook-silent: inner rc 0, driver rc=0, bo_day_du [], NGOAI_VUNG []. Neither bad case prints KHÔNG ĐO ĐƯỢC.",
+          "scope": "Unmodified shell driver and --oracle; clone and Python child calls are controlled /tmp fault shims, not a claim about the real suite outcome."
+        },
+        {
+          "command": "python3 -B <reviewed checkout>/ops/specs/wp1463-r1/do-chuan-bi/probe_pc.py /tmp/wp1463-r8-audit/fault-root bon /tmp/wp1463-r8-audit/fault-tracked <two fixture paths>; row-mismatch.json",
+          "exit_code": 0,
+          "observed_output": "MOI_sha16 1fd38d5cbd2a997b trong_NHE False\nke_hoach_va_oracle 19/29 ['rong', 'goc_tai_lieu', 'tai_lieu', 'spec_ho_so', 'ops_khac_nhe', 'gan_dung_hau_to', 'gan_dung_thu_muc', 'gan_dung_workflow', 'workflow_khac', 'dev_khac']\nphan_chung True []\nmo ['.github/workflows/ci.yml']\nNHAN_CHUNG_ci_yml True NGOAI_VUNG []\n"
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Put one result classifier in the named pre-lease measurement tool and reference it from SPEC.md:303; the frozen spec names this command as the admission evidence. Keep Acceptance 4 per-observation witnesses.",
+        "how": "Require successful completion and valid positive output for every invocation, checked row results, independent nonempty observations and the correct witness before considering outside-zone membership. Emit explicit clean / out-of-zone / not-measured results; only clean may admit. Retain nonzero child exits and classify bootstrap/hook/read failures as not measured.",
+        "locking_test_and_mutant": "Run healthy, failed child, false phan_chung, mismatched table, empty observations, missing witness and outside-zone controls. A mutant that ignores rc or substitutes an empty observation must fail the corresponding control.",
+        "regression_risk": "Do not use the full-suite witness for standalone probes or union their sets to fabricate liveness. Do not relabel unknown as a zone violation or weaken tests to make the gate green."
+      }
+    },
+    {
+      "id": "PR2-S13",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 303,
+        "related": [
+          "SPEC.md:224",
+          "SPEC.md:426",
+          "do-chuan-bi/probe_pc.py:55-60",
+          "do-chuan-bi/do_vung_pr2.sh:16",
+          "do-chuan-bi/hook/sitecustomize.py:5-10"
+        ]
+      },
+      "claim": "The measurement used to close future zone drift can miss genuine tracked reads. The three phan_chung invocations install only an in-process hook; their Python descendants receive no sitecustomize hook. Both hook implementations also resolve dir_fd-relative opens against cwd and then discard the incorrectly resolved path in the tracked intersection. A live ci.yml witness does not establish coverage of these reads.",
+      "manifestations": [
+        "S13-a: Python child reads are invisible to standalone registry probes.",
+        "S13-b: directory-descriptor-relative tracked file opens are misresolved and filtered out by both hooks."
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r8-audit/fault_probe.py",
+          "exit_code": 0,
+          "observed_output": "direct-outside: NGOAI_VUNG [docs/audit-sentinel.txt]. child-outside: CHILD_READ sentinel, NHAN_CHUNG_ci_yml True, NGOAI_VUNG [], rc=0. dirfd-outside: successful read and phan_chung True, same clean set and rc=0.",
+          "scope": "One benign tracked sentinel, healthy direct-read control, unmodified probe. No traversal payload was authored."
+        },
+        {
+          "command": "rg -n \"subprocess.run|subprocess.Popen\" /tmp/wp1463-r8-audit/master/.claude/dev/ci_dang_ky_test.py",
+          "exit_code": 0,
+          "observed_output": "Current registry already launches Python descendants in lenh_kiem (line 2021), con (2394) and other phan_chung paths. The child path is not an impossible future execution model."
+        },
+        {
+          "command": "Python direct/dir_fd read with original do-chuan-bi/hook/sitecustomize.py; see site-results.json",
+          "exit_code": 0,
+          "observed_output": "Both children print READ sentinel and exit 0. Direct-read tracked set contains docs/audit-sentinel.txt; descriptor-relative-read tracked set contains only ci.yml. The sentinel is in git ls-files."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Repair observer coverage in do-chuan-bi/probe_pc.py, its shell launcher and sitecustomize hook, then reconcile the pre-lease promise and Acceptance 4. Adding more Z entries alone cannot fix an invisible read.",
+        "how": "Use inherited observation for all Python descendants of all four measured invocations, with per-invocation logs and liveness. Resolve descriptor-relative reads correctly or explicitly classify any unresolved relevant open as not measured. Install observation before measured dependency imports. Keep non-Python limitations explicit.",
+        "locking_test_and_mutant": "Direct-read, Python-child-read and dir_fd-read controls must all report the same tracked outside-zone sentinel, including when ci.yml is observed normally. Mutants removing child propagation or forcing cwd resolution must die. Verify no untracked scratch file enters the zone set.",
+        "regression_risk": "Do not indiscriminately union runs or treat all filesystem opens as tracked dependencies. Path aliases, descriptor reuse and child logging failures must not create false completeness; maintain per-run provenance and unknown states."
+      }
+    },
+    {
+      "id": "PR2-S14",
+      "class_slug": "zone-mutation-count-stale",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 189,
+        "related": [
+          "SPEC.md:47",
+          "SPEC.md:349",
+          "SPEC.md:430"
+        ]
+      },
+      "claim": "K6 still freezes five VUNG_THEM removal mutants while the revision-7 tuple has seven elements and K6 simultaneously requires one mutant per element. This is an active test obligation, unlike the explicitly historical 27-row references. The final no-change claim for contract section 5 also needs to acknowledge this update.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r8-audit/measure.py",
+          "exit_code": 0,
+          "observed_output": "VUNG_THEM_count=7; all seven independent removals alter table outcomes. The two new removals are caught specifically by hop_dong_schema and hop_dong_fixture; K6 line 189 still says năm đột biến."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Update active K6 and the revision-7 delta summary, because these determine the mandatory mutation plan; leave clearly labelled historical tables intact.",
+        "how": "State seven independent removals, including the two new paths and their rows, or state the per-element invariant without a duplicate frozen count. Reconcile all current-scope occurrences.",
+        "locking_test_and_mutant": "Recompute tuple cardinality and run each independent removal through the real selector and frozen table; require seven distinct removed paths, with the two new mutants failing their designated rows.",
+        "regression_risk": "Do not replace exact path matching with a directory prefix, or accidentally rewrite the preserved revision-3 measurement/history."
+      }
+    },
+    {
+      "id": "PR2-S08",
+      "class_slug": "budget-authority-revision-misattributed",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 305,
+        "related": [
+          "SPEC.md:430"
+        ]
+      },
+      "claim": "The active process paragraph still calls this revision 6, says author budget is exhausted at 6/6, review usage is 6/7, and round 7 is future. Revision 7 ends with 7/8 author and 7/9 review usage, and the owner grant raises the ceilings to 8/9. The active budget instructions contradict the current grant and the assigned round-8 review.",
+      "evidence": [
+        {
+          "command": "rg -n \"Hai bộ đếm|trần tác giả 8\" ops/specs/wp1463-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "Line 305: revision 6 này, tác giả 6/6, không còn lượt tác giả nào, review 6/7, lượt 7 sẽ là Codex. Line 430: author 7/8, reviews 7/9 before round 8. Owner comment: +2 soạn, +2 review; ceilings 6→8 and 7→9.",
+          "source_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7156449294"
+        },
+        {
+          "command": "tools.mcp__codex_apps__github_fetch_issue_comments({repo_full_name:\"ducthangho/tra-luat\",issue_number:1172}); select comment id7156449294",
+          "exit_code": null,
+          "tool_status": "success",
+          "observed_output": "Structured response contains owner comment7156449294: +2 soạn,+2 review; ceilings6→8 and7→9. Saved authority.json; no shell rc is fabricated for the connected tool."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Replace the active Hai bộ đếm paragraph and scan active status/authority references; historical revision-6 counters can remain clearly dated in history.",
+        "how": "Make the current spec-drafting grant, consumed counts and round numbering consistent, while preserving separate implementation budgets and the real history of the blocked Antigravity invocation.",
+        "locking_test_and_mutant": "Read back the durable grant and compare active counters: author 7/8 at drafting, spec review 8/9 including this run. A stale active 6/6-final or 6/7 counter must be caught by the consistency review.",
+        "regression_risk": "Do not reset counters on a new revision, convert an invocation into a completed review round, or borrow unused implementation budget."
+      }
+    },
+    {
+      "id": "PR2-S15",
+      "class_slug": "registry-unchanged-evidence-overclaim",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 350,
+        "related": [
+          "SPEC.md:42"
+        ]
+      },
+      "claim": "The new measurement paragraph says all twelve registry names forbidden by section 3 are unchanged from e2f28fb. MOI is one of those names, and its dictionary has changed. Only eleven named ASTs are unchanged; the narrower PR2 MOI entry is unchanged. The aggregate measurement overstates what was verified.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r8-audit/measure.py; python3 -B /tmp/wp1463-r8-audit/moi_diff.py",
+          "exit_code": 0,
+          "observed_output": "protected_AST_unchanged: MOI=false; other eleven=true. Added MOI keys: ops/gate_output_doi_chieu_test.py and scripts/tl_core/llm_route_test.py. PR2 MOI SHA-256 remains 4fa8ef5331631f7848412ec70ea7c05ea279c607212f1475076eba03e5b4fdab."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Correct the revision-7 measurement statement at line 350; the implementation restriction at section 3 is still appropriate and does not need weakening.",
+        "how": "Report the measured distinction: eleven whole definitions unchanged, and only the PR2 entry preserved within the expanded MOI dictionary. Identify both comparison OIDs.",
+        "locking_test_and_mutant": "Rerun AST comparison over exactly the twelve listed names and a separate value/hash comparison for MOI[ops/ci_provenance_test.py]; do not summarize the latter as whole-MOI equality.",
+        "regression_risk": "Do not classify legitimate unrelated registry additions as PR2 changes, revert them, or silently move the immutable acceptance baseline."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [
+        "PR2-S01"
+      ],
+      "manifestations": [
+        "S01-a",
+        "S01-b",
+        "S01-c",
+        "S01-d",
+        "S01-e",
+        "S01-f",
+        "S01-g",
+        "S01-h"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "One typed exception classifier, common sidecar validator and ordered composition of all mandatory calls; cache status atomically with the legacy pair.",
+      "closing_check": "A3 region SHA-256 11ee829928e2cd3ae493133c3929df5bf7e7ff2ce4d09f30fd8ec30ba72078f8 identical to round 7; typed five-outcome envelope and ordered mandatory-call composition retained."
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [
+        "PR2-S02"
+      ],
+      "manifestations": [
+        "S02-a"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Validate plan uniqueness and result identity/order independently in both modes.",
+      "closing_check": "Same exact A3/K5 bytes retain duplicate-plan checks independent of result identity, in both modes."
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [
+        "PR2-S03"
+      ],
+      "manifestations": [
+        "S03-a"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Emit valid reason/reviewer fields verbatim in the named result; production table stays empty.",
+      "closing_check": "Same exact A3/K5 bytes retain name-bound verbatim reason/reviewer emission and empty production equivalence table."
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "manifestations": [
+        "S04-a",
+        "S04-b",
+        "S04-c",
+        "S04-d",
+        "S04-e",
+        "S04-f",
+        "S04-g",
+        "S04-h",
+        "S04-i",
+        "S04-j",
+        "S04-k",
+        "S04-l"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Preserve whole tuples and classifier behavior; keep raw cu separate; derive independent comparator masks from their actual read domains.",
+      "closing_check": "Preservation region SHA-256 45903a665bf727da1ebb58ffed2221fdda598e786f5c88a6116fb5dfd5cee38d identical; all nine independent predicates and derived masks preserved. Real main/phan_hang/lam_nong_nen ASTs still equal drafting base."
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [
+        "PR2-S05"
+      ],
+      "manifestations": [
+        "S05-a"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Remove the four coupled registry entries together and retain unrelated entries.",
+      "closing_check": "Whole four-key removal and all three complete current-registry probes pass; the exact current p643/p647 expressions yield true/true after full removal, false/false after only NHE removal and false/true after NHE+MAU_NHE removal."
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [
+        "PR2-S06"
+      ],
+      "manifestations": [
+        "S06-a",
+        "S06-b",
+        "S06-c",
+        "S06-d",
+        "S06-e"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Require protocol landed evidence for each predecessor separately from write exclusion.",
+      "closing_check": "Exact dependency region SHA-256 54d0770f8fc8a4fd47e39c9992ddb74ec20dccfccade584e7ec1a1c49e8ffa6e retained: both predecessors landed, four evidence conditions, then separate lease exclusion. No lease absence substitute introduced."
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [
+        "PR2-S07"
+      ],
+      "manifestations": [
+        "S07-a",
+        "S07-b"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Apply ADR0060 through ADR0062 regardless of the optional declaration; keep M3/K6 and M9.",
+      "closing_check": "Exact process-region hash 7c01918cf23735f6a3b73cf344ad07ebfa4fd88a151ec229c7bd61ad46fb90aa retained; zero declaration lines do not waive default rules or Windows evidence."
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "finding_ids": [
+        "PR2-S08"
+      ],
+      "manifestations": [
+        "PR2-S08"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "VÁ SINH LỖI MỚI",
+      "common_fix": "Make the current spec-drafting grant, consumed counts and round numbering consistent, while preserving separate implementation budgets and the real history of the blocked Antigravity invocation.",
+      "closing_check": "Read back the durable grant and compare active counters: author 7/8 at drafting, spec review 8/9 including this run. A stale active 6/6-final or 6/7 counter must be caught by the consistency review."
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [
+        "PR2-S09"
+      ],
+      "manifestations": [
+        "S09-1",
+        "S09-2",
+        "S09-3",
+        "S09-4",
+        "S09-5"
+      ],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Keep the five decisions connected to their durable ledgers.",
+      "closing_check": "Existing decision-ledger/ADR0060 region unchanged; fresh owner budget grant read from GitHub. Proposed r7 still requires owner hash approval, Mission installation and a separate lease. No new authority inferred from the footer."
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [
+        "PR2-S10"
+      ],
+      "manifestations": [
+        "S10-a",
+        "S10-b"
+      ],
+      "highest_open_severity": null,
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Include both workflow dependencies and remeasure tracked opens on the eventual execution base.",
+      "closing_check": "30/30 oracle+real-selector rows, all seven deletion controls, current three registry loads and full-suite tracked intersection independently measured. Both new fixture files covered; no current observed tracked dependency outside Z."
+    },
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-S11"
+      ],
+      "manifestations": [
+        "S11-r8-a: --oracle on an empty or witness-free set exits 0 with NGOAI_VUNG [].",
+        "S11-r8-b: a full-suite infrastructure exit 42 is printed but the unchanged driver exits 0 with NGOAI_VUNG [] and no KHÔNG ĐO ĐƯỢC.",
+        "S11-r8-c: phan_chung False or a missing probe witness does not fail probe_pc.py.",
+        "S11-r8-d: probe reports 19/29 selector rows and exits0 without an unknown marker."
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "VÁ SINH LỖI MỚI",
+      "common_fix": "Require successful completion and valid positive output for every invocation, checked row results, independent nonempty observations and the correct witness before considering outside-zone membership. Emit explicit clean / out-of-zone / not-measured results; only clean may admit. Retain nonzero child exits and classify bootstrap/hook/read failures as not measured.",
+      "closing_check": "Run healthy, failed child, false phan_chung, mismatched table, empty observations, missing witness and outside-zone controls. A mutant that ignores rc or substitutes an empty observation must fail the corresponding control."
+    },
+    {
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "finding_ids": [
+        "PR2-S12"
+      ],
+      "manifestations": [
+        "S12-a",
+        "S12-b"
+      ],
+      "highest_open_severity": null,
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "previous_round": 7,
+      "previous_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+      "reviewed_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Decide checkpoint completeness over independently validated combined evidence; preserve raw collector states and reconcile every supplemental job/log, with a pinned evaluator and negative controls.",
+      "closing_check": "Dependency region is byte-identical to round 7, preserving same-run/attempt/head/job/log-hash constraints, named evaluator, positive step evidence and deletion counterproof; no collector-only NOT_MEASURED:0 requirement reintroduced."
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-S13"
+      ],
+      "manifestations": [
+        "S13-a: Python child reads are invisible to standalone registry probes.",
+        "S13-b: directory-descriptor-relative tracked file opens are misresolved and filtered out by both hooks."
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 8,
+      "source_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "CHƯA VÁ",
+      "common_fix": "Use inherited observation for all Python descendants of all four measured invocations, with per-invocation logs and liveness. Resolve descriptor-relative reads correctly or explicitly classify any unresolved relevant open as not measured. Install observation before measured dependency imports. Keep non-Python limitations explicit.",
+      "closing_check": "Direct-read, Python-child-read and dir_fd-read controls must all report the same tracked outside-zone sentinel, including when ci.yml is observed normally. Mutants removing child propagation or forcing cwd resolution must die. Verify no untracked scratch file enters the zone set."
+    },
+    {
+      "class_slug": "zone-mutation-count-stale",
+      "finding_ids": [
+        "PR2-S14"
+      ],
+      "manifestations": [
+        "PR2-S14"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 8,
+      "source_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "CHƯA VÁ",
+      "common_fix": "State seven independent removals, including the two new paths and their rows, or state the per-element invariant without a duplicate frozen count. Reconcile all current-scope occurrences.",
+      "closing_check": "Recompute tuple cardinality and run each independent removal through the real selector and frozen table; require seven distinct removed paths, with the two new mutants failing their designated rows."
+    },
+    {
+      "class_slug": "registry-unchanged-evidence-overclaim",
+      "finding_ids": [
+        "PR2-S15"
+      ],
+      "manifestations": [
+        "PR2-S15"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 8,
+      "source_sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+      "status": "CHƯA VÁ",
+      "common_fix": "Report the measured distinction: eleven whole definitions unchanged, and only the PR2 entry preserved within the expanded MOI dictionary. Identify both comparison OIDs.",
+      "closing_check": "Rerun AST comparison over exactly the twelve listed names and a separate value/hash comparison for MOI[ops/ci_provenance_test.py]; do not summarize the latter as whole-MOI equality."
+    }
+  ],
+  "prior_findings_check": {
+    "title": "ĐỐI CHIẾU LƯỢT TRƯỚC",
+    "source_round": 7,
+    "source_sha": "8c923092900b1a5ad2c67267765693d5f5e8493e",
+    "source_path": "ops/specs/wp1463-r1/reviews/wp1463-spec-review-7.json",
+    "previous_findings": [],
+    "previous_finding_count": 0,
+    "per_finding_check": [],
+    "closed_class_regression_checks": [
+      {
+        "class_slug": "a3-case-execution-status-collapsed",
+        "finding_ids": [
+          "PR2-S01"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "A3 contract and K5a; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "A3 region SHA-256 11ee829928e2cd3ae493133c3929df5bf7e7ff2ce4d09f30fd8ec30ba72078f8 identical to round 7; typed five-outcome envelope and ordered mandatory-call composition retained.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "a3-plan-identity-validation-gap",
+        "finding_ids": [
+          "PR2-S02"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "A3 contract and K5b; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Same exact A3/K5 bytes retain duplicate-plan checks independent of result identity, in both modes.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "a3-equivalence-provenance-not-emitted",
+        "finding_ids": [
+          "PR2-S03"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "A3 contract and K5c; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Same exact A3/K5 bytes retain name-bound verbatim reason/reviewer emission and empty production equivalence table.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "preservation-oracle-checks-names-only",
+        "finding_ids": [
+          "PR2-S04"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "Acceptance 2(a-e); r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Preservation region SHA-256 45903a665bf727da1ebb58ffed2221fdda598e786f5c88a6116fb5dfd5cee38d identical; all nine independent predicates and derived masks preserved. Real main/phan_hang/lam_nong_nen ASTs still equal drafting base.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "registry-rollback-leaves-dependent-entries",
+        "finding_ids": [
+          "PR2-S05"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "K8, real registry probes and isolated existing predicates; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Whole four-key removal and all three complete current-registry probes pass; the exact current p643/p647 expressions yield true/true after full removal, false/false after only NHE removal and false/true after NHE+MAU_NHE removal.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "dependency-completion-replaced-by-lease-absence",
+        "finding_ids": [
+          "PR2-S06"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "Prerequisite evidence and truth table; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Exact dependency region SHA-256 54d0770f8fc8a4fd47e39c9992ddb74ec20dccfccade584e7ec1a1c49e8ffa6e retained: both predecessors landed, four evidence conditions, then separate lease exclusion. No lease absence substitute introduced.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "obsolete-adr0060-opt-in-rationale",
+        "finding_ids": [
+          "PR2-S07"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "ADR0060/Windows process paragraph; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Exact process-region hash 7c01918cf23735f6a3b73cf344ad07ebfa4fd88a151ec229c7bd61ad46fb90aa retained; zero declaration lines do not waive default rules or Windows evidence.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "budget-authority-revision-misattributed",
+        "finding_ids": [
+          "PR2-S08"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "VÁ SINH LỖI MỚI",
+        "reopened": true,
+        "evidence": [
+          {
+            "command": "rg -n \"Hai bộ đếm|trần tác giả 8\" ops/specs/wp1463-r1/SPEC.md",
+            "exit_code": 0,
+            "observed_output": "Line 305: revision 6 này, tác giả 6/6, không còn lượt tác giả nào, review 6/7, lượt 7 sẽ là Codex. Line 430: author 7/8, reviews 7/9 before round 8. Owner comment: +2 soạn, +2 review; ceilings 6→8 and 7→9.",
+            "source_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7156449294"
+          },
+          {
+            "command": "tools.mcp__codex_apps__github_fetch_issue_comments({repo_full_name:\"ducthangho/tra-luat\",issue_number:1172}); select comment id7156449294",
+            "exit_code": null,
+            "tool_status": "success",
+            "observed_output": "Structured response contains owner comment7156449294: +2 soạn,+2 review; ceilings6→8 and7→9. Saved authority.json; no shell rc is fabricated for the connected tool."
+          }
+        ],
+        "scope": "Old remedy retained in its original section, but the r7 active budget/pre-lease path contradicts it."
+      },
+      {
+        "class_slug": "delegated-decisions-missing-durable-ledger",
+        "finding_ids": [
+          "PR2-S09"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "Decision ledger and proposed-state installation boundary; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Existing decision-ledger/ADR0060 region unchanged; fresh owner budget grant read from GitHub. Proposed r7 still requires owner hash approval, Mission installation and a separate lease. No new authority inferred from the footer.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+        "finding_ids": [
+          "PR2-S10"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "Frozen zone, all 30 selector rows, current full and registry probes; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "30/30 oracle+real-selector rows, all seven deletion controls, current three registry loads and full-suite tracked intersection independently measured. Both new fixture files covered; no current observed tracked dependency outside Z.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      },
+      {
+        "class_slug": "measurement-liveness-oracle-crosses-scope",
+        "finding_ids": [
+          "PR2-S11"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "VÁ SINH LỖI MỚI",
+        "reopened": true,
+        "evidence": [
+          {
+            "command": "python3 -B /tmp/wp1463-r8-audit/fault_probe.py",
+            "exit_code": 0,
+            "observed_output": "oracle-empty: rc=0, bo_day_du [], NGOAI_VUNG []; oracle-missing-witness: rc=0, bo_day_du [ops/bash_nen.py], NGOAI_VUNG []; false-with-witness: rc=0, phan_chung False, NHAN_CHUNG_ci_yml True NGOAI_VUNG [].",
+            "scope": "Unmodified probe_pc.py; synthetic tracked fixture is indexed in an external /tmp Git repository."
+          },
+          {
+            "command": "python3 -B /tmp/wp1463-r8-audit/shell_faults.py",
+            "exit_code": 0,
+            "observed_output": "Healthy: driver rc=0, witness present. suite-failed: inner rc 42, driver rc=0, bo_day_du [], NGOAI_VUNG []. hook-silent: inner rc 0, driver rc=0, bo_day_du [], NGOAI_VUNG []. Neither bad case prints KHÔNG ĐO ĐƯỢC.",
+            "scope": "Unmodified shell driver and --oracle; clone and Python child calls are controlled /tmp fault shims, not a claim about the real suite outcome."
+          },
+          {
+            "command": "python3 -B <reviewed checkout>/ops/specs/wp1463-r1/do-chuan-bi/probe_pc.py /tmp/wp1463-r8-audit/fault-root bon /tmp/wp1463-r8-audit/fault-tracked <two fixture paths>; row-mismatch.json",
+            "exit_code": 0,
+            "observed_output": "MOI_sha16 1fd38d5cbd2a997b trong_NHE False\nke_hoach_va_oracle 19/29 ['rong', 'goc_tai_lieu', 'tai_lieu', 'spec_ho_so', 'ops_khac_nhe', 'gan_dung_hau_to', 'gan_dung_thu_muc', 'gan_dung_workflow', 'workflow_khac', 'dev_khac']\nphan_chung True []\nmo ['.github/workflows/ci.yml']\nNHAN_CHUNG_ci_yml True NGOAI_VUNG []\n"
+          }
+        ],
+        "scope": "Old remedy retained in its original section, but the r7 active budget/pre-lease path contradicts it."
+      },
+      {
+        "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+        "finding_ids": [
+          "PR2-S12"
+        ],
+        "previous_status": "ĐÃ VÁ THẬT",
+        "status": "ĐÃ VÁ THẬT",
+        "reopened": false,
+        "scope": "Combined predecessor evidence steps 3-5 and fallback; r7-delta spec regression check only",
+        "command": "byte comparison of independently read r6/r7 Git blobs; measure.py; rollback.py; current-master probes where applicable",
+        "exit_code": 0,
+        "evidence": "Dependency region is byte-identical to round 7, preserving same-run/attempt/head/job/log-hash constraints, named evaluator, positive step evidence and deletion counterproof; no collector-only NOT_MEASURED:0 requirement reintroduced.",
+        "limitations": "Prior round test outputs are not relabelled fresh. No future PR2 implementation or land gate is certified."
+      }
+    ],
+    "convergence": {
+      "U": [],
+      "F": [],
+      "fraction": "N/A",
+      "explanation": "Round7 had zero open findings/classes. No0%/100% closure ratio invented. Two historical classes reopen and three new classes are reported separately."
+    }
+  },
+  "hunt_table": [
+    {
+      "hypothesis": "New paths still fail exact-match selection, or copied table/hash diverges",
+      "command": "python3 -B /tmp/wp1463-r8-audit/measure.py",
+      "observed_output": "30 rows; exact hash 0aba13e7...375e58; 30/30 real+oracle; 7/7 removals detected.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Current master has further observed dependencies outside frozen Z",
+      "command": "run_pc.py; run_pc_deep.py; full suite open audit",
+      "observed_output": {
+        "registry": [
+          {
+            "mode": "nguyen",
+            "rc": 0,
+            "observed": [
+              ".claude/dev/ci_dang_ky_test.py",
+              ".github/workflows/ci-dot-bien-du.yml",
+              ".github/workflows/ci.yml",
+              ".github/workflows/launcher-windows.yml",
+              "ops/bash_nen.py",
+              "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+              "ops/specs/wp1460-r1/hop_dong/fixture.json"
+            ]
+          },
+          {
+            "mode": "bon",
+            "rc": 0,
+            "observed": [
+              ".claude/dev/ci_dang_ky_test.py",
+              ".github/workflows/ci-dot-bien-du.yml",
+              ".github/workflows/ci.yml",
+              ".github/workflows/launcher-windows.yml",
+              "ops/bash_nen.py",
+              "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+              "ops/specs/wp1460-r1/hop_dong/fixture.json"
+            ]
+          },
+          {
+            "mode": "go",
+            "rc": 0,
+            "observed": [
+              ".claude/dev/ci_dang_ky_test.py",
+              ".github/workflows/ci-dot-bien-du.yml",
+              ".github/workflows/ci.yml",
+              ".github/workflows/launcher-windows.yml",
+              "ops/bash_nen.py",
+              "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+              "ops/specs/wp1460-r1/hop_dong/fixture.json"
+            ]
+          }
+        ],
+        "full": {
+          "base_sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+          "tracked_count": 18608,
+          "tracked_source": "git ls-files -z in exact-master scratch clone",
+          "bo_day_du": [
+            ".claude/dev/ci_dang_ky_test.py",
+            ".github/workflows/ops-do-workflow-definition.yml",
+            "ops/bash_nen.py",
+            "ops/ci_provenance.py",
+            "ops/ci_provenance_test.py"
+          ],
+          "witness": true,
+          "outside": [],
+          "rc": 0,
+          "wall_seconds": 1378.1670120429999,
+          "summary": [
+            "TIEN TRINH: 4",
+            "CA: 77/77 dat",
+            "DOT BIEN: 485/485 bi giet dung ly do",
+            "TU KIEM PHAN HANG: DAT (2 dot bien)",
+            "TONG: DAT"
+          ]
+        }
+      },
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "A failed or absent measurement is mistaken for clean",
+      "command": "fault_probe.py; shell_faults.py",
+      "observed_output": "Inner rc42 or empty full audit => outer rc0, NGOAI_VUNG [], no unknown marker; real probe false/witness-free also rc0.",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "Python children or descriptor-relative opens bypass a live observer",
+      "command": "fault_probe.py; site-results.json",
+      "observed_output": "Direct tracked sentinel detected; child and dir_fd reads return successfully but are absent; ci.yml remains observed.",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "R7 contradicts active cardinality/budget/evidence statements",
+      "command": "measure.py; consistency scan; authority.json",
+      "observed_output": "K6 says five for seven; budget line305 still6/6 and6/7; MOI changed,11/12 unchanged.",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "New zone entries regress rollback isolation",
+      "command": "rollback.py and real bon/go phan_chung",
+      "observed_output": "Full removal healthy; only-NHE predicates false/false; NHE+MAU_NHE false/true; complete original/injected/removed probes 1677/1677.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "R7 reopens A3/preservation/combined-evidence semantic defects",
+      "command": "independent r6/r7 normative-region byte/sha comparisons",
+      "observed_output": "A3, preservation, liveness acceptance, prerequisite and ADR0060 regions byte-identical; current main/phan_hang/lam_nong_nen ASTs identical to draft base. No future implementation certified.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The declared measurement is taken from the wrong cwd/index/tree",
+      "command": "run_pc.py (caller cwd /tmp), Git HEAD/tree and NUL tracked set; exact-script source inspection",
+      "observed_output": "Probe changes cwd to selected clone; shell uses git -C CL ls-files after checkout; full suite cwd exact clone; GitHub API confirms master. Paths are intersected against that tree, not spec checkout.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Original one-command GitHub clone can complete in this runtime",
+      "command": [
+        "bash",
+        "/tmp/claude-0/-home-user-tra-luat/c4f557a5-3dc1-52de-8f7c-efef0dc5741c/scratchpad/rv8/kho/ops/specs/wp1463-r1/do-chuan-bi/do_vung_pr2.sh",
+        "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "/tmp/wp1463-r8-audit/exact-script-attempt",
+        "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+        "ops/specs/wp1460-r1/hop_dong/fixture.json"
+      ],
+      "observed_output": "rc128: configured127.0.0.1:41951 proxy unavailable. Local object-complete clone used; no claim this command passed.",
+      "result": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Frozen r7 identity",
+      "expected": "revision7; requested SHA/hash",
+      "observed": {
+        "sha": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+        "tree": "20fe44198b541a156c74b54ccad485781785c34d",
+        "sha256": "54ad219100ab3d34f413bf9d0bd1f34fd97ff2e87f5d1883f00010939699f1c1"
+      },
+      "command": "git rev-parse; hash git-show bytes",
+      "status": "matched"
+    },
+    {
+      "claim": "Zone delta",
+      "expected": "2 exact paths; VUNG_THEM5→7; Z9→11",
+      "observed": {
+        "added_paths": [
+          "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+          "ops/specs/wp1460-r1/hop_dong/fixture.json"
+        ],
+        "VUNG_THEM": 7,
+        "Z": 11
+      },
+      "command": "measure.py",
+      "status": "matched"
+    },
+    {
+      "claim": "Frozen table delta/hash",
+      "expected": "27+3=30; 0aba13e7b73bee2a09d4a5aac541dfba76dbe4497edde2d77a938ac04a375e58",
+      "observed": [
+        {
+          "revision": "r6",
+          "rows": 27,
+          "sha256": "135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036"
+        },
+        {
+          "revision": "r7",
+          "rows": 30,
+          "sha256": "0aba13e7b73bee2a09d4a5aac541dfba76dbe4497edde2d77a938ac04a375e58"
+        }
+      ],
+      "command": "measure.py; table-history.json",
+      "status": "matched"
+    },
+    {
+      "claim": "All table predictions / reported29 subset",
+      "expected": "29/29 subset plus near-match=nhe;30/30 overall",
+      "observed": {
+        "rows_ok": 30,
+        "near_match": {
+          "name": "hop_dong_gan_dung",
+          "expected": "nhe",
+          "oracle": "nhe",
+          "real": "nhe"
+        }
+      },
+      "command": "measure.py and real bon probe",
+      "status": "matched"
+    },
+    {
+      "claim": "K6 per-element mutation count",
+      "expected": "one per element; active prose still says5",
+      "observed": {
+        "required_and_measured": 7,
+        "new_paths_detected": [
+          "hop_dong_schema",
+          "hop_dong_fixture"
+        ]
+      },
+      "command": "measure.py",
+      "status": "mismatch: PR2-S14"
+    },
+    {
+      "claim": "Registry loads and observed sets",
+      "expected": "3 modes;1677/1677 each;7 files;ci.yml;outside empty",
+      "observed": [
+        {
+          "mode": "nguyen",
+          "rc": 0,
+          "seconds": 463.687046657,
+          "files": [
+            ".claude/dev/ci_dang_ky_test.py",
+            ".github/workflows/ci-dot-bien-du.yml",
+            ".github/workflows/ci.yml",
+            ".github/workflows/launcher-windows.yml",
+            "ops/bash_nen.py",
+            "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+            "ops/specs/wp1460-r1/hop_dong/fixture.json"
+          ]
+        },
+        {
+          "mode": "bon",
+          "rc": 0,
+          "seconds": 426.441579265,
+          "files": [
+            ".claude/dev/ci_dang_ky_test.py",
+            ".github/workflows/ci-dot-bien-du.yml",
+            ".github/workflows/ci.yml",
+            ".github/workflows/launcher-windows.yml",
+            "ops/bash_nen.py",
+            "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+            "ops/specs/wp1460-r1/hop_dong/fixture.json"
+          ]
+        },
+        {
+          "mode": "go",
+          "rc": 0,
+          "seconds": 384.72156550299997,
+          "files": [
+            ".claude/dev/ci_dang_ky_test.py",
+            ".github/workflows/ci-dot-bien-du.yml",
+            ".github/workflows/ci.yml",
+            ".github/workflows/launcher-windows.yml",
+            "ops/bash_nen.py",
+            "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+            "ops/specs/wp1460-r1/hop_dong/fixture.json"
+          ]
+        }
+      ],
+      "command": "run_pc.py;run_pc_deep.py",
+      "status": "matched"
+    },
+    {
+      "claim": "Original drafting base comparison",
+      "expected": "1226/1226;4 files",
+      "observed": "MOI_sha16 4fa8ef5331631f78 trong_NHE False\nphan_chung True ['PHẢN CHỨNG: 1226/1226 đỏ đúng']\nmo ['.github/workflows/ci-dot-bien-du.yml', '.github/workflows/ci.yml', '.github/workflows/launcher-windows.yml', 'ops/bash_nen.py']\nNHAN_CHUNG_ci_yml True NGOAI_VUNG []\n",
+      "command": "probe_pc on exact e2f28fb clone",
+      "status": "matched"
+    },
+    {
+      "claim": "Full-suite r7 baseline numbers",
+      "expected": "4 processes;77/77;485/485;2 self mutants;rc0;5 tracked files;727s original report",
+      "observed": {
+        "base_sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "tracked_count": 18608,
+        "tracked_source": "git ls-files -z in exact-master scratch clone",
+        "bo_day_du": [
+          ".claude/dev/ci_dang_ky_test.py",
+          ".github/workflows/ops-do-workflow-definition.yml",
+          "ops/bash_nen.py",
+          "ops/ci_provenance.py",
+          "ops/ci_provenance_test.py"
+        ],
+        "witness": true,
+        "outside": [],
+        "rc": 0,
+        "wall_seconds": 1378.1670120429999,
+        "summary": [
+          "TIEN TRINH: 4",
+          "CA: 77/77 dat",
+          "DOT BIEN: 485/485 bi giet dung ly do",
+          "TU KIEM PHAN HANG: DAT (2 dot bien)",
+          "TONG: DAT"
+        ]
+      },
+      "command": "full suite on exact434846a; original moc-437257a.txt",
+      "status": "rerun measured; original727s is historical and not an expected timing equality"
+    },
+    {
+      "claim": "Baseline/current master drift",
+      "expected": "437257a→434846a: three named files unchanged",
+      "observed": {
+        ".claude/dev/ci_dang_ky_test.py": true,
+        "ops/ci_provenance_test.py": true,
+        "ops/ci_provenance.py": true
+      },
+      "command": "Git blob byte comparisons",
+      "status": "matched"
+    },
+    {
+      "claim": "Three protected suite ASTs",
+      "expected": "main/phan_hang/lam_nong_nen unchanged",
+      "observed": {
+        "main": true,
+        "phan_hang": true,
+        "lam_nong_nen": true
+      },
+      "command": "measure.py",
+      "status": "matched"
+    },
+    {
+      "claim": "PR2 MOI entry hash",
+      "expected": "prefix4fa8ef53",
+      "observed": "4fa8ef5331631f7848412ec70ea7c05ea279c607212f1475076eba03e5b4fdab",
+      "command": "measure.py",
+      "status": "matched"
+    },
+    {
+      "claim": "Twelve whole registry names unchanged",
+      "expected": "12/12",
+      "observed": {
+        "ke_hoach": true,
+        "env_theo_che_do": true,
+        "chay_moi": true,
+        "doc_diff": true,
+        "_cham_vung": true,
+        "MOI": false,
+        "VUNG_CHUNG": true,
+        "TIEN_TO_CHUNG": true,
+        "TIEN_TO_THEM": true,
+        "GOC_TAI_LIEU": true,
+        "ENV_REGISTRY": true,
+        "BAM_GATE_REGISTRY": true
+      },
+      "command": "measure.py",
+      "status": "mismatch:11/12;PR2-S15"
+    },
+    {
+      "claim": "Observation count and three-state gate",
+      "expected": "Prelease4 invocations; acceptance4 has3 observations; unknown blocks",
+      "observed": "Invocation counts differ intentionally; named prelease command lacks reliable unknown classification and accepts empty sets.",
+      "command": "fault_probe.py;shell_faults.py",
+      "status": "mismatch:PR2-S11"
+    },
+    {
+      "claim": "Budget delta and current usage",
+      "expected": "owner+2/+2;caps8/9;author7/8;review7/9 before this run",
+      "observed": "Grant verified; this is review8/9; active line305 still6/6 and6/7. Author7/8 is declared spec usage, not a full independent author-invocation audit.",
+      "command": "GitHub comment7156449294;prior verdict7;SPEC current/historical counters",
+      "status": "active prose mismatch:PR2-S08"
+    },
+    {
+      "claim": "Claim of unchanged implementation write set, caps and budgets",
+      "expected": "4 delivered files;<=6files/450added lines;attempts3/review3/connector2/Ubuntu3/M9one/rerunone/Windows0",
+      "observed": "Relevant frozen sections byte-identical. No PR2 implementation diff or postmerge metrics exists to test here.",
+      "command": "r6/r7 exact-region comparisons",
+      "status": "unchanged contract;future gate not_run"
+    }
+  ],
+  "counts": {
+    "open_findings": 5,
+    "open_classes": 5,
+    "open_manifestations": 9,
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 3,
+    "tracked_classes": 15,
+    "previously_closed_classes_still_closed_at_delta_scope": 10,
+    "reopened_classes": [
+      "measurement-liveness-oracle-crosses-scope",
+      "budget-authority-revision-misattributed"
+    ],
+    "new_classes": [
+      "zone-audit-open-coverage-incomplete",
+      "zone-mutation-count-stale",
+      "registry-unchanged-evidence-overclaim"
+    ]
+  },
+  "budget_and_process": {
+    "spec_author_calls_at_r7_drafting": "7/8, declared; remaining1",
+    "spec_review_calls_including_this_run": "8/9; remaining1",
+    "grant": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7156449294",
+    "generation_null_reason": "Proposed-spec independent review; implementation lease not yet issued. Explicit assignment authorizes this review, not execution.",
+    "no_reset": "History and blocked Antigravity invocation retained; implementation counters separate.",
+    "next_step": "Author addresses classes within remaining approved author allowance, freezes a new revision/hash, then remaining review may verify that exact object. No automatic new call or authority created by this report."
+  },
+  "environment": {
+    "os": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "python": "3.13.18",
+    "cpu_count": 4,
+    "scratch": "/tmp/wp1463-r8-audit",
+    "git": {
+      "rc": 0,
+      "stdout": "git version 2.43.0\n",
+      "stderr": ""
+    },
+    "actionlint": {
+      "rc": 0,
+      "stdout": "1.7.7\ninstalled by downloading from release page\nbuilt with go1.23.4 compiler for linux/amd64\n",
+      "stderr": ""
+    },
+    "shellcheck": {
+      "rc": 0,
+      "stdout": "ShellCheck - shell script analysis tool\nversion: 0.9.0\nlicense: GNU General Public License, version 3\nwebsite: https://www.shellcheck.net\n",
+      "stderr": ""
+    },
+    "codex": {
+      "rc": 0,
+      "stdout": "codex-cli 0.172.0\n",
+      "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\n"
+    }
+  },
+  "sandbox": {
+    "mode": "workspace-write",
+    "approval_policy": "never",
+    "network": "restricted;configured Git proxy unavailable;connected GitHub read API usable",
+    "reviewed_checkout": "Read-only assignment; all authored probes/results/clones outside. One accidental ignored bytecode write from fault harness was detected, documented and removed; no tracked edits.",
+    "limitations": "Endpoint Git listings and diff/index match; not a full ignored-file content audit or proof against transient writes. One codex --version probe warned PATH aliases could not be created on read-only filesystem; no escalation attempted."
+  },
+  "freshness": {
+    "head_start": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+    "head_end": "49f75f74ded2eb06dedd6b981ea39a58f62aa84c",
+    "tree_start": "20fe44198b541a156c74b54ccad485781785c34d",
+    "tree_end": "20fe44198b541a156c74b54ccad485781785c34d",
+    "endpoint_snapshot_equal": true,
+    "remote_api_receipt": "remote-verified.json",
+    "remote_final_receipt": "remote-final.json",
+    "master_start": "434846a154ef42711e79d0c9b376b1cb15b21180",
+    "master_end": "d0868dbf7f6324755aa4ed0f3e02d4efa84866f0",
+    "master_drift": {
+      "repository_full_name": "ducthangho/tra-luat",
+      "base": "434846a154ef42711e79d0c9b376b1cb15b21180",
+      "head": "d0868dbf7f6324755aa4ed0f3e02d4efa84866f0",
+      "status": "ahead",
+      "ahead_by": 5,
+      "behind_by": 0,
+      "total_commits": 5,
+      "too_large": null,
+      "base_commit": {
+        "sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/434846a154ef42711e79d0c9b376b1cb15b21180",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/434846a154ef42711e79d0c9b376b1cb15b21180"
+      },
+      "merge_base_commit": {
+        "sha": "434846a154ef42711e79d0c9b376b1cb15b21180",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/434846a154ef42711e79d0c9b376b1cb15b21180",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/434846a154ef42711e79d0c9b376b1cb15b21180"
+      },
+      "files": [
+        {
+          "filename": "ops/land_evidence_nguon.py",
+          "status": "modified",
+          "additions": 87,
+          "deletions": 1,
+          "changes": 88,
+          "previous_filename": null
+        },
+        {
+          "filename": "ops/land_evidence_nguon_test.py",
+          "status": "modified",
+          "additions": 419,
+          "deletions": 10,
+          "changes": 429,
+          "previous_filename": null
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Master moved during review from434846a to d0868db. GitHub compare reports exactly two modified paths: ops/land_evidence_nguon.py and ops/land_evidence_nguon_test.py; neither is in the full/probe observed tracked sets. All executions remain anchored to434846a. No execution on d0868db is claimed; the pre-lease gate must still run on the actual eventual lease base.",
+    "The two concrete B1a fixture paths and30-row table correctly close the observed current drift. Findings concern the new gate guarantee and unresolved active prose/evidence inconsistencies.",
+    "Normative old27 counts/hash references at SPEC.md102,355,385 and revision history are intentionally historical; no stale active table hash found. Active K6 five-mutant count is different.",
+    "Hunt scope is not limited to the author list; both hooks, all four invocation paths, result/rc handling, current/old sets, tuple removals, budgets and old class regions examined.",
+    "Hostile-input model in words: a future registry dependency is opened in a Python child or relative to a directory descriptor while normal ci.yml reads continue; a child exits early or its audit hook becomes silent. Only benign synthetic sentinels used, no path-traversal payload.",
+    "Reported wall times were collected while the full suite and registry probes overlapped on a4-CPU host. They are actual durations, not an isolated performance comparison or a reproduction of the historical727seconds.",
+    "Full observation is Python-open-event coverage only; non-Python processes and unresolved dir_fd opens are not certified. An empty outside list is not a proof of complete observation.",
+    "No tracked repository edits, commits, pushes, GitHub writes, workflow dispatch, lease grant, merge, deploy or LIVE operation. The fault harness accidentally created one ignored hook bytecode cache in the reviewed checkout; its path/hash and intermediate snapshot were preserved outside the checkout, only that generated artifact was removed, and the harness was rerun with bytecode disabled. This was a read-only-discipline violation; final endpoint equality must not be read as absence of transient writes.",
+    "The output JSON is the requested local review artifact. Final launcher rc/output hash can only be attested by the caller after this run terminates; not self-certified here."
+  ],
+  "generated_at_utc": "2026-11-25T14:53:10.773938+00:00",
+  "artifact_manifest": [
+    {
+      "path": "/tmp/wp1463-r8-audit/authority.json",
+      "bytes": 5324,
+      "sha256": "70c44f7b24d5dc8ebfba8e6ea2735699746c8e82a91684955aabdb3a4735eb6f"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/build_report.py",
+      "bytes": 26603,
+      "sha256": "c81ba13967f27292c0afcaf77fc0952f26106c7535d4da80f3e84ba33e232a66"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/cache-incident.json",
+      "bytes": 661,
+      "sha256": "754675f17c50242d0d9aea92291f63cdfeb87a5f778a7a42da08fcba871bb684"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/consistency.json",
+      "bytes": 12021,
+      "sha256": "e7bfe222cd915868516258aeae3f531937deadfc16ffae3566796dff2b2c2c63"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/deep-pc-results.json",
+      "bytes": 3892,
+      "sha256": "fb29dee5433362816fba578cbc30a44ca7c02db8622904efd25f5c11a61088c0"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/environment.json",
+      "bytes": 789,
+      "sha256": "411faeb81dc7029d94c9855640b97212aa422b760246ceb9f0681f8d0eb852b8"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/exact-script-attempt.json",
+      "bytes": 588,
+      "sha256": "55b47213f70448b6cc7bdfb98526c68ece5d1351ce177a0891dafdd09aa0621d"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/fault-results.json",
+      "bytes": 1957,
+      "sha256": "8c53507e997cbb5f13fc504b87725f74b2ef3fd60e66bf9964d45ce6274f4626"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/fault_probe.py",
+      "bytes": 2904,
+      "sha256": "797157e6577e03fbb088829ba9a1a42fbcc4cb19671fedf5d82ecfdc97d82ace"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/findings.json",
+      "bytes": 12307,
+      "sha256": "8edcae9984dc905ec96fdc6716e7910c335c597e76bdc125575d463a1f461102"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/full-measure.json",
+      "bytes": 604,
+      "sha256": "4451190b4f2da798316a19f605a5f5734748f4fd8704770c9918b859486092cd"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/full-result.json",
+      "bytes": 290,
+      "sha256": "964309e4be7cc3854d46ed5ac1811aacb82b08bea7620256fc09765f4904ba31"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/master-drift.json",
+      "bytes": 1256,
+      "sha256": "2b0c9af6b85407974e89f3a7a0145b19b3ae61fd4eb7b6576a3a18dd9970a676"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/measure.json",
+      "bytes": 6026,
+      "sha256": "68734b8d890014702c4b8265b22f0946ce3a0267ff5e805553a42f977eb8ffed"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/measure.py",
+      "bytes": 3821,
+      "sha256": "1c7bff86f4af46ecb15e824ea5f1fdbaea981e98f64a1feff6f10c887d938f34"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/missing-tool.json",
+      "bytes": 129,
+      "sha256": "c1dec2bec8702512c41fd2844f3f4d1ae65dace8a9e5d58f501566d97595dd15"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/moi-delta.json",
+      "bytes": 155,
+      "sha256": "6d05a3abd657d75c8ea4eeaf631f2163b0e864c6a10bcaead9abf048a52698c0"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/moi_diff.py",
+      "bytes": 777,
+      "sha256": "1eb00c2a7c79d7d0f01c5b77d301bb59a19543f23204a3a75412986e49bdbdce"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/old-pc.json",
+      "bytes": 637,
+      "sha256": "69ebf11d5076d5bbc7f750c337237134731fba71a61e73174796021ec70a4a74"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/pc-results.json",
+      "bytes": 2840,
+      "sha256": "03a4f125d8af22b865d41304746dacfb2e520c0323bf7daad5390d37a3c21ac4"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/regression-regions.json",
+      "bytes": 694,
+      "sha256": "da68e9ad13a11ada3dd35080d48d572f71df052a96ca9f99e95892d6aaf93ac1"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/remote-final.json",
+      "bytes": 228,
+      "sha256": "42f092113424088e726a9a57fa679a9b99d815ca492dd35782c270842f3b52f3"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/remote-heads.json",
+      "bytes": 200,
+      "sha256": "a8937b741fffb738ca7b57feedf83dcf5e9d5c228a2f96d803aacec2795a5bb4"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/remote-verified.json",
+      "bytes": 818,
+      "sha256": "c83f4add96c92e9022bbae2fd207780701de700feb3c669c02e846c2397b254a"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/rollback.json",
+      "bytes": 567,
+      "sha256": "a62516b99bbda7691444a5a726727c7cad5a3449d87dcde810b3886072d62633"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/rollback.py",
+      "bytes": 1599,
+      "sha256": "e066605f27888bba4d29d90cd1ca7b895bee61167d765ee2817ecd0a38eed87c"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/row-mismatch.json",
+      "bytes": 388,
+      "sha256": "acbe0249820c295e6960883c2ffec0fc76b7240c37fc0e1a20a34ec84d3677fe"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/ruff.json",
+      "bytes": 239,
+      "sha256": "57c526691000f7f1e1d330d87e0941b1c833963fd530ae565f50e91294546e3c"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/run_pc.py",
+      "bytes": 878,
+      "sha256": "85eff223b5b34c0a6cba63a0a590df6a91800b3adf145ddb0612d433eb97c269"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/run_pc_deep.py",
+      "bytes": 1156,
+      "sha256": "cc3da55305b0ea5e024893cd9687fd25a3a384e29a8fc1046fa6892dca65f5f9"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/shell-fault-initial-setup-error.json",
+      "bytes": 4454,
+      "sha256": "b304f2f3d2063b594f3792c2757ee7a6a19dd932a6c06394632fd266e6754749"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/shell-fault-results.json",
+      "bytes": 2659,
+      "sha256": "44e1d7aa81fdc3f12bc193e85bd36a76deaebd11b943df98d49bc537da561eaf"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/shell_faults.py",
+      "bytes": 2123,
+      "sha256": "1a30c39859b41768a3a3114c31323785b78af9282dd8bd1b7af9903740bd1b48"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/site-results.json",
+      "bytes": 385,
+      "sha256": "94cf164a781709b636495ef36f7812cade8b750eb1b41ee52d96f87974177e0c"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/snapshot-after-before-cache-cleanup.json",
+      "bytes": 1621,
+      "sha256": "866e548f9448423fc7c24d48810d97d18450d9daf3c20160015b6bba48e7157f"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/snapshot-after.json",
+      "bytes": 1487,
+      "sha256": "dbd92cbf66f44a1c7ae9fae97e9bafc74ccbf571d04d8981f95575bb082edfb3"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/snapshot-before.json",
+      "bytes": 1487,
+      "sha256": "dbd92cbf66f44a1c7ae9fae97e9bafc74ccbf571d04d8981f95575bb082edfb3"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/spec-diff.patch",
+      "bytes": 32768,
+      "sha256": "348928b7a57a8cc7bbc9d443a495cb6e120dc0d9f66e569b4d42c8b8f0c5bb0f"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/table-history.json",
+      "bytes": 258,
+      "sha256": "661e627182527638b76de2f2123c47af4758f6bbf83d246f011d6a8f4766a316"
+    },
+    {
+      "path": "/tmp/wp1463-r8-audit/write_findings.py",
+      "bytes": 10778,
+      "sha256": "87d8f58b1b5de2c70114e2a8d2bf9e1263a6b39ae17fa520c1f7177a80410005"
+    }
+  ]
+}

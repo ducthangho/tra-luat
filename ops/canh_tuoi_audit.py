@@ -242,8 +242,8 @@ def _tho_zip(c, byte):
                 break
             dem, c.giai_nen = dem + len(b), c.giai_nen + len(b)
             if c.giai_nen > c.tran["TRAN_GIAI_NEN_TONG"]:  # d110
-                c.can_tn = True
-                return VUOT
+                c.can_tn = True   # can tran TONG => DUNG NGAY moi viec danh gia con lai: goi nay, artifact ke cua T5, T3/T7 cua luot, cac luot con lai cua E
+                return VUOT  # f04:goi
             if dem > c.tran["TRAN_GIAI_NEN"]:  # d109 d112
                 return VUOT  # d111
             khuc.append(b)
@@ -587,6 +587,8 @@ def _t5(c, rest, b, V):
     neu = [r["dau_job"]["id"] for r in b["job"]] + [m["artifact"]["id"] for m in b["manh"]]
     tt, tai_ve = (DAT, DAT), {}
     for aid in sorted(set(neu)):  # d12 d133
+        if c.can_tn:  # f04:t5
+            break
         if aid not in co:
             continue
         byte, loi = _tai(c, aid)
@@ -632,7 +634,8 @@ def _phan_luot(c, d1, V, khung):
         chua_xong = run["status"] != "completed"  # d135
         if not chua_xong:
             pc["T2"], b = _t2(c, rest)
-            pc["T3"], ten, tree_h = _t3(c, run["head_sha"])  # d36
+            if not c.can_tn:  # f04:t3
+                pc["T3"], ten, tree_h = _t3(c, run["head_sha"])  # d36
             if pc["T2"][0] == DAT:
                 pc["T5"], tai_ve = _t5(c, rest, b, V)
                 if pc["T3"][0] == DAT and pc["T5"][0] == DAT:
@@ -647,7 +650,7 @@ def _phan_luot(c, d1, V, khung):
                         if "C10" in ra["canh_bao"]:
                             ra["dinh_danh_definition"] = b.get("dinh_danh_definition")
                         pc["T6"] = (KHONG_DAT, "luat_C:" + "+".join(sorted(vp, key=lambda s: int(s[1:])))) if vp else (DAT, DAT)  # d58
-    if run is not None:
+    if run is not None and not c.can_tn:  # f04:t7
         pc["T7"] = _t7(c, d1, run)
     neo = next((pc[t][1] for t in ("T1", "T7") if pc[t][0] == KHONG_DO_DUOC), None)  # d84
     if neo is not None:  # d83
@@ -711,13 +714,13 @@ def _danh_gia(c, T, goc, dong_den0, khung_dau, dong_tay):
     luot = {}
     for r in E:
         luot[r["id"]] = _phan_luot(c, r, V, kc[r["id"]])  # d13
+        if c.can_tn:  # f04:e
+            return s1("het_tai_nguyen_danh_gia")
     gop = {}
     for k in sorted({F, P} | set(R)):
         ds = [luot[r["id"]] for r in E if kc[r["id"]] == k]
         gop[k] = "dong_tay" if k in tay else _gop([x["phan_quyet"] for x in ds])  # d86
         kq["khung"][viet(k)] = {"gop": gop[k], "ly_do": tay[k]} if k in tay else {"gop": gop[k], "luot": ds}
-    if c.can_tn:
-        return s1("het_tai_nguyen_danh_gia")
     O = [k for k in R if not _da_dong(gop[k])]
     dong_den = dong_den0
     for k in R:

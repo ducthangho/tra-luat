@@ -886,6 +886,38 @@ def n2_tong_vuot():
         mong((*S(bc), bc["sha_audit"], dem(nk, "PATCH")), mong_s, f"tong {them:+d}")
 khong("d110", "d110", "n2_tong_vuot")
 
+# ---- Review ma luot 3, RV3-F04: can TRAN_GIAI_NEN_TONG la DUNG NGAY moi viec danh gia, khong chi doi ket qua cuoi pha ----
+def ca_can_tn(hau, them, mo):
+    """Tran tong = byte bien nhan cua luot DAU cua E (id 10) + `them`: can SOM o T2 (-1) hoac o goi bang chung dau cua T5 (0), khi T3/T7 cua
+    luot ay, cac artifact ke va ca luot 20 con o phia sau. `mo` = (co can TRUOC, co can SAU) cua TUNG lan mo ZIP; sau luc can: 0 GET danh gia."""
+    def chay():
+        g, mo_zip = dat_than(gh(), nt_cu(da_bao=sk(KDD, "het_tai_nguyen_danh_gia"))), []
+        def boc(goc):
+            def f(c, byte):
+                truoc, r = c.can_tn, goc(c, byte)
+                mo_zip.append((truoc, c.can_tn, len(g.nk)))
+                return r
+            return f
+        with thay_ten("_tho_zip", boc):
+            ma, bc, nk = luot_wd(g, tran={"TRAN_GIAI_NEN_TONG": len(bn_byte(g.luot[10])) + them})
+        moc = next((n for _, can, n in mo_zip if can), 0)   # so lan gui vat ly da co luc phat hien can
+        mong(([x[:2] for x in mo_zip], [x["url"] for x in nk[moc:] if re.search(DG, x["url"])], S(bc), bc["sha_audit"], dem(nk, "PATCH"), ma),
+             (mo, [], (KDD, "het_tai_nguyen_danh_gia"), None, 1, 1), f"can o {hau}: (cac lan mo ZIP, GET danh gia sau can, S, sha_audit, PATCH, ma thoat)")
+    ca(chay, "n2_can_tn_" + hau)
+
+ca_can_tn("t2", -1, [(False, True)])
+ca_can_tn("t5", 0, [(False, False), (False, True)])
+khong("f04_t5", "f04:t5", "n2_can_tn_t5")                                       # T5 tai va mo artifact ke sau khi can
+db("f04_t3", "f04:t3", "not c.can_tn", "True", "n2_can_tn_t2")                  # T3 (D6, D7) cua luot van chay sau khi T2 can
+db("f04_t7", "f04:t7", " and not c.can_tn", "", "n2_can_tn_t2", "n2_can_tn_t5")   # T7 (D2 cuoi) cua luot van chay sau khi can
+khong("f04_e", "f04:e", "n2_can_tn_t2", "n2_can_tn_t5")                         # cac luot con lai cua E van duoc danh gia
+
+@ca
+def n2_can_tn_cung_goi():   # cung goi: tep dau lam can tran tong => tep THU HAI khong duoc doc (byte da dem dung o tep dau)
+    c = M._NguCanh(None, None, None, "t", {"TRAN_GIAI_NEN_TONG": 4})
+    mong((M._tho_zip(c, zip_cua([("a", b"12345"), ("b", b"678")])) is M.VUOT, c.can_tn, c.giai_nen), (True, True, 5))
+db("f04_goi", "f04:goi", "return VUOT", "pass", "n2_can_tn_cung_goi")
+
 class thay_ten:
     """Thay MOT ten trong khong gian ten cua mo-dun trong luc chay (tiem loi vao nguyen ham, I3)."""
     def __init__(self, ten, moi): self.ten, self.moi = ten, moi

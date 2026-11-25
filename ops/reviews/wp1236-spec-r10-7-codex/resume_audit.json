@@ -1,0 +1,47 @@
+{
+  "receipt": {
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_input.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_kq.jsonl",
+      "--song-song",
+      "1"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+    "rc": 0,
+    "seconds": 88.85024685199824,
+    "stdout_sha256": "24462066dd3eb0ec0aa20b266f7f0481df8d649865a93c48230def6e13882244",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": "SONG a2:_chuan:0:0:bo_if0 \nTONG 1 · GIET 0 · SONG_SACH 1 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0\nHOAN_TAT neo={\"cong_cu\": \"1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a\", \"goc\": \"af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94\", \"manifest\": \"d6196ab136596c89acb4e0d9f674a58ec16a8da2b19363dd8a2111d10910d4ca\", \"test\": \"f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63\"}\n",
+  "result": [
+    {
+      "neo": {
+        "cong_cu": "1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a",
+        "test": "f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63",
+        "goc": "af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94",
+        "manifest": "d6196ab136596c89acb4e0d9f674a58ec16a8da2b19363dd8a2111d10910d4ca"
+      },
+      "baseline": "SONG"
+    },
+    {
+      "id": "a2:_chuan:0:0:bo_if0",
+      "rc": 0,
+      "giet": [],
+      "hong": [],
+      "phan_hang": "SONG",
+      "stderr_cuoi": "",
+      "op": "a2",
+      "dong": null,
+      "sha256": "af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94"
+    }
+  ],
+  "assessment": "Original healthy source under formerly killed stable ID reran and stayed SONG; prior927 results discarded. Uses existing frozen output and healthy source only."
+}

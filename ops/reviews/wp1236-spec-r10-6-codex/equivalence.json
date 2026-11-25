@@ -1,0 +1,18 @@
+{
+  "ref_no_boundary": {
+    "vectors": 20736,
+    "differences": [],
+    "argument": "Mọi ký tự của phần tên tệp bắt buộc đều thuộc lớp C=[A-Za-z0-9_./-]. Prefix C* tham lam làm match bắt đầu ở đầu dải C và kết thúc ở tên hợp lệ cuối trong dải; findall không cần khởi đầu lại trong cùng dải. Lookbehind cùng C không loại thêm match trong miền str này."
+  },
+  "identity_equivalent": [
+    "identity_72_67",
+    "identity_85_11",
+    "identity_126_7",
+    "identity_131_7",
+    "identity_154_11",
+    "identity_262_25",
+    "identity_271_11",
+    "identity_285_19"
+  ],
+  "identity_scope": "Giá trị được tạo bởi parser/Path/regex chuẩn và YAML safe_load; loại hai phép is True trong la_landed vì int 1 phân biệt được."
+}

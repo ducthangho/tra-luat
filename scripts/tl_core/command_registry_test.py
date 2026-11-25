@@ -78,10 +78,11 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertTrue(report["ok"])
 
         summary = report["summary"]
-        self.assertEqual(summary["total_nodes"], 201)
+        # r380 (PR #1503): +2 lệnh `llm-order`, `llm-khai-niem` ⇒ 201 → 203 nút, 199 → 201 lệnh lá.
+        self.assertEqual(summary["total_nodes"], 203)
         self.assertEqual(summary["container_commands"], 2)
-        self.assertEqual(summary["total_leaf_commands"], 199)
-        self.assertEqual(summary["registered_leaf_commands"], 199)
+        self.assertEqual(summary["total_leaf_commands"], 201)
+        self.assertEqual(summary["registered_leaf_commands"], 201)
         self.assertEqual(summary["unregistered_leaf_commands"], 0)
         self.assertEqual(summary["high_risk_unregistered_count"], 0)
         self.assertEqual(summary["registry_orphaned_commands"], 0)
@@ -102,7 +103,7 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         report_all = compute_parser_coverage(self.parser, unregistered_only=False)
         report_unreg = compute_parser_coverage(self.parser, unregistered_only=True)
 
-        self.assertEqual(len(report_all["commands"]), 199)
+        self.assertEqual(len(report_all["commands"]), 201)   # r380: +2 lệnh llm-*
         self.assertEqual(len(report_unreg["commands"]), 0)
 
     def test_registry_coverage_command_registered(self):

@@ -1,0 +1,4 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype/.claude/dev/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+CA MOI 57 HO CU 132 CASES 1639 TEN KHAC NHAU 1639 MUTANTS 1890
+CHON 40 CHAY 40 DAT 40 KHONG DAT 0 giay 9

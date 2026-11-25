@@ -1,0 +1,64 @@
+# ai-dang-giu sau han lease wp1460-r9-g4-claude (06:15:00Z) — do 2026-11-25T06:16:03Z, origin/master b4b79bf; master cuc bo da fast-forward theo origin (lan do 06:15:53Z bi chan rc 12 NHANH_CUC_BO_TUT_SAU, khong tinh)
+# so tap ls-remote/for-each-ref: thieu 0, thua 0
+## .github/workflows/ci-dot-bien-du.yml
+HẾT_HẠN	ci-dot-bien-chia-manh-r2-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r2-g2-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r2-g2-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r3-g3-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r3-g3-claude.yaml
+HẾT_HẠN	ci-registry-thu-hep-vung-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-thu-hep-vung-r1-g1-claude.yaml
+HẾT_HẠN	wp1166-r4-g4-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/wp1166-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r7-g1-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r7-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r8-g2-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r8-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r9-g3-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g3-claude.yaml
+HẾT_HẠN	wp1460-r9-g4-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## .claude/dev/ci_dang_ky_test.py
+HẾT_HẠN	c1a1a-exec-2-claude-20260927	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/c1a1a-exec-2-claude-20260927.yaml
+HẾT_HẠN	ci-dot-bien-chia-manh-r2-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g2-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-duong-nhanh-ho-so-r2-g2-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g3-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-duong-nhanh-ho-so-r2-g3-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g4-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-duong-nhanh-ho-so-r2-g4-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	ci-registry-dot-bien-theo-diff-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-dot-bien-theo-diff-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r2-g2-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r2-g2-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r3-g3-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-nang-tran-bo-day-du-r3-g3-claude.yaml
+HẾT_HẠN	ci-registry-pretooluse-che-do-nhe-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-pretooluse-che-do-nhe-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-thu-hep-vung-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-registry-thu-hep-vung-r1-g1-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g1-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g2-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g2-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g3-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g3-claude.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1-claude-20260906	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml
+HẾT_HẠN	khong-do-duoc-phai-do-exec-1-claude-20260829	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/khong-do-duoc-phai-do-exec-1-claude-20260829.yaml
+HẾT_HẠN	khong-do-duoc-phai-do-exec-1r2-claude-20260829	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/khong-do-duoc-phai-do-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	lease-pr-r1-g1-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/lease-pr-r1-g1-claude.yaml
+HẾT_HẠN	mutant-khong-chay-tren-windows-exec-1-claude-20260906	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml
+HẾT_HẠN	wp1166-r4-g4-claude	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/wp1166-r4-g4-claude.yaml
+HẾT_HẠN	wp773-r2-g2-claude-20261017	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/wp773-r2-g2-claude-20261017.yaml
+HẾT_HẠN	wp773-r3-g3-claude-20261018	refs/heads/agent/wp1460-r9-g4-fable:ops/leases/wp773-r3-g3-claude-20261018.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r7-g1-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r7-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r8-g2-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r8-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r9-g3-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g3-claude.yaml
+HẾT_HẠN	wp1460-r9-g4-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r7-g1-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r7-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r8-g2-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r8-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r9-g3-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g3-claude.yaml
+HẾT_HẠN	wp1460-r9-g4-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/specs/wp1460-r1/hop_dong/fixture.json
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r7-g1-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r7-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r8-g2-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r8-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1460-r9-g3-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g3-claude.yaml
+HẾT_HẠN	wp1460-r9-g4-claude	refs/remotes/origin/ops/wp1460-r1:ops/leases/wp1460-r9-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

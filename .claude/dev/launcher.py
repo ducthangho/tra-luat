@@ -156,6 +156,7 @@ _TRANSPORT_CONTRACTS = (
     ("anthropic_claude", ("claude",), "claude_code", "machine/local"),
     ("openai_codex", ("codex",), "codex_cli", "machine"),
     ("openai_api", ("llm",), "llm_cli", "machine"),
+    ("google_antigravity", ("agy",), "antigravity", "machine/local"),
 )
 
 # Bề mặt KHÔNG đi qua một CLI của launcher nằm ngoài `_TRANSPORT_CONTRACTS`.
@@ -172,14 +173,6 @@ _TRANSPORT_CONTRACTS = (
 # (provider, execution_surface, transport) — cùng ba trường với `_TRANSPORT_CONTRACTS`,
 # trừ tên lệnh vì không có lệnh nào.
 _PROVIDER_NGOAI_CLI = (
-    # `machine/local`, KHÔNG phải `machine` — chép đúng `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`
-    # §2 hàng "Google Antigravity". Cross-review PR #460 đo được hàng này LỆCH nguồn, và lệch
-    # theo chiều CHẶN NHẦM: một biên nhận Antigravity khai TRUNG THỰC `machine/local` bị cổng
-    # TỪ CHỐI, còn khai SAI `machine` thì ĐƯỢC NHẬN — validation đảo ngược. Cùng LỚP với
-    # `R7-02` (chặn quá rộng theo một hằng chép tay lệch nguồn). `anthropic_claude` trong
-    # `_TRANSPORT_CONTRACTS` vốn đã dùng `machine/local`, nên dạng giá trị này được hỗ trợ sẵn
-    # và Antigravity là hàng DUY NHẤT còn lệch.
-    ("google_antigravity", "antigravity", "machine/local"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
     # WP610: Desktop khai đúng bề mặt; không là CLI hoặc bằng chứng model/assurance.
     ("openai_codex", "codex_desktop", "machine"),
@@ -3882,6 +3875,47 @@ def _cho_snapshot_hoac_chan() -> bool:
     return _dang_cho_snapshot(home)
 
 
+# r1509 (đo 24-11-2026 trên máy chủ kho): Codex Windows tự đặt DACL bảo vệ trên `~/.codex`
+# `(A;OICI;0x1200a9;;;<CodexSandboxUsers>)` — nhóm cục bộ "(managed)" chứa CodexSandboxOffline/Online,
+# để lệnh trong sandbox đọc config. Chốt cũ đỏ ở THƯ MỤC ⇒ launcher "chờ snapshot" mãi. Cho phép HẸP:
+# chỉ trên THƯ MỤC, chỉ ACE allow, quyền ⊆ đọc/duyệt, SID là alias cục bộ TÊN đúng `CodexSandboxUsers`
+# cùng miền máy với người dùng. TỆP (auth.json) KHÔNG được nới: ACE ấy trên tệp nghĩa là lệnh sandbox
+# đọc được token — phải sửa ACL tệp (`launcher.py doctor` in lệnh icacls), đừng nới chốt.
+_SANDBOX_CODEX_NHOM = "codexsandboxusers"
+_SANDBOX_CODEX_QUYEN_DOC = 0x1200A9   # SYNCHRONIZE|READ_CONTROL|FILE_READ_ATTRIBUTES|EXECUTE|READ_EA|READ_DATA
+_SDDL_QUYEN_CHU = {"FR": 0x120089, "FX": 0x1200A0, "GR": 0x120089, "GX": 0x1200A0}
+
+
+def _quyen_sddl(rights: str):
+    """Mặt nạ quyền từ trường rights của SDDL; None khi không hiểu (fail-closed)."""
+    if re.fullmatch(r"0[xX][0-9a-fA-F]+", rights):
+        return int(rights, 16)
+    if not rights or len(rights) % 2:
+        return None
+    mask = 0
+    for i in range(0, len(rights), 2):
+        bit = _SDDL_QUYEN_CHU.get(rights[i:i + 2])
+        if bit is None:
+            return None
+        mask |= bit
+    return mask
+
+
+def _ace_sandbox_codex_duoc_phep(directory: bool, loai: str, rights: str, sid: str,
+                                 ten: str, kieu: int, user_sid: str) -> bool:
+    """r1509: ACE của nhóm sandbox Codex chỉ được tha trên thư mục, chỉ đọc, đúng danh tính."""
+    if not directory or loai != "A":
+        return False
+    mask = _quyen_sddl(rights)
+    if mask is None or mask & ~_SANDBOX_CODEX_QUYEN_DOC:
+        return False
+    if (ten or "").casefold() != _SANDBOX_CODEX_NHOM or kieu != 4:   # SidTypeAlias
+        return False
+    may = user_sid.rsplit("-", 1)[0]
+    return (sid.startswith("S-1-5-21-") and sid.rsplit("-", 1)[0] == may
+            and sid != user_sid)
+
+
 class _KhoCodex:
     """Pinned directory storage. No symlink traversal, broad ACL, or repo writes.
 
@@ -3916,7 +3950,7 @@ class _KhoCodex:
                     self.stack.callback(self.k.CloseHandle, h)
                     if (current / ".git").exists() or (current / ".git").is_symlink():
                         raise OSError("Codex home is inside a repository")
-                self._win_private(h)
+                self._win_private(h, directory=True)
             else:
                 if not hasattr(os, "O_NOFOLLOW") or os.open not in os.supports_dir_fd:
                     raise OSError("secure directory-relative storage unavailable")
@@ -4116,7 +4150,7 @@ class _KhoCodex:
                 self.k.LocalFree(c.cast(text, c.c_void_p))
             self.k.LocalFree(sid)
 
-    def _win_private(self, handle):
+    def _win_private(self, handle, directory=False):
         c, w = self.c, self.w
         sd, text = c.c_void_p(), w.LPWSTR()
         if self.a.GetSecurityInfo(handle, 1, 5, None, None, None, None, c.byref(sd)):
@@ -4144,8 +4178,36 @@ class _KhoCodex:
                 continue
             # Python's private Windows directories use OWNER RIGHTS (OW).
             # It is safe here only because the actual owner was checked above.
-            if fields[0] != "A" or self._win_sid(fields[5]) not in allowed | {"S-1-3-4"}:
-                raise OSError("credential ACL grants access to another principal")
+            sid = self._win_sid(fields[5])
+            if fields[0] == "A" and sid in allowed | {"S-1-3-4"}:
+                continue
+            if directory and fields[0] == "A":
+                ten, kieu = self._win_ten_sid(sid)
+                if _ace_sandbox_codex_duoc_phep(True, fields[0], fields[2], sid, ten, kieu, self.sid):
+                    continue
+            raise OSError("credential ACL grants access to another principal"
+                          + (f" ({sid}); fix: icacls <file> /inheritance:r /grant:r "
+                             "\"%USERNAME%:F\" \"*S-1-5-18:F\" \"*S-1-5-32-544:F\""
+                             if not directory else f" ({sid})"))
+
+    def _win_ten_sid(self, sid_text):
+        """(tên, SID_NAME_USE) của một SID cục bộ; lỗi ⇒ ("", 0) để chốt đỏ."""
+        c, w = self.c, self.w
+        fn = self.a.LookupAccountSidW
+        fn.argtypes = [w.LPCWSTR, c.c_void_p, w.LPWSTR, c.POINTER(w.DWORD), w.LPWSTR,
+                       c.POINTER(w.DWORD), c.POINTER(c.c_int)]
+        fn.restype = w.BOOL
+        sid = c.c_void_p()
+        if not self.a.ConvertStringSidToSidW(sid_text, c.byref(sid)):
+            return "", 0
+        try:
+            name, dom = c.create_unicode_buffer(256), c.create_unicode_buffer(256)
+            n, d, kind = w.DWORD(256), w.DWORD(256), c.c_int()
+            if not fn(None, sid, name, c.byref(n), dom, c.byref(d), c.byref(kind)):
+                return "", 0
+            return name.value, kind.value
+        finally:
+            self.k.LocalFree(sid)
 
     @contextlib.contextmanager
     def _win_security(self, directory=False):
@@ -4780,6 +4842,97 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
 
 
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
+
+
+ANTHROPIC_KEY_BIEN = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL_KIEM_SONG = "claude-haiku-5-5"
+
+
+def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool = False,
+                      mo=urllib.request.urlopen) -> tuple[str, str]:
+    """Đo đường Claude API bằng API key cho SCRIPT (`tl llm-khai-niem`, lõi `scripts/tl_core/llm_route.py`), KHÔNG phải
+    xác thực của chính Claude Code.
+
+    Key đọc từ `TL_ANTHROPIC_API_KEY` rồi `ANTHROPIC_API_KEY`. Tên riêng `TL_` vì trang sửa
+    môi trường cloud báo `ANTHROPIC_API_KEY` "won't be used to authenticate requests"
+    (đo 24-11-2026), và Network secrets không lưu được cho host của Anthropic.
+
+    Mặc định KHÔNG gọi mạng: có key ⇒ `CO_CREDENTIAL` (có mặt ≠ dùng được). `--kiem-song`
+    gửi MỘT lời gọi Messages nhỏ thật (tốn token rất ít) — chỉ 2xx mới là `DUNG_DUOC`,
+    vì nó chứng minh cả key lẫn còn credit. Số dư credit KHÔNG đọc được bằng API key:
+    xem Claude Console > Billing. KHÔNG BAO GIỜ đưa giá trị key vào mô tả.
+    """
+    mt = _env_da_chuan(moi_truong)
+    ten = next((b for b in ANTHROPIC_KEY_BIEN if (mt.get(b) or "").strip()), None)
+    if ten is None:
+        # `THIEU`, không phải `CHUA_XAC_THUC`: đường này TUỲ CHỌN, mà hook phiên in CANH BAO cho
+        # mọi `CHUA_XAC_THUC` — để vậy thì mọi phiên không dùng key mang một cảnh báo thường trực,
+        # và chốt đỏ thường trực là chốt bị bỏ qua. Key BỊ TỪ CHỐI / HẾT CREDIT mới cảnh báo.
+        return ("THIEU", "chua dat " + " / ".join(ANTHROPIC_KEY_BIEN) + " (tuy chon)")
+    if not kiem_song:
+        return ("CO_CREDENTIAL", f"co key ({ten}) · chua chung minh dung duoc, them --kiem-song")
+    goc = (mt.get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com").rstrip("/")
+    than = json.dumps({"model": ANTHROPIC_MODEL_KIEM_SONG, "max_tokens": 16,
+                       "output_config": {"effort": "low"},
+                       "messages": [{"role": "user", "content": "ok"}]}).encode()
+    req = urllib.request.Request(goc + "/v1/messages", data=than, method="POST", headers={
+        "x-api-key": mt[ten].strip(), "anthropic-version": "2023-06-01",
+        "content-type": "application/json"})
+    try:
+        with mo(req, timeout=30) as r:
+            than_tl = json.loads(r.read() or b"null")
+            u = than_tl.get("usage") if isinstance(than_tl, dict) else None
+            # BẰNG CHỨNG DƯƠNG, không phải 2xx trần (cross-review PR #1503 F8: gateway trả 200 rỗng hoặc
+            # `{"status":"ok"}` từng được dán `DUNG_DUOC`). Đòi đúng một Message có usage số nguyên.
+            # Từng điều kiện TÁCH RIÊNG để mỗi cái có đột biến canh riêng (cross-review lượt 2 N8: bỏ riêng
+            # kiểm `type` mà t162 vẫn xanh; token âm và model khác từng được dán DUNG_DUOC).
+            # Lượt 3 M6: đòi đủ khung một Message thật (id, role, content) — object chỉ có type/model/usage 0+0 không
+            # chứng minh một lượt gọi đã được phục vụ.
+            # Lượt 4 Q4: mỗi trường khung MỘT điều kiện (mỗi cái một đột biến + một mẫu hỏng riêng trong t162), và
+            # `content` phải là danh sách KHÁC RỖNG các khối có `type` chuỗi (khối `text` thì `text` là chuỗi) — mảng
+            # chứa `null` hay mảng rỗng kèm 0 token đầu ra từng được dán DUNG_DUOC trong khi SDK từ chối.
+            la_dict = isinstance(than_tl, dict)
+            noi_dung = than_tl.get("content") if la_dict else None
+            co_type = la_dict and than_tl.get("type") == "message"
+            co_id = la_dict and isinstance(than_tl.get("id"), str) and than_tl["id"].startswith("msg_")
+            co_role = la_dict and than_tl.get("role") == "assistant"
+            # Lượt 5 R4: probe KHÔNG khai tools ⇒ Message hợp lệ chỉ có khối `text`; khối loại khác (vd `tool_use` thiếu
+            # trường bắt buộc) không phải bằng chứng một lượt đã phục vụ.
+            co_content = isinstance(noi_dung, list) and len(noi_dung) > 0 and all(
+                isinstance(kh, dict) and kh.get("type") == "text"
+                and isinstance(kh.get("text"), str) for kh in noi_dung)
+            la_message = co_type and co_id and co_role and co_content
+            dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG
+            # Token đều phải là số nguyên (không bool) và DƯƠNG: một lượt đã phục vụ thì có cả đầu vào lẫn đầu ra
+            # (lượt 4 Q4) — điều kiện "> 0" đã bao luôn token âm.
+            co_usage = isinstance(u, dict) and all(
+                isinstance(u.get(k), int) and not isinstance(u.get(k), bool)
+                for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0
+            co_dau_ra = isinstance(u, dict) and isinstance(u.get("output_tokens"), int) and u["output_tokens"] > 0
+            if not (la_message and dung_model and co_usage and co_dau_ra):
+                return ("KHONG_DO_DUOC", f"key ({ten}) · HTTP {r.status} nhung phan hoi KHONG phai Message cua "
+                                         f"{ANTHROPIC_MODEL_KIEM_SONG} co usage hop le — khong chung minh duoc "
+                                         "(gateway/proxy?)")
+            u = u if isinstance(u, dict) else {}
+            mdl = than_tl.get("model") if isinstance(than_tl, dict) else None
+            return ("DUNG_DUOC", f"key ({ten}) · kiem song HTTP {r.status} (model tra ve {mdl}, "
+                                 f"{u.get('input_tokens')}+{u.get('output_tokens')} token) · "
+                                 "so du credit: xem Claude Console > Billing")
+    except urllib.error.HTTPError as e:
+        try:
+            than_loi = json.loads(e.read() or b"null")
+        except (ValueError, OSError):
+            than_loi = None
+        loi = than_loi.get("error") if isinstance(than_loi, dict) else None
+        loi = loi if isinstance(loi, dict) else {}
+        kieu, tb = str(loi.get("type") or ""), str(loi.get("message") or "")
+        if e.code == 402 or kieu == "billing_error" or (e.code == 400 and "credit balance" in tb.lower()):
+            return ("CHUA_XAC_THUC", f"key ({ten}) · HET CREDIT (HTTP {e.code}) — nap them o Console > Billing")
+        if e.code in (401, 403):
+            return ("CHUA_XAC_THUC", f"key ({ten}) · bi tu choi HTTP {e.code} ({kieu or 'khong ro'})")
+        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song HTTP {e.code} ({kieu or 'khong ro'})")
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")
 
 
 def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None) -> tuple[str, str, bool]:
@@ -5595,6 +5748,10 @@ KHA_NANG = [
     {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),
      "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",
      "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},
+    {"ten": "anthropic-api", "do": lambda ws, ks=False: _do_anthropic_api(_MOI_TRUONG_DA_DOC, ks),
+     "vi_sao": "duong api cua `tl llm-khai-niem` (script goi Claude bang API key, khong phai Claude Code)",
+     "khac_phuc": "them TL_ANTHROPIC_API_KEY vao bien moi truong cua environment (KHONG dung Network "
+                  "secrets), mo phien moi; het credit: Claude Console > Billing"},
 ]
 
 

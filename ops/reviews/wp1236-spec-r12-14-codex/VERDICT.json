@@ -1,0 +1,955 @@
+{
+  "spec_sha256": "02d60e53c80a7d7145930abadd516fba8d9e736d2a7bf5dc355114352e4abbe4",
+  "vong": 14,
+  "reviewed_sha": "03bff7fefb27ed2ea03c5235b03fd21f261b37aa",
+  "reviewed_tree": "75d7a8971d57b9f6e81bd2a9d96e931ee635dc91",
+  "review_class": "sensitive",
+  "review_axes": [
+    "Spec",
+    "Standards/Security"
+  ],
+  "findings": [
+    {
+      "id": "AE01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/specs/wp1236-r12.md:125\u2013126, 420\u2013428, 467\u2013469",
+      "van_de": "AD01 m\u1edbi v\u00e1 casefold, c\u00f2n oracle b\u1eaft bu\u1ed9c d\u1ef1a v\u00e0o membership c\u1ee7a l\u1edbp ch\u01b0a t\u00ednh nh\u00e1nh assertion $ c\u1ee7a token. \u1ede v\u1ecb tr\u00ed sau token, LF cu\u1ed1i chu\u1ed7i kh\u00f4ng thu\u1ed9c l\u1edbp d\u1ea5u ph\u00e2n c\u00e1ch (casefold c\u0169ng kh\u00f4ng \u0111\u1ed5i LF) n\u00ean lu\u1eadt 8 \u0111\u00f2i \u00e2m; nh\u01b0ng bi\u1ec3u th\u1ee9c s\u1ea3n ph\u1ea9m t\u1ea1i d\u00f2ng 125 nh\u1eadn n\u00f3 v\u00ec $ kh\u1edbp tr\u01b0\u1edbc LF cu\u1ed1i. Hai y\u00eau c\u1ea7u kh\u00f4ng th\u1ec3 c\u00f9ng \u0111\u01b0\u1ee3c nghi\u1ec7m thu. \u0110\u00e2y l\u00e0 ph\u1ea7n c\u00f2n m\u1edf c\u1ee7a oracle AD01, kh\u00f4ng ph\u1ea3i mutant m\u1edbi \u0111\u1ec3 ph\u00e2n h\u1ea1ng P3 ngo\u00e0i b\u1ea3ng.",
+      "bang_chung": {
+        "trich_dan": [
+          "D\u00f2ng 125: re.match(r\"[ \\t]*([a-z_]+)(?=$|[ \\t\u2014\\-:(,.;])\", gia_tri.casefold()).",
+          "D\u00f2ng 420\u2013425: d\u01b0\u01a1ng khi v\u00e0 ch\u1ec9 khi casefold() cho chu\u1ed7i thu\u1ed9c l\u1edbp; M\u1eccI U+0000\u2013U+007F d\u01b0\u01a1ng n\u1ebfu thu\u1ed9c l\u1edbp, \u00e2m n\u1ebfu kh\u00f4ng, k\u1ef3 v\u1ecdng CH\u00cdNH X\u00c1C.",
+          "Lu\u1eadt 9 gi\u1eef lu\u1eadt 4/b\u1ea3ng lu\u1eadt 8 l\u00e0 ca B\u1eaeT BU\u1ed8C \u0111\u1ed9c l\u1eadp v\u1edbi membership c\u1ee7a \u0111\u1ed9t bi\u1ebfn."
+        ],
+        "command": "python3 -B ../work/probe_contract.py",
+        "rc": 0,
+        "do_duoc": "Qu\u00e9t 128 ASCII \u00d7 3 ng\u1eef c\u1ea3nh: \u0111\u1ea7u token, sau token \u1edf EOF, sau token c\u00f2n payload = 384 ph\u00e9p \u0111o qua token v\u00e0 kiem_ho_so. 383 kh\u1edbp oracle membership; \u0111\u00fang m\u1ed9t l\u1ec7ch: U+000A sau skipped \u1edf EOF. token(\"skipped\\n\") = \"skipped\"; kiem_ho_so({\"gate_output\":\"skipped\\n\"}) = [].",
+        "doi_chung": "\"\\nskipped\", \"skipped\\nX\", \"skipped\\r\" \u0111\u1ec1u token=None/consumer dinh_dang_loi_khai; \"skipped\\tX\" v\u00e0 \"  skipped\" \u0111\u01b0\u1ee3c nh\u1eadn. Casefold \u0111\u00e3 \u0111\u00fang cho \u017fkipped, s\u212aipped, not_mea\u017fured; fa\u0131led v\u1eabn \u00e2m.",
+        "quet_lop": "\u0110\u1ecdc \u0111\u1ee7 10 regex module v\u00e0 hai regex D2b; assertion $ ch\u1ec9 \u1edf RE_TOKEN. \u0110\u1ed1i chi\u1ebfu c\u00e1c tuy\u1ebfn ti\u1ec1n x\u1eed l\u00fd: casefold; UTF-8/CRLF/split newline; JSON decode/splitlines/strip; fullmatch/findall. AD02 qua ba ca lazy v\u00e0 Cs \u0111\u00e3 kh\u1edbp; kh\u00f4ng m\u1edf finding ri\u00eang cho c\u00f9ng c\u01a1 ch\u1ebf.",
+        "artifacts": [
+          "ascii_token_sweep.json",
+          "contract_probes.json",
+          "regex_inventory.json",
+          "probe_contract.py"
+        ],
+        "gioi_han": "B\u1ea3n chi\u1ebfu r11 ch\u1ec9 thay regex theo r12, kh\u00f4ng ph\u1ea3i m\u00e3 thi c\u00f4ng r12. Ph\u1ea3n ch\u1ee9ng LF c\u0169ng suy tr\u1ef1c ti\u1ebfp t\u1eeb regex nguy\u00ean v\u0103n c\u1ee7a \u0111\u1eb7c t\u1ea3. Kh\u00f4ng kh\u1eb3ng \u0111\u1ecbnh l\u1ed7i h\u00e0nh vi s\u1ea3n ph\u1ea9m."
+      },
+      "de_xuat": "\u0110\u1ecbnh ngh\u0129a oracle c\u1ee7a b\u1ea3ng tr\u00ean to\u00e0n bi\u1ec3u th\u1ee9c v\u00e0 ng\u1eef c\u1ea3nh v\u1ecb tr\u00ed sau c\u00e1c b\u01b0\u1edbc ti\u1ec1n x\u1eed l\u00fd, g\u1ed3m nh\u00e1nh $/lookahead v\u00e0 t\u1eadp TOKEN, thay \u0111i\u1ec1u ki\u1ec7n iff membership. Ghi r\u00f5 LF cu\u1ed1i sau token l\u00e0 d\u01b0\u01a1ng theo h\u1ee3p \u0111\u1ed3ng \u0111ang gi\u1eef; LF \u0111\u1ea7u ho\u1eb7c LF c\u00f2n payload l\u00e0 \u00e2m. Gi\u1eef nguy\u00ean regex s\u1ea3n ph\u1ea9m; kh\u00f4ng \u0111\u1ed5i $ th\u00e0nh \\Z hay c\u1ea5m LF \u0111\u1ec3 l\u00e0m b\u1ea3ng xanh n\u1ebfu ch\u01b0a \u0111\u1ed5i lu\u1eadt \u0111\u01b0\u1ee3c duy\u1ec7t. Gi\u1eef c\u00f9ng th\u01b0\u1edbc cho h\u00e0m l\u00e1 v\u00e0 consumer; kh\u00f4ng m\u1edf l\u1ea1i mi\u1ec1n m\u1ecdi \u0111\u1ed9t bi\u1ebfn."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "AE01"
+      ],
+      "manifestations": [
+        "Oracle b\u1eaft bu\u1ed9c c\u1ee7a token kh\u00f4ng t\u00ednh $ tr\u01b0\u1edbc LF cu\u1ed1i; AD01 v\u00e1 m\u1ed9t ph\u1ea7n."
+      ],
+      "highest_open_severity": "P2",
+      "nguon": "AD01 v\u00f2ng 13 \u2190 AC01/AC02 v\u00f2ng 12; P01/Q01/S01 m\u00e3 9\u201311; alias nghi\u1ec7m thu U02/V01/W01/X01/Z01/AA01.",
+      "common_fix": "\u0110\u1ecbnh ngh\u0129a oracle c\u1ee7a b\u1ea3ng tr\u00ean to\u00e0n bi\u1ec3u th\u1ee9c v\u00e0 ng\u1eef c\u1ea3nh v\u1ecb tr\u00ed sau c\u00e1c b\u01b0\u1edbc ti\u1ec1n x\u1eed l\u00fd, g\u1ed3m nh\u00e1nh $/lookahead v\u00e0 t\u1eadp TOKEN, thay \u0111i\u1ec1u ki\u1ec7n iff membership. Ghi r\u00f5 LF cu\u1ed1i sau token l\u00e0 d\u01b0\u01a1ng theo h\u1ee3p \u0111\u1ed3ng \u0111ang gi\u1eef; LF \u0111\u1ea7u ho\u1eb7c LF c\u00f2n payload l\u00e0 \u00e2m. Gi\u1eef nguy\u00ean regex s\u1ea3n ph\u1ea9m; kh\u00f4ng \u0111\u1ed5i $ th\u00e0nh \\Z hay c\u1ea5m LF \u0111\u1ec3 l\u00e0m b\u1ea3ng xanh n\u1ebfu ch\u01b0a \u0111\u1ed5i lu\u1eadt \u0111\u01b0\u1ee3c duy\u1ec7t. Gi\u1eef c\u00f9ng th\u01b0\u1edbc cho h\u00e0m l\u00e1 v\u00e0 consumer; kh\u00f4ng m\u1edf l\u1ea1i mi\u1ec1n m\u1ecdi \u0111\u1ed9t bi\u1ebfn.",
+      "closing_check": "C\u00f9ng oracle cho to\u00e0n bi\u1ec3u th\u1ee9c token v\u00e0 b\u1ea3ng b\u1eaft bu\u1ed9c: qu\u00e9t 128 k\u00fd t\u1ef1 \u1edf \u0111\u1ea7u/sau token t\u1ea1i EOF/sau token c\u00f2n payload, Unicode casefold preimages v\u00e0 \u0111\u1ed1i ch\u1ee9ng. LF cu\u1ed1i nh\u1eadn; LF \u0111\u1ea7u/gi\u1eefa kh\u00f4ng nh\u1eadn. \u0110\u1ed1i chi\u1ebfu c\u1ea3 token v\u00e0 kiem_ho_so.",
+      "ly_do_va_rieng": "Kh\u00f4ng t\u00e1ch slug cho casefold v\u00e0 assertion: c\u00f9ng c\u01a1 ch\u1ebf oracle \u0111\u01a1n k\u00fd t\u1ef1 kh\u00f4ng b\u1eb1ng oracle to\u00e0n bi\u1ec3u th\u1ee9c."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [],
+      "manifestations": [
+        "AD02: ba ca delimiter ch\u1ecdn lazy \u0111\u00fang; Cs qua escape JSON \u0111\u01b0\u1ee3c nh\u1eadn."
+      ],
+      "highest_open_severity": null,
+      "nguon": "AC03 v\u00f2ng 12 \u2192 AD02 v\u00f2ng 13",
+      "common_fix": "M\u00f4 t\u1ea3 lazy l\u00e0 \u0111i\u1ec3m s\u1edbm nh\u1ea5t cho ph\u00e9p kh\u1edbp tr\u1ecdn; \u0111i\u1ec1u ki\u1ec7n chung t\u00e1ch theo tuy\u1ebfn. B\u1ea3n s\u1eeda 2 \u0111\u00e3 \u00e1p.",
+      "closing_check": "contract_probes.json: 3/3 lazy helper+consumer passed/[]; \u0111\u1ed5i sang greedy \u1edf ca hai suffix l\u00e0m consumer \u0111\u1ecf. Cs c\u00f3 UTF-8 JSON h\u1ee3p l\u1ec7 v\u00e0 [] \u1edf kiem_mien(head=None/non-None), kiem_ho_so; 28 category c\u00f3 \u0111\u01b0\u1eddng h\u1ee3p l\u1ec7 v\u00e0 c\u00e1c separator \u00e2m.",
+      "ly_do_va_rieng": "Hai bi\u1ec3u hi\u1ec7n AD02 \u0111\u00e3 ki\u1ec3m ri\u00eang v\u00ec \u0111i hai tuy\u1ebfn kh\u00e1c nhau."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_ids": [],
+      "manifestations": [
+        "AD03: nang_tran neo r12 hi\u1ec7n h\u00e0nh; t\u00e1ch 1985 \u0111o, 1950\u20132080 \u01b0\u1edbc, 2100 m\u1ee9c gi\u1eef l\u1ea1i ch\u1edd duy\u1ec7t b\u0103m."
+      ],
+      "highest_open_severity": null,
+      "nguon": "AC04 v\u00f2ng 12 \u2192 AD03 v\u00f2ng 13",
+      "common_fix": "Neo revision hi\u1ec7n h\u00e0nh cho \u0111\u1ec1 ngh\u1ecb v\u00e0 g\u1eafn t\u1eebng s\u1ed1 v\u1edbi ph\u1ea1m vi/th\u1eddi \u0111i\u1ec3m. B\u1ea3n s\u1eeda 2 \u0111\u00e3 \u00e1p.",
+      "closing_check": "inventory_summary.json: 201 ID \u0111\u00fang b\u0103m, 125 \u00f4 \u0111\u00fang b\u0103m, 30 ca s\u00e0n, 9 lu\u1eadt, numstat 1+343+1641=1985; ai_nang d\u00f2ng 568 ghi r12.",
+      "ly_do_va_rieng": "Kh\u00f4ng c\u1ea7n s\u1eeda ri\u00eang t\u1eebng s\u1ed1; ph\u1ea7n c\u00f2n stale \u1edf v\u00f2ng 13 \u0111\u00e3 \u0111\u1ed5i."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "AC01",
+        "AC02",
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02",
+        "alias U02/V01/W01/X01/Z01/AA01",
+        "AD01"
+      ],
+      "vong_xuat_hien": {
+        "dac_ta": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13
+        ],
+        "ma": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "status": "VA_MOT_PHAN",
+      "nhan_protocol": "V\u00c1 H\u1edc",
+      "evidence": [
+        "AD01 casefold \u0111\u00e3 s\u1eeda nh\u01b0ng AE01 \u0111o c\u00f2n m\u00e2u thu\u1eabn assertion $ \u1edf LF cu\u1ed1i: 1/384 oracle l\u1ec7ch.",
+        "A h\u1eefu h\u1ea1n/t\u1ea5t \u0111\u1ecbnh: 780 mutant \u00d72 byte-equal, 24 to\u00e1n t\u1eed. B \u0111\u1ee7 201 ID, 186 l\u1ecbch s\u1eed \u222a15 r11. Lu\u1eadt 9 d\u00f9ng m\u1ed9t th\u1ee9 t\u1ef1 B\u2192A\u2192ngo\u00e0i; gi\u1ea3m acceptance kh\u00f4ng t\u00ednh l\u00e0 v\u00e1 code (\u00a78.3).",
+        "15 r11_*: 9 t\u01b0\u01a1ng \u0111\u01b0\u01a1ng theo ng\u1eef ph\u00e1p m\u1edbi, 4 reason c\u00f2n ph\u00e2n bi\u1ec7t, token_single_ws v\u00e0 event_casefold c\u00f2n ngh\u0129a v\u1ee5 GIET. B\u1ea3ng ri\u00eang c\u00f3 m\u1ed7i ID/proof.",
+        "P02/AA01 gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng m\u00e3 10\u201311: h\u1ea1t gi\u1ed1ng/ph\u00e9p chi\u1ebfu/125 \u00f4 c\u00f2n c\u00f9ng b\u0103m, kh\u00f4ng \u0111\u1ed5i \u1edf b\u1ea3n s\u1eeda 2.",
+        "S02/Q02/P03: hai ID r9b_event_tab,r9b_name_inner_spaces v\u1eabn trong B. Nh\u00e3n P3 c\u0169 l\u00e0 l\u1ecbch s\u1eed; tr\u00ean head r12, survivor c\u00f2n ngh\u0129a thu\u1ed9c B ph\u1ea3i x\u1eed l\u00fd lu\u1eadt 5/9, kh\u00f4ng d\u00f9ng b\u1ea3ng l\u1ecbch s\u1eed l\u00e0m ngo\u1ea1i l\u1ec7."
+      ],
+      "chua_do_duoc": "Ch\u01b0a c\u00f3 m\u00e3/suite r12 v\u00e0 ledger GIET exact head r12. Kh\u00f4ng x\u00e1c minh waiver online theo l\u1ec7nh c\u1ea5m m\u1ea1ng; kh\u00f4ng g\u1ecdi chuy\u1ec3n scope l\u00e0 DA_VA_THAT. Scope verdict hi\u1ec7n t\u1ea1i l\u00e0 \u0111\u1eb7c t\u1ea3."
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05",
+        "V02",
+        "Z02 (t\u00e1i m\u1edf b\u1edfi r11 ti\u1ebfp nh\u1eadn l\u01b0\u1ee3t m\u00e37\u20138)",
+        "AC04",
+        "AD03"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        5,
+        9
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "inventory_summary.json: 201 ID \u0111\u00fang b\u0103m, 125 \u00f4 \u0111\u00fang b\u0103m, 30 ca s\u00e0n, 9 lu\u1eadt, numstat 1+343+1641=1985; ai_nang d\u00f2ng 568 ghi r12.",
+      "chua_do_duoc": "Numstat th\u1ef1c c\u1ee7a r12 ch\u01b0a c\u00f3; ch\u01b0a readback comment owner online. Kh\u00f4ng c\u1ea7n s\u1ed1 m\u00e3 t\u01b0\u01a1ng lai \u0111\u1ec3 \u0111\u00f3ng l\u1ed7i nh\u00e3n ngu\u1ed3n AD03; ph\u1ea3i \u0111o tr\u01b0\u1edbc review m\u00e3 nh\u01b0 \u0111\u1eb7c t\u1ea3 \u0111\u00e3 \u0111\u00f2i."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03",
+        "U01",
+        "ma7:M02",
+        "ma8:N03",
+        "AC03",
+        "AD02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        "ma7",
+        "ma8"
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "contract_probes.json: 3/3 lazy helper+consumer passed/[]; \u0111\u1ed5i sang greedy \u1edf ca hai suffix l\u00e0m consumer \u0111\u1ecf. Cs c\u00f3 UTF-8 JSON h\u1ee3p l\u1ec7 v\u00e0 [] \u1edf kiem_mien(head=None/non-None), kiem_ho_so; 28 category c\u00f3 \u0111\u01b0\u1eddng h\u1ee3p l\u1ec7 v\u00e0 c\u00e1c separator \u00e2m.",
+      "chua_do_duoc": "\u0110\u00f3ng AD02 \u1edf ph\u1ea1m vi h\u1ee3p \u0111\u1ed3ng \u0111\u1eb7c t\u1ea3. Kh\u00f4ng ch\u1ee9ng nh\u1eadn suite tri\u1ec3n khai r12; c\u00e1c ngh\u0129a v\u1ee5 code t\u01b0\u01a1ng lai v\u1eabn gi\u1eef."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_cu": [
+        "U03"
+      ],
+      "vong_xuat_hien": [
+        4
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "AC01",
+        "AC02",
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02",
+        "alias U02/V01/W01/X01/Z01/AA01",
+        "AD01"
+      ],
+      "vong_xuat_hien": {
+        "dac_ta": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13
+        ],
+        "ma": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "status": "VA_MOT_PHAN",
+      "nhan_protocol": "V\u00c1 H\u1edc",
+      "evidence": [
+        "AD01 casefold \u0111\u00e3 s\u1eeda nh\u01b0ng AE01 \u0111o c\u00f2n m\u00e2u thu\u1eabn assertion $ \u1edf LF cu\u1ed1i: 1/384 oracle l\u1ec7ch.",
+        "A h\u1eefu h\u1ea1n/t\u1ea5t \u0111\u1ecbnh: 780 mutant \u00d72 byte-equal, 24 to\u00e1n t\u1eed. B \u0111\u1ee7 201 ID, 186 l\u1ecbch s\u1eed \u222a15 r11. Lu\u1eadt 9 d\u00f9ng m\u1ed9t th\u1ee9 t\u1ef1 B\u2192A\u2192ngo\u00e0i; gi\u1ea3m acceptance kh\u00f4ng t\u00ednh l\u00e0 v\u00e1 code (\u00a78.3).",
+        "15 r11_*: 9 t\u01b0\u01a1ng \u0111\u01b0\u01a1ng theo ng\u1eef ph\u00e1p m\u1edbi, 4 reason c\u00f2n ph\u00e2n bi\u1ec7t, token_single_ws v\u00e0 event_casefold c\u00f2n ngh\u0129a v\u1ee5 GIET. B\u1ea3ng ri\u00eang c\u00f3 m\u1ed7i ID/proof.",
+        "P02/AA01 gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng m\u00e3 10\u201311: h\u1ea1t gi\u1ed1ng/ph\u00e9p chi\u1ebfu/125 \u00f4 c\u00f2n c\u00f9ng b\u0103m, kh\u00f4ng \u0111\u1ed5i \u1edf b\u1ea3n s\u1eeda 2.",
+        "S02/Q02/P03: hai ID r9b_event_tab,r9b_name_inner_spaces v\u1eabn trong B. Nh\u00e3n P3 c\u0169 l\u00e0 l\u1ecbch s\u1eed; tr\u00ean head r12, survivor c\u00f2n ngh\u0129a thu\u1ed9c B ph\u1ea3i x\u1eed l\u00fd lu\u1eadt 5/9, kh\u00f4ng d\u00f9ng b\u1ea3ng l\u1ecbch s\u1eed l\u00e0m ngo\u1ea1i l\u1ec7."
+      ],
+      "chua_do_duoc": "Ch\u01b0a c\u00f3 m\u00e3/suite r12 v\u00e0 ledger GIET exact head r12. Kh\u00f4ng x\u00e1c minh waiver online theo l\u1ec7nh c\u1ea5m m\u1ea1ng; kh\u00f4ng g\u1ecdi chuy\u1ec3n scope l\u00e0 DA_VA_THAT. Scope verdict hi\u1ec7n t\u1ea1i l\u00e0 \u0111\u1eb7c t\u1ea3."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "ma6:L03"
+      ],
+      "vong_xuat_hien": [
+        "ma6"
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "vong_xuat_hien": [
+        "ma1"
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2"
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma3"
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn \u0111\u00e3 \u0111\u00f3ng t\u1eeb l\u1ecbch s\u1eed, kh\u00f4ng t\u00e1i m\u1edf. \u0110o delta 138ecd7\u219203bff7f: n\u0103m kh\u1ed1i Module m\u1edbi / Lu\u1eadt m\u1edbi hai c\u1ed5ng / write_set / b\u1ea3ng A\u2013C / ki\u1ec3m ch\u1ee9ng theo n\u1ec1n t\u1edbi phan_bien byte-equal; b\u1ed9 125 \u00f4 gi\u1eef b\u0103m. Ph\u00e9p \u0111o base 66/170 kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3. inventory_summary.json, diff_fix2.patch, base_summary.json.",
+      "chua_do_duoc": "Kh\u00f4ng ch\u1ea1y l\u1ea1i to\u00e0n b\u1ed9 suite m\u00e3 c\u0169; \u0111\u00e2y l\u00e0 b\u1ea3o to\u00e0n l\u1edbp \u0111\u00e3 \u0111\u00f3ng v\u00e0 ki\u1ec3m t\u00e1c \u0111\u1ed9ng delta \u0111\u1eb7c t\u1ea3, kh\u00f4ng tuy\u00ean b\u1ed1 thi c\u00f4ng r12 \u0111\u00e3 \u0111\u1ea1t."
+    }
+  ],
+  "per_finding_previous_round": [
+    {
+      "id": "AD01",
+      "slug": "test-thieu-chot",
+      "status": "VA_MOT_PHAN",
+      "nhan_protocol": "V\u00c1 H\u1edc",
+      "evidence": "Casefold controls \u0111\u00fang; c\u00f2n LF cu\u1ed1i (AE01)."
+    },
+    {
+      "id": "AD02",
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "contract_probes.json: 3/3 lazy helper+consumer passed/[]; \u0111\u1ed5i sang greedy \u1edf ca hai suffix l\u00e0m consumer \u0111\u1ecf. Cs c\u00f3 UTF-8 JSON h\u1ee3p l\u1ec7 v\u00e0 [] \u1edf kiem_mien(head=None/non-None), kiem_ho_so; 28 category c\u00f3 \u0111\u01b0\u1eddng h\u1ee3p l\u1ec7 v\u00e0 c\u00e1c separator \u00e2m."
+    },
+    {
+      "id": "AD03",
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "inventory_summary.json: 201 ID \u0111\u00fang b\u0103m, 125 \u00f4 \u0111\u00fang b\u0103m, 30 ca s\u00e0n, 9 lu\u1eadt, numstat 1+343+1641=1985; ai_nang d\u00f2ng 568 ghi r12."
+    },
+    {
+      "id": "S01\u2190Q01\u2190P01",
+      "slug": "test-thieu-chot",
+      "status": "VA_MOT_PHAN",
+      "nhan_protocol": "V\u00c1 H\u1edc",
+      "evidence": "\u0110\u1ed5i grammar/mi\u1ec1n nghi\u1ec7m thu; ch\u01b0a c\u00f3 suite r12 \u0111\u00f3ng ngh\u0129a v\u1ee5, AE01 c\u00f2n m\u1edf. Kh\u00f4ng t\u00ednh scope cut l\u00e0 v\u00e1."
+    },
+    {
+      "id": "S02\u2190Q02\u2190P03",
+      "slug": "test-thieu-chot",
+      "status": "CHUA_VA",
+      "nhan_protocol": "CH\u01afA V\u00c1",
+      "evidence": "Kho 201 c\u00f2n \u0111\u1ee7 hai ID; ch\u01b0a c\u00f3 code/waiver exact head m\u1edbi trong \u0111\u1ea7u v\u00e0o. \u0110\u00e2y l\u00e0 ngh\u0129a v\u1ee5 review m\u00e3, kh\u00f4ng th\u00eam finding \u0111\u1eb7c t\u1ea3 ch\u1ec9 v\u00ec m\u00e3 ch\u01b0a c\u00f3."
+    },
+    {
+      "id": "P02/AA01",
+      "slug": "test-thieu-chot",
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "\u0110\u00c3 V\u00c1 TH\u1eacT",
+      "evidence": "Gi\u1eef k\u1ebft lu\u1eadn m\u00e310\u201311, seed/chieu/o byte/b\u0103m kh\u00f4ng \u0111\u1ed5i."
+    }
+  ],
+  "status_encoding": "Enum theo validator \u0111\u01b0\u1ee3c giao; nhan_protocol theo \u00a78. VA_MOT_PHAN bi\u1ec3u di\u1ec5n V\u00c1 H\u1edc \u1edf l\u1edbp/bi\u1ec3u hi\u1ec7n c\u00f2n thi\u1ebfu; kh\u00f4ng c\u00f3 bi\u1ec3u hi\u1ec7n V\u00c1 SINH L\u1ed6I M\u1edaI trong v\u00f2ng n\u00e0y. KHONG_DO_DUOC ch\u1ec9 d\u00f9ng khi kh\u00f4ng \u0111\u1ee7 quan s\u00e1t, kh\u00f4ng thay c\u00e1c ph\u00e9p \u0111o th\u1eadt.",
+  "bang_noi_slug": [
+    {
+      "tu": "nghiem-thu-khong-co-lap-chot-dich",
+      "den": "test-thieu-chot",
+      "pham_vi": "Alias m\u1ee9c \u0111\u1eb7c t\u1ea3/m\u00e3 c\u1ee7a c\u00f9ng c\u01a1 ch\u1ebf; gi\u1eef c\u1ea3 slug trong prior_class_status, \u0111\u1ebfm m\u1ed9t l\u1ea7n trong h\u1ed9i t\u1ee5.",
+      "doi_chieu": "U02/V01/W01/X01/Z01/AA01 \u2194 P01/P02/P03\u2192Q01/Q02\u2192S01/S02\u2192AC01/AC02\u2192AD01\u2192AE01; kh\u00f4ng reset l\u1ecbch s\u1eed, kh\u00f4ng m\u1edf slug cho LF."
+    }
+  ],
+  "hoi_tu": {
+    "vong13_sang_14": "2/3",
+    "U": [
+      "test-thieu-chot",
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "F": [
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "lop_lap_lan_ba": [
+      "test-thieu-chot",
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "lop_moi": [],
+    "lop_tai_mo": [],
+    "alias_dem_mot_lan": true,
+    "checkpoint": "L\u1ecbch s\u1eed l\u1edbp l\u1eb7p gi\u1eef nguy\u00ean; v\u00f2ng 14/call 15 \u0111\u01b0\u1ee3c ch\u1ee7 kho giao theo prompt (#1236 issuecomment-7062258757). Kh\u00f4ng t\u1ef1 c\u1ea5p l\u01b0\u1ee3t k\u1ebf hay quy\u1ec1n thi c\u00f4ng. T\u1ef7 l\u1ec7 2/3 kh\u00f4ng thay \u0111i\u1ec1u ki\u1ec7n severity sensitive."
+  },
+  "preflight": {
+    "head": "03bff7fefb27ed2ea03c5235b03fd21f261b37aa",
+    "tree": "75d7a8971d57b9f6e81bd2a9d96e931ee635dc91",
+    "spec_sha256": "02d60e53c80a7d7145930abadd516fba8d9e736d2a7bf5dc355114352e4abbe4",
+    "branch": "spec12",
+    "core_abbrev": "7",
+    "refs": {
+      "8048551": "8048551a9b1eb886c126d2a1a4df0f95fb285964",
+      "0d81487": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "e767abc": "e767abcd32a2efbc86fd661d3bff385cdfcd1cd1",
+      "138ecd7": "138ecd74ef5b65999d212a73f53ec4956caf4958"
+    },
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "identity": {
+      "run_id": "9b150ce7dd674d9c9680c7f15c467159",
+      "provider": "openai_codex",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "transport_sha256": "e14fc83739c13c1074b12bd1acce4010c893c7f6fbfc1593b4a31d74cabb57af"
+    },
+    "session_env": {
+      "CODEX_SESSION_ID": "01a1fe3f-6343-7ca2-9f73-3e3cd6716ced",
+      "CODEX_THREAD_ID": "01a1fe3f-6343-7ca2-9f73-3e3cd6716ced"
+    },
+    "blob_hashes": {
+      "r11_module.py": "ac6d6253753deef360f9196dabdb149c19a654d88854536fb4572d65ca94c624",
+      "quet_dot_bien.py": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "pairs201.jsonl": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740"
+    },
+    "note": "Reference branch names absent; immutable objects supplied and verified. No refs changed; no network.",
+    "generation": "N/A \u2014 review \u0111\u1eb7c t\u1ea3 theo ch\u1ec9 th\u1ecb tr\u1ef1c ti\u1ebfp; kh\u00f4ng nh\u1eadn lease thi c\u00f4ng.",
+    "repository_write_set": [],
+    "effective_write_set": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-14-codex/work"
+    ],
+    "authority": "Ch\u1ec9 th\u1ecb user giao v\u00f2ng14/call15, ch\u1ec9 \u0111\u1ecdc repo, kh\u00f4ng m\u1ea1ng; b\u0103m r12 ch\u1edd owner duy\u1ec7t sau review.",
+    "reference_ref_observation": "Kh\u00f4ng c\u00f3 t\u00ean ma-0d81487/lease-moi t\u1ea1i clone; refs/remotes/origin/lease-moi2 tr\u1ecf e767abc; d\u00f9ng Git OID 0d81487/e767abc s\u1eb5n c\u00f3. HEAD checkout \u0111\u00fang; kh\u00f4ng t\u1ef1 s\u1eeda refs."
+  },
+  "review_identity": {
+    "run_id": "9b150ce7dd674d9c9680c7f15c467159",
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "transport_sha256": "e14fc83739c13c1074b12bd1acce4010c893c7f6fbfc1593b4a31d74cabb57af",
+    "model_family": "openai",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "session_id": "01a1fe3f-6343-7ca2-9f73-3e3cd6716ced",
+    "source": "run/9b150ce7/run.json; CODEX_SESSION_ID; sandbox runtime instructions. Kh\u00f4ng l\u1ea5y model t\u1eeb actor GitHub.",
+    "sandbox": "workspace-write; repo gi\u1eef read-only b\u1eb1ng k\u1ef7 lu\u1eadt theo assignment; kh\u00f4ng khai kernel mount read-only. Cache/output/script ch\u1ec9 work/.",
+    "independence": "Context reviewer \u0111\u1ed9c l\u1eadp \u0111\u01b0\u1ee3c giao; kh\u00f4ng fork Executor, kh\u00f4ng subagent.",
+    "assurance_limit": "Verdict n\u1ed9i dung offline. Kh\u00f4ng t\u1ef1 t\u1ea1o cross_approved, waiver, human audit ho\u1eb7c merge authorization. Launcher c\u1ea7n ch\u1ed1t terminal rc/stdout hash sau run."
+  },
+  "da_do_khop": [
+    {
+      "command": "python3 -B ../work/setup_review.py",
+      "rc": 0,
+      "status": "passed",
+      "evidence": "Spec hash/blob/head/tree matched; snapshot_start.json; Python3.13.18; PyYAML6.0.3."
+    },
+    {
+      "command": "python3 -B ../work/quet_dot_bien.py sinh ../work/r11_module.py --ra ../work/manifest1.jsonl (l\u1eb7p v\u1edbi manifest2.jsonl)",
+      "rc": [
+        0,
+        0
+      ],
+      "status": "passed",
+      "evidence": "780/780, 24 operators; manifests byte-equal, sha256 e0143c6018d6a06b6ae98bc39fa2cc57bb7f7edbbed57cfb5dd30b089c99643f"
+    },
+    {
+      "command": "python3 -B ../work/measure_review.py",
+      "rc": 0,
+      "status": "passed",
+      "evidence": {
+        "evaluations": {
+          "total": 66,
+          "counts": {
+            "not_measured": 9,
+            "passed": 47,
+            "failed": 10
+          },
+          "result_delta": 0,
+          "parser_delta": 0
+        },
+        "records": {
+          "total": 170,
+          "buckets": {
+            "MIEN_CUTOVER": 25,
+            "KHONG_LOI_KHAI": 50,
+            "DO": 56,
+            "DAT": 39
+          },
+          "result_delta": 0,
+          "landed_old": 94,
+          "landed_new": 94
+        },
+        "urls": {
+          "raw_occurrences": 2508,
+          "raw_outside": [
+            {
+              "path": "ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py",
+              "url": "https://github.com/ducthangho/tra-luat/pull/{PR_GHI_SO}#issuecomment-4242",
+              "allowed": false
+            }
+          ],
+          "json_count": 3624,
+          "decoded_occurrences": 1942,
+          "decoded_outside": []
+        }
+      }
+    },
+    {
+      "command": "python3 -B ../work/probe_contract.py",
+      "rc": 0,
+      "status": "passed",
+      "evidence": "Ph\u00e9p \u0111o ho\u00e0n t\u1ea5t; AE01 t\u00e1i hi\u1ec7n 1/384 l\u1ec7ch oracle. Ba ca lazy passed/[]; greedy contrast \u0111\u1ecf; Cs/28 categories readback \u0111o \u0111\u1ee7. passed \u1edf \u0111\u00e2y l\u00e0 probe ch\u1ea1y xong, kh\u00f4ng ph\u1ea3i \u0111\u1eb7c t\u1ea3 \u0111\u1ea1t."
+    },
+    {
+      "command": "python3 -B ../work/check_inventory.py",
+      "rc": 0,
+      "status": "passed",
+      "evidence": {
+        "manifest_equal": true,
+        "manifest_count": 780,
+        "manifest_sha256": "e0143c6018d6a06b6ae98bc39fa2cc57bb7f7edbbed57cfb5dd30b089c99643f",
+        "operator_count": 24,
+        "bank_count": 201,
+        "bank_ids": 201,
+        "bank_hash": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740",
+        "bank_by_round": {
+          "6": 127,
+          "7": 14,
+          "8": 11,
+          "9": 15,
+          "10": 19,
+          "11": 15
+        },
+        "ledger186_counts": {
+          "GIET": 172,
+          "KHONG_AP_DUNG": 5,
+          "TUONG_DUONG": 7,
+          "NGOAI_BANG_DONG": 2
+        },
+        "all_186_preserved": true,
+        "old_anchor_counts": {
+          "1": 196,
+          "0": 5
+        },
+        "projection_anchor_counts": {
+          "1": 148,
+          "0": 53
+        },
+        "A_B_shared_sources": 65,
+        "frozen_cells": 125,
+        "frozen_cells_hash": "628e27046ab4ba7a7b3cf31eb65ded9b88c718c5bfd067401d12b60d2c21b857",
+        "required_A_rows": 30,
+        "laws": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "numstat": "1\t0\t.claude/dev/ci_dang_ky_test.py\n343\t0\tops/gate_output_doi_chieu.py\n1641\t0\tops/gate_output_doi_chieu_test.py\n",
+        "added_lines": 1985,
+        "sections_unchanged_vs_fix1": {
+          "### Module m\u1edbi": true,
+          "### Lu\u1eadt m\u1edbi": true,
+          "## write_set": true,
+          "### \u0110\u1ee3t A": true,
+          "## Ki\u1ec3m ch\u1ee9ng theo n\u1ec1n": true
+        },
+        "r12_code_size": "not_measured; estimate 1950\u20132080, proposal 2100 remains pending spec_hash approval"
+      }
+    },
+    {
+      "command": "git diff --check 138ecd7 HEAD -- ops/specs/",
+      "rc": 0,
+      "status": "passed",
+      "evidence": "No whitespace errors in spec delta."
+    }
+  ],
+  "law8_law9_assessment": {
+    "language_finite": false,
+    "meaning": "Ng\u00f4n ng\u1eef chu\u1ed7i v\u1eabn v\u00f4 h\u1ea1n v\u00ec * v\u00e0 + kh\u00f4ng ch\u1eb7n \u0111\u1ed9 d\u00e0i, k\u1ec3 c\u1ea3 alphabet ASCII. B\u1ea3n s\u1eeda 1/2 \u0111\u00e3 b\u1ecf kh\u1eb3ng \u0111\u1ecbnh v\u00e9t c\u1ea1n m\u1ecdi mutant. Mi\u1ec1n nghi\u1ec7m thu A\u222aB h\u1eefu h\u1ea1n tr\u00ean m\u1ed9t head; \u0111i\u1ec1u n\u00e0y kh\u00f4ng ch\u1ee9ng minh m\u1ecdi h\u00e0nh vi.",
+    "regex_scope": "10 regex module v\u00e0 2 regex D2b: ch\u1eef/l\u1edbp ASCII t\u01b0\u1eddng minh, literal \u2014, c\u00e1c lookaround, c\u00f9ng s\u00e1u nh\u00f3m v\u0103n b\u1ea3n t\u1ef1 do (t\u00ean job/skipped, labels, header tail, job tail, reason, th\u00e0nh ph\u1ea7n D2b). S\u00e1u ch\u1ed7 l\u00e0 b\u1ea3n hi\u1ec7n h\u00e0nh, kh\u00f4ng c\u00f2n n\u0103m nh\u01b0 r12 \u0111\u1ea7u. D2b [^/]+ v\u00e0 .* / [^\\]]* \u0111\u01b0\u1ee3c ghi nh\u1eadn, kh\u00f4ng ph\u1ea3i mi\u1ec1n k\u00edn ASCII.",
+    "finite_A": "\u0110\u1ecdc sinh(): AST/n\u00fat/chu\u1ed7i ngu\u1ed3n h\u1eefu h\u1ea1n, v\u00f2ng l\u1eb7p b\u1ecb ch\u1eb7n theo ngu\u1ed3n; c\u00e1c bi\u1ebfn \u0111\u1ed5i l\u1ea5y theo tuple th\u1ee9 t\u1ef1 c\u1ed1 \u0111\u1ecbnh. Hai l\u1ea7n tr\u00ean 0d81487 ra c\u00f9ng 780/24. Kh\u00f4ng ch\u1ea1y do/HOAN_TAT c\u1ee7a m\u00e3 r12 ch\u01b0a t\u1ed3n t\u1ea1i.",
+    "priority": "B tr\u01b0\u1edbc A tr\u01b0\u1edbc ngo\u00e0i; 65 source mutant giao A/B tr\u00ean r11, B th\u1eafng. V\u1edbi c\u00f9ng head v\u00e0 c\u00f9ng ch\u1ee9ng minh t\u01b0\u01a1ng \u0111\u01b0\u01a1ng, membership cho c\u00f9ng ph\u00e2n h\u1ea1ng. Lu\u1eadt1/2/4/6/7 l\u00e0 ngh\u0129a v\u1ee5 ri\u00eang. AE01 n\u1eb1m \u1edf h\u1ee3p \u0111\u1ed3ng b\u1ea3ng b\u1eaft bu\u1ed9c, kh\u00f4ng ph\u1ea3i survivor ngo\u00e0i A/B.",
+    "actual_bug": "Lu\u1eadt9 ch\u1ec9 \u0111\u1ecbnh ngh\u0129a test \u0111\u1ee7 cho l\u1edbp test-thieu-chot. Candidate th\u1ef1c vi ph\u1ea1m K1\u2013K8/L8/D2b v\u1eabn l\u00e0 finding h\u00e0nh vi theo m\u1ee9c th\u1eadt; kh\u00f4ng c\u00f3 quy\u1ec1n h\u1ea1 m\u00e3 sai xu\u1ed1ng P3 b\u1eb1ng ngoai_bang_dong. Ngo\u00e0i A/B v\u1eabn P3 ph\u1ea3i \u0111\u00f3ng/mi\u1ec5n exact SHA; kh\u00f4ng \u0111\u1ee7 approve sensitive.",
+    "bank": "201=186+15, \u0111\u1ee7 t\u1eadp/b\u0103m. Ledger l\u1ecbch s\u1eed 186:172 GIET/7 TUONG_DUONG/5 KHONG_AP_DUNG/2 NGOAI_BANG_DONG; kh\u00f4ng chuy\u1ec3n k\u1ebft lu\u1eadn \u1ea5y t\u1ef1 \u0111\u1ed9ng l\u00ean r12. 53/201 neo kh\u00f4ng xu\u1ea5t hi\u1ec7n tr\u00ean projection ASCII (so 5/201 \u1edf r11) ph\u1ea3i t\u00e1i d\u1eabn xu\u1ea5t c\u00f9ng ngh\u0129a/ch\u1ee9ng minh, kh\u00f4ng g\u1ecdi CHOT_DA_BO ch\u1ec9 v\u00ec \u0111\u1ed5i regex.",
+    "pair11_projection": [
+      {
+        "id": "r11_url_bmp_only",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_url_no_zero_width",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_url_no_combining",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_url_no_control",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_reason_bmp_only",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement GIET required",
+        "witness": "mien_gate_output: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa os=ubuntu-latest ly_do=\ud83d\ude00 han=2026-11-21",
+        "original": true,
+        "mutant": false,
+        "replacement_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\U00010000-\\U0010ffff])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})"
+      },
+      {
+        "id": "r11_reason_no_zero_width",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement GIET required",
+        "witness": "mien_gate_output: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa os=ubuntu-latest ly_do=\u200b han=2026-11-21",
+        "original": true,
+        "mutant": false,
+        "replacement_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\u200b-\\u200f\\ufeff])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})"
+      },
+      {
+        "id": "r11_reason_no_combining",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement GIET required",
+        "witness": "mien_gate_output: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa os=ubuntu-latest ly_do=\u0301 han=2026-11-21",
+        "original": true,
+        "mutant": false,
+        "replacement_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\u0300-\\u036f])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})"
+      },
+      {
+        "id": "r11_reason_no_control",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement GIET required",
+        "witness": "mien_gate_output: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa os=ubuntu-latest ly_do=\u0001 han=2026-11-21",
+        "original": true,
+        "mutant": false,
+        "replacement_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\x00-\\x1f])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})"
+      },
+      {
+        "id": "r11_word_ascii_first",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_word_ascii_last",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_token_single_ws",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement GIET required",
+        "witness": "  skipped",
+        "original": true,
+        "mutant": false
+      },
+      {
+        "id": "r11_token_no_nel",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_run_no_arabic",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 0,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "KHONG_AP_DUNG -> same-meaning replacement TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_consumer_ascii_conclusion",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 1,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "TUONG_DUONG",
+        "proof": "Excluded code points are outside the explicit ASCII class. Parsed conclusion [a-z_]+ is already ASCII. token prefix is space/tab so removing NEL has no effect. Reconfirm on implementation head; not CHOT_DA_BO."
+      },
+      {
+        "id": "r11_event_casefold",
+        "old_anchor_count": 1,
+        "projected_anchor_count": 1,
+        "same_source_in_A": false,
+        "r12_obligation": "re-derive and measure; no previous ledger result auto-inherited",
+        "disposition": "GIET required",
+        "witness": "event=PUSH",
+        "proof": "K3 exact push false; casefold true; frozen cell run.event:H1 discriminates."
+      }
+    ],
+    "remaining_problem": "AE01: b\u1ea3ng h\u1eefu h\u1ea1n v\u1eabn c\u00f3 oracle kh\u00f4ng nh\u1ea5t qu\u00e1n \u1edf assertion LF cu\u1ed1i."
+  },
+  "measurements_not_passed": {
+    "failed_setup_only": [
+      {
+        "command": "git show origin/ma-0d81487:ops/gate_output_doi_chieu.py",
+        "rc": 128,
+        "reason": "T\u00ean ref kh\u00f4ng c\u00f3; sau \u0111\u00f3 d\u00f9ng OID s\u1eb5n c\u00f3."
+      },
+      {
+        "command": "git show ma-0d81487:ops/gate_output_doi_chieu.py",
+        "rc": 128,
+        "reason": "T\u00ean ref kh\u00f4ng c\u00f3; OID 0d81487 t\u1ed3n t\u1ea1i."
+      },
+      {
+        "command": "python3 -B ../work/probe_contract.py (b\u1ea3n nh\u00e1p l\u1ea7n1)",
+        "rc": 1,
+        "reason": "Fixture \u201cdelimiter s\u1edbm kh\u00f4ng kh\u1edbp\u201d d\u00f9ng [broken ch\u01b0a c\u00f3 ] n\u00ean th\u1ef1c t\u1ebf kh\u1edbp th\u00e0nh labels; s\u1eeda fixture trong scratch th\u00e0nh [broken] nope r\u1ed3i \u0111o l\u1ea1i rc0. Kh\u00f4ng ph\u1ea3i l\u1ed7i s\u1ea3n ph\u1ea9m; kh\u00f4ng d\u00f9ng l\u01b0\u1ee3t \u0111\u1ecf l\u00e0m b\u1eb1ng ch\u1ee9ng \u0111\u00f3ng."
+      }
+    ],
+    "skipped": [],
+    "not_run": [
+      "Suite m\u00e3 r12/full mutant do/HOAN_TAT (ch\u01b0a c\u00f3 m\u00e3 r12).",
+      "Windows native/CI, live GitHub/owner waiver readback (ngo\u00e0i scope/c\u1ea5m m\u1ea1ng).",
+      "Full selftest/release gates/Ruff pin-probe/bare lint (review \u0111\u1eb7c t\u1ea3, kh\u00f4ng s\u1eeda code)."
+    ],
+    "not_measured": [
+      "Numstat th\u1eadt r12; model/effort ph\u1ee5c v\u1ee5; tr\u1ea1ng th\u00e1i remote live; waiver exact head code m\u1edbi."
+    ]
+  },
+  "counts": {
+    "findings": 1,
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0,
+    "open_logical_classes": 1,
+    "code_obligations_not_erased": true,
+    "call": 15,
+    "round": 14
+  },
+  "verdict": "changes_requested",
+  "severity_decision": "Sensitive c\u00f2n AE01 P2: kh\u00f4ng approve. AD02/AD03 \u0111\u00f3ng trong ph\u1ea1m vi \u0111\u1eb7c t\u1ea3; kh\u00f4ng t\u1ef1 mi\u1ec5n b\u1ea5t k\u1ef3 P3 code n\u00e0o.",
+  "read_only_snapshot": {
+    "start": "snapshot_start.json",
+    "end": "snapshot_end.json",
+    "equal": true,
+    "head_unchanged": true,
+    "tree_unchanged": true,
+    "tracked_diff": "empty",
+    "index_diff": "empty",
+    "untracked": "empty",
+    "ignored": "!! .codex/",
+    "file_hashes_compared": 17534,
+    "scope": "Only supplied checkout; Executor original tree not in observation scope.",
+    "limit": "Snapshots prove no observed delta at endpoints, not no transient write in all history. No repository edit was performed; .codex/ existed initially."
+  },
+  "validation": {
+    "command": "python3 /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-14-codex/kiem_verdict_lop.py /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-14-codex/work/VERDICT.json --vong 14",
+    "rc": 0,
+    "status": "passed",
+    "positive_evidence": "HOP_LE (\u00a78.3): 1 finding, 3 lop",
+    "artifact": "kiem_verdict.txt"
+  },
+  "artifact_hashes": {
+    "VERDICT.md": "bff216a560f6621c8bb3fae33f5f1e5640dc72054e7b746a1dfaa47a8f1896f2",
+    "ascii_token_sweep.json": "ee424c8ee86a30f537ce70f702c4aac173ff542816ee2c2d7e2c608bdedeb58e",
+    "bank_anchor_inventory.json": "32afbfa2ff4a3a61420287a7891414e28c2377433bfa49ccbc36322a3b53d98c",
+    "base_evaluations.json": "fb2f4eb55e42a6452fdd9f83a4cf9b01b68e7e084b49c1afad15cd59c3ffb546",
+    "base_records.json": "4a7be8e5d3e8200b24e5200057e596fd8ed28b127ec2ed7071efe6ba687fe97f",
+    "base_summary.json": "2352b51ebf12cb1e78e4f0a6003d25468be9f512fe8af5a4d976ae57b1f04e34",
+    "base_urls.json": "b5a6bbae7f6688bdaafd4b2e4b8fe9487c1bf51a46cb2313f0e9fb96fb9173f1",
+    "build_verdict.py": "69015ccb37d516bae5ff7a50d41d1728756120e0909d611e01a512b70d2a9823",
+    "check_inventory.py": "bd0a9a249109855012157b3ee7fe9badd097626cc07db81565e569b32ca8f83d",
+    "contract_probes.json": "7bd184b224f489e4acc329ffebb1d602b807f0366c78d7883ed33eceb550a84a",
+    "diff_fix2.patch": "339ed38e1c36523e01e0ecdcf0545c11bb10694cd8410551eb789d5ec1eaefeb",
+    "diff_r11_r12.patch": "f6a6308471ef36a3b4a4eec55cf851800f14cd7da2106f0a9955b6fd16401abb",
+    "inventory_stdout.txt": "ae15ed30a6cc8e1e8a107da2e486c828c5efe11b923fe55a49d19ab0fb3cc176",
+    "inventory_summary.json": "ae15ed30a6cc8e1e8a107da2e486c828c5efe11b923fe55a49d19ab0fb3cc176",
+    "kiem_verdict.txt": "928a1d539c03ebdba448745f337c638ebb6c0c1dc9a73264ef477712d599784f",
+    "ledger186.jsonl": "b0ef3c681c5516e8d2ac1eae07a31259def770dd625c8b6de2ce5d67cab062c1",
+    "manifest1.jsonl": "e0143c6018d6a06b6ae98bc39fa2cc57bb7f7edbbed57cfb5dd30b089c99643f",
+    "measure_review.py": "3b2f8da68ad34b2b2097a54136a2ebebe2644f9135e7268a198ac1f491e24d7b",
+    "numstat.txt": "00bab768e3948a6cc3f7a7d46f2b46636ed439454c85c41d4f34de0c1b3744de",
+    "pairs11_projection.json": "256b425ec5e02b13c62479a7330f048c6dfceec6f9be68aee6a38edd465772eb",
+    "pairs201.jsonl": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740",
+    "probe_contract.py": "de701c254fcccf65515ac03196c3fc2e0f75d67d808bd5588fc12fddb1342478",
+    "quet_dot_bien.py": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+    "r11_module.py": "ac6d6253753deef360f9196dabdb149c19a654d88854536fb4572d65ca94c624",
+    "r12_projection.py": "b86ee97ec3b6373fb738b46e53c61b2e63e15c005d34d890693dde89775ed2a9",
+    "regex_inventory.json": "b9c79320b37359977bdc72fdb9c549865a6b8064f5da64bd81f89892041b0be6",
+    "setup.json": "0f1be6f334d3cfd3f0f8210f895dec4326563c1fd9c6605c394e3ed2ed748bc4",
+    "setup_review.py": "f5931341bbd4284eeed807eefe4fafb063b7b28943c201b576d2848b4157c1a2",
+    "snapshot_end.json": "e560ac2cc8720c24ba6144ecde3d6834517090203d3133c9338982ba07a6ceb0",
+    "snapshot_start.json": "e560ac2cc8720c24ba6144ecde3d6834517090203d3133c9338982ba07a6ceb0"
+  }
+}

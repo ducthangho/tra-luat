@@ -1,0 +1,319 @@
+{
+  "fixtures": {
+    "v3": [
+      "passed",
+      []
+    ],
+    "v2": [
+      "passed",
+      []
+    ],
+    "v1": [
+      "passed",
+      []
+    ],
+    "fail": [
+      "failed",
+      []
+    ],
+    "skip": [
+      "not_measured",
+      [
+        "co_job_skipped"
+      ]
+    ],
+    "no_prov": [
+      "not_measured",
+      [
+        "provenance_0"
+      ]
+    ]
+  },
+  "parser_ab": {
+    "lf": {
+      "base": [
+        "passed",
+        []
+      ],
+      "m45": [
+        "passed",
+        []
+      ],
+      "m46": [
+        "passed",
+        []
+      ]
+    },
+    "crlf": {
+      "base": [
+        "passed",
+        []
+      ],
+      "m45": [
+        "passed",
+        []
+      ],
+      "m46": [
+        "passed",
+        []
+      ]
+    },
+    "mixed": {
+      "base": [
+        "not_measured",
+        [
+          "xuong_dong_tron"
+        ]
+      ],
+      "m45": [
+        "not_measured",
+        [
+          "xuong_dong_tron"
+        ]
+      ],
+      "m46": [
+        "passed",
+        []
+      ]
+    },
+    "cr_le": {
+      "base": [
+        "not_measured",
+        [
+          "cr_le"
+        ]
+      ],
+      "m45": [
+        "passed",
+        []
+      ],
+      "m46": [
+        "not_measured",
+        [
+          "cr_le"
+        ]
+      ]
+    }
+  },
+  "duplicate_provenance": {
+    "reference": [
+      "passed",
+      []
+    ],
+    "duplicate_ids": [
+      136067207297
+    ],
+    "spec_required": "not_measured/job_id_trung_provenance"
+  },
+  "k3": {
+    "run": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "tap": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "empty": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ]
+  },
+  "duplicate_skip": {
+    "reference_parse_reasons": [],
+    "reference_result": [
+      "not_measured",
+      [
+        "co_job_skipped"
+      ]
+    ],
+    "spec_required": "job_lap",
+    "skip_id": "133659160050"
+  },
+  "conclusion_control": [
+    "not_measured",
+    [
+      "ket_luan_lech:136203672900"
+    ]
+  ],
+  "landed_parity": {
+    "total": 170,
+    "expected_true": 94,
+    "actual_true": 94,
+    "mismatches": []
+  },
+  "claim_tokens": {
+    "distinct_record_token_pairs": 62,
+    "resolves": 60,
+    "wrong": [
+      [
+        "pr1392-wp1389-land-evidence.yaml",
+        "pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt"
+      ],
+      [
+        "pr1406-wp1404-land-evidence.yaml",
+        "pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt"
+      ]
+    ]
+  },
+  "cutover": {
+    "sha256": "964742fef636a70587b2247c094ac4f38aea540a01abdce8b6319c8f74b447bf",
+    "constant": "964742fef636a70587b2247c094ac4f38aea540a01abdce8b6319c8f74b447bf",
+    "gate": {
+      "rc": 0,
+      "stdout": "MIỄN TRỪ ops/land/pr680-wp676-land-evidence.yaml (băm khớp ảnh chụp cutover)\nland_evidence_nguon: 0 ĐẠT · 1/1 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+      "stderr": ""
+    }
+  },
+  "inventory": {
+    "a_cases": 28,
+    "a_mutants": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "duplicates": []
+  },
+  "adrs": {
+    "0053": {
+      "present": {
+        "command": [
+          "git",
+          "cat-file",
+          "-e",
+          "8ab100793df9831505f495543a74044b91c2c9ab:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md"
+        ],
+        "rc": 0,
+        "out": "",
+        "err": ""
+      },
+      "parent_absent": {
+        "command": [
+          "git",
+          "cat-file",
+          "-e",
+          "8ab100793df9831505f495543a74044b91c2c9ab^1:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md"
+        ],
+        "rc": 128,
+        "out": "",
+        "err": "fatal: path 'docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md' exists on disk, but not in '8ab100793df9831505f495543a74044b91c2c9ab^1'\n"
+      },
+      "on_supplied_first_parent": true
+    },
+    "0055": {
+      "present": {
+        "command": [
+          "git",
+          "cat-file",
+          "-e",
+          "d2e3052d479d140b7e7b91df41ec4914fab7d544:docs/adr/0055-tran-loi-goi-codex-len-muoi.md"
+        ],
+        "rc": 0,
+        "out": "",
+        "err": ""
+      },
+      "parent_absent": {
+        "command": [
+          "git",
+          "cat-file",
+          "-e",
+          "d2e3052d479d140b7e7b91df41ec4914fab7d544^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md"
+        ],
+        "rc": 128,
+        "out": "",
+        "err": "fatal: path 'docs/adr/0055-tran-loi-goi-codex-len-muoi.md' exists on disk, but not in 'd2e3052d479d140b7e7b91df41ec4914fab7d544^1'\n"
+      },
+      "on_supplied_first_parent": true
+    }
+  },
+  "archive": {
+    "rc": 0,
+    "byte_match": true,
+    "result": [
+      "passed",
+      []
+    ]
+  },
+  "c5_regex": {
+    "base": [
+      true,
+      false
+    ],
+    "literal_old_mutant": [
+      false,
+      false
+    ],
+    "revised_mutant": [
+      true,
+      true
+    ]
+  },
+  "attempt_types": {
+    "1": true,
+    "2": true,
+    "None": false,
+    "True": false,
+    "1.0": false,
+    "0": false
+  },
+  "scope": "Reference/fixtures and literal specification predicates only; no r9 production module or future L8/D2b CLI executed."
+}

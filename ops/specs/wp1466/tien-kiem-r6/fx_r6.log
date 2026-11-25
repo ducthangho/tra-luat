@@ -1,0 +1,37 @@
+2026-11-21T04:09:00Z
+OK  sach                       rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  policy_co_mat              rc=1 (đòi 1)   policy change-impact có mặt trên base: ['.github/coordination/change-impact.v1.json'] — phải tính closure tr | TIỀN KIỂM: DỪNG
+OK  schema_policy_co_mat       rc=1 (đòi 1)   policy change-impact có mặt trên base: ['.github/coordination/schemas/change-impact.v1.schema.json'] — phải  | TIỀN KIỂM: DỪNG
+OK  trung_tuyet_doi            rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  tien_to_thu_muc            rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  tien_to_khong_gach         rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  khac_kieu_chu              rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  chi_effective              rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  planned_gach_nguoc         rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  duong_dan_thoat            rc=1 (đòi 1)   đường dẫn bị §5 từ chối trong lease fxa-r1-g1-claude: '../ngoai.py' | TIỀN KIỂM: DỪNG
+OK  effective_sai_kieu         rc=1 (đòi 1)   lease không đọc được write set: refs/remotes/origin/ops/a:ops/leases/a.yaml | TIỀN KIỂM: DỪNG
+OK  lien_ket_thu_muc           rc=1 (đòi 1)   liên kết tượng trưng chạm write set: lk -> .claude/dev | TIỀN KIỂM: DỪNG
+OK  lien_ket_ngoai_ws          rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  ref_chua_moi               rc=1 (đòi 1)   ref chưa mới hoặc clone shallow: máy chủ có mà bộ đệm thiếu 1 cặp, bộ đệm thừa 0 cặp (fetch đủ nhánh rồi chạ | TIỀN KIỂM: DỪNG
+OK  lease_het_han              rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  lease_bia_mo_hai_chieu     rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  sau_dang_chinh_no          rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  sau_dang_co_nguoi_khac     rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  sau_dang_chua_co           rc=1 (đòi 1)   --sau-dang wp1466-r5-g1-claude: không thấy lease ấy còn hiệu lực trên ref nào | TIỀN KIỂM: DỪNG
+OK  chi_may_chu                rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_nhanh_cuc_bo         rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_remote_phu           rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_packed_refs          rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_tag                  rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_ref_origin_thua      rc=1 (đòi 1)   ref chưa mới hoặc clone shallow: máy chủ có mà bộ đệm thiếu 0 cặp, bộ đệm thừa 1 cặp (fetch đủ nhánh rồi chạ | TIỀN KIỂM: DỪNG
+OK  rieng_replace              rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_nhanh_cuc_bo_sau_dang rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  rieng_remote_phu_sau_dang  rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  b_bi_che_boi_tag           rc=1 (đòi 1)   B=origin/master giải ra ff3b252340069f8611ca23fb622d04aa8f7ff9a7: không phải master của máy chủ trong ảnh ch | TIỀN KIỂM: DỪNG
+OK  lp_cay_lam_viec_bi_sua     rc=1 (đòi 1)   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude'] | TIỀN KIỂM: DỪNG
+OK  b_la_to_tien_master        rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+OK  b_la_sha_rieng             rc=1 (đòi 1)   B=3e343b68924b7198299f793272b10b12d9ae858a giải ra 3e343b68924b7198299f793272b10b12d9ae858a: không phải mast | TIỀN KIỂM: DỪNG
+OK  sau_dang_sach_co_nhanh_rieng rc=0 (đòi 0) TIỀN KIỂM: ĐẠT
+TONG 33 kịch bản: đúng 33 · sai 0
+rc=0
+2026-11-21T04:09:10Z

@@ -1,0 +1,34 @@
+# nghiem thu tai cho tren merge 29c22f7 (worktree sach tu origin/master), 2026-11-21T13:00:08Z
+## git rev-parse
+29c22f7d1f92321978d4d1dff16bd80d9ea744e0
+d0aae59f7a8cf0154085229cda3cbc53cc15829a
+5f461a599059c525235abbfd081345fc6cd03586
+26fbacd9d4ba73f8e83359e9af060a76b32cae08
+4583e5bd5d3b7d1efdd2aec8f39da878776f03bd
+8656dc0176ed108e12c209ba55c91a1f6f9d612f
+## numstat HEAD^1..HEAD
+7	7	RELEASE_MANIFEST.json
+151	0	scripts/test_fragments/wp433_secrets_set_bundle.py
+5	1	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled_2.py
+## numstat 8656dc0..26fbacd9d4ba73f8e83359e9af060a76b32cae08 (base lease..head)
+7	7	RELEASE_MANIFEST.json
+151	0	scripts/test_fragments/wp433_secrets_set_bundle.py
+5	1	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled_2.py
+TONG 4 tep +164/-8
+## base lease 8656dc0 la to tien HEAD^1
+rc=0
+## diff 8656dc0..HEAD^1 cham write set?
+(het)
+## blob write set tai merge vs head
+RELEASE_MANIFEST.json 603890caf8f7bd2740a0f5f3c9f569ce97219ba2 BANG
+scripts/test_fragments/wp433_secrets_set_bundle.py 0dc0e47593fb2a02dad0ab0263f0abbe30394eff BANG
+scripts/tl_gws.py 96642590a5f76e3d644bd39df11d99fbc60c7178 BANG
+scripts/tl_test_fragments_bundled.py 81096d8a66c327761828e5f543375f6e957f3e01 BANG
+scripts/tl_test_fragments_bundled_2.py 1a5913dd5a9116e3b3ba78e1d05a267fdc04cef7 BANG
+## release-verify RELEASE_MANIFEST.json --strict --json
+rc=0
+ok True expected 186 checked 186 failed []
+## git diff --check HEAD^1 HEAD
+rc=0

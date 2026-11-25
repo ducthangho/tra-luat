@@ -1,0 +1,83 @@
+{
+  "receipts": [
+    {
+      "command": [
+        "/usr/bin/python3.12",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/h_py312.jsonl"
+      ],
+      "rc": 0,
+      "seconds": 0.20260106099885888,
+      "stdout": "HOI_QUY 127 · AP_DUNG 125 · KHONG_AP_DUNG 2\nKHONG_AP_DUNG kho:reason_claim_failed neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\nKHONG_AP_DUNG kho:reason_complete_290_39 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3.12",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "sinh",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m_py312.jsonl"
+      ],
+      "rc": 0,
+      "seconds": 40.35931275800249,
+      "stdout": "SINH 800 a=70 a2=78 b=75 c=26 c2=43 d=9 e=52 f=41 g=236 h1=18 h2=4 i1=39 i2=11 i3=6 i4=23 i5=29 i6=2 i7=8 j1=10 j2=2 k1=3 k2=6 k3=3 l=6\n",
+      "stderr": ""
+    }
+  ],
+  "regression_312_applicable": 125,
+  "regression_not_applicable": [
+    {
+      "id": "kho:reason_claim_failed",
+      "op": "kho",
+      "kind": "extended_contract",
+      "trang_thai": "KHONG_AP_DUNG",
+      "ly_do": "neo xuat hien 0 lan"
+    },
+    {
+      "id": "kho:reason_complete_290_39",
+      "op": "kho",
+      "kind": "reason_complete",
+      "trang_thai": "KHONG_AP_DUNG",
+      "ly_do": "neo xuat hien 0 lan"
+    }
+  ],
+  "manifest_313": 800,
+  "manifest_312": 800,
+  "id_diff": [],
+  "same_ids_different_src_hash": 800,
+  "per_op_312": {
+    "a": 70,
+    "a2": 78,
+    "b": 75,
+    "c": 26,
+    "c2": 43,
+    "d": 9,
+    "e": 52,
+    "f": 41,
+    "g": 236,
+    "h1": 18,
+    "h2": 4,
+    "i1": 39,
+    "i2": 11,
+    "i3": 6,
+    "i4": 23,
+    "i5": 29,
+    "i6": 2,
+    "i7": 8,
+    "j1": 10,
+    "j2": 2,
+    "k1": 3,
+    "k2": 6,
+    "k3": 3,
+    "l": 6
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "input_rows": 800,
+  "rows_with_source": 1,
+  "retained_id": "g:loi_khai:185:24",
+  "receipt": {
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/partially_reconstructed_manifest.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/partially_reconstructed_kq.jsonl",
+      "--song-song",
+      "1"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+    "rc": 0,
+    "seconds": 70.33274276000157,
+    "stdout_sha256": "82734d5123107325fa73be4d594c3b375424128010c0a0d391f454a7fd6a3326",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": "TONG 1 · GIET 1 · SONG_SACH 0 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0\nHOAN_TAT neo={\"cong_cu\": \"1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a\", \"goc\": \"af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94\", \"manifest\": \"897ae399333158c0faf0ec249a6bdaccc16bec7d8a34e27df6e78728f2ad4e82\", \"test\": \"f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63\"}\n"
+}

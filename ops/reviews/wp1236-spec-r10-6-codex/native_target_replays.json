@@ -1,0 +1,354 @@
+[
+  {
+    "id": "a:doc_danh_gia:77:7",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "2a7f3d55254a4d2dc65a54d06c95422ccabf169f877a32467f50258f328b5a80",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['thieu_moc'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "a2:doc_danh_gia:53:4",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "4d7b8433b034c9369907918db008b9ca824e65169631afb90ac93174b43c535d",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['xuong_dong_tron'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "b:chon_provenance:96:7:ve0",
+    "case": "a116_yaml_la_trong_thu_muc",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a116_yaml_la_trong_thu_muc"
+    ],
+    "module_sha256": "4a9e37e841647a2cba28ff3853b0062a7df35a40cb19ce734a2d12a5d8aa1cec",
+    "rc": 3,
+    "stdout": "DO:a116_yaml_la_trong_thu_muc:(e) thu muc provenance la symlink: mong ('not_measured', ['symlink', 'provenance_0']), được ('not_measured', ['symlink'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "c:doc_danh_gia:78:8",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "module_sha256": "83a28f8de4232540e73f77b9ff208c2b26499df272c15668723544258d2aed04",
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:thieu_moc: mong ('not_measured', ['thieu_moc']), được ('not_measured', ['moc_lech'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "c2:doc_danh_gia:81:4",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "356941d954f718b81ba791829e346520d017bc8bcc254d71372881c75283adb2",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['TypeError'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "d:la_landed:214:15",
+    "case": "a215_landed_mien_di_dang",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a215_landed_mien_di_dang"
+    ],
+    "module_sha256": "d7e7eb27fb388135538349281177d749d0cfd157698f7ce863a4ed0aab7287e4",
+    "rc": 3,
+    "stdout": "DO:a215_landed_mien_di_dang:la_landed tren list\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "e:main:321:9",
+    "case": "a217_cli_tham_so_va_ma_thoat",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a217_cli_tham_so_va_ma_thoat"
+    ],
+    "module_sha256": "4c39e148c3560fcdfe240e08db52f9c5aa2960cf3a02dfb8cf41d53bb69e04e7",
+    "rc": 3,
+    "stdout": "DO:a217_cli_tham_so_va_ma_thoat:ho so sach: rc=1 DAT /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/tmp/godc_hs_ra8udii7/pr9001-thu-land-evidence.yaml (0 vi phạm)\n\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "f:doc_danh_gia:81:4",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "f0eff948d0b8b61f848322734fc129af3bf104d9b8976186a6e559af9f79ace0",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['TypeError'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "g:loi_khai:185:24",
+    "case": "a201_loi_khai",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a201_loi_khai"
+    ],
+    "module_sha256": "f69fec6c5a51f369c639594fdf8a348fd808488bfdfe19a6f41ca43f846e23f6",
+    "rc": 3,
+    "stdout": "DO:a201_loi_khai:loi_khai: ['$~.a[0].gate_output', '$~.b.Gate-Output', '$~.moc_gate_output']\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "h1:BO_SINH:0",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "15c28f6bfae616cf3e94fec5c7573c67b8cd2cba54d620e1e7759c8a4bfb10a8",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v1-pass: mong ('passed', []), được ('not_measured', ['bo_sinh_la'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "h2:CHECK_BAT_BUOC_TEN",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "e0de27c058bceb3100c757d94d35aeb4bd11034e5af581c131218518069d1eac",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['check_bat_buoc:~them~'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i1:RE_DAU:lop@53 bo '0-9'",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "8fbc7e78946e4655c2411bdcf6fb65377c6abe750eee484a651aa713d045abe3",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['dau_tep_sai'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i2:RE_TOKEN:lop@4 thanh .",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "module_sha256": "a984e61dd25006f8bbd58681f23ef806a1510ddba352019934fb12644c3dc872",
+    "rc": 3,
+    "stdout": "DO:a202_token:token: [None, 'passed', None, None, None, None, None, None]\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i3:RE_JOB:nhanh@75 bo 'passed'",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "9ac60c3464e217aa123f16a9d194a046026e7413721f82cbfac8a59d7e2a9a40",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['dong_la'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i4:RE_DAU:luong_tu@107 {64}→*",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "module_sha256": "3364bce372f597e21cae4e9537a52ce8262b6696dce366cfb1f0555476c6fa15",
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dau_tep_sai: mong ('not_measured', ['dau_tep_sai']), được ('not_measured', ['bo_sinh_la'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i5:RE_JOB:escape@5 \\d→.",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "module_sha256": "fd85b713c6d8440ff50e6a423bea8eaa4fc4db07b2c9d940a93344e87987914a",
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['ValueError'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i6:RE_TOKEN:lookaround@12 bo",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "module_sha256": "05faf829c39b278454d69c22b0fd0c485bf33bb680f753c1b3b33f3c5beb589c",
+    "rc": 3,
+    "stdout": "DO:a202_token:token: ['measured', 'passed', 'failed', None, 'measured', 'passed', None, None]\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "i7:doc_danh_gia:59:17",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "module_sha256": "571486f8b7eaf81ed7922cf07e4641399cffe72b3ebaaba9291955e4aa021cd3",
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dau_tep_sai : mong ('not_measured', ['dau_tep_sai']), được ('passed', [])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "k1:token:202:23",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "module_sha256": "66852f71965b6855721b09bf27d157b35c7df64d84e1723f02ada6f8c966ba18",
+    "rc": 3,
+    "stdout": "DO:a202_token:token: ['measured', 'passed', None, None, None, None, None, None]\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "k2:doc_danh_gia:53:11",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "module_sha256": "57a2223b98b3e6219c4722a67ecc9c458e2195fa5060c1550ed8214388e54027",
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:xuong_dong_tron: mong ('not_measured', ['xuong_dong_tron']), được ('not_measured', ['cr_le'])\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "k3:token:203:25",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "module_sha256": "f0589ed6e5bd808e3478ab1ed5f76506866576aded3d2f0e91de95a86e5d1648",
+    "rc": 3,
+    "stdout": "DO:a202_token:token: ['measured', 'passed', 'failed', 'measuredx', None, None, None, None]\n",
+    "stderr": "",
+    "exact_signal": true
+  },
+  {
+    "id": "l:module:124:0:body1",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "module_sha256": "45a55edf9990e913738ec823e30e77be8334cf1194c5987fd0945f7208163242",
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dong_la: mong ('not_measured', ['dong_la']), được ('not_measured', ['TypeError'])\n",
+    "stderr": "",
+    "exact_signal": true
+  }
+]

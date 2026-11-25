@@ -14,8 +14,10 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unicodedata
 from unittest import mock
@@ -28,7 +30,8 @@ for _s in (sys.stdout, sys.stderr):
 
 HERE = Path(__file__).resolve().parent
 ROOT_THAT = HERE.parent
-MA = Path(os.environ.get("LAND_EVIDENCE_NGUON_MA") or HERE / "land_evidence_nguon.py")
+# GATE_OUTPUT_DOI_CHIEU_MA: tên DUY NHẤT mà bộ quét ghim của luật 9 (`quet_dot_bien.py`) biết đặt, trỏ bản đột biến của bộ kiểm này (E3).
+MA = Path(os.environ.get("LAND_EVIDENCE_NGUON_MA") or os.environ.get("GATE_OUTPUT_DOI_CHIEU_MA") or HERE / "land_evidence_nguon.py")
 TEN = "pr9001-thu-land-evidence.yaml"
 PROV = "pr9001-thu-provenance"
 
@@ -42,6 +45,12 @@ L7_KHOA = ("sandbox_mode",)   # chép riêng: bỏ khoá ở bộ kiểm ⇒ c17
 L7_TUY_CHON = ("model", "effort")   # #1240 ADR-0065: ghi nếu đo được (vắng được); đưa lại vào bắt buộc ⇒ c23 ĐỎ
 KY_VONG_SO_MIEN_TRU_L7 = 3
 KY_VONG_VAN_TAY_MIEN_TRU_L7 = "6b5ef08603e37239742fe5d7fe8cbe933b24e33174cf3af04c453b0e7be83574"
+# L8 (#1236 đợt B) — chép riêng như L5/L7: 56 hồ sơ L8 cho ĐỎ trên base đợt B. Đổi bảng ⇒ c28 ĐỎ; c24 đo lại bảng trên chính base ấy.
+BASE_B = "f602325574c62184caf16309631f5f680ca5cee2"
+KY_VONG_SO_MIEN_TRU_L8 = 56
+KY_VONG_VAN_TAY_MIEN_TRU_L8 = "8f81d90d2d6cae3a74651b30cee3c4eb0a0e3748eb498c54824b30029f31b68b"
+DOI_CHIEU = (HERE / "gate_output_doi_chieu.py").read_bytes().decode("utf-8")   # module đợt A THẬT; L8 nạp nó từ gốc ĐANG KIỂM
+L8_CAM = "def kiem_ho_so(du_lieu, thu_muc):\n    return []\n"   # ca L1–L7 dùng module câm: mỗi ca chỉ đo luật của nó
 
 
 class TinHieuChotCa(AssertionError):
@@ -69,17 +78,20 @@ def nap():
 
 
 @contextlib.contextmanager
-def cay(ho_so, prov=None):
-    """Cây tạm: `ops/land/<TEN>` = `ho_so`; `prov` = {đường dẫn trong provenance: nội dung} (None ⇒ không tạo thư mục)."""
+def cay(ho_so, prov=None, doi_chieu=L8_CAM, ten=TEN):
+    """Cây tạm: `ops/land/<ten>` = `ho_so`; `prov` = {đường dẫn trong provenance: nội dung} (None ⇒ không tạo thư mục);
+    `doi_chieu` = nguồn `ops/gate_output_doi_chieu.py` mà L8 nạp (None ⇒ vắng)."""
     # wp871: newline="" — chế độ văn bản Windows đổi \n thành \r\n, mà c09 băm kỳ vọng trên byte LF (gate-registry windows đỏ).
     with tempfile.TemporaryDirectory(prefix="len_cay_") as thu:
         goc = Path(thu) / "kho"
-        tep = {TEN: ho_so} | {f"{PROV}/{d}": nd for d, nd in (prov or {}).items()}
+        pv = ten[: -len("-land-evidence.yaml")] + "-provenance"
+        tep = {f"land/{ten}": ho_so} | {f"land/{pv}/{d}": nd for d, nd in (prov or {}).items()}
+        tep |= {} if doi_chieu is None else {"gate_output_doi_chieu.py": doi_chieu}
         for duong, nd in tep.items():
-            (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
-            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8", newline="")
+            (goc / "ops" / duong).parent.mkdir(parents=True, exist_ok=True)
+            (goc / "ops" / duong).write_bytes(nd if isinstance(nd, bytes) else nd.encode("utf-8"))   # bytes: ca sai UTF-8 (c35)
         if prov is not None:
-            (goc / "ops/land" / PROV).mkdir(exist_ok=True)
+            (goc / "ops/land" / pv).mkdir(exist_ok=True)
         yield goc
 
 
@@ -89,8 +101,8 @@ def kiem(m, goc):
     return rc, buf.getvalue()
 
 
-def chay(ho_so, prov=None):
-    with cay(ho_so, prov) as goc:
+def chay(ho_so, prov=None, **kw):
+    with cay(ho_so, prov, **kw) as goc:
         return kiem(nap(), goc)
 
 
@@ -286,7 +298,9 @@ def _cay_that_dat(rc, ra, n):
 
 @ca
 def c11_cay_that_dat_va_mien_tru_du():
-    rc, ra = kiem(nap(), ROOT_THAT)
+    # B1 (#1236): CLI THẬT như chữ đặc tả — bộ kiểm sập giữa chừng trên cây thật là rc ≠ 0 đo được, không phải lỗi vô can của ca.
+    r = subprocess.run([sys.executable, "-B", str(MA), "--root", str(ROOT_THAT)], capture_output=True)
+    rc, ra = r.returncode, r.stdout.decode("utf-8", "replace")
     n = KY_VONG_SO_MIEN_TRU   # c10 khoá danh sách; c15 khoá chính phép so này
     bang(_cay_that_dat(rc, ra, n), f"cây thật phải ĐẠT, mẫu số {n} miễn trừ: rc={rc} {ra[-400:]}")
 
@@ -525,6 +539,365 @@ def c23_l7_model_effort_tuy_chon():
     ky7(hs7("CHUA_DAT", {"model": "DAT"}), 0, "không khai DAT ⇒ L7 không áp cho rác tuỳ chọn", khong=["L7"])
 
 
+NHAN = f"ops/land/{TEN}"
+K8 = {"kiem-gate-output.txt": "x"}   # nguồn L1 cho lời khai không trích tệp danh-gia ⇒ chỉ L8 được phép ĐỎ
+DG = "danh-gia-gate-output-44669622916.txt"
+HS8 = "moc_gate_output: 'measured — kiem-gate-output.txt'\n"
+VP8 = "$.moc_gate_output: duong_khong_tep_danh_gia"
+L8_MIEN, L8_MAT = "L8 miễn trừ (băm khớp ảnh chụp base đợt B)", "L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ"
+REF8 = "ops/reviews/wp1236-r9-soan/do_loi_khai.txt"
+URL8, SHA8 = "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123", "d8cf2ab57f9f25a93cefedcebfb315826b6b78fe"
+M8 = f"mien_gate_output: {SHA8} os=ubuntu-latest ly_do=job huy theo chi thi han=2026-12-31"
+LANDED8 = "trang_thai_packet: {landed: true}\npost_merge_checks: [{name: g}]\nbookkeeping: [{item: x}]\n"
+
+
+def prov_that():
+    """Hai tệp của `pr1440-wp1319-provenance` (fixture T-v3-pass của đặc tả): tệp đánh giá và provenance của đúng run ấy."""
+    goc = ROOT_THAT / "ops/land/pr1440-wp1319-provenance"
+    return {d: (goc / d).read_bytes().decode("utf-8") for d in (DG, "ci-provenance-44669622916/provenance.yaml")}
+
+
+def dong_l8(ra):
+    return [x[5:] for x in ra.split("\n") if x.startswith("  L8 ")]
+
+
+def ky8(ho_so, prov, mong, ly_do, l8=(), dong=(), doi_chieu=DOI_CHIEU, ten=TEN):
+    """L8 qua `main` với module đợt A THẬT: đòi rc `mong`, các dòng vi phạm L8 bằng ĐÚNG danh sách `l8`, mỗi phần tử `dong` là
+    NGUYÊN MỘT DÒNG của đầu ra."""
+    rc, ra = chay(ho_so, prov, doi_chieu=doi_chieu, ten=ten)
+    bang(rc == mong and dong_l8(ra) == list(l8) and all(x in ra.split("\n") for x in dong),
+         f"{ly_do}: mong rc={mong} l8={list(l8)} dong={list(dong)}, được {rc} {ra[-400:]}")
+
+
+@contextlib.contextmanager
+def cay_tai(commit, *duong):
+    """`git archive <commit> <đường dẫn…>` ra thư mục tạm. Không đọc được commit ⇒ ca ĐỎ, không bỏ qua (CI: fetch-depth 0)."""
+    with tempfile.TemporaryDirectory(prefix="len_arc_") as thu:
+        r = subprocess.run(["git", "-C", str(ROOT_THAT), "archive", "--format=tar", commit, "--", *duong], capture_output=True)
+        bang(r.returncode == 0, f"git archive {commit} rc={r.returncode}: {r.stderr[-200:]!r}")
+        with tarfile.open(fileobj=io.BytesIO(r.stdout)) as tf:
+            tf.extractall(thu, filter="data")
+        yield Path(thu)
+
+
+@ca
+def c24_b1_mien_tru_l8_la_dung_tap_do_tren_base():
+    """B1: bỏ bảng miễn trừ rồi đo L8 trên MỌI hồ sơ của base đợt B (đầu vào bất biến, đọc bằng `git archive`): tập ĐỎ phải bằng
+    `MIEN_TRU_L8` cả tên lẫn băm, và lý do TỪNG hồ sơ phải bằng danh sách của đặc tả. Hồ sơ được L5 miễn (băm khớp) không vào tập.
+    Vế "cây thật rc 0" của B1 là c11."""
+    m, yml, do, ly = nap(), __import__("yaml"), {}, {}
+    bang_mien = dict(m.MIEN_TRU_L8)
+    m.MIEN_TRU_L8.clear()
+    with cay_tai(BASE_B, "ops/gate_output_doi_chieu.py", ":(glob)ops/land/**/*.yaml", ":(glob)ops/land/**/danh-gia-gate-output-*.txt",
+                 ":(glob)ops/land/**/readback-*issuecomment-*.json", REF8) as goc:
+        ref = {x.split(" ")[1]: sorted(tuple(v.split(":")[:2]) for v in x.split(" ", 2)[2].split("; "))   # oracle độc lập: bản tham chiếu
+               for x in (goc / REF8).read_bytes().decode("utf-8").splitlines() if x.startswith("DO ")}     # của đặc tả, đo trên 8048551
+        for tep in sorted((goc / "ops/land").glob("*-land-evidence.yaml")):
+            byte = tep.read_bytes()
+            bam = hashlib.sha256(byte).hexdigest()
+            if m.MIEN_TRU_CUTOVER.get(tep.name) == bam:
+                continue
+            prov = tep.parent / (tep.name[: -len("-land-evidence.yaml")] + "-provenance")
+            if vp := m.l8(tep, byte, m.nap_yaml(yml, byte), prov, goc)[0]:
+                do[tep.name], ly[tep.name] = bam, sorted((v[3:].split(": ")[0], v.split(": ")[1].split(":")[0]) for v in vp)
+    bang(do == bang_mien, f"MIEN_TRU_L8 lệch tập ĐỎ đo trên {BASE_B[:7]}: thiếu {sorted(set(do) - set(bang_mien))}, thừa "
+                          f"{sorted(set(bang_mien) - set(do))}, lệch băm {sorted(t for t in do if bang_mien.get(t, do[t]) != do[t])}")
+    bang(ly == ref and sum(map(len, ly.values())) == 93, f"lý do L8 TỪNG hồ sơ (đường dẫn, tên lý do) lệch bản tham chiếu {REF8}: "
+                                                        f"{sorted(t for t in set(ly) | set(ref) if ly.get(t) != ref.get(t))}")
+
+
+@ca
+def c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia():
+    ky8(HS8, K8, 1, "B2 lời khai dương chỉ trích kiem-gate", [VP8], [f"ĐỎ {NHAN}: 1 vi phạm"])
+    ky8(HS8.replace("measured", "not_measured"), K8, 0, "đối chứng: not_measured không đòi gì", dong=[f"ĐẠT {NHAN}"])
+    with cay("x: ok\n", K8, DOI_CHIEU) as goc:   # đĩa SẠCH, byte đưa vào mang lời khai: L8 đo CHÍNH lần nạp đã băm (L4)
+        vp, ghi = nap().kiem_ho_so(goc / "ops/land" / TEN, HS8.encode(), goc, __import__("yaml"))
+    bang((vp, ghi) == (["L8 " + VP8], []), f"L8 phải đo dữ liệu đã nạp, không đọc lại đĩa: {vp} {ghi}")
+
+
+@ca
+def c26_b6_l8_duong_khop_tep_danh_gia():
+    hs, p = f"moc_gate_output: 'measured — {DG}'\n", prov_that()
+    ky8(hs, p, 0, "B6 dương khớp tệp đánh giá và provenance", dong=[f"ĐẠT {NHAN}"])
+    ky8(LANDED8 + hs, p, 0, "landed có lời khai dương hợp lệ", dong=[f"ĐẠT {NHAN}"])
+    del p["ci-provenance-44669622916/provenance.yaml"]
+    ky8(hs, p, 1, "đối chứng: thiếu provenance của run", [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:provenance_0"])
+
+
+@ca
+def c27_b7_l8_landed_khong_loi_khai():
+    """B7 + luật 4 qua L8: ba dạng landed × `True`/`1`, thứ tự ưu tiên `trang_thai_packet`, tên khối `landed_<8 số>` khớp trọn. Hồ sơ
+    chỉ có văn xuôi dưới khoá không chứa `gateoutput`; (hồ sơ, rc, landed?) — landed ⇒ đúng một dòng L8."""
+    l6, vp = {"post_merge_checks": [{"name": "g"}], "bookkeeping": [{"item": "x"}], "landed_dieu_kien": "Gate output DAT 39/39"}, "$: landed_khong_loi_khai_gate_output"
+    for hs, rc, landed in (({"trang_thai_packet": {"landed": True}}, 1, 1), ({"landed": True}, 1, 1),
+                           ({"trang_thai_packet": {"landed": False}, "landed_20261124": {"landed": True}}, 1, 1),
+                           ({"trang_thai_packet": {"landed": 1}}, 1, 0),   # rc 1 là của L6 (landed phải là bool); L8 không coi 1 là landed
+                           ({"landed": 1}, 0, 0), ({"landed_20261124": {"landed": 1}}, 0, 0), ({"trang_thai_packet": {"landed": False}, "landed": True}, 0, 0),
+                           ({"trang_thai_packet": "x", "landed": True}, 0, 0), ({"landed_2026112": {"landed": True}}, 0, 0),
+                           ({"landed_20261124x": {"landed": True}}, 0, 0), ({"xlanded_20261124": {"landed": True}}, 0, 0),
+                           ({"landed_20261124": True}, 0, 0), ({"trang_thai_packet": {"landed": False}}, 0, 0)):
+        ky8(json.dumps(hs | l6), None, rc, f"landed {hs}", [vp] * landed)
+    ky8(LANDED8 + HS8, K8, 1, "landed + lời khai dương VI PHẠM: cả hai vi phạm", [VP8, vp])
+
+
+@ca
+def c28_b5_l8_danh_sach_dong_bang():
+    ds = nap().MIEN_TRU_L8
+    van_tay = hashlib.sha256(json.dumps(sorted(ds.items())).encode()).hexdigest()
+    bang(len(ds) == KY_VONG_SO_MIEN_TRU_L8 and van_tay == KY_VONG_VAN_TAY_MIEN_TRU_L8,
+         f"MIEN_TRU_L8 trôi khỏi ảnh chụp base đợt B: {len(ds)} tên, vân tay {van_tay[:12]}…")
+
+
+@ca
+def c29_b3_l8_mien_tru_theo_ten_va_bam():
+    ten = "pr963-wp943-land-evidence.yaml"   # có trong MIEN_TRU_L8; L8 trên nội dung ấy: đúng một vi phạm landed
+    hs, nhan, vp = (ROOT_THAT / "ops/land" / ten).read_bytes().decode("utf-8"), f"ops/land/{ten}", "$: landed_khong_loi_khai_gate_output"
+    ky8(hs, {}, 1, "bản sao NGUYÊN BYTE: được miễn L8 (rc 1 là của L1, bản sao không mang provenance)", [],
+        [f"  ghi chú {nhan}: {L8_MIEN}"], ten=ten)
+    ky8(hs + "\n", {}, 1, "B3 sửa một byte ⇒ mất miễn trừ, L8 áp", [vp], [f"  ghi chú {nhan}: {L8_MAT}"], ten=ten)
+    with cay(hs, {}, DOI_CHIEU, "x" + ten) as goc:   # cùng byte dưới TÊN khác (tên bảng chỉ là CHUỖI CON) ⇒ không miễn, không ghi chú L8
+        vp_, ghi_ = nap().kiem_ho_so(goc / "ops/land" / ("x" + ten), hs.encode(), goc, __import__("yaml"))
+    bang([x for x in vp_ if x.startswith("L8")] == ["L8 " + vp] and "L8" not in " ".join(ghi_), f"miễn trừ L8 gắn TÊN: {vp_} {ghi_}")
+    with cay(HS8, K8, DOI_CHIEU) as goc:
+        m, tep, yml = nap(), goc / "ops/land" / TEN, __import__("yaml")
+        m.MIEN_TRU_L8[TEN] = hashlib.sha256(HS8.encode()).hexdigest()
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and f"  ghi chú {NHAN}: {L8_MIEN}" in ra.split("\n") and not dong_l8(ra) and L8_MAT not in ra,
+             f"băm khớp ⇒ miễn L8 có ghi nhận, rc 0: rc={rc} {ra[-300:]}")
+        kq = m.kiem_ho_so(tep, (HS8 + " ").encode(), goc, yml)   # đĩa giữ byte được miễn, byte ĐÃ NẠP thì lệch
+        bang(kq == (["L8 " + VP8], [L8_MAT]), f"băm miễn trừ L8 phải đo CHÍNH byte đã nạp, không đọc lại đĩa: {kq}")
+        lai = "x: 'measured — khong-co.json'\n" + HS8   # miễn trừ L8 chỉ bỏ L8: vi phạm L1 cùng hồ sơ vẫn còn
+        m.MIEN_TRU_L8[TEN] = hashlib.sha256(lai.encode()).hexdigest()
+        vp, ghi = m.kiem_ho_so(tep, lai.encode(), goc, yml)
+        bang(len(vp) == 1 and vp[0].startswith("L1 $.x:") and ghi == [L8_MIEN], f"miễn trừ L8 không được xoá vi phạm L1: {vp} {ghi}")
+
+
+@ca
+def c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc():
+    """B4: module đối chiếu vắng / hỏng / trả sai kiểu ⇒ rc 2 KHÔNG ĐO ĐƯỢC cho hồ sơ ấy, không bao giờ ĐẠT. Mỗi đường một dòng."""
+    kd = f"KHÔNG ĐO ĐƯỢC {NHAN}: L8 không nạp/chạy được gate_output_doi_chieu.py: "
+    for nguon, loi in ((None, "FileNotFoundError: "), ("def (\n", "SyntaxError: "), ("x = 1\n", "AttributeError: "),
+                       ("def kiem_ho_so(d, t):\n    raise RuntimeError('gia')\n", "RuntimeError: gia\n"),
+                       ("raise KeyError('k')\n", "KeyError: 'k'\n"), ("raise SystemExit(0)\n", "SystemExit: 0\n"),
+                       ("def kiem_ho_so(d, t):\n    return None\n", "TypeError: kiem_ho_so trả NoneType\n"),
+                       ("def kiem_ho_so(d, t):\n    return ()\n", "TypeError: kiem_ho_so trả tuple\n")):
+        for hs in (HS8, "x: ok\n"):   # cả hồ sơ có vi phạm L8 lẫn hồ sơ sạch đều không được ĐẠT trên gốc không đo được
+            try:
+                rc, ra = chay(hs, K8, doi_chieu=nguon)
+            except (Exception, SystemExit) as e:   # tính chất ĐANG ĐO: lỗi của module không thoát thành traceback hay mã thoát 0
+                rc, ra = -1, f"{type(e).__name__}: {e}"
+            bang(rc == 2 and "\n" + kd + loi in "\n" + ra and "1 KHÔNG ĐO ĐƯỢC" in ra and ra.endswith("TỔNG: KHÔNG ĐO ĐƯỢC\n")
+                 and f"ĐẠT {NHAN}" not in ra, f"module {nguon!r} ⇒ rc 2 KHÔNG ĐO ĐƯỢC: rc={rc} {ra[-300:]}")
+    with cay(HS8, K8, None) as goc:   # chữ B4: chép bộ kiểm vào gốc tạm KHÔNG có module, chạy CLI thật
+        (goc / "ops/land_evidence_nguon.py").write_bytes(MA.read_bytes())
+        r = subprocess.run([sys.executable, "-B", str(goc / "ops/land_evidence_nguon.py"), "--root", str(goc)], capture_output=True)
+        ra = (r.stdout + r.stderr).decode("utf-8", "replace")
+        bang(r.returncode == 2 and kd in ra and "Traceback" not in ra, f"CLI gốc tạm thiếu module ⇒ rc 2: {r.returncode} {ra[-300:]}")
+        m = nap()   # hồ sơ ĐƯỢC MIỄN L8 cũng không ĐẠT khi module vắng: nạp module đứng TRƯỚC xét miễn trừ
+        m.MIEN_TRU_L8[TEN] = hashlib.sha256(HS8.encode()).hexdigest()
+        rc, ra = kiem(m, goc)
+        bang(rc == 2 and kd + "FileNotFoundError: " in ra, f"hồ sơ được miễn L8 trên gốc thiếu module ⇒ rc 2: rc={rc} {ra[-300:]}")
+    ky8(HS8, K8, 1, "đối chứng: module CỦA GỐC ĐANG KIỂM được dùng (không phải bản cạnh bộ kiểm)", ["$: dau_rieng"],
+        doi_chieu="def kiem_ho_so(d, t):\n    return ['$: dau_rieng']\n")
+
+
+@ca
+def c31_b8_l8_chay_sau_chot_cutover():
+    ten = "pr680-wp676-land-evidence.yaml"   # mục MIEN_TRU_CUTOVER; L8 trên nội dung ấy ra dinh_dang_loi_khai (và landed)
+    hs = (ROOT_THAT / "ops/land" / ten).read_bytes().decode("utf-8")
+    with cay(hs, None, DOI_CHIEU, ten) as goc:
+        m, tep = nap(), goc / "ops/land" / ten
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and f"MIỄN TRỪ ops/land/{ten} (băm khớp ảnh chụp cutover)" in ra.split("\n") and "L8" not in ra
+             and "· 1/1 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1" in ra, f"B8 L5 miễn ⇒ L8 không chạy: rc={rc} {ra[-300:]}")
+        vp, ghi = m.l8(tep, hs.encode(), m.nap_yaml(__import__("yaml"), hs.encode()), goc / "ops/land/x", goc)
+    do = ["$.post_merge_checks[1].moc_gate_output: dinh_dang_loi_khai", "$: landed_khong_loi_khai_gate_output"]
+    bang((vp, ghi) == (["L8 " + x for x in do], []), f"đối chứng: chính nội dung ấy, khi L8 CHẠY, phải ĐỎ: {vp} {ghi}")
+    ky8(hs + "\n", {}, 1, "mất miễn trừ L5 (băm lệch) ⇒ kiểm đủ luật, gồm L8", do,
+        [f"MẤT MIỄN TRỪ ops/land/{ten}: băm lệch ảnh chụp cutover — kiểm đủ luật"], ten=ten)
+
+
+@ca
+def c32_l8_ma_tran_token_va_khoa_qua_cong():
+    """Luật 4 của đặc tả qua consumer của đợt B (`main` → L8), kỳ vọng suy từ luật: tập token, dấu phân cách sau token, tệp trích,
+    chuẩn hoá khoá (giữ chữ SỐ), ba tên phi-lời-khai. Mỗi phần tử một ô; `mong` = phần lý do sau `<đường dẫn>: ` ("" = không vi phạm)."""
+    p, sai = prov_that() | K8, "dinh_dang_loi_khai"
+    o = [(f"passed — {DG}", ""), (f"Measured: ./{DG}", ""), ("failed — khong trich tep", ""), (f"failed — {DG}", f"danh_gia_khong_failed:{DG}:passed:-"),
+         ("measured — kiem-gate-output.txt", "duong_khong_tep_danh_gia"), (f"passed — x/../{DG}", f"tep_danh_gia_khong_hop_le:x/../{DG}"),
+         (f"passed — /{DG}", f"tep_danh_gia_khong_hop_le:/{DG}"), (f"passed — {DG} danh-gia-gate-output-1.txt", "tep_danh_gia_khong_hop_le:danh-gia-gate-output-1.txt"),
+         ("owner_waived — khong co url", "waiver_khong_co_can_cu:url"), (5, sai), (None, sai), ("", sai), ("da do", sai), ("pass", sai)]
+    o += [(t + s, "") for t in ("not_run", " \tNOT_MEASURED", "skipped") for s in ("", " x", "\tx", "—x", "-x", ":x", "(x", ",x", ".x", ";x", "\n")]
+    o += [("not_run" + s, sai) for s in ("1", "x", "_", "!x", "/x", "=x", "\nx", "–x")] + [("\nnot_run", sai), ("x not_run", sai)]
+    for gt, mong in o:
+        ky8(json.dumps({"a": [{"Gate-Output": gt}]}), p, 1 if mong else 0, f"lời khai {gt!r}", [f"$.a[0].Gate-Output: {mong}"] if mong else [])
+    for khoa, doc in (("gate_output", 1), ("MOC GATE-OUTPUT 2", 1), ("gate_out_put", 1), ("gate_output_nguon2", 1), ("x_gate_output_nguon", 1),
+                      ("gate_output_nguon", 0), ("Gate-Output Nguon_va_gioi_han", 0), ("moc_gate_output_rc_disposition", 0), ("gate2output", 0),
+                      ("gate_outpu", 0)):
+        ky8(json.dumps({khoa: "da do"}), p, doc, f"khoá {khoa!r}", [f"$.{khoa}: {sai}"] * doc)
+
+
+def rb8(body=M8, **k):
+    return json.dumps({"html_url": URL8, "user": {"login": "ducthangho"}, "author_association": "OWNER", "body": body} | k)
+
+
+@ca
+def c34_l8_ma_tran_mien_qua_cong():
+    """Luật 4 qua L8: số URL 0/1/2, dòng miễn khớp trọn sau `strip`, và THỨ TỰ chín điều kiện của `kiem_mien` — mỗi điều kiện một ô một
+    lỗi, cạnh ô HAI lỗi đồng thời (lỗi đứng trước phải thắng). `mong` "" = miễn có căn cứ; mỗi ô đo cả hồ sơ thường lẫn hồ sơ landed."""
+    kh, rb, mem = f"owner_waived — {URL8} {SHA8}", "readback-1-issuecomment-123.json", {"author_association": "MEMBER"}
+    win, han = M8.replace("ubuntu", "windows"), M8.replace("12-31", "02-30")
+    for khai, p, mong in (
+            (kh, {rb: rb8()}, ""), (kh, {rb: rb8(f"x\n \t{M8}\t \ny")}, ""), (kh, {rb: rb8(M8.replace("os=", "os=windows-latest,"))}, ""),
+            (f"owner_waived — {SHA8}", {rb: rb8()}, "url"), (f"{kh} {URL8}", {rb: rb8()}, "url"), (f"{kh} {URL8}4", {}, "url"),
+            (kh, {}, "readback"), (kh, {rb: rb8(), "readback-2-issuecomment-123.json": "{"}, "readback"), (kh, {rb: "{"}, "doc_readback"),
+            (kh, {rb: rb8(html_url=URL8 + "4")}, "html_url"), (kh, {rb: rb8(html_url=None, **mem)}, "html_url"),
+            (kh, {rb: rb8(**mem)}, "tac_gia"), (kh, {rb: rb8(user={"login": "khac"})}, "tac_gia"), (kh, {rb: rb8("khong dong", **mem)}, "tac_gia"),
+            (kh, {rb: rb8(f"chi nhac {SHA8}")}, "dong_mien"), (kh, {rb: rb8(M8 + "\n" + M8)}, "dong_mien"), (kh, {rb: rb8("x " + M8)}, "dong_mien"),
+            (kh, {rb: rb8(M8 + " x")}, "dong_mien"), (kh, {rb: rb8(han + "\n" + han)}, "dong_mien"),
+            (kh, {rb: rb8(han)}, "han"), (kh, {rb: rb8(han.replace("ubuntu", "windows"))}, "han"),
+            (kh, {rb: rb8(win)}, "os"), (f"owner_waived — {URL8}", {rb: rb8(win)}, "os"),
+            (f"owner_waived — {URL8}", {rb: rb8()}, "sha"), (kh, {rb: rb8(M8.replace(SHA8, SHA8[::-1]))}, "sha")):
+        for landed in ({}, {"landed": True}):
+            ky8(json.dumps({"gate_output": khai} | landed), p, 1 if mong else 0, f"miễn {mong or 'hợp lệ'}, landed={bool(landed)}: {khai[-45:]!r}",
+                [f"$.gate_output: waiver_khong_co_can_cu:{mong}"] * bool(mong) + ["$: landed_khong_loi_khai_gate_output"] * bool(mong and landed))
+
+
+@ca
+def c35_l8_ngu_phap_tep_danh_gia_qua_cong():
+    """Luật 4 qua L8: ngữ pháp TỪNG loại dòng của tệp đánh giá (đầu tệp, job, skipped hai dạng, tổng, rỗng) và luật xuống dòng. Mỗi ô
+    sửa đúng một chỗ trên bản sao T-v3-pass; `mong` = lý do của `kiem_tep` suy từ K1–K7 ("" = vẫn `passed`)."""
+    p = prov_that()
+    dg, skip = p[DG], "\nJOB 1 x: skipped"
+    job = next(d for d in dg.split("\n") if d.startswith("JOB ") and " -> passed: " in d)
+    tong = next(d for d in dg.split("\n") if d.startswith("MOC_GATE_OUTPUT: "))
+    for cu, moi, mong in ((dg, dg, ""), (dg, dg.replace("\n", "\r\n"), ""), (job, job + "\n", ""), ("# Danh gia", "# Danh giá", "dau_tep_sai"),
+                          ("# Danh gia", "\n# Danh gia", "dau_tep_sai"), (" attempt ", " attempt x", "dau_tep_sai"),
+                          (job, job.replace(" -> passed: ", " -> pass: "), "dong_la"), (job, job.replace("JOB ", "Job "), "dong_la"),
+                          (job, job.replace(" conclusion=", " ket_luan="), "dong_la"), (job, job + "\n" + job, "job_lap"), (job, job + skip, "dong_la"),
+                          (job, job + skip + " (khong tinh)", "tap_skip_lech,dong_skip_sai_phien_ban,moc_lech"),
+                          (job, job + skip + " -> not_measured (khong suy pass)", "tap_skip_lech,moc_lech"),
+                          (job, job + skip + " (khong tinh) x", "dong_la"), (job, job + skip + " -> not_measured (khong suy pass) x", "dong_la"),
+                          (tong, tong.replace("MOC_GATE_OUTPUT: ", "MOC_GATE_OUTPUT "), "dong_la,thieu_moc"), (tong, "", "thieu_moc"),
+                          (tong, tong + "\n" + tong, "moc_lap"), (tong, tong.replace(" job co ", " jobs co "), "dong_la,thieu_moc"),
+                          (job, job + "\r", "xuong_dong_tron"), (job, job + "\rx", "cr_le")):
+        bang(dg.count(cu) == 1, f"neo ô phải xuất hiện đúng một lần trong tệp đánh giá: {cu[:40]!r}")
+        ky8(f"moc_gate_output: 'measured — {DG}'\n", p | {DG: dg.replace(cu, moi)}, 1 if mong else 0, f"tệp đánh giá {moi[-40:]!r}",
+            [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:{mong}"] if mong else [])
+    ky8(f"moc_gate_output: 'measured — {DG}'\n", p | {DG: dg.encode("utf-8") + b"\xff"}, 1, "tệp đánh giá có BYTE không phải UTF-8",
+        [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:khong_phai_utf8"])
+
+
+# B02 (review mã lượt 3): bảng ngữ pháp của đợt A BẮT BUỘC đi qua L8 — tiền tố ca ⇒ SÀN số phần tử (đo 24-11-2026: 1733 · 3840 · 52 · 36 ·
+# 1 · 1280 · 1136 · 318). Mỗi tiền tố phải giải ra ĐÚNG MỘT ca của bộ test đợt A: bỏ, đổi tên hay nhân đôi một ca ⇒ c36 ĐỎ (c38 đo).
+A_CA = {"a124": 1700, "a125": 3800, "a126": 50, "a129": 30, "a131": 1, "a132": 1250, "a133": 1100, "a134": 300}
+
+
+def nap_a(ten):   # nạp theo ĐƯỜNG DẪN trong kho, không theo biến môi trường (bộ quét luật 9 trỏ biến ấy vào bản đột biến)
+    spec = importlib.util.spec_from_file_location(ten.replace(".", "_") + "_cho_l8", HERE / ten)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def chon_ca_a(so_dang_ky):
+    """Tên ca của bộ test đợt A cho TỪNG tiền tố bắt buộc; không đúng một ca ⇒ ĐỎ (không lọc theo "ca nào đang có")."""
+    khop = {tt: [t for t in so_dang_ky if t.split("_")[0] == tt] for tt in A_CA}
+    bang(all(len(v) == 1 for v in khop.values()), f"mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: { {k: v for k, v in khop.items() if len(v) != 1} }")
+    return {tt: v[0] for tt, v in khop.items()}
+
+
+@ca
+def c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a():
+    """Luật 8 qua consumer của đợt B: IMPORT (không chép) các ca `*_qua_ho_so` của bộ test đợt A (bộ sinh 128 ký tự ASCII mỗi vị trí + đại
+    diện mỗi general category + ngoài BMP, oracle viết từ đặc tả) rồi THAY consumer `kiem_ho_so` của module A bằng `main` → L8 ở đây."""
+    a, that, m, yml, dem, ma = nap_a("gate_output_doi_chieu_test.py"), nap_a("gate_output_doi_chieu.py"), nap(), __import__("yaml"), [0], {}
+    chon = chon_ca_a(a.CA)   # TRƯỚC mọi việc khác: thiếu / đổi tên / trùng một ca bắt buộc thì ĐỎ ngay, không chạy bảng nào
+    m.compile = lambda *x: ma.get(x) or ma.setdefault(x, compile(*x))   # nhớ đệm theo ĐỐI SỐ: cùng byte nguồn ⇒ cùng code, chỉ để nhanh
+
+    def qua_l8(du_lieu, thu):
+        byte, dem[0] = yml.safe_dump(du_lieu, allow_unicode=False).encode("ascii"), dem[0] + 1
+        bang(m.nap_yaml(yml, byte) == du_lieu, f"hồ sơ YAML phải nạp lại ĐÚNG phần tử bộ sinh đưa ra: {du_lieu!r}")
+        with tempfile.TemporaryDirectory(prefix="len_l8_") as tam, contextlib.redirect_stdout(io.StringIO()) as ra:
+            if Path(thu) != a.ROOT:   # ca không cần tệp đưa gốc kho làm thư mục provenance: để vắng
+                shutil.copytree(thu, Path(tam) / PROV)
+            (Path(tam) / TEN).write_bytes(byte)
+            m.main(["--root", str(ROOT_THAT), "--tep", str(Path(tam) / TEN)])
+        return dong_l8(ra.getvalue())
+    that.kiem_ho_so, a._M[:] = qua_l8, [that]   # hàm lá vẫn là module A THẬT; chỉ consumer đổi sang L8
+    for tt, ten in chon.items():
+        truoc, (rc, dong) = dem[0], a.chay_ca(ten)
+        if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này
+            raise RuntimeError(dong)
+        bang(rc == 0 and dem[0] - truoc >= A_CA[tt], f"{ten} qua main → L8: {dem[0] - truoc} phần tử (sàn {A_CA[tt]}), rc={rc} {dong[:600]}")
+
+
+@ca
+def c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong():
+    """Luật 8 qua L8, ba vị trí VĂN BẢN TỰ DO của tệp đánh giá mà bảng của đợt A không đưa qua consumer: vùng `.*` của dòng đầu, nhãn
+    (không chứa `]`), tên dòng skipped (hai dạng). Tệp mẫu mang băm bộ sinh GIẢ có chủ ý: đúng ngữ pháp ⇒ `bo_sinh_la`, sai ⇒ lý do của bộ phân
+    tích. Kỳ vọng theo mệnh đề đặc tả: LF tách dòng (`dong_la`; ở dòng đầu là `dau_tep_sai`), CR lẻ ⇒ `cr_le`, nhãn không chứa `]`, tên
+    không rỗng và kết thúc ở điểm SỚM NHẤT mà phần còn lại khớp trọn; mọi ký tự khác đi được qua tuyến (128 ASCII, mỗi general
+    category trừ Cs, ngoài BMP) là DƯƠNG."""
+    ten, cu, v3 = "danh-gia-gate-output-10.txt", ": skipped (khong tinh)", ": skipped -> not_measured (khong suy pass)"
+    mau = {"dau": "# Danh gia Gate output run 10 attempt 20 head " + "a" * 40 + " — {}(danh_gia_gate.py sha256 " + "a" * 64 + ")",
+           "nhan": "JOB 31 ten [{}] conclusion=success log_sha256=" + "a" * 64 + " -> passed: x",
+           "cu": "JOB 42 {}" + cu, "v3": "JOB 53 {}" + v3, "tong": "MOC_GATE_OUTPUT: passed (1/2 job co dau hieu duong)"}
+    goc, dung = {"dau": "", "nhan": "nhan", "cu": "x", "v3": "y", "tong": ""}, "bo_sinh_la"
+    vu_tru = [*map(chr, range(128)), *nap_a("gate_output_doi_chieu_test.py")._mau_loai_unicode("\r\n", ("Cs",))]
+    o = [(vt, c, "dau_tep_sai" if c == "\n" and vt == "dau" else "dong_la" if c == "\n" or c == "]" and vt == "nhan" else "cr_le" if c == "\r" else dung)
+         for vt in ("dau", "nhan", "cu", "v3") for c in vu_tru]
+    o += [("dau", "x (danh_gia_gate.py sha256 " + "b" * 64 + ") ", dung), ("dau", "café 𐐀 ) (", dung), ("nhan", "", dung),
+          ("nhan", "ubuntu-latest, x y [", dung), ("nhan", "a]b", "dong_la"), ("nhan", "a] [b", dung), ("cu", "", "dong_la"), ("v3", "", "dong_la"),   # `a] [b`: tên job lùi thành `ten [a]`, nhãn `b`
+          ("cu", "a" + cu + " b", dung), ("cu", "a" + v3 + " b", dung), ("cu", "a" + cu, dung), ("cu", "café 𐐀", dung),
+          ("v3", "a" + v3 + " b", dung), ("v3", "a" + cu + " b", dung), ("v3", "a" + v3, dung), ("v3", "café 𐐀", dung)]
+    bang(len(vu_tru) >= 150 and len(o) == 4 * len(vu_tru) + 16, f"vũ trụ ký tự co lại: {len(vu_tru)} ký tự, {len(o)} ô")
+    for vt, gt, mong in o:
+        ky8(json.dumps({"gate_output": f"measured — {ten}"}), {ten: "\n".join(d.format(gt if k == vt else goc[k]) for k, d in mau.items())}, 1,
+            f"{vt} {gt!r}", [f"$.gate_output: danh_gia_khong_passed:{ten}:not_measured:{mong}"])
+
+
+@ca
+def c38_c36_do_khi_bang_cua_dot_a_mat_ca():
+    """B02: chạy CHÍNH c36 trên sổ đăng ký ca của bộ test đợt A đã bị sửa — bỏ, đổi tên hay nhân đôi TỪNG ca bắt buộc đều phải làm c36
+    ĐỎ bằng tín hiệu chốt của nó (không phải lỗi vô can, không phải xanh); sổ nguyên vẹn giải ra đủ tám ca khác nhau."""
+    a = nap_a("gate_output_doi_chieu_test.py")
+    so, c36 = dict(a.CA), "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a"
+    chon = chon_ca_a(so)
+    bang(len(set(chon.values())) == len(A_CA) == 8, f"sổ nguyên vẹn phải giải ra tám ca khác nhau: {chon}")
+    for tt, ten in chon.items():
+        for bien, so_moi in (("bỏ", {k: v for k, v in so.items() if k != ten}), ("đổi tên", {("renamed_" + k if k == ten else k): v for k, v in so.items()}),
+                             ("nhân đôi", so | {tt + "_ban_sao": so[ten]})):
+            a.CA = so_moi
+            with mock.patch.dict(CA[c36].__globals__, {"nap_a": lambda _: a}):
+                rc, dong = chay_ca(c36)
+            bang(rc == 3 and f"DO:{c36}:mỗi ca bắt buộc" in dong and tt in dong, f"{bien} ca {ten} của bộ test đợt A mà c36 không ĐỎ đúng chốt: rc={rc} {dong[:300]}")
+
+
+@ca
+def c33_tong_ket_qua_cong_ci():
+    """Luật 7 của đặc tả: đầu ra `main` của CHÍNH tệp này đi qua consumer CI thật (`chay_moi`), hai chế độ nền, ca/đột biến thu nhỏ.
+    Tệp này không có ca chỉ-POSIX nên đối chứng "tên chỉ-POSIX lạ" không áp; ba đối chứng còn lại phải ĐỎ."""
+    import runpy
+    cong = runpy.run_path(str(ROOT_THAT / ".claude/dev/ci_dang_ky_test.py"))
+    duong = "ops/land_evidence_nguon_test.py"
+    mau, db = {duong: cong["MOI"][duong]}, (("mot", "x", "y", "a"),)
+    for windows in (False, True):
+        for bien, ca_rc, hang, bang_db in (("dat", 0, "GIET", db), ("ca do", 3, "GIET", db), ("dot bien song", 0, "SONG_SOT", db),
+                                           ("mau so 0", 0, "GIET", ())):
+            ra = io.StringIO()
+            with mock.patch.dict(main.__globals__, {"CA": {"a": None}, "DOT_BIEN": bang_db, "TU_KIEM": (),
+                                                    "chay_ca": lambda _: (ca_rc, "ca thu"), "chay_dot_bien": lambda *_: (hang, "")}), \
+                    contextlib.redirect_stdout(ra):
+                rc = main([])
+            txt = ra.getvalue()
+            with contextlib.redirect_stdout(io.StringIO()):
+                do = [cong["chay_moi"](moi=mau, cach_ly={}, chay_mot=lambda _: (x, txt), doc_moi_truong=lambda: None,
+                                       doc_trong_ci=lambda: True, doc_nen_windows=lambda: windows) for x in (rc, 0)]
+            bang((rc, do) == ((0, [0, 0]) if bien == "dat" else (1, [1, 1])), f"windows={windows}, {bien}: rc={rc} consumer={do} {txt!r}")
+            bang(bien != "dat" or txt.splitlines()[-4:] == ["CA: 1/1 dat", "DOT BIEN: 1/1 bi giet dung ly do",
+                                                         "TU KIEM PHAN HANG: DAT (0 dot bien)", "TONG: DAT"], repr(txt))
+
+
 @ca
 def c12_dong_cuoi_dung_dinh_dang():
     import re
@@ -676,6 +1049,42 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7r2_duong_dan_khong_escape", 'return f".{k}" if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", k) else', 'return f".{k}" if True else', "c20"),
     ("L7r2_khoa_khong_chuoi_nhu_list", 'return f"[{type(k).__name__}:{k!r}]"', 'return f"[{k!r}]"', "c20"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
+    # L8 (#1236 đợt B, đặc tả r12 mB1–mB8 + mỗi đường vào của từng chốt một đột biến riêng)
+    ("mB1_xoa_muc_mien_tru_cay_that", '    "pr1023-wp1009-r4-land-evidence.yaml": "be6a19a854be2163322d216c1e1d8d725a20a55f97e795aa5428727f57b214f8",\n', "", "c11"),
+    ("mB1_xoa_muc_mien_tru_tap_do", '    "pr963-wp943-land-evidence.yaml": "81395ff671200dcdcff2e0aa570be534559ede6ce02555f3da517426df428212",\n', "", "c24"),
+    ("mB2_L8_khong_duoc_goi", "vp8, ghi8 = l8(tep, byte, du_lieu, prov, goc)", "vp8, ghi8 = [], []", "c25"),
+    ("L8_doc_tep_lan_hai", "= l8(tep, byte, du_lieu, prov, goc)", "= l8(tep, byte, nap_yaml(yaml, tep.read_bytes()), prov, goc)", "c25"),
+    ("L8_bo_tien_to_luat", 'return [f"L8 {x}" for x in kq]', 'return [f"{x}" for x in kq]', "c25"),
+    ("mB3_mien_tru_theo_ten", 'if MIEN_TRU_L8.get(tep.name) == hashlib.sha256(byte).hexdigest():', "if tep.name in MIEN_TRU_L8:", "c29"),
+    ("L8_mien_tru_bo_ten", 'if MIEN_TRU_L8.get(tep.name) == hashlib.sha256(byte).hexdigest():', "if hashlib.sha256(byte).hexdigest() in MIEN_TRU_L8.values():", "c29"),
+    ("L8_bam_doc_lai_dia", "== hashlib.sha256(byte).hexdigest():", "== hashlib.sha256(tep.read_bytes()).hexdigest():", "c29"),
+    ("L8_mat_mien_tru_khong_ghi", '["L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ"] if tep.name in MIEN_TRU_L8 else []', "[]", "c29"),
+    ("L8_mat_mien_tru_ghi_ca_ten_la", '— kiểm đủ"] if tep.name in MIEN_TRU_L8 else []', '— kiểm đủ"]', "c29"),
+    ("L8_mien_tru_khong_ghi", 'return [], ["L8 miễn trừ (băm khớp ảnh chụp base đợt B)"]', "return [], []", "c29"),
+    ("L8_mien_xoa_vi_pham_luat_khac", "return vp + vp8, ghi + ghi8", "return (vp8 if ghi8 else vp + vp8), ghi + ghi8", "c29"),
+    ("mB4_nuot_loi_nap", '        raise KhongDoDuoc(f"L8 không nạp/chạy được', '        return [], []\n        (f"L8 không nạp/chạy được', "c30"),
+    ("L8_chi_bat_loi_doc_tep", "    except (Exception, SystemExit) as e:", "    except OSError as e:", "c30"),
+    ("L8_module_thoat_0_la_dat", "    except (Exception, SystemExit) as e:", "    except Exception as e:", "c30"),
+    ("L8_nhan_moi_kieu_tra_ve", "        if not isinstance(kq, list):\n", "        if kq is None:\n", "c30"),
+    ("L8_mien_tru_truoc_khi_nap", '    nguon = goc / "ops/gate_output_doi_chieu.py"\n    try:\n',
+     '    nguon = goc / "ops/gate_output_doi_chieu.py"\n    if MIEN_TRU_L8.get(tep.name) == hashlib.sha256(byte).hexdigest():\n        return [], []\n    try:\n', "c30"),
+    ("L8_nap_module_canh_bo_kiem", 'nguon = goc / "ops/gate_output_doi_chieu.py"',
+     'nguon = Path(__file__).resolve().parent / "gate_output_doi_chieu.py"', "c30"),
+    ("mB5_noi_danh_sach", "MIEN_TRU_L8 = {\n", "MIEN_TRU_L8 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c28"),
+    ("mB6_sai_thu_muc_provenance", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = mod.kiem_ho_so(du_lieu, prov.parent)", "c26"),
+    ("mB7_bo_qua_ho_so_khong_loi_khai", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = mod.kiem_ho_so(du_lieu, prov) if mod.loi_khai(du_lieu) else []", "c27"),
+    ("mB8_L8_truoc_chot_cutover", "        if (bam := MIEN_TRU_CUTOVER.get(tep.name)) is not None:\n",
+     "        v += len(l8(tep, byte, nap_yaml(yaml, byte), tep.parent / \"x\", goc)[0])\n"
+     "        if (bam := MIEN_TRU_CUTOVER.get(tep.name)) is not None:\n", "c31"),
+    ("L8_ten_cutover_cung_mien_L8", "        if MIEN_TRU_L8.get(tep.name) == hashlib",
+     "        if tep.name in MIEN_TRU_CUTOVER or MIEN_TRU_L8.get(tep.name) == hashlib", "c31"),
+    ("L8_chi_giu_ly_do_dau", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = mod.kiem_ho_so(du_lieu, prov)[:1]", "c24"),
+    ("L8_nuot_ly_do_mien", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"waiver_\" not in x]", "c34"),
+    ("L8_nuot_ly_do_tep_danh_gia", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"danh_gia_khong_passed\" not in x]", "c35"),
+    ("L8_chuan_hoa_nfkc_truoc_khi_doi_chieu", 'kq = mod.kiem_ho_so(du_lieu, prov)',
+     'kq = mod.kiem_ho_so(json.loads(unicodedata.normalize("NFKC", json.dumps(du_lieu, ensure_ascii=False))), prov)', "c36"),
+    ("L8_nuot_ly_do_bo_sinh_la", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"bo_sinh_la\" not in x]", "c37"),
+    ("L8_chi_chuyen_mot_so_ly_do", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"duong_khong\" in x or x[:3] == \"$: \"]", "c32"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),

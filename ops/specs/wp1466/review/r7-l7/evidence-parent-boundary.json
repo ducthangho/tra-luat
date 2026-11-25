@@ -1,0 +1,79 @@
+[
+  {
+    "name": "external_nonisolated_nosite_nofrozen",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-v",
+      "-S",
+      "-X",
+      "frozen_modules=off",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/sc/tien_kiem.py",
+      "origin/master"
+    ],
+    "rc": 1,
+    "local_os": true,
+    "trace": [
+      "# code object from /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/tmp/closed-inputs/os_startup/kho/os.py"
+    ],
+    "stdout": "",
+    "stop": [
+      "  KHÔNG ĐO ĐƯỢC: PyYAML vắng; phải nằm trong stdlib hay site-packages của trình thông dịch, ngoài clone, cwd và thư mục script"
+    ]
+  },
+  {
+    "name": "external_isolated_nosite_nofrozen",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-v",
+      "-I",
+      "-S",
+      "-X",
+      "frozen_modules=off",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/sc/tien_kiem.py",
+      "origin/master"
+    ],
+    "rc": 1,
+    "local_os": false,
+    "trace": [],
+    "stdout": "",
+    "stop": [
+      "  KHÔNG ĐO ĐƯỢC: PyYAML vắng; phải nằm trong stdlib hay site-packages của trình thông dịch, ngoài clone, cwd và thư mục script"
+    ]
+  },
+  {
+    "name": "external_nonisolated_nosite_frozen",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-v",
+      "-S",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/sc/tien_kiem.py",
+      "origin/master"
+    ],
+    "rc": 1,
+    "local_os": false,
+    "trace": [],
+    "stdout": "",
+    "stop": [
+      "  KHÔNG ĐO ĐƯỢC: PyYAML vắng; phải nằm trong stdlib hay site-packages của trình thông dịch, ngoài clone, cwd và thư mục script"
+    ]
+  },
+  {
+    "name": "external_isolated_normal",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-v",
+      "-I",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/sc/tien_kiem.py",
+      "origin/master"
+    ],
+    "rc": 0,
+    "local_os": false,
+    "trace": [],
+    "stdout": "base origin/master = 7f18e5c5a543 · master V = 7f18e5c5a543 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module\nTIỀN KIỂM: ĐẠT\n",
+    "stop": []
+  }
+]

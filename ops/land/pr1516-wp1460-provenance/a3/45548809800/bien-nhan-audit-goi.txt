@@ -1,0 +1,4 @@
+artifact bien-nhan-audit-45548809800-1 id 14995095884 digest sha256:e8d2337b36a422f4a859a754f6ad71761c22b710f1c2f3deca8b9c92e963d75d
+sha256 goi zip tai ve: e8d2337b36a422f4a859a754f6ad71761c22b710f1c2f3deca8b9c92e963d75d (khop digest)
+sha256 bien_nhan_audit.json trong goi: 41c7d952f52138743e98949dcbd7bc5f9e724b52a3f5b1acfbf8530a94f82f94
+Tep zip nhi phan khong dua vao kho (ci_duong_nhanh kiem-re cam tep nhi phan trong ho so); noi dung goi la dung mot tep JSON o tren.

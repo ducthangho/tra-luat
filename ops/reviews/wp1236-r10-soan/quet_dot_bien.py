@@ -1,0 +1,431 @@
+#!/usr/bin/env python3
+"""Bộ quét đột biến với TẬP TOÁN TỬ ĐÓNG cho wp1236 r10 (luật 3 mục *Ma trận chốt–ca–đột biến*). Công cụ ĐO dev-side, không phải mã
+thi công. Tất định: cùng tệp nguồn ⇒ cùng manifest (id, toán tử, vị trí, băm nguồn đột biến).
+
+  do    <module.py> <test.py> <kho.jsonl> --thu-muc-ra D [--song-song N]
+        ĐO CHÍNH THỨC (luật 3 + 5): tự sinh manifest từ <module>, tự áp <kho>, chạy, đối chiếu đủ inventory rồi mới in `HOAN_TAT`.
+        Không nhận manifest từ ngoài ⇒ không nộp thiếu mẫu số được. Chỉ chạy trên Python PYTHON_CHUAN (dạng chuẩn ast.unparse đổi giữa
+        các bản), không thì rc 2. Kết quả ở D/kq.jsonl; dòng đầu là neo (công cụ, test, gốc, manifest, kho, python), ca baseline.
+  sinh  <module.py> [--ra manifest.jsonl]            sinh manifest (mỗi dòng một đột biến, kèm toàn văn nguồn)
+  chay  <manifest.jsonl> <test.py> --goc <module gốc> [--ra kq.jsonl] [--song-song N]
+        BASELINE trước: module gốc phải qua mọi ca, không thì rc 2 KHÔNG ĐO ĐƯỢC. Rồi chạy MỌI ca của <test.py> (biến
+        GATE_OUTPUT_DOI_CHIEU_MA trỏ bản đột biến), dừng ở ca đầu tiên ném TinHieuChotCa; phân hạng GIET (kèm tên ca) · SONG ·
+        VO_CAN (chỉ lỗi vô can) · LOI_CHAY (tiến trình con rc ≠ 0). Dòng đầu kq là neo sha256 (công cụ, test, gốc, manifest); resume chỉ
+        dùng kết quả cũ khi neo VÀ (id, sha256 đột biến) khớp. Dòng thiếu `src` (manifest bàn giao) ⇒ rc 2. `chay` là TẬP CON: in
+        `TAP_CON neo=…` chứ không bao giờ `HOAN_TAT`; chỉ `do` in `HOAN_TAT`. Có LOI_CHAY ⇒ rc 3. Tiến trình con phải in `XONG_CON`. Bộ nạp YAML là của SẢN PHẨM (PyYAML SafeLoader thuần); chỉ nhớ đệm theo nội dung
+        và trả deepcopy (không đổi ngữ nghĩa — review mã lượt 6 đo C loader lệch, nên KHÔNG dùng C loader).
+  hoi-quy <kho> <goc.py> <dich.py> [--ra manifest.jsonl]
+        <kho> là .json {id: {src, kind}} (toàn văn trên <goc.py>) HOẶC .jsonl các cặp {id, kind, cu, moi} (dạng ghim trong kho,
+        `kho_dot_bien_reviewer_luot6.jsonl`; khi ấy <goc.py> không được đọc, có thể ghi `-`); áp từng cặp lên <dich.py>; cặp không áp được (neo không xuất hiện đúng một lần) ghi
+        KHONG_AP_DUNG kèm lý do, không bỏ im.
+
+Toán tử (mã ổn định, xem TOAN_TU): a so_sanh_phu_dinh · a2 dieu_kien_phu_dinh (kể cả bỏ hẳn từng `if` của comprehension) · b bo_ve_boolop · c xoa_cau_ghi · c2 return_thanh_pass ·
+d lat_bool · e so_nguyen_cong_1 · f return_none · g chuoi_doi (+"~") · h1 tap_bo_phan_tu · h2 tap_them_phan_tu ("~them~") ·
+i1 lop_ky_tu_bo_mot · i2 lop_ky_tu_thanh_cham · i3 nhanh_alternation_bo · i4 luong_tu_noi (+→*, {m,n}→*) · i5 escape_thanh_cham
+(\\. \\( \\d \\s… → `.`; ngoài lớp ký tự là wildcard, TRONG lớp ký tự là dấu chấm literal) · i6 lookaround_bo · i7 khop_tron_noi (fullmatch→match, match→search) · j1 is_thanh_bang · j2 is_True_thanh_truthy ·
+k1 bo_chuan_hoa (strip/casefold/lower) · k2 doi_phuong_thuc (isalnum↔isalpha, startswith↔endswith) · k3 thuoc_tap_thanh_chuoi_con ·
+l doi_thu_tu_hai_chot (hai `if …: return` liền nhau).
+"""
+import argparse, ast, concurrent.futures as cf, copy, difflib, hashlib, json, os, re, subprocess, sys, tempfile
+from pathlib import Path
+
+TOAN_TU = ("a", "a2", "b", "c", "c2", "d", "e", "f", "g", "h1", "h2", "i1", "i2", "i3", "i4", "i5", "i6", "i7", "j1", "j2", "k1", "k2",
+           "k3", "l")
+DOI_PT = {"isalnum": "isalpha", "isalpha": "isalnum", "startswith": "endswith", "endswith": "startswith"}
+CHUAN_HOA = ("strip", "casefold", "lower")
+TAP_TEN = (ast.Set, ast.Tuple, ast.List, ast.Dict)
+
+
+def _cha(t):
+    return {c: n for n in ast.walk(t) for c in ast.iter_child_nodes(n)}
+
+
+def _ham(n, cha):
+    while n in cha:
+        n = cha[n]
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return n.name
+    return None
+
+
+def _docstring(n, cha):
+    p = cha.get(n)
+    return isinstance(p, ast.Expr) and isinstance(cha.get(p), (ast.Module, ast.FunctionDef, ast.ClassDef)) and cha[p].body[0] is p
+
+
+def _hang_module(t):
+    """Tên → nút giá trị của các phép gán mức module có dạng tập/tuple/list/dict/frozenset({…})."""
+    kq = {}
+    for n in t.body:
+        if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name):
+            v = n.value
+            if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) and v.func.id in ("frozenset", "set", "tuple") and v.args:
+                v = v.args[0]
+            if isinstance(v, TAP_TEN):
+                kq[n.targets[0].id] = v
+    return kq
+
+
+def _bien_regex(p):
+    """Các phép sửa tất định trên MỘT mẫu regex (chuỗi). Trả [(mã, mô tả, mẫu mới)]."""
+    out, n = [], len(p)
+    # i1/i2: lớp ký tự
+    for m in re.finditer(r"(?<!\\)\[((?:\\.|[^\]\\])+)\]", p):
+        tv = re.findall(r"\\.|.-.|.", m[1])
+        for k in range(len(tv)):
+            if len(tv) > 1:
+                out.append(("i1", f"lop@{m.start()} bo {tv[k]!r}", p[:m.start()] + "[" + "".join(tv[:k] + tv[k + 1:]) + "]" + p[m.end():]))
+        out.append(("i2", f"lop@{m.start()} thanh .", p[:m.start()] + "." + p[m.end():]))
+    # i3: nhánh alternation trong nhóm cấp một (bỏ từng nhánh)
+    for m in re.finditer(r"\((?:\?[:=!<][!=]?)?([^()]*\|[^()]*)\)", p):
+        nh = m[1].split("|")
+        for k in range(len(nh)):
+            moi = "|".join(nh[:k] + nh[k + 1:])
+            out.append(("i3", f"nhanh@{m.start()} bo {nh[k]!r}", p[:m.start(1)] + moi + p[m.end(1):]))
+    # i4: lượng từ
+    for m in re.finditer(r"(?<!\\)(\+|\{\d+(?:,\d*)?\})", p):
+        out.append(("i4", f"luong_tu@{m.start()} {m[1]}→*", p[:m.start()] + "*" + p[m.end():]))
+    # i5: escape thành wildcard
+    for m in re.finditer(r"\\([.()\[\]dsw])", p):
+        out.append(("i5", f"escape@{m.start()} \\{m[1]}→.", p[:m.start()] + "." + p[m.end():]))
+    # i6: lookaround
+    for m in re.finditer(r"\(\?(?:<[!=]|[=!])", p):
+        sau, sau_i = 1, m.end()
+        while sau and sau_i < n:
+            c = p[sau_i]
+            if c == "\\":
+                sau_i += 2
+                continue
+            sau += (c == "(") - (c == ")")
+            sau_i += 1
+        out.append(("i6", f"lookaround@{m.start()} bo", p[:m.start()] + p[sau_i:]))
+    return out
+
+
+def sinh(nguon):
+    goc = ast.parse(nguon)
+    base = ast.unparse(goc)
+    kq, thay = [], set()
+
+    def them(op, ten, cay_or_src, dong):
+        s = cay_or_src if isinstance(cay_or_src, str) else ast.unparse(cay_or_src)
+        if s == base or s in thay:
+            return
+        try:
+            compile(s, ten, "exec")
+        except SyntaxError:
+            return
+        thay.add(s)
+        mid = f"{op}:{ten}"
+        mid = mid if mid not in {x["id"] for x in kq} else f"{mid}#{sum(x['id'].startswith(mid) for x in kq)}"
+        kq.append({"id": mid, "op": op, "dong": dong, "sha256": hashlib.sha256(s.encode()).hexdigest(), "src": s})
+
+    nut = list(ast.walk(goc))
+    for i, n in enumerate(nut):
+        cha = _cha(goc)
+        h = _ham(n, cha)
+
+        def cay():
+            t = copy.deepcopy(goc)
+            return t, list(ast.walk(t))[i], _cha(t)
+
+        def thay_nut(t, cu, moi, ct):
+            p = ct[cu]
+            for f, v in ast.iter_fields(p):
+                if v is cu:
+                    setattr(p, f, moi)
+                    return
+                if isinstance(v, list):
+                    for k, x in enumerate(v):
+                        if x is cu:
+                            v[k] = moi
+                            return
+        dong = getattr(n, "lineno", 0)
+        ten = f"{h or 'module'}:{dong}:{getattr(n, 'col_offset', 0)}"
+        if h is not None:
+            if isinstance(n, ast.Compare):
+                t, m, ct = cay(); thay_nut(t, m, ast.UnaryOp(ast.Not(), m), ct); them("a", ten, t, dong)
+                if any(isinstance(o, (ast.Is, ast.IsNot)) for o in n.ops):
+                    t, m, ct = cay()
+                    m.ops = [ast.Eq() if isinstance(o, ast.Is) else ast.NotEq() if isinstance(o, ast.IsNot) else o for o in m.ops]
+                    them("j1", ten, t, dong)
+                if (len(n.ops) == 1 and isinstance(n.ops[0], ast.Is) and isinstance(n.comparators[0], ast.Constant)
+                        and n.comparators[0].value is True):
+                    t, m, ct = cay(); thay_nut(t, m, m.left, ct); them("j2", ten, t, dong)
+                if (len(n.ops) == 1 and isinstance(n.ops[0], (ast.In, ast.NotIn)) and isinstance(n.comparators[0], ast.Name)
+                        and n.comparators[0].id in _hang_module(goc)):
+                    t, m, ct = cay()
+                    moi = ast.parse(f"any(_p_ in ({ast.unparse(m.left)}) for _p_ in {m.comparators[0].id})", mode="eval").body
+                    if isinstance(m.ops[0], ast.NotIn):
+                        moi = ast.UnaryOp(ast.Not(), moi)
+                    thay_nut(t, m, moi, ct); them("k3", ten, t, dong)
+            if isinstance(n, (ast.If, ast.IfExp, ast.While)) and not isinstance(n.test, ast.Compare):
+                t, m, ct = cay(); m.test = ast.UnaryOp(ast.Not(), m.test); them("a2", ten, t, dong)
+            if isinstance(n, ast.comprehension):
+                for k in range(len(n.ifs)):
+                    t, m, ct = cay(); m.ifs[k] = ast.UnaryOp(ast.Not(), m.ifs[k]); them("a2", f"{ten}:if{k}", t, dong)
+                    t, m, ct = cay(); del m.ifs[k]; them("a2", f"{ten}:bo_if{k}", t, dong)
+            if isinstance(n, ast.BoolOp):
+                for k in range(len(n.values)):
+                    t, m, ct = cay(); vs = [v for j, v in enumerate(m.values) if j != k]
+                    thay_nut(t, m, vs[0] if len(vs) == 1 else ast.BoolOp(m.op, vs), ct); them("b", f"{ten}:ve{k}", t, dong)
+            if (isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Attribute)
+                    and n.value.func.attr in ("append", "extend")) or isinstance(n, ast.AugAssign):
+                t, m, ct = cay(); thay_nut(t, m, ast.Pass(), ct); them("c", ten, t, dong)
+            if isinstance(n, ast.Return):
+                t, m, ct = cay(); thay_nut(t, m, ast.Pass(), ct); them("c2", ten, t, dong)
+                if n.value is not None:
+                    t, m, ct = cay(); m.value = ast.Constant(None); them("f", ten, t, dong)
+            if isinstance(n, ast.Constant) and isinstance(n.value, bool):
+                t, m, ct = cay(); m.value = not m.value; them("d", ten, t, dong)
+            if isinstance(n, ast.Constant) and type(n.value) is int:
+                t, m, ct = cay(); m.value += 1; them("e", ten, t, dong)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str) and not _docstring(n, cha) and n.value:
+                t, m, ct = cay(); m.value = m.value + "~"; them("g", ten, t, dong)
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+                if n.func.attr in CHUAN_HOA and not n.args:
+                    t, m, ct = cay(); thay_nut(t, m, m.func.value, ct); them("k1", ten, t, dong)
+                if n.func.attr in DOI_PT:
+                    t, m, ct = cay(); m.func.attr = DOI_PT[m.func.attr]; them("k2", ten, t, dong)
+                if n.func.attr in ("fullmatch", "match"):
+                    t, m, ct = cay(); m.func.attr = "match" if m.func.attr == "fullmatch" else "search"; them("i7", ten, t, dong)
+        if isinstance(n, (ast.FunctionDef, ast.For, ast.If, ast.With, ast.Try)) and (h is not None or isinstance(n, ast.FunctionDef)):
+            for fld in ("body", "orelse"):
+                b = getattr(n, fld, None) or []
+                for k in range(len(b) - 1):
+                    x, y = b[k], b[k + 1]
+                    if all(isinstance(z, ast.If) and z.body and isinstance(z.body[-1], ast.Return) for z in (x, y)):
+                        t, m, ct = cay(); bb = getattr(m, fld); bb[k], bb[k + 1] = bb[k + 1], bb[k]
+                        them("l", f"{ten}:{fld}{k}", t, x.lineno)
+    # h1/h2: tập hằng mức module
+    for ten, v in _hang_module(goc).items():
+        so = len(v.keys) if isinstance(v, ast.Dict) else len(v.elts)
+        for k in range(so):
+            t = copy.deepcopy(goc); vv = _hang_module(t)[ten]
+            if isinstance(vv, ast.Dict):
+                del vv.keys[k]; del vv.values[k]
+            else:
+                del vv.elts[k]
+            them("h1", f"{ten}:{k}", t, v.lineno)
+        t = copy.deepcopy(goc); vv = _hang_module(t)[ten]
+        if isinstance(vv, ast.Dict):
+            vv.keys.append(ast.Constant("~them~")); vv.values.append(copy.deepcopy(vv.values[0]) if vv.values else ast.Constant(None))
+        else:
+            vv.elts.append(ast.Constant("~them~"))
+        them("h2", ten, t, v.lineno)
+    # i1–i6: regex hằng mức module (re.compile(<chuỗi>))
+    for n in goc.body:
+        if (isinstance(n, ast.Assign) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Attribute)
+                and n.value.func.attr == "compile" and n.value.args and isinstance(n.value.args[0], ast.Constant)):
+            ten = n.targets[0].id
+            for op, mo_ta, moi in _bien_regex(n.value.args[0].value):
+                try:
+                    re.compile(moi)
+                except re.error:
+                    continue
+                t = copy.deepcopy(goc)
+                q = next(q for q in t.body if isinstance(q, ast.Assign) and getattr(q.targets[0], "id", None) == ten)
+                q.value.args[0].value = moi
+                them(op, f"{ten}:{mo_ta}", t, n.lineno)
+    return kq
+
+
+# ---------------------------------------------------------------- chạy
+_CHAY_CA = r'''
+import sys, importlib.util, copy, yaml
+_goc, _bo = yaml.safe_load, {}
+def _nho(x):
+    k = x if isinstance(x, (str, bytes)) else None
+    if k is None:
+        return _goc(x)
+    if k not in _bo:
+        _bo[k] = _goc(x)
+    return copy.deepcopy(_bo[k])
+yaml.safe_load = _nho
+spec = importlib.util.spec_from_file_location("godc_test", sys.argv[1])
+m = importlib.util.module_from_spec(spec); sys.modules["godc_test"] = m; spec.loader.exec_module(m)
+for ten in m.CA:
+    rc, dong = m.chay_ca(ten)
+    if rc == 3:
+        print("GIET", ten, dong[:300].replace("\n", " ")); break
+    elif rc:
+        print("HONG", ten, dong[:200].replace("\n", " "))
+    else:
+        print("DAT", ten)
+print("XONG_CON", len(m.CA))
+'''
+
+
+def _sha(b):
+    return hashlib.sha256(b if isinstance(b, bytes) else b.encode("utf-8")).hexdigest()
+
+
+def _mot(src, test, thu, mid="baseline"):
+    p = Path(tempfile.mkdtemp(dir=thu)) / "gate_output_doi_chieu.py"   # thư mục riêng từng đột biến: không đụng tên, không đụng .pyc
+    p.write_text(src, encoding="utf-8")
+    r = subprocess.run([sys.executable, "-B", "-c", _CHAY_CA, str(test)], capture_output=True, timeout=1800,
+                       env=dict(os.environ, GATE_OUTPUT_DOI_CHIEU_MA=str(p), PYTHONDONTWRITEBYTECODE="1"))
+    ra = r.stdout.decode("utf-8", "replace").splitlines()
+    p.unlink()
+    giet = [x.split()[1] for x in ra if x.startswith("GIET ")]
+    hong = [x for x in ra if x.startswith("HONG ")]
+    dat = [x.split()[1] for x in ra if x.startswith("DAT ")]
+    so_ca = next((int(x.split()[1]) for x in ra if x.startswith("XONG_CON ")), None)
+    xong = so_ca is not None
+    # Tiến trình con lỗi (rc ≠ 0) hay thiếu dấu kết thúc XONG_CON ⇒ LOI_CHAY: không phải SỐNG, không phải GIẾT.
+    loi = r.returncode != 0 or not xong or (mid == "baseline" and len(dat) != so_ca)   # baseline phải ĐẠT đủ mọi ca
+    return {"id": mid, "rc": r.returncode, "giet": giet, "hong": hong, "dat": dat if mid == "baseline" else len(dat),
+            "assertion": next((x.split(" ", 2)[2] for x in ra if x.startswith("GIET ")), ""),
+            "phan_hang": "LOI_CHAY" if loi else "GIET" if giet else "VO_CAN" if hong else "SONG",
+            "stderr_cuoi": r.stderr.decode("utf-8", "replace")[-300:] if r.returncode else ""}
+
+
+PYTHON_CHUAN = (3, 13)   # ast.unparse đổi cách viết (vd quote f-string) giữa các bản ⇒ dạng chuẩn và băm chỉ có nghĩa trên một bản
+
+
+def chay(manifest, test, ra, ss, goc, tap_con=True, kho=None):
+    """Neo: (công cụ, test, module gốc, manifest) theo sha256. Baseline: module gốc phải qua MỌI ca (không GIẾT, không lỗi), không thì
+    KHÔNG ĐO ĐƯỢC rc 2. Resume chỉ nhận kết quả cũ khi (id, sha256 đột biến) VÀ neo khớp. rc 0 chỉ khi đủ mọi đột biến, không LOI_CHAY."""
+    test = Path(test).resolve()
+    if not test.is_file() or not Path(goc).is_file():
+        print("KHONG_DO_DUOC: test hoac module goc vang", file=sys.stderr)
+        return 2
+    if sys.version_info[:2] != PYTHON_CHUAN:
+        print(f"KHONG_DO_DUOC: can Python {PYTHON_CHUAN}, dang chay {sys.version_info[:2]}", file=sys.stderr)
+        return 2
+    ms = [json.loads(x) for x in Path(manifest).read_text(encoding="utf-8").splitlines() if x.strip()]
+    # Dòng KHONG_AP_DUNG của hoi-quy là nghĩa vụ ledger, không phải đột biến; mọi dòng khác PHẢI mang src khớp sha256.
+    if any("src" not in m and m.get("trang_thai") != "KHONG_AP_DUNG" for m in ms):
+        print("KHONG_DO_DUOC: manifest co dong thieu src (manifest ban giao) — dung lenh `do` de tai dung", file=sys.stderr)
+        return 2
+    ms = [m for m in ms if "src" in m]
+    if len({m["id"] for m in ms}) != len(ms) or any(_sha(m["src"]) != m["sha256"] for m in ms):
+        print("KHONG_DO_DUOC: id trung hoac sha256 lech nguon trong manifest", file=sys.stderr)
+        return 2
+    neo = {"cong_cu": _sha(Path(__file__).read_bytes()), "test": _sha(test.read_bytes()), "goc": _sha(Path(goc).read_bytes()),
+           "manifest": _sha(Path(manifest).read_bytes()), "python": ".".join(map(str, sys.version_info[:3]))}
+    if kho:
+        neo["kho"] = _sha(Path(kho).read_bytes())
+    cu = {}
+    if Path(ra).exists():
+        dong = [json.loads(x) for x in Path(ra).read_text(encoding="utf-8").splitlines() if x.strip()]
+        if dong and dong[0].get("neo") == neo:
+            cu = {(k["id"], k.get("sha256")): k for k in dong[1:] if k.get("phan_hang") != "LOI_CHAY"}
+    with tempfile.TemporaryDirectory(prefix="quet_db_") as thu:
+        bl = _mot(Path(goc).read_text(encoding="utf-8"), test, thu)
+        if bl["phan_hang"] != "SONG" or not bl["dat"]:
+            print(f"KHONG_DO_DUOC: baseline khong xanh {bl}", file=sys.stderr)
+            return 2
+        lam = [m for m in ms if (m["id"], m["sha256"]) not in cu]
+        with cf.ThreadPoolExecutor(ss) as ex:
+            moi = list(ex.map(lambda m: dict(_mot(m["src"], test, thu, m["id"]), op=m["op"], dong=m.get("dong"), sha256=m["sha256"]),
+                              lam))
+    kq = [cu.get((m["id"], m["sha256"])) or next(k for k in moi if k["id"] == m["id"]) for m in ms]
+    if [k["id"] for k in kq] != [m["id"] for m in ms]:   # đối chiếu inventory: đủ, đúng thứ tự, không thừa
+        print("KHONG_DO_DUOC: ket qua khong khop inventory", file=sys.stderr)
+        return 2
+    Path(ra).write_text(json.dumps({"neo": neo, "baseline": "SONG", "baseline_ca_dat": bl["dat"], "tap_con": tap_con}) + "\n" + "".join(json.dumps(k, ensure_ascii=False) + "\n"
+                                                                                       for k in kq), encoding="utf-8")
+    dem = {h: sum(k["phan_hang"] == h for k in kq) for h in ("GIET", "SONG", "VO_CAN", "LOI_CHAY")}
+    for k in kq:
+        if k["phan_hang"] != "GIET":
+            print(f"{k['phan_hang']} {k['id']} {k['hong'][0][:120] if k['hong'] else ''}")
+    print(f"TONG {len(kq)} · GIET {dem['GIET']} · SONG_SACH {dem['SONG']} · CHI_LOI_VO_CAN {dem['VO_CAN']} · LOI_CHAY {dem['LOI_CHAY']}")
+    if dem["LOI_CHAY"]:
+        print("CHUA_HOAN_TAT (co LOI_CHAY)")
+        return 3
+    print(f"TAP_CON neo={json.dumps(neo, sort_keys=True)}" if tap_con else f"HOAN_TAT neo={json.dumps(neo, sort_keys=True)}")
+    return 0
+
+
+# ---------------------------------------------------------------- hồi quy kho cũ
+def _chuan(src):
+    """Dạng chuẩn để neo cặp hồi quy: ast.unparse (bỏ khác biệt định dạng/chú thích; đột biến của reviewer vốn sinh bằng ast.unparse)."""
+    return ast.unparse(ast.parse(src))
+
+
+def _cap_toi_thieu(a, b, d):
+    """Cặp (cũ, mới) nhỏ nhất theo DÒNG trên dạng chuẩn sao cho `cũ` xuất hiện đúng một lần trong `d`."""
+    a, b = a.splitlines(keepends=True), b.splitlines(keepends=True)
+    ops = [o for o in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if o[0] != "equal"]
+    if not ops:
+        return None
+    i1, i2, j1, j2 = ops[0][1], ops[-1][2], ops[0][3], ops[-1][4]
+    for k in range(len(a) + 1):
+        cu = "".join(a[max(0, i1 - k):min(len(a), i2 + k)])
+        moi = "".join(a[max(0, i1 - k):i1]) + "".join(b[j1:j2]) + "".join(a[i2:min(len(a), i2 + k)])
+        if cu and d.count(cu) == 1:
+            return cu, moi
+    return None
+
+
+def hoi_quy(kho, goc, dich, ra):
+    """Áp kho lên <dich> trên DẠNG CHUẨN. .jsonl: cặp {id, kind, cu, moi} đã chuẩn hoá. .json: {id: {src, kind}} toàn văn trên <goc>."""
+    d = _chuan(Path(dich).read_text(encoding="utf-8"))
+    if str(kho).endswith(".jsonl"):
+        cap = [json.loads(y) for y in Path(kho).read_text(encoding="utf-8").splitlines() if y.strip()]
+    else:
+        g = _chuan(Path(goc).read_text(encoding="utf-8"))
+        cap = []
+        for mid, v in sorted(json.loads(Path(kho).read_text(encoding="utf-8")).items()):
+            c = _cap_toi_thieu(g, _chuan(v["src"]), g)
+            cap.append({"id": mid, "kind": v.get("kind"), "cu": c[0], "moi": c[1]} if c else {"id": mid, "kind": v.get("kind")})
+    out = []
+    for x in cap:
+        if "cu" not in x or d.count(x["cu"]) != 1:
+            out.append({"id": f"kho:{x['id']}", "op": "kho", "kind": x.get("kind"), "trang_thai": "KHONG_AP_DUNG",
+                        "ly_do": "khong co cap" if "cu" not in x else f"neo xuat hien {d.count(x['cu'])} lan"})
+            continue
+        s = d.replace(x["cu"], x["moi"])
+        out.append({"id": f"kho:{x['id']}", "op": "kho", "kind": x.get("kind"), "cu": x["cu"], "moi": x["moi"], "sha256": _sha(s), "src": s})
+    Path(ra).write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in out), encoding="utf-8")
+    print(f"HOI_QUY {len(out)} · AP_DUNG {sum('src' in x for x in out)} · KHONG_AP_DUNG {sum('src' not in x for x in out)}")
+    for x in out:
+        if "src" not in x:
+            print(f"KHONG_AP_DUNG {x['id']} {x['ly_do']} — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo")
+    return 0
+
+
+def do(module, test, kho, thu_ra, ss):
+    """Đo CHÍNH THỨC: tự sinh manifest từ <module> + áp <kho>, rồi chạy; không nhận manifest từ ngoài ⇒ không thể nộp thiếu mẫu số."""
+    if sys.version_info[:2] != PYTHON_CHUAN:
+        print(f"KHONG_DO_DUOC: can Python {PYTHON_CHUAN}, dang chay {sys.version_info[:2]}", file=sys.stderr)
+        return 2
+    thu_ra = Path(thu_ra)
+    thu_ra.mkdir(parents=True, exist_ok=True)
+    ms = sinh(Path(module).read_text(encoding="utf-8"))
+    (thu_ra / "manifest.jsonl").write_text("".join(json.dumps(m, ensure_ascii=False) + "\n" for m in ms), encoding="utf-8")
+    hoi_quy(kho, "-", module, thu_ra / "hoi_quy.jsonl")
+    tat = (thu_ra / "manifest.jsonl").read_text(encoding="utf-8") + (thu_ra / "hoi_quy.jsonl").read_text(encoding="utf-8")
+    (thu_ra / "tat_ca.jsonl").write_text(tat, encoding="utf-8")
+    return chay(thu_ra / "tat_ca.jsonl", test, thu_ra / "kq.jsonl", ss, module, tap_con=False, kho=kho)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser()
+    sp = ap.add_subparsers(dest="lenh", required=True)
+    a = sp.add_parser("sinh"); a.add_argument("module"); a.add_argument("--ra", default="manifest.jsonl")
+    b = sp.add_parser("chay"); b.add_argument("manifest"); b.add_argument("test"); b.add_argument("--ra", default="kq.jsonl")
+    b.add_argument("--song-song", type=int, default=4); b.add_argument("--goc", required=True, help="module goc cho baseline")
+    e = sp.add_parser("do"); e.add_argument("module"); e.add_argument("test"); e.add_argument("kho"); e.add_argument("--thu-muc-ra", required=True)
+    e.add_argument("--song-song", type=int, default=4)
+    c = sp.add_parser("hoi-quy"); c.add_argument("kho"); c.add_argument("goc"); c.add_argument("dich")
+    c.add_argument("--ra", default="hoi_quy.jsonl")
+    x = ap.parse_args(argv)
+    if x.lenh == "sinh":
+        ms = sinh(Path(x.module).read_text(encoding="utf-8"))
+        Path(x.ra).write_text("".join(json.dumps(m, ensure_ascii=False) + "\n" for m in ms), encoding="utf-8")
+        dem = {}
+        for m in ms:
+            dem[m["op"]] = dem.get(m["op"], 0) + 1
+        print(f"SINH {len(ms)} " + " ".join(f"{k}={dem.get(k, 0)}" for k in TOAN_TU))
+        return 0
+    if x.lenh == "do":
+        return do(x.module, x.test, x.kho, x.thu_muc_ra, x.song_song)
+    if x.lenh == "chay":
+        return chay(x.manifest, x.test, x.ra, x.song_song, x.goc)
+    return hoi_quy(x.kho, x.goc, x.dich, x.ra)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

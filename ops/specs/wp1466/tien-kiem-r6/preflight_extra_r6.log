@@ -1,0 +1,17 @@
+2026-11-21T04:09:46Z
+local_head SERVER_ONLY_BEFORE 1   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+local_head PRIVATE_SHA_ON_SERVER False
+local_head STEP_3C 0 NGƯỜI_GIỮ 0: không có
+local_head_STEP_3D rc 1 base origin/master = 636c8a273783 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+local_head_STEP_3E rc 1 base origin/master = 636c8a273783 · 3 nhánh máy chủ = 3 ref kho tạm · 2 bản ghi lease · 2 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+local_head_AFTER_REMOVING_PRIVATE_REF rc 1 base origin/master = 636c8a273783 · 3 nhánh máy chủ = 3 ref kho tạm · 2 bản ghi lease · 2 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+other_remote SERVER_ONLY_BEFORE 1   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+other_remote PRIVATE_SHA_ON_SERVER False
+other_remote STEP_3C 0 NGƯỜI_GIỮ 0: không có
+other_remote_STEP_3D rc 1 base origin/master = cbfc85cb5a6e · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+other_remote_STEP_3E rc 1 base origin/master = cbfc85cb5a6e · 3 nhánh máy chủ = 3 ref kho tạm · 2 bản ghi lease · 2 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+other_remote_AFTER_REMOVING_PRIVATE_REF rc 1 base origin/master = cbfc85cb5a6e · 3 nhánh máy chủ = 3 ref kho tạm · 2 bản ghi lease · 2 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: DỪNG |   lease còn hiệu lực giao write set wp1466: ['fxa-r1-g1-claude']
+invalid_expiry rc 1 TIỀN KIỂM: DỪNG |   KHÔNG ĐO ĐƯỢC: quét lease toàn kho: Chan: KHÔNG_XÁC_ĐỊNH: lease_expires_at_utc không đọc được: 'unknown' (cần ISO8601, ví dụ 2026-08-14T07:00:00Z)
+empty_write_set rc 0 base origin/master = 44ed92162a9e · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+rc=0
+2026-11-21T04:09:49Z

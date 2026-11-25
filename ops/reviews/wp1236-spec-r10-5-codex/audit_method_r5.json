@@ -1,0 +1,182 @@
+{
+  "scope": "Đối chứng trên r9 c2d606b, không phải kết quả r10",
+  "fixture_source": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-5-codex/repo/ops/land/pr1453-wp433-land-evidence.yaml",
+  "good": [],
+  "replays": [
+    {
+      "id": "ref_any_run",
+      "original": [
+        "$.moc_gate_output: duong_khong_tep_danh_gia"
+      ],
+      "mutant": [],
+      "different": true,
+      "mutant_src_sha256": "3e0b055aa5a6d87f579fe7778acf5a215f0739ad702a4ae7ff80df0059049f87"
+    },
+    {
+      "id": "ref_txt_wild",
+      "original": [
+        "$.moc_gate_output: duong_khong_tep_danh_gia"
+      ],
+      "mutant": [],
+      "different": true,
+      "mutant_src_sha256": "9b73cd899d499460ecb3a62d90e45d9080967fae215f41f323bac824a81bb4d7"
+    },
+    {
+      "id": "key_alpha_only",
+      "original": [
+        "$.gate_output_nguon1: tep_danh_gia_khong_hop_le:danh-gia-gate-output-44711337223.txt"
+      ],
+      "mutant": [],
+      "different": true,
+      "mutant_src_sha256": "e4e1e69b8cfb469d4ee876165637b27ffedf33df6e240fa69688c539bcf60b11"
+    },
+    {
+      "id": "phi_substring",
+      "original": [
+        "$.gate_output_nguon_extra: tep_danh_gia_khong_hop_le:danh-gia-gate-output-44711337223.txt"
+      ],
+      "mutant": [],
+      "different": true,
+      "mutant_src_sha256": "bbe00aa2c57c2b09316866940ab91be9e4724d96997f29899a575e542b5b4c05"
+    },
+    {
+      "id": "phi_skip_descendants",
+      "original": [
+        "$.gate_output_nguon.moc_gate_output: tep_danh_gia_khong_hop_le:danh-gia-gate-output-44711337223.txt"
+      ],
+      "mutant": [],
+      "different": true,
+      "mutant_src_sha256": "7952abda04d5377e4530dbba72f5ab1a4b1fcb740ee99249ea22e0dd33eb135a"
+    }
+  ],
+  "regression_inventory": {
+    "entries": 138,
+    "unique_ids": 127,
+    "duplicate_ids": {
+      "identity_85_11": [
+        [
+          "independent_mutants.jsonl",
+          "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76"
+        ]
+      ],
+      "identity_126_7": [
+        [
+          "independent_mutants.jsonl",
+          "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099"
+        ]
+      ],
+      "identity_131_7": [
+        [
+          "independent_mutants.jsonl",
+          "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed"
+        ]
+      ],
+      "identity_154_11": [
+        [
+          "independent_mutants.jsonl",
+          "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905"
+        ]
+      ],
+      "identity_219_11": [
+        [
+          "independent_mutants.jsonl",
+          "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6"
+        ]
+      ],
+      "identity_262_25": [
+        [
+          "independent_mutants.jsonl",
+          "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7"
+        ]
+      ],
+      "identity_271_11": [
+        [
+          "independent_mutants.jsonl",
+          "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1"
+        ]
+      ],
+      "identity_285_19": [
+        [
+          "independent_mutants.jsonl",
+          "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196"
+        ]
+      ],
+      "identity_219_107": [
+        [
+          "independent_mutants.jsonl",
+          "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231"
+        ]
+      ],
+      "identity_72_67": [
+        [
+          "independent_mutants.jsonl",
+          "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3"
+        ]
+      ],
+      "token_delimiter_40": [
+        [
+          "independent_mutants.jsonl",
+          "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd"
+        ],
+        [
+          "independent_corrected.jsonl",
+          "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd"
+        ]
+      ]
+    },
+    "conflicting_source_ids": [],
+    "invalid_regex": []
+  },
+  "consumer_args": [
+    "du_lieu",
+    "thu_muc"
+  ],
+  "waiver_calls": [
+    "kiem_mien(v, thu_muc, None)"
+  ],
+  "literal_examples": {
+    "BO_SINH": "{'b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd': 'v1', '539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24': 'v2', '0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf': 'v3'}",
+    "PHI_LOI_KHAI": "frozenset({'gateoutputnguon', 'gateoutputnguonvagioihan', 'mocgateoutputrcdisposition'})",
+    "TOKEN": "frozenset({'passed', 'measured', 'not_measured', 'failed', 'skipped', 'not_run', 'owner_waived'})"
+  }
+}

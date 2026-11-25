@@ -10,7 +10,7 @@ bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị tr
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
-import argparse, base64, binascii, datetime, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request, zipfile
+import argparse, base64, binascii, datetime, errno, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request, zipfile
 from pathlib import Path
 
 import yaml
@@ -550,8 +550,61 @@ def ghi_tep(p, byte):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_bytes(byte)
 
+# #1475 (phát hiện Windows của #1322, comment 7049377019): `os.replace` một THƯ MỤC trên Windows bị từ chối (WinError 5)
+# khi tiến trình khác — nghi Defender quét thời gian thực — còn giữ handle một tệp bên trong. Thử lại có giới hạn, CHỈ
+# `PermissionError`, CHỈ Windows; nền khác và lỗi khác ném ngay. Ba hằng/hàm dưới là chỗ test tiêm (không vá `os.name`).
+LA_WINDOWS = os.name == "nt"
+SO_LAN_THU_LAI = 5            # tối đa 5 lần thử lại ⇒ 6 lời gọi
+CHO_GOC = 0.05               # chờ trước lần thử lại thứ k (k = 0..4): CHO_GOC · 2^k ⇒ tổng 1,55 s
+_thay_the = os.replace
+_xoa_cay = shutil.rmtree
+ngu_thu_lai = time.sleep
+
+def doi_ten_thu_lai(nguon, dich):
+    """`os.replace` có thử lại (#1475); hết lượt thì ném CHÍNH `PermissionError` của lần cuối."""
+    for k in range(SO_LAN_THU_LAI + 1):
+        try:
+            return _thay_the(nguon, dich)
+        except PermissionError:
+            if not LA_WINDOWS:   # chỉ Windows
+                raise
+            if k == SO_LAN_THU_LAI:   # hết lượt: ném chính lỗi cuối
+                raise
+            ngu_thu_lai(CHO_GOC * 2 ** k)
+
+_DUNG_ONEXC = sys.version_info >= (3, 12)   # `onexc` có từ 3.12; trước đó `onerror` (test chạy được cả hai nhánh)
+
+def don_thu_muc(p):
+    """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475): mọi lỗi xoá được GOM (không nuốt câm như
+    `ignore_errors=True`); thử lại khi trên Windows lần dọn ấy có ≥1 `PermissionError` và mọi lỗi còn lại chỉ là ENOTEMPTY
+    (`rmtree` thật báo ENOTEMPTY ở thư mục cha khi một tệp con hỏng). Luật chỉ đọc LOẠI lỗi, không đọc hình dạng cây (sổ uỷ
+    quyền #1475, lần xét lại thứ hai). Lỗi khác (EIO…) hay nền khác ⇒ dừng ngay. Không bao giờ ném — dọn dẹp không được đổi kết
+    quả của lần ghi — nhưng còn sót thì BÁO `KHONG_DON_DUOC` (lỗi của chính việc báo bị cô lập, review lượt 2 F3) và trả False."""
+    for k in range(SO_LAN_THU_LAI + 1):
+        loi = []
+        if _DUNG_ONEXC:
+            _xoa_cay(p, onexc=lambda ham, duong, e: loi.append((duong, e)))
+        else:
+            _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append((duong, tt[1])))
+        if not os.path.lexists(p):
+            return True
+        loai = {"PE" if isinstance(e, PermissionError) else "ENOTEMPTY" if isinstance(e, OSError) and e.errno == errno.ENOTEMPTY
+                else "khac" for _, e in loi}   # phân loại LẠI ở mỗi lần dọn (lỗi có thể đổi loại giữa các lần)
+        if not (LA_WINDOWS and "PE" in loai and "khac" not in loai):   # dọn: chỉ thử lại PermissionError trên Windows
+            break
+        if k == SO_LAN_THU_LAI:   # dọn: hết lượt
+            break
+        ngu_thu_lai(CHO_GOC * 2 ** k)
+    try:   # báo là best-effort: stderr hỏng (đĩa đầy…) không được đổi kết quả ghi hay thay lỗi đang ném
+        print(f"KHONG_DON_DUOC {p}: {[f'{type(e).__name__}: {e}' for _, e in loi][:3]}", file=sys.stderr)
+    except Exception:
+        pass
+    return False
+
 def ghi_nguyen_tu(out, tep):
-    """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước."""
+    """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước.
+    Cả ba lần đổi tên (cất bản trước · đưa tạm vào chỗ · hoàn tác) đi qua `doi_ten_thu_lai`; cả hai lần dọn qua
+    `don_thu_muc` (#1475). Hoàn tác hỏng thì bản trước GIỮ NGUYÊN ở `<tam>.cu` để phục hồi tay, còn thư mục tạm vẫn được dọn."""
     out = Path(out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     tam = Path(tempfile.mkdtemp(prefix=f".{out.name}.tam-", dir=out.parent))
@@ -560,14 +613,18 @@ def ghi_nguyen_tu(out, tep):
         for ten, byte in tep.items():
             ghi_tep(tam / ten, byte)
         if out.exists():
-            os.replace(out, cu)
-        os.replace(tam, out)
+            doi_ten_thu_lai(out, cu)
+        doi_ten_thu_lai(tam, out)
     except BaseException:
-        if cu.exists() and not out.exists():
-            os.replace(cu, out)
-        shutil.rmtree(tam, ignore_errors=True)
+        try:
+            if cu.exists() and not out.exists():
+                doi_ten_thu_lai(cu, out)
+        finally:   # dọn thư mục tạm KỂ CẢ khi hoàn tác ném
+            if os.path.lexists(tam):
+                don_thu_muc(tam)
         raise
-    shutil.rmtree(cu, ignore_errors=True)
+    if os.path.lexists(cu):
+        don_thu_muc(cu)
 
 def cac_trang_thai(prov):
     m = prov["moc"]

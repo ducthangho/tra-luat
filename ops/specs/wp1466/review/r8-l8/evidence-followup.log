@@ -1,0 +1,8 @@
+UTC 2026-11-21T05:58:26.278015+00:00
+3A_UNCHANGED_BYTE False FETCH_PRUNE_IN_SPEC False
+GREP_LOCALE C RC 0 MATCHES 58 AUTHOR_BYTES_EQUAL True
+GREP_LOCALE C.UTF-8 RC 0 MATCHES 86 AUTHOR_BYTES_EQUAL False
+INITIAL_DEBT_COUNTER_CORRECTION setup-measure counted six N1-N6 enforcement bullets outside the Nợ section; independent.py and audit_text.py count only Nợ: 27
+TOOL ['git', '--version'] rc 0 output git version 2.43.0
+TOOL ['/usr/bin/python3', '--version'] rc 0 output Python 3.13.18
+SHARED_BOUNDARY []

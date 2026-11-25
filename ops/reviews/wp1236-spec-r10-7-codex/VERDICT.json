@@ -1,0 +1,977 @@
+{
+  "spec_sha256": "d386636003250664b98b4657283c63bdde9f25757e16e342df4bddc4f7eb0779",
+  "vong": 7,
+  "reviewed_sha": "33b6803676b12fd069976dedb79f043a268c29c3",
+  "reviewed_tree": "0f8f559e57d7ced781b2addaed83cad14cb497cb",
+  "findings": [
+    {
+      "id": "X01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P2",
+      "vi_tri": "SPEC.md:328–338,357–364; ops/reviews/wp1236-r10-soan/quet_dot_bien.py:242–247,265–266,277–306,311–313",
+      "van_de": "W01 mới vá một phần: thước đo vẫn phát rc0 + HOAN_TAT khi âm thầm bỏ các ID chưa có src; neo bốn hash chưa ghim môi trường tạo dạng chuẩn. Baseline chỉ lưu nhãn SONG, không có danh sách/số ca hoặc marker hoàn tất tiến trình con. Vì vậy HOAN_TAT + 0 sống sạch chưa chứng minh đã thực thi đầy đủ manifest và kiểm đúng ca; bộ chạy ghim chưa đủ làm phép kiểm đóng lớp.",
+      "bang_chung": [
+        "runner_checks.json/handoff_no_src: 800 ID/op/sha256 sinh thật được giữ nguyên, chỉ bỏ src theo định dạng handoff SPEC:338. Lệnh chay với test/module r9 thật trả rc0: TONG0/GIET0/SONG_SACH0/LOI_CHAY0 và HOAN_TAT; kq chỉ còn neo/baseline. Không sửa nguồn sản phẩm/test, không soạn payload tấn công.",
+        "partial_manifest_probe.json: manifest bàn giao 800 dòng chỉ tái cấp src cho a2:_chuan:0:0:bo_if0; rc=0, TONG 1 / GIET 1 / SONG_SACH 0 / LOI_CHAY 0 và HOAN_TAT. 799 ID biến mất. Chỉ kiểm tổng lớn hơn 0 không đóng được lớp.",
+        "quet_dot_bien.py:278 lọc mọi dòng falsy/thiếu src trước kiểm ID/hash :279, trước tính tập đã chạy :298 và completion :306. Cùng bộ lọc nuốt cả các dòng KHONG_AP_DUNG; ledger ngoài runner vẫn cần được đối chiếu, không thể suy hoàn tất từ stdout.",
+        "python_version_audit.json: cùng byte nguồn/tool/kho, Python3.13 sinh800 và hoi-quy127/127; Python3.12 sinh cùng800 ID/toán tử nhưng800 hash nguồn khác, hoi-quy chỉ125/127. Hai ID mất neo là kho:reason_claim_failed và kho:reason_complete_290_39. normalization_versions.json chứng minh AST gốc bằng nhau, chỉ cách quote f-string đổi. CI ghim3.12 (.github/workflows/ci.yml:164,606,…); đặc tả chưa ghim Python của ast.unparse, neo :282–283 không chứa runtime.",
+        "Trích dẫn cho phần tín hiệu chưa đủ: :242–247 chỉ nhận rc=3 từ chay_ca, bỏ nội dung dong của tín hiệu; :265–266 nhận rc=0 và không GIET/HONG là SONG; :299 chỉ lưu baseline=SONG. Không lưu tập CA thực chạy, số ca hoặc marker cuối child. Hướng CA rỗng, thoát 0 sớm, đổi test chuyển lỗi vô can thành rc=3 chỉ mô tả bằng lời; KHÔNG tạo/chạy nội dung tấn công theo giới hạn người dùng.",
+        "Đối chứng sửa thật: resume_audit.json — nguồn gốc lành dưới ID từng GIET không còn nhận kill cũ; rc=0/SONG, sha256 đúng nguồn gốc. missing_test trả rc=2 KHONG_DO_DUOC. Baseline native 36/36 xanh; native_target_replays.json có 55/55 kill với DO:<ca> và rc=3 bằng test gốc, không cache YAML. Không quy toàn bộ pilot là sai."
+      ],
+      "de_xuat": {
+        "o_dau": "Luật3/5 và chay/_CHAY_CA của bộ quét được ghim, nơi xác lập mẫu số, run identity và tín dụng. Băm công cụ đổi phải đi cùng revision của đặc tả; reviewer không sửa checkout.",
+        "cach_va": "Tách manifest chỉ mục bàn giao khỏi manifest thực thi; thiếu src ở ID phải chạy thì fail-closed hoặc tái dựng và kiểm hash trước khi chạy. Bảo toàn tập ID gốc và đối chiếu tập thực thi/kết quả/ledger KHONG_AP_DUNG, không thu nhỏ mẫu số bằng lọc. Ghim runtime chuẩn hoá hoặc dùng neo AST ổn định đã kiểm trên các runtime hỗ trợ, đưa runtime/dependency profile vào identity của run/resume. Ghi baseline nonempty với tập CA thực chạy, terminal marker và tín hiệu DO/tên ca/assertion; giữ bước reviewer đọc nghĩa để cấp tín dụng luật1/5.",
+        "ca_dong": "Manifest 800 dòng đủ src có đủ 800 trạng thái; toàn bộ hoặc 799 dòng thiếu src bị chặn, không HOAN_TAT. Dòng KHONG_AP_DUNG có disposition/thay thế kiểm được và không biến mất. Resume đổi nguồn/test/runtime không dùng tín dụng cũ. Trên runtime công bố, tái dựng 127/127; đổi định dạng giữ 127. Runtime khác phải bị từ chối rõ ràng hoặc có phép đo tương đương. Baseline không đủ ca, child không hoàn tất, lỗi setup phải là lỗi đo; GIET phải có tín hiệu ca đích thật và đối chứng.",
+        "rui_ro": "Đừng vá bằng cấm handoff gọn mà không có đường tái dựng, hoặc chỉ kiểm tổng>0; sẽ còn mẫu số1/800. Đừng thêm chốt so nguyên văn sản phẩm kiểu A14-S0. AST chuẩn hoá và ledger là chứng cứ hỗ trợ, không tự thay review ngữ nghĩa/test độc lập."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "X01"
+      ],
+      "manifestations": [
+        "Rơi ID trước validation: 0/800 hoặc 1/800 vẫn HOAN_TAT.",
+        "Runtime chuẩn hoá không ghim: Python 3.12 chỉ áp 125/127 cặp trên cùng nguồn.",
+        "Baseline/child thiếu bằng chứng dương về tập ca hoàn tất; GIET mất assertion để audit tín dụng."
+      ],
+      "highest_open_severity": "P2",
+      "nguon": {
+        "reviewed_sha": "33b6803676b12fd069976dedb79f043a268c29c3",
+        "vong6": "W01 trên 19fd74ac8a69c4912b5f9484630a607c5dd11184",
+        "lich_su": "R02/S01/T01/U02/V01/W01; alias test-thieu-chot, mã lượt 1–6."
+      },
+      "common_fix": "Tách manifest chỉ mục bàn giao khỏi manifest thực thi; thiếu src ở ID phải chạy thì fail-closed hoặc tái dựng và kiểm hash trước khi chạy. Bảo toàn tập ID gốc và đối chiếu tập thực thi/kết quả/ledger KHONG_AP_DUNG, không thu nhỏ mẫu số bằng lọc. Ghim runtime chuẩn hoá hoặc dùng neo AST ổn định đã kiểm trên các runtime hỗ trợ, đưa runtime/dependency profile vào identity của run/resume. Ghi baseline nonempty với tập CA thực chạy, terminal marker và tín hiệu DO/tên ca/assertion; giữ bước reviewer đọc nghĩa để cấp tín dụng luật1/5.",
+      "closing_check": "Manifest 800 dòng đủ src có đủ 800 trạng thái; toàn bộ hoặc 799 dòng thiếu src bị chặn, không HOAN_TAT. Dòng KHONG_AP_DUNG có disposition/thay thế kiểm được và không biến mất. Resume đổi nguồn/test/runtime không dùng tín dụng cũ. Trên runtime công bố, tái dựng 127/127; đổi định dạng giữ 127. Runtime khác phải bị từ chối rõ ràng hoặc có phép đo tương đương. Baseline không đủ ca, child không hoàn tất, lỗi setup phải là lỗi đo; GIET phải có tín hiệu ca đích thật và đối chứng.",
+      "ly_do_va_rieng": "Không tách/gộp lại slug. Cùng đơn vị nghĩa là hợp đồng bằng chứng nghiệm thu đầy đủ và tái lập; phải vá chung từ inventory/run profile tới tín dụng ca, không thêm riêng từng survivor."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:69–80,372 giữ CRLF đồng nhất, CR trộn và CR lẻ. Baseline native a103 xanh; census 66=47/10/9 trùng byte bản ghim. Diff hiện tại không đổi hợp đồng này.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "codex:R02",
+        "claude:R03",
+        "claude:R06",
+        "codex:S01",
+        "codex:S03",
+        "claude:S03",
+        "claude:S05",
+        "claude:S06",
+        "codex:T01",
+        "claude:T01",
+        "U02",
+        "V01",
+        "W01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "W01 đã sửa thật resume và test vắng: resume_changed_source và missing_test xác nhận. Đo native 36/36, 55/55 kill đúng tín hiệu; tái dựng/định dạng lại kho 127/127. Còn X01 về rơi inventory, runtime không ghim và bằng chứng child/ca. Ledger GIET <ca> chưa tự chứng minh đúng assertion.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Nghĩa vụ đóng lớp còn ở X01."
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:454–462 ghi rõ ĐỀ NGHỊ, CHỜ duyệt E2; đủ ai_nang/can_cu/tran_cu/tran_moi. Numstat đo lại 1+335+988=1324 trên 3 tệp. Chưa chứng minh 1700 đủ; không suy quyền nâng đã cấp.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:169–170,181–182,425 còn int không bool, >=1, chỉ áp nhánh passed và đối chiếu attempt header; mC9/mC10 còn. Diff không thay nghĩa. Chưa có mã C mới để chạy.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05",
+        "V02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "V02: đếm 17 A1 + 13 A2 = 30 ID; năm luật; 50 mutant đánh số là sàn; ba finding mã lượt 6 thuộc hai lớp. Inventory pilot 800+127=927, mọi hash khớp, phân hạng 764/153/10/0. Hash m1+h khớp neo pilot. Census 66=47/10/9 và 170=25/56/39/50 trùng byte ghim. 1324 là numstat r9. Lệch runtime 125/127 thuộc X01.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:96–98,382 giữ ràng buộc conclusion/trạng thái của K5. Baseline a113 xanh; diff không đổi hợp đồng.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:127–133,397–398 giữ ba dạng landed và yêu cầu lời khai hợp lệ. Baseline a212/a213 xanh trên r9; census 170 đúng tập. Luật 4 giữ ma trận True/1.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:157,199–206,410,415 giữ cutover trước L8 và B8 nguyên byte. Census độc lập: 25 cutover/56 đỏ/39 đạt/50 không lời khai. Chưa chạy L8 mới; không có mâu thuẫn mới trong đặc tả.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:89–92,383 giữ đủ cờ run/tập job/checkout và checkout khác rỗng. Baseline a114 xanh; diff không thay nghĩa.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03",
+        "U01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:143–151,185–197,423–429 giữ mẫu đầu ra/rc CLI, hai nhánh D2b độc lập, failed:-, stderr/rc12 và lỗi đo rc8. Baseline a210 là đối chứng r9, không chứng nhận CLI r10. Không tái xuất biến tep thiếu ở nhánh miễn.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:114–118,157,171–197 giữ du_lieu đã nạp, đường dẫn thô/mode từ OID và git archive đúng OID; mã canonical tách dữ liệu OID. Đọc diff/source; không gọi GitHub. Nghĩa vụ snapshot còn nguyên.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "Quét SPEC:208–230,245–263,503–517: giới hạn hậu duệ, waiver, log/readback chưa xác thực, lệch Issue mục 3, symlink Windows đều còn khai. Không nâng nguồn tự khai thành xác thực authority.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_cu": [
+        "U03"
+      ],
+      "vong_xuat_hien": [
+        4
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:464–478 tách OS bằng chứng và OS test; A/C required, B theo diff; miễn Windows CI chỉ A và phải neo head khi audit. So ADR-0060 M3: không miễn chung, không skipped=pass.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Không còn biểu hiện ĐẶC TẢ của lớp cũ cần đo để giữ nhãn đóng."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "ma1:F04",
+        "ma2:G02",
+        "ma3:H01",
+        "ma4:J01",
+        "ma4:J02",
+        "ma5:K01",
+        "ma5:K02",
+        "ma6:L01",
+        "ma6:L02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2",
+        "ma3",
+        "ma4",
+        "ma5",
+        "ma6"
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "Giữ alias lịch sử. Luật 1–5 và A2-10 đủ sáu fixture; luật 4 bổ sung miền nghĩa. Kho 127 tái dựng đúng. Mẫu pilot 99 chứa đủ 25 bản khác nghĩa và 9 bản tương đương còn sống ở r9. Chưa có mã r10 để chứng minh đóng nợ; thước đo còn X01.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. Nghĩa vụ đóng lớp còn ở X01."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "ma6:L03"
+      ],
+      "vong_xuat_hien": [
+        "ma6"
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "SPEC:121–123,585 xác nhận ./tệp hợp lệ ở A. dotpath_current.json đo lại: plain=[] và dot=[]; docstring r9 vẫn khai cấm dấu chấm. Hợp đồng đặc tả đã rõ, mã tham chiếu chưa sửa; không tự mở P3 đặc tả mới hoặc coi L03 đã đóng mã.",
+      "chua_do_duoc": "Chưa có mã r10 A/B/C; Windows, CI, full release/land không chạy và không tính pass. L03 cần implementation sửa docstring."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug_nguon": "test-thieu-chot",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "ma1:F04",
+        "ma2:G02",
+        "ma3:H01",
+        "ma4:J01/J02",
+        "ma5:K01/K02",
+        "ma6:L01/L02",
+        "spec4:U02"
+      ],
+      "ly_do": "Cùng cơ chế: ca/đột biến không phân biệt đúng chốt và miền nghĩa; đổi từ spec sang code không tạo lớp khác. Cách vá chung là thước kiểm độc lập có target/non-target, ma trận nghĩa và phân hạng. Giữ cả alias và lịch sử; không dùng phép gộp để xoá lần tái diễn.",
+      "phep_doi_chieu": "Giữ phép nối đã có: cùng 127 ID, 25 survivor khác nghĩa và A2-10 được đối chiếu. X01 tiếp tục W01, không đổi slug để giảm lần tái diễn; không đếm alias lần hai."
+    }
+  ],
+  "hoi_tu": {
+    "vong6_sang_7": "0/2",
+    "U": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "mo-ta-duong-dan-lech-hop-dong"
+    ],
+    "F": [],
+    "lop_lap_lan_ba": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "so-do-khong-cung-pham-vi-nguon",
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "test-thieu-chot"
+    ],
+    "lich_su_giu_nguyen": {
+      "spec1_sang_2": "KHONG_DO_DUOC",
+      "spec2_sang_3": "KHONG_DO_DUOC",
+      "spec3_sang_4": "2/4",
+      "ma4_sang_5": "0/1",
+      "ma5_sang_6": "0/1",
+      "spec4_sang_5": "2/3",
+      "vong5_sang_6": "1/2"
+    },
+    "giai_thich": "Đếm mọi lớp kế thừa còn VA_MOT_PHAN cuối vòng 6, sau phép nối alias đã có: W01 và L03, nên F/U=0/2. test-thieu-chot là alias của lớp W01, không đếm đôi. Nếu chỉ xét finding đặc tả mở W01 thì 0/1; không dùng cách đếm hẹp ấy để xoá nợ L03. Giữ nguyên tỷ lệ lịch sử 5→6=1/2. Checkpoint lặp lớp ít nhất ba vòng vẫn có hiệu lực.",
+    "current_spec_finding_only": "0/1"
+  },
+  "da_do_khop": [
+    "Spec d386636003250664b98b4657283c63bdde9f25757e16e342df4bddc4f7eb0779; HEAD 33b6803676b12fd069976dedb79f043a268c29c3; tree 0f8f559e57d7ced781b2addaed83cad14cb497cb đúng assignment.",
+    "Sinh hai lần rc=0: 800 dòng/24 mã, cùng byte hash 0c4f2caa…e646. 800 hash nguồn khớp pilot. Hash m1+h=23a2b387…d60 khớp neo pilot đầy đủ.",
+    "Hồi quy rc=0: 127/127. Chạy lại bốn script sinh đã lưu từ review mã lượt 6, chỉ đổi đường dẫn đọc: 138 dòng/127 ID, không lệch dạng chuẩn. Đổi định dạng/chú thích vẫn áp 127/127.",
+    "Pilot lưu 927 kết quả: 764 GIET, 153 SONG, 10 VO_CAN, 0 LOI_CHAY. Mẫu 99 gồm 34 survivor lịch sử, 10 VO_CAN và 55 GIET, bao 34 ca đích cùng mỗi toán tử có GIET.",
+    "Baseline native rc=0, 36/36. Replay 55 ca đích của mutant trên test gốc, không cache YAML: 55/55 có rc=3 và DO:<đúng ca>.",
+    "Resume sửa thật: ID từng GIET với nguồn gốc lành được chạy lại thành SONG, đúng hash. Test vắng trả rc=2, không còn SONG giả như vòng 6.",
+    "W01 chưa đóng: manifest bàn giao 800 ID thiếu src nhận TONG 0 và HOAN_TAT; chỉ tái cấp một src nhận GIET 1, SONG 0 và HOAN_TAT. Lệnh/rc/hash ở runner_checks và partial_manifest_probe.",
+    "Python 3.12 và 3.13 sinh cùng 800 ID nhưng toàn bộ hash nguồn khác; hồi quy 125/127 so với 127/127. Chỉ khác cách quote f-string, AST gốc bằng nhau. CI dùng 3.12; đặc tả chưa ghim runtime.",
+    "Census rc=0: 66=47/10/9; 170=25 cutover+56 đỏ+39 đạt+50 không lời khai, stdout trùng byte ghim. Số hiện hành: 30 ca, năm luật, 50 mutant đánh số là sàn, 127 cặp kho; 1324 dòng là r9. Trần 1700 chưa có mã r10 để đo.",
+    "Luật 4 route đúng. Luật 5 có ledger tốt hơn nhưng cần kiểm đủ ID/runtime/head mới. Adapter B/C chưa đo. L03 r9: ./tệp vẫn hợp lệ nhưng docstring khai cấm dấu chấm; giữ VA_MOT_PHAN.",
+    "Pilot chạy lại rc=0: 99/99 khớp pilot đóng băng, 55 GIET / 34 SONG / 10 VO_CAN / 0 LOI_CHAY; 25/25 survivor khác nghĩa và 9/9 tương đương đều tái hiện. Có HOAN_TAT và neo trong pilot_subset.stdout."
+  ],
+  "verdict": "changes_requested",
+  "review_status": "complete",
+  "review_class": "sensitive",
+  "preflight": {
+    "authority": "Chỉ thị trực tiếp của người dùng: review độc lập ĐẶC TẢ wp1236 r10 bản sửa2 vòng7; không phải nhận lease thi công. Không gọi mạng/GitHub.",
+    "revision": 10,
+    "generation": "N/A cho review đặc tả được giao; generation thi công mới chưa cấp, không nhận quyền ghi/land từ đặc tả.",
+    "spec_sha256": "d386636003250664b98b4657283c63bdde9f25757e16e342df4bddc4f7eb0779",
+    "blob_check": "git show 33b6803:ops/specs/wp1236-r10.md có cùng sha256 d3866360…0779.",
+    "change_base_sha": "19fd74ac8a69c4912b5f9484630a607c5dd11184",
+    "r9_sha": "c2d606bb6fc230c288200b8f1dd79715462c172b",
+    "r9_tree": "9b78e9e0b1e1d445e19747e65ab4f65ea4016511",
+    "write_set": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work"
+    ],
+    "read_only": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git"
+    ],
+    "capability": "Linux; Python 3.13.18/PyYAML 6.0.3; probe chuẩn hoá bằng Python 3.12.3/PyYAML 6.0.1. Repo review core.abbrev=7; ma_r9_git chưa đặt core.abbrev, các phép đo dùng full OID và không phụ thuộc short SHA. Không sửa config. Có objects 8048551 và ref review mã; freshness remote không đo vì cấm mạng."
+  },
+  "operator_audit": [
+    {
+      "op": "a",
+      "count": 70,
+      "assessment": "Phủ định Compare trong hàm; đếm70, kể cả Compare là test của if.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "a2",
+      "count": 78,
+      "assessment": "78: phủ định điều kiện không phải Compare và comprehension; thêm bỏ hẳn từng if trong comprehension. Docstring bản sửa 2 đã khai rõ phần xoá.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "b",
+      "count": 75,
+      "assessment": "Bỏ từng vế BoolOp, rút singleton;75.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "c",
+      "count": 26,
+      "assessment": "Expr append/extend hoặc AugAssign thành pass;26, không phải xoá mọi loại ghi.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "c2",
+      "count": 43,
+      "assessment": "Return thành Pass, giữ control flow tiếp tục;43.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "d",
+      "count": 9,
+      "assessment": "Đảo bool literal, không lẫn int;9.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "e",
+      "count": 52,
+      "assessment": "Chỉ type(value) is int, +1;52.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "f",
+      "count": 41,
+      "assessment": "Return có value thành None;41, khác c2.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "g",
+      "count": 236,
+      "assessment": "Chuỗi không rỗng, không docstring, TRONG HÀM thêm ~;236. Không đổi values BO_SINH ở module.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "h1",
+      "count": 18,
+      "assessment": "Bỏ từng mục tập/list/tuple/dict module nhận diện được;18.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "h2",
+      "count": 4,
+      "assessment": "Thêm ~them~, dict copy value đầu;4. TOKEN: phần thêm không thể khớp [a-z_]+, do đó tương đương trong miền này; không kiểm được token_expand bằng riêng h2.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i1",
+      "count": 39,
+      "assessment": "Quét lớp ký tự bằng regex chữ, bỏ từng token;39. Caret phủ định cũng bị coi token; cần khai đây là phép thay cú pháp, không khẳng định luôn bỏ một phần tử của tập nghĩa.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i2",
+      "count": 11,
+      "assessment": "Thay nguyên lớp bằng dấu chấm;11. Rộng hơn phép mở rộng [0-9] thành [a-z0-9], không giống hệt mutant ref_any_run nhưng có thể phát hiện cùng ca ký tự chữ.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i3",
+      "count": 6,
+      "assessment": "Bỏ alternation trong nhóm khớp regex đơn giản không ngoặc lồng;6. Không phải mọi nút regex (lookahead RE_TOKEN có dấu ngoặc trong lớp ký tự không được quét cách này).",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i4",
+      "count": 23,
+      "assessment": "Chỉ + hoặc {m,n}/{m} thành *,23; không sinh bỏ * như token_no_whitespace.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i5",
+      "count": 29,
+      "assessment": "29: escape được liệt kê thành ký tự chấm. Ngoài character class là wildcard; trong class là literal. Docstring bản sửa 2 đã sửa đúng.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i6",
+      "count": 2,
+      "assessment": "Bỏ lookaround theo đếm ngoặc và escape,2; không dùng parser regex đầy đủ.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "i7",
+      "count": 8,
+      "assessment": "fullmatch→match, match→search trên method call trong hàm;8.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "j1",
+      "count": 10,
+      "assessment": "is/is not→==/!= trong Compare,10.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "j2",
+      "count": 2,
+      "assessment": "x is True→x;2. Không có x is not None→truthiness của waiver_head_truthy.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "k1",
+      "count": 3,
+      "assessment": "Bỏ strip/casefold/lower không positional args;3.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "k2",
+      "count": 6,
+      "assessment": "Đổi isalnum/isalpha, startswith/endswith;6.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "k3",
+      "count": 3,
+      "assessment": "Membership trên Name của tập module→any substring;3. phi_substring khác tên biến bound nhưng cùng nghĩa, không coi là thiếu chỉ vì AST khác.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    },
+    {
+      "op": "l",
+      "count": 6,
+      "assessment": "Đảo if-return liền nhau trong body/orelse hỗ trợ;6. Không đảo qua gán dong hay try/except ngày như hai biến thể thứ tự cũ.",
+      "evidence": "Đọc sinh/_bien_regex, đối chiếu delta nhóm tại operator_deltas.json và hai manifest sinh mới; 24 mã, tổng 800."
+    }
+  ],
+  "operator_coverage_limits": {
+    "exact_overlap": 68,
+    "exact_nonmatches": 59,
+    "interpretation": "68/127 trùng nguồn manifest. 59 khác nguồn không có nghĩa 59 toán tử thiếu: g dùng hậu tố ~ thay __doi; k3 đổi tên biến nhưng cùng nghĩa.",
+    "not_generated_or_not_exact": [
+      "phi_skip_descendants: bỏ đệ quy chọn lọc dưới metadata.",
+      "waiver_head_truthy: is not None thành truthiness; j2 chỉ đổi is True.",
+      "producer_version_0..2: đổi value BO_SINH; g chỉ hoạt động trong hàm.",
+      "waiver_order_author_url/line_author/os_date: đổi thứ tự qua guard/gán/try; l chỉ hai if-return liền nhau.",
+      "token_expand: thêm token hợp grammar như pass; h2 chỉ thêm ~them~ nên tương đương ở TOKEN.",
+      "token_no_whitespace: bỏ \\s*; i4 chỉ đổi +/{…} thành *.",
+      "ref_any_run: mở [0-9] thành [a-z0-9]; i2 thay bằng dấu chấm rộng hơn, có thể giết cùng ca nhưng không cùng phép thay.",
+      "url_zero_indexerror/url_zero_optional: !=1 thành >1 hoặc trả rỗng chọn lọc khi 0 URL; không phải phủ định Compare đơn thuần."
+    ],
+    "disposition": "Tất cả nằm trong 127 cặp kho nên vẫn là nghĩa vụ luật 5. Không tạo payload mới. Công cụ hữu hạn không chứng minh bao mọi ngữ nghĩa; regex dùng phép thay chữ, không phải parser đầy đủ."
+  },
+  "law5_assessment": {
+    "r9": "127/127 dạng chuẩn khớp bản gốc tái sinh; đổi định dạng/chú thích giữ 127/127. Neo trung bình 1,19685 dòng, tối đa 6.",
+    "new_head": "Đổi tên biến cục bộ c thành ky_tu trong _chuan: 125 áp được, 2 KHONG_AP_DUNG (key_alpha_only/key_no_casefold) được liệt kê. Ledger mới đòi thay thế cùng nghĩa GIET hoặc chứng minh chốt đã bỏ khỏi đặc tả. Đây là ràng buộc quy trình tốt; phải đối chiếu đủ tập ID, không tự miễn vì neo vắng.",
+    "runtime": "Cùng head, chỉ đổi Python 3.13 thành 3.12: 125/127 cặp áp được; 800 hash manifest đổi. Runtime chưa ghim: biểu hiện X01.",
+    "equivalence": "TUONG_DUONG phải có chứng minh trên miền đầu vào/consumer/head hiện hành; chín ID r9 không tự chuyển sang head mới. h2 trên TOKEN tương đương vì ~them~ ngoài regex; không chứng minh test đã khoá tập TOKEN.",
+    "incidental": "VO_CAN không được tính GIET cho luật 1/5. Danh sách này cần chứng minh lỗi trên đầu vào hợp lệ; không cho phép đổi test để ngoại lệ vô can thành TinHieuChotCa.",
+    "residual_adversarial_directions_verbal_only": [
+      "Tự khai tương đương khi còn đầu vào phân biệt sẽ vi phạm luật 3; reviewer cần đối chứng độc lập.",
+      "KHONG_AP_DUNG thiếu thay thế/authority bỏ luật không đóng ledger; runner lọc dòng ấy không làm ledger hợp lệ.",
+      "Đổi test để lỗi setup trả rc=3 sẽ được scanner ghi GIET. Cần nguyên nhân assertion, đối chứng và smoke đúng consumer. Không tạo/chạy nội dung tấn công."
+    ]
+  },
+  "consumer_adapter_assessment": {
+    "law4": "Route ngữ nghĩa đúng: A gọi helper và kiem_ho_so với head=None; head khác None qua kiem_mien ở A và D2b ở C; L8 ở B. Ca hai lỗi giữ thứ tự waiver; grammar file đi qua consumer.",
+    "current_interfaces": "A dùng CA/chay_ca và GATE_OUTPUT_DOI_CHIEU_MA. B có CA/chay_ca nhưng đọc LAND_EVIDENCE_NGUON_MA (:31). C dùng CANONICAL/CASES (:39,3046). Bộ quét chỉ đặt GATE_OUTPUT_DOI_CHIEU_MA và nhập CA/chay_ca.",
+    "required_before_code_approval": "Test trong write set B/C phải nối adapter và chứng minh mutant được nạp qua L8/D2b bằng smoke có ca dương/âm/đích. Chưa có mã mới để chứng nhận; khác giao thức của harness cũ không tự là finding đặc tả mới. Baseline xanh không chứng minh mutant được nạp."
+  },
+  "budget_assessment": {
+    "proposed": 1700,
+    "approved_in_candidate": false,
+    "measured_base_added_lines": 1324,
+    "files": 3,
+    "remaining_over_r9": 376,
+    "estimate": "+200..+300 là ước lượng, không phải prototype đo được. Cộng chính xác là 1524..1624, được làm tròn thành khoảng 1550..1650. 34 survivor kho nằm trong 153, không cộng thành 187 đột biến độc lập.",
+    "conclusion": "Có phép đo nền 1324 và pilot; CHƯA có phép đo chứng minh 1700 đủ. Giữ nhãn đề nghị E2, đo numstat mã r10 trước review.",
+    "split_limit": "Phương án A1/A2 ở SPEC:461 không tự hợp thức land A1 chưa đạt luật 3. Cần revision với slice có acceptance độc lập theo §12/ADR-0044; không bỏ gate để vừa 1400."
+  },
+  "method_decision": {
+    "E1": "Chưa kết luận E1: không công nhận cách hiện tại đã đóng lớp, nhưng chưa hết phương án có phép đo. Resume, 127 bản tái dựng và 55 native kill là tiến bộ đã đo. Còn phương án hữu hạn kiểm đủ inventory/runtime/terminal evidence với ca đóng X01 cụ thể. Phải checkpoint xét lại hợp đồng bằng chứng theo §12, không tiếp tục chỉ thêm ca cho từng survivor.",
+    "approval": "changes_requested: một P2 trong một lớp còn mở; sensitive không đủ điều kiện approve. V02 giữ đóng.",
+    "scope": "Review đặc tả và công cụ nghiệm thu ghim; không chứng nhận mã r10, CI, triển khai L8/D2b hoặc authority merge/land."
+  },
+  "review_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "model_family": "openai",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "run_id": "ab68a4ed2ef640e19349764febeb41f2",
+    "session_id": "KHONG_DO_DUOC",
+    "evidence": "../run/ab68a4ed/run.json ghi provider, execution_surface, transport và run_id. Không có bằng chứng runtime về model/effort phục vụ; không suy identity từ GitHub actor.",
+    "independence": "Context reviewer độc lập theo assignment; không tham gia Executor, không spawn/fork subagent.",
+    "sandbox": "workspace-write theo môi trường; người dùng giới hạn repo/ma_r9_git chỉ đọc. Mọi script/output/cache/TMPDIR do reviewer tạo nằm trong work. Không khai OS cưỡng chế read-only toàn kho.",
+    "assurance": "Verdict nội dung, không tự tạo cross_approved/human_audited hoặc quyền land. Điều phối kiểm terminal run/hash và receipt riêng."
+  },
+  "validation_scope": {
+    "environment": {
+      "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+      "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+      "PyYAML": "6.0.3",
+      "python_compat_probe": "3.12.3"
+    },
+    "passed": [
+      "Hash spec/HEAD/tree/blob/tool/kho/pilot",
+      "Sinh hai lần: 800 dòng giống byte",
+      "Tái dựng 127 bản gốc; đổi định dạng giữ 127",
+      "Nguồn gốc lành vô hiệu kết quả kill cũ",
+      "Test vắng bị chặn rc=2",
+      "Baseline native 36/36",
+      "Native target replay 55/55",
+      "Census trùng byte bản ghim; số tổng V02",
+      "Đường dẫn thường và ./tệp đều hợp lệ",
+      "Pilot 99/99 khớp hash/rc/grade/giet/hong: 55 GIET, 34 SONG, 10 VO_CAN; tái hiện đủ 25/25 + 9/9, rc=0 và HOAN_TAT.",
+      "Snapshot repo và ma_r9_git không có delta quan sát được; HEAD/tree/diff/index/status khớp đầu/cuối."
+    ],
+    "failed": [
+      "Manifest thiếu src toàn bộ/một phần vẫn HOAN_TAT: 0/800 và 1/800",
+      "Runtime chưa ghim: Python 3.12 chỉ tái dựng 125/127"
+    ],
+    "skipped": [],
+    "not_run": [
+      "Full 927 pilot replay; đã chạy mẫu 99 có chủ đích, không là mẫu thống kê.",
+      "Mã r10 A/B/C, Windows local/CI, release/land gates",
+      "GitHub/mạng và freshness remote",
+      "Ruff lint/pin-probe (review đặc tả)",
+      "Harness tấn công, ledger giả, early exit: chỉ mô tả bằng lời"
+    ],
+    "limits": [
+      "Mẫu 99 chọn có chủ đích, không phải mẫu thống kê.",
+      "Kết quả r9 không chứng minh mã r10 đạt.",
+      "Snapshot đầu/cuối chỉ chứng minh không có delta quan sát được; không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên."
+    ]
+  },
+  "execution_receipts": [
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/formatted_source.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/formatted_h.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 0.12949717599985888,
+      "stdout_sha256": "5d34104b1e59d5cffc232d455175f7df0fa82d780a2c38289c46b5222f3e4bd3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/manifest_handoff_no_src.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/handoff_no_src_kq.jsonl",
+        "--song-song",
+        "4"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 39.54575134699917,
+      "stdout_sha256": "083dd6aa5407dc3a70302eec352f1f094a0662c0434cd21a54298bb40141fb08",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/h.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 0.12299389600048016,
+      "stdout_sha256": "5d34104b1e59d5cffc232d455175f7df0fa82d780a2c38289c46b5222f3e4bd3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m1.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/does_not_exist_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/missing_test_kq.jsonl",
+        "--song-song",
+        "4"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 2,
+      "seconds": 0.09007624399964698,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5baf7294bded8b868d50eaef41eeee69d0ff0acd5243653ea1a9dfee8408d691"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/partially_reconstructed_manifest.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/partially_reconstructed_kq.jsonl",
+        "--song-song",
+        "1"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 70.33274276000157,
+      "stdout_sha256": "82734d5123107325fa73be4d594c3b375424128010c0a0d391f454a7fd6a3326",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/renamed_local.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/renamed_h.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 0.11626881700067315,
+      "stdout_sha256": "55614f97468c2481fa4b69ae972a2b2d5c73c861a0d0b8d28b4f7d0aede969d0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_input.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_kq.jsonl",
+        "--song-song",
+        "1"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 88.85024685199824,
+      "stdout_sha256": "24462066dd3eb0ec0aa20b266f7f0481df8d649865a93c48230def6e13882244",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "sinh",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m1.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 36.98322909499984,
+      "stdout_sha256": "560f93146e1e9d9c9b1ea7a8172a59e07caadef68c6832f9dcce19f2f2a18dd8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "sinh",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m2.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 37.012206994000735,
+      "stdout_sha256": "560f93146e1e9d9c9b1ea7a8172a59e07caadef68c6832f9dcce19f2f2a18dd8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r9-soan/thamchieu.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo"
+      ],
+      "rc": 0,
+      "stdout_sha256": "3f47032b137318ecab965197abadd9f162cf3f2e30f0350e36f92f09b3816d18",
+      "matches_frozen": true,
+      "seconds": 9.923797532999743,
+      "last_lines": [
+        "passed ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/danh-gia-gate-output-42018846747.txt ",
+        "Counter({'passed': 47, 'failed': 10, 'not_measured': 9})"
+      ]
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r9-soan/do_loi_khai.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo"
+      ],
+      "rc": 0,
+      "stdout_sha256": "1befd6837c7840dd962af700b6f5c84bae9ae107e346ba72b92f6ec91b7275d2",
+      "matches_frozen": true,
+      "seconds": 11.444558262999635,
+      "last_lines": [
+        "{'MIEN_CUTOVER': 25, 'KHONG_LOI_KHAI': 50, 'DO': 56, 'DAT': 39}",
+        "{'duong_khong_tep_danh_gia': 39, 'landed_khong_loi_khai_gate_output': 36, 'danh_gia_khong_passed': 12, 'dinh_dang_loi_khai': 2, 'waiver_khong_co_can_cu': 2, 'tep_danh_gia_khong_hop_le': 2}"
+      ]
+    },
+    {
+      "command": [
+        "/usr/bin/python3.12",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/h_py312.jsonl"
+      ],
+      "rc": 0,
+      "seconds": 0.20260106099885888,
+      "stdout": "HOI_QUY 127 · AP_DUNG 125 · KHONG_AP_DUNG 2\nKHONG_AP_DUNG kho:reason_claim_failed neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\nKHONG_AP_DUNG kho:reason_complete_290_39 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3.12",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "sinh",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m_py312.jsonl"
+      ],
+      "rc": 0,
+      "seconds": 40.35931275800249,
+      "stdout": "SINH 800 a=70 a2=78 b=75 c=26 c2=43 d=9 e=52 f=41 g=236 h1=18 h2=4 i1=39 i2=11 i3=6 i4=23 i5=29 i6=2 i7=8 j1=10 j2=2 k1=3 k2=6 k3=3 l=6\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "-c",
+        "import importlib.util,json,sys,time\np=sys.argv[1]\ns=importlib.util.spec_from_file_location(\"godc_native\",p);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m)\nrows=[]\nfor c in m.CA:\n st=time.monotonic();rc,out=m.chay_ca(c);rows.append({\"case\":c,\"rc\":rc,\"output\":out,\"seconds\":time.monotonic()-st})\nprint(json.dumps(rows,ensure_ascii=False))\nsys.exit(0 if rows and all(x[\"rc\"]==0 for x in rows) else 1)\n",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py"
+      ],
+      "rc": 0,
+      "stdout_sha256": "a4d888be63157e9ea7f2cb92ecd0065776649f250972d7254e3e66416231baf2"
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset_kq.jsonl",
+        "--song-song",
+        "4"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 771.4265575209993,
+      "stdout_sha256": "0365d847dd3093956797adc941c06529de4772d0f19488917a218f9832a2c5f4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "evidence_files": [
+    "generation_audit.json",
+    "reconstruction_audit.json",
+    "structure_audit.json",
+    "operator_deltas.json",
+    "literal_manifest_overlap.json",
+    "runner_checks.json",
+    "partial_manifest_probe.json",
+    "python_version_audit.json",
+    "normalization_versions.json",
+    "resume_audit.json",
+    "native_target_replays.json",
+    "baseline_cases.json",
+    "reference_census.json",
+    "dotpath_current.json",
+    "snapshot_before.json",
+    "pilot_comparison.json",
+    "pilot_subset_kq.jsonl",
+    "pilot_subset.stdout",
+    "environment.json",
+    "snapshot_after.json"
+  ],
+  "pilot_replay": {
+    "receipt": {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "chay",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset.jsonl",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+        "--goc",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset_kq.jsonl",
+        "--song-song",
+        "4"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 771.4265575209993,
+      "stdout_sha256": "0365d847dd3093956797adc941c06529de4772d0f19488917a218f9832a2c5f4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "counts": {
+      "GIET": 55,
+      "VO_CAN": 10,
+      "SONG": 34
+    },
+    "result_count": 99,
+    "mismatches": [],
+    "non_equivalent25_reproduced": 25,
+    "equivalent9_reproduced": 9,
+    "completion_stdout": [
+      "TONG 99 · GIET 55 · SONG_SACH 34 · CHI_LOI_VO_CAN 10 · LOI_CHAY 0",
+      "HOAN_TAT neo={\"cong_cu\": \"1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a\", \"goc\": \"af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94\", \"manifest\": \"3314bf8cadcfb48e64387e6184b5dbf2a342ebc6cb5a15cb0c7fd3e97cee72f0\", \"test\": \"f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63\"}"
+    ],
+    "scope": "99 selected mutants, not full927; all prior25 non-equivalent survivors+9equivalent,all10incidental,55kills covering34target cases and every operator with a kill."
+  },
+  "read_only_snapshot": {
+    "scope": "Mọi file thường ngoài .git có hash/mode; symlink có đích. Git HEAD/tree, status cả ignored/untracked, diff/index diff đo riêng. Không đo lịch sử từng ghi rồi hoàn nguyên.",
+    "before": "snapshot_before.json",
+    "after": "snapshot_after.json",
+    "results": {
+      "repo": {
+        "files_before": 17431,
+        "files_after": 17431,
+        "changed_paths": [],
+        "git_equal": true,
+        "head_tree": [
+          "33b6803676b12fd069976dedb79f043a268c29c3",
+          "0f8f559e57d7ced781b2addaed83cad14cb497cb"
+        ]
+      },
+      "ma_r9_git": {
+        "files_before": 17333,
+        "files_after": 17333,
+        "changed_paths": [],
+        "git_equal": true,
+        "head_tree": [
+          "c2d606bb6fc230c288200b8f1dd79715462c172b",
+          "9b78e9e0b1e1d445e19747e65ab4f65ea4016511"
+        ]
+      }
+    }
+  },
+  "schema_validation": {
+    "command": [
+      "/usr/local/bin/python3",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/kiem_verdict_lop.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/VERDICT.json",
+      "--vong",
+      "7"
+    ],
+    "rc": 0,
+    "positive_evidence": "HOP_LE (§8.3): 1 finding, 1 lop",
+    "output_file": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/kiem_verdict.txt",
+    "stdout_sha256": "ca7a635162664a79d33a714e78991a7bfe5e028a16ac9b2cd7ce80ca4b0aab71",
+    "meaning": "Chỉ kiểm schema, không tự chứng minh phép đo/approval."
+  }
+}

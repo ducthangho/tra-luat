@@ -1,0 +1,882 @@
+[
+  {
+    "id": "a2:_chuan:0:0:bo_if0",
+    "case": "a201_loi_khai",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a201_loi_khai"
+    ],
+    "rc": 3,
+    "stdout": "DO:a201_loi_khai:loi_khai: []\n",
+    "stderr": "",
+    "seconds": 0.07827435899889679,
+    "positive": true
+  },
+  {
+    "id": "a2:_kiem_tep:0:0:bo_if0",
+    "case": "a119_k3_k6_du_lieu_di_dang",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a119_k3_k6_du_lieu_di_dang"
+    ],
+    "rc": 3,
+    "stdout": "DO:a119_k3_k6_du_lieu_di_dang:job provenance khong phai mapping: mong ('passed', []), được ('not_measured', ['AttributeError'])\n",
+    "stderr": "",
+    "seconds": 0.5329739909975615,
+    "positive": true
+  },
+  {
+    "id": "a2:_kiem_tep:0:0:bo_if0#1",
+    "case": "a109_check_bat_buoc",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a109_check_bat_buoc"
+    ],
+    "rc": 3,
+    "stdout": "DO:a109_check_bat_buoc:gate-registry not_measured: mong ('not_measured', ['check_bat_buoc:gate-registry (ubuntu-latest)']), được ('not_measured', [])\n",
+    "stderr": "",
+    "seconds": 1.2373318819991255,
+    "positive": true
+  },
+  {
+    "id": "a2:_kiem_tep:0:0:bo_if0#2",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['check_bat_buoc:gate (ubuntu-latest)', 'check_bat_buoc:gate-cong-cu-gop (ubuntu-latest)', 'check_bat_buoc:gate-ops (ubuntu-latest)', 'check_bat_buoc:gate-packet-loop (ubuntu-latest)', 'check_bat_buoc:gate-registry (ubuntu-latest)'])\n",
+    "stderr": "",
+    "seconds": 0.2978484599989315,
+    "positive": true
+  },
+  {
+    "id": "a2:_tep_trong:226:4",
+    "case": "a204_duong_dan",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a204_duong_dan"
+    ],
+    "rc": 3,
+    "stdout": "DO:a204_duong_dan:(a) ['$.moc_gate_output: danh_gia_khong_passed:x/../danh-gia-gate-output-44669622916.txt:not_measured:symlink']\n",
+    "stderr": "",
+    "seconds": 0.6168987700002617,
+    "positive": true
+  },
+  {
+    "id": "a2:_tep_trong:230:8",
+    "case": "a205_duong_khop",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a205_duong_khop"
+    ],
+    "rc": 3,
+    "stdout": "DO:a205_duong_khop:vp: ['$.moc_gate_output: tep_danh_gia_khong_hop_le:danh-gia-gate-output-44669622916.txt']\n",
+    "stderr": "",
+    "seconds": 0.2442229430016596,
+    "positive": true
+  },
+  {
+    "id": "a2:chon_provenance:97:22",
+    "case": "a116_yaml_la_trong_thu_muc",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a116_yaml_la_trong_thu_muc"
+    ],
+    "rc": 3,
+    "stdout": "DO:a116_yaml_la_trong_thu_muc:(e) thu muc provenance la symlink: mong ('not_measured', ['symlink', 'provenance_0']), được ('not_measured', ['provenance_0'])\n",
+    "stderr": "",
+    "seconds": 1.5703979930003698,
+    "positive": true
+  },
+  {
+    "id": "a2:doc_danh_gia:52:12",
+    "case": "a102_ca_kho_tai_base",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a102_ca_kho_tai_base"
+    ],
+    "rc": 3,
+    "stdout": "DO:a102_ca_kho_tai_base:cả kho tại base: 66 tệp {'not_measured': 11, 'passed': 45, 'failed': 10}\n",
+    "stderr": "",
+    "seconds": 20.108266422997986,
+    "positive": true
+  },
+  {
+    "id": "a2:kiem_ho_so:281:12",
+    "case": "a203_duong_khong_tep",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a203_duong_khong_tep"
+    ],
+    "rc": 3,
+    "stdout": "DO:a203_duong_khong_tep:vp: []\n",
+    "stderr": "",
+    "seconds": 0.18450474100245629,
+    "positive": true
+  },
+  {
+    "id": "a2:kiem_ho_so:291:8",
+    "case": "a212_landed_khong_loi_khai",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a212_landed_khong_loi_khai"
+    ],
+    "rc": 3,
+    "stdout": "DO:a212_landed_khong_loi_khai:(d) mong ['$.moc_gate_output: duong_khong_tep_danh_gia', '$: landed_khong_loi_khai_gate_output'], được ['$.moc_gate_output: duong_khong_tep_danh_gia']\n",
+    "stderr": "",
+    "seconds": 0.15942286000063177,
+    "positive": true
+  },
+  {
+    "id": "a2:kiem_mien:0:0:bo_if0#1",
+    "case": "a209_mien",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a209_mien"
+    ],
+    "rc": 3,
+    "stdout": "DO:a209_mien:(l) readback symlink\n",
+    "stderr": "",
+    "seconds": 0.13620190000074217,
+    "positive": true
+  },
+  {
+    "id": "a2:loi_khai:190:21",
+    "case": "a214_vong_tham_chieu",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a214_vong_tham_chieu"
+    ],
+    "rc": 3,
+    "stdout": "DO:a214_vong_tham_chieu:loi_khai tren vong: RecursionError('maximum recursion depth exceeded')\n",
+    "stderr": "",
+    "seconds": 0.12313974799690186,
+    "positive": true
+  },
+  {
+    "id": "a2:loi_khai:191:59",
+    "case": "a210_cli",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a210_cli"
+    ],
+    "rc": 3,
+    "stdout": "DO:a210_cli:khoang trang: 2 THAM SỐ: /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/tmp/godc cli 6wi0_wbw/pr9001 thu-land-evidence.yaml: không đọc được (RecursionError)\n\n",
+    "stderr": "",
+    "seconds": 1.6081233550030447,
+    "positive": true
+  },
+  {
+    "id": "a2:main:308:15",
+    "case": "a217_cli_tham_so_va_ma_thoat",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a217_cli_tham_so_va_ma_thoat"
+    ],
+    "rc": 3,
+    "stdout": "DO:a217_cli_tham_so_va_ma_thoat:khong doi so: rc=0 [-h] {kiem-tep,kiem-ho-so} ...\n7e49fa894d2be766d6a1cabc83e7c3297c01a9d6a046efaff359f3ab051cd933.py: error: the following arguments are required: lenh\n\n",
+    "stderr": "",
+    "seconds": 0.15231097099967883,
+    "positive": true
+  },
+  {
+    "id": "a:_kiem_tep:126:7",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', [])\n",
+    "stderr": "",
+    "seconds": 0.10767926199696376,
+    "positive": true
+  },
+  {
+    "id": "a:_kiem_tep:154:11",
+    "case": "a105_bam_log",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a105_bam_log"
+    ],
+    "rc": 3,
+    "stdout": "DO:a105_bam_log:log_sha_lech: mong ('not_measured', ['log_sha_lech:136067289201']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 0.6958694479981204,
+    "positive": true
+  },
+  {
+    "id": "a:kiem_ho_so:291:11",
+    "case": "a216_hop_le_theo_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a216_hop_le_theo_token"
+    ],
+    "rc": 3,
+    "stdout": "DO:a216_hop_le_theo_token:landed + duong hop le\n",
+    "stderr": "",
+    "seconds": 0.40786195299733663,
+    "positive": true
+  },
+  {
+    "id": "a:token:203:25",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "rc": 3,
+    "stdout": "DO:a202_token:token: [None, None, None, 'measuredx', None, None, None, None]\n",
+    "stderr": "",
+    "seconds": 0.09097092400043039,
+    "positive": true
+  },
+  {
+    "id": "b:_kiem_tep:135:12:ve0",
+    "case": "a108_neo",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a108_neo"
+    ],
+    "rc": 3,
+    "stdout": "DO:a108_neo:(c): mong ('not_measured', ['khong_phai_run_land']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 2.0706529149974813,
+    "positive": true
+  },
+  {
+    "id": "b:_kiem_tep:143:12:ve0",
+    "case": "a114_provenance_tu_khai_du",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a114_provenance_tu_khai_du"
+    ],
+    "rc": 3,
+    "stdout": "DO:a114_provenance_tu_khai_du:(a): mong ('not_measured', ['provenance_chua_du']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 0.4912411749974126,
+    "positive": true
+  },
+  {
+    "id": "b:_kiem_tep:156:12:ve0",
+    "case": "a106_danh_tinh_job",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a106_danh_tinh_job"
+    ],
+    "rc": 3,
+    "stdout": "DO:a106_danh_tinh_job:doi name: mong ('not_measured', ['job_lech:136067289244']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 0.5368266500008758,
+    "positive": true
+  },
+  {
+    "id": "b:_tep_trong:226:7:ve2",
+    "case": "a215_landed_mien_di_dang",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a215_landed_mien_di_dang"
+    ],
+    "rc": 3,
+    "stdout": "DO:a215_landed_mien_di_dang:thu muc ho so la symlink: ['$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:symlink,provenance_0']\n",
+    "stderr": "",
+    "seconds": 0.16899601600016467,
+    "positive": true
+  },
+  {
+    "id": "b:chon_provenance:108:16:ve0",
+    "case": "a118_k1_k2_quet_he_thong",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a118_k1_k2_quet_he_thong"
+    ],
+    "rc": 3,
+    "stdout": "DO:a118_k1_k2_quet_he_thong:provenance khac co run khong phai mapping: mong ('passed', []), được ('not_measured', ['AttributeError'])\n",
+    "stderr": "",
+    "seconds": 1.1283896880013344,
+    "positive": true
+  },
+  {
+    "id": "b:doc_danh_gia:67:15:ve0",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:job_lap: mong ('not_measured', ['job_lap']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 1.2446519750010339,
+    "positive": true
+  },
+  {
+    "id": "b:doc_danh_gia:70:19:ve1",
+    "case": "a107_tap_job",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a107_tap_job"
+    ],
+    "rc": 3,
+    "stdout": "DO:a107_tap_job:doi thanh skipped: mong ('not_measured', ['tap_job_lech', 'tap_skip_lech']), được ('not_measured', ['dong_la'])\n",
+    "stderr": "",
+    "seconds": 1.0718351130017254,
+    "positive": true
+  },
+  {
+    "id": "b:kiem_ho_so:281:15:ve0",
+    "case": "a208_failed_nhat_quan",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a208_failed_nhat_quan"
+    ],
+    "rc": 3,
+    "stdout": "DO:a208_failed_nhat_quan:failed khong tep\n",
+    "stderr": "",
+    "seconds": 0.4031905250012642,
+    "positive": true
+  },
+  {
+    "id": "b:kiem_ho_so:290:72:ve0",
+    "case": "a206_duong_lech",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a206_duong_lech"
+    ],
+    "rc": 3,
+    "stdout": "DO:a206_duong_lech:T-skip ['$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-43969906464.txt:not_measured:-']\n",
+    "stderr": "",
+    "seconds": 0.5791437809966737,
+    "positive": true
+  },
+  {
+    "id": "b:la_landed:219:28:ve1",
+    "case": "a213_la_landed_khop_kiem_ho_so_land",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a213_la_landed_khop_kiem_ho_so_land"
+    ],
+    "rc": 3,
+    "stdout": "DO:a213_la_landed_khop_kiem_ho_so_land:la_landed vs kiem_ho_so_land: 170 ho so, 94 landed, 2 lech\n",
+    "stderr": "",
+    "seconds": 12.541919742998289,
+    "positive": true
+  },
+  {
+    "id": "c2:_chuan:182:4",
+    "case": "a210_cli",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a210_cli"
+    ],
+    "rc": 3,
+    "stdout": "DO:a210_cli:khoang trang: 2 LỖI THAM SỐ: /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/tmp/godc cli hcf4q5jk/pr9001 thu-land-evidence.yaml: không đọc được (TypeError)\n\n",
+    "stderr": "",
+    "seconds": 1.454499172999931,
+    "positive": true
+  },
+  {
+    "id": "c2:_kiem_tep:129:8",
+    "case": "a104_bo_sinh_la",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a104_bo_sinh_la"
+    ],
+    "rc": 3,
+    "stdout": "DO:a104_bo_sinh_la:bo_sinh_la: mong ('not_measured', ['bo_sinh_la']), được ('not_measured', ['KeyError'])\n",
+    "stderr": "",
+    "seconds": 0.5122358980006538,
+    "positive": true
+  },
+  {
+    "id": "c2:kiem_tep:121:8",
+    "case": "a117_loi_duyet_va_job_trung",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a117_loi_duyet_va_job_trung"
+    ],
+    "rc": 3,
+    "stdout": "DO:a117_loi_duyet_va_job_trung:G01 loi duyet: mong ('not_measured', ['PermissionError']), được None\n",
+    "stderr": "",
+    "seconds": 0.9632389239995973,
+    "positive": true
+  },
+  {
+    "id": "c:_kiem_tep:136:8",
+    "case": "a108_neo",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a108_neo"
+    ],
+    "rc": 3,
+    "stdout": "DO:a108_neo:(c): mong ('not_measured', ['khong_phai_run_land']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 1.8127820030022122,
+    "positive": true
+  },
+  {
+    "id": "c:_kiem_tep:160:12",
+    "case": "a113_ket_luan",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a113_ket_luan"
+    ],
+    "rc": 3,
+    "stdout": "DO:a113_ket_luan:lat failure thanh passed: mong ('not_measured', ['ket_luan_lech:136203672900']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 0.5933675079977547,
+    "positive": true
+  },
+  {
+    "id": "c:_kiem_tep:165:8",
+    "case": "a111_skipped_theo_phien_ban",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a111_skipped_theo_phien_ban"
+    ],
+    "rc": 3,
+    "stdout": "DO:a111_skipped_theo_phien_ban:v3 + dong cu: mong ('not_measured', ['dong_skip_sai_phien_ban']), được ('not_measured', ['co_job_skipped'])\n",
+    "stderr": "",
+    "seconds": 0.45272165300048073,
+    "positive": true
+  },
+  {
+    "id": "c:_kiem_tep:169:8",
+    "case": "a110_dong_tong",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a110_dong_tong"
+    ],
+    "rc": 3,
+    "stdout": "DO:a110_dong_tong:v2: mong ('not_measured', ['moc_lech']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 0.5838345209995168,
+    "positive": true
+  },
+  {
+    "id": "c:chon_provenance:102:16",
+    "case": "a112_symlink",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a112_symlink"
+    ],
+    "rc": 3,
+    "stdout": "DO:a112_symlink:symlink tep: mong ('not_measured', ['symlink', 'provenance_0']), được ('not_measured', ['provenance_0'])\n",
+    "stderr": "",
+    "seconds": 0.37785074899875326,
+    "positive": true
+  },
+  {
+    "id": "d:chon_provenance:98:54",
+    "case": "a118_k1_k2_quet_he_thong",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a118_k1_k2_quet_he_thong"
+    ],
+    "rc": 3,
+    "stdout": "DO:a118_k1_k2_quet_he_thong:khong di vao thu muc symlink: mong ('not_measured', ['symlink']), được ('not_measured', ['symlink', 'provenance_nhieu'])\n",
+    "stderr": "",
+    "seconds": 1.4086519129996304,
+    "positive": true
+  },
+  {
+    "id": "e:chon_provenance:111:20",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['provenance_nhieu'])\n",
+    "stderr": "",
+    "seconds": 0.2244703770011256,
+    "positive": true
+  },
+  {
+    "id": "f:_chuan:182:4",
+    "case": "a210_cli",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a210_cli"
+    ],
+    "rc": 3,
+    "stdout": "DO:a210_cli:khoang trang: 2 LỖI THAM SỐ: /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/tmp/godc cli 12t0_dn1/pr9001 thu-land-evidence.yaml: không đọc được (TypeError)\n\n",
+    "stderr": "",
+    "seconds": 1.4799740850030503,
+    "positive": true
+  },
+  {
+    "id": "g:_kiem_tep:127:15",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dong_la: mong ('not_measured', ['dong_la']), được ('not_measured~', ['dong_la'])\n",
+    "stderr": "",
+    "seconds": 0.2997173809999367,
+    "positive": true
+  },
+  {
+    "id": "g:kiem_ho_so:290:61",
+    "case": "a207_hai_tep",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a207_hai_tep"
+    ],
+    "rc": 3,
+    "stdout": "DO:a207_hai_tep:vp: ['$.moc_gate_output: danh_gia_khong_passed:~x/danh-gia-gate-output-44669622916.txt:not_measured:log_sha_lech:136067289201']\n",
+    "stderr": "",
+    "seconds": 0.426027127999987,
+    "positive": true
+  },
+  {
+    "id": "h1:BO_SINH:0",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v1-pass: mong ('passed', []), được ('not_measured', ['bo_sinh_la'])\n",
+    "stderr": "",
+    "seconds": 0.5752389070003119,
+    "positive": true
+  },
+  {
+    "id": "h2:CHECK_BAT_BUOC_TEN",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['check_bat_buoc:~them~'])\n",
+    "stderr": "",
+    "seconds": 0.25817130799987353,
+    "positive": true
+  },
+  {
+    "id": "i1:RE_DAU:lop@53 bo '0-9'",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['dau_tep_sai'])\n",
+    "stderr": "",
+    "seconds": 0.1120047819968022,
+    "positive": true
+  },
+  {
+    "id": "i2:RE_TEP_DG:lop@20 thanh .",
+    "case": "a204_duong_dan",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a204_duong_dan"
+    ],
+    "rc": 3,
+    "stdout": "DO:a204_duong_dan:(a) ['$.moc_gate_output: tep_danh_gia_khong_hop_le:measured — x/../danh-gia-gate-output-44669622916.txt']\n",
+    "stderr": "",
+    "seconds": 0.13296891899881302,
+    "positive": true
+  },
+  {
+    "id": "i3:RE_JOB:nhanh@75 bo 'failed'",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-fail: mong ('failed', []), được ('not_measured', ['dong_la'])\n",
+    "stderr": "",
+    "seconds": 0.7628389390010852,
+    "positive": true
+  },
+  {
+    "id": "i4:RE_DAU:luong_tu@107 {64}→*",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dau_tep_sai: mong ('not_measured', ['dau_tep_sai']), được ('not_measured', ['bo_sinh_la'])\n",
+    "stderr": "",
+    "seconds": 2.936033538000629,
+    "positive": true
+  },
+  {
+    "id": "i5:RE_JOB:escape@16 \\[→.",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['job_lech:136067289042', 'job_lech:136067289134', 'job_lech:136067289163', 'job_lech:136067289169', 'job_lech:136067289193', 'job_lech:136067289201', 'job_lech:136067289213', 'job_lech:136067289230', 'job_lech:136067289238', 'job_lech:136067289244', 'job_lech:136067289245', 'job_lech:136067289247', 'job_lech:136067289250', 'job_lech:136067289251', 'job_lech:136067289254', 'job_lech:136067289266', 'job_lech:136067289289', 'job_lech:136067289292', 'job_lech:136067289294', 'job_lech:136067289296', 'job_lech:136067289302', 'job_lech:136067289303', 'job_lech:136067289305', 'job_lech:136067289306', 'job_lech:136067289313', 'job_lech:136067289331', 'job_lech:136067289337', 'job_lech:136067289343', 'job_lech:136067289344', 'job_lech:136067289357', 'job_lech:136067289401', 'job_lech:136067289440', 'job_lech:136067289464', 'job_lech:136067289482', 'job_lech:136068102986', 'job_lech:136068225978', 'job_lech:136069191410', 'job_lech:136075190508'])\n",
+    "stderr": "",
+    "seconds": 0.20890141600102652,
+    "positive": true
+  },
+  {
+    "id": "i6:RE_TOKEN:lookaround@12 bo",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "rc": 3,
+    "stdout": "DO:a202_token:token: ['measured', 'passed', 'failed', None, 'measured', 'passed', None, None]\n",
+    "stderr": "",
+    "seconds": 0.07636206400275114,
+    "positive": true
+  },
+  {
+    "id": "i7:doc_danh_gia:59:17",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dau_tep_sai : mong ('not_measured', ['dau_tep_sai']), được ('passed', [])\n",
+    "stderr": "",
+    "seconds": 1.4535478420002619,
+    "positive": true
+  },
+  {
+    "id": "k1:_chuan:182:30",
+    "case": "a201_loi_khai",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a201_loi_khai"
+    ],
+    "rc": 3,
+    "stdout": "DO:a201_loi_khai:loi_khai: ['$.a[0].gate_output', '$.moc_gate_output']\n",
+    "stderr": "",
+    "seconds": 0.07437892099915189,
+    "positive": true
+  },
+  {
+    "id": "k2:chon_provenance:100:56",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-v3-pass: mong ('passed', []), được ('not_measured', ['provenance_0'])\n",
+    "stderr": "",
+    "seconds": 0.07558463600071263,
+    "positive": true
+  },
+  {
+    "id": "k3:token:203:25",
+    "case": "a202_token",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a202_token"
+    ],
+    "rc": 3,
+    "stdout": "DO:a202_token:token: ['measured', 'passed', 'failed', 'measuredx', None, None, None, None]\n",
+    "stderr": "",
+    "seconds": 0.07419187500272528,
+    "positive": true
+  },
+  {
+    "id": "kho:delete_return_112",
+    "case": "a101_sau_fixture_that",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a101_sau_fixture_that"
+    ],
+    "rc": 3,
+    "stdout": "DO:a101_sau_fixture_that:T-khong-prov: mong ('not_measured', ['provenance_0']), được ('not_measured', ['IndexError'])\n",
+    "stderr": "",
+    "seconds": 1.1069971220022126,
+    "positive": true
+  },
+  {
+    "id": "l:module:124:0:body1",
+    "case": "a103_bo_phan_tich",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a103_bo_phan_tich"
+    ],
+    "rc": 3,
+    "stdout": "DO:a103_bo_phan_tich:dong_la: mong ('not_measured', ['dong_la']), được ('not_measured', ['TypeError'])\n",
+    "stderr": "",
+    "seconds": 0.3670451040015905,
+    "positive": true
+  }
+]

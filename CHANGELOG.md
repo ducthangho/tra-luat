@@ -1,3 +1,85 @@
+# ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
+
+Chủ kho cần chạy tác vụ trích xuất bằng Claude ngay trong skill (cả Cowork), dùng subscription hoặc API key
+và chuyển qua lại khi một bên hết hạn mức/credit.
+
+- Lõi THUẦN `scripts/tl_core/llm_route.py`: đường `sub` = `claude -p` đã cắt ngữ cảnh (đo 24-11: ~1,9k token
+  thay vì ~92k của lệnh trần; KHÔNG `--bare` vì chế độ ấy chỉ nhận API key) và gỡ mọi biến key khỏi env con;
+  đường `api` = SDK `anthropic` + `TL_ANTHROPIC_API_KEY` (rồi `ANTHROPIC_API_KEY`). Chỉ CHUYỂN đường khi lỗi
+  thuộc về đường (thiếu key/SDK/CLI, 401/402/403/429, `billing_error`, 400 "credit balance", mất mạng,
+  `claude -p` báo lỗi); lỗi phía yêu cầu (400 khác, từ chối, `max_tokens`, sai model, sai schema) thì DỪNG.
+- `tl llm-order [THU_TU] [--reset]`: thứ tự lưu bền ở `~/.tra_luat_llm.json` (`TL_LLM_ORDER_FILE`); hiệu lực
+  cờ > tệp > `TL_LLM_ORDER` > mặc định **`sub,api`**. Tệp hỏng ⇒ rc 2, không lùi im lặng về mặc định.
+- `tl llm-khai-niem <số hiệu> --dieu N | --tep`: nguyên văn qua chính `tl extract` (tiến trình con). Mã quyết
+  ranh giới (bỏ "là " thừa — đo 24-11: đường `sub` giữ "là …", đường `api` thì không) và kiểm CẢ CỤM
+  `<thuật ngữ> là <định nghĩa>` có nguyên văn trong nguồn; lệch ⇒ rc 5.
+- Selftest `r380_llm_order_luu_doi_xoa`, `r380_llm_khai_niem_tu_tep_qua_sub`; bộ dev `llm_route_test.py`
+  (không vào gói). Dev-side kèm theo: `launcher.py doctor` mục `anthropic-api`, tài liệu `docs/GOI_AGENT_DA_NEN.md`.
+- Cross-review Codex lượt 1 (`ops/reviews/pr1503-review-1-codex/`, REQUEST_CHANGES, 6 P1 · 5 P2 · 1 P3) — đã vá:
+  kiểm nguyên văn so TRỌN KHOẢN + số/thứ tự khoản (F1); `claude -p` cạn lượt sửa schema ⇒ DỪNG, chỉ nhận khi
+  rc 0 + `subtype=success` + `is_error=false` (F2, F10); `CLAUDE_CODE_USE_*` lạ ⇒ từ chối đường `sub`, cho phép
+  đúng 4 cờ tính năng (danh sách CHO PHÉP), `ANTHROPIC_BASE_URL` chỉ host Anthropic (F3); `--out` chỉ ghi khi
+  đạt, nguyên tử (F4); chuyển tiếp `--config` (F5); nguồn chạm trần export ⇒ dừng trước model (F6); 503/529 ⇒
+  chuyển đường (F7); `doctor` đòi Message có usage (F8); `--thu-tu ""`/symlink đứt ⇒ fail-closed (F9); `--tep`
+  lấy số Điều từ tiêu đề, cấm ghép số hiệu (F11); tệp không UTF-8 ⇒ rc 2 (F12).
+- Cross-review Codex lượt 2 (`ops/reviews/pr1503-review-2-codex/`, REQUEST_CHANGES, 4 P1 · 4 P2) — đã vá: tách
+  khoản FAIL-CLOSED (dòng lạ trước khoản đầu ⇒ nguồn mơ hồ; số khoản nguồn là `stt` kỳ vọng; `1.X`/`(1)`;
+  thuật ngữ không chứa "là") (N1); envelope `claude -p` kiểm kiểu, `stop_reason` refusal/max_tokens ⇒ DỪNG,
+  lỗi SAU khi model đã chạy (có token) ⇒ DỪNG, thành công 0 token ⇒ DỪNG (N2); BOM UTF-8 (N3); đường `sub` đo
+  `claude auth status --json` cùng env — chỉ `authMethod` ∈ {claude.ai, oauth_token} + `apiProvider=firstParty`
+  (N4); `--out` kiểm đích trước khi gọi model, giữ quyền tệp, lỗi I/O ⇒ rc 2 (N5); CAP chỉ chặn khi không thấy
+  Điều kế tiếp (N6); mã HTTP thắng `type` của body (N7); `doctor` đòi đúng model + token không âm (N8).
+- Cross-review Codex lượt 3 (`ops/reviews/pr1503-review-3-codex/`, chủ kho nâng trần; REQUEST_CHANGES, 6 P1 · 1 P2)
+  — đã vá: tách thuật ngữ tại chữ "là" đầu tiên NGOÀI ngoặc và so theo vị trí ranh giới; nguồn có số mà một
+  dòng không số mở bằng "… là …" ⇒ mơ hồ; khoản dùng từ nối khác "là" (vd "bao gồm") ⇒ bị chặn, không nhận sai
+  (M1); dấu "model đã chạy" xét MỌI trường token (cả cache, cả `usage` tổng), số đo sai kiểu ⇒ dừng (M2);
+  `auth status` chạy với CÙNG `--setting-sources ""` như lời gọi model, kiểm kiểu `authMethod` (M3); chạm CAP
+  ⇒ chặn mọi Điều, bỏ lần đọc thứ hai (M4); `--out` trùng `--nhat-ky` ⇒ rc 2 trước khi gọi model (M5); `doctor`
+  đòi khung Message (id/role/content) và input > 0 (M6); số writer ghim trong `pretooluse_guard_test` 106 → 108 (M7).
+- Cross-review Codex lượt 4 (`ops/reviews/pr1503-review-4-codex/`, trần nâng lên 5; REQUEST_CHANGES, 2 P1 · 3 P2)
+  — đã vá: từ nối "là" cấp khoản phải nằm ngoài ngoặc VÀ ngoài cụm trích dẫn, ở phần đầu khoản (trước dòng điểm
+  đầu tiên, không sau dấu `:`), hai vế khác rỗng (Q1); dòng mở bằng "là" hoặc còn trong ngoặc là tiếp dòng, không
+  phải khoản mất số (Q3); chỉ chuyển sang `api` khi envelope TỰ KHAI lỗi (`is_error=True`) kèm số đo ĐẦY ĐỦ bằng
+  0 — `null`/thiếu `usage`/chi phí ước tính dương/envelope thành công hỏng ⇒ dừng (Q2); `doctor` đòi `content`
+  khác rỗng gồm các khối đúng kiểu và token đầu ra dương (Q4); `--nhat-ky` là thư mục ⇒ rc 2 trước model, lỗi
+  I/O nhật ký muộn ⇒ rc 2 có thông báo (Q5).
+- Cross-review Codex lượt 5 (`ops/reviews/pr1503-review-5-codex/`, REQUEST_CHANGES, 2 P1 · 3 P2) chạm trần ⇒
+  Review Rescue Checkpoint; chủ kho chọn ĐỔI THIẾT KẾ (+1 lượt, trần 6) vì hai lớp P1 tái phát cả năm lượt:
+  · chuyển đường `sub`→`api` CHỈ khi lỗi trước khi `claude -p` khởi chạy (thiếu CLI, định tuyến, `auth status`,
+    spawn hỏng); đã khởi chạy thì mọi lỗi (quá hạn, mất envelope, hết hạn mức gói) ⇒ DỪNG, gợi ý `--thu-tu api`.
+    Bỏ hẳn phép đoán "model đã chạy chưa" từ envelope (`_dau_model_da_chay`) (R2);
+  · ranh giới khoản theo CẤU TRÚC dòng: nguồn có số ⇒ số liên tục từ 1, dòng không số phải là điểm hoặc tiếp
+    dòng có bằng chứng; nguồn mất số ⇒ mỗi dòng một khoản (R1). Bộ quét có trạng thái ngoặc/trích dẫn thay cho
+    đếm/regex (R3);
+  · `doctor` chỉ nhận khối `text` có `text` là chuỗi (R4); `--nhat-ky` tạo thư mục cha như `--out`, chỉ chặn khi
+    đích là thư mục hoặc cha bị một tệp chắn (R5).
+- Cross-review Codex lượt 6 (`ops/reviews/pr1503-review-6-codex/`, REQUEST_CHANGES, 2 P1 · 1 P2; đóng R1/R3/R4)
+  — chủ kho nâng trần lên 7, đã vá: mốc khởi chạy là lúc `Popen` trả tiến trình (`_chay_co_moc`, lỗi spawn ném
+  `KhongKhoiChay` ⇒ chuyển được; mọi OSError sau mốc ⇒ dừng; thư mục tạm tạo trước mốc, dọn bằng
+  `ignore_errors`) (S1); ngoặc tròn nằm trong trích dẫn là nội dung, nguồn mất số không có tiếp dòng, tiêu đề Điều
+  đòi dấu `.`/`:` sau số (dòng "Điều 3 của …" không còn bị bỏ) (S2); `--out`/`--nhat-ky` quan hệ cha–con ⇒ rc 2
+  trước model (S3).
+- Cross-review Codex lượt 7 (`ops/reviews/pr1503-review-7-codex/`, REQUEST_CHANGES, 1 P1 · 1 P2; đóng S1/S3 và
+  lớp `phan-loai-sub`) — chủ kho nâng trần lên 8, đóng bằng thiết kế: tiếp dòng ở nguồn có số KHÔNG còn dựa vào
+  trạng thái ngoặc/trích dẫn (chỉ dòng mở bằng "là" sau thuật ngữ chưa có từ nối; ngoặc trải nhiều dòng bị chặn);
+  bộ quét giữ ĐÚNG một cụm trích dẫn đang mở, ký tự bên trong là nội dung (T1); tiến trình con được giết, đóng
+  pipe và `wait` có giới hạn, không phụ thuộc đọc lại (T2).
+- Cross-review Codex lượt 8 (`ops/reviews/pr1503-review-8-codex/`, REQUEST_CHANGES, 2 P1 · 1 P2; đóng T1/T2) —
+  chủ kho nâng trần lên 9, chặn MỌI nguồn mơ hồ: một dòng (sau khi bỏ dấu số khoản/điểm đầu dòng) có ngoặc hay
+  trích dẫn không khép trong dòng, `)`/`”` lẻ, hoặc trích dẫn cong lồng cùng kiểu ⇒ từ chối cả nguồn (U1, U3);
+  `wait` có giới hạn TRƯỚC khi đóng pipe, và trên Windows không đóng pipe đồng bộ (U2).
+- Cross-review Codex lượt 9 (`ops/reviews/pr1503-review-9-codex/`, lượt chết giữa chừng `ma_thoat` 1; đã đóng
+  U1–U3; ghi kịp V1 P1) — chủ kho nâng trần lên 10: DANH SÁCH CHO PHÉP kiểu dấu — ngoài `(` `)` `“` `”` `"`, mọi dấu
+  nhóm ngoặc/trích dẫn Unicode (Ps/Pe/Pi/Pf, cùng `＂` `″`…) ⇒ nguồn mơ hồ, từ chối cả nguồn (V1).
+- Cross-review Codex lượt 10 bị bộ lọc nội dung của nền chặn (không verdict); lượt 11 (giao việc kiểu kiểm chứng,
+  `ops/reviews/pr1503-review-11-codex/`, REQUEST_CHANGES 3 P1 · 1 P2) xác nhận lớp chuyển đường đã đóng nhưng lớp
+  ranh giới khoản vẫn ra lỗ mới. Chủ kho quyết định HẠ LỜI KHAI: kết quả chỉ chứng minh khớp nguyên văn từng khoản
+  theo phân đoạn của bộ quét, KHÔNG chứng minh ranh giới khoản — JSON mang `can_nguoi_duyet: true` + `pham_vi_kiem`.
+  Vá rẻ: nháy đơn thẳng `'` vào danh sách dấu bị từ chối (X1); tiêu đề Điều dính khoản đầu ⇒ từ chối (X3 phần a).
+  Phần còn lại của X2/X3 và X4 ghi nợ ở issue riêng.
+- Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
+  key qua `agent_creds` chưa làm.
+
 # ★ v1.36.70 — r377: phát hành gom 8 packet từ sau v1.36.69 (#1371) (2026-11-17)
 
 Packet phát hành `RELEASE-1.36.70` r1 (Issue #1371). Bump ba chỗ (`VERSION`, `tl.py`, `SKILL.md`), tái sinh manifest.

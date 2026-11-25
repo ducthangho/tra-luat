@@ -1,0 +1,41 @@
+{
+ "mo_ta": "MO PHONG sau PR4: dang chay duong_nhanh, gom success nhung in dau cua bo moi",
+ "mo_phong": true,
+ "run": {
+  "id": 9010,
+  "event": "pull_request",
+  "head_sha": "1111111111111111111111111111111111111111",
+  "run_attempt": 1,
+  "conclusion": "success",
+  "created_at": "2026-11-01T00:00:00Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 1,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu-gop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 30,
+   "head_sha": "1111111111111111111111111111111111111111"
+  }
+ ],
+ "log": {
+  "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=duong_nhanh\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=dat run=9003/1 su_kien=pull_request\n",
+  "gom": "2026-11-01T00:10:00.0Z GOM: KHÔNG ĐO — diff ngoài bao đóng (cong_cu=bo_qua, 0 mảnh)\n"
+ },
+ "artifact": null,
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "thieu_bang_chung",
+   9
+  ],
+  "g4a": "duong_nhanh_dang_chay"
+ }
+}

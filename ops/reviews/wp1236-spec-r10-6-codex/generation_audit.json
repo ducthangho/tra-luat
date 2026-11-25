@@ -1,0 +1,354 @@
+{
+  "deterministic_bytes": true,
+  "m_sha256": "0c4f2caabd6b9cb49e2057e999e5bcde588a4f287012d56ad9e97e6a22a0e646",
+  "manifest": 800,
+  "regressions": 127,
+  "applied": 127,
+  "pilot_count": 927,
+  "ids_match": true,
+  "hash_mismatches": [],
+  "classification": {
+    "GIET": 764,
+    "HONG": 10,
+    "SONG_SACH": 153
+  },
+  "rc_nonzero": [],
+  "kills_after_hong": [
+    {
+      "id": "a2:loi_khai:191:59",
+      "op": "a2",
+      "dong": 191,
+      "sha256": "c405e228696b2b02c48a94497234b480ee2313a33b5cb3b5b03f3f8fa86c3ec5",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:RecursionError: maximum recursion depth exceeded",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:RecursionError: maximum recursion depth exceeded",
+        "HONG a204_duong_dan HONG:a204_duong_dan:RecursionError: maximum recursion depth exceeded",
+        "HONG a205_duong_khop HONG:a205_duong_khop:RecursionError: maximum recursion depth exceeded",
+        "HONG a206_duong_lech HONG:a206_duong_lech:RecursionError: maximum recursion depth exceeded",
+        "HONG a207_hai_tep HONG:a207_hai_tep:RecursionError: maximum recursion depth exceeded",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:RecursionError: maximum recursion depth exceeded",
+        "HONG a209_mien HONG:a209_mien:RecursionError: maximum recursion depth exceeded"
+      ]
+    },
+    {
+      "id": "a2:token:202:8",
+      "op": "a2",
+      "dong": 202,
+      "sha256": "04940b56333a04e676f1b988c78495b281e90072077ee8564b1c0bdcc0d8c0be",
+      "rc": 0,
+      "giet": [
+        "a203_duong_khong_tep"
+      ],
+      "hong": [
+        "HONG a202_token HONG:a202_token:AttributeError: 'int' object has no attribute 'casefold'"
+      ]
+    },
+    {
+      "id": "a2:token:203:11",
+      "op": "a2",
+      "dong": 203,
+      "sha256": "6a58be427764786a0978ee860acea31ff982b9a8b064b87900686d5d91375d5f",
+      "rc": 0,
+      "giet": [
+        "a203_duong_khong_tep"
+      ],
+      "hong": [
+        "HONG a202_token HONG:a202_token:TypeError: 'NoneType' object is not subscriptable"
+      ]
+    },
+    {
+      "id": "a:la_landed:215:7",
+      "op": "a",
+      "dong": 215,
+      "sha256": "9104e02389f0abc964d616d45e75322b0ce28884b44f4a69f9a1c41b42d680b7",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:KeyError: 'trang_thai_packet'",
+        "HONG a204_duong_dan HONG:a204_duong_dan:KeyError: 'trang_thai_packet'",
+        "HONG a205_duong_khop HONG:a205_duong_khop:KeyError: 'trang_thai_packet'",
+        "HONG a206_duong_lech HONG:a206_duong_lech:KeyError: 'trang_thai_packet'",
+        "HONG a207_hai_tep HONG:a207_hai_tep:KeyError: 'trang_thai_packet'",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:KeyError: 'trang_thai_packet'",
+        "HONG a209_mien HONG:a209_mien:KeyError: 'trang_thai_packet'"
+      ]
+    },
+    {
+      "id": "a:loi_khai:188:7",
+      "op": "a",
+      "dong": 188,
+      "sha256": "231b52ad61d572923a63fa707440f1218394694fa26493dc6f03a8b4fb061d2f",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:ValueError: vong_tham_chieu tại $",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:ValueError: vong_tham_chieu tại $",
+        "HONG a204_duong_dan HONG:a204_duong_dan:ValueError: vong_tham_chieu tại $",
+        "HONG a205_duong_khop HONG:a205_duong_khop:ValueError: vong_tham_chieu tại $",
+        "HONG a206_duong_lech HONG:a206_duong_lech:ValueError: vong_tham_chieu tại $",
+        "HONG a207_hai_tep HONG:a207_hai_tep:ValueError: vong_tham_chieu tại $",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:ValueError: vong_tham_chieu tại $",
+        "HONG a209_mien HONG:a209_mien:ValueError: vong_tham_chieu tại $"
+      ]
+    },
+    {
+      "id": "c2:_chuan:182:4",
+      "op": "c2",
+      "dong": 182,
+      "sha256": "4d42b3c5da12ca133c65843facfaba3c0239fa602ac7a2eef9ddb8631be0db5e",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a209_mien HONG:a209_mien:TypeError: argument of type 'NoneType' is not iterable"
+      ]
+    },
+    {
+      "id": "c2:loi_khai:198:4",
+      "op": "c2",
+      "dong": 198,
+      "sha256": "37bfba77c73867375260d4020e23167c66442895278b027b95cfd740bd2d5318",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:TypeError: 'NoneType' object is not iterable",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable",
+        "HONG a209_mien HONG:a209_mien:TypeError: 'NoneType' object is not iterable"
+      ]
+    },
+    {
+      "id": "c2:tep_danh_gia:207:4",
+      "op": "c2",
+      "dong": 207,
+      "sha256": "c7761f10a83051a7b08415529bb76d49590aed5e5dda0e585dba5ed6f523a82c",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable"
+      ]
+    },
+    {
+      "id": "e:token:203:13",
+      "op": "e",
+      "dong": 203,
+      "sha256": "feedfe201a47e624119df50591384c9fa37e42fbaf7a9917ec3009b5b62276b5",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a202_token HONG:a202_token:IndexError: no such group",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:IndexError: no such group",
+        "HONG a204_duong_dan HONG:a204_duong_dan:IndexError: no such group",
+        "HONG a205_duong_khop HONG:a205_duong_khop:IndexError: no such group",
+        "HONG a206_duong_lech HONG:a206_duong_lech:IndexError: no such group",
+        "HONG a207_hai_tep HONG:a207_hai_tep:IndexError: no such group",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:IndexError: no such group",
+        "HONG a209_mien HONG:a209_mien:IndexError: no such group"
+      ]
+    },
+    {
+      "id": "e:token:203:27",
+      "op": "e",
+      "dong": 203,
+      "sha256": "d9067f96f7ee8203dfea26ec582cc865f97343f3270a7119c1fd5037bdfe8ceb",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a202_token HONG:a202_token:IndexError: no such group",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:IndexError: no such group",
+        "HONG a204_duong_dan HONG:a204_duong_dan:IndexError: no such group",
+        "HONG a205_duong_khop HONG:a205_duong_khop:IndexError: no such group",
+        "HONG a206_duong_lech HONG:a206_duong_lech:IndexError: no such group",
+        "HONG a207_hai_tep HONG:a207_hai_tep:IndexError: no such group",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:IndexError: no such group",
+        "HONG a209_mien HONG:a209_mien:IndexError: no such group"
+      ]
+    },
+    {
+      "id": "f:_chuan:182:4",
+      "op": "f",
+      "dong": 182,
+      "sha256": "e4c4409edf8ce150a7c150129d56f58647e5739ae11d6e6c662e2f1ede047f99",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: argument of type 'NoneType' is not iterable",
+        "HONG a209_mien HONG:a209_mien:TypeError: argument of type 'NoneType' is not iterable"
+      ]
+    },
+    {
+      "id": "f:loi_khai:198:4",
+      "op": "f",
+      "dong": 198,
+      "sha256": "2ad3ce033a9f311b1cca963d5ab95f6dc76f629971769bce6e892125514a13b7",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a201_loi_khai HONG:a201_loi_khai:TypeError: 'NoneType' object is not iterable",
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable",
+        "HONG a209_mien HONG:a209_mien:TypeError: 'NoneType' object is not iterable"
+      ]
+    },
+    {
+      "id": "f:tep_danh_gia:207:4",
+      "op": "f",
+      "dong": 207,
+      "sha256": "47eee7715e75f26692e86c36acd0cd7144f0a80be9fa8a3c03c7cef9e0ac5d0c",
+      "rc": 0,
+      "giet": [
+        "a210_cli"
+      ],
+      "hong": [
+        "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable",
+        "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable",
+        "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable",
+        "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable",
+        "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable"
+      ]
+    }
+  ],
+  "subset_count": 66,
+  "subset_ids": [
+    "kho:identity_126_7",
+    "kho:identity_131_7",
+    "kho:identity_154_11",
+    "kho:identity_219_107",
+    "kho:identity_219_11",
+    "kho:identity_262_25",
+    "kho:identity_271_11",
+    "kho:identity_285_19",
+    "kho:identity_72_67",
+    "kho:identity_85_11",
+    "kho:key_alpha_only",
+    "kho:landed_partial",
+    "kho:phi_skip_descendants",
+    "kho:phi_substring",
+    "kho:ref_any_run",
+    "kho:ref_no_boundary",
+    "kho:ref_txt_wild",
+    "kho:skip_v3_partial",
+    "kho:token_delimiter_40",
+    "kho:token_delimiter_44",
+    "kho:token_delimiter_45",
+    "kho:token_delimiter_46",
+    "kho:token_delimiter_59",
+    "kho:token_delimiter_8212",
+    "kho:token_expand",
+    "kho:url_zero_indexerror",
+    "kho:url_zero_optional",
+    "kho:waiver_head_truthy",
+    "kho:waiver_no_strip",
+    "kho:waiver_order_author_url",
+    "kho:waiver_order_line_author",
+    "kho:waiver_order_os_date",
+    "kho:waiver_order_os_sha",
+    "kho:waiver_partial",
+    "a:doc_danh_gia:77:7",
+    "a2:doc_danh_gia:53:4",
+    "b:chon_provenance:96:7:ve0",
+    "c:doc_danh_gia:78:8",
+    "c2:doc_danh_gia:81:4",
+    "d:la_landed:214:15",
+    "e:main:321:9",
+    "f:doc_danh_gia:81:4",
+    "g:loi_khai:185:24",
+    "h1:BO_SINH:0",
+    "h2:CHECK_BAT_BUOC_TEN",
+    "i1:RE_DAU:lop@53 bo '0-9'",
+    "i2:RE_TOKEN:lop@4 thanh .",
+    "i3:RE_JOB:nhanh@75 bo 'passed'",
+    "i4:RE_DAU:luong_tu@107 {64}→*",
+    "i5:RE_JOB:escape@5 \\d→.",
+    "i6:RE_TOKEN:lookaround@12 bo",
+    "i7:doc_danh_gia:59:17",
+    "k1:token:202:23",
+    "k2:doc_danh_gia:53:11",
+    "k3:token:203:25",
+    "l:module:124:0:body1",
+    "b:token:203:19:ve0",
+    "c2:kiem_mien:247:8",
+    "a2:kiem_mien:0:0:if0",
+    "a2:kiem_mien:0:0:bo_if0",
+    "e:kiem_mien:255:13",
+    "e:kiem_mien:257:38",
+    "g:la_landed:216:77",
+    "g:la_landed:216:20",
+    "g:kiem_mien:250:50",
+    "e:kiem_mien:240:66"
+  ],
+  "per_op": {
+    "l": 6,
+    "a2": 78,
+    "c2": 43,
+    "f": 41,
+    "a": 70,
+    "c": 26,
+    "j1": 10,
+    "b": 75,
+    "k3": 3,
+    "g": 236,
+    "e": 52,
+    "i7": 8,
+    "d": 9,
+    "j2": 2,
+    "k2": 6,
+    "k1": 3,
+    "h1": 18,
+    "h2": 4,
+    "i1": 39,
+    "i2": 11,
+    "i4": 23,
+    "i5": 29,
+    "i3": 6,
+    "i6": 2
+  }
+}

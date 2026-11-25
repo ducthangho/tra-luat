@@ -1,0 +1,18 @@
+# nghiem thu tren merge 9d61d4e, 2026-11-24T10:42:54Z
+9d61d4efe6b59c20c12ba87420efd7dfd6e224bc
+32b1eabba0f6a4309127f1efd9fde0cb2660e9bc
+## git diff --check 168d562..9d61d4e
+rc=0
+## release-verify --strict
+{'ok': True, 'expected_file_count': 186, 'checked_file_count': 186, 'failed': []}
+## ops/gate_output_doi_chieu_test.py
+CA: 51/51 dat
+DOT BIEN: 158/158 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+rc=0
+## ci_dang_ky_test
+PHẢN CHỨNG: 1226/1226 đỏ đúng
+TỔNG: ĐẠT
+rc=0
+# XONG

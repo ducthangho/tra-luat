@@ -1,0 +1,74 @@
+{
+  "format_regression": {
+    "command_receipt": {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/formatted_source.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/formatted_h.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 0.12949717599985888,
+      "stdout_sha256": "5d34104b1e59d5cffc232d455175f7df0fa82d780a2c38289c46b5222f3e4bd3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": "HOI_QUY 127 · AP_DUNG 127 · KHONG_AP_DUNG 0\n",
+    "all_127_equal": true
+  },
+  "anchor_lines": {
+    "mean": 1.1968503937007875,
+    "max": 6
+  },
+  "numstat": {
+    "rc": 0,
+    "stdout": "1\t0\t.claude/dev/ci_dang_ky_test.py\n335\t0\tops/gate_output_doi_chieu.py\n988\t0\tops/gate_output_doi_chieu_test.py\n"
+  },
+  "original_sha256": "af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94",
+  "normalized_sha256": "39db46befde72ff1b6dc75f065603efe028aaeb8acb27515a7b29f659a668495",
+  "rename_regression": {
+    "renames": {
+      "Name": 3
+    },
+    "receipt": {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+        "hoi-quy",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+        "-",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/renamed_local.py",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/renamed_h.jsonl"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+      "rc": 0,
+      "seconds": 0.11626881700067315,
+      "stdout_sha256": "55614f97468c2481fa4b69ae972a2b2d5c73c861a0d0b8d28b4f7d0aede969d0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout": "HOI_QUY 127 · AP_DUNG 125 · KHONG_AP_DUNG 2\nKHONG_AP_DUNG kho:key_alpha_only neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\nKHONG_AP_DUNG kho:key_no_casefold neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\n",
+    "not_applicable": [
+      {
+        "id": "kho:key_alpha_only",
+        "op": "kho",
+        "kind": "regex_or_set",
+        "trang_thai": "KHONG_AP_DUNG",
+        "ly_do": "neo xuat hien 0 lan"
+      },
+      {
+        "id": "kho:key_no_casefold",
+        "op": "kho",
+        "kind": "regex_or_set",
+        "trang_thai": "KHONG_AP_DUNG",
+        "ly_do": "neo xuat hien 0 lan"
+      }
+    ]
+  }
+}

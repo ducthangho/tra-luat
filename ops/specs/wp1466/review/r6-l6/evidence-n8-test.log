@@ -1,0 +1,27 @@
+OK  r4   pass_trong_ca_cu                         rc=1   nút mới ở vị trí không được phép: dòng 1602
+OK  r4   sua_mot_dot_bien_cu                      rc=1   nút mới ở vị trí không được phép: dòng 9930
+OK  r4   sua_them_trong_repo_gia                  rc=1   _repo_gia: AST đổi ngoài đúng chỗ được phép
+OK  r4   gan_lai_ham_cu                           rc=1   nút mới khai tên đã có trong mã nền hoặc ngoài họ cho phép: ['_doi'] dòng 19467
+OK  r4   gan_nhieu_dich_co_ten_cu                 rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r4   cau_lenh_vo_danh_la                      rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r4   them_mot_ca_moi (dat)                    rc=0 PHẠM VI [test]: ĐẠT
+OK  rv4  new_function_default_binding             rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 19467
+OK  rv4  new_function_decorator_binding           rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 19469
+OK  r5   so_walrus_trong_comprehension            rc=1   nút mới ngoài ngữ pháp cho phép (AugAssign): dòng 19467
+OK  r5   so_walrus_mac_dinh_lambda                rc=1   nút mới ngoài ngữ pháp cho phép (AugAssign): dòng 19467
+OK  r5   so_gan_chi_so                            rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r5   so_gan_chi_so_cases                      rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r5   so_chen_dau                              rc=1   nút mới ngoài ngữ pháp cho phép (Expr): dòng 19467
+OK  r5   so_gan_lai_ca_so                         rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r5   ham_moi_global                           rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 19467
+OK  r5   ham_moi_de_ten_dung_san                  rc=1   nút mới khai tên đã có trong mã nền hoặc ngoài họ cho phép: ['len'] dòng 19467
+OK  r5   gan_moi_de_ten_dung_san                  rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r5   lop_moi                                  rc=1   nút mới ngoài ngữ pháp cho phép (ClassDef): dòng 19467
+OK  r5   gan_goi_ham                              rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 19467
+OK  r5   ham_moi_ten_la (dat)                     rc=0 PHẠM VI [test]: ĐẠT
+OK  r5   so_update (dat)                          rc=0 PHẠM VI [test]: ĐẠT
+OK  r5   so_or_bang (dat)                         rc=0 PHẠM VI [test]: ĐẠT
+TONG test r4: 7 biến thể · đỏ 6 · đạt 1 · đúng kỳ vọng 7
+TONG test rv4: 2 biến thể · đỏ 2 · đạt 0 · đúng kỳ vọng 2
+TONG test r5: 14 biến thể · đỏ 11 · đạt 3 · đúng kỳ vọng 14
+TONG test: dung 23 sai 0

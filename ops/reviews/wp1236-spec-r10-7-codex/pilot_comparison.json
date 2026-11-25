@@ -1,0 +1,37 @@
+{
+  "receipt": {
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/pilot_subset_kq.jsonl",
+      "--song-song",
+      "4"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+    "rc": 0,
+    "seconds": 771.4265575209993,
+    "stdout_sha256": "0365d847dd3093956797adc941c06529de4772d0f19488917a218f9832a2c5f4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "counts": {
+    "GIET": 55,
+    "VO_CAN": 10,
+    "SONG": 34
+  },
+  "result_count": 99,
+  "mismatches": [],
+  "non_equivalent25_reproduced": 25,
+  "equivalent9_reproduced": 9,
+  "completion_stdout": [
+    "TONG 99 · GIET 55 · SONG_SACH 34 · CHI_LOI_VO_CAN 10 · LOI_CHAY 0",
+    "HOAN_TAT neo={\"cong_cu\": \"1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a\", \"goc\": \"af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94\", \"manifest\": \"3314bf8cadcfb48e64387e6184b5dbf2a342ebc6cb5a15cb0c7fd3e97cee72f0\", \"test\": \"f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63\"}"
+  ],
+  "scope": "99 selected mutants, not full927; all prior25 non-equivalent survivors+9equivalent,all10incidental,55kills covering34target cases and every operator with a kill."
+}

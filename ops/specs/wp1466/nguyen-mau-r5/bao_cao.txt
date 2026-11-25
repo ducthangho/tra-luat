@@ -1,0 +1,28 @@
+r5 xong, chưa commit; trong kho chỉ tệp đặc tả đổi.
+
+**Đặc tả:** /home/user/tra-luat/ops/specs/wp1466.md, 913 dòng, sha256 `5357004a67d83528dc903d6a29a989eeedc373d21ec4812d453db95320ef84f4`. Đặt `revision: 5`, tác giả Opus 5.5 theo E2. Khối `khoa`, 8 khối protocol y hệt r4. Ba khối mã trùng byte script đã chạy. 0 ký tự đặc biệt, 0 dấu bỏ qua CI.
+
+**Cây:** /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/r5b/cay (nhánh `proto`). Nền `48d372e14f190dae83a75ccbca8ee9a0b25635c5`, vá `c35ee0399f529d1f45c7fdc3eedbec2872e9843a`.
+
+**Ba lớp:**
+- `kiem-chuoi`: `read_bytes` một lần, băm byte thô. Biên là dòng rỗng 0 byte; đơn vị phải hiển thị tại địa chỉ; ID qua NFKC, bỏ Cf. Ca đỏ mới: CRLF, khoảng trắng cuối, U+2028/FF/tab/NBSP/CR, che K04, ID ẩn. 48/48 phép reviewer đúng.
+- `tieu-chi`: ngữ pháp đóng F/A/R, mẫu CHEN, `compile`; một luật hai chế độ, không danh sách cấm. Thêm khối `so-dang-ky`. 65/65 biến thể.
+- `tien-kiem`: điều kiện 3a–3f và khối `tien-kiem` fail-closed. Khối kiểm policy vắng trên base, so tập cặp ref, `ai-dang-giu` từng đường dẫn, đo lại sau đăng. 19/19 kịch bản. Nợ INV-02 giữ cho ca tổng quát, wp1466 không dựa vào.
+
+**Số đo (21-11):**
+- master `5a152c1` (03:05:30Z), 392 nhánh (03:24:05Z), lease còn hiệu lực 5/549 (03:24:55Z).
+- 190/190 ca. Đột biến mới 26/26 (03:04–03:08Z), cũ 21/21 (03:08–03:11Z).
+- numstat 434/450, 4 tệp. Ruff F 16→16 (03:13Z).
+- Trên `5a152c1`: `doctrine-scan` rc 0, `adr-song` 67/67 (03:13:26Z).
+- Sổ đăng ký: `CASES` 1582→1639, `MUTANTS` 1864→1890 (03:26:24Z).
+
+**Đang chặn:** trên kho thật, `tien-kiem` DỪNG vì lease `wp1462-r8-g2-claude` (B4). Chỉ cấp lease wp1466 sau khi B4 land và lease ấy bị thu hồi.
+
+**Câu hỏi cho chủ kho:** không có câu mới. Ba quyết định thiết kế (D5, D9, D12) tự chốt, lý do ở §16–17.
+
+**Chưa đo:**
+- `packet_loop_test` chạy trọn;
+- Windows;
+- diff B4;
+- `tien-kiem` ĐẠT trên kho thật;
+- chữ cùng hình khác hệ chữ.

@@ -1,0 +1,16 @@
+== 3a 2026-11-21T05:41:07Z
+ten: may_chu 394 cuc_bo 394 thieu 0 thua 0
+cap: thieu 0 thua 0 shallow false master 4e56f005785db1b04e043bb71fc694a674a8dc9f
+== 3b 2026-11-21T05:41:08Z
+policy_tren_master 0
+== 3f 2026-11-21T05:41:08Z
+adr_tren_master 66
+ref_co_adr_0068_tro_len 0
+== 3c 2026-11-21T05:41:09Z
+.claude/dev/packet_loop.py rc=11 :: wp1462-r8-g2-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml; :: NGƯỜI_GIỮ 1: wp1462-r8-g2-claude
+.claude/dev/packet_loop_test.py rc=11 :: wp1462-r8-g2-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml; :: NGƯỜI_GIỮ 1: wp1462-r8-g2-claude
+docs/PROTOCOL_DA_PHIEN.md rc=0 ::  :: NGƯỜI_GIỮ 0: không có
+docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md rc=0 ::  :: NGƯỜI_GIỮ 0: không có
+== doi chung (khong phai dieu kien) 2026-11-21T05:41:44Z
+2026-11-21T05:41:51Z ban_ghi 551 con_han 17 bia_mo 12 song ['wp1236-a-r10-g1-claude-20261121', 'wp1448-r6-g6-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude', 'wp433-r9-g5-claude']
+== het 2026-11-21T05:41:51Z

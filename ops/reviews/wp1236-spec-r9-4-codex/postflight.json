@@ -1,0 +1,52 @@
+{
+  "files_before": 17357,
+  "files_after": 17357,
+  "changed_paths": [],
+  "commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "stdout": "176feba3a09a4e86c6d8b06487f3e4224571be51\n3befda03f3bb668cb31c1dad4e651356a4fec9dd\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+        "--ignored=matching"
+      ],
+      "rc": 0,
+      "stdout": "!! .codex/\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "scope": "Mọi file thường/symlink đọc được dưới checkout trừ .git; gồm ignored .codex/ tồn tại trước lượt. Diff/index kiểm bằng git. Repo nguồn executor ngoài phạm vi quan sát."
+}

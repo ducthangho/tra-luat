@@ -1,0 +1,38 @@
+UTC 2026-11-21T05:52:48.912812+00:00
+git rev-parse HEAD HEAD^{tree} origin/master rc 0 e215940d15286add6fe30947cfccda09a09d82c0
+ad1e8b3d341a02b500631c44ec549290f171d978
+4e56f005785db1b04e043bb71fc694a674a8dc9f
+git status --porcelain=v1 --untracked-files=all rc 0 
+git rev-parse --is-shallow-repository rc 0 false
+git config core.abbrev rc 0 7
+SPEC_BLOB_MATCH True
+SIZE r7 lines 1022 bytes 184992
+SIZE r8 lines 882 bytes 158467
+BLOCK adr equal True sha 8c0ceb1bb10103f839ce4728bc72b6bb0b9440fdfe4150f56caec008a2118d34
+BLOCK do-pham-vi equal True sha 24b890e0f9c473a8a20fbb3cd776b17e950463a353eba4ad300e3749e7dfb836
+BLOCK khoa equal True sha 859b398e354ea8d5b1a1e2a462e65e221b55a404ea87da91153d511f9102b74e
+BLOCK p1-moi equal True sha 6985b0490ca18e220213c673a58b7b9d83d9ea746e18b8169b228a89dea105bf
+BLOCK p2-moi equal True sha 02fcd4bb194d0be33aa99827de2f17c057fa5ab0b0b1351f1e4144cb5d630a4f
+BLOCK p3-moi equal True sha d8bf2a60b8f84debbcf825de27b4417a3e9cf5efe01b34eed35afbb06f71cb91
+BLOCK p4-cu equal True sha 5adbf3d1fe17e0a745af8d08be1531f5af619c1db8190c035f30abb8d5778761
+BLOCK p4-moi equal True sha b8c1944a4f31ecf5d47cf6369fdad395d5101cfbf61eb85e3c1ef974276a936b
+BLOCK p5-cu equal True sha addb9adec0c1012e34149e728379a3148434161b70d802e6d488099f1f797e8c
+BLOCK p5-moi equal True sha 0a54a5a7e42001d99b9b803e47ce1ebd621f540ea7f22e8a78ce0e2d58637640
+BLOCK p6-moi equal True sha 9082a8a7c2e1fb52e2b1c19ef9d02ed400e5aa3bd241ee6a664f4d11ec32b8bb
+BLOCK so-dang-ky equal True sha 18c1d550fd224c9dd412bfa9c667161405445c584eb7f626235360364a1c351a
+BLOCK tien-kiem equal False sha REMOVED
+PATCH_EQUAL_R7 True sha 838bbccba7309c0989fb22b0433b7e33c683677129061bd0a9bef5b203123b55
+PATCH_NUMSTAT 76	1	.claude/dev/packet_loop.py
+163	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md
+149	0	docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+OPTIN 0053 count 1 oid 8ab100793df9831505f495543a74044b91c2c9ab exists_rc 0 parent_rc 128 first_parent True
+OPTIN 0055 count 1 oid d2e3052d479d140b7e7b91df41ec4914fab7d544 exists_rc 0 parent_rc 128 first_parent True
+ADR0052_OPTIN 0
+DEBT_NAMES 33 REFERENCES 25 MISSING []
+ADR_1484_LINK False SPEC_1484_COUNT 18
+PRECHECK_BLOCK_PRESENT False
+REGEX_HISTORY_COUNT 3
+CLONE_RC 0
+DETACH_RC 0
+COPY /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/out/snapshot-clone

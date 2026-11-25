@@ -1,0 +1,11 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/prototype/.claude/dev/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+baseline rc 9 ASSERTION_PASS True error None stderr doctrine-scan: đơn vị khoá K01 (muc) vắng hoặc đã đổi trong protocol
+1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+
+without_mask rc 9 ASSERTION_PASS True error None stderr doctrine-scan: KHÔNG ĐO ĐƯỢC: protocol dòng 1692: dòng mở bằng `<` — cổng không phân tích khối HTML
+doctrine-scan: đơn vị khoá K01 (muc) vắng hoặc đã đổi trong protocol
+2 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+
+without_K01 rc 0 ASSERTION_PASS False error AssertionError("bảng trong rào: đòi rc=9, được rc=0; stderr=''") stderr 
+R3_TABLE_FENCE_CASES []

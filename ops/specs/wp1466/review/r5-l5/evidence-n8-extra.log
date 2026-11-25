@@ -1,0 +1,4 @@
+clean rc 0 EPILOG_REQUIRED True OLD_COMMENT_PRESERVED True PHẠM VI [ma]: ĐẠT
+omit_epilog rc 1 EPILOG_REQUIRED False OLD_COMMENT_PRESERVED True PHẠM VI [ma]: KHÔNG ĐẠT |   dòng xoá: cần đúng 1, thấy 0 (kể cả dòng chú thích và dòng trống)
+omit_epilog_delete_old_comment rc 0 EPILOG_REQUIRED False OLD_COMMENT_PRESERVED False PHẠM VI [ma]: ĐẠT
+omit_epilog_reflow_old_assignment rc 0 EPILOG_REQUIRED False OLD_COMMENT_PRESERVED True PHẠM VI [ma]: ĐẠT

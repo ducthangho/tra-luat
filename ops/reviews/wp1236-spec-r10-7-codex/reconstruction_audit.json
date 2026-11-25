@@ -1,0 +1,33 @@
+{
+  "receipts": [
+    {
+      "script": "make_independent.py",
+      "rc": 0,
+      "stdout": "96\n",
+      "stderr": ""
+    },
+    {
+      "script": "make_extra.py",
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "script": "make_order_url.py",
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "script": "complete_reason_sweep.py",
+      "rc": 0,
+      "stdout": "reason occurrences 43 new mutants 20\n",
+      "stderr": ""
+    }
+  ],
+  "rows": 138,
+  "unique": 127,
+  "id_diff": [],
+  "normalized_mismatches": [],
+  "method": "Re-execute archived ma6 generators unmodified except read path, compare ast.unparse each original against current hoi-quy. No newly authored attack payload."
+}

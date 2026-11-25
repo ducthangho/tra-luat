@@ -1,0 +1,28 @@
+UTC 2026-11-21T05:18:52.471985+00:00
+EXISTING_PATH ops/reviews/pr896-review-5-codex/review_evidence/HƯỚNG 10 - HINT tren ban sao.log
+COMMAND ["git", "-C", "cay-kho", "-c", "core.quotePath=true", "ls-tree", "-r", "HEAD", "--", "ops/reviews/pr896-review-5-codex/review_evidence/HƯỚNG 10 - HINT tren ban sao.log"]
+RAW '100644 blob ffd4c9ee0a9063fed623f90eaf63143bce9e1349\t"ops/reviews/pr896-review-5-codex/review_evidence/H\\306\\257\\341\\273\\232NG 10 - HINT tren ban sao.log"\n'
+CASE default PARSED_EQUALS_PATH False SUFFIX_LOG False
+COMMAND ["git", "-C", "cay-kho", "-c", "core.quotePath=true", "ls-tree", "-r", "-z", "HEAD", "--", "ops/reviews/pr896-review-5-codex/review_evidence/HƯỚNG 10 - HINT tren ban sao.log"]
+RAW '100644 blob ffd4c9ee0a9063fed623f90eaf63143bce9e1349\tops/reviews/pr896-review-5-codex/review_evidence/HƯỚNG 10 - HINT tren ban sao.log\x00'
+CASE nul PARSED_EQUALS_PATH True SUFFIX_LOG True
+B_SCANNER 742                        "KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy chủ: " + ", ".join(sorted(thieu)))
+B_SCANNER 743     da_doc, ket_qua = set(), []
+B_SCANNER 744     try:
+B_SCANNER 745         import yaml
+B_SCANNER 746     except ImportError:
+B_SCANNER 747         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: thiếu PyYAML") from None
+B_SCANNER 748     for ref in refs:
+B_SCANNER 749         out = _git(goc, "ls-tree", "-r", ref, "--", "ops/leases")
+B_SCANNER 750         for dong in out.splitlines():
+B_SCANNER 751             try:
+B_SCANNER 752                 meta, duong = dong.split("\t", 1)
+B_SCANNER 753                 _, loai, blob = meta.split()
+B_SCANNER 754             except ValueError:
+B_SCANNER 755                 raise Chan(RC_KHONG_XAC_DINH,
+B_SCANNER 756                            f"KHÔNG_XÁC_ĐỊNH: ls-tree có dòng hỏng: {dong!r}") from None
+B_SCANNER 757             if loai != "blob" or not duong.endswith((".yaml", ".yml")):
+B_SCANNER 758                 continue
+B_SCANNER 759             khoa = (blob, duong)
+B_SCANNER 760             if khoa in da_doc:
+NO_NEW_ATTACK_PATH_CREATED True; lease .yaml bypass described only, not executed

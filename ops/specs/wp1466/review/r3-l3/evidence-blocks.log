@@ -1,0 +1,36 @@
+PROTOCOL_BLOCK p1-moi base=0 prototype=1
+PROTOCOL_BLOCK p2-moi base=0 prototype=1
+PROTOCOL_BLOCK p3-moi base=0 prototype=1
+PROTOCOL_BLOCK p4-moi base=0 prototype=1
+PROTOCOL_BLOCK p5-moi base=0 prototype=1
+PROTOCOL_BLOCK p6-moi base=0 prototype=1
+PROTOCOL_BLOCK p4-cu base=1 prototype=0
+PROTOCOL_BLOCK p5-cu base=1 prototype=0
+INSERT_MARKER packet_loop.py '    proto_words = _doc_nguon_protocol(root)' count=1
+INSERT_MARKER packet_loop.py '9 bảng ADR §20 lệch với docs/adr/' count=1
+INSERT_MARKER packet_loop_test.py 'protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding=' count=1
+CASE_REFERENCE .claude/dev/packet_loop_test.py::r812_nguoi_giu_khac present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::r812_nguoi_giu_prefix_giao_nhau present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k0_pr_head present=True
+CASE_REFERENCE .githooks/eol_policy_test.py::case_khong_chi_so_voi_head present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::init_cung_provider_thoat_4 present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k0_pr_head present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k4_head present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k1_hash present=True
+CASE_REFERENCE ops/bien_nhan_v2_test.py::c49_cross_approved_cung_ho_model_phai_bi_tu_choi present=True
+CASE_REFERENCE ops/lease_publish_test.py::t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA present=True
+CASE_REFERENCE .claude/dev/launcher_test.py::r1252_ghi_trong_git present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_d2_not_measured present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::pl_m3_codex present=True
+CASE_REFERENCE ops/lease_publish_test.py::t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::tu_cap_lease_bang_ten_provider_bi_chan present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::doctrine_scan_chep_tron_5_1_bi_chan present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k3_p1 present=True
+CASE_REFERENCE .claude/dev/packet_loop_test.py::cong_c_k5_p3_khong_mien present=True
+CASE_REFERENCE_COUNT 18/18
+AUTHOR_SCRIPT ma3.py lines=58
+AUTHOR_SCRIPT test_moi.py lines=96
+AUTHOR_SCRIPT fix_moi.py lines=16
+AUTHOR_SCRIPT chay3.py lines=22
+AUTHOR_SCRIPT chay_cu.py lines=15
+AUTHOR_SCRIPT do_pham_vi.py lines=47

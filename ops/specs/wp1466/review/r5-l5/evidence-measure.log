@@ -1,0 +1,65 @@
+AT 2026-11-21T03:42:21.438097+00:00
+SPEC_BLOB_EQUALS True
+R4_VERDICT_HASH 400234b2ce15af8ed09571643f695fea56744bd10a12b03d500e9177e7039175
+SHALLOW_ABBREV false 7
+ORIGIN_REFS 393 BRANCHES 392
+MASTER_DRIFT 24 commits 116 paths
+MEASURED_CHANGED ['.claude/skills/work-packet/SKILL.md']
+OPTIN 0055 0 128 True
+OPTIN 0053 0 128 True
+ADR_BASE 66 67
+ADR68_PLUS_REFS 0
+LOCK K01 LOCATION 49 82 HASH_MATCH True VISIBLE True
+LOCK K02 LOCATION 31 47 HASH_MATCH True VISIBLE True
+LOCK K03 LOCATION 851 894 HASH_MATCH True VISIBLE True
+LOCK K04 LOCATION 747 751 HASH_MATCH True VISIBLE True
+LOCK K05 LOCATION 1170 1176 HASH_MATCH True VISIBLE True
+LOCK K06 LOCATION 1178 1183 HASH_MATCH True VISIBLE True
+LOCK K07 LOCATION 1185 1188 HASH_MATCH True VISIBLE True
+CODE_LOCK_TABLE_MATCH True
+SIX_ANCHORS [1, 1, 1, 1, 1, 1]
+PROTOCOL_EXACT True
+INV_COUNTS 28 15 15 12 1 18 DEBTS 27 REF_DEBTS 25 MISSING []
+SOURCE_ITEMS [('1', True), ('2', True), ('3', True), ('4', True), ('5', True), ('6', True), ('7', True), ('8', True), ('9', True), ('10', True)]
+ADR_TEMPLATE True LINES 149
+NUMSTAT prototype 76	1	.claude/dev/packet_loop.py; 163	1	.claude/dev/packet_loop_test.py; 46	2	docs/PROTOCOL_DA_PHIEN.md ADR 149 TOTAL 434
+DIFF_CHECK prototype 0
+GATE prototype doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+GATE prototype adr-song 0 adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+NUMSTAT master 76	1	.claude/dev/packet_loop.py; 163	1	.claude/dev/packet_loop_test.py; 46	2	docs/PROTOCOL_DA_PHIEN.md ADR 149 TOTAL 434
+DIFF_CHECK master 0
+GATE master doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+GATE master adr-song 0 adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+VECTOR bang_lop [0, 7, 0, 0, 0, 0]
+VECTOR class_slug [0, 0, 0, 0, 0, 0]
+VECTOR review_verdict [0, 0, 0, 0, 0, 0]
+VECTOR KET_LUAN [0, 2, 0, 0, 0, 0]
+VECTOR numstat [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0068|INV_|_inv_ [0, 0, 0, 0, 0, 0]
+VECTOR ai-dang-giu|ai_dang_giu|RC_DANG_GIU [11, 5, 0, 0, 0, 0]
+VECTOR refs/pull/ [0, 1, 1, 0, 0, 0]
+VECTOR eol|EOL|gitattributes [0, 0, 0, 0, 24, 0]
+VECTOR RC_PROVIDER [0, 9, 0, 0, 0, 0]
+VECTOR reviewed_sha|reviewing_head_sha [4, 49, 0, 0, 0, 0]
+VECTOR spec_hash|spec_sha256 [0, 28, 0, 0, 0, 0]
+VECTOR model_family|ho_model [15, 33, 0, 0, 0, 0]
+VECTOR effective_review_class|_kiem_lop_review|RC_LOP [15, 0, 0, 0, 0, 0]
+VECTOR chup-workspace|chup_workspace|ghi_workspace [0, 0, 21, 0, 0, 0]
+VECTOR MOC_10_2_2|moc_10_2_2 [0, 3, 0, 0, 0, 0]
+VECTOR codex_review_calls|RC_TRAN [0, 34, 0, 0, 0, 0]
+VECTOR NGUOI_CO_THAM_QUYEN|RC_TU_CAP [13, 15, 0, 0, 0, 1]
+VECTOR doctrine [1, 27, 5, 0, 5, 1]
+VECTOR mien_p3 [0, 3, 0, 0, 0, 0]
+VECTOR \bLIVE\b [0, 0, 0, 0, 0, 0]
+VECTOR changed_paths [0, 0, 0, 0, 0, 0]
+VECTOR tested_sha [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0067|uy_quyen_quyet_dinh [0, 0, 0, 0, 0, 0]
+VECTOR Drive MCP|Sheets MCP [0, 0, 0, 0, 0, 0]
+VECTOR integration [0, 1, 0, 0, 0, 0]
+VECTOR label|assignee|board [1, 2, 8, 6, 1, 0]
+VECTOR diff --check [0, 0, 0, 0, 1, 0]
+VECTOR push_them|so_lan_push|M5 [0, 5, 3, 0, 0, 0]
+VECTOR writer_slot|hai writer|max_writers|executor_writers [0, 0, 1, 0, 0, 0]
+ADR_ENFORCEMENT [0, 11, 0, 0, 0, 0]
+RECEIPTS 352 BANG_LOP 0
+ATTR docs/PROTOCOL_DA_PHIEN.md: eol: lf

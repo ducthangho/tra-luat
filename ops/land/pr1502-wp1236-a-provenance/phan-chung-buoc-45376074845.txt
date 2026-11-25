@@ -1,0 +1,13 @@
+# phan chung danh_gia_gate.py (sha256 539fed68) tren run 45376074845: xoa DAU HIEU mot buoc => phai not_measured (rc 0). rc la ma thoat cua CHINH danh_gia_gate.py.
+## --am-buoc 'gate (ubuntu' '== tl selftest'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate (ubuntu' 'scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-registry' '.claude/dev/ci_dang_ky_test.py --chay'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-packet-loop (' 'packet_loop_test_manh.py --gom'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0

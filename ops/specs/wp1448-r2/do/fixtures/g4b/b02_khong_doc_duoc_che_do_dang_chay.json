@@ -1,0 +1,106 @@
+{
+ "mo_ta": "chuan-bi success nhung log khong con (het han): khong doc duoc che do",
+ "mo_phong": false,
+ "run": {
+  "id": 9002,
+  "event": "pull_request",
+  "head_sha": "1111111111111111111111111111111111111111",
+  "run_attempt": 1,
+  "conclusion": "success",
+  "created_at": "2026-11-01T00:00:00Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 1,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 10,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 11,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 12,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 13,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 14,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 15,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 16,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 17,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu-gop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 30,
+   "head_sha": "1111111111111111111111111111111111111111"
+  }
+ ],
+ "log": {
+  "chuan_bi": null,
+  "gom": "2026-11-01T00:10:00.0Z GOM MẢNH 8/8\n2026-11-01T00:10:01.0Z SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0\n"
+ },
+ "artifact": [
+  "gate-cong-cu-manh-ubuntu-latest-0",
+  "gate-cong-cu-manh-ubuntu-latest-1",
+  "gate-cong-cu-manh-ubuntu-latest-2",
+  "gate-cong-cu-manh-ubuntu-latest-3",
+  "gate-cong-cu-manh-ubuntu-latest-4",
+  "gate-cong-cu-manh-ubuntu-latest-5",
+  "gate-cong-cu-manh-ubuntu-latest-6",
+  "gate-cong-cu-manh-ubuntu-latest-7"
+ ],
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "thieu_bang_chung",
+   2
+  ],
+  "g4a": "khong_phan_loai_duoc"
+ }
+}

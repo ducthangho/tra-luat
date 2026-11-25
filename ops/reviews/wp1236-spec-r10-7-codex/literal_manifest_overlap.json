@@ -1,0 +1,242 @@
+{
+  "exact_matches": 68,
+  "not_exact": [
+    {
+      "id": "kho:phi_skip_descendants",
+      "kind": "extended_contract"
+    },
+    {
+      "id": "kho:phi_substring",
+      "kind": "extended_contract"
+    },
+    {
+      "id": "kho:producer_version_0",
+      "kind": "set"
+    },
+    {
+      "id": "kho:producer_version_1",
+      "kind": "set"
+    },
+    {
+      "id": "kho:producer_version_2",
+      "kind": "set"
+    },
+    {
+      "id": "kho:reason_129_32",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_140_15",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_158_24",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_160_24",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_162_24",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_175_32",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_177_15",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_238_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_243_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_247_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_249_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_251_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_254_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_259_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_261_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_263_16",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_51_22",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_55_26",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_58_22",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_60_22",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_71_19",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_97_23",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_97_70",
+      "kind": "reason"
+    },
+    {
+      "id": "kho:reason_claim_failed",
+      "kind": "extended_contract"
+    },
+    {
+      "id": "kho:reason_complete_102_26",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_112_40",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_112_72",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_136_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_147_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_149_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_151_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_165_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_169_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_272_31",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_278_28",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_282_35",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_286_39",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_290_39",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_294_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_68_26",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_76_22",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_78_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_80_18",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_complete_99_15",
+      "kind": "reason_complete"
+    },
+    {
+      "id": "kho:reason_waiver",
+      "kind": "extended_contract"
+    },
+    {
+      "id": "kho:ref_any_run",
+      "kind": "regex_or_set"
+    },
+    {
+      "id": "kho:token_expand",
+      "kind": "regex_or_set"
+    },
+    {
+      "id": "kho:token_no_whitespace",
+      "kind": "regex_or_set"
+    },
+    {
+      "id": "kho:url_zero_indexerror",
+      "kind": "order_or_missing_url"
+    },
+    {
+      "id": "kho:url_zero_optional",
+      "kind": "order_or_missing_url"
+    },
+    {
+      "id": "kho:waiver_head_truthy",
+      "kind": "extended_contract"
+    },
+    {
+      "id": "kho:waiver_order_author_url",
+      "kind": "order_or_missing_url"
+    },
+    {
+      "id": "kho:waiver_order_line_author",
+      "kind": "order_or_missing_url"
+    },
+    {
+      "id": "kho:waiver_order_os_date",
+      "kind": "order_or_missing_url"
+    }
+  ],
+  "note": "Different suffix or bound variable spelling can implement same operator; this raw count is not a count of missing semantic mechanisms."
+}

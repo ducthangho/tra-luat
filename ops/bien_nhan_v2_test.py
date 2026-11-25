@@ -1000,7 +1000,8 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
 # tên/đổi chỗ làm `_thay_1` báo KHÔNG ĐO ĐƯỢC thay vì im lặng sửa hụt.
 HANG_CODEX = '    ("openai_codex", ("codex",), "codex_cli", "machine"),'
 HANG_API = '    ("openai_api", ("llm",), "llm_cli", "machine"),'
-HANG_AG = '    ("google_antigravity", "antigravity", "machine/local"),'
+HANG_WEB = '    ("openai_chatgpt", "chatgpt_web", "human_mediated"),'
+HANG_AG = '    ("google_antigravity", ("agy",), "antigravity", "machine/local"),'
 HANG_BD = '    ("anthropic", "anthropic_claude"),'
 HANG_BM = '    ("claude_code_cli", "claude_code"),'
 
@@ -1070,7 +1071,7 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
          {"sua_launcher": _thay_1(HANG_API, '    ("openai_api", ("llm",), "llm_cli"),')},
          2, "`_TRANSPORT_CONTRACTS` hàng 3 có 3 cột, lược đồ đòi 4"),
         ("hàng `_PROVIDER_NGOAI_CLI` thừa cột",
-         {"sua_launcher": _thay_1(HANG_AG, '    ("google_antigravity", "antigravity", "machine/local", "thua"),')},
+         {"sua_launcher": _thay_1(HANG_WEB, '    ("openai_chatgpt", "chatgpt_web", "human_mediated", "thua"),')},
          2, "`_PROVIDER_NGOAI_CLI` hàng 1 có 4 cột, lược đồ đòi 3"),
         ("hàng `_PROVIDER_BI_DANH` thiếu cột",
          {"sua_launcher": _thay_1(HANG_BD, '    ("anthropic",),')},
@@ -2108,7 +2109,7 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
     for nhan, kw, mong_nhan in (("hàng THẬT (machine/local)", {}, True),
                                 ("hàng LỆCH (machine)",
                                  {"sua_launcher": _thay_1(HANG_AG,
-                                  '    ("google_antigravity", "antigravity", "machine"),')}, False)):
+                                  '    ("google_antigravity", ("agy",), "antigravity", "machine"),')}, False)):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             cong = _cay_guong(tmp, kho_rieng=False, **kw)

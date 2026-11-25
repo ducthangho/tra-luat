@@ -1362,6 +1362,32 @@ GENERATED_SPECS = [
          {"flags": ['--out'], "help": '(v1.34.60 ADR-6) ghi envelope fallback (toàn văn không cắt --max) ra file — né tràn stdout'},
          {"flags": ['--max'], "type": int, "default": 4000, "help": '(v1.34.60) trần ký tự/văn bản khi fallback in stdout (0/âm → 4000); --out bỏ trần'},
      ]},
+    {"name": 'llm-order', "handler": 'cmd_llm_order',
+     "help": '(v1.36.71 r380) Xem/đặt/xoá THỨ TỰ đường gọi Claude cho script: sub (claude -p, tính vào SUBSCRIPTION) '
+             'và api (SDK + TL_ANTHROPIC_API_KEY, tính vào credit API). Lưu bền ở ~/.tra_luat_llm.json (TL_LLM_ORDER_FILE); '
+             'hiệu lực: cờ --thu-tu > tệp > biến TL_LLM_ORDER > mặc định sub,api. Không gọi API.',
+     "args": [
+         {"dest": 'thu_tu', "nargs": '?', "metavar": 'THU_TU', "help": 'sub,api | api,sub | sub | api (bỏ trống = chỉ xem)'},
+         {"flags": ['--reset'], "action": 'store_true', "help": 'xoá tệp đã lưu (về TL_LLM_ORDER hoặc mặc định sub,api)'},
+         {"flags": ['--json'], "action": 'store_true'},
+     ]},
+    {"name": 'llm-khai-niem', "handler": 'cmd_llm_khai_niem',
+     "help": '(v1.36.71 r380) Tách khái niệm của Điều "Giải thích từ ngữ" bằng Claude (mặc định claude-haiku-5-5) '
+             'theo thứ tự của `tl llm-order`; tự chuyển đường khi đường hỏng TRƯỚC khi gọi model (hết credit, thiếu key/CLI); '
+             '`claude -p` đã khởi chạy thì mọi lỗi đều dừng. '
+             'Nguyên văn lấy qua `tl extract`; kiểm thuật ngữ + định nghĩa khớp nguyên văn từng khoản (lệch ⇒ rc 5) — '
+             'ranh giới khoản KHÔNG được chứng minh, kết quả mang can_nguoi_duyet: true. '
+             'rc: 0 đạt · 2 đầu vào · 3 hết đường · 4 dừng (lỗi phía yêu cầu) · 5 lệch nguyên văn',
+     "args": [
+         {"dest": 'sohieu', "nargs": '?', "help": 'số hiệu văn bản (vd 134/2025/QH15) — cần kèm --dieu'},
+         {"flags": ['--dieu'], "help": 'Điều cần tách (theo số hiệu: mặc định 3; với --tep: lấy từ tiêu đề tệp, lệch ⇒ rc 2)'},
+         {"flags": ['--tep'], "help": 'đọc văn bản Điều từ tệp local UTF-8 thay cho tl extract (không ghép với số hiệu)'},
+         {"flags": ['--thu-tu'], "dest": 'thu_tu', "help": 'ghi đè thứ tự cho LẦN NÀY (sub,api | api,sub | sub | api)'},
+         {"flags": ['--model'], "default": 'claude-haiku-5-5'},
+         {"flags": ['--out'], "help": 'ghi JSON khái niệm ra tệp'},
+         {"flags": ['--nhat-ky'], "dest": 'nhat_ky', "help": 'tệp JSONL ghi dồn usage mỗi lần gọi'},
+         {"flags": ['--json'], "action": 'store_true', "help": 'envelope đủ: đường, model, token, lan_thu, lech'},
+     ]},
     {"name": 'doc-text', "handler": 'cmd_doc_text',
      "help": '(v1.34.60 A1) MỘT đường đọc text mọi định dạng: GDoc→export; .docx→download+unzip word/document.xml (text THẬT, hết footgun binary); .pdf→pdftotext; cache extract_<id>.txt. --dieu cắt Điều; nền cho fallback NLM-chết',
      "args": [
@@ -1820,6 +1846,12 @@ COMMAND_META = {
     "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True, nlm_fallback="unverified"),   # v1.34.57 B-#3 read-only; v1.34.61 E2: NLM-chết → stale-cache + cờ UNVERIFIED_NLM_STATE
     "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True, nlm_fallback="defer"),   # v1.34.57 B-#4..#7; v1.34.61 E2: --apply NLM-chết → DEFERRED + resume-artifact --from-plan
     "nlm-cross":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", nlm_fallback="corpus_read"),   # v1.34.60 E1 (meta mới — lệnh cũ ở cli.py chưa từng có meta)
+    # v1.36.71 r380 — llm-order ghi TỆP CẤU HÌNH LOCAL (không Drive/registry/NLM); llm-khai-niem đọc nguồn qua
+    # tl extract, gọi Claude, ghi khi người gọi khai --out/--nhat-ky.
+    "llm-order":            _m("low", False, "local", False, False, True, None, None, False, "ops_misc", generated=True),
+    # read_only=False CÓ CHỦ ĐÍCH: lệnh tiêu credit/hạn mức Claude và ghi `--out`/`--nhat-ky` (cờ `--nhat-ky` nằm
+    # NGOÀI họ cờ sinh tệp mà hook subagent canh) — xếp lớp GHI để subagent read-only bị chặn (sai về phía an toàn).
+    "llm-khai-niem":        _m("low", False, "local", False, False, True, None, None, False, "ops_misc", generated=True),
     "doc-text":             _m("low", True, "local", False, False, False, None, None, False, "lookup_ops", generated=True),   # v1.34.60 A1 (read-only; ghi cache extract local)
     "doc-compare":          _m("low", True, "local", False, False, False, None, None, False, "doc_identity", generated=True, nlm_fallback="corpus_read"),   # v1.34.63 A2 (read-only; đọc corpus — chạy khi NLM chết; ghi cache extract local)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),

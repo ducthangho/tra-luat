@@ -1,0 +1,1640 @@
+{
+  "coverage": [
+    {
+      "id": "kho:delete_return_112",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:chon_provenance:112:8"
+      ],
+      "src_sha256": "780dd5c65588efe55fe0f5e31c381aa1d85d7b1b5bc017b5fd4804ab59a76b1b"
+    },
+    {
+      "id": "kho:delete_return_127",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:127:8"
+      ],
+      "src_sha256": "627233c95aea6a741ebf06d494dbdc1763c3c07e2fc3246c84b9f842c68a0843"
+    },
+    {
+      "id": "kho:delete_return_129",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:129:8"
+      ],
+      "src_sha256": "c25b7468b6e2c98da19d4cc0f7605a7ba7b6c9f2220c487d72c8cde74097f23a"
+    },
+    {
+      "id": "kho:delete_return_132",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:132:8"
+      ],
+      "src_sha256": "0c47090494320cbab89c115a5b84b4d37e8b0866102441a46d5aac706ebe79b5"
+    },
+    {
+      "id": "kho:delete_return_171",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:171:8"
+      ],
+      "src_sha256": "d280dc884b265cb140adb9031635871c1974c5f3008ec9c1a504be8855fdcc9b"
+    },
+    {
+      "id": "kho:delete_return_173",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:173:8"
+      ],
+      "src_sha256": "a1f4ab67cfa5f1baa49a069e4f25384b0bc54334113779475273492fe2011ae5"
+    },
+    {
+      "id": "kho:delete_return_175",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_kiem_tep:175:8"
+      ],
+      "src_sha256": "3700edecdbd1f1c709fd621bf742889547b04c4e1847bba609f677f77b683637"
+    },
+    {
+      "id": "kho:delete_return_214",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:la_landed:214:8"
+      ],
+      "src_sha256": "78686448fd1bb832ef25cfc97b8950107e93129ae8653d4af0a3df072b07070f"
+    },
+    {
+      "id": "kho:delete_return_227",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_tep_trong:227:8"
+      ],
+      "src_sha256": "d79accd4443f0d8737c8a1882dd03e5715406bec2e6ca894f32625e5bd5de52b"
+    },
+    {
+      "id": "kho:delete_return_231",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:_tep_trong:231:12"
+      ],
+      "src_sha256": "e46d97867f21bd330bb799ef15ce19ad57d7f1163f3f199517f0450b6f5f8b2c"
+    },
+    {
+      "id": "kho:delete_return_238",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:238:8"
+      ],
+      "src_sha256": "d74749f6a87e35dc172e444bdd5ccb67121ab52d580fde3460ef9a696988b993"
+    },
+    {
+      "id": "kho:delete_return_243",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:243:8"
+      ],
+      "src_sha256": "b7cac07fab569df818f0fa16d215c4dea3e9f922024e4e5df7153f31d49ab44b"
+    },
+    {
+      "id": "kho:delete_return_249",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:249:8"
+      ],
+      "src_sha256": "9eebd7d90aee71aa7556e6a9b61745260e341b58f5ed5ffd09c0c486b3992e4d"
+    },
+    {
+      "id": "kho:delete_return_251",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:251:8"
+      ],
+      "src_sha256": "3f20ced6a37003c3e473b2a320c0713f0355589c435ee4d7bc0c414e20365900"
+    },
+    {
+      "id": "kho:delete_return_254",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:254:8"
+      ],
+      "src_sha256": "16acf79057b93e7f6bfe6cd88088883bdd2907fa51c3854029679e274a3083cf"
+    },
+    {
+      "id": "kho:delete_return_261",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:261:8"
+      ],
+      "src_sha256": "0a5fb3e328b17ec001261ef421231b4ba69c55ecaf90a9102deac890b70fb980"
+    },
+    {
+      "id": "kho:delete_return_263",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:kiem_mien:263:8"
+      ],
+      "src_sha256": "b44cb8eb10e33f96f3fe3baa67303d0eb300adb7540e05fd7e5aee379f83bcae"
+    },
+    {
+      "id": "kho:delete_return_316",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:main:316:12"
+      ],
+      "src_sha256": "be251ea7e401628a8e56459231fed8b3eae0f786ad867ab6b0229c5b5d31a66b"
+    },
+    {
+      "id": "kho:delete_return_319",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:main:319:8"
+      ],
+      "src_sha256": "5a3dae25e319bc4ad56cb2255e28fc3b601aa900c68fac7eeb3b6610125266b4"
+    },
+    {
+      "id": "kho:delete_return_55",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:doc_danh_gia:55:12"
+      ],
+      "src_sha256": "54bd38e5baeb7048b53fa89c75b1914afe9b7a2c2510463f42c0593e042cb8b7"
+    },
+    {
+      "id": "kho:delete_return_58",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:doc_danh_gia:58:8"
+      ],
+      "src_sha256": "89a1c3467b3078e26359a7f126d1834dfec781ae9f0bca06b394b7efda916db7"
+    },
+    {
+      "id": "kho:delete_return_60",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:doc_danh_gia:60:8"
+      ],
+      "src_sha256": "11d2f767e31baf0922b4023c99c96b7479f8b28d2e85f1f7c7c11de685949570"
+    },
+    {
+      "id": "kho:delete_return_97",
+      "kind": "early_return",
+      "exact_ast_generated": [
+        "c2:chon_provenance:97:8"
+      ],
+      "src_sha256": "c0a2e95ab2a7186a4cddc64bb1d76a605408fc39e7656181b213e68ca1f25a1b"
+    },
+    {
+      "id": "kho:identity_126_7",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:_kiem_tep:126:7"
+      ],
+      "src_sha256": "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099"
+    },
+    {
+      "id": "kho:identity_131_7",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:_kiem_tep:131:7"
+      ],
+      "src_sha256": "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed"
+    },
+    {
+      "id": "kho:identity_154_11",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:_kiem_tep:154:11"
+      ],
+      "src_sha256": "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905"
+    },
+    {
+      "id": "kho:identity_219_107",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:la_landed:219:107"
+      ],
+      "src_sha256": "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231"
+    },
+    {
+      "id": "kho:identity_219_11",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:la_landed:219:11"
+      ],
+      "src_sha256": "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6"
+    },
+    {
+      "id": "kho:identity_262_25",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:kiem_mien:262:25"
+      ],
+      "src_sha256": "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7"
+    },
+    {
+      "id": "kho:identity_271_11",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:kiem_ho_so:271:11"
+      ],
+      "src_sha256": "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1"
+    },
+    {
+      "id": "kho:identity_285_19",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:kiem_ho_so:285:19"
+      ],
+      "src_sha256": "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196"
+    },
+    {
+      "id": "kho:identity_72_67",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:doc_danh_gia:72:67"
+      ],
+      "src_sha256": "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3"
+    },
+    {
+      "id": "kho:identity_85_11",
+      "kind": "identity",
+      "exact_ast_generated": [
+        "j1:_la_so:85:11"
+      ],
+      "src_sha256": "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76"
+    },
+    {
+      "id": "kho:key_alpha_only",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "k2:_chuan:182:51"
+      ],
+      "src_sha256": "e4e1e69b8cfb469d4ee876165637b27ffedf33df6e240fa69688c539bcf60b11"
+    },
+    {
+      "id": "kho:key_no_casefold",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "k1:_chuan:182:30"
+      ],
+      "src_sha256": "98b689e5248fb16ee7cbc2bc8c37dc2fb34a3262bbd9781b5a9205b209501bb3"
+    },
+    {
+      "id": "kho:landed_partial",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "i7:la_landed:219:51"
+      ],
+      "src_sha256": "f0ceda5e0393803f2b6d02ec835be4e48c6549682857dec775cf08962c7b8484"
+    },
+    {
+      "id": "kho:phi_skip_descendants",
+      "kind": "extended_contract",
+      "exact_ast_generated": [],
+      "src_sha256": "7952abda04d5377e4530dbba72f5ab1a4b1fcb740ee99249ea22e0dd33eb135a"
+    },
+    {
+      "id": "kho:phi_substring",
+      "kind": "extended_contract",
+      "exact_ast_generated": [],
+      "src_sha256": "bbe00aa2c57c2b09316866940ab91be9e4724d96997f29899a575e542b5b4c05"
+    },
+    {
+      "id": "kho:producer_version_0",
+      "kind": "set",
+      "exact_ast_generated": [],
+      "src_sha256": "d3eb4b2527269445682d7d31423b53feb1853b235983a356c36a68a48779bc67"
+    },
+    {
+      "id": "kho:producer_version_1",
+      "kind": "set",
+      "exact_ast_generated": [],
+      "src_sha256": "3af68bfd7682735ff3e6f6fb91ac9ba962682588927090deb93d21b788109d77"
+    },
+    {
+      "id": "kho:producer_version_2",
+      "kind": "set",
+      "exact_ast_generated": [],
+      "src_sha256": "e4af26589e8486bcd23b28671daf43e0e968d2468dc6c4875bf1146262779e6f"
+    },
+    {
+      "id": "kho:reason_129_32",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "e05ea6269a20cc9b9811927e988be1201bd0969bbd89c07ac57d4c0e13a08711"
+    },
+    {
+      "id": "kho:reason_140_15",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "fce63ce67801006f0274413703b4ec755468f6386f6ba7d11d2345f1fe0af5b1"
+    },
+    {
+      "id": "kho:reason_158_24",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "9a5404f1bdad16a9c2f0dd9c63e1b80da3cdd37792467abe0517bedbc6bffd66"
+    },
+    {
+      "id": "kho:reason_160_24",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "782a31f35f8c7b50047891f9f4dee1448cd4291ca627de03811f5edefdefce16"
+    },
+    {
+      "id": "kho:reason_162_24",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "06b10d516e3f99bb3e70c72d5ead7ff07a68423036ca6b34e12097a22692516d"
+    },
+    {
+      "id": "kho:reason_175_32",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "8a52e7e3655194feddc87ab3ec918009325035947601067f1ef589901e17f6cc"
+    },
+    {
+      "id": "kho:reason_177_15",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "594d700bf0e04ea50b4881e816a1f30e09f998cdaed53977e9efb26177e6e341"
+    },
+    {
+      "id": "kho:reason_238_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "c6472ae8be62bd7c8bbf59ced1b1f553fb23d96003d67c8fd28b1f84fe4f832a"
+    },
+    {
+      "id": "kho:reason_243_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "bd2f991a1085c0c016b4de8ce6dc8ac69bc2c382fd395c4e63f17c59715356d5"
+    },
+    {
+      "id": "kho:reason_247_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "d489a7142ae568610e56a5afbad489218ef0bf13b592ca3f712151e5147c0960"
+    },
+    {
+      "id": "kho:reason_249_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "8c643469e1aad86901272034aaf9333463d7a45a96a5f077f597e6d9088535ef"
+    },
+    {
+      "id": "kho:reason_251_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "2cca0109c3a7a3ebb232f19d7bcd5c6223335b1f97ef67471161d8b80e466d2c"
+    },
+    {
+      "id": "kho:reason_254_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "86214df7e4c22277c23185bea7d824f48b9334d5145c796605f016fd4ec4f99a"
+    },
+    {
+      "id": "kho:reason_259_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "cbe1c0e5988219fafbb908b9b929948b9135f12f729e27bb471b870ec7240a3f"
+    },
+    {
+      "id": "kho:reason_261_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "784bcadacdc114ffaf72cd7d1b0b4d817ace8c505196baf49329ba06d733efe0"
+    },
+    {
+      "id": "kho:reason_263_16",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "fa92983421e92722d9d4713e5dd91ea2569bdee6ac15f05eb26b8f7a5b8f6923"
+    },
+    {
+      "id": "kho:reason_51_22",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "524b9406156e05f5dd50f5e0d5553352a8a668e224435c504a55b2b142e7d305"
+    },
+    {
+      "id": "kho:reason_55_26",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "36303820a75c2ecd3abc083b20d0b3a23c139ec8bfd30d84f498db2329ce9fad"
+    },
+    {
+      "id": "kho:reason_58_22",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "cdca49e6510efa22044a6ab41792ee80b915af22e5e7ca1d019d11ae1525ffde"
+    },
+    {
+      "id": "kho:reason_60_22",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "9c406fe48e6623ec8e193e630c61cdd062cda695f08be013adb7bf318a8eea9c"
+    },
+    {
+      "id": "kho:reason_71_19",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "8d895b76e777e11cfe66dc7f23ff7a9abf58f07d0bbc9d1a63f5b898b223724d"
+    },
+    {
+      "id": "kho:reason_97_23",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "6bb36be8ea44a1aba15cbde8cb316a0e6a9b98b135bb16fbd0e08297e0d23a5d"
+    },
+    {
+      "id": "kho:reason_97_70",
+      "kind": "reason",
+      "exact_ast_generated": [],
+      "src_sha256": "c218840152ef328478191143e5c2cdbee7b8f207fcacc6b495535cae69723eb3"
+    },
+    {
+      "id": "kho:reason_claim_failed",
+      "kind": "extended_contract",
+      "exact_ast_generated": [],
+      "src_sha256": "e4dbbe140ee392f91643abec2a93829fff02a7d72019e2e004f4557f79d928c4"
+    },
+    {
+      "id": "kho:reason_complete_102_26",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "54297540a1274d711259f6cdb40941331179b30246b6165e13647fbdb41c56ba"
+    },
+    {
+      "id": "kho:reason_complete_112_40",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "b256f45f338bc51f458b21ce4ac7c9b91274d91023385aa9a8a9cc043b8279d9"
+    },
+    {
+      "id": "kho:reason_complete_112_72",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "b252b14f06c8956d36e601440ca764a23879207433ef435e474fa3444610aced"
+    },
+    {
+      "id": "kho:reason_complete_136_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "615e7a6387f5376a874b7d3e40022caeddb8e53de69a5c5cea48d33599fd88b3"
+    },
+    {
+      "id": "kho:reason_complete_147_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "01e7b9d4d97208f2b980122452b7d078398687528befadfa75e7d1d4aa2b4588"
+    },
+    {
+      "id": "kho:reason_complete_149_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "5d7292d7112444b61598885fd25f8e8028ccafdb7d577e27b8dbd9912d6ac179"
+    },
+    {
+      "id": "kho:reason_complete_151_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "29a31dcdaf93148fdd2af9518e5f4e20109eba43ee0b06fff56e743e30eb4fe5"
+    },
+    {
+      "id": "kho:reason_complete_165_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "3206b46bc04bdbe48fe55b2aa8dc8b4ab86e1d3cb7377fdd1aad84be00b2b3e4"
+    },
+    {
+      "id": "kho:reason_complete_169_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "68ce0d35d0a4908f3eab392e3a76ab13a51ebba6fabf0d2d3b62d6627f3c89da"
+    },
+    {
+      "id": "kho:reason_complete_272_31",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "c48af8ab1d560d111fed055ed9f3bca081ff76218f4b2ab8b9fe5505aea015bc"
+    },
+    {
+      "id": "kho:reason_complete_278_28",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "b19316ea91209123213403409195e80698d367c666917f96cbfbc896866eb491"
+    },
+    {
+      "id": "kho:reason_complete_282_35",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "e6d6eaf981093576a4ed100e577c9ad9a17286cfc7da03afa51b9c530bd516c3"
+    },
+    {
+      "id": "kho:reason_complete_286_39",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "3772a174704bebd5604f00fad6ee276ad3fe24591041c16ec04272b8d56a5226"
+    },
+    {
+      "id": "kho:reason_complete_290_39",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "4f945c9134d2ae5437c28d7069dadd5e3764ee0aee15cf9ef81b4b00e15cff3e"
+    },
+    {
+      "id": "kho:reason_complete_294_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "e1eb894ae0e1eac39ab2d1f8107470faa6183bc418185e150ec36b938364db51"
+    },
+    {
+      "id": "kho:reason_complete_68_26",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "a997e6034eb4b78adec7e32f314f4c9e9b689c9a134c45609f75afa47be3835c"
+    },
+    {
+      "id": "kho:reason_complete_76_22",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "1f74de53f1af5a1340f4c589063cd1547dd2caa397b98e0648cb2cc1de3b8ced"
+    },
+    {
+      "id": "kho:reason_complete_78_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "098f4fd40e16047908580014a8fa96337e5ad8e6bf2c18735d6705925f78dde7"
+    },
+    {
+      "id": "kho:reason_complete_80_18",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "f2d56c7f2d4d68630cebf387a806de8d1b6f532d5a8978ec4d3b98769c858ef4"
+    },
+    {
+      "id": "kho:reason_complete_99_15",
+      "kind": "reason_complete",
+      "exact_ast_generated": [],
+      "src_sha256": "054738d61b0dbe225b182b1d87c684b6f2ee35dc1633ccc8bb0c202e1106e4cb"
+    },
+    {
+      "id": "kho:reason_waiver",
+      "kind": "extended_contract",
+      "exact_ast_generated": [],
+      "src_sha256": "2b3a6a326f3b7a191b6d3ea1b92f2402f49f2801f644a32947c8f388a11d5620"
+    },
+    {
+      "id": "kho:ref_any_run",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [],
+      "src_sha256": "3e0b055aa5a6d87f579fe7778acf5a215f0739ad702a4ae7ff80df0059049f87"
+    },
+    {
+      "id": "kho:ref_no_boundary",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "i6:RE_TEP_DG:lookaround@0 bo"
+      ],
+      "src_sha256": "c21103bf4fe41524e47c817eb16baccfed3efa9a0f597c8e27db1f28ddf4ec2f"
+    },
+    {
+      "id": "kho:ref_txt_wild",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "i5:RE_TEP_DG:escape@63 \\.→."
+      ],
+      "src_sha256": "9b73cd899d499460ecb3a62d90e45d9080967fae215f41f323bac824a81bb4d7"
+    },
+    {
+      "id": "kho:set_remove_BO_SINH_0",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:BO_SINH:0"
+      ],
+      "src_sha256": "15c28f6bfae616cf3e94fec5c7573c67b8cd2cba54d620e1e7759c8a4bfb10a8"
+    },
+    {
+      "id": "kho:set_remove_BO_SINH_1",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:BO_SINH:1"
+      ],
+      "src_sha256": "4b64379b49bfe84b7db855f0229df48a0f349e67c12b542bde19be0cc7c4da32"
+    },
+    {
+      "id": "kho:set_remove_BO_SINH_2",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:BO_SINH:2"
+      ],
+      "src_sha256": "29101fa01fe98d10b5ae0ba4338f42377e6db53b73f373d0ffbd6396a4bfeb90"
+    },
+    {
+      "id": "kho:set_remove_CHECK_BAT_BUOC_TEN_0",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:CHECK_BAT_BUOC_TEN:0"
+      ],
+      "src_sha256": "b23f3bff9b1e5793e6ea63b1b0585d9773d7c432258dca8b94f68d0b6687f5dd"
+    },
+    {
+      "id": "kho:set_remove_CHECK_BAT_BUOC_TEN_1",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:CHECK_BAT_BUOC_TEN:1"
+      ],
+      "src_sha256": "54c8ce52dbfe28099b322011d9ccb7f04a4e3cbd6e2092126d608a6fdb6fa869"
+    },
+    {
+      "id": "kho:set_remove_CHECK_BAT_BUOC_TEN_2",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:CHECK_BAT_BUOC_TEN:2"
+      ],
+      "src_sha256": "f5dd411930f2b06e081af177c1f9260cc23d317edddf44720b1985878aa4e3dc"
+    },
+    {
+      "id": "kho:set_remove_CHECK_BAT_BUOC_TEN_3",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:CHECK_BAT_BUOC_TEN:3"
+      ],
+      "src_sha256": "a74e3eee93796c2ee16ad611b176b716a80c981070d8b94236729e0fb467b12a"
+    },
+    {
+      "id": "kho:set_remove_CHECK_BAT_BUOC_TEN_4",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:CHECK_BAT_BUOC_TEN:4"
+      ],
+      "src_sha256": "cace2d80b821ecee11915f8c1628faa432a15d11062c39c2e632b67bfacab299"
+    },
+    {
+      "id": "kho:set_remove_PHI_LOI_KHAI_0",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:PHI_LOI_KHAI:0"
+      ],
+      "src_sha256": "2401781e5c9f2d6911a66bb50f18f392eec3faac68819c3f608c69e16a906b3d"
+    },
+    {
+      "id": "kho:set_remove_PHI_LOI_KHAI_1",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:PHI_LOI_KHAI:1"
+      ],
+      "src_sha256": "9fcbec9143a7d7d20c2d1fd8c8a0a50facbffedc8f4f656d3075f17d027b5f19"
+    },
+    {
+      "id": "kho:set_remove_PHI_LOI_KHAI_2",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:PHI_LOI_KHAI:2"
+      ],
+      "src_sha256": "e18dc4bdab02f239d74cd91d19270fd470b2b96d62d5580ec3863ac56e5bbc5d"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_0",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:0"
+      ],
+      "src_sha256": "d567fc5fa1d779ec6a55ff505a5dce9bf9d541c4bac5930efb09bb1f2e0d1f2d"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_1",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:1"
+      ],
+      "src_sha256": "d236d1182b212fb64aff108a0a918b9f9bcfb35dc1ac5ffe8200ec0a9b7ca242"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_2",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:2"
+      ],
+      "src_sha256": "dde9aeb8e38af697324d134761ed133078f3a1b61040a1086f4aea55dacd7cc1"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_3",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:3"
+      ],
+      "src_sha256": "bd8297dba01ddbbac618cc3832d8e0abe583efffef76eb6ba87a4420416607c8"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_4",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:4"
+      ],
+      "src_sha256": "6c03ce915a617dc0254ee9f229f4932236059a78abf1ada208dc9f2ad67f4e6d"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_5",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:5"
+      ],
+      "src_sha256": "b2a0ef64a5708e246d4f8976e91f355de0e63e96269f1ff9bf12f3b32f5ae993"
+    },
+    {
+      "id": "kho:set_remove_TOKEN_6",
+      "kind": "set",
+      "exact_ast_generated": [
+        "h1:TOKEN:6"
+      ],
+      "src_sha256": "c61fbf177a00ae40d7d4c73e2bbba11e2e5ff3d2b38a832b232d163b9532d434"
+    },
+    {
+      "id": "kho:skip_v3_partial",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "i7:doc_danh_gia:70:46"
+      ],
+      "src_sha256": "c1373dcc92a8200f78d7bd0e2f46146e9231898df8ab7169b534a3bba130f484"
+    },
+    {
+      "id": "kho:token_delimiter_40",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo '('"
+      ],
+      "src_sha256": "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd"
+    },
+    {
+      "id": "kho:token_delimiter_44",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo ','"
+      ],
+      "src_sha256": "2ac296e6dd5f2e2e9f0efbcca82dac1adbad57e3f2c45ddc54f59a540673674b"
+    },
+    {
+      "id": "kho:token_delimiter_45",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo '\\\\-'"
+      ],
+      "src_sha256": "60b43cc5990e052301c6c71bf841256b44530b011bf895358a1297519a02f194"
+    },
+    {
+      "id": "kho:token_delimiter_46",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo '.'"
+      ],
+      "src_sha256": "0cd09ede7c3655b068939ea06608aef792961e52cc59fceba6db18d3182d5f6a"
+    },
+    {
+      "id": "kho:token_delimiter_58",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo ':'"
+      ],
+      "src_sha256": "b555981d8a7f838c8bc22edd9573a211b7fcdd3852bb97e3bf2a0e663ba2a38d"
+    },
+    {
+      "id": "kho:token_delimiter_59",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo ';'"
+      ],
+      "src_sha256": "a0606ffcc4007a5c53159bc37aebaf89b8d6e7ee3425d3ceb0186ba86586b414"
+    },
+    {
+      "id": "kho:token_delimiter_8212",
+      "kind": "regex",
+      "exact_ast_generated": [
+        "i1:RE_TOKEN:lop@17 bo '—'"
+      ],
+      "src_sha256": "74f8fcfcdeecfa5eabfcb18d647c58dea6b303d08e5bdde4c0f633d53733e0db"
+    },
+    {
+      "id": "kho:token_expand",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [],
+      "src_sha256": "2dcb2395aafb784e7dba11b454f9b0ee4027e4a937467710234114363300d907"
+    },
+    {
+      "id": "kho:token_no_casefold",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "k1:token:202:23"
+      ],
+      "src_sha256": "a868a1523dabf52648a1d15d1ad9d4ca0055bda0098533c11f00968bb8c6ff10"
+    },
+    {
+      "id": "kho:token_no_whitespace",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [],
+      "src_sha256": "8468613271df2dc45b3bc47118aaf140922606e8b5bb22c2e270912e4a3053ee"
+    },
+    {
+      "id": "kho:url_zero_indexerror",
+      "kind": "order_or_missing_url",
+      "exact_ast_generated": [],
+      "src_sha256": "75e98a56c119c629a02f67c00755bb12e2e7f0fc131f503164c9e704e693b93b"
+    },
+    {
+      "id": "kho:url_zero_optional",
+      "kind": "order_or_missing_url",
+      "exact_ast_generated": [],
+      "src_sha256": "2c7df1d251e8542336da6c0c3be8e66d5f3e33cffe2534a19a11a3a607715222"
+    },
+    {
+      "id": "kho:waiver_head_truthy",
+      "kind": "extended_contract",
+      "exact_ast_generated": [],
+      "src_sha256": "bc3a07e10fde3161bd8f4ecac15e9c5449e91a31cf6fe6693fd21fa1ef16d853"
+    },
+    {
+      "id": "kho:waiver_no_strip",
+      "kind": "extended_contract",
+      "exact_ast_generated": [
+        "k1:kiem_mien:252:82"
+      ],
+      "src_sha256": "d73ea5879e551dfab74ce480373b0e62ed13f922bfffb1a4ea48d4f723ebef87"
+    },
+    {
+      "id": "kho:waiver_order_author_url",
+      "kind": "order_or_missing_url",
+      "exact_ast_generated": [],
+      "src_sha256": "aa9067803a2109066a2b2c67272566e6deb6ce21d662a636f67af1f11cbb0ec6"
+    },
+    {
+      "id": "kho:waiver_order_line_author",
+      "kind": "order_or_missing_url",
+      "exact_ast_generated": [],
+      "src_sha256": "bac28ea1bda5ea24342249b062c11c4531e290a82ba505aad7b75139083a41c4"
+    },
+    {
+      "id": "kho:waiver_order_os_date",
+      "kind": "order_or_missing_url",
+      "exact_ast_generated": [],
+      "src_sha256": "bb4381fd0b9b358fed172b414cbc842fa20d6873840b548257d55985c1b46d30"
+    },
+    {
+      "id": "kho:waiver_order_os_sha",
+      "kind": "order",
+      "exact_ast_generated": [
+        "l:module:235:0:body12"
+      ],
+      "src_sha256": "d4388ae786e4941b1c7867dfb90a8ef4387809c892469077f5afa023edfc6d8f"
+    },
+    {
+      "id": "kho:waiver_partial",
+      "kind": "regex_or_set",
+      "exact_ast_generated": [
+        "i7:kiem_mien:252:64"
+      ],
+      "src_sha256": "ba9ee378e32492a95bc1a270ba49bce4ae9deb848c0db2d7ce43433e576cb2ea"
+    }
+  ],
+  "exact_ast_count": 68,
+  "regex_inventory": [
+    {
+      "id": "i1:RE_DAU:lop@53 bo '0-9'",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i1:RE_DAU:lop@53 bo 'a-f'",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i2:RE_DAU:lop@53 thanh .",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head (.{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i1:RE_DAU:lop@99 bo '0-9'",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([a-f]{64})\\)"
+    },
+    {
+      "id": "i1:RE_DAU:lop@99 bo 'a-f'",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9]{64})\\)"
+    },
+    {
+      "id": "i2:RE_DAU:lop@99 thanh .",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 (.{64})\\)"
+    },
+    {
+      "id": "i4:RE_DAU:luong_tu@30 +→*",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d*) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i4:RE_DAU:luong_tu@44 +→*",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d*) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i4:RE_DAU:luong_tu@61 {40}→*",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]*) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i4:RE_DAU:luong_tu@107 {64}→*",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]*)\\)"
+    },
+    {
+      "id": "i5:RE_DAU:escape@28 \\d→.",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (.+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i5:RE_DAU:escape@42 \\d→.",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (.+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i5:RE_DAU:escape@71 \\(→.",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*.danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i5:RE_DAU:escape@86 \\.→.",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate.py sha256 ([0-9a-f]{64})\\)"
+    },
+    {
+      "id": "i5:RE_DAU:escape@112 \\)→.",
+      "name": "RE_DAU",
+      "before": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})\\)",
+      "after": "# Danh gia Gate output run (\\d+) attempt (\\d+) head ([0-9a-f]{40}) — .*\\(danh_gia_gate\\.py sha256 ([0-9a-f]{64})."
+    },
+    {
+      "id": "i1:RE_JOB:lop@19 bo '^'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i1:RE_JOB:lop@19 bo '\\\\]'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i2:RE_JOB:lop@19 thanh .",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[(.*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i1:RE_JOB:lop@58 bo '0-9'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i1:RE_JOB:lop@58 bo 'a-f'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i2:RE_JOB:lop@58 thanh .",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=(.{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i3:RE_JOB:nhanh@75 bo 'passed'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (failed|not_measured): (.*)"
+    },
+    {
+      "id": "i3:RE_JOB:nhanh@75 bo 'failed'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|not_measured): (.*)"
+    },
+    {
+      "id": "i3:RE_JOB:nhanh@75 bo 'not_measured'",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed): (.*)"
+    },
+    {
+      "id": "i4:RE_JOB:luong_tu@7 +→*",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d*) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i4:RE_JOB:luong_tu@12 +→*",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.*?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i4:RE_JOB:luong_tu@43 +→*",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w*) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i4:RE_JOB:luong_tu@66 {64}→*",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]*) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i5:RE_JOB:escape@5 \\d→.",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (.+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i5:RE_JOB:escape@16 \\[→.",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) .([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i5:RE_JOB:escape@21 \\]→.",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^.]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i5:RE_JOB:escape@26 \\]→.",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*). conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i5:RE_JOB:escape@41 \\w→.",
+      "name": "RE_JOB",
+      "before": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(\\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)",
+      "after": "JOB (\\d+) (.+?) \\[([^\\]]*)\\] conclusion=(.+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)"
+    },
+    {
+      "id": "i4:RE_SKIP_CU:luong_tu@7 +→*",
+      "name": "RE_SKIP_CU",
+      "before": "JOB (\\d+) (.+?): skipped \\(khong tinh\\)",
+      "after": "JOB (\\d*) (.+?): skipped \\(khong tinh\\)"
+    },
+    {
+      "id": "i4:RE_SKIP_CU:luong_tu@12 +→*",
+      "name": "RE_SKIP_CU",
+      "before": "JOB (\\d+) (.+?): skipped \\(khong tinh\\)",
+      "after": "JOB (\\d+) (.*?): skipped \\(khong tinh\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_CU:escape@5 \\d→.",
+      "name": "RE_SKIP_CU",
+      "before": "JOB (\\d+) (.+?): skipped \\(khong tinh\\)",
+      "after": "JOB (.+) (.+?): skipped \\(khong tinh\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_CU:escape@25 \\(→.",
+      "name": "RE_SKIP_CU",
+      "before": "JOB (\\d+) (.+?): skipped \\(khong tinh\\)",
+      "after": "JOB (\\d+) (.+?): skipped .khong tinh\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_CU:escape@37 \\)→.",
+      "name": "RE_SKIP_CU",
+      "before": "JOB (\\d+) (.+?): skipped \\(khong tinh\\)",
+      "after": "JOB (\\d+) (.+?): skipped \\(khong tinh."
+    },
+    {
+      "id": "i4:RE_SKIP_V3:luong_tu@7 +→*",
+      "name": "RE_SKIP_V3",
+      "before": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass\\)",
+      "after": "JOB (\\d*) (.+?): skipped -> not_measured \\(khong suy pass\\)"
+    },
+    {
+      "id": "i4:RE_SKIP_V3:luong_tu@12 +→*",
+      "name": "RE_SKIP_V3",
+      "before": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass\\)",
+      "after": "JOB (\\d+) (.*?): skipped -> not_measured \\(khong suy pass\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_V3:escape@5 \\d→.",
+      "name": "RE_SKIP_V3",
+      "before": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass\\)",
+      "after": "JOB (.+) (.+?): skipped -> not_measured \\(khong suy pass\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_V3:escape@41 \\(→.",
+      "name": "RE_SKIP_V3",
+      "before": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass\\)",
+      "after": "JOB (\\d+) (.+?): skipped -> not_measured .khong suy pass\\)"
+    },
+    {
+      "id": "i5:RE_SKIP_V3:escape@57 \\)→.",
+      "name": "RE_SKIP_V3",
+      "before": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass\\)",
+      "after": "JOB (\\d+) (.+?): skipped -> not_measured \\(khong suy pass."
+    },
+    {
+      "id": "i3:RE_MOC:nhanh@17 bo 'passed'",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i3:RE_MOC:nhanh@17 bo 'failed'",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i3:RE_MOC:nhanh@17 bo 'not_measured'",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed) \\((\\d+)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i4:RE_MOC:luong_tu@51 +→*",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d*)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i4:RE_MOC:luong_tu@57 +→*",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d*) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i5:RE_MOC:escape@46 \\(→.",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) .(\\d+)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i5:RE_MOC:escape@49 \\d→.",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((.+)/(\\d+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i5:RE_MOC:escape@55 \\d→.",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(.+) job co dau hieu duong\\)"
+    },
+    {
+      "id": "i5:RE_MOC:escape@81 \\)→.",
+      "name": "RE_MOC",
+      "before": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong\\)",
+      "after": "MOC_GATE_OUTPUT: (passed|failed|not_measured) \\((\\d+)/(\\d+) job co dau hieu duong."
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@4 bo 'a-z'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([_]+)(?=$|[\\s—\\-:(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@4 bo '_'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z]+)(?=$|[\\s—\\-:(,.;])"
+    },
+    {
+      "id": "i2:RE_TOKEN:lop@4 thanh .",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*(.+)(?=$|[\\s—\\-:(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo '\\\\s'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[—\\-:(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo '—'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s\\-:(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo '\\\\-'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—:(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo ':'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—\\-(,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo '('",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—\\-:,.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo ','",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—\\-:(.;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo '.'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,;])"
+    },
+    {
+      "id": "i1:RE_TOKEN:lop@17 bo ';'",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.])"
+    },
+    {
+      "id": "i2:RE_TOKEN:lop@17 thanh .",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|.)"
+    },
+    {
+      "id": "i4:RE_TOKEN:luong_tu@10 +→*",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]*)(?=$|[\\s—\\-:(,.;])"
+    },
+    {
+      "id": "i5:RE_TOKEN:escape@0 \\s→.",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": ".*([a-z_]+)(?=$|[\\s—\\-:(,.;])"
+    },
+    {
+      "id": "i5:RE_TOKEN:escape@18 \\s→.",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)(?=$|[.—\\-:(,.;])"
+    },
+    {
+      "id": "i6:RE_TOKEN:lookaround@12 bo",
+      "name": "RE_TOKEN",
+      "before": "\\s*([a-z_]+)(?=$|[\\s—\\-:(,.;])",
+      "after": "\\s*([a-z_]+)"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo 'A-Z'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![a-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo 'a-z'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo '0-9'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo '_'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo '.'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_/-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo '/'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_.-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@4 bo '-'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i2:RE_TEP_DG:lop@4 thanh .",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<!.)[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo 'A-Z'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[a-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo 'a-z'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo '0-9'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo '_'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo '.'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_/-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo '/'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_.-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i1:RE_TEP_DG:lop@20 bo '-'",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i2:RE_TEP_DG:lop@20 thanh .",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-]).*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i2:RE_TEP_DG:lop@57 thanh .",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-.+\\.txt"
+    },
+    {
+      "id": "i4:RE_TEP_DG:luong_tu@62 +→*",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]*\\.txt"
+    },
+    {
+      "id": "i5:RE_TEP_DG:escape@63 \\.→.",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+.txt"
+    },
+    {
+      "id": "i6:RE_TEP_DG:lookaround@0 bo",
+      "name": "RE_TEP_DG",
+      "before": "(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt",
+      "after": "[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt"
+    },
+    {
+      "id": "i4:RE_KHOI_LANDED:luong_tu@9 {8}→*",
+      "name": "RE_KHOI_LANDED",
+      "before": "landed_\\d{8}",
+      "after": "landed_\\d*"
+    },
+    {
+      "id": "i5:RE_KHOI_LANDED:escape@7 \\d→.",
+      "name": "RE_KHOI_LANDED",
+      "before": "landed_\\d{8}",
+      "after": "landed_.{8}"
+    },
+    {
+      "id": "i4:RE_URL:luong_tu@61 +→*",
+      "name": "RE_URL",
+      "before": "https://github\\.com/ducthangho/tra-luat/\\S*?#issuecomment-(\\d+)",
+      "after": "https://github\\.com/ducthangho/tra-luat/\\S*?#issuecomment-(\\d*)"
+    },
+    {
+      "id": "i5:RE_URL:escape@14 \\.→.",
+      "name": "RE_URL",
+      "before": "https://github\\.com/ducthangho/tra-luat/\\S*?#issuecomment-(\\d+)",
+      "after": "https://github.com/ducthangho/tra-luat/\\S*?#issuecomment-(\\d+)"
+    },
+    {
+      "id": "i5:RE_URL:escape@59 \\d→.",
+      "name": "RE_URL",
+      "before": "https://github\\.com/ducthangho/tra-luat/\\S*?#issuecomment-(\\d+)",
+      "after": "https://github\\.com/ducthangho/tra-luat/\\S*?#issuecomment-(.+)"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@19 bo '0-9'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@19 bo 'a-f'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i2:RE_MIEN:lop@19 thanh .",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: (.{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@37 bo 'a-z'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@37 bo '0-9'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@37 bo ','",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@37 bo '.'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i1:RE_MIEN:lop@37 bo '-'",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i2:RE_MIEN:lop@37 thanh .",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=(.+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i4:RE_MIEN:luong_tu@27 {40}→*",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]*) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i4:RE_MIEN:luong_tu@48 +→*",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]*) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i4:RE_MIEN:luong_tu@72 {4}→*",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d*-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i4:RE_MIEN:luong_tu@78 {2}→*",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d*-\\d{2})"
+    },
+    {
+      "id": "i4:RE_MIEN:luong_tu@84 {2}→*",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d*)"
+    },
+    {
+      "id": "i5:RE_MIEN:escape@70 \\d→.",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(.{4}-\\d{2}-\\d{2})"
+    },
+    {
+      "id": "i5:RE_MIEN:escape@76 \\d→.",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-.{2}-\\d{2})"
+    },
+    {
+      "id": "i5:RE_MIEN:escape@82 \\d→.",
+      "name": "RE_MIEN",
+      "before": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-\\d{2})",
+      "after": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\\S.*?) han=(\\d{4}-\\d{2}-.{2})"
+    }
+  ],
+  "counts": {
+    "A1": [
+      "A1-1",
+      "A1-2",
+      "A1-3",
+      "A1-4",
+      "A1-5",
+      "A1-6",
+      "A1-7",
+      "A1-8",
+      "A1-9",
+      "A1-10",
+      "A1-11",
+      "A1-12",
+      "A1-13",
+      "A1-14",
+      "A1-16",
+      "A1-17",
+      "A1-15"
+    ],
+    "A2": [
+      "A2-1",
+      "A2-2",
+      "A2-3",
+      "A2-4",
+      "A2-5",
+      "A2-6",
+      "A2-7",
+      "A2-8",
+      "A2-9",
+      "A2-10",
+      "A2-12",
+      "A2-13",
+      "A2-11"
+    ],
+    "rules": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  "numstat": {
+    "rc": 0,
+    "stdout": "1\t0\t.claude/dev/ci_dang_ky_test.py\n335\t0\tops/gate_output_doi_chieu.py\n988\t0\tops/gate_output_doi_chieu_test.py\n"
+  },
+  "kiem_ho_so_args": [
+    "du_lieu",
+    "thu_muc"
+  ],
+  "kiem_mien_calls": [
+    "kiem_mien(v, thu_muc, None)"
+  ],
+  "interfaces": {
+    "B": {
+      "CA": true,
+      "CASES": false,
+      "chay_ca": true,
+      "TinHieuChotCa": true,
+      "contains_GODC_override": false
+    },
+    "C": {
+      "CA": false,
+      "CASES": true,
+      "chay_ca": false,
+      "TinHieuChotCa": false,
+      "contains_GODC_override": false
+    }
+  },
+  "B_override_probe": {
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/repo/ops/land_evidence_nguon.py\n/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/module_not_loaded.py\n",
+    "stderr": ""
+  }
+}

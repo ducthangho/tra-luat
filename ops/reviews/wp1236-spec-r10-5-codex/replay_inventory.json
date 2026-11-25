@@ -1,0 +1,150 @@
+{
+  "total_entries": 138,
+  "unique_ids": 127,
+  "duplicate_ids": [
+    {
+      "id": "identity_85_11",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76"
+        }
+      ]
+    },
+    {
+      "id": "identity_126_7",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099"
+        }
+      ]
+    },
+    {
+      "id": "identity_131_7",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed"
+        }
+      ]
+    },
+    {
+      "id": "identity_154_11",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905"
+        }
+      ]
+    },
+    {
+      "id": "identity_219_11",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6"
+        }
+      ]
+    },
+    {
+      "id": "identity_262_25",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7"
+        }
+      ]
+    },
+    {
+      "id": "identity_271_11",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1"
+        }
+      ]
+    },
+    {
+      "id": "identity_285_19",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196"
+        }
+      ]
+    },
+    {
+      "id": "identity_219_107",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231"
+        }
+      ]
+    },
+    {
+      "id": "identity_72_67",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3"
+        }
+      ]
+    },
+    {
+      "id": "token_delimiter_40",
+      "versions": [
+        {
+          "file": "independent_mutants.jsonl",
+          "src_sha256": "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd"
+        },
+        {
+          "file": "independent_corrected.jsonl",
+          "src_sha256": "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd"
+        }
+      ]
+    }
+  ],
+  "regex_compile_errors": []
+}

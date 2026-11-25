@@ -1,0 +1,129 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1236
+packet_id: wp1236
+packet_slug: GATE-OUTPUT-DOI-CHIEU
+dot: A
+mission_issue: 1236
+mission_id: gh-1236
+mission_ghi_chu: 'Dot A wp1236 r12, dung lai tu r10 theo chi thi chu kho'
+revision: 12
+generation: 2
+lease_id: wp1236-a-r12-g2-codex-20261122
+thay_the_cho:
+- wp1236-a-r12-g1-claude-20261121
+thay_the_cho_ghi_chu: 'Bia thay the hai chieu trong cung commit'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7082184146
+authority_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7082184146
+authority_ghi_chu: 'Chu kho truc tiep duyet doi executor va diem khoi dau du phong'
+authority_caveat: 'Comment truc tiep cua chu kho'
+recorded_by: openai_codex_session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Ghi nhan lenh cap lease cua chu kho tai authority_url'
+executor_session: codex-current-session-wp1236-r12-g2
+executor_ghi_chu: 'Doi chieu T01 va T02 tren ban dung lai r12'
+leased_at_utc: '2026-11-22T16:38:54Z'
+heartbeat_at: '2026-11-22T16:38:54Z'
+lease_until: '2026-11-24T10:44:49Z'
+lease_expires_at_utc: '2026-11-24T10:44:49Z'
+role: executor
+provider: openai_codex
+executor: openai_codex
+model: gpt-6
+model_family: openai
+execution_surface: codex_service
+transport: machine
+transport_ghi_chu: 'Codex cloud Linux'
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec r12 review_class sensitive (cong land/M8); pham_vi_e cham E5 (fail-closed)'
+assurance_target: human_audited
+assurance_ghi_chu: 'AGY Gemini review doc lap; chu kho audit truoc merge'
+reviewer: google_antigravity
+reviewer_provider: google_antigravity
+reviewer_model_family: gemini
+reviewer_execution_surface: antigravity
+reviewer_transport: machine/local
+reviewer_independence: 'AGY Gemini qua launcher, phien doc lap read-only tren exact head'
+spec_path: ops/specs/wp1236-r12.md
+spec_ref: refs/heads/claude/spec-1236-r9@26436102171819ff5a11ecf4b2ff3a4b4d09daf1
+spec_source_oid: 26436102171819ff5a11ecf4b2ff3a4b4d09daf1
+spec_blob: e5583bc042448517b94eadda57231dfc60e0a284
+spec_hash: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+spec_sha256: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+spec_ref_ghi_chu: 'ghim OID40; nhanh claude/spec-1236-r9 (PR #1459) phai giu toi khi packet land; executor KHONG chep spec vao nhanh thi cong'
+branch: agent/wp1236-a-r12-g2-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 010046f2141799ec6ffc9cfa1322d49df3f3f680
+start_from_sha: 79b3c24b8e6c7b74e456880a1249b0de1cb0d948
+reviewed_sha_required: 79b3c24b8e6c7b74e456880a1249b0de1cb0d948
+write_set:
+- .claude/dev/ci_dang_ky_test.py
+- ops/gate_output_doi_chieu.py
+- ops/gate_output_doi_chieu_test.py
+write_set_hash: e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc cho tep test moi; hai tep ops/ la tep MOI'
+closure_status: 'Chờ kết quả quét holder trước khi đăng'
+tran_kich_thuoc: '<= 3 tep / <= 2100 dong them, do git diff --numstat origin/master...<head A> (chu kho duyet issuecomment-7058143773); vuot => DUNG truoc review (E2)'
+tran_loi_goi_codex: 'Giu lich su review Codex; reviewer generation 2 la AGY Gemini'
+windows: 'dot A: ADR-0060 M3 required => Windows LOCAL tren may chu kho qua Desktop Commander (ADR-0057/58/59) tren exact head A; chu kho MIEN Windows CI cho dot A (issuecomment-7048063512); KHONG workflow_dispatch'
+coordination_paths:
+- ops/leases/wp1236-a-r12-g2-codex-20261122.yaml
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'chu kho audit va duyet SHA cu the truoc merge (E5); dieu phoi merge khi kiem-merge rc=0'
+nang_tran:
+  tran_cu: <= 3 tep / <= 1700 dong them (lease r10, issuecomment-7053833153)
+  tran_moi: <= 3 tep / <= 2100 dong them (git diff --numstat origin/master...<head A>)
+  can_cu: 'numstat 5a1bf33 = 1592; tap 125 o dong cua r11 + hop dong dau ra + seam => ~1795 tai 2719f81; do lai truoc review ma'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7058143773
+  lich_su:
+  - tran_cu: <= 3 tep / <= 1400 dong them
+    tran_moi: <= 3 tep / <= 1700 dong them
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7053833153
+  - tran_cu: <= 3 tep / <= 1200 dong them
+    tran_moi: <= 3 tep / <= 1400 dong them
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7047718543
+  - tran_cu: <= 3 tep / <= 1100 dong them
+    tran_moi: <= 3 tep / <= 1200 dong them
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7044561323
+  - tran_cu: <= 3 tep / <= 800 dong them
+    tran_moi: <= 3 tep / <= 1100 dong them
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043702814
+  - tran_cu: <= 6 tep / <= 450 dong them (ADR-0053)
+    tran_moi: <= 3 tep / <= 800 dong them
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043381576
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien land Claude session_015GtxrZk6gmfQKo7g4BfMBS). Review offline toan dot A r12 G2 APPROVED boi Google Antigravity tren 835655b (issues/1236#issuecomment-7125514979). Windows native mien (issues/1236#issuecomment-7127447632). Kich thuoc 3 tep, numstat 010046f..835655b do lai khi ghi ho so land.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-24T16:38:54Z'
+  han_moi_utc: '2026-11-24T10:44:49Z'
+  chi_thi: 'Chu kho trong phien Claude Code: "Dong #1465, merge #1459 roi hoan thanh land, ghi so" (ghi ho o pull/1459#issuecomment-7129098397).'
+  ly_do: >-
+    Dot A cua packet GATE-OUTPUT-DOI-CHIEU (#1236) da MERGE: PR #1502 (head 835655b6b5d8ad2add49f04ded92d3fd3f42515e) merge commit 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc luc 2026-11-24T10:34:28Z.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut (dot B/C chua co dac ta).'
+  nguoi_rut: 'phien land Claude session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

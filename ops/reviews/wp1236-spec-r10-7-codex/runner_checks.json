@@ -1,0 +1,50 @@
+[
+  {
+    "name": "handoff_no_src",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/manifest_handoff_no_src.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/handoff_no_src_kq.jsonl",
+      "--song-song",
+      "4"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+    "rc": 0,
+    "seconds": 39.54575134699917,
+    "stdout_sha256": "083dd6aa5407dc3a70302eec352f1f094a0662c0434cd21a54298bb40141fb08",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "TONG 0 · GIET 0 · SONG_SACH 0 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0\nHOAN_TAT neo={\"cong_cu\": \"1aeadb969943db3e8a147d69190c7e45ed2130df24073d16afb7b06a386b4d4a\", \"goc\": \"af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94\", \"manifest\": \"955ac744c54d7aedae15b872698a8a7eeefb366da7db9344c4334e21e09df59e\", \"test\": \"f27c93d68c627fc0653f2b688a9080414af43d9f3bb67fa8c66d8dd05336da63\"}\n",
+    "stderr": ""
+  },
+  {
+    "name": "missing_test",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m1.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/does_not_exist_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/missing_test_kq.jsonl",
+      "--song-song",
+      "4"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+    "rc": 2,
+    "seconds": 0.09007624399964698,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "5baf7294bded8b868d50eaef41eeee69d0ff0acd5243653ea1a9dfee8408d691",
+    "stdout": "",
+    "stderr": "KHONG_DO_DUOC: test hoac module goc vang\n"
+  }
+]

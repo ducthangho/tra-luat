@@ -1,0 +1,66 @@
+2026-11-22T02:40:36Z
+== .github/workflows/ci.yml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r2-g1-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r3-g2-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r3-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g3-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g3-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g4-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g5-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g5-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g6-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g6-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g7-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g8-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g8-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g9-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g9-claude.yaml
+NGƯỜI_GIỮ 0: không có
+het_han=44 rc=0
+== ops/ci_duong_nhanh.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r2-g1-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r3-g2-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r3-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g3-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g3-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g4-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g5-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g5-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g6-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g6-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g7-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g8-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g8-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g9-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g9-claude.yaml
+NGƯỜI_GIỮ 0: không có
+het_han=11 rc=0
+== ops/ci_duong_nhanh_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r2-g1-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r3-g2-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r3-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g3-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g3-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g4-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g5-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g5-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g6-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g6-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g7-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g8-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g8-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g9-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g9-claude.yaml
+NGƯỜI_GIỮ 0: không có
+het_han=20 rc=0
+== ops/cong_cu_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r2-g1-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r3-g2-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r3-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g3-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g3-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g4-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g5-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g5-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g6-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g6-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g7-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g8-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g8-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g9-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g9-claude.yaml
+NGƯỜI_GIỮ 0: không có
+het_han=16 rc=0
+== ops/specs/wp1448-r2/do/
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r2-g1-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r3-g2-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r3-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g3-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g3-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g4-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g4-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r4-g5-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r4-g5-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g6-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g6-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r6-g7-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r6-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g8-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g8-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1448-r7-g9-claude	refs/heads/ops/wp1448-r1:ops/leases/wp1448-r7-g9-claude.yaml
+NGƯỜI_GIỮ 0: không có
+het_han=1 rc=0

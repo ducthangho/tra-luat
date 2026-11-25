@@ -1,0 +1,146 @@
+{
+  "landed_shapes": {
+    "root": true,
+    "dated": true,
+    "false": false,
+    "wrapped": true
+  },
+  "positive_claim_contract": {
+    "root": {
+      "landed": true,
+      "claim_count": 0,
+      "required_landed_error": true
+    },
+    "dated": {
+      "landed": true,
+      "claim_count": 0,
+      "required_landed_error": true
+    },
+    "false": {
+      "landed": false,
+      "claim_count": 0,
+      "required_landed_error": false
+    },
+    "wrapped": {
+      "landed": true,
+      "claim_count": 0,
+      "required_landed_error": true
+    }
+  },
+  "m50": {
+    "healthy": {
+      "base": [
+        "passed",
+        []
+      ],
+      "mutant": [
+        "passed",
+        []
+      ]
+    },
+    "a": {
+      "base": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ],
+      "mutant": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ]
+    },
+    "b": {
+      "base": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ],
+      "mutant": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ]
+    },
+    "c": {
+      "base": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ],
+      "mutant": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ]
+    },
+    "d": {
+      "base": [
+        "not_measured",
+        [
+          "provenance_chua_du"
+        ]
+      ],
+      "mutant": [
+        "passed",
+        []
+      ]
+    }
+  },
+  "required_jobs": {
+    "count": 5,
+    "names": [
+      "gate (ubuntu-latest)",
+      "gate-cong-cu-gop (ubuntu-latest)",
+      "gate-ops (ubuntu-latest)",
+      "gate-packet-loop (ubuntu-latest)",
+      "gate-registry (ubuntu-latest)"
+    ],
+    "matches_reference": true
+  },
+  "m8": {
+    "files": 48,
+    "with_run_attempt": 0,
+    "waived": [
+      "ops/land/pr1340-wp1315-provenance/bien-ban-m8.yaml",
+      "ops/land/pr1344-wp1343-provenance/bien-ban-m8.yaml",
+      "ops/land/pr1347-wp1345-provenance/bien-ban-m8.yaml",
+      "ops/land/pr1352-wp1350-provenance/bien-ban-m8.yaml"
+    ],
+    "descendant_cases": [
+      {
+        "file": "ops/land/pr1392-wp1389-provenance/bien-ban-m8.yaml",
+        "merge": "11bd0336d00b4a9544e70dcbbe049d372053a3ec",
+        "ci_master": {
+          "run_id": 44502045702,
+          "conclusion": "success",
+          "ghi_chu": "run hau due tren 4eda94e 39/39 (pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt); run tren chinh 11bd033 FAILED 38/39 (ci-11bd033/)."
+        }
+      },
+      {
+        "file": "ops/land/pr1406-wp1404-provenance/bien-ban-m8.yaml",
+        "merge": "cad9b1fa95da303b085a4555e85608c0b77b8ae0",
+        "ci_master": {
+          "run_id": 44502045702,
+          "conclusion": "success",
+          "ghi_chu": "run hau due tren 4eda94e 39/39 (pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt); run tren chinh cad9b1f FAILED 38/39 (ci-cad9b1f/)."
+        }
+      },
+      {
+        "file": "ops/land/pr1415-wp433-provenance/bien-ban-m8.yaml",
+        "merge": "417b59397669e6966da2b546537279d15e2ba0c0",
+        "ci_master": {
+          "run_id": 44502045702,
+          "conclusion": "success",
+          "ghi_chu": "ci.yml push master tren 4eda94e (merge #1417, hau due cua 417b593) 39/39 job co dau hieu duong (hau-due-4eda94e/danh-gia-gate-output-44502045702.txt). Run tren chinh 417b593 (44489289788) FAILED 38/39 o release-verify LAND vi manifest — giu trong ho so."
+        }
+      }
+    ]
+  }
+}

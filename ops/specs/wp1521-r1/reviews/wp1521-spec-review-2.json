@@ -1,0 +1,478 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1521",
+  "generation": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "launcher.py run",
+  "session_id": null,
+  "model_reviewer_identity": "OpenAI Codex, GPT-6 family. Exact served model/effort: KHONG_DO_DUOC in the in-progress launcher metadata. Observed launcher run 06016d7bd8d142aba5e5fee0b4c42bc0 declares openai_codex / codex_cli / machine; not inferred from the GitHub account.",
+  "github_submitter_identity": null,
+  "reviewed_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+  "reviewed_file_sha256": "74eaf6784cbfeb60fa35a7bd653119581735b51bc20e877f7b847df970a547e6",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "N2-06",
+      "class_slug": "skip-state-consumer-contract-incomplete",
+      "severity": "P2",
+      "location": "ops/specs/wp1521-r1/SPEC.md:59-67,82-89",
+      "claim": "The rewritten acceptance inventory contradicts the prescribed implementation. Section 2c retires wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249 and names two replacements, but acceptance 1 permits only additions and requires every old name to remain. Acceptance 2(c) also specifies two skipped cases and three skipped mutants: the actual target map has 2 cases/2 mutants for dau-job, 2/1 for bien-nhan-xanh, or 4/3 for both. The whole-chain counters cannot simultaneously satisfy these statements. The core skip propagation is now specified, but its acceptance oracle still needs correction.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/contract_probe.py",
+          "exit_code": 0,
+          "observed": "Measured base inventory: 314 cases. Applying the explicitly prescribed name split gives 315 before new meta-tests, removes exactly the old combined name and adds exactly the two specified names. Measured target sets: dau-job=2 cases/2 mutants; bien-nhan-xanh=2/1; both=4/3. This is an inventory/set probe, not execution of an absent r2 implementation."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Acceptance 1 and 2(c)/(f), alongside section 2c; these define the names and counters that the executor must prove.",
+        "how": "Declare the one allowed old-to-two-new mapping and require equality of all other named cases and expected mutant classifications. State separately the four total case skips when both scans qualify, the two mixed-case variants, and their exact mutant sets. Do not retain a dummy old-name success merely to satisfy the inventory.",
+        "locking_test_and_mutant": "In one A/B command, apply only the explicit split mapping, then compare named outcomes. Assert both-zero and each mixed-direction skip set, output lines, case counters, mutant counters and baseline-target exclusion. A mutant dropping an unrelated old wrapper, counting a skipped wrapper as passed, or suppressing its skip line must fail the named meta-test.",
+        "possible_new_failures": "An overly broad rename allowance can hide deleted tests; an alias can double-count the same execution. Keep the mapping closed to exactly the prescribed split."
+      }
+    },
+    {
+      "id": "N2-07",
+      "class_slug": "mutation-cache-fingerprint-detached-from-inputs",
+      "severity": "P2",
+      "location": "ops/specs/wp1521-r1/SPEC.md:53-67,69,76,91-100; .claude/dev/ci_dang_ky_test.py:865-881",
+      "claim": "The replacement invalidation mechanism can still detach mutation execution from changed inputs. doc_diff() treats git diff base...head rc=0 as measured, but Git returns rc=0 and chooses one merge base on criss-cross history. A real scratch graph produced an empty doc_diff while a clean git merge-tree changed ci_dang_ky_test.py. Section 2c therefore mandates skip, contradicting 2d and the changed-input guarantee. The existing outer CI classifier detects this ambiguity and selects day_du, but that does not force the new inner K5 selector. The specified two-commit tests cannot expose this history-dependent failure.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+          "exit_code": 0,
+          "observed": "Two merge bases; git diff rc=0 with stderr warning multiple merge bases; actual registry doc_diff=set(); clean merge-tree delta includes .claude/dev/ci_dang_ky_test.py; literal r2 selector run_full=false. Actual outer ops/ci_duong_nhanh.py doc_diff=None and mode=day_du. Reversing parent order changes inner selection to run_full=true for the same resulting merge tree 147ee722abf8ada11c1f6602b45fb82799ce9ac9. Linear changed-source, changed-fixture, changed-ci.yml and changed-requirements controls all select full."
+        }
+      ],
+      "suggested_fix": {
+        "where": "K5 sections 2a-2c, invariant 3 and acceptance 3/5; implementation can remain in the authorized ci_dang_ky_test.py.",
+        "how": "Define when a diff is sufficiently complete to authorize skipping. At minimum, multiple or unmeasurable merge bases must force a full run. Prefer also checking the delta to the actual checkout/merge tree, so renamed or merged inputs cannot escape through a head-only path list. This can be a K5 qualification wrapper without modifying frozen doc_diff, but the spec must permit the extra fallback. Keep unresolved runtime/dependency qualification recorded as a limit, not as a repaired part of N2-05.",
+        "locking_test_and_mutant": "Add the two-parent-order criss-cross graph from diff_probe.py and a linear unrelated-change control in one command. Both ambiguous graphs must execute --dot-bien and the unrelated control must still skip. Kill the mutant trusting rc=0/empty paths without the ambiguity guard; also test missing objects and actual-merge input changes.",
+        "possible_new_failures": "Using every base-versus-head difference indiscriminately can restore full cost for unrelated target-branch drift. Executing historical Python merely to discover a directory adds side effects. Read immutable metadata safely, fail closed when it cannot be resolved, and measure the retained skip control."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "skip-state-consumer-contract-incomplete",
+      "finding_ids": [
+        "N2-01",
+        "N2-06"
+      ],
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+      "status": "VÁ SINH LỖI MỚI",
+      "highest_open_severity": "P2",
+      "manifestations": [
+        "contradictory old-name preservation after test split",
+        "wrong whole-chain skip cardinality"
+      ],
+      "common_fix": "Declare the one allowed old-to-two-new mapping and require equality of all other named cases and expected mutant classifications. State separately the four total case skips when both scans qualify, the two mixed-case variants, and their exact mutant sets. Do not retain a dummy old-name success merely to satisfy the inventory.",
+      "closure_measurement": "In one A/B command, apply only the explicit split mapping, then compare named outcomes. Assert both-zero and each mixed-direction skip set, output lines, case counters, mutant counters and baseline-target exclusion. A mutant dropping an unrelated old wrapper, counting a skipped wrapper as passed, or suppressing its skip line must fail the named meta-test.",
+      "chua_do_duoc": "Future implementation and CI; for K3 also other Python builds/platforms."
+    },
+    {
+      "class_slug": "skip-waiver-masks-measured-failure",
+      "finding_ids": [
+        "N2-02"
+      ],
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "manifestations": [
+        "waiver formerly masking wrong rc or invalid receipt; mixed/incomplete outcomes"
+      ],
+      "common_fix": "No further specification fix identified for this class; implementation must prove the revised contract.",
+      "closure_measurement": "Both real scans under a no-throw validator give tran=0/dat_het=true for the healthy control, and tran=0/dat_het=false for each separately injected wrong rc and invalid receipt. R2 1c now unconditionally rejects the latter before any waiver, explicitly handles mixed scans, exceptions and incomplete scans. Acceptance 2(d)/(f)/(g) and mutant (iii) lock that distinction.",
+      "chua_do_duoc": "Future implementation and CI; for K3 also other Python builds/platforms."
+    },
+    {
+      "class_slug": "mutation-cache-enrollment-without-verified-evidence",
+      "finding_ids": [
+        "N2-03"
+      ],
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "manifestations": [
+        "unverified initial and later enrollment removed"
+      ],
+      "common_fix": "No further specification fix identified for this class; implementation must prove the revised contract.",
+      "closure_measurement": "Reproduced broken-oracle fixture rc=0/480 of 480 versus full rc=1/0 of 249. R2 deletes enrollment and key membership entirely; a linear change to the file containing that oracle now selects full. An unverified record is no longer an input to the decision. The remaining Git-history invalidation defect is N2-07, not an enrollment record defect.",
+      "chua_do_duoc": "Future implementation and CI."
+    },
+    {
+      "class_slug": "self-referential-final-head-cache-bootstrap",
+      "finding_ids": [
+        "N2-04"
+      ],
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "manifestations": [
+        "self-referential final-H enrollment removed"
+      ],
+      "common_fix": "No further specification fix identified for this class; implementation must prove the revised contract.",
+      "closure_measurement": "The real two-commit source-change control selects full using the existing event variables. No CI key, log URL or result is written into H, so the final H can run full directly and be audited without another commit. No workflow change or bootstrap loop is needed.",
+      "chua_do_duoc": "Future implementation and CI."
+    },
+    {
+      "class_slug": "mutation-cache-fingerprint-detached-from-inputs",
+      "finding_ids": [
+        "N2-05",
+        "N2-07"
+      ],
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_sha": "5e8731f8b1af097d8ba5d7fc05f55e79de265dd9",
+      "status": "VÁ SINH LỖI MỚI",
+      "highest_open_severity": "P2",
+      "manifestations": [
+        "old-directory invalidation fixed",
+        "ambiguous Git history misses actual merged input",
+        "runtime qualification remains an explicitly deferred limit"
+      ],
+      "common_fix": "Define when a diff is sufficiently complete to authorize skipping. At minimum, multiple or unmeasurable merge bases must force a full run. Prefer also checking the delta to the actual checkout/merge tree, so renamed or merged inputs cannot escape through a head-only path list. This can be a K5 qualification wrapper without modifying frozen doc_diff, but the spec must permit the extra fallback. Keep unresolved runtime/dependency qualification recorded as a limit, not as a repaired part of N2-05.",
+      "closure_measurement": "Add the two-parent-order criss-cross graph from diff_probe.py and a linear unrelated-change control in one command. Both ambiguous graphs must execute --dot-bien and the unrelated control must still skip. Kill the mutant trusting rc=0/empty paths without the ambiguity guard; also test missing objects and actual-merge input changes.",
+      "chua_do_duoc": "Future implementation and CI; runtime/dependency drift is not qualified."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Current KHE consumers and prior skip mechanism",
+      "hypothesis": "A pre-existing case skip state makes the new consumer work unnecessary.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py inventory",
+      "real_output": "314/118 -> 310/115; four cases disappear. CON_1460 maps None to rc1 and a nonempty skip string to rc0. Source has omission gates, not a case-level third state.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Khe stability under local load, recursion and stack changes",
+      "hypothesis": "The tested machine spuriously yields zero overflows under these conditions.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py default; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py stack4; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py limit10000",
+      "real_output": "All three pairs: lo=9998, 43 depths per scan, tran=1/2, dat_het=true. Default overlapped full oracle/targeted probes; 4 MiB stack and recursion limit 10000 also retain the khe.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Waiver cannot suppress a measured failure",
+      "hypothesis": "The revised waiver still admits bad collector results.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/no_khe_r2.py",
+      "real_output": "Six runs: healthy tran=0/dat_het=true for both targets; wrong rc and invalid receipt separately give false for both. Section 1c rejects these before waiver.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Existing targeted mutation signal",
+      "hypothesis": "The three gated mutants already survive or die through unrelated exceptions.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/targeted.py",
+      "real_output": "2/2 wrapper baselines true; all 3/3 f02r3 targeted mutants GIET, 20.464 seconds.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Acceptance inventory across every consumer",
+      "hypothesis": "R2 name and skip-count acceptance can match its prescribed split and propagation.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/contract_probe.py",
+      "real_output": "Old combined name removed by prescribed split; 314 -> 315 before new tests. Skip pairs: 2/2, 2/1, both 4/3; no 2/3 combination.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N2-06"
+      ]
+    },
+    {
+      "direction": "Enrollment and exact-H bootstrap removal",
+      "hypothesis": "An unverified cache record can still bypass a linear oracle change.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/cache_probe.py; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+      "real_output": "Broken oracle fixture passes but full fails. R2 removes all enrollment; source-change control selects full, with no result-bearing commit needed.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Git graph completeness of invalidation",
+      "hypothesis": "doc_diff rc=0 means all changed mutation inputs are covered.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+      "real_output": "Two merge bases: inner diff empty/run_full=false despite source in clean merge delta; reversed parent order selects full on the same merge tree. Outer classifier selects day_du in both.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N2-07"
+      ]
+    },
+    {
+      "direction": "Sibling relocation and derived expected output",
+      "hypothesis": "Changing to wp1522 leaves an old-directory or 480-only requirement.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/cache_probe.py; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+      "real_output": "Sibling r2 oracle fixture rc0/490 of 490; dynamic directory controls detect v2 changes. R2 derives first/last lines from the updated constant.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Timing scope",
+      "hypothesis": "Standalone timings establish an equivalent full gate-registry speedup.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py timing; read PR1516 luot-4 VERDICT.md:46-49",
+      "real_output": "Standalone 2.850 s versus 224.024 s. Historical review explicitly identifies a suite A/B of 7 s/268 s and an independent oracle 195.478 s; these are different scopes. No final-H CI timing exists here.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    },
+    {
+      "direction": "Fresh ownership and policy ancestry",
+      "hypothesis": "The local branch cache certifies current lease exclusivity.",
+      "command": "git ls-remote --heads origin; git for-each-ref refs/remotes/origin; git rev-parse --is-shallow-repository",
+      "real_output": "Remote read rc128: proxy 127.0.0.1:42971 unavailable. 347 local origin branch names; shallow=true. Required remote/local name equality not established; ai-dang-giu not_run.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    }
+  ],
+  "measure_table": [
+    {
+      "measurement": "Candidate integrity and full scope",
+      "status": "passed",
+      "value": "Authoritative blob and local SPEC sha256 both 74eaf6784cbfeb60fa35a7bd653119581735b51bc20e877f7b847df970a547e6. HEAD 5e8731f8b1af097d8ba5d7fc05f55e79de265dd9; tree dc5d692e38c24527ef0e3b93dc56e00a62e0ed18. Full candidate is one spec file +167/-0 versus supplied origin/master; diff --check rc0."
+    },
+    {
+      "measurement": "Implementation baseline",
+      "status": "passed",
+      "value": "Supplied origin/master 437257a3cad68bdec7c646aa99ccd4f5fd4256da. ci_dang_ky_test.py bytes equal candidate and round-1 baseline, sha256 70f26b456582de504b5993685ad3fe29da9a957d26efcc3206e896fb9126eb28. This is a spec-only review; implementation acceptance baseline will be frozen at lease issuance."
+    },
+    {
+      "measurement": "Runtime",
+      "status": "passed",
+      "value": "Linux x86_64/glibc 2.39; CPython 3.13.18; jsonschema 4.26.0; PyYAML 6.0.3; attrs 26.1.0; referencing 0.37.0; rpds-py 2026.6.3; jsonschema-specifications 2025.9.1; core.abbrev=7."
+    },
+    {
+      "measurement": "Acceptance 1 and 2",
+      "status": "failed",
+      "value": "Specification consistency failed as N2-06. Baseline inventory and relevant actual scans/wrappers/mutants measured; future implementation A/B, sentinel, child rc5, aggregation and baseline skip propagation not_run."
+    },
+    {
+      "measurement": "Acceptance 3",
+      "status": "failed",
+      "value": "Linear path/event controls support the intended selection; ambiguous-history counterexample fails the claimed coverage, N2-07. Actual r2 argv-spy test not_run because no implementation was supplied."
+    },
+    {
+      "measurement": "Acceptance 4",
+      "status": "passed",
+      "value": "Independent standalone fixture rc0/480 of 480 in 2.850 s; full rc0/249 of 249 in 224.024 s. Concurrent local load existed. These are measurements, not CI test-registry timings or a speedup threshold."
+    },
+    {
+      "measurement": "Acceptance 5 discriminator audit",
+      "status": "not_run",
+      "value": "Sixteen proposed mutants have no implementation to run. Required distinguishing inputs: (i) synthetic Python >=3.14 with measured khe, versus <3.14; (ii) unknown tran=0; (iii) allowlisted zero with wrong rc and invalid receipt; (iv) allowlisted positive tran; (v) absent/present allowlist; (vi)-(xi) exact direct/wrapper/mutant/baseline sets and counters for both-zero and both mixed directions; (xii)-(xiv) each directory and workflow path independently plus unrelated control; (xv) None versus empty diff; (xvi) exact healthy two-line output, wrong expected three-line output and single-byte corruption. Also cover requirements.txt, incomplete scans, unexpected child rc5 and the N2-07 graph. Their listing is not kill evidence."
+    },
+    {
+      "measurement": "Acceptance 6 and platforms",
+      "status": "not_run",
+      "value": "No implementation --chay/CI/Windows/full 118-mutant suite run. No workflow dispatched. No changed Python file needs a lint delta; bare Ruff lint not_run. Ruff version 0.15.15 and pin/probe contract independently measured rc0, 3 checks, no errors."
+    },
+    {
+      "measurement": "Predecessor and sibling identity",
+      "status": "passed",
+      "value": "wp1460 r9 at supplied origin/ops/wp1460-r1 f2c900cca91788195c39a296297bd4d5cdcf7c37, SPEC sha256 280f6f8d0dc97f29a79ed8ef94d3070d8ae1fe0487b549054137bcdbc4acbb0c. Sibling supplied ref is now r2 at 5826c847a4a456ca698f5502399c61d995e50330, SPEC sha256 07f7cf25a535252bf2d1e61c453bc881099da2cb2ab2b916963b75e689c8c10b: 490 fixture checks, 250 expected mutants. Only sibling fixture run independently here."
+    },
+    {
+      "measurement": "Write set and process",
+      "status": "not_run",
+      "value": "No executor lease is claimed. Revised mechanism fits the one authorized Python file plus optional evidence in principle; actual implementation size unmeasured. Remote freshness and complete ADR ancestry unavailable. Mission r96 readback grants per_new_packet 5 author calls, 6 spec-review calls, 3 executor attempts, 3 source reviews, 3 PR Ubuntu CI runs and 1 rerun; spec-review and PR-call budgets are distinct. This review does not authorize another call or installation."
+    },
+    {
+      "measurement": "Read-only endpoint comparison",
+      "status": "passed",
+      "value": "Before/after HEAD/tree, branch, index/diff, status, untracked/ignored listings and hashes of all 18,187 tracked paths are identical. Pre-existing ignored .codex/ remains; its internal contents were not byte-hashed. No source repository outside the supplied checkout was inspected. Endpoint equality does not prove absence of transient writes."
+    }
+  ],
+  "tests": [
+    {
+      "name": "inventory-and-contract-counterexample",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py inventory; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/contract_probe.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Measured named inventories and contradictory acceptance counts; contract-probe.json."
+    },
+    {
+      "name": "real-boundary-conditions",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py default; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py stack4; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py limit10000",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Three pairs retain tran=1/2 and dat_het=true; stack4.log, limit10000.log and captured default output."
+    },
+    {
+      "name": "no-khe-negative-controls",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/no_khe_r2.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Two healthy plus four independently bad scan measurements; no-khe-r2.log. Deliberately False current case outcomes are expected."
+    },
+    {
+      "name": "existing-gated-mutants",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/targeted.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "2/2 baseline wrappers; 3/3 targeted GIET; targeted.log/json."
+    },
+    {
+      "name": "direct-oracle-timing",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py timing",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Both child rc0; 480/480 fixture and 249/249 full mutations; timing.json."
+    },
+    {
+      "name": "broken-oracle-and-sibling-controls",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/cache_probe.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Broken oracle fixture child rc0, full child rc1 as expected; sibling fixture rc0/490 of 490. R1 membership-model output is historical, not an r2 implementation result."
+    },
+    {
+      "name": "real-Git-diff-controls-and-counterexample",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Actual current doc_diff exercised in temporary Git repositories; same clean merge tree but parent-order-dependent selection. Finding N2-07; diff-probe.json."
+    },
+    {
+      "name": "ruff-pin-probe-contract",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B - <<'PY'\nimport runpy\nm=runpy.run_path('.claude/dev/ci_dang_ky_test.py');errors,count=m['loi_ruff_ci']();print('RUFF_CONTRACT',count,errors);raise SystemExit(bool(errors) or count==0)\nPY",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "RUFF_CONTRACT 3 []; separate python3 -m ruff --version reports 0.15.15. This is not bare lint."
+    },
+    {
+      "name": "fresh-ref-comparison",
+      "command": "git ls-remote --heads origin",
+      "status": "failed",
+      "exit_code": 128,
+      "evidence": "Proxy connection failure; remote/local equality unavailable."
+    },
+    {
+      "name": "lease-overlap",
+      "command": "python3 ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Required successful remote/local ref-name comparison was not established."
+    },
+    {
+      "name": "implementation-CI-Windows-and-bare-lint",
+      "command": "python .claude/dev/ci_dang_ky_test.py --chay; Ruff lint; Windows; PR CI",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Spec-only candidate; no implementation gate certification or CI dispatch authorization."
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "N2-01",
+      "class_slug": "skip-state-consumer-contract-incomplete",
+      "status": "VÁ SINH LỖI MỚI",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/probe.py inventory; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/targeted.py; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/contract_probe.py",
+        "exit_code": 0,
+        "observed": "Reconfirmed 314/118 versus 310/115, four gated cases, two passing wrappers and 3/3 genuine targeted kills. Sections 1b/1d/1f now allow structured results, parent-side wrapper skips, baseline filtering and a distinct child rc=5. However, the rewritten acceptance name-preservation and skip cardinality rules conflict with these consumers; see N2-06."
+      },
+      "scope": "Specification closure only; no r2 implementation exists."
+    },
+    {
+      "id": "N2-02",
+      "class_slug": "skip-waiver-masks-measured-failure",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/no_khe_r2.py",
+        "exit_code": 0,
+        "observed": "Both real scans under a no-throw validator give tran=0/dat_het=true for the healthy control, and tran=0/dat_het=false for each separately injected wrong rc and invalid receipt. R2 1c now unconditionally rejects the latter before any waiver, explicitly handles mixed scans, exceptions and incomplete scans. Acceptance 2(d)/(f)/(g) and mutant (iii) lock that distinction."
+      },
+      "scope": "The specification defect is closed; future implementation behavior remains not_run."
+    },
+    {
+      "id": "N2-03",
+      "class_slug": "mutation-cache-enrollment-without-verified-evidence",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/cache_probe.py; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+        "exit_code": 0,
+        "observed": "Reproduced broken-oracle fixture rc=0/480 of 480 versus full rc=1/0 of 249. R2 deletes enrollment and key membership entirely; a linear change to the file containing that oracle now selects full. An unverified record is no longer an input to the decision. The remaining Git-history invalidation defect is N2-07, not an enrollment record defect."
+      },
+      "scope": "Specification mechanism removed; no claim that fixture-only success proves mutation health."
+    },
+    {
+      "id": "N2-04",
+      "class_slug": "self-referential-final-head-cache-bootstrap",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py; inspect ops/specs/wp1521-r1/SPEC.md:53-72 and ci.yml gate-registry env",
+        "exit_code": 0,
+        "observed": "The real two-commit source-change control selects full using the existing event variables. No CI key, log URL or result is written into H, so the final H can run full directly and be audited without another commit. No workflow change or bootstrap loop is needed."
+      },
+      "scope": "Feasibility of the revised specification; actual final-H CI not_run."
+    },
+    {
+      "id": "N2-05",
+      "class_slug": "mutation-cache-fingerprint-detached-from-inputs",
+      "status": "VÁ SINH LỖI MỚI",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/cache_probe.py; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1521-review2/diff_probe.py",
+        "exit_code": 0,
+        "observed": "Dynamic-directory controls now detect the actual v1 or v2 fixture and both directories during transition. The supplied sibling r2 fixture runs 490/490, not the prompt historical 486/486. However, the new diff-based predicate misses a changed actual merge input on criss-cross history (N2-07). Environment equivalence was explicitly excluded in 2d, not measured or repaired."
+      },
+      "scope": "Directory-name defect addressed; whole cause class remains open. No dependency-version regression is claimed."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "skip-state-consumer-contract-incomplete",
+      "status": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_finding_ids": [
+        "N2-06"
+      ]
+    },
+    {
+      "class_slug": "skip-waiver-masks-measured-failure",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_finding_ids": []
+    },
+    {
+      "class_slug": "mutation-cache-enrollment-without-verified-evidence",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_finding_ids": []
+    },
+    {
+      "class_slug": "self-referential-final-head-cache-bootstrap",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_finding_ids": []
+    },
+    {
+      "class_slug": "mutation-cache-fingerprint-detached-from-inputs",
+      "status": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "15f5437c30a66620305f14492a287ea688a9f25b",
+      "current_finding_ids": [
+        "N2-07"
+      ]
+    }
+  ],
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": "Two open P2 cause classes, three confirmed current manifestations; three of five prior classes closed at specification level (60%). No approval. Scratch evidence is /tmp/wp1521-review2/. No repository edits, commits, pushes, GitHub writes, workflow dispatches, sub-agents or LIVE actions. Actual sandbox profile is workspace-write; read-only was an observed working constraint, not a filesystem-enforced permission. Final launcher exit/artifact hashes must be recorded after this response. Assignment authorizes this technical review. Retrieved owner approval https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7155973207 refers to r1; r2 itself says approval/lease pending. No r2 implementation authority is certified. Scope reductions and runtime/dependency limits are not counted as fixes; no changed dependency regression or permanent green bypass was demonstrated. The weekly full-audit workflow supplies no diff variables and therefore still selects full under r2. The frozen predecessor requires full reruns; r2 explicitly proposes changing that obligation and requires renewed approval. Historical 7/268 seconds is a suite measurement identified in the supplied review, whereas 2.850/224.024 seconds here is the standalone oracle. Required checks that were not run are not passes."
+}

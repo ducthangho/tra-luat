@@ -6,6 +6,9 @@
   có đánh số tự động ⇒ đường văn bản thô.
 - Đường văn bản thô chỉ nhận khoản đúng một dòng: dòng điểm hay tiếp dòng "là" ⇒ chặn ở mọi nguồn (đóng K1 của #1514).
 - `pham_vi_kiem` nói rõ nguồn ranh giới; `can_nguoi_duyet: true` giữ nguyên.
+- r2 (sau cross-review lượt 1, đặc tả `ops/specs/llm-khoan-docx-r2.md`): duyệt khối theo thứ tự tài liệu (sdt, bảng được đếm);
+  đánh số qua style được đếm; `lvlRestart`/`isLgl`/nhãn khoản khác `%N.` ⇒ chặn; từ nối chỉ dò ở đầu khoản; chữ gạch ngang còn sót
+  (tiền tố khác, theo style) và sửa đổi dấu đoạn ⇒ chặn; chỉ xác thực danh sách mà Điều dùng; điểm gõ tay dính thân được nhận.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

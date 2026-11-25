@@ -370,9 +370,9 @@ biến môi trường của environment.
   minh được — 11 lượt cross-review (PR #1503) lượt nào cũng tìm ra một cách phân đoạn sai mới. Kết quả luôn mang
   `"can_nguoi_duyet": true` kèm `pham_vi_kiem`; người dùng phải duyệt số khoản và ranh giới trước khi dùng. Các lỗ
   đã biết của #1512 được chặn bảo thủ ở packet #1514 (xem gạch dưới); cờ `can_nguoi_duyet` vẫn giữ.
-- **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
-  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
-  thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản và không được có dòng điểm. Nguồn có BẤT KỲ dòng nào mà
+- **Kiểm nguyên văn là fail-closed; đường văn bản THÔ chỉ nhận khoản ĐÚNG MỘT DÒNG** (#1525; không đoán theo chữ
+  "là"): nguồn có số thì mỗi khoản là một dòng mang số, số liên tục từ 1; nguồn mất số (Google Doc) thì mỗi dòng là
+  một khoản. Dòng điểm (`a)`, `-`) hay dòng tiếp mở bằng "là" ⇒ chặn — khoản có điểm đi đường `.docx` (gạch dưới). Nguồn có BẤT KỲ dòng nào mà
   ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
   nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`

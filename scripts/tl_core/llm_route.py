@@ -525,12 +525,17 @@ _RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]")
 _RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\s+[IVXLCDM\d]+\b", re.IGNORECASE)
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 _RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)]")
-_RE_DIEM_GO_TAY_DOCX = re.compile(r"^(?:[a-zđ]\)|[-–•+])\s")
+# r2 (lượt 1 A6): dấu điểm gõ tay có thể DÍNH thân điểm (`a)tổ chức`, `-tổ chức`).
+_RE_DIEM_GO_TAY_DOCX = re.compile(r"^(?:[a-zđ]\)|[-–•+])")
+# Phần tử khối được phép làm con của body / sdtContent mà không mang nội dung (bỏ qua). Phần tử khối KHÁC ⇒ mốc lạ.
+_KHOI_BO_QUA = {"sectPr", "bookmarkStart", "bookmarkEnd", "proofErr", "permStart", "permEnd", "commentRangeStart",
+                "commentRangeEnd"}
+_TAT_OOXML = ("0", "false", "off")
 
 
 class KhongCauTruc(Exception):
-    """Điều không có đoạn nào mang `w:numPr` — không có cấu trúc để đọc. `van_ban` mang chữ của Điều (mỗi đoạn một dòng)
-    để người gọi lùi về đường văn bản thô với luật chặn của nó."""
+    """Điều không có đoạn nào được đánh số tự động — không có cấu trúc để đọc. `van_ban` mang chữ của Điều (mỗi đoạn một
+    dòng) để người gọi lùi về đường văn bản thô với luật chặn của nó."""
 
     def __init__(self, ly_do, van_ban=""):
         super().__init__(ly_do)
@@ -563,19 +568,16 @@ def _gon_doan(s):
     return " ".join(str(s).split())
 
 
-def _van_ban_doan(p):
-    """Chữ của một đoạn: nối `w:t`; `w:tab`/`w:br`/`w:cr` ⇒ khoảng trắng (ranh giới là ĐOẠN, không phải dòng mềm)."""
-    phan = []
-    for el in p.iter():
-        if el.tag == _W + "t":
-            phan.append(el.text or "")
-        elif el.tag in (_W + "tab", _W + "br", _W + "cr"):
-            phan.append(" ")
-    return _gon_doan("".join(phan))
+def _bat_ooxml(el):
+    """Thuộc tính bật/tắt kiểu OOXML (`<w:strike/>` = bật; `w:val="0|false|off"` = tắt)."""
+    return el is not None and el.get(_W + "val", "1") not in _TAT_OOXML
 
 
 def _doc_danh_so(z, doc_gioi_han):
-    """numId → {ilvl: (numFmt, lvlText, start)}. `lvlOverride` khác `startOverride` ⇒ ValueError (không hỗ trợ)."""
+    """numId → {"muc": {ilvl: (numFmt, lvlText, start)}, "loi": lý do không hỗ trợ | None}.
+
+    r2 (lượt 1 A5): định nghĩa danh sách KHÔNG hỗ trợ không làm hỏng cả tài liệu — chỉ ghi `loi`, người gọi chặn khi Điều
+    đích dùng danh sách ấy. Không hỗ trợ: `lvlOverride` ngoài `startOverride`, `w:lvlRestart`, `w:isLgl` (lượt 1 A2)."""
     try:
         xml = _doc_thanh_phan(z, "word/numbering.xml", doc_gioi_han)
     except KeyError:
@@ -583,41 +585,76 @@ def _doc_danh_so(z, doc_gioi_han):
     goc = ET.fromstring(xml)
     truu_tuong = {}
     for an in goc.findall(_W + "abstractNum"):
-        muc = {}
+        muc, loi = {}, None
+        if an.find(_W + "numStyleLink") is not None or an.find(_W + "styleLink") is not None:
+            loi = "abstractNum lien ket style danh so"
         for lvl in an.findall(_W + "lvl"):
             il = int(lvl.get(_W + "ilvl", "0"))
             fmt = lvl.find(_W + "numFmt")
             txt = lvl.find(_W + "lvlText")
             st = lvl.find(_W + "start")
+            if lvl.find(_W + "lvlRestart") is not None or _bat_ooxml(lvl.find(_W + "isLgl")):
+                loi = loi or f"cap {il}: lvlRestart/isLgl khong ho tro"
             muc[il] = (fmt.get(_W + "val") if fmt is not None else "decimal",
                        txt.get(_W + "val") if txt is not None else "",
-                       int(st.get(_W + "val")) if st is not None else 1)
-        truu_tuong[an.get(_W + "abstractNumId")] = muc
+                       int(st.get(_W + "val")) if st is not None else 0)
+        truu_tuong[an.get(_W + "abstractNumId")] = (muc, loi)
     kq = {}
     for num in goc.findall(_W + "num"):
+        nid = num.get(_W + "numId")
         aid = num.find(_W + "abstractNumId")
         if aid is None or aid.get(_W + "val") not in truu_tuong:
-            raise ValueError(f"numId {num.get(_W + 'numId')} khong tro abstractNum hop le")
-        muc = dict(truu_tuong[aid.get(_W + "val")])
+            kq[nid] = {"muc": {}, "loi": "numId khong tro abstractNum hop le"}
+            continue
+        muc, loi = truu_tuong[aid.get(_W + "val")]
+        muc = dict(muc)
         for ov in num.findall(_W + "lvlOverride"):
             il = int(ov.get(_W + "ilvl", "0"))
-            con = [c.tag for c in ov]
-            if con != [_W + "startOverride"]:
-                raise ValueError(f"numId {num.get(_W + 'numId')}: lvlOverride ngoai startOverride — khong ho tro")
-            fmt, txt, _ = muc.get(il, ("decimal", "", 1))
+            if [c.tag for c in ov] != [_W + "startOverride"]:
+                loi = loi or f"lvlOverride cap {il} ngoai startOverride"
+                continue
+            fmt, txt, _ = muc.get(il, ("decimal", "", 0))
             muc[il] = (fmt, txt, int(ov.find(_W + "startOverride").get(_W + "val")))
-        kq[num.get(_W + "numId")] = muc
+        kq[nid] = {"muc": muc, "loi": loi}
     return kq
 
 
-def _kieu_co_danh_so(z, doc_gioi_han):
-    """Các styleId tự mang `w:numPr` — đoạn dùng style ấy được đánh số mà KHÔNG có `w:numPr` trực tiếp."""
+def _doc_kieu(z, doc_gioi_han):
+    """styleId → (basedOn, numId|None, ilvl|None, gạch_ngang|None) — để tính đánh số và gạch ngang HIỆU LỰC (lượt 1 A2/A4)."""
     try:
         goc = ET.fromstring(_doc_thanh_phan(z, "word/styles.xml", doc_gioi_han))
     except KeyError:
-        return set()
-    return {s.get(_W + "styleId") for s in goc.findall(_W + "style")
-            if s.find(f"{_W}pPr/{_W}numPr") is not None}
+        return {}
+    kq = {}
+    for st in goc.findall(_W + "style"):
+        b = st.find(_W + "basedOn")
+        np_ = st.find(f"{_W}pPr/{_W}numPr")
+        nid = il = None
+        if np_ is not None:
+            e = np_.find(_W + "numId")
+            nid = e.get(_W + "val") if e is not None else None
+            e = np_.find(_W + "ilvl")
+            il = int(e.get(_W + "val")) if e is not None else None
+        rpr = st.find(_W + "rPr")
+        gach = None
+        if rpr is not None and (rpr.find(_W + "strike") is not None or rpr.find(_W + "dstrike") is not None):
+            gach = _bat_ooxml(rpr.find(_W + "strike")) or _bat_ooxml(rpr.find(_W + "dstrike"))
+        kq[st.get(_W + "styleId")] = (b.get(_W + "val") if b is not None else None, nid, il, gach)
+    return kq
+
+
+def _theo_kieu(kieu, sid, chi_so):
+    """Giá trị hiệu lực theo chuỗi `basedOn` (chi_so: 1 numId, 2 ilvl, 3 gạch ngang). Vòng lặp ⇒ ValueError."""
+    da = set()
+    while sid and sid in kieu:
+        if sid in da:
+            raise ValueError(f"style {sid}: vong lap basedOn")
+        da.add(sid)
+        v = kieu[sid][chi_so]
+        if v is not None:
+            return v
+        sid = kieu[sid][0]
+    return None
 
 
 def _chu_cai(n, hoa):
@@ -653,85 +690,161 @@ def _nhan(muc, ilvl, bo_dem):
     return nhan.strip()
 
 
+def _doan_trong(cha, trong_bang=False):
+    """Duyệt khối theo THỨ TỰ tài liệu (r2, lượt 1 A1/A2): `w:p` ⇒ ("p", el, trong_bang); `w:tbl` ⇒ ("bang", …) rồi các
+    đoạn trong ô (để ĐẾM số); `w:sdt`/`w:customXml` ⇒ đi vào nội dung; khối lạ ⇒ ("la", …) — không bỏ nội dung nào."""
+    for el in cha:
+        ten = el.tag[len(_W):] if el.tag.startswith(_W) else el.tag
+        if ten == "p":
+            yield ("p", el, trong_bang)
+        elif ten == "tbl":
+            yield ("bang", el, trong_bang)
+            for tc in el.iter(_W + "tc"):
+                yield from _doan_trong(tc, True)
+        elif ten == "sdt":
+            nd = el.find(_W + "sdtContent")
+            if nd is not None:
+                yield from _doan_trong(nd, trong_bang)
+        elif ten == "customXml":
+            yield from _doan_trong(el, trong_bang)
+        elif ten not in _KHOI_BO_QUA:
+            yield ("la", el, trong_bang)
+
+
+def _phan_tich_doan(p, kieu):
+    """(chữ, numPr hiệu lực (numId, ilvl)|None, còn_dấu_bỏ, có_ngắt_mềm) của một đoạn (sau `strip_markup`)."""
+    phan, ngat, con_bo = [], False, False
+    ppr = p.find(_W + "pPr")
+    psid = ppr.find(_W + "pStyle").get(_W + "val") if ppr is not None and ppr.find(_W + "pStyle") is not None else None
+    gach_doan = bool(_theo_kieu(kieu, psid, 3))
+    for el in p.iter():
+        if el.tag in (_W + "del", _W + "delText", _W + "moveFrom", _W + "moveFromRangeStart"):
+            con_bo = True
+        elif el.tag == _W + "r":
+            rpr = el.find(_W + "rPr")
+            gach = gach_doan
+            if rpr is not None:
+                rs = rpr.find(_W + "rStyle")
+                g_kieu = _theo_kieu(kieu, rs.get(_W + "val"), 3) if rs is not None else None
+                if g_kieu is not None:
+                    gach = g_kieu
+                for t in ("strike", "dstrike"):
+                    if rpr.find(_W + t) is not None:
+                        gach = _bat_ooxml(rpr.find(_W + t))
+            if gach and any(c.tag == _W + "t" and (c.text or "").strip() for c in el):
+                con_bo = True   # r2 (lượt 1 A4): chữ GẠCH NGANG còn sau bộ lọc (tiền tố lạ, gạch theo style)
+        elif el.tag == _W + "t":
+            phan.append(el.text or "")
+        elif el.tag in (_W + "tab",):
+            phan.append(" ")
+        elif el.tag in (_W + "br", _W + "cr"):
+            phan.append(" ")
+            ngat = True
+    # numPr HIỆU LỰC: trực tiếp đè style (theo basedOn); numId "0" = tắt (lượt 1 A2).
+    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)
+    np_ = ppr.find(_W + "numPr") if ppr is not None else None
+    if np_ is not None:
+        e = np_.find(_W + "numId")
+        nid = e.get(_W + "val") if e is not None else nid
+        e = np_.find(_W + "ilvl")
+        il = int(e.get(_W + "val")) if e is not None else il
+    so = None if nid in (None, "0") else (nid, il or 0)
+    return _gon_doan("".join(phan)), so, con_bo, ngat
+
+
 def doc_dieu_docx(nguon, dieu):
     """Đọc Điều `dieu` từ .docx (`nguon`: đường dẫn hoặc bytes). Trả dict `van_ban`, `khoan`, `cau_dan`:
 
-    - `khoan`: `[(so, văn bản khoản)]`, `so` = số Word hiển thị (liên tục từ 1); điểm nối vào khoản bằng `\\n`, mang nhãn
-      từ cấu trúc (`a) …`, `- …`).
+    - `khoan`: `[(so, văn bản khoản, đầu khoản)]`, `so` = số Word hiển thị (liên tục từ 1); điểm nối vào khoản bằng `\\n`,
+      mang nhãn từ cấu trúc (`a) …`, `- …`); `đầu khoản` = chữ của đoạn mở khoản (lượt 1 A3: dò từ nối CHỈ ở đó).
     - `van_ban`: tiêu đề + câu dẫn + các khoản có nhãn — đưa cho model.
-    - `cau_dan`: các đoạn KHÔNG đánh số đứng trước khoản đầu (người gọi xác thực — module này không quyết câu dẫn).
+    - `cau_dan`: các đoạn KHÔNG đánh số đứng trước khoản đầu (người gọi xác thực — hàm này không quyết câu dẫn).
 
-    Ném `KhongCauTruc` khi Điều không có đoạn đánh số tự động nào; `ValueError` khi cấu trúc mơ hồ/không hỗ trợ."""
+    Ném `KhongCauTruc` khi Điều không có đoạn đánh số tự động; `ValueError` khi cấu trúc mơ hồ/không hỗ trợ."""
     dm, doc_gioi_han = _nap_docx_markup()
     import io
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
-        xml = _doc_thanh_phan(z, "word/document.xml", doc_gioi_han).decode("utf-8", errors="strict")
-        xml, _ = dm.strip_markup(xml, "strip")   # chữ ĐÃ BỎ của dự thảo không vào nguyên văn (như `tl extract`)
+        goc_xml = _doc_thanh_phan(z, "word/document.xml", doc_gioi_han).decode("utf-8", errors="strict")
+        xml, _ = dm.strip_markup(goc_xml, "strip")   # chữ ĐÃ BỎ của dự thảo không vào nguyên văn (như `tl extract`)
         danh_so = _doc_danh_so(z, doc_gioi_han)
-        kieu_so = _kieu_co_danh_so(z, doc_gioi_han)
+        kieu = _doc_kieu(z, doc_gioi_han)
+    # r2 (lượt 1 A4): sửa đổi DẤU ĐOẠN (gộp/tách đoạn bằng track-changes) — bộ lọc bỏ dấu nhưng giữ hai `w:p` ⇒ ranh giới
+    # đoạn KHÔNG còn là ranh giới thật. Đo trên XML GỐC, theo namespace (mọi tiền tố).
+    for rpr in ET.fromstring(goc_xml).iter(_W + "rPr"):
+        if any(c.tag in (_W + "del", _W + "ins", _W + "moveFrom", _W + "moveTo") for c in rpr):
+            raise ValueError("tai lieu co sua doi dau doan (track changes gop/tach doan) — ranh gioi doan khong tin duoc")
     body = ET.fromstring(xml).find(_W + "body")
     if body is None:
         raise ValueError("document.xml khong co w:body")
-    # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số (bộ đếm Word chạy suốt tài liệu theo numId).
+    # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số (kể cả trong bảng/sdt) — bộ đếm Word chạy suốt tài liệu theo numId.
     bo_dem_tl = {}
-    doan = []   # (chữ, numId|None, ilvl|None, nhãn|None, số cấp|None, là_bảng, kiểu_có_số_ngầm)
-    for el in body:
-        if el.tag == _W + "tbl":
-            doan.append(("", None, None, None, None, True, False))
+    doan = []   # dict: chu, so (numId, ilvl)|None, dem, loai ("p"|"bang"|"la"), trong_bang, con_bo, ngat
+    for loai, el, trong_bang in _doan_trong(body):
+        if loai != "p":
+            doan.append({"chu": "", "so": None, "dem": None, "loai": loai, "trong_bang": trong_bang,
+                         "con_bo": False, "ngat": False})
             continue
-        if el.tag != _W + "p":
-            continue
-        ppr = el.find(_W + "pPr")
-        np_ = ppr.find(_W + "numPr") if ppr is not None else None
-        kieu = ppr.find(_W + "pStyle") if ppr is not None else None
-        ngam = kieu is not None and kieu.get(_W + "val") in kieu_so and np_ is None
-        chu = _van_ban_doan(el)
-        if np_ is not None and np_.find(_W + "numId") is not None:
-            nid = np_.find(_W + "numId").get(_W + "val")
-            ilvl_el = np_.find(_W + "ilvl")
-            il = int(ilvl_el.get(_W + "val")) if ilvl_el is not None else 0
-            if nid == "0":   # numId 0 = TẮT đánh số
-                doan.append((chu, None, None, None, None, False, ngam))
-                continue
-            if nid not in danh_so or il not in danh_so[nid]:
-                raise ValueError(f"doan tro numId {nid} ilvl {il} khong co trong numbering.xml")
-            muc = danh_so[nid]
-            dem = bo_dem_tl.setdefault(nid, {})
-            dem[il] = dem.get(il, muc[il][2] - 1) + 1
-            for k in [k for k in dem if k > il]:
-                del dem[k]
-            for k in range(il):
-                dem.setdefault(k, muc.get(k, ("decimal", "", 1))[2])
-            doan.append((chu, nid, il, _nhan(muc, il, dem) if chu else None, dict(dem), False, ngam))
-        else:
-            doan.append((chu, None, None, None, None, False, ngam))
-    # Định vị Điều: đúng MỘT đoạn mở bằng `Điều <dieu>` + dấu `.`/`:`.
+        chu, so, con_bo, ngat = _phan_tich_doan(el, kieu)
+        dem_snap = None
+        if so is not None:
+            nid, il = so
+            dn = danh_so.get(nid)
+            if dn is not None and dn["loi"] is None and il in dn["muc"]:
+                muc = dn["muc"]
+                dem = bo_dem_tl.setdefault(nid, {})
+                dem[il] = dem.get(il, muc[il][2] - 1) + 1
+                for k in [k for k in dem if k > il]:
+                    del dem[k]
+                for k in range(il):
+                    dem.setdefault(k, muc.get(k, ("decimal", "", 0))[2])
+                dem_snap = dict(dem)
+        doan.append({"chu": chu, "so": so, "dem": dem_snap, "loai": "p", "trong_bang": trong_bang,
+                     "con_bo": con_bo, "ngat": ngat})
+    # Định vị Điều: đúng MỘT đoạn (ngoài bảng) mở bằng `Điều <dieu>` + dấu `.`/`:`.
     re_dau = re.compile(rf"^Điều\s+{re.escape(str(dieu))}\s*[.:]")
-    vi_tri = [i for i, d in enumerate(doan) if not d[5] and re_dau.match(d[0])]
+    vi_tri = [i for i, d in enumerate(doan) if d["loai"] == "p" and not d["trong_bang"] and re_dau.match(d["chu"])]
     if len(vi_tri) != 1:
         raise ValueError(f"tim thay {len(vi_tri)} doan tieu de 'Dieu {dieu}' (can dung 1)")
     i0 = vi_tri[0]
+    if doan[i0]["ngat"] or doan[i0]["so"] is not None:
+        # lượt 1 A1: tiêu đề có ngắt mềm có thể mang thân Điều trong cùng đoạn; tiêu đề đánh số tự động thì mơ hồ.
+        raise ValueError("doan tieu de Dieu co ngat dong mem hoac duoc danh so tu dong")
     vung = []
     for d in doan[i0 + 1:]:
-        if not d[5] and (_RE_DIEU_BAT_KY.match(d[0]) or _RE_RANH_GIOI_LON.match(d[0])):
+        if d["loai"] == "p" and not d["trong_bang"] and (_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"])):
+            if d["so"] is not None:
+                # lượt 1 A1: đoạn mở bằng "Điều/Chương/…" mà được đánh số tự động ⇒ có thể là khoản, không phải ranh giới.
+                raise ValueError(f"doan danh so tu dong mo bang tieu de: {d['chu'][:60]!r}")
             break
         vung.append(d)
-    vung = [d for d in vung if d[5] or d[0]]   # bỏ đoạn rỗng
-    # Bảng (`w:tbl`) không mang chữ ở đây (d[0] rỗng) ⇒ rơi vào nhánh "đoạn không số" và bị chặn ở vòng dưới.
-    if any(d[6] for d in vung):
-        raise ValueError("doan duoc danh so qua style (khong co w:numPr truc tiep) — khong doc duoc so")
-    tieu_de = doan[i0][0]
-    co_so = [d for d in vung if d[1] is not None]
+    # Kiểm TRƯỚC khi lùi về đường thô (lượt 1 A1): bảng, khối lạ, chữ đã bỏ còn sót ⇒ dừng ở MỌI đường.
+    if any(d["loai"] != "p" or d["trong_bang"] for d in vung):
+        raise ValueError("Dieu chua bang hoac khoi khong ho tro")
+    if any(d["con_bo"] for d in vung):
+        raise ValueError("Dieu con chu gach ngang/da xoa sau bo loc markup — khong doc duoc nguyen van")
+    vung = [d for d in vung if d["chu"]]   # bỏ đoạn rỗng
+    tieu_de = doan[i0]["chu"]
+    co_so = [d for d in vung if d["so"] is not None]
     if not co_so:
-        raise KhongCauTruc(f"Dieu {dieu} khong co doan danh so tu dong", "\n".join([tieu_de, *(d[0] for d in vung)]))
-    cap0 = min(d[2] for d in co_so)
-    nid0 = co_so[0][1]
-    fmt0 = danh_so[nid0][cap0][0]
-    if fmt0 != "decimal":
-        raise ValueError(f"cap khoan co numFmt {fmt0!r} (can decimal)")
+        raise KhongCauTruc(f"Dieu {dieu} khong co doan danh so tu dong", "\n".join([tieu_de, *(d["chu"] for d in vung)]))
+    for d in co_so:   # lượt 1 A5: chỉ xác thực các danh sách Điều đích DÙNG
+        nid, il = d["so"]
+        dn = danh_so.get(nid)
+        if dn is None or il not in dn.get("muc", {}):
+            raise ValueError(f"doan tro numId {nid} ilvl {il} khong co trong numbering.xml")
+        if dn["loi"]:
+            raise ValueError(f"numId {nid}: {dn['loi']}")
+    cap0 = min(d["so"][1] for d in co_so)
+    nid0 = co_so[0]["so"][0]
+    muc0 = danh_so[nid0]["muc"]
+    fmt0, txt0, _ = muc0[cap0]
+    if fmt0 != "decimal" or not re.fullmatch(rf"%{cap0 + 1}[.)]", txt0):
+        # lượt 1 A2: nhãn khoản phải CHÍNH LÀ số của cấp khoản (`%N.`/`%N)`), không cố định/ghép cấp khác.
+        raise ValueError(f"cap khoan co numFmt {fmt0!r}, lvlText {txt0!r} (can decimal, '%{cap0 + 1}.')")
     cau_dan, khoan = [], []
-    for chu, nid, il, nhan, dem, _bang, _ngam in vung:
-        if nid is None:
+    for d in vung:
+        chu = d["chu"]
+        if d["so"] is None:
             if not khoan:
                 cau_dan.append(chu)   # trước khoản đầu: không phải khoản theo cấu trúc
             elif _RE_DIEM_GO_TAY_DOCX.match(chu):
@@ -740,19 +853,20 @@ def doc_dieu_docx(nguon, dieu):
                 # đoạn KHÔNG đánh số sau khoản đầu: có thể là khoản mất số, tiếp dòng hay lời dẫn nhóm ⇒ không đoán.
                 raise ValueError(f"doan khong danh so giua cac khoan: {chu[:60]!r}")
             continue
+        nid, il = d["so"]
         if _RE_SO_GO_TAY_DOCX.match(chu):
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
-            khoan.append([dem[cap0], chu])
+            khoan.append([d["dem"][cap0], chu, chu])
         elif nid == nid0 and il > cap0 and khoan:
-            khoan[-1][1] += "\n" + f"{nhan} {chu}"
+            khoan[-1][1] += "\n" + f"{_nhan(muc0, il, d['dem'])} {chu}"
         else:
             # cấp khoản của danh sách KHÁC, cấp con của danh sách khác, hay cấp con trước khoản đầu ⇒ ranh giới không rõ.
             raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")
-    if [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):
-        raise ValueError(f"so khoan khong lien tuc tu 1: {[so for so, _ in khoan]}")
-    dong = [tieu_de, *cau_dan] + [f"{so}. {txt}" for so, txt in khoan]
-    return {"van_ban": "\n".join(dong), "khoan": [(so, txt) for so, txt in khoan], "cau_dan": cau_dan}
+    if [so for so, _, _ in khoan] != list(range(1, len(khoan) + 1)):
+        raise ValueError(f"so khoan khong lien tuc tu 1: {[so for so, _, _ in khoan]}")
+    dong = [tieu_de, *cau_dan] + [f"{so}. {txt}" for so, txt, _ in khoan]
+    return {"van_ban": "\n".join(dong), "khoan": [(so, txt, dau) for so, txt, dau in khoan], "cau_dan": cau_dan}
 
 
 PHAM_VI_KIEM_CAU_TRUC = ("thuat ngu va dinh nghia khop nguyen van tung khoan; ranh gioi khoan doc tu CAU TRUC danh sach "
@@ -948,7 +1062,9 @@ def lech_nguyen_van(khai_niem, van_ban, khoan=None):
             # So THEO VỊ TRÍ ranh giới trong nguồn (lượt 3 M1), không so chuỗi ghép: thuật ngữ = phần trước chữ "là"
             # đầu tiên NGOÀI ngoặc; định nghĩa = phần sau nó. Khoản không có từ nối "là" ngoài ngoặc (vd "bao gồm")
             # ⇒ không xác minh được ⇒ lệch (chặn, không nhận sai).
-            m = _tu_noi(khoan[i][1])
+            # #1525 r2 (lượt 1 A3): khoản từ CẤU TRÚC mang `đầu khoản` (phần tử thứ ba) — dò từ nối CHỈ ở đó, không lấy "là"
+            # của một điểm có nhãn ngoài mẫu `_RE_DIEM` (`A)`, `1.`…). Đầu khoản là tiền tố của khoản nên vị trí giữ nguyên.
+            m = _tu_noi(khoan[i][2] if len(khoan[i]) > 2 else khoan[i][1])
             if m:
                 tn_nguon, dn_nguon = _gon(khoan[i][1][:m.start()]), _gon(khoan[i][1][m.end():])
                 # Lượt 4 Q1: HAI VẾ phải khác rỗng — khoản mất phần đầu (chỉ còn "là …") từng qua với thuật ngữ "".

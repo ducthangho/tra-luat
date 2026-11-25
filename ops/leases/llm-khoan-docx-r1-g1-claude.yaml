@@ -66,3 +66,5 @@ max_lease_hours: 8
 review_calls_limit: 5
 review_calls_used_truoc: 0
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r2-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 1 (A1-A8); revision r2 (ops/specs/llm-khoan-docx-r2.md).'

@@ -32236,7 +32236,7 @@ def run() -> int:
             pr = f'<w:pPr><w:numPr><w:ilvl w:val="{il}"/><w:numId w:val="{num}"/></w:numPr></w:pPr>' if num else ""
             return f'<w:p>{pr}<w:r><w:t xml:space="preserve">{t}</w:t></w:r></w:p>'
         _num = (f'<w:numbering {_W}><w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:numFmt w:val="decimal"/>'
-                '<w:lvlText w:val="%1."/></w:lvl><w:lvl w:ilvl="1"><w:numFmt w:val="lowerLetter"/><w:lvlText w:val="%2)"/>'
+                '<w:lvlText w:val="%1."/><w:start w:val="1"/></w:lvl><w:lvl w:ilvl="1"><w:start w:val="1"/><w:numFmt w:val="lowerLetter"/><w:lvlText w:val="%2)"/>'
                 '</w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>')
         _doc = (f'<w:document {_W}><w:body>' + _p("Điều 3. Giải thích từ ngữ")
                 + _p("Trong Luật này, các từ ngữ dưới đây được hiểu như sau:")

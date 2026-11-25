@@ -395,7 +395,8 @@ biến môi trường của environment.
   một tầng ⇒ gạch, nhiều tầng ⇒ không giải được ⇒ chặn) và chữ đã xoá/đã chuyển đi bị LỌC khỏi nguyên văn. Chặn (rc 2):
   nội dung trước tiêu đề hay thêm tiêu đề Điều/Chương/Mục/Phần trong tệp, Điều không có đánh số tự động (dùng `--tep`
   tệp văn bản), đoạn không số sau khoản đầu, hai danh sách ở cấp khoản, số khoản không liên tục từ 1, số gõ tay lẫn số
-  tự động, đánh số qua style, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
+  tự động, đánh số qua style (kể cả style chỉ mang `ilvl`), nhãn cấp (`lvlText`) có chữ, thuộc tính tương thích
+  `mc:AlternateContent` trong định dạng, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
   `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
   không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
   `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột

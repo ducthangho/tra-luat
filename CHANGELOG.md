@@ -27,6 +27,8 @@
   part numbering/styles theo `document.xml.rels`; ngắt trang/cột được nhận; tiêu đề viết hoa được nhận.
 - r9 (sau cross-review lượt 8, đặc tả `ops/specs/llm-khoan-docx-r9.md`): part chính theo `_rels/.rels`; tiêu đề Điều viết hoa trong
   vùng ⇒ chặn; ngắt trang có chữ sau ⇒ chặn; numId lỗi qua style ⇒ chặn.
+- r10 (sau cross-review lượt 9, đặc tả `ops/specs/llm-khoan-docx-r10.md`): style mang `ilvl` cũng là đánh số qua style;
+  `mc:AlternateContent` trong định dạng ⇒ chặn; `lvlText` có chữ ⇒ chặn; chữ gạch sau ngắt trang không còn làm chặn oan.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

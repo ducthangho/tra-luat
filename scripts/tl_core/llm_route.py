@@ -701,6 +701,10 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
         goc = None
     if goc is None:
         return {"": (None, None, None)}
+    if any(not str(e.tag).startswith(_W) for st in goc.iter() if st.tag in (_W + "rPr", _W + "pPr") for e in st):
+        # r10 (lượt 9 J2): thuộc tính ngoài namespace w (vd `mc:AlternateContent`) trong rPr/pPr của styles — không giải được
+        # nhánh tương thích nào có hiệu lực ⇒ dừng.
+        raise ValueError("styles co thuoc tinh ngoai namespace w (mc:AlternateContent…) — khong ho tro")
 
     def gach(rpr, ten):
         e = rpr.find(_W + ten) if rpr is not None else None
@@ -779,6 +783,9 @@ def _nhan(muc, ilvl, bo_dem):
         raise ValueError(f"numFmt {f!r} khong ho tro")
     if fmt not in ("decimal", "lowerLetter", "upperLetter"):
         raise ValueError(f"numFmt {fmt!r} khong ho tro")
+    if re.search(r"[^\W\d_]", re.sub(r"%\d", "", txt)):
+        # r10 (lượt 9 J3): `lvlText` có CHỮ (vd "Điều %2.") ⇒ nhãn có thể là tiêu đề/khác điểm ⇒ chỉ nhận placeholder + dấu.
+        raise ValueError(f"lvlText {txt!r} co chu — khong ho tro")
     nhan = re.sub(r"%(\d)", thay, txt)
     if not nhan.strip():
         raise ValueError("lvlText rong")
@@ -827,6 +834,8 @@ def _phan_tich_doan(p, kieu):
         dem = dict(dem_nen)
         truc_tiep = {}
         if rpr is not None:
+            if any(not str(e.tag).startswith(_W) for e in rpr):
+                kq["la"] = True   # r10 (lượt 9 J2): thuộc tính ngoài namespace w (mc:AlternateContent…) ⇒ không biết có gạch
             rs = rpr.find(_W + "rStyle")
             if rs is not None:
                 for t, ci in (("strike", 3), ("dstrike", 4)):
@@ -843,13 +852,13 @@ def _phan_tich_doan(p, kieu):
                 hl[t] = False
             else:
                 hl[t] = dem[t] == 1
-        chu_run = []
+        chu_run, chu_sau_ngat = [], False
         for c in r:
             ten = c.tag[len(_W):] if c.tag.startswith(_W) else None
             if ten in _CON_RUN_CHU:
                 chu = (c.text or "") if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten]
                 if kq["sau_ngat_trang"] and chu.strip():
-                    kq["ngat"] = True   # r9 (lượt 8 H5): có chữ SAU ngắt trang/cột ⇒ có thể che số khoản gõ tay ⇒ như ngắt mềm
+                    chu_sau_ngat = True   # r9 (lượt 8 H5); r10 (lượt 9 J5): chỉ tính khi run KHÔNG bị gạch (xét bên dưới)
                 chu_run.append(chu)
             elif ten in ("br", "cr"):
                 chu_run.append(" ")
@@ -868,6 +877,8 @@ def _phan_tich_doan(p, kieu):
             # như `tl extract --markup strip` — nhưng lọc theo CÂY, không qua regex của `docx_markup` (regex có thể nuốt ranh
             # giới đoạn khi run rỗng tự đóng đứng trước run gạch).
             return
+        if chu_sau_ngat:
+            kq["ngat"] = True   # có chữ HIỆU LỰC sau ngắt trang/cột ⇒ có thể che số khoản gõ tay ⇒ như ngắt mềm
         kq["phan"].extend(chu_run)
 
     def duyet(cha):
@@ -892,18 +903,22 @@ def _phan_tich_doan(p, kieu):
     duyet(p)
     # numPr HIỆU LỰC: trực tiếp đè style (theo basedOn); numId "0" = tắt.
     nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)
-    tu_style = nid is not None
+    # r10 (lượt 9 J1): style mang BẤT KỲ thuộc tính đánh số nào (numId hay ilvl) ⇒ cấp/danh sách hiệu lực phụ thuộc quy tắc
+    # style↔cấp của Word — đoạn đánh số dùng style ấy bị chặn trong Điều, kể cả khi numId khai trực tiếp.
+    tu_style = nid is not None or il is not None
     np_ = ppr.find(_W + "numPr") if ppr is not None else None
     if np_ is not None:
         e = np_.find(_W + "numId")
         if e is not None:
-            nid, tu_style = _so_id(e.get(_W + "val")), False
+            nid = _so_id(e.get(_W + "val"))
             if nid is None:
                 kq["la"] = True   # r8 (lượt 7 G1): numId không hợp lệ ⇒ không biết danh sách
         e = np_.find(_W + "ilvl")
         il = int(e.get(_W + "val")) if e is not None else il
     if nid == "!":
         kq["la"], nid = True, None   # r9 (lượt 8 H4): numId lỗi khai qua style ⇒ đoạn lạ
+    if ppr is not None and any(not str(e.tag).startswith(_W) for x in (ppr, ppr.find(_W + "numPr")) if x is not None for e in x):
+        kq["la"] = True   # r10 (lượt 9 J2): pPr/numPr có phần tử ngoài namespace w
     so = None if nid in (None, "0") else (nid, il or 0)
     # r7 (lượt 6 F5): cấp ngoài miền ở ĐOẠN không cần chốt riêng — chỉ đếm khi cấp có trong định nghĩa (đã giới hạn 0–8),
     # và bước xác thực chặn đoạn trỏ cấp không có định nghĩa.

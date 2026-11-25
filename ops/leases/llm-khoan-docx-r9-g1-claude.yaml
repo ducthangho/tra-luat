@@ -95,3 +95,5 @@ revision_ly_do: 'Cross-review luot 8 (H1, H2, H5 P1; H3, H4 P2). Tran review tin
 review_calls_limit: 9
 review_calls_used_truoc: 8
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r10-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 9 (J1-J5); revision r10 (ops/specs/llm-khoan-docx-r10.md), tran 11.'

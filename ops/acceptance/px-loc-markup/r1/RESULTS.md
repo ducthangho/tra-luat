@@ -34,7 +34,13 @@ lease `ops/leases/px-loc-markup-r1-g1-claude.yaml`, Issue #1529.
   không khối, một khối, hai khối, khối cụt, khối lồng, tên `ElicitationsGroupX`, tên viết thường, thẻ mở cụt ở cuối chuỗi.
   Đột biến `CX15` (so tên thẻ `OrdinalIgnoreCase`) trên bản sao thư mục `scripts`: 7/8, đúng ca tên viết thường đổi sang
   `unterminated`. Đột biến `CX14` nằm trong `Invoke-PxcAsk`, phép thử phụ này không đo được nó.
-- N5, N7, N8: ghi khi chạy gate trước push (mục 4).
+- **N5** (đo trên `SKILL.md` đã nối dòng theo từng đoạn): câu hướng dẫn `gemini:auto` có ở 1 đoạn; `answerMarkup` và
+  `answerMarkupRemoved` mỗi tên có ở 1 đoạn; frontmatter `2.1.0` = 0, `2.2.0` = 1; mục *Phiên bản* `2.1.0` = 0, `2.2.0` = 2. **Đạt.**
+- **N8**: `git diff --name-only d0868db..HEAD` cho đúng 8 đường dẫn, cả 8 thuộc `write_set`. **Đạt.**
 
-## 4. Gate trước push
-Chưa chạy.
+## 4. Gate trước push (N7)
+Trên commit thi công `651de87e96e35c32baffe08bdd8bf6587f7363b9` (`core.abbrev` = 7):
+- `python3 scripts/tl.py --selftest` ⇒ `1789/1789`.
+- `git diff --check` trên phần thay đổi ⇒ sạch.
+- `ops/lease_publish.py check ops/leases/px-loc-markup-r1-g1-claude.yaml` ⇒ đăng được.
+Commit chứa bản RESULTS này chạy lại gate trước push; số ghi ở PR.

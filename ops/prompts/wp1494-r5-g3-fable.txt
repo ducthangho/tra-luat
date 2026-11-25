@@ -1,0 +1,31 @@
+You are the EXECUTOR for work packet wp1494 (B2, Mission #1172) of repository ducthangho/tra-luat, under lease wp1494-r5-g3-claude (successor of wp1494-r5-g2-claude).
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+This is attempt 4 of 4 (owner Review Rescue decision). You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments or Issues.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1494
+- Frozen spec: ops/specs/wp1494-r1/SPEC.md on branch ops/wp1494-r1 at commit a819291bb08af5e72cdd833b86544ea48d97b1fd, sha256 345520e199ba7072c2bea92b876a3db1877cabce7969f82a379bb078d1dc2e4d, revision 5. Verify the hash first; if it differs, STOP.
+- Owner decisions: hash approval of r5 https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7155606183 ; D134 waiver https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7157619068 ; this attempt https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7161189582
+- Lease: ops/leases/wp1494-r5-g3-claude-20261125.yaml on branch ops/wp1494-r1. Read it and obey its limits.
+- Codex source review 2 on d3bcd6a171644b18d9fd37a185cfb8fc6d641ef4: committed at ops/specs/wp1494-r1/src-reviews/luot-2/VERDICT.md on ops/wp1494-r1; a working copy with the reviewer's runnable evidence scripts is at /home/user/tra-luat/.claude/.packet_state/wp1494-src-review-2/ (VERDICT.md, evidence/). Review 1 is at src-reviews/luot-1/.
+
+START POINT
+- Base B = b4b79bf0cd301bb067a22c5245505d9a8ab232cb (unchanged). Repo must not be shallow.
+- Continue from d3bcd6a171644b18d9fd37a185cfb8fc6d641ef4 (tree 7176af1b194328a9e8f1c73619f88abe1bd11fe0), local branch agent/wp1494-r5-g2-fable. Create local branch agent/wp1494-r5-g3-fable at that SHA (verify SHA and tree first). Do not restart.
+
+SCOPE — NARROW FIX ONLY (owner decision 7161189582). Add no new mechanism.
+1. F02 bounded-evaluation-order-dependent: bind the absolute per-attempt and per-phase deadline to EVERY underlying read in the shared reader (`_mot_lan` or wherever the real transport reads), e.g. read1/bounded raw reads with the remaining time re-applied to the socket before each read, so that one real HTTPResponse.read can never hold the thread past the deadline. It must cover all four paths the reviewer named: GET API, GET storage (D5 host), PATCH, POST. The reviewer's `evidence/buffered_deadline.py` must show all four bounded on the new head. Each path gets its own case and mutant.
+2. F03 mutant-oracles-non-discriminating:
+   - Put the reviewer's nine distinguishing cases N01–N09 (evidence/rv2_distinguish.py, rv2_mutations.py) into ops/canh_tuoi_audit_test.py as committed cases, each with its own mutant killed by its own TinHieuChotCa.
+   - Fix N06 so that an HTTPError at the adapter boundary makes the target case fail through its own signal, not rc 4.
+   - Row 61: add writer-side cases at W2 and W7 for the shared heartbeat domain checker, following the call-site rule (evidence/rv2_heartbeat_callers.py). If a condition truly cannot be produced at the writer, STOP and report rather than self-exempt.
+   - Before handoff, run the reviewer's rv2 scripts unmodified where possible. If one needs an edit to run, say exactly which line and why.
+Same failure shape three times ⇒ STOP and report.
+
+WRITE SET (unchanged, four files): .github/workflows/canh-tuoi-audit.yml, ops/canh_tuoi_audit.py, ops/canh_tuoi_audit_test.py, .claude/dev/ci_dang_ky_test.py (only the one MOI entry, already present). Expect changes in the two ops/canh_tuoi_audit*.py files only. Needing any other file ⇒ STOP.
+
+SIZE: ≤ 6 files and ≤ 3500 added lines by `git diff --numstat b4b79bf0cd301bb067a22c5245505d9a8ab232cb HEAD` (currently 3098). If you would exceed 3500, commit what you have, STOP and report numstat and the missing work. Do not cut cases, mutants or rules.
+
+GATES: `git config core.abbrev 7`; plain clone with .git as a directory; actionlint (shellcheck present) rc 0; `python3 ops/canh_tuoi_audit_test.py` last four lines matching the MOI regex with equal numbers; `python3 .claude/dev/ci_dang_ky_test.py` N/N; `python3 -m ruff check --select F` delta 0 vs B; no CI-skip marker in files or commit messages; no real GitHub calls in tests. Commit locally, never push.
+
+HANDOFF: /tmp/wp1494-r5-g3-HANDOFF.yaml plus a copy at /home/user/tra-luat/.claude/.packet_state/wp1494-r5-g3-HANDOFF.yaml, following protocol §7: packet wp1494, revision 5, generation 3, lease wp1494-r5-g3-claude; base/head/tree OIDs; numstat; every gate with command, rc and marker; for F02 and F03 a table: path or item, fix, case, mutant, killed yes/no; reviewer scripts re-run with rc; what is not measured; open questions. Then reply with head SHA, tree, numstat totals, gate summary and handoff path.

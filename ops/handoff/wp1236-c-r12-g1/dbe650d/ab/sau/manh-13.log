@@ -1,0 +1,28 @@
+/tmp/claude-0/-home-user-tra-luat/5967f379-4bdf-59e4-8c2d-d41c6965cf15/scratchpad/rig_ab3/sau/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+/tmp/packet_loop_test_jqsaajq2/baseline/dot_bien-8c3007cb16b4eaae/test_harness_mutant/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+{"test": "wp1178_r3", "original_source_oid": "8f8cf8e1f28bf970d6c68179dac7a74b5b8f1c8e", "fixture_source_oid": "05462e88eba80dc9f84ec84c98721891f0ee8a7d", "source_path": "ops/specs/wp1178-r3.md", "sha256": "4fe4cc94da39fff575b3c0c60d3d2795af3afd948f08359a3e8a5b9d94ff67bf", "rc": 0, "at_head": false, "policy_graph": "synthetic rollout; not canonical rollout authority"}
+  BỎ QUA  wp1342_native_lock_names: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+  BỎ QUA  wp1342_native_seed_drift: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+  BỎ QUA  wp1342_native_job_cha_chet_sau_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+nền: 114/114 đạt · BỎ QUA: 3
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 41 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1803
+  đột biến         : 2058
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+MẢNH: ca 13/16 · đột biến - · 117/117 ca · 0 lượt đột biến · carrier=không · 125s · rc=0

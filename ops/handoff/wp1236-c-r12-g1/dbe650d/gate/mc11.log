@@ -1,0 +1,14 @@
+## 2439922c67a091c53e277c9e0b13d8fc04089453
+goc   tep_la_symlink         rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/lk5-provenance/danh-gia-gate-output-1.txt'] []
+goc   thu_muc_la_symlink     rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/lk-provenance'] []
+goc   mien_thu_muc_la_tep    rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt'] []
+mC11  tep_la_symlink         rc=0 [] ['D2b ĐẠT ops/land/lk5-provenance/danh-gia-gate-output-1.txt@e']
+mC11  thu_muc_la_symlink     rc=8 ["KHÔNG ĐO ĐƯỢC: D2b FileNotFoundError(2, 'No such file or directory')"] []
+mC11  mien_thu_muc_la_tep    rc=12 ['THIẾU  D2b mien:readback'] []
+## dbe650d2a3c3fb6da9573ea485adc65934efdc78
+goc   tep_la_symlink         rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/lk5-provenance/danh-gia-gate-output-1.txt'] []
+goc   thu_muc_la_symlink     rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/lk-provenance'] []
+goc   mien_thu_muc_la_tep    rc=12 ['THIẾU  D2b symlink_hoac_mode:ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt'] []
+mC11  tep_la_symlink         rc=0 [] ['D2b ĐẠT ops/land/lk5-provenance/danh-gia-gate-output-1.txt@a']
+mC11  thu_muc_la_symlink     rc=8 ["KHÔNG ĐO ĐƯỢC: D2b FileNotFoundError(2, 'No such file or directory')"] []
+mC11  mien_thu_muc_la_tep    rc=12 ['THIẾU  D2b mien:readback'] []

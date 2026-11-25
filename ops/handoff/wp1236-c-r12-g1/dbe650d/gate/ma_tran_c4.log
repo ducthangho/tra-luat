@@ -1,0 +1,14 @@
+22 bien the · 12 dot bien
+(goc): 0 lech :: 
+d2b_loc_mat_symlink: 6 lech :: yaml_chi_la_symlink [ChotB4] · yaml_thuong_kem_yaml_symlink [ChotB4] · yaml_thuong_kem_thu_muc_symlink [ChotB4] · symlink_ngoai_pham_vi_k2 [ChotB4] · mien_readback_kem_symlink [ChotB4] · nen_viet_lai_dich_symlink [ChotB4]
+d2b_tin_ban_bung: 7 lech :: nen_khong_tao_duoc_symlink[0] [ChotB4] · nen_khong_tao_duoc_symlink[1] [ChotB4] · nen_khong_tao_duoc_symlink[2] [ChotB4] · an_tep_bang_export_ignore [ChotB4] · nen_gop_hai_thu_muc [ChotB4] · nen_thua_mot_muc [ChotB4] · nen_thieu_mot_muc [ChotB4]
+d2b_danh_muc_chi_chieu_git: 1 lech :: nen_thua_mot_muc [ChotB4]
+d2b_danh_muc_chi_chieu_dia: 2 lech :: an_tep_bang_export_ignore [ChotB4] · nen_thieu_mot_muc [ChotB4]
+d2b_tin_ban_chep_cua_symlink: 3 lech :: nen_khong_tao_duoc_symlink[0] [ChotB4] · nen_khong_tao_duoc_symlink[1] [ChotB4] · nen_khong_tao_duoc_symlink[2] [ChotB4]
+d2b_danh_muc_bo_thu_muc: 14 lech :: doi_chung_dat [ChotB4] · yaml_chi_la_symlink [ChotB4] · yaml_thuong_kem_yaml_symlink [ChotB4] · yaml_thuong_kem_thu_muc_symlink [ChotB4] · symlink_ngoai_pham_vi_k2 [ChotB4] · mien_readback_kem_symlink [ChotB4] · doi_byte_bang_eol [ChotB4] · doi_byte_bang_eol_mien [ChotB4] · hai_thu_muc_trung_khoa [ChotB4] · hai_thu_muc_trung_khoa_mien [ChotB4] · thu_muc_va_tep_trung_khoa_mien [ChotB4] · anh_em_khong_readback [ChotB4] · anh_em_co_readback [ChotB4] · nen_viet_lai_dich_symlink [ChotB4]
+d2b_bo_bam_blob: 2 lech :: doi_byte_bang_eol [ChotB4] · doi_byte_bang_eol_mien [ChotB4]
+d2b_bo_dich_symlink: 1 lech :: nen_viet_lai_dich_symlink [ChotB4]
+d2b_gop_ten_khac_hoa_thuong: 4 lech :: hai_ten_chi_khac_hoa_thuong [ChotB4] · hai_thu_muc_trung_khoa [ChotB4] · hai_thu_muc_trung_khoa_mien [ChotB4] · thu_muc_va_tep_trung_khoa_mien [ChotB4]
+d2b_trung_khoa_chi_xet_la: 3 lech :: hai_thu_muc_trung_khoa [ChotB4] · hai_thu_muc_trung_khoa_mien [ChotB4] · thu_muc_va_tep_trung_khoa_mien [ChotB4]
+d2b_trung_khoa_chi_xet_thu_muc: 2 lech :: hai_ten_chi_khac_hoa_thuong [ChotB4] · thu_muc_va_tep_trung_khoa_mien [ChotB4]
+d2b_trung_khoa_chi_cung_loai: 1 lech :: thu_muc_va_tep_trung_khoa_mien [ChotB4]

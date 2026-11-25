@@ -1,0 +1,6 @@
+## 2439922c67a091c53e277c9e0b13d8fc04089453 sach=0
+(1) doi chung Linux      : rc=12 ['THIẾU  D2b mien:readback', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+(2) mo phong gop hoa/thuong: rc=0 ['D2b ĐẠT mien ops/land/pr1440-wp1319-provenance/A@cf2405bf137ce1093d18380315137679be8d21ff', 'ĐÓNG ĐƯỢC WP P — merge 9743c7c99060fefe953d99e10ca16588d70a9009']
+## dbe650d2a3c3fb6da9573ea485adc65934efdc78 sach=0
+(1) doi chung Linux      : rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')"]
+(2) mo phong gop hoa/thuong: rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError('cây của oid có hai tên trùng nhau sau NFC + casefold')"]

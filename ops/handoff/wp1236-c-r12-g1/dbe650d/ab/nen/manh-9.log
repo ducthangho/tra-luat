@@ -1,0 +1,26 @@
+/tmp/claude-0/-home-user-tra-luat/5967f379-4bdf-59e4-8c2d-d41c6965cf15/scratchpad/rig_ab3/nen/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  BỎ QUA  luong_canonical_chay_that: chỉ đo lệnh pwsh trên Windows
+  BỎ QUA  wp1342_native_lock_noinherit: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+  BỎ QUA  wp1342_native_seed_nonfile: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+  BỎ QUA  wp1342_native_job_loi_sau_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+nền: 113/113 đạt · BỎ QUA: 4
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 41 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1786
+  đột biến         : 2009
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+MẢNH: ca 9/16 · đột biến - · 117/117 ca · 0 lượt đột biến · carrier=không · 123s · rc=0

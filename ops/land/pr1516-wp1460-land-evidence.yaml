@@ -1,0 +1,97 @@
+# HO SO LAND — PR #1516 (packet wp1460 = B1a cua ke hoach nguon r4, Mission #1172).
+# Khuon: ops/land/pr1492-wp1448-land-evidence.yaml (tien le gan nhat).
+# TRANG THAI: merged (b4b79bf0), `landed: true` — bon moc §10.2.2 passed tren merge SHA; lease g4 da rut han va
+# ai-dang-giu sau han cho NGUOI_GIU 0 tren ca 4 duong dan write set.
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo; not_measured = khong do, ghi ly do.
+# Readback tho: ops/land/pr1516-wp1460-provenance/ (SHA256SUMS). Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-25.
+
+schema_version: 1
+mission_id: gh-1172
+packet_id: wp1460
+packet_issue: 1460
+generation: 4
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+session_id: https://claude.ai/code/session_015Gtxrarp2Zu1TdWDHorvE6
+recorded_by: 'phien dieu phoi goi B1a (khong phai executor, khong phai reviewer cua wp1460)'
+input_packet_generations:
+  - {packet_issue: 1460, packet_id: wp1460, revision: 9, generation: 4, lease_id: wp1460-r9-g4-claude, lease_ref: 'refs/heads/ops/wp1460-r1:ops/leases/wp1460-r9-g4-claude.yaml'}
+lich_su_lease: 'r7-g1 (a13e57f) -> r8-g2 (bca76c3, nang_tran 6/1600) -> r9-g3 (fea2205, nang_tran 6/1700) -> r9-g4 (db8214d, Review Rescue (a)); moi buoc bia mo hai chieu; rut han g4 tai f2c900c'
+spec: {path: ops/specs/wp1460-r1/SPEC.md, sha256: 280f6f8d0dc97f29a79ed8ef94d3070d8ae1fe0487b549054137bcdbc4acbb0c, spec_ref: 'refs/heads/ops/wp1460-r1@0883d49edc22cf261f471ef71f2dc5f323e8d667', revision: 9}
+authorized_head_sha: f5af7469c03e7fe421a3704c731f390842260304
+authorized_head_tree: 3f977dc24ae10e4d5007845584469ba3247b9c1d
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1516#issuecomment-7152539561
+authorization_ghi_chu: >-
+  measured — readback-audit-7152539561.json: human_exact_head_audit.v1 cua chu kho (User, OWNER) tren dung f5af746 (packet wp1460,
+  revision 9, generation 4, pr 1516, verdict approve, assurance human_audited, open_findings []), sua lan cuoi 04:07:24Z, TRUOC moi run
+  tren H (som nhat 04:09:34Z). Audit dang tren Issue giu cho #1516 truoc khi day H, roi Issue duoc chuyen thanh PR (POST /pulls {issue}).
+  Chu kho tu bam merge.
+land_operator: 'loi_khai_co_neo — chu kho tu bam merge; REST neo merged_by=ducthangho (readback-pr-1516.json), KHONG_DO_DUOC nguoi bam hay phien dung credential'
+merge_method: merge
+merge_commit: b4b79bf0cd301bb067a22c5245505d9a8ab232cb
+merge_commit_tree: fd79936f57176c875fc6caa5cf392be3cc60e57c
+merge_commit_parents: [111bbbdc441fa66b62bff6c593ff435fb9bb69fa, f5af7469c03e7fe421a3704c731f390842260304]
+merge_commit_parents_nguon: 'measured — git cat-file -p b4b79bf0 (tree fd79936f, parent 111bbbdc, parent f5af7469); khop ci-provenance-45554804645/provenance.yaml. base.sha 64b7f2c1 trong readback-pr-1516.json la base CU cua PR luc mo, KHONG phai cha thu nhat (connector P2 r4691243149)'
+merge_goi: 'measured — readback-pr-1516.json: merged true, merge_commit_sha b4b79bf0, head.sha f5af7469, merged_at 2026-11-25T05:36:54Z'
+review:
+  executor: 'Claude Fable 5.2 (Agent tool), 6 luot: 1 dung boi dieu phoi, 2 dung vi tran kich thuoc, 3-6 giao noi dung'
+  source_review: 'Codex gpt-6-astra xhigh qua launcher.py run, 4 luot (db869399, 6e53f3d5, c8a3bf7e, aaaf15c6); luot 4 approve, open_findings []; ban sao VERDICT/run.json/PROMPT o reviews/luot-1..4'
+  lop_finding: 'F01 rest-error-sidecar-ignored · F02/F02-R2/F02-R3 v1-not-fully-specified · F03 workflow-context-interpreted-as-shell · F04 collector-derived-evidence-unasserted — ca bon DA SUA DUNG LOP o luot 4'
+  numstat_so_base: '4 tep, +1693/-20 (tran nang_tran thu hai 6/1700)'
+pre_merge_checks:
+  - {name: 'kiem-merge ADR-0060 K0-K7', sha: f5af7469c03e7fe421a3704c731f390842260304, conclusion: 'ĐỦ ĐIỀU KIỆN MERGE, rc 0', nguon: kiem-merge-f5af746.txt, dau_vao: kiem-merge-dau-vao/}
+  - {name: 'CI PR Ubuntu ci.yml', run_id: 45544838266, conclusion: 'success, 23 success + 1 skipped', nguon: kiem-merge-dau-vao/km-jobs-45544838266.json}
+  - {name: 'Codex connector', sha: f5af7469c03e7fe421a3704c731f390842260304, conclusion: "Didn't find any major issues, Reviewed commit f5af7469c0 (comment 7153427801)", nguon: readback-connector-1516.json}
+  - name: 'K7 + canary A3 (ci-dot-bien-du.yml)'
+    runs: [45547652858, 45548809800]
+    conclusion: >-
+      DAT — ca hai 11/11 success; job manh chong nhau 04:44:23Z-05:03:15Z; hai bien nhan bien_nhan_audit.v1 hop schema, ok true,
+      su_kien.sha = H, cung kiem_ke_job, khac run_id, definition measured; tieu_dung (khoi Lenh kiem trich tu SPEC r9) tren dau vao THAT
+      (REST run/jobs filter=all/artifacts + 19 goi artifact) cho 0 vi pham 0 canh bao ca hai luot.
+    nguon: [a3/a3-ket-qua.json, a3/a3.log, a3/a3_tieu_dung.py]
+  - {name: 'Windows K6', conclusion: 'chu kho mien (dong windows: <H> mien, comment 7152556364)', nguon: readback-k6-7152556364.json, ghi_chu: loi_khai_co_neo}
+post_merge_checks:
+  - name: 'ci.yml push master — DUNG merge SHA'
+    run_id: 45554804645
+    run_attempt: 1
+    sha: b4b79bf0cd301bb067a22c5245505d9a8ab232cb
+    conclusion: success
+    jobs: '39/39 success, nhan ubuntu-latest'
+    nguon: [readback-run-45554804645.json, readback-jobs-45554804645.json]
+    provenance_10_2_2:
+      run: 'passed — ci-provenance-45554804645/provenance.yaml moc.run (event push, head_sha b4b79bf0, attempt 1)'
+      checkout: 'passed — 39/39 job checkout sha b4b79bf0 (ci-provenance-45554804645)'
+      workflow_definition: >-
+        passed — ops-do-workflow-definition.yml run 45554936114 (workflow_dispatch tren master b4b79bf0 voi run_id 45554804645, phien
+        dieu phoi goi qua MCP actions_run_trigger; readback-run-45554936114.json conclusion success). Nhap bang
+        ops/ci_provenance.py thu --wd-run 45554936114 (WORKFLOW_DEFINITION: passed (wd-run)).
+      gate_output: >-
+        passed — danh-gia-gate-output-45554804645.txt (danh_gia_gate.py v3 sha256 0ea9a5e9, chep nguyen tu
+        ops/land/pr1492-wp1448-provenance/): MOC_GATE_OUTPUT passed 39/39 job co dau hieu duong theo TUNG BUOC. Phan chung
+        phan-chung-buoc-45554804645.txt: xoa dau hieu buoc gate-registry / gate-nhanh-manh / gate-cong-cu => not_measured rc 0 ca ba.
+        ops/ci_provenance.py (bo sinh chuan) van ghi gate_output not_measured cho tung job — khong viet lai.
+      nguon: 'ci-provenance-45554804645/provenance.yaml sha256 6b54d4e4… (ops/ci_provenance.py thu --repo ducthangho/tra-luat --run 45554804645 --attempt 1 --wd-run 45554936114, rc 0)'
+bookkeeping:
+  - {item: 'rut han lease wp1460-r9-g4-claude', ket_qua: 'lease_until 2026-11-25T06:15:00Z, khoi thu_hoi_bang_rut_han (commit f2c900c tren ops/wp1460-r1)'}
+  - {item: 'ho so nay', duong_dan: ops/land/pr1516-wp1460-land-evidence.yaml}
+landed: true
+landed_dieu_kien: >-
+  PROTOCOL §10.2.4 — (1) gate hau merge tren b4b79bf0: run/checkout/workflow_definition/gate_output measured passed => DAT.
+  (2) lease nha: ai-dang-giu-sau-rut-han.txt (sau han 06:15:00Z; ref day du, so tap ls-remote/for-each-ref thieu 0) 4/4 duong dan
+  write set NGUOI_GIU 0 => DAT. (3) bookkeeping: ho so nay + lease rut han. (4) uy quyen: audit exact-H cua chu kho tren f5af746.
+  (5) kiem-merge K0-K7 DU DIEU KIEN.
+no_ngoai_pham_vi:
+  - 'Phuong an (b): revision dac ta khoanh loi hua "doi so hop le => luon co bien nhan hop le" (lop v1-not-fully-specified tai dien 4 lan); quyet dinh chu kho 7137001118. Cach bien bat loi ngoai cung giu lam ung vien (Mission r108).'
+  - 'Tai lieu sau hon gioi han cua chinh parser JSON (~9994+ tang) van do (nhu H2).'
+  - 'KHE_1460: hai ca quet bien + ba mutant chi co khi Python < 3.14; doi interpreter CI len 3.14 thi chung bien mat khong bao.'
+  - 'Oracle dong bang tran o nam 0001; jobs[].run_id chua doi chieu cheo.'
+  - 'Chi phi CI: ci_dang_ky_test.py 7 s -> ~268 s (luot --dot-bien 249 dot bien cua nghiem thu 1, dac ta buoc chay trong gate-registry).'
+khong_do_duoc:
+  - 'nguoi thuc su bam merge (chi do duoc merged_by).'
+  - 'Windows (K6 la dong mien cua chu kho, khong co phep do).'

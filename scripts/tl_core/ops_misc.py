@@ -3024,7 +3024,34 @@ def cmd_llm_khai_niem(a) -> int:
         return 2
     so_hieu = getattr(a, "sohieu", None) or None
     dieu = getattr(a, "dieu", None)
+    khoan_ct = None   # #1525: ranh giới khoản đọc từ CẤU TRÚC .docx (None = đường văn bản thô)
+    la_docx = False
     if getattr(a, "tep", None):
+        # #1525: .docx nhận theo CHỮ KÝ zip, không theo đuôi tên. Viết tại chỗ (không tách hàm phụ): handler được
+        # re-home `__globals__` về tl.py nên hàm phụ của module này không tra được tên (NameError).
+        try:
+            with open(a.tep, "rb") as _f:
+                la_docx = _f.read(4) == b"PK\x03\x04"
+        except OSError:
+            la_docx = False
+    if la_docx:
+        # #1525: tệp .docx ⇒ ranh giới khoản từ danh sách đánh số TỰ ĐỘNG (`w:numPr`). Không có số Điều trong
+        # tên/tiêu đề tệp để đối chiếu ⇒ `--dieu` BẮT BUỘC; không ghép số hiệu (F11).
+        if so_hieu or dieu is None:
+            print("[tl] tep .docx: can --dieu N va KHONG kem <so_hieu>", file=sys.stderr)
+            return 2
+        dieu = str(dieu)
+        try:
+            van_ban, khoan_ct = lr.doc_dieu_cau_truc(Path(a.tep), dieu)
+            nguon_vb = f"{a.tep} (docx, ranh gioi khoan tu cau truc danh sach)"
+        except lr.KhongCauTruc as e:
+            # Điều không có đánh số tự động ⇒ lùi về đường thô với ĐỦ luật chặn của nó (không đoán thêm).
+            print(f"[tl] {e} — dung duong van ban tho", file=sys.stderr)
+            van_ban, nguon_vb = e.van_ban, f"{a.tep} (docx, van ban tho)"
+        except (ValueError, KeyError, OSError, zipfile.BadZipFile, lr.ET.ParseError) as e:
+            print(f"[tl] khong doc duoc cau truc Dieu {dieu} tu {a.tep}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
+    elif getattr(a, "tep", None):
         # F11 (PR #1503): tệp local KHÔNG mang số hiệu/Điều xác minh được ⇒ không cho gắn số hiệu tay, và
         # số Điều lấy từ chính tiêu đề tệp; `--dieu` lệch tiêu đề ⇒ rc 2 (không dán nhãn sai).
         if so_hieu:
@@ -3088,7 +3115,7 @@ def cmd_llm_khai_niem(a) -> int:
         return 2
     print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
     try:
-        kq = lr.tach_khai_niem(van_ban, so_hieu or "", a.model, thu_tu)
+        kq = lr.tach_khai_niem(van_ban, so_hieu or "", a.model, thu_tu, khoan=khoan_ct)
     except lr.HetDuong as e:
         print("[tl] HET DUONG — moi duong deu hong phia duong:", file=sys.stderr)
         for d, ly_do in e.lan_thu:
@@ -3101,7 +3128,8 @@ def cmd_llm_khai_niem(a) -> int:
     # PHÂN ĐOẠN CỦA BỘ QUÉT" — ranh giới khoản tách từ văn bản THÔ không chứng minh được (11 lượt review liên tiếp tìm
     # ra một cách phân đoạn sai mới). Kết quả luôn mang cờ cần người duyệt ranh giới.
     ket = {"so_hieu": so_hieu, "dieu": dieu, "nguon": nguon_vb, "khai_niem": kq["khai_niem"],
-           "can_nguoi_duyet": True, "pham_vi_kiem": lr.PHAM_VI_KIEM}
+           "can_nguoi_duyet": True,
+           "pham_vi_kiem": lr.PHAM_VI_KIEM_CAU_TRUC if khoan_ct is not None else lr.PHAM_VI_KIEM}
     # F4 (PR #1503): `--out` CHỈ ghi khi kết quả QUA kiểm nguyên văn, và ghi nguyên tử — kết quả bị từ
     # chối (rc 5) không được đè lên bản đã xác minh trước đó.
     if getattr(a, "out", None) and not kq["lech"]:

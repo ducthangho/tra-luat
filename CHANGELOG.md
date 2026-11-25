@@ -1,3 +1,12 @@
+# ★ (chưa phát hành) — packet #1525 LLM-KHOAN-DOCX r1: ranh giới khoản từ cấu trúc danh sách .docx
+
+Đặc tả `ops/specs/llm-khoan-docx-r1.md`, lease `ops/leases/llm-khoan-docx-r1-g1-claude.yaml`. Không bump VERSION.
+- `tl llm-khai-niem --tep <tệp.docx> --dieu N`: ranh giới khoản đọc từ danh sách đánh số TỰ ĐỘNG (`w:numPr`) — khoản có
+  điểm đọc được mà không phải đoán; chữ gạch ngang của dự thảo bị lọc như `tl extract`; cấu trúc mơ hồ ⇒ rc 2; Điều không
+  có đánh số tự động ⇒ đường văn bản thô.
+- Đường văn bản thô chỉ nhận khoản đúng một dòng: dòng điểm hay tiếp dòng "là" ⇒ chặn ở mọi nguồn (đóng K1 của #1514).
+- `pham_vi_kiem` nói rõ nguồn ranh giới; `can_nguoi_duyet: true` giữ nguyên.
+
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 
 Đặc tả `ops/specs/llm-ranh-gioi-khoan-r1.md`, lease `ops/leases/llm-ranh-gioi-khoan-r1-g1-claude.yaml`. Không bump VERSION.

@@ -32227,6 +32227,63 @@ def run() -> int:
                 and _j["can_nguoi_duyet"] is True and "KHONG chung minh ranh gioi" in _j["pham_vi_kiem"])
     _t110("r380_llm_khai_niem_tu_tep_qua_sub", _c380_llm_khai_niem_tu_tep_qua_sub)
 
+    def _c1525_llm_khai_niem_tep_docx_cau_truc():
+        # #1525: `--tep <.docx> --dieu N` ⇒ ranh giới khoản từ danh sách đánh số TỰ ĐỘNG; khoản có điểm đạt, model tách
+        # điểm thành khái niệm riêng ⇒ rc 5; thiếu --dieu ⇒ rc 2; pham_vi_kiem nói rõ nguồn ranh giới.
+        _W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+
+        def _p(t, num=None, il=0):
+            pr = f'<w:pPr><w:numPr><w:ilvl w:val="{il}"/><w:numId w:val="{num}"/></w:numPr></w:pPr>' if num else ""
+            return f'<w:p>{pr}<w:r><w:t xml:space="preserve">{t}</w:t></w:r></w:p>'
+        _num = (f'<w:numbering {_W}><w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:numFmt w:val="decimal"/>'
+                '<w:lvlText w:val="%1."/></w:lvl><w:lvl w:ilvl="1"><w:numFmt w:val="lowerLetter"/><w:lvlText w:val="%2)"/>'
+                '</w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>')
+        _doc = (f'<w:document {_W}><w:body>' + _p("Điều 3. Giải thích từ ngữ")
+                + _p("Trong Luật này, các từ ngữ dưới đây được hiểu như sau:")
+                + _p("Chủ thể là một trong các đối tượng sau:", 1) + _p("tổ chức;", 1, 1) + _p("cá nhân.", 1, 1)
+                + _p("Hồ sơ là tài liệu.", 1) + '</w:body></w:document>')
+        _kn = [{"stt": 1, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."},
+               {"stt": 2, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu."}]
+        _lr = _tlm380._tl_core_import("llm_route")
+        _sav = _lr.duong_sub
+        _tra = {"kn": _kn}
+
+        def _sub_gia(he, nd, schema, model, env):
+            return {"duong": "sub", "nguon_key": None, "model": model, "data": {"khai_niem": [dict(x) for x in _tra["kn"]]},
+                    "usage": {"input": 1, "output": 1, "cache_doc": 0, "cache_ghi": 0}, "usd_uoc_tinh": 0.0}
+
+        import zipfile as _zf1525
+        with _tf378.TemporaryDirectory() as _d:
+            _tep = _P378(_d) / "luat.docx"
+            with _zf1525.ZipFile(_tep, "w") as _z:
+                _z.writestr("word/document.xml", _doc)
+                _z.writestr("word/numbering.xml", _num)
+            _sv = _env110({"TL_LLM_ORDER_FILE": str(_P378(_d) / "khong_co.json"), "TL_LLM_ORDER": None,
+                           "TL_ANTHROPIC_API_KEY": None, "ANTHROPIC_API_KEY": None})
+            try:
+                _lr.duong_sub = _sub_gia
+
+                def _chay(dieu):
+                    _ns = _ty378.SimpleNamespace(sohieu=None, dieu=dieu, tep=str(_tep), thu_tu=None,
+                                                 model="claude-haiku-5-5", out=None, nhat_ky=None, json=True)
+                    _o = _io378.StringIO()
+                    with _ctx378.redirect_stdout(_o), _ctx378.redirect_stderr(_io378.StringIO()):
+                        _rc = _tlm380.cmd_llm_khai_niem(_ns)
+                    return _rc, _o.getvalue()
+                _rc, _out = _chay("3")
+                _j = json.loads(_out)
+                _tra["kn"] = [{"stt": 1, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:"},
+                              {"stt": 2, "thuat_ngu": "tổ chức", "dinh_nghia": "pháp nhân."},
+                              {"stt": 3, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu."}]
+                _rc5, _ = _chay("3")
+                _rc2, _ = _chay(None)
+            finally:
+                _lr.duong_sub = _sav
+                _env110_restore(_sv)
+        return (_rc == 0 and _j["lech_nguyen_van"] == [] and _rc5 == 5 and _rc2 == 2
+                and _j["can_nguoi_duyet"] is True and "CAU TRUC" in _j["pham_vi_kiem"] and "docx" in _j["nguon"])
+    _t110("r1525_llm_khai_niem_tep_docx_cau_truc", _c1525_llm_khai_niem_tep_docx_cau_truc)
+
     # Cross-review PR #1503 lượt 1 (Codex): F4 --out không đè khi rc 5 · F5 chuyển tiếp --config ·
     # F11 số Điều từ tiêu đề tệp, cấm ghép số hiệu · F12 tệp không UTF-8 ⇒ rc 2 · F9 `llm-order ""` ⇒ rc 2.
     def _c380_llm_khai_niem_bien_dau_vao():

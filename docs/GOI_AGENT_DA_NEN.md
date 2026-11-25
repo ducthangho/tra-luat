@@ -382,11 +382,19 @@ biến môi trường của environment.
   từ ngữ` (tiêu đề tên khác, tiền tố viết HOA `ĐIỀU 3.`, hay tên xuống dòng riêng đều bị chặn); câu dẫn chỉ được bỏ khi
   nằm ở dòng ĐẦU và CẢ dòng đúng câu dẫn chuẩn `Trong|Tại <Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư
   liên tịch|Quyết định> này, <các|những> <từ ngữ|thuật ngữ> <dưới đây|sau đây> được <hiểu|giải thích> như sau:` (phân biệt hoa
-  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; nguồn mất số có BẤT KỲ dòng điểm nào (`a)`, `-`)
-  ⇒ chặn cả nguồn — mỗi khoản phải đúng một dòng; khoản có điểm cần nguồn có số khoản); phép so giữ nguyên xuống dòng của
+  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; đường văn bản THÔ có BẤT KỲ dòng điểm nào (`a)`, `-`)
+  hay dòng tiếp mở bằng "là" ⇒ chặn cả nguồn — mỗi khoản phải đúng một dòng (#1525); khoản có điểm đi đường `.docx`); phép so giữ nguyên xuống dòng của
   các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
+- **Đường `.docx` (#1525):** `tl llm-khai-niem --tep <tệp.docx> --dieu N` đọc ranh giới khoản từ danh sách đánh số TỰ
+  ĐỘNG của Word/Google Doc (`w:numPr`): đoạn cấp khoản (định dạng số `1.`) mở khoản, đoạn cấp con cùng danh sách và
+  điểm gõ tay (`a)`, `-`) nối vào khoản đang mở; chữ gạch ngang/đã xoá của dự thảo bị lọc như `tl extract`. Chặn
+  (rc 2): đoạn không số giữa các khoản, hai danh sách ở cấp khoản, số khoản không liên tục từ 1 (danh sách chạy tiếp
+  từ Điều trước), số gõ tay lẫn số tự động, đánh số qua style, `lvlOverride` ngoài `startOverride`, định dạng số ngoài
+  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn. Điều không có đánh số tự động ⇒ lùi về
+  đường thô. Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft Word. Đường `<số hiệu>` (qua `tl extract`)
+  vẫn là văn bản thô.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

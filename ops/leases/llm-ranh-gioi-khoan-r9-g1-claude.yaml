@@ -94,3 +94,5 @@ max_lease_hours: 8
 review_calls_limit: 10
 review_calls_used_truoc: 9
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r1-g1-claude
+da_bi_thay_the_ly_do: 'Packet #1514 dung o r9; viec tiep (dong K1) chuyen sang packet #1525 llm-khoan-docx tren cung nhanh.'

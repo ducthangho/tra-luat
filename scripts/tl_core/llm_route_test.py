@@ -14,6 +14,7 @@ from __future__ import annotations
 import contextlib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -481,9 +482,23 @@ def ca_lay_dieu_qua_extract(m):
 
 VAN_BAN_SO = ("Điều 2. Giải thích từ ngữ\nTrong Luật này, các từ ngữ dưới đây được hiểu như sau:\n"
               "1. Hồ sơ là tài liệu do cơ quan có thẩm quyền lập.\n"
-              "2. Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")
+              "2. Chủ thể là tổ chức hoặc cá nhân.")
+# #1525: đường THÔ chỉ nhận khoản một dòng — khoản có điểm được đo ở đường cấu trúc (`ca_cau_truc_*`).
 KN_SO = [{"stt": 1, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu do cơ quan có thẩm quyền lập."},
-         {"stt": 2, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."}]
+         {"stt": 2, "thuat_ngu": "Chủ thể", "dinh_nghia": "tổ chức hoặc cá nhân."}]
+
+
+def kh(vb):
+    """#1525: khoản theo CẤU TRÚC (như `docx_khoan` trả) dựng từ văn bản có số — dòng mang số mở khoản, dòng khác nối vào.
+    Dùng để đo logic so nguyên văn trên khoản có điểm, vốn nay chỉ đi đường cấu trúc."""
+    out = []
+    for ln in [x.strip() for x in vb.splitlines() if x.strip()][1:]:
+        mm = re.match(r"^(?:(\d+)\s*[.)]|\((\d+)\))\s*", ln)
+        if mm:
+            out.append([int(mm.group(1) or mm.group(2)), ln[mm.end():]])
+        elif out:
+            out[-1][1] += "\n" + ln
+    return [(a, b) for a, b in out]
 
 
 def ca_dinh_nghia_bi_cat(m):
@@ -507,7 +522,7 @@ def ca_trao_so(m):
 
 def ca_khoan_co_so_va_diem_dat(m):
     bang(m.tach_khoan(VAN_BAN_SO) == [(1, "Hồ sơ là tài liệu do cơ quan có thẩm quyền lập."),
-                                       (2, "Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")],
+                                       (2, "Chủ thể là tổ chức hoặc cá nhân.")],
          f"tach sai: {m.tach_khoan(VAN_BAN_SO)}")
     bang(m.lech_nguyen_van(KN_SO, VAN_BAN_SO) == [], "ket qua dung (co diem a, b) bi chan oan")
     bang(m.lech_nguyen_van(m.chuan_hoa_khai_niem(json.loads(json.dumps(DUNG["khai_niem"]))), VAN_BAN) == [],
@@ -636,7 +651,8 @@ def ca_khoan_mat_so_co_diem_dat(m):
     # r9 (lượt 9 J1): nguồn mất số có dòng điểm ⇒ chặn (không phân biệt được khoản có điểm với lời dẫn nhóm); cùng nội dung CÓ số ⇒ đạt.
     bang(m.tach_khoan(vb) is None, f"r9: nguon mat so co diem phai bi chan: {m.tach_khoan(vb)}")
     vb_so = vb.replace("Chủ thể là", "1. Chủ thể là").replace("Hồ sơ l", "2. Hồ sơ l")
-    bang(m.lech_nguyen_van(kn, vb_so) == [], f"khoan CO so co diem a, b bi chan oan: {m.tach_khoan(vb_so)}")
+    bang(m.tach_khoan(vb_so) is None, "#1525: khoan co diem o duong THO phai bi chan")
+    bang(m.lech_nguyen_van(kn, vb_so, kh(vb_so)) == [], "khoan co diem a, b theo CAU TRUC bi chan oan")
 
 
 def ca_bom_tieu_de(m):
@@ -738,7 +754,7 @@ def ca_tron_co_so_va_mat_so(m):
 def ca_khoan_bao_gom_bi_chan(m):
     vb = "Điều 3.\n1. Thiết bị bao gồm:\na) máy;\nb) dụng cụ."
     kn = [{"stt": 1, "thuat_ngu": "Thiết bị", "dinh_nghia": "bao gồm:\na) máy;\nb) dụng cụ."}]
-    bang(m.lech_nguyen_van(kn, vb) == [1], "khoan dung 'bao gom' khong xac minh duoc phai chan (khong nhan sai)")
+    bang(m.lech_nguyen_van(kn, vb, kh(vb)) == [1], "khoan dung 'bao gom' khong xac minh duoc phai chan (khong nhan sai)")
 
 
 def ca_auth_sai_kieu(m):
@@ -777,17 +793,21 @@ def ca_ranh_gioi_luot4(m):
     for vb, k in sai:
         # [1] (lệch khoản) hay [0] (nguồn mơ hồ — lượt 8 U1/U3) đều là CHẶN; chỉ [] là nhận nhầm.
         bang(m.lech_nguyen_van(k, vb) in ([1], [0]), f"ranh gioi sai phai lech: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
+        # #1525: cùng mẫu theo CẤU TRÚC (khoản có điểm) — logic `_tu_noi` phải tự chặn, không nhờ đường thô.
+        if kh(vb):
+            bang(m.lech_nguyen_van(k, vb, kh(vb)) != [], f"ranh gioi sai (cau truc) phai lech: {vb!r}")
     dung = (
         ('Điều 3.\n1. "Tổ chức là gì" là tên gọi của dự án.', kn(('"Tổ chức là gì"', "tên gọi của dự án."))),
         ("Điều 3.\n1. \u201cTổ chức là gì\u201d là tên gọi.", kn(("\u201cTổ chức là gì\u201d", "tên gọi."))),
         # Xuống dòng TRƯỚC từ nối: dòng mở bằng "là" là tiếp dòng, không phải khoản mất số.
-        ("Điều 3.\n1. Tài liệu số\nlà tài liệu ở dạng số.\n2. Hồ sơ là tập tài liệu.",
-         kn(("Tài liệu số", "tài liệu ở dạng số."), ("Hồ sơ", "tập tài liệu."))),
         # Lượt 7 T1: ngoặc kép thẳng NẰM TRONG trích dẫn cong là nội dung — không lật trạng thái trích dẫn.
         ('Điều 3.\n1. \u201cKý hiệu " là dấu\u201d là ký tự trích dẫn.', kn(('\u201cKý hiệu " là dấu\u201d', "ký tự trích dẫn."))),
     )
     for vb, k in dung:
         bang(m.lech_nguyen_van(k, vb) == [], f"ket qua dung bi chan oan: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
+    # #1525: tiếp dòng mở bằng "là" (lượt 4 Q3) nay bị chặn ở đường thô — có thể là khoản mất số (giới hạn đã khai).
+    bang(m.tach_khoan("Điều 3.\n1. Tài liệu số\nlà tài liệu ở dạng số.\n2. Hồ sơ là tập tài liệu.") is None,
+         "#1525: tiep dong 'la' o duong tho phai bi chan")
     # Lượt 7 T1 (giới hạn đã khai): tiếp dòng KHÔNG dựa vào trạng thái ngoặc/trích dẫn ⇒ ngoặc trải hai dòng bị chặn,
     # và một dòng mất số sau `“"”` không bao giờ bị gộp.
     hai_dong = "Điều 3.\n1. Hồ sơ (gồm cả bản\nđiện tử là bản số) là tài liệu.\n2. Dữ liệu là thông tin."
@@ -971,7 +991,9 @@ def ca_nguon_mo_ho_luot8(m):
         bang(m.tach_khoan(vb) is None and m.lech_nguyen_van(k, vb) == [0], f"nguon mo ho phai bi tu choi: {vb!r}")
     dung = ("Điều 3.\n(1) Hồ sơ (bản chính) là tài liệu;\na) bản giấy;\nb) bản số.\n2) Dữ liệu là thông tin.",
             kn(("Hồ sơ (bản chính)", "tài liệu;\na) bản giấy;\nb) bản số."), ("Dữ liệu", "thông tin.")))
-    bang(m.lech_nguyen_van(dung[1], dung[0]) == [], f"dau so/diem dau dong bi chan oan: {m.tach_khoan(dung[0])}")
+    bang(m.lech_nguyen_van(dung[1], dung[0], kh(dung[0])) == [], f"dau so/diem dau dong bi chan oan: {kh(dung[0])}")
+    tho = "Điều 3.\n(1) Hồ sơ (bản chính) là tài liệu.\n2) Dữ liệu là thông tin."
+    bang(m.tach_khoan(tho) is not None, f"dau so '2)' dau dong (duong tho) bi chan oan: {m.tach_khoan(tho)}")
 
 
 def ca_wp1514(m):
@@ -995,8 +1017,8 @@ def ca_wp1514(m):
     # Đối chứng: "… sau:" + điểm a), b) kết thúc "." vẫn đạt; dấu đóng sau dấu chấm (`.”`) vẫn kết câu.
     diem = f"Điều 3.\n{CD}\n1. Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.\n2. Thông báo là văn bản ghi \u201cĐã nhận.\u201d"
     bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."),
-                              ("Thông báo", "văn bản ghi \u201cĐã nhận.\u201d")), diem) == [],
-         f"doi chung diem + dau dong sau dau cham bi chan oan: {m.tach_khoan(diem)}")
+                              ("Thông báo", "văn bản ghi \u201cĐã nhận.\u201d")), diem, kh(diem)) == [],
+         f"doi chung diem + dau dong sau dau cham bi chan oan: {kh(diem)}")
     # X3: dòng đầu "X gồm:" KHÔNG phải câu dẫn ⇒ không bỏ ⇒ kết quả bỏ khoản đầu bị chặn.
     gom = "Điều 3.\nThiết bị gồm:\nDữ liệu là thông tin."
     bang(m.lech_nguyen_van(kn(("Dữ liệu", "thông tin.")), gom) != [], "X3: dong 'X gom:' bi bo nhu cau dan")
@@ -1005,7 +1027,7 @@ def ca_wp1514(m):
              f"X3 doi chung: cau dan chuan khong duoc bo: {cd!r}")
     # X4: định nghĩa gộp các dòng điểm thành một dòng ⇒ lệch; giữ xuống dòng ⇒ đạt (đối chứng ở `diem` trên).
     bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau: a) tổ chức; b) cá nhân."),
-                              ("Thông báo", "văn bản ghi \u201cĐã nhận.\u201d")), diem) == [1],
+                              ("Thông báo", "văn bản ghi \u201cĐã nhận.\u201d")), diem, kh(diem)) == [1],
          "X4: gop dong diem thanh mot dong phai lech")
 
 
@@ -1058,8 +1080,11 @@ def ca_wp1514_luot3(m):
              f"C1 doi chung: tieu de hop le bi chan oan: {td!r}")
     # C2: số điều ở CUỐI một dòng điểm (theo sau là xuống dòng) không phải đánh số nội dòng.
     c2 = f"Điều 3.\n{CD}\n1. Chủ thể là một trong các đối tượng sau:\na) tổ chức theo Điều 5.\nb) cá nhân theo Điều 6."
-    bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức theo Điều 5.\nb) cá nhân theo Điều 6.")), c2)
-         == [], f"C2: so dieu cuoi dong diem bi chan oan: {m.tach_khoan(c2)}")
+    bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức theo Điều 5.\nb) cá nhân theo Điều 6.")), c2,
+                           kh(c2)) == [], f"C2: so dieu cuoi dong diem bi chan oan: {kh(c2)}")
+    c2_tho = f"Điều 3.\n{CD}\n1. Chủ thể là tổ chức theo Điều 5.\n2. Hồ sơ là tài liệu theo Điều 6."
+    bang(m.lech_nguyen_van(kn(("Chủ thể", "tổ chức theo Điều 5."), ("Hồ sơ", "tài liệu theo Điều 6.")), c2_tho) == [],
+         f"C2: so dieu cuoi khoan (duong tho) bi chan oan: {m.tach_khoan(c2_tho)}")
 
 
 def ca_wp1514_luot4(m):
@@ -1138,8 +1163,8 @@ def ca_wp1514_luot7(m):
         bang(m.tach_khoan(h1) is None, f"H1: dong dau {ket!r} co diem noi vao phai mo ho: {m.tach_khoan(h1)}")
     # Đối chứng: khoản thật có điểm ở nguồn CÓ số ⇒ vẫn đạt (r9: nguồn mất số có điểm bị chặn cả khi có câu dẫn chuẩn).
     vb = f"Điều 3.\n{CD}\n1. Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."
-    bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")), vb) == [],
-         "G1 doi chung: khoan that co diem sau cau dan chuan bi chan oan")
+    bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")), vb, kh(vb)) == [],
+         "G1 doi chung: khoan that co diem (cau truc) bi chan oan")
 
 
 def ca_wp1514_luot9(m):
@@ -1149,9 +1174,126 @@ def ca_wp1514_luot9(m):
                f"Điều 3.\n{CD}\nTổ chức là đơn vị.\nNhóm dữ liệu là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin.",
                "Điều 3.\nTổ chức là đơn vị.\nNhóm dữ liệu là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin."):
         bang(m.tach_khoan(vb) is None, f"J1: nguon mat so co diem phai bi chan: {m.tach_khoan(vb)}")
+    # Mọi dòng kết bằng "." (chốt dấu kết câu không che): điểm không được thành khoản riêng hay nối vào khoản trước.
+    for vb in (f"Điều 3.\n{CD}\nNhóm dữ liệu là các khái niệm sau.\na) Hồ sơ là tài liệu.\nb) Dữ liệu là thông tin.",
+               f"Điều 3.\n{CD}\n1. Nhóm dữ liệu là các khái niệm sau.\na) Hồ sơ là tài liệu.\nb) Dữ liệu là thông tin."):
+        bang(m.tach_khoan(vb) is None, f"#1525: duong tho co dong diem phai bi chan: {m.tach_khoan(vb)}")
     # Đối chứng: nguồn mất số mỗi khoản một dòng vẫn đạt.
     bang(m.tach_khoan(f"Điều 3.\n{CD}\nTổ chức là đơn vị.\nHồ sơ là tài liệu.") == [(None, "Tổ chức là đơn vị."), (None, "Hồ sơ là tài liệu.")],
          "J1 doi chung: nguon mat so mot dong mot khoan bi chan oan")
+
+
+# ------------------------------------------------------------------ #1525: đường CẤU TRÚC .docx
+
+_WNS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+_NUMBERING_CHUAN = (
+    f'<w:numbering {_WNS}>'
+    '<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+    '<w:lvlText w:val="%1."/></w:lvl><w:lvl w:ilvl="1"><w:start w:val="1"/><w:numFmt w:val="lowerLetter"/>'
+    '<w:lvlText w:val="%2)"/></w:lvl></w:abstractNum>'
+    '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>'
+    '<w:num w:numId="2"><w:abstractNumId w:val="0"/></w:num>'
+    '</w:numbering>')
+
+
+def p_docx(chu, num=None, ilvl=0, xoa=None):
+    """Một `w:p`: `num` = numId (đánh số tự động), `xoa` = mẩu chữ trong `w:del` (chữ ĐÃ BỎ của dự thảo)."""
+    ppr = (f'<w:pPr><w:numPr><w:ilvl w:val="{ilvl}"/><w:numId w:val="{num}"/></w:numPr></w:pPr>' if num else "")
+    # Google Doc dự thảo đánh dấu chữ bỏ bằng GẠCH NGANG (`w:strike`) — `strip_markup` loại nó như `tl extract`.
+    dl = (f'<w:r><w:rPr><w:strike/></w:rPr><w:t xml:space="preserve">{xoa}</w:t></w:r>' if xoa else "")
+    return f'<w:p>{ppr}<w:r><w:t xml:space="preserve">{chu}</w:t></w:r>{dl}</w:p>'
+
+
+def lam_docx(*doan, numbering=_NUMBERING_CHUAN, styles=None):
+    import io as _io
+    import zipfile as _zip
+    buf = _io.BytesIO()
+    with _zip.ZipFile(buf, "w") as z:
+        z.writestr("word/document.xml", f'<w:document {_WNS}><w:body>{"".join(doan)}</w:body></w:document>')
+        if numbering is not None:
+            z.writestr("word/numbering.xml", numbering)
+        if styles is not None:
+            z.writestr("word/styles.xml", styles)
+    return buf.getvalue()
+
+
+CD_CHUAN = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+DOCX_DIEU3 = lam_docx(
+    p_docx("Điều 2. Phạm vi điều chỉnh"), p_docx("Luật này quy định về dữ liệu."),
+    p_docx("Điều 3. Giải thích từ ngữ"), p_docx(CD_CHUAN),
+    p_docx("Chủ thể là một trong các đối tượng sau:", 1), p_docx("tổ chức;", 1, 1), p_docx("cá nhân.", 1, 1),
+    p_docx("Hồ sơ là tài liệu gồm:", 1), p_docx("bản chính.", 1, 1),
+    p_docx("Điều 4. Nguyên tắc"), p_docx("Bảo đảm an toàn.", 2))
+
+
+def ca_cau_truc_docx_dat(m):
+    """#1525: khoản + điểm đánh số TỰ ĐỘNG ⇒ ranh giới từ cấu trúc; kết quả đúng đạt, kết quả gộp/tách sai lệch."""
+    def doc(docx, dieu=3):
+        try:
+            return m.doc_dieu_cau_truc(docx, dieu)
+        except (ValueError, m.KhongCauTruc) as e:
+            raise TinHieuChotCa(f"docx hop le bi chan oan: {e}") from None
+    vb, khoan = doc(DOCX_DIEU3)
+    bang(khoan == [(1, "Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."), (2, "Hồ sơ là tài liệu gồm:\na) bản chính.")],
+         f"khoan cau truc sai: {khoan}")
+    bang(vb.splitlines()[:3] == ["Điều 3. Giải thích từ ngữ", CD_CHUAN, "1. Chủ thể là một trong các đối tượng sau:"],
+         f"van ban dua model sai: {vb!r}")
+    dung = [{"stt": 1, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."},
+            {"stt": 2, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu gồm:\na) bản chính."}]
+    bang(m.lech_nguyen_van(dung, vb, khoan) == [], "ket qua dung (cau truc) bi chan oan")
+    # Model tách điểm thành khái niệm riêng (cách đọc "lời dẫn nhóm") ⇒ cấu trúc nói KHÁC ⇒ lệch.
+    tach = [{"stt": 1, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:"},
+            {"stt": 2, "thuat_ngu": "tổ chức;", "dinh_nghia": ""}, {"stt": 3, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu."}]
+    bang(m.lech_nguyen_van(tach, vb, khoan) != [], "tach diem thanh khai niem rieng phai lech")
+    # Chữ ĐÃ BỎ (w:del) không vào nguyên văn.
+    vb2, kh2 = doc(lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1, xoa=" CŨ")), 3)
+    bang(kh2 == [(1, "Hồ sơ là tài liệu.")] and "CŨ" not in vb2, f"chu da bo lot vao: {kh2}")
+
+
+def ca_cau_truc_docx_chan(m):
+    """#1525: cấu trúc mơ hồ ⇒ ValueError (DỪNG); không có đánh số tự động ⇒ KhongCauTruc (mang chữ cho đường thô)."""
+    def chan(docx, ly_do, dieu=3):
+        try:
+            m.doc_dieu_cau_truc(docx, dieu)
+        except m.KhongCauTruc:
+            raise TinHieuChotCa(f"{ly_do}: ra KhongCauTruc thay vi ValueError") from None
+        except ValueError:
+            return
+        raise TinHieuChotCa(f"{ly_do}: phai bi chan")
+    H, A, B = p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1), p_docx("Dữ liệu là thông tin.", 1)
+    chan(lam_docx(H, A, p_docx("Tổ chức là đơn vị."), B), "doan khong so giua cac khoan")
+    chan(lam_docx(H, A, H, B), "hai tieu de Dieu 3")
+    chan(lam_docx(H, p_docx("Hồ sơ gồm các tài liệu sau:"), A, B), "doan truoc khoan dau khong phai cau dan chuan")
+    chan(lam_docx(H, p_docx(CD_CHUAN), p_docx(CD_CHUAN), A, B), "hai cau dan")
+    chan(lam_docx(H, p_docx("1. Hồ sơ là tài liệu.", 1), B), "so go tay trong doan danh so")
+    chan(lam_docx(H, A, p_docx("Dữ liệu là thông tin.", 2)), "hai danh sach o cap khoan")
+    chan(lam_docx(H, p_docx("tổ chức;", 1, 1), A), "doan danh so dau tien o cap con")
+    chan(lam_docx(H, A, p_docx("tổ chức;", 2, 1)), "diem thuoc danh sach khac")
+    chan(lam_docx(p_docx("Điều 2."), A, H, B), "so khoan khong bat dau tu 1 (danh sach chay tiep)")
+    chan(lam_docx(H, A, f"<w:tbl {_WNS}></w:tbl>", B), "Dieu chua bang")
+    tron = _NUMBERING_CHUAN.replace('<w:abstractNumId w:val="0"/></w:num><w:num w:numId="2">',
+                                    '<w:abstractNumId w:val="0"/><w:lvlOverride w:ilvl="0"><w:lvl w:ilvl="0"/></w:lvlOverride>'
+                                    '</w:num><w:num w:numId="2">')
+    chan(lam_docx(H, A, B, numbering=tron), "lvlOverride ngoai startOverride")
+    chan(lam_docx(H, A, B, numbering=_NUMBERING_CHUAN.replace('"decimal"/><w:lvlText w:val="%1."', '"lowerLetter"/><w:lvlText w:val="%1."')),
+         "numFmt cap khoan khong ho tro")
+    kieu = (f'<w:styles {_WNS}><w:style w:styleId="DS"><w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:style>'
+            '</w:styles>')
+    chan(lam_docx(H, A, '<w:p><w:pPr><w:pStyle w:val="DS"/></w:pPr><w:r><w:t>a) bản sao.</w:t></w:r></w:p>',
+                  styles=kieu), "doan danh so qua style (chu trong nhu diem go tay)")
+    # Không đánh số tự động ⇒ KhongCauTruc, mang chữ Điều mỗi đoạn một dòng.
+    try:
+        m.doc_dieu_cau_truc(lam_docx(H, p_docx("Hồ sơ là tài liệu."), p_docx("Điều 4.")), 3)
+    except m.KhongCauTruc as e:
+        bang(e.van_ban == "Điều 3.\nHồ sơ là tài liệu.", f"van ban lui ve duong tho sai: {e.van_ban!r}")
+    else:
+        raise TinHieuChotCa("Dieu khong danh so phai ra KhongCauTruc")
+    # Đối chứng: danh sách bắt đầu lại bằng startOverride=1 thì đạt.
+    ov = _NUMBERING_CHUAN.replace('<w:num w:numId="2"><w:abstractNumId w:val="0"/></w:num>',
+                                  '<w:num w:numId="2"><w:abstractNumId w:val="0"/><w:lvlOverride w:ilvl="0">'
+                                  '<w:startOverride w:val="1"/></w:lvlOverride></w:num>')
+    _, k = m.doc_dieu_cau_truc(lam_docx(p_docx("Điều 2."), A, H, p_docx("Dữ liệu là thông tin.", 2), numbering=ov), 3)
+    bang(k == [(1, "Dữ liệu là thông tin.")], f"startOverride doi chung bi chan oan: {k}")
 
 
 def ca_usage_thieu_truong(m):
@@ -1170,7 +1312,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9, ca_cau_truc_docx_dat, ca_cau_truc_docx_chan]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1182,7 +1324,6 @@ DOT_BIEN = [
     ('wp1514_l2_so_noi_dong_nhan_thap_phan', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\n]|$)")'), 'ca_wp1514_luot2'),
     # r3 (lượt 3 C1/C2).
     ("wp1514_l3_tieu_de_chi_do_la", ('        if not _RE_TIEU_DE_TRON.match(" ".join(dong[0].split())):\n', '        if _RE_LA.search(dong[0]):\n'), "ca_wp1514_luot3"),
-    ('wp1514_l3_so_noi_dong_qua_dong', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?!\\d|$)")'), 'ca_wp1514_luot3'),
     # r4 (lượt 4 D1/D3).
     ('wp1514_l4_chi_cach_ascii', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?=[ \\t])")'), 'ca_wp1514_luot4'),
     # r5 (lượt 5 E1/E2).
@@ -1192,8 +1333,24 @@ DOT_BIEN = [
     # r6 (lượt 6 F1/F2).
     ('wp1514_l6_so_lieu_ke_dang_sau', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\\S\\n])\\(?\\d+[.)](?=[^\\S\\n]|[^\\W\\d_])")'), 'ca_wp1514_luot6'),
     ('wp1514_l6_cau_dan_mo_rong_chu_ngu', ('r"(?:Trong|Tại) (?:Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư liên tịch|Quyết định) này, "', 'r".*"'), 'ca_wp1514_luot6'),
+    # #1525: đường cấu trúc .docx — mỗi chốt một đột biến.
+    ('wp1525_khong_loc_markup', ('        xml, _ = dm.strip_markup(xml, "strip")', '        pass'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_nhan_nhieu_tieu_de', ('    if len(vi_tri) != 1:', '    if not vi_tri:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_style_ngam', ('    if any(d[6] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_gop_doan_khong_so', ('                raise ValueError(f"doan khong danh so giua cac khoan: {chu[:60]!r}")', '                khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + f"{nhan} {chu}"'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_bo_lien_tuc', ('    if [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_chu_cap_khoan', ('    if fmt0 != "decimal":', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_bo_qua_override_la', ('                raise ValueError(f"numId {num.get(_W + \'numId\')}: lvlOverride ngoai startOverride — khong ho tro")', '                continue'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_cau_dan_nhieu', ('    if len(cd) > 1 or (cd and not _RE_CAU_DAN_TRON', '    if False or (cd and not _RE_CAU_DAN_TRON'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_cau_dan_tu_do', ('(cd and not _RE_CAU_DAN_TRON.fullmatch(" ".join(cd[0].split())))', 'False'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_lui_khong_mang_chu', ('"\\n".join([tieu_de, *(d[0] for d in vung)]))', '"")'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_khong_dat_lai_cap_con', ('            for k in [k for k in dem if k > il]:\n                del dem[k]\n', ''), 'ca_cau_truc_docx_dat'),
+    ('wp1525_khong_dung_o_dieu_sau', ('        if not d[5] and (_RE_DIEU_BAT_KY.match(d[0]) or _RE_RANH_GIOI_LON.match(d[0])):\n            break\n', ''), 'ca_cau_truc_docx_dat'),
+    # #1525: đường thô không nhận dòng điểm.
+    ('wp1525_tho_nhan_diem', ('        elif _RE_DIEM.match(ln):\n            # #1525', '        elif False:\n            # #1525'), 'ca_wp1514_luot9'),
     # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.
-    ('wp1514_l9_cho_diem_nguon_mat_so', ('            if not co_so:\n                # r9', '            if False:\n                # r9'), 'ca_wp1514_luot9'),
     ('wp1514_l4_cau_dan_moi_vi_tri', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):'), 'ca_wp1514_luot4'),
     ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
@@ -1218,9 +1375,6 @@ DOT_BIEN = [
     ("cho_trich_dan_qua_dong", ("    return sau != 0 or trich is not None", "    return sau != 0"), "ca_nguon_mo_ho_luot8"),
     ("dong_ong_tren_windows", ("        if not _LA_WINDOWS:\n", "        if True:\n"), "ca_sau_khoi_chay_khong_chuyen"),
     # Lượt 7 T1/T2.
-    ("tiep_dong_ca_nguon_mat_so", ("        elif co_so and khoan and _RE_MO_BANG_LA.match(ln)", "        elif khoan and _RE_MO_BANG_LA.match(ln)"),
-     "ca_ranh_gioi_luot4"),
-    ("la_dau_dong_luon_noi", ("_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None:", "_RE_MO_BANG_LA.match(ln):"), "ca_ranh_gioi_luot4"),
     ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi",
                             "        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi"), "ca_ranh_gioi_luot4"),
     ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"\n\n\ndef _tu_noi', "        pass\n\n\ndef _tu_noi"),
@@ -1238,8 +1392,6 @@ DOT_BIEN = [
      "ca_tron_co_so_va_mat_so"),
     ("bo_so_lien_tuc", ("    if co_so and [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):\n        return None\n", ""),
      "ca_tron_co_so_va_mat_so"),
-    ("diem_thanh_khoan", ('        elif _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            if not co_so:\n                # r9 (lượt 9 J1; thay r7 G1 theo dấu `:` và r8 H1 theo vị trí): ở nguồn mất số, dòng mở một khối có điểm có thể là\n                # khoản thật (`X là … sau:` + điểm) hoặc lời dẫn nhóm mà các điểm là định nghĩa riêng — văn bản thô không phân biệt\n                # được. Nên nguồn mất số KHÔNG được có dòng điểm: mỗi khoản đúng một dòng, không có nhánh gom nào để đoán sai.\n                return None\n            khoan[-1][1] += "\\n" + ln\n', ""),
-     "ca_khoan_mat_so_co_diem_dat"),
     ("nguon_mat_so_khong_tach", ("        elif not co_so:\n            khoan.append([None, ln])\n", ""), "ca_khoan_co_so_va_diem_dat"),
     # Lượt 6 S2.
     ("tieu_de_long", ('_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\s*[.:]")',
@@ -1285,7 +1437,7 @@ DOT_BIEN = [
     ("bo_kiem_model_sub", ("    if da_chay != {model}:\n", "    if False:\n"), "ca_sub_sai_model_thi_dung"),
     ("refusal_chuyen_duong", ('raise Dung(f"model tu choi', 'raise ChuyenDuong(f"model tu choi'), "ca_tu_choi_thi_dung"),
     ("bo_kiem_schema", ('    kiem_schema(kq["data"], SCHEMA_KHAI_NIEM)\n', ""), "ca_schema_sai_thi_dung"),
-    ("bo_kiem_nguyen_van", ('kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban)', 'kq["lech"] = []'),
+    ("bo_kiem_nguyen_van", ('kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban, khoan)', 'kq["lech"] = []'),
      "ca_lech_nguyen_van"),
     ("bo_chuan_hoa_la", ('        if k["dinh_nghia"].startswith("là "):', "        if False:"), "ca_chuan_hoa_chu_la"),
     ("so_chuoi_con", ("and tn == tn_nguon and dn == dn_nguon", "and tn == tn_nguon and dn in dn_nguon"),

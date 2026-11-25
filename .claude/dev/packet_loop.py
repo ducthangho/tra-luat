@@ -3966,16 +3966,20 @@ def _d2b_kiem(root: Path, bb: dict) -> list:
             _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {D2B_MODULE} trên origin/master")
         ma.parent.mkdir(), ma.write_bytes(b)
         mod = _nap(Path(tam), "gate_output_doi_chieu")
+        # Bản bung phải ĐÚNG là cây con ấy của `oid`: cùng tên, cùng loại, cùng nội dung ở MỌI mục, kể cả thư mục (`-t`). Đối chiếu bằng cách LIỆT KÊ
+        # đĩa, hai chiều: tra theo tên thì đi qua đúng phép gộp tên của nền (hoa/thường, dấu chấm cuối, tên dành riêng) nên không thấy nó. Lệch khi
+        # `.gitattributes` của `oid` ẩn tệp hay đổi byte, khi nền không tạo được symlink (tarfile chép đích) hoặc bộ lọc `data` viết lại đích của nó.
+        muc = {os.fsdecode(x.partition(b"\t")[2]): ("d" if x[:6] == b"040000" else "l" if x[:6] == b"120000" else "f", x.split(b"\t")[0][-40:])
+               for x in filter(None, git("ls-tree", "-r", "-t", "-z", oid, "--", thu).split(b"\0"))}
+        if len({unicodedata.normalize("NFC", t).casefold() for t in muc}) != len(muc):  # nền không phân biệt hoa/thường sẽ gộp hai tên (tệp HAY thư mục) làm một
+            raise OSError("cây của oid có hai tên trùng nhau sau NFC + casefold")
         with tarfile.open(fileobj=io.BytesIO(git("archive", "--format=tar", oid, "--", thu))) as t:
             t.extractall(cay, filter="data")
-        # Bản bung phải ĐÚNG là cây của `oid`, từng mục: symlink vẫn là symlink (validator tự thấy và tự từ chối theo K2), tệp khớp băm blob.
-        # Lệch khi `.gitattributes` của `oid` ẩn tệp (export-ignore) hay đổi byte (eol, ident), khi nền không tạo được symlink (tarfile chép
-        # đích), hoặc khi hai tên chỉ khác hoa/thường hay dạng chuẩn hoá (nền không phân biệt sẽ gộp làm một).
-        muc = [(x.split(b" ")[0], x.split(b"\t")[0][-40:], os.fsdecode(x.partition(b"\t")[2])) for x in filter(None, git("ls-tree", "-r", "-z", oid, "--", thu).split(b"\0"))]
-        if len({unicodedata.normalize("NFC", t).casefold() for _, _, t in muc}) != len(muc) or not all(
-                (cay / t).is_symlink() if mode == b"120000" else (cay / t).is_file() and _d2b_blob((cay / t).read_bytes()) == sha
-                for mode, sha, t in muc):
-            raise OSError("bản bung git archive không khớp cây của oid")
+        dia = {(p := Path(g, n)).relative_to(cay).as_posix(): "l" if p.is_symlink() else "d" if p.is_dir() else "f" for g, ds, fs in os.walk(cay) for n in ds + fs}
+        if dia != {t: k for t, (k, _) in muc.items()}:
+            raise OSError("bản bung git archive không khớp danh mục cây của oid")
+        if any(k != "d" and _d2b_blob(os.fsencode(os.readlink(cay / t)) if k == "l" else (cay / t).read_bytes()) != sha for t, (k, sha) in muc.items()):
+            raise OSError("bản bung git archive không khớp nội dung của oid")
         if passed:
             tt, ly = mod.kiem_tep(cay / dd, cay / thu)
             if tt != "passed":

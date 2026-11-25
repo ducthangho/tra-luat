@@ -913,7 +913,6 @@ db("f04_t3", "f04:t3", "not c.can_tn", "True", "n2_can_tn_t2")                  
 db("f04_t7", "f04:t7", " and not c.can_tn", "", "n2_can_tn_t2", "n2_can_tn_t5")   # T7 (D2 cuoi) cua luot van chay sau khi can
 khong("f04_e", "f04:e", "n2_can_tn_t2", "n2_can_tn_t5")                         # cac luot con lai cua E van duoc danh gia
 
-db("rv4_bo", "rv4:bo", "if bo else", "if False else", "n2_can_tn_t2", "n2_can_tn_t5")   # luot sau khi can van doc REST
 
 # ---- Review ma luot 4, RV4-F01: van DUNG nhu tren, nhung bao cao (muc 6) GIU moi luot cua E; KET LUAN van tat-ca-hoac-khong (muc 3, muc 5) ----
 DAT, CAN = "dat", (KDD, "het_tai_nguyen_danh_gia")
@@ -939,8 +938,9 @@ ca_giu("chua_danh_gia", lambda g: len(bn_byte(g.luot[10])) - 1, {10: (*CAN, "dk-
 # luot giu KHONG duoc dung: F co luot 20 `dat` (gop F = dat) va luot 21 gay can; P `dat` voi `dong_den_truoc` = P - 7 ngay. Van S1, SHA null, `dong_den` dung yen
 ca_giu("khong_dung_luot_giu", tong_tru_1, {10: (DAT, DAT, "ddddddd"), 20: (DAT, DAT, "ddddddd"), 21: (*CAN, "ddddk--")}, [DAT, DAT],
        sua=lambda g: them(g, 21, F0, "dat"), dong_den=viet(P0 - TD(days=7)))
-db("rv4_giu", "rv4:giu", "bo = True", 'return s1("het_tai_nguyen_danh_gia")', "n2_can_tn_giu_luot")        # tra som: bo cac luot da giu (hanh vi H4)
-db("rv4_can", "rv4:can", "KHONG_DO_DUOC, ", "DAT, ", "n2_can_tn_chua_danh_gia")                              # luot chua danh gia bi ghi `dat`
+db("rv4_giu", "rv4:giu", "break", 'return s1("het_tai_nguyen_danh_gia")', "n2_can_tn_giu_luot")            # tra som: bo cac luot da giu (hanh vi H4)
+db("rv4_can", "rv4:can", "KHONG_DO_DUOC, ", "DAT, ", "n2_can_tn_chua_danh_gia")                              # luot GAY can bi ghi `dat`
+db("rv4_con", "rv4:con", "phan_quyet=KHONG_DO_DUOC", "phan_quyet=DAT", "n2_can_tn_chua_danh_gia")             # luot CHUA danh gia bi ghi `dat`
 khong("rv4_s1", "rv4:s1", "n2_can_tn_khong_dung_luot_giu")                                                   # luot `dat` da giu chon SHA va tien `dong_den`
 
 @ca
@@ -1740,7 +1740,7 @@ def n15_can_ngan_sach():
         ma, bc, nk = luot_wd(g)
         mong((S(bc), bc["sha_audit"], bc["dong_den"] == bc["dong_den_truoc"], dem(nk, "PATCH")), ((KDD, "het_ngan_sach_danh_gia"), None, True, 1), f"dao={dao}")
     mong(S(luot_wd(nen_can(cham=0))[1]), XANH, "doi chung ngan sach du")
-db("d13", "d13", '_phan_luot(c, r, V, kc[r["id"]], bo)', '(_phan_luot(c, r, V, kc[r["id"]], bo) if not any(luot[x]["phan_quyet"] == DAT and kc[x] == kc[r["id"]] for x in luot) else {"id": r["id"], "phan_quyet": "dang_chay", "ma": "bo_qua", "phep": {}, "head_sha": r["head_sha"], "khung": "", "moc_tuoi": None})', "n15_can_ngan_sach")
+db("d13", "d13", '_phan_luot(c, r, V, kc[r["id"]])', '(_phan_luot(c, r, V, kc[r["id"]]) if not any(luot[x]["phan_quyet"] == DAT and kc[x] == kc[r["id"]] for x in luot) else {"id": r["id"], "phan_quyet": "dang_chay", "ma": "bo_qua", "phep": {}, "head_sha": r["head_sha"], "khung": "", "moc_tuoi": None})', "n15_can_ngan_sach")
 khong("d14", "d14", "n15_can_ngan_sach")
 
 @ca

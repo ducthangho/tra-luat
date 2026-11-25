@@ -1,0 +1,26 @@
+SHA 437257a3cad68bdec7c646aa99ccd4f5fd4256da
+== phan_chung nguyen
+MOI_sha16 4fa8ef5331631f78 trong_NHE False
+phan_chung True ['PHẢN CHỨNG: 1677/1677 đỏ đúng']
+mo ['.claude/dev/ci_dang_ky_test.py', '.github/workflows/ci-dot-bien-du.yml', '.github/workflows/ci.yml', '.github/workflows/launcher-windows.yml', 'ops/bash_nen.py', 'ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json', 'ops/specs/wp1460-r1/hop_dong/fixture.json']
+NHAN_CHUNG_ci_yml True NGOAI_VUNG []
+== phan_chung bon
+MOI_sha16 4fa8ef5331631f78 trong_NHE False
+ke_hoach_va_oracle 29/29 []
+phan_chung True ['PHẢN CHỨNG: 1677/1677 đỏ đúng']
+mo ['.claude/dev/ci_dang_ky_test.py', '.github/workflows/ci-dot-bien-du.yml', '.github/workflows/ci.yml', '.github/workflows/launcher-windows.yml', 'ops/bash_nen.py', 'ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json', 'ops/specs/wp1460-r1/hop_dong/fixture.json']
+NHAN_CHUNG_ci_yml True NGOAI_VUNG []
+== phan_chung go
+MOI_sha16 4fa8ef5331631f78 trong_NHE False
+phan_chung True ['PHẢN CHỨNG: 1677/1677 đỏ đúng']
+mo ['.claude/dev/ci_dang_ky_test.py', '.github/workflows/ci-dot-bien-du.yml', '.github/workflows/ci.yml', '.github/workflows/launcher-windows.yml', 'ops/bash_nen.py', 'ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json', 'ops/specs/wp1460-r1/hop_dong/fixture.json']
+NHAN_CHUNG_ci_yml True NGOAI_VUNG []
+== bo_day_du
+rc 0 wall 727s cpu 4
+TIEN TRINH: 4
+CA: 77/77 dat
+DOT BIEN: 485/485 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+bo_day_du ['.claude/dev/ci_dang_ky_test.py', '.github/workflows/ops-do-workflow-definition.yml', 'ops/bash_nen.py', 'ops/ci_provenance.py', 'ops/ci_provenance_test.py']
+NGOAI_VUNG [] them_Z ['ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json', 'ops/specs/wp1460-r1/hop_dong/fixture.json']

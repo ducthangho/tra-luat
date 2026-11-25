@@ -1,0 +1,75 @@
+[
+  {
+    "label": "Exact L8 waiver bytes with missing target-root module",
+    "rc": 2,
+    "expected_rc": 2,
+    "required": [
+      "KHÔNG ĐO ĐƯỢC",
+      "L8 không nạp/chạy được gate_output_doi_chieu.py: FileNotFoundError:",
+      "TỔNG: KHÔNG ĐO ĐƯỢC"
+    ],
+    "forbidden": [
+      "L8 miễn trừ",
+      "TỔNG: ĐẠT"
+    ],
+    "passed": true,
+    "output": "KHÔNG ĐO ĐƯỢC ops/land/pr963-wp943-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/tmp/len_cay_n79cyv76/kho/ops/gate_output_doi_chieu.py'\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n"
+  },
+  {
+    "label": "Exact cutover waiver short-circuits L8 even if module missing",
+    "rc": 0,
+    "expected_rc": 0,
+    "required": [
+      "MIỄN TRỪ",
+      "TỔNG: ĐẠT"
+    ],
+    "forbidden": [
+      "L8",
+      "KHÔNG ĐO ĐƯỢC ops/"
+    ],
+    "passed": true,
+    "output": "MIỄN TRỪ ops/land/pr680-wp676-land-evidence.yaml (băm khớp ảnh chụp cutover)\nland_evidence_nguon: 0 ĐẠT · 1/1 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n"
+  },
+  {
+    "label": "Hash uses supplied bytes despite unchanged file bytes",
+    "passed": true,
+    "violations": [
+      "L1 $.authorization_ghi_chu: lời khai đo không có token nguồn phân giải được (token: readback-pr-963.json, readback-events-963.json, readback-comment-6435716217.json) — 'measured — readback-pr-963.json merged_by=ducthangho, merged_at 2026-10-27T06:11:11Z; read'",
+      "L1 $.land_operator: lời khai đo không có token nguồn phân giải được (token: readback-pr-963.json, readback-events-963.json) — 'measured — readback-pr-963.json merged_by=ducthangho; readback-events-963.json.'",
+      "L1 $.merge_noi_dung: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/merge-va-diff.txt, docs/adr/0056-lease-no-progress-six-hours.md, docs/PROTOCOL_DA_PHIEN.md) — 'measured — do-lai-nguon-20261027/merge-va-diff.txt: diff cha1 (a917673) .. merge bang BYTE'",
+      "L1 $.pre_merge_checks[0].kiem_gate: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/kiem-gate-pre-fb2bbcb.txt) — 'measured — do-lai-nguon-20261027/kiem-gate-pre-fb2bbcb.txt: suite 109643304558, 23 ten, rc'",
+      "L1 $.pre_merge_checks[2].ghi_chu: lời khai đo không có token nguồn phân giải được (token: verdicts/wp943-g1-claude-review-3-codex-verdict.md, verdicts/wp943-g1-claude-review-3-codex-run.json, ops/reviews/wp943-g1-review-3-codex/) — 'measured — verdicts/wp943-g1-claude-review-3-codex-verdict.md dong 1–2 \"verdict: approve\",'",
+      "L1 $.pre_merge_checks[3].ghi_chu: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/tom-tat-luot.txt, readback-comments-943.json) — 'measured — do-lai-nguon-20261027/tom-tat-luot.txt. Luot 3 sinh ra vi merge master de chua '",
+      "L1 $.post_merge_checks[0].kiem_gate: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/kiem-gate-post-7129f7d.txt) — 'measured — do-lai-nguon-20261027/kiem-gate-post-7129f7d.txt: suite 109658522090, 23 ten, r'",
+      "L1 $.bookkeeping[0].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-comments-943.json) — 'measured — readback-comments-943.json comment 6416560959'",
+      "L1 $.bookkeeping[1].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-comments-943.json) — 'measured — readback-comments-943.json comment 6430260805, 6432439309'",
+      "L1 $.bookkeeping[2].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-comments-943.json) — 'measured — readback-comments-943.json comment 6434092559'",
+      "L1 $.bookkeeping[3].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-comments-943.json) — 'measured — readback-comments-943.json comment 6430570920, 6433908651, 6435005418'",
+      "L1 $.bookkeeping[4].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-comment-6435716217.json) — 'measured — readback-comment-6435716217.json'",
+      "L1 $.spec.do_lai: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/spec-sha256.txt) — 'measured — do-lai-nguon-20261027/spec-sha256.txt (khop).'",
+      "L1 $.lease.ban_chep: lời khai đo không có token nguồn phân giải được (token: do-lai-nguon-20261027/lease-wp943-r1-g1-claude-ab75b66.yaml.txt, -sau-rut-han-529e2bb.yaml.txt) — 'measured — do-lai-nguon-20261027/lease-wp943-r1-g1-claude-ab75b66.yaml.txt va -sau-rut-han'",
+      "L1 $.lease.thu_hoi_cuoi: lời khai đo không có token nguồn phân giải được (token: readback-run-40463845556.json, ai-dang-giu-sau-rut-han/luc-do.txt) — 'measured — RÚT HẠN (khong bia mo), do executor ghi: commit 529e2bb tren ops/wp943-r1-g1-le'",
+      "L1 $.trang_thai_packet.merged_nguon: lời khai đo không có token nguồn phân giải được (token: readback-pr-963.json) — 'measured — readback-pr-963.json: merged true, merged_at 2026-10-27T06:11:11Z, merge_commit'",
+      "L1 $.assurance_81.ly_do: lời khai đo không có token nguồn phân giải được (token: verdicts/wp943-g1-claude-review-3-codex-run.json, launcher.py) — 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json: luot launcher.py run 58e19716'",
+      "L1 $.assurance_81.thuc_thi.model: lời khai đo không có token nguồn phân giải được (token: verdicts/wp943-g1-claude-review-3-codex-run.json) — 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json model_phuc_vu DO_DUOC, 35/35 r'",
+      "L1 $.assurance_81.thuc_thi.effort: lời khai đo không có token nguồn phân giải được (token: verdicts/wp943-g1-claude-review-3-codex-run.json) — 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json effort_phuc_vu [xhigh], effort'",
+      "L1 $.assurance_81.thuc_thi.sandbox_mode: lời khai đo không có token nguồn phân giải được (token: verdicts/wp943-g1-claude-review-3-codex-run.json, /) — 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json sandbox_trang_thai DO_DUOC; sa'",
+      "L1 $.moc_workflow_definition_20261027.workflow_definition: lời khai đo không có token nguồn phân giải được (token: .github/workflows/ci.yml, .github/workflows/ci.yml) — 'measured — WorkflowRun.file cua run 40459598250 (chu kho doc ngoai phien): path .github/wo'",
+      "L1 $.landed_20261027.quyet_dinh_chu_kho.do_duoc: lời khai đo không có token nguồn phân giải được (token: ops/land/pr963-wp943-provenance/do-1027-landed/readback-comment-970-6437175210.json, readback-commit-8aafb6e.json, readback-pr-970.json, readback-comments-970.json) — 'measured — ops/land/pr963-wp943-provenance/do-1027-landed/readback-comment-970-6437175210.'",
+      "L8 $: landed_khong_loi_khai_gate_output"
+    ],
+    "notes": [
+      "L3 không áp dụng: provenance không có readback PR mang merged_at",
+      "L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ"
+    ],
+    "disk_sha256": "81395ff671200dcdcff2e0aa570be534559ede6ce02555f3da517426df428212",
+    "input_sha256": "96635f34bc6f1c06b2820ea9871499f8b024c8077ea2c4944151ae2781c55d9b"
+  },
+  {
+    "label": "All waiver raw-byte hashes match and exact cutover sets disjoint",
+    "passed": true,
+    "l8_count": 56,
+    "cutover_count": 25,
+    "intersection": []
+  }
+]

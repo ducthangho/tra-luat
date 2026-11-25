@@ -1,0 +1,954 @@
+{
+  "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+  "reviewed_tree": "14f1571aada834fc22ea32c29076df8834c05bd6",
+  "base_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 5,
+  "dot": "B",
+  "revision": 12,
+  "generation": 1,
+  "review_class": "sensitive",
+  "review_status": "complete",
+  "verdict": "approve",
+  "findings": [],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "B01",
+        "B02"
+      ],
+      "manifestations": [
+        "B01 missing mandatory domain cases: fixed and reconfirmed",
+        "B02 inventory deletion/rename/duplication: fixed in round4",
+        "B02 category/structural omission sensitivity: technically persists, owner-waived on exact H"
+      ],
+      "highest_open_severity": null,
+      "highest_residual_technical_severity": "P3",
+      "status": "VA_MOT_PHAN",
+      "disposition": "closed_for_M1_by_owner_waiver; not all manifestations technically fixed",
+      "source_rounds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source_shas": [
+        "f4e93b366d7014e3efd464b2018e8ec7a4f8576c",
+        "58bfa5f0bd5bf69b2003ac2524ea455447711bab",
+        "8782e25719b2664ccc8968961ee4242febc5050d",
+        "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+      ],
+      "common_fix": "Successor debt: independently assert mandatory semantic coverage of imported generator; keep inventory guard. No code change in this round.",
+      "closing_check": "B01 independent domain/oracle confirmation passed. B02 closes approval condition only through exact-SHA owner waiver quoted by coordinator; K5 verifies remote line.",
+      "waiver": {
+        "status": "owner_waived",
+        "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+        "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+        "finding_id": "B02",
+        "source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7156364013",
+        "created_at_utc": "2026-11-25T07:53:18Z",
+        "quoted_line": "mien_p3: bca55c1cd09c57180d60b05d5ca1813828ae1d10 nghiem-thu-khong-co-lap-chot-dich",
+        "owner_instruction": "Cho miễn P3, ghi nợ và xử lý ở packet sau",
+        "debt_id": "WP1236-B02-bat-bien-bo-sinh-test-dot-A",
+        "supporting_source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7153679183",
+        "evidence_origin": "Coordinator quotation in run/a8703b65/prompt.snapshot; accepted as supplied input per assignment",
+        "author_verified_by_reviewer": false,
+        "github_readback_by_reviewer": "not_measured; no network/GitHub used",
+        "gate_followup": "K5 kiem-merge must independently read mien_p3 on GitHub; this local verdict does not certify comment author"
+      }
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "B01",
+        "B02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "status": "VA_MOT_PHAN",
+      "disposition": "B01 DA_VA_THAT; B02 owner_waived exact SHA; no open unwaived manifestation",
+      "evidence": [
+        "Same head/tree as round4, no code changes; byte hashes and Git snapshots equal.",
+        "B01 reconfirmed by810 B cells +8396 c36 elements,648 independent oracle cells,4 semantic probes and12+23 historical probes.",
+        "B02 technical gap remains unchanged: category/structural omissions can survive thresholds, as round4 measured; accepted owner waiver, not a code fix.",
+        {
+          "status": "owner_waived",
+          "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+          "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+          "finding_id": "B02",
+          "source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7156364013",
+          "created_at_utc": "2026-11-25T07:53:18Z",
+          "quoted_line": "mien_p3: bca55c1cd09c57180d60b05d5ca1813828ae1d10 nghiem-thu-khong-co-lap-chot-dich",
+          "owner_instruction": "Cho miễn P3, ghi nợ và xử lý ở packet sau",
+          "debt_id": "WP1236-B02-bat-bien-bo-sinh-test-dot-A",
+          "supporting_source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7153679183",
+          "evidence_origin": "Coordinator quotation in run/a8703b65/prompt.snapshot; accepted as supplied input per assignment",
+          "author_verified_by_reviewer": false,
+          "github_readback_by_reviewer": "not_measured; no network/GitHub used",
+          "gate_followup": "K5 kiem-merge must independently read mien_p3 on GitHub; this local verdict does not certify comment author"
+        }
+      ],
+      "finding_status": [
+        {
+          "id": "B01",
+          "status": "DA_VA_THAT",
+          "evidence": [
+            "ledger.md",
+            "ledger-o.json",
+            "ledger-c36.jsonl",
+            "c37-audit.json",
+            "missing-probes.json",
+            "scope-probes.json"
+          ]
+        },
+        {
+          "id": "B02",
+          "status": "VA_MOT_PHAN",
+          "disposition": "owner_waived",
+          "evidence": [
+            {
+              "status": "owner_waived",
+              "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+              "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+              "finding_id": "B02",
+              "source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7156364013",
+              "created_at_utc": "2026-11-25T07:53:18Z",
+              "quoted_line": "mien_p3: bca55c1cd09c57180d60b05d5ca1813828ae1d10 nghiem-thu-khong-co-lap-chot-dich",
+              "owner_instruction": "Cho miễn P3, ghi nợ và xử lý ở packet sau",
+              "debt_id": "WP1236-B02-bat-bien-bo-sinh-test-dot-A",
+              "supporting_source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7153679183",
+              "evidence_origin": "Coordinator quotation in run/a8703b65/prompt.snapshot; accepted as supplied input per assignment",
+              "author_verified_by_reviewer": false,
+              "github_readback_by_reviewer": "not_measured; no network/GitHub used",
+              "gate_followup": "K5 kiem-merge must independently read mien_p3 on GitHub; this local verdict does not certify comment author"
+            }
+          ],
+          "technical_fix_claimed": false
+        }
+      ],
+      "chua_do_duoc": [
+        "B02 remains technical debt; not rerunning the historical outside-mutant experiments this confirmation round.",
+        "Windows/CI/connector authorship and provenance are supplied claims, not directly measured here.",
+        "Full law9 mutation execution not rerun in round5."
+      ]
+    }
+  ],
+  "hoi_tu": {
+    "luot4_sang_5": "0/1",
+    "U": [
+      "nghiem-thu-khong-co-lap-chot-dich"
+    ],
+    "F": [],
+    "lop_lap_lan_ba": [
+      "nghiem-thu-khong-co-lap-chot-dich"
+    ],
+    "new_classes": [],
+    "reopened_classes": [],
+    "finding_counts_open_unwaived": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "waived_P3": 1,
+    "ghi_chu": "Waiver does not count as DA_VA_THAT, so F remains empty. Confirmation round authorized by supplied prompt and E2 cap6; call5/6. Preserve recurrent class/checkpoint history; no further rework or call authorized by this verdict."
+  },
+  "m3_windows": {
+    "ket_luan": "required",
+    "status": "not_run",
+    "reported_status": "passed",
+    "can_cu": [
+      "ADR-0060 M3 step2: added subprocess/encoding= lines in Python diff.",
+      "Windows local on DESKTOP-T9R33P2 is reported green on H in supplied prompt; reviewer cannot independently verify remote receipt.",
+      "Windows CI waiver per LEASE issuecomment-7129998930, not a Windows local waiver."
+    ],
+    "coordinator_report": {
+      "source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7161189686",
+      "sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "selftest": "1786/1786",
+      "suite_B": "38/38;145/145",
+      "ci_duong_nhanh_test": "candidate failing IDs equal base failing IDs;delta0"
+    },
+    "independently_verified": false
+  },
+  "luat9": {
+    "domain_authority": "Coordinator/executor E3 quotation: #1236 issuecomment-7130670276, DELTA + no regression; historical B corpus empty",
+    "round5_artifact_check": "passed; regenerated manifests and inheritance byte/ID/hash equal supplied artifacts, pinned tool/Python/source/test anchors checked",
+    "round5_summary": {
+      "head_total": 624,
+      "base_total": 550,
+      "delta": 76,
+      "inherited": 548,
+      "regressions": [],
+      "not_applicable": [
+        {
+          "id": "kho:c2:kiem_ho_so:340:4",
+          "op": "kho",
+          "kind": "c2",
+          "trang_thai": "KHONG_AP_DUNG",
+          "ly_do": "neo xuat hien 0 lan"
+        },
+        {
+          "id": "kho:f:kiem_ho_so:340:4",
+          "op": "kho",
+          "kind": "f",
+          "trang_thai": "KHONG_AP_DUNG",
+          "ly_do": "neo xuat hien 0 lan"
+        }
+      ],
+      "head_neo": {
+        "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+        "test": "ae44cc6223c44ca887b0395bffe96e6299b808ec88b7e2846b6d298a6dbce7be",
+        "goc": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+        "manifest": "a606d347220333bd12930c1604c3d7cd56c1f140f9e70d8b8bdbc58eb38b5df6",
+        "python": "3.13.18",
+        "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "base_neo": {
+        "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+        "test": "3bbeea803f2506b146e5502ba7e5858bbb67da28882abad592b43291a3910f55",
+        "goc": "628b8cc310f286c4d26114878100fdb173bf4b4793e8ffd8f88504d656fcb35e",
+        "manifest": "abdeec1b218c8aafc52aa9e3ac33dbcefb096e0cfad4b821c74a972019876a2a",
+        "python": "3.13.18",
+        "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "head_baseline_cases": 38,
+      "base_baseline_cases": 23
+    },
+    "round5_mutation_execution": "not_run",
+    "round4_reviewer_measurements": {
+      "source": "../lich_su/VERDICT_luot4.json",
+      "sha256": "a35f695b805a54d4336ed6665ec8652e0092492b11e8ddbc1e892e280f125ece",
+      "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "delta": "76/76 independently GIET in round4, baseline38/38",
+      "inherited_sample": "6 pairs,5 GIET/GIET+1 SONG/SONG",
+      "not_rerun_in_round4": 542
+    },
+    "limits": "Round5 artifact validation is not a new full do execution. Zero inherited regressions is result in supplied artifacts; do not extrapolate sample to independently measured full coverage. No new outside mutants generated."
+  },
+  "da_do_khop": [
+    {
+      "name": "suite",
+      "command": [
+        "python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "rc": 0,
+      "seconds": 315.262,
+      "status": "passed",
+      "stdout_sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "suite.stdout.log",
+      "stderr_log": "suite.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "CA: 38/38 dat; DOT BIEN: 145/145 bi giet dung ly do; TU KIEM PHAN HANG: DAT (2 dot bien); TONG: DAT"
+    },
+    {
+      "name": "tree",
+      "command": [
+        "python3",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "seconds": 8.021,
+      "status": "passed",
+      "stdout_sha256": "a9a5ffdd6e84365989aa08bd6d0c2e97a3f3a51c8dd13b8cc3f10d4df7dbb144",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "tree.stdout.log",
+      "stderr_log": "tree.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "149 ĐẠT;25/28 cutover;0 vi phạm;0 KHÔNG ĐO ĐƯỢC;tổng174"
+    },
+    {
+      "name": "ruff",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon.py",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "rc": 0,
+      "seconds": 0.502,
+      "status": "passed",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "ruff.stdout.log",
+      "stderr_log": "ruff.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "All checks passed;0 F on both files;delta base=0"
+    },
+    {
+      "name": "ruff-base",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon_test.py"
+      ],
+      "rc": 0,
+      "seconds": 0.032,
+      "status": "passed",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "ruff-base.stdout.log",
+      "stderr_log": "ruff-base.stderr.log",
+      "tested_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+      "positive_evidence": "All checks passed;0 F on same files from immutable base"
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "f602325574c62184caf16309631f5f680ca5cee2",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.004,
+      "status": "passed",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "diff-check.stdout.log",
+      "stderr_log": "diff-check.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "rc0, no whitespace error"
+    },
+    {
+      "name": "numstat",
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "f602325574c62184caf16309631f5f680ca5cee2",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.005,
+      "status": "passed",
+      "stdout_sha256": "bd2cf903972504d0f369ffd5668a46143dfab4e795c21e666aca36c0447b8f9c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "numstat.stdout.log",
+      "stderr_log": "numstat.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "2 files;87+419=506 additions <=560;1+10=11 deletions"
+    },
+    {
+      "name": "ruff-version",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "seconds": 0.032,
+      "status": "passed",
+      "stdout_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "ruff-version.stdout.log",
+      "stderr_log": "ruff-version.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "ruff 0.15.15"
+    },
+    {
+      "name": "runtime",
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import sys,platform,yaml; print(sys.executable); print(sys.version); print(platform.platform()); print(\"PyYAML\",yaml.__version__)"
+      ],
+      "rc": 0,
+      "seconds": 0.047,
+      "status": "passed",
+      "stdout_sha256": "b5e4435149ef43b2a44932f804eedb43e53c867f139557170edd23cab8b16da1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "runtime.stdout.log",
+      "stderr_log": "runtime.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "/usr/local/bin/python3\n3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]\nLinux-6.18.44-fc-v880-x86_64-with-glibc2.39\nPyYAML 6.0.3"
+    },
+    {
+      "name": "ruff-contract",
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import runpy,sys; m=runpy.run_path(\".claude/dev/ci_dang_ky_test.py\"); e,n=m[\"loi_ruff_ci\"](); print(\"RUFF_CONTRACT\",n,e); sys.exit(bool(e) or n == 0)"
+      ],
+      "rc": 0,
+      "seconds": 0.178,
+      "status": "passed",
+      "stdout_sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "ruff-contract.stdout.log",
+      "stderr_log": "ruff-contract.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "RUFF_CONTRACT 3 [] (pin/probe, separate from bare lint)"
+    },
+    {
+      "name": "missing",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/probe_missing.py"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "seconds": 0.33252627299998494,
+      "stdout_sha256": "16bc832d8cc98e97c28175961d20988eca76144cd869914da3c2039623306c38",
+      "stdout_log": "missing.stdout.log",
+      "stderr_log": "missing.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "12/12 historical independent data probes passed"
+    },
+    {
+      "name": "scope",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/probe_scope.py"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "seconds": 1.5721345869999936,
+      "stdout_sha256": "6584ad7f0d2d2e32a4d88653a095c5764802074e72e0232e8da36f8aba6960b1",
+      "stdout_log": "scope.stdout.log",
+      "stderr_log": "scope.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "23/23 historical independent data probes passed"
+    },
+    {
+      "name": "ledger",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/bang_chung/ledger/ledger_mien.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/repo",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ledger.md",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ledger-o.json",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ledger-c36.jsonl"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "seconds": 60.024886912,
+      "stdout_sha256": "392e873f960af0adeee685339bf0407b27c76c99572d52b71ed04a99b1c73c26",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "ledger.stdout.log",
+      "stderr_log": "ledger.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "810 B cells +8396 c36 elements;exact match supplied frozen ledger"
+    },
+    {
+      "name": "c37-audit",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/audit_c37.py"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "seconds": 10.355411709999998,
+      "stdout_sha256": "464d4fcec1c16ea20d669a3541878fa29c1b6a385861c8839379f433aa15fbb5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "c37-audit.stdout.log",
+      "stderr_log": "c37-audit.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "648 cells independently checked;ASCII128/category29/nonBMP at each of4 positions;4 semantic lazy probes;ledger exact equal"
+    },
+    {
+      "name": "law9-artifacts",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/law9_audit.py"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "seconds": 73.76330710900004,
+      "stdout_sha256": "f03e6b679dde415aa6c8e6560637a1eac687b03f4a3e71f5d37ab7711535f8f3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_log": "law9-artifacts.stdout.log",
+      "stderr_log": "law9-artifacts.stderr.log",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "550 base/624 head manifests regenerated byte-identical;76 delta all GIET in supplied results;548 inherited;0 regressions in supplied results"
+    },
+    {
+      "name": "l8-priority-independent",
+      "command": "TMPDIR=<work/tmp> PYTHONDONTWRITEBYTECODE=1 python3 -B ../work/l8_priority_probe.py",
+      "rc": 0,
+      "status": "passed",
+      "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "positive_evidence": "4/4: exact L8 waiver plus missing module gives rc2; exact L5 cutover gives rc0 before L8; supplied-byte mismatch loses L8 waiver;56 hashes match with0 overlap among25 cutover records",
+      "evidence": "l8-priority.json",
+      "sha256": "1a74349d296554c16343d127e9ef9b7c18baddefa890e3c921024f852b410538"
+    },
+    {
+      "name": "l8-priority-initial-probe",
+      "command": "TMPDIR=<work/tmp> PYTHONDONTWRITEBYTECODE=1 python3 -B ../work/l8_priority_probe.py (initial reviewer version)",
+      "rc": 1,
+      "status": "failed",
+      "classification": "reviewer_assertion_setup_only",
+      "positive_evidence": "First2 checks passed; third assertion incorrectly demanded notes == [L8 note], although L3 advisory note also legitimately exists. Changed scratch assertion to L8 note membership; full rerun4/4 passed; no product edit.",
+      "finding": false
+    }
+  ],
+  "scope_domains": [
+    {
+      "domain": "tập 7 token và đầu vào không chuỗi/rỗng/ngoài tập",
+      "observed": "c32 67 ô (41 không L8/26 có L8); c36/a124 1733 (39/1694)",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "3 tên phi-lời-khai, chuẩn hóa khóa giữ số",
+      "observed": "c32: 10 ô khóa trong 67 ô, đủ 3 tên phi-lời-khai và giữ số",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "tập dấu phân cách và đầu/cuối LF",
+      "observed": "c32 + c36/a124: ASCII128, category, non-BMP, LF/cuối/đầu",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "3 dạng landed, True/1, ưu tiên khóa",
+      "observed": "c27 14 (10/4 theo L8; một rc1 do L6); a132 1280 (1200/80 theo L8; đúng chữ số→landed→L8)",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "URL 0/1/2, readback 0/1/2, 9 điều kiện miễn và thứ tự",
+      "observed": "c34 50 (6/44), 9 điều kiện và 7 cặp khả thi",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "dòng miễn strip/fullmatch, văn bản tự do ly_do",
+      "observed": "a126 52 (34/18); a133 1136 (124/1012), cùng c34",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "tệp đánh giá: điều kiện chung UTF-8 và CR/LF",
+      "observed": "c35 22 ô (3 không L8/19 có L8); gồm byte không UTF8, CRLF/trộn/CR lẻ; c37 có CR/LF từng vị trí.",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "tệp đánh giá: header/job/skipped cũ/skipped v3/tổng/rỗng",
+      "observed": "c35 22; c36/a125 3840 + a129 36; c37 648 = 636 đúng ngữ pháp / 12 âm, 4 vị trí × 128 ASCII + 29 category + ngoài BMP, 16 cấu trúc.",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    },
+    {
+      "domain": "tên tệp trích: đường tương đối/tuyệt đối/.., nhiều tệp",
+      "observed": "a131 1 dương; a134 318 có L8 (path thiếu/không trích tên), oracle phân biệt lớp bằng đường/lý do chính xác; c32 path dương và âm",
+      "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+      "evidence": [
+        "ledger-o.json",
+        "ledger-c36.jsonl",
+        "c37-audit.json",
+        "scope-probes.json",
+        "missing-probes.json"
+      ]
+    }
+  ],
+  "c37_audit": {
+    "independent_oracle": {
+      "dau": {
+        "n": 160,
+        "categories": [
+          "Cc",
+          "Cf",
+          "Cn",
+          "Co",
+          "Ll",
+          "Lm",
+          "Lo",
+          "Lt",
+          "Lu",
+          "Mc",
+          "Me",
+          "Mn",
+          "Nd",
+          "Nl",
+          "No",
+          "Pc",
+          "Pd",
+          "Pe",
+          "Pf",
+          "Pi",
+          "Po",
+          "Ps",
+          "Sc",
+          "Sk",
+          "Sm",
+          "So",
+          "Zl",
+          "Zp",
+          "Zs"
+        ],
+        "ASCII": 128,
+        "reasons": {
+          "bo_sinh_la": 158,
+          "dau_tep_sai": 1,
+          "cr_le": 1
+        }
+      },
+      "nhan": {
+        "n": 162,
+        "categories": [
+          "Cc",
+          "Cf",
+          "Cn",
+          "Co",
+          "Ll",
+          "Lm",
+          "Lo",
+          "Lt",
+          "Lu",
+          "Mc",
+          "Me",
+          "Mn",
+          "Nd",
+          "Nl",
+          "No",
+          "Pc",
+          "Pd",
+          "Pe",
+          "Pf",
+          "Pi",
+          "Po",
+          "Ps",
+          "Sc",
+          "Sk",
+          "Sm",
+          "So",
+          "Zl",
+          "Zp",
+          "Zs"
+        ],
+        "ASCII": 128,
+        "reasons": {
+          "bo_sinh_la": 158,
+          "dong_la": 3,
+          "cr_le": 1
+        }
+      },
+      "cu": {
+        "n": 163,
+        "categories": [
+          "Cc",
+          "Cf",
+          "Cn",
+          "Co",
+          "Ll",
+          "Lm",
+          "Lo",
+          "Lt",
+          "Lu",
+          "Mc",
+          "Me",
+          "Mn",
+          "Nd",
+          "Nl",
+          "No",
+          "Pc",
+          "Pd",
+          "Pe",
+          "Pf",
+          "Pi",
+          "Po",
+          "Ps",
+          "Sc",
+          "Sk",
+          "Sm",
+          "So",
+          "Zl",
+          "Zp",
+          "Zs"
+        ],
+        "ASCII": 128,
+        "reasons": {
+          "bo_sinh_la": 160,
+          "dong_la": 2,
+          "cr_le": 1
+        }
+      },
+      "v3": {
+        "n": 163,
+        "categories": [
+          "Cc",
+          "Cf",
+          "Cn",
+          "Co",
+          "Ll",
+          "Lm",
+          "Lo",
+          "Lt",
+          "Lu",
+          "Mc",
+          "Me",
+          "Mn",
+          "Nd",
+          "Nl",
+          "No",
+          "Pc",
+          "Pd",
+          "Pe",
+          "Pf",
+          "Pi",
+          "Po",
+          "Ps",
+          "Sc",
+          "Sk",
+          "Sm",
+          "So",
+          "Zl",
+          "Zp",
+          "Zs"
+        ],
+        "ASCII": 128,
+        "reasons": {
+          "bo_sinh_la": 160,
+          "dong_la": 2,
+          "cr_le": 1
+        }
+      }
+    },
+    "semantic_lazy_probes": [
+      {
+        "label": "label-backtracks",
+        "rc": 0,
+        "l8": [],
+        "passed": true
+      },
+      {
+        "label": "label-backtracks-wrong-identity",
+        "rc": 1,
+        "l8": [
+          "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067207297"
+        ],
+        "passed": true
+      },
+      {
+        "label": "earliest-full-suffix",
+        "rc": 0,
+        "l8": [],
+        "passed": true
+      },
+      {
+        "label": "skip-invalid-delimiter",
+        "rc": 0,
+        "l8": [],
+        "passed": true
+      }
+    ],
+    "ledger_equal": {
+      "B": 810,
+      "c36": 8396
+    }
+  },
+  "reviewer_identity": {
+    "provider": "openai_codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_run_id": "a8703b65f7124891991a369b4672fcb5",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "requested_effort": "high",
+    "identity_source": "run/a8703b65/run.json: /opt/node22/lib/node_modules/@openai/codex/bin/codex.js, transport machine; active Codex tool surface. No measured serving model/effort fields in available run receipt.",
+    "transport_note": "Lease uses machine/local; actual local subprocess transport is machine; not human-mediated.",
+    "sandbox_mode": "workspace-write",
+    "sandbox_source": "Active developer permissions; repository treated read-only by review policy, scratch/output restricted to work/.",
+    "environment": {
+      "os": "Linux",
+      "python": "3.13.18",
+      "ruff": "0.15.15",
+      "yaml": "6.0.3",
+      "network_used": false
+    }
+  },
+  "executor_identity": {
+    "provider": "claude",
+    "model_family": "claude",
+    "execution_surface": "claude_code",
+    "source": "LEASE.yaml and bang_chung/handoff.yaml, supplied claims"
+  },
+  "preflight": {
+    "repository": "ducthangho/tra-luat",
+    "checkout": "detached HEAD",
+    "spec_source": "f602325574c62184caf16309631f5f680ca5cee2:ops/specs/wp1236-r12.md",
+    "spec_blob": "e5583bc042448517b94eadda57231dfc60e0a284",
+    "local_spec": "../SPEC.md",
+    "source_bytes_equal_local": true,
+    "lease_id": "wp1236-b-r12-g1-claude-20261124",
+    "lease_until": "2026-11-27T11:22:26Z",
+    "effective_write_set": [
+      "ops/land_evidence_nguon.py",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "added_lines": 506,
+    "deleted_lines": 11,
+    "addition_cap": 560,
+    "call": "5/6",
+    "core_abbrev": "Per-process GIT_CONFIG_COUNT=1 sets core.abbrev=7 for gate subprocesses, no repository config write.",
+    "lease_authority_limit": "Lease and budget extension are supplied offline records; remote actor/state not independently verified."
+  },
+  "class_scan": [
+    {
+      "scope": "Module loading, errors, exemption order",
+      "result": "No new P0-P2 found; raw source compiled from --root before L8 exemption; catches Exception/SystemExit; non-list rejected; main maps KhongDoDuoc to rc2 for isolated error. Cutover exemption remains before YAML/L8.",
+      "evidence": "l8-priority.json; suite c25/c29/c30/c31 and targeted mutants; code review lines408-433,main"
+    },
+    {
+      "scope": "Exemption identity/byte binding",
+      "result": "All56 name/hash pairs independently checked; no intersection with25 exact cutover exemptions; input bytes used for both parse/hash; L8 exemption does not clear L1-L7 failures.",
+      "evidence": "l8-priority.json; c24 and c29 suite; full diff read"
+    },
+    {
+      "scope": "Test domains, adapters, output consumer, mutation routing",
+      "result": "B01 stays fixed; B02 unchanged technical debt accepted by owner. No new P0-P2 or P3 found in whole diff pass.",
+      "evidence": "ledger and oracle audits; historical probe reruns; law9 artifact validation; c33/c38 in full suite"
+    }
+  ],
+  "checkout_integrity": {
+    "initial_head": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+    "initial_tree": "14f1571aada834fc22ea32c29076df8834c05bd6",
+    "final_head": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+    "final_tree": "14f1571aada834fc22ea32c29076df8834c05bd6",
+    "tracked_files_hashed": 17938,
+    "status": "tracked/index/untracked clean at endpoints; pre-existing empty ignored .codex/ only",
+    "snapshot_before": "snapshot-before.json",
+    "snapshot_after": "snapshot-after.json",
+    "all_observed_bytes_equal": true,
+    "same_candidate_as_round4": true,
+    "limits": "Endpoint equality does not prove every intermediate event; no other source checkout observed."
+  },
+  "external_reports": {
+    "source": "run/a8703b65/prompt.snapshot",
+    "CI_PR1526": "reported green; not independently verified",
+    "connector_PR1526": "reported completed with no findings; not independently verified",
+    "waiver": {
+      "status": "owner_waived",
+      "reviewed_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_id": "B02",
+      "source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7156364013",
+      "created_at_utc": "2026-11-25T07:53:18Z",
+      "quoted_line": "mien_p3: bca55c1cd09c57180d60b05d5ca1813828ae1d10 nghiem-thu-khong-co-lap-chot-dich",
+      "owner_instruction": "Cho miễn P3, ghi nợ và xử lý ở packet sau",
+      "debt_id": "WP1236-B02-bat-bien-bo-sinh-test-dot-A",
+      "supporting_source_url": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7153679183",
+      "evidence_origin": "Coordinator quotation in run/a8703b65/prompt.snapshot; accepted as supplied input per assignment",
+      "author_verified_by_reviewer": false,
+      "github_readback_by_reviewer": "not_measured; no network/GitHub used",
+      "gate_followup": "K5 kiem-merge must independently read mien_p3 on GitHub; this local verdict does not certify comment author"
+    }
+  },
+  "not_run": [
+    "Windows local exact base/head by this reviewer",
+    "GitHub CI/connector/M9 and remote comment author readback",
+    "Full law9 do execution; round5 confirms artifacts on unchanged SHA",
+    "scripts/tl.py --selftest by this reviewer",
+    "Historical B02 outside-mutant execution in round5"
+  ],
+  "skipped": [],
+  "limits": [
+    "Offline code approval only; not merge/land authorization or human_audited.",
+    "Acceptance of B02 waiver relies expressly on coordinator quotation; K5 must independently verify GitHub.",
+    "Windows/CI/connector results recorded as reported, not reviewer passes.",
+    "B02 remains technical debt; waiver does not rewrite class as DA_VA_THAT."
+  ],
+  "completed_utc": "2026-11-25T14:01:32.325530+00:00",
+  "schema_validation": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/kiem_verdict_lop.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/VERDICT.json",
+      "--vong",
+      "5"
+    ],
+    "expected": "HOP_LE",
+    "stdout": "kiem_verdict.txt",
+    "rc": 0,
+    "status": "passed",
+    "observed": "HOP_LE (§8.3): 0 finding, 1 lop",
+    "stdout_sha256": "4b7f3765b9ad286ebced5a0d28bf39c18efbf5b2c38f298fe2ba74b767d9e529"
+  }
+}

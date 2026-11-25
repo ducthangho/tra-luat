@@ -1,0 +1,17 @@
+{
+  "name": "ruff-version",
+  "command": [
+    "python3",
+    "-m",
+    "ruff",
+    "--version"
+  ],
+  "rc": 0,
+  "seconds": 0.032,
+  "status": "passed",
+  "stdout_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "ruff-version.stdout.log",
+  "stderr_log": "ruff-version.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

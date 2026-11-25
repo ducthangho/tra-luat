@@ -1,0 +1,22 @@
+{
+  "name": "ruff-base",
+  "command": [
+    "python3",
+    "-m",
+    "ruff",
+    "check",
+    "--no-cache",
+    "--select",
+    "F",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon.py",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon_test.py"
+  ],
+  "rc": 0,
+  "seconds": 0.032,
+  "status": "passed",
+  "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "ruff-base.stdout.log",
+  "stderr_log": "ruff-base.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

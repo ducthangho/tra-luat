@@ -1,0 +1,32 @@
+[
+  {
+    "name": "missing",
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/probe_missing.py"
+    ],
+    "rc": 0,
+    "status": "passed",
+    "seconds": 0.33252627299998494,
+    "stdout_sha256": "16bc832d8cc98e97c28175961d20988eca76144cd869914da3c2039623306c38",
+    "stdout_log": "missing.stdout.log",
+    "stderr_log": "missing.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "scope",
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/probe_scope.py"
+    ],
+    "rc": 0,
+    "status": "passed",
+    "seconds": 1.5721345869999936,
+    "stdout_sha256": "6584ad7f0d2d2e32a4d88653a095c5764802074e72e0232e8da36f8aba6960b1",
+    "stdout_log": "scope.stdout.log",
+    "stderr_log": "scope.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "name": "runtime",
+  "command": [
+    "python3",
+    "-B",
+    "-c",
+    "import sys,platform,yaml; print(sys.executable); print(sys.version); print(platform.platform()); print(\"PyYAML\",yaml.__version__)"
+  ],
+  "rc": 0,
+  "seconds": 0.047,
+  "status": "passed",
+  "stdout_sha256": "b5e4435149ef43b2a44932f804eedb43e53c867f139557170edd23cab8b16da1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "runtime.stdout.log",
+  "stderr_log": "runtime.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "suite",
+  "command": [
+    "python3",
+    "-B",
+    "ops/land_evidence_nguon_test.py"
+  ],
+  "rc": 0,
+  "seconds": 315.262,
+  "status": "passed",
+  "stdout_sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "suite.stdout.log",
+  "stderr_log": "suite.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

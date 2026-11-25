@@ -1,0 +1,167 @@
+[
+  {
+    "name": "suite",
+    "command": [
+      "python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "seconds": 315.262,
+    "status": "passed",
+    "stdout_sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "suite.stdout.log",
+    "stderr_log": "suite.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "tree",
+    "command": [
+      "python3",
+      "-B",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 8.021,
+    "status": "passed",
+    "stdout_sha256": "a9a5ffdd6e84365989aa08bd6d0c2e97a3f3a51c8dd13b8cc3f10d4df7dbb144",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "tree.stdout.log",
+    "stderr_log": "tree.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "ruff",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon.py",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "seconds": 0.502,
+    "status": "passed",
+    "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "ruff.stdout.log",
+    "stderr_log": "ruff.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "ruff-base",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/work/ruff-base/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "seconds": 0.032,
+    "status": "passed",
+    "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "ruff-base.stdout.log",
+    "stderr_log": "ruff-base.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "f602325574c62184caf16309631f5f680ca5cee2",
+      "HEAD"
+    ],
+    "rc": 0,
+    "seconds": 0.004,
+    "status": "passed",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "diff-check.stdout.log",
+    "stderr_log": "diff-check.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "numstat",
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "f602325574c62184caf16309631f5f680ca5cee2",
+      "HEAD"
+    ],
+    "rc": 0,
+    "seconds": 0.005,
+    "status": "passed",
+    "stdout_sha256": "bd2cf903972504d0f369ffd5668a46143dfab4e795c21e666aca36c0447b8f9c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "numstat.stdout.log",
+    "stderr_log": "numstat.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "ruff-version",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "--version"
+    ],
+    "rc": 0,
+    "seconds": 0.032,
+    "status": "passed",
+    "stdout_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "ruff-version.stdout.log",
+    "stderr_log": "ruff-version.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "runtime",
+    "command": [
+      "python3",
+      "-B",
+      "-c",
+      "import sys,platform,yaml; print(sys.executable); print(sys.version); print(platform.platform()); print(\"PyYAML\",yaml.__version__)"
+    ],
+    "rc": 0,
+    "seconds": 0.047,
+    "status": "passed",
+    "stdout_sha256": "b5e4435149ef43b2a44932f804eedb43e53c867f139557170edd23cab8b16da1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "runtime.stdout.log",
+    "stderr_log": "runtime.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  },
+  {
+    "name": "ruff-contract",
+    "command": [
+      "python3",
+      "-B",
+      "-c",
+      "import runpy,sys; m=runpy.run_path(\".claude/dev/ci_dang_ky_test.py\"); e,n=m[\"loi_ruff_ci\"](); print(\"RUFF_CONTRACT\",n,e); sys.exit(bool(e) or n == 0)"
+    ],
+    "rc": 0,
+    "seconds": 0.178,
+    "status": "passed",
+    "stdout_sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_log": "ruff-contract.stdout.log",
+    "stderr_log": "ruff-contract.stderr.log",
+    "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+  }
+]

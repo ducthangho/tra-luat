@@ -1,0 +1,16 @@
+{
+  "name": "law9-artifacts",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/law9_audit.py"
+  ],
+  "rc": 0,
+  "status": "passed",
+  "seconds": 73.76330710900004,
+  "stdout_sha256": "f03e6b679dde415aa6c8e6560637a1eac687b03f4a3e71f5d37ab7711535f8f3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "law9-artifacts.stdout.log",
+  "stderr_log": "law9-artifacts.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

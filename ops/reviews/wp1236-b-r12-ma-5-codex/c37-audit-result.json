@@ -1,0 +1,16 @@
+{
+  "name": "c37-audit",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b5-5-codex/lich_su/audit_c37.py"
+  ],
+  "rc": 0,
+  "status": "passed",
+  "seconds": 10.355411709999998,
+  "stdout_sha256": "464d4fcec1c16ea20d669a3541878fa29c1b6a385861c8839379f433aa15fbb5",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "c37-audit.stdout.log",
+  "stderr_log": "c37-audit.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

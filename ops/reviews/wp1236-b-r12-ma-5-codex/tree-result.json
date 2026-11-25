@@ -1,0 +1,18 @@
+{
+  "name": "tree",
+  "command": [
+    "python3",
+    "-B",
+    "ops/land_evidence_nguon.py",
+    "--root",
+    "."
+  ],
+  "rc": 0,
+  "seconds": 8.021,
+  "status": "passed",
+  "stdout_sha256": "a9a5ffdd6e84365989aa08bd6d0c2e97a3f3a51c8dd13b8cc3f10d4df7dbb144",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_log": "tree.stdout.log",
+  "stderr_log": "tree.stderr.log",
+  "tested_sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10"
+}

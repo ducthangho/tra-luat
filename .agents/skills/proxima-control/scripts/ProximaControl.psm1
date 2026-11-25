@@ -284,10 +284,11 @@ function Get-PxcPending([string]$Base, [string]$Protected) {
 }
 
 # ---- operations (endpoint side; also the in-process Local path after px's gate) ----
-# px-loc-markup r1 #1529 (#1457 r2: the Gemini web UI appended a suggestion block to an answer): drop each COMPLETE
+# px-loc-markup r1 #1529 (#1457 r2 reported one gateway answer carrying such a block): drop each COMPLETE
 # <ElicitationsGroup ...>...</ElicitationsGroup> block (tag name compared Ordinal; the name must end at whitespace, '>', '/' or end of
-# text). An open tag without its own close, or a second open before that close, leaves the text untouched and reports 'unterminated'.
-# Only trailing whitespace is trimmed after a removal. The removed text is never returned or written anywhere.
+# text). The open tag must end with '>' outside double quotes, with no '<' before it and not self-closing; it pairs with the first
+# close after that '>' only when no second open comes first. Anything else leaves the whole text untouched as 'unterminated'.
+# Trailing whitespace is trimmed only when nothing but whitespace follows the last removed block. The removed text is never returned.
 function Find-PxcOpenTag([string]$Text, [int]$From) {
     while ($From -le $Text.Length) {
         $i = $Text.IndexOf('<ElicitationsGroup', $From, [StringComparison]::Ordinal)
@@ -298,18 +299,33 @@ function Find-PxcOpenTag([string]$Text, [int]$From) {
     }
     return -1
 }
+function Find-PxcOpenEnd([string]$Text, [int]$From) {
+    $inQuote = $false
+    for ($p = $From; $p -lt $Text.Length; $p++) {
+        $ch = $Text[$p]
+        if ($ch -eq [char]34) { $inQuote = -not $inQuote; continue }
+        if ($inQuote) { continue }
+        if ($ch -eq [char]'<') { return -1 }
+        if ($ch -eq [char]'>') { if ($Text[$p - 1] -eq [char]'/') { return -1 }; return $p }
+    }
+    return -1
+}
 function Remove-PxcElicitation([string]$Text) {
-    $close = '</ElicitationsGroup>'; $sb = [Text.StringBuilder]::new(); $pos = 0; $n = 0
+    $close = '</ElicitationsGroup>'; $keep = @{ Text = $Text; State = 'unterminated'; Removed = 0 }
+    $sb = [Text.StringBuilder]::new(); $pos = 0; $n = 0
     while ($true) {
         $i = Find-PxcOpenTag $Text $pos
         if ($i -lt 0) { break }
-        $j = $Text.IndexOf($close, $i, [StringComparison]::Ordinal); $k = Find-PxcOpenTag $Text ($i + 18)
-        if ($j -lt 0 -or ($k -ge 0 -and $k -lt $j)) { return @{ Text = $Text; State = 'unterminated'; Removed = 0 } }
+        $e = Find-PxcOpenEnd $Text ($i + 18)
+        if ($e -lt 0) { return $keep }
+        $j = $Text.IndexOf($close, $e + 1, [StringComparison]::Ordinal); $k = Find-PxcOpenTag $Text ($e + 1)
+        if ($j -lt 0 -or ($k -ge 0 -and $k -lt $j)) { return $keep }
         $null = $sb.Append($Text, $pos, $i - $pos); $pos = $j + $close.Length; $n++
     }
     if ($n -eq 0) { return @{ Text = $Text; State = 'none'; Removed = 0 } }
-    $null = $sb.Append($Text, $pos, $Text.Length - $pos)
-    return @{ Text = $sb.ToString().TrimEnd(); State = 'removed'; Removed = $n }
+    $tail = $Text.Substring($pos)
+    if ($tail.Trim().Length -eq 0) { $out = $sb.ToString().TrimEnd() } else { $out = $sb.ToString() + $tail }
+    return @{ Text = $out; State = 'removed'; Removed = $n }
 }
 function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$Provider, [string]$Model, [string]$Prompt) {
     $url = Get-PxcGateway $Base

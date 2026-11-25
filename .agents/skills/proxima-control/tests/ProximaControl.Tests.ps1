@@ -1069,30 +1069,45 @@ Invoke-Case 'X5-10' {
 }
 Invoke-Case 'X5-11' {
     # px-loc-markup r1 #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
-    # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, and never surfaces the dropped text.
-    $mark = 'PXMARK7f3a'; $nl = [string][char]10; $q = [string][char]34
-    $g = '<ElicitationsGroup message=' + $q + 'm ' + $mark + $q + '><Elicitation label=' + $q + 'l ' + $mark + $q + ' query=' + $q + 'q ' + $mark + $q + '/></ElicitationsGroup>'
+    # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, trims trailing whitespace only after a
+    # trailing block, and never surfaces the dropped text. Leak check: the RAW objects of every stream (output incl. strings, error, warning,
+    # verbose, debug, information; verbose/debug forced on) plus the journal record, which must exist. Separate markers for dropped/kept text.
+    $drop = 'PXDROP7f3a'; $keepMk = 'PXKEEP7f3a'; $nl = [string][char]10; $crlf = [string][char]13 + $nl; $q = [string][char]34; $nb = [string][char]0xA0
+    $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + 'l ' + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
     $open = '<ElicitationsGroup message=' + $q + 'x' + $q + '>'
     $cases = @(
         @('none', ('plain answer' + $nl), ('plain answer' + $nl), 'none', 0),
         @('one block', ('OK' + $nl + $nl + $g + $nl), 'OK', 'removed', 1),
         @('two blocks', ('A ' + $g + ' B' + $nl + $g), 'A  B', 'removed', 2),
+        @('middle keeps tail', ('A' + $g + 'B  ' + $crlf), ('AB  ' + $crlf), 'removed', 1),
+        @('middle keeps nbsp', ('A' + $g + 'B' + $nb), ('AB' + $nb), 'removed', 1),
         @('unterminated', ('OK' + $nl + $open + 'tail'), ('OK' + $nl + $open + 'tail'), 'unterminated', 0),
         @('nested', ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), 'unterminated', 0),
+        @('opener without end', 'A <ElicitationsGroup </ElicitationsGroup> B', 'A <ElicitationsGroup </ElicitationsGroup> B', 'unterminated', 0),
+        @('opener open quote', ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), 'unterminated', 0),
+        @('self closing', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'unterminated', 0),
         @('other name', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'none', 0),
         @('case variant', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'none', 0),
-        @('kept outside', ('keep ' + $mark + $nl + $g), ('keep ' + $mark), 'removed', 1))
+        @('kept outside', ('keep ' + $keepMk + $nl + $g), ('keep ' + $keepMk), 'removed', 1))
+    $cmd = $script:PxCmd; $vp = $global:VerbosePreference; $dp = $global:DebugPreference
     foreach ($c in $cases) {
         $global:PxcT.Chat = (@{ model = 'prov/served'; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
-        $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' })
-        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok') { Add-Fail "MARKUP_ASK_FAILED[$($c[0])]"; continue }
-        if (-not [string]::Equals([string]$x.R.data.answer, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
-        if ("$($x.R.data.answerMarkup)" -cne $c[3] -or $x.R.data.answerMarkupRemoved -isnot [int] -or $x.R.data.answerMarkupRemoved -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
-        $rp = "$($Tg.Pos.Base)\results\px-active\$($x.R.data.recordId).json"
-        $recText = $(if ([IO.File]::Exists($rp)) { [IO.File]::ReadAllText($rp) } else { '' })
-        if ($c[0] -ceq 'kept outside') {
-            if (-not ([string]$x.R.data.answer).Contains($mark)) { Add-Fail 'MARKUP_POSITIVE_CONTROL[kept outside]' }
-        } elseif ($x.Text.Contains($mark) -or $recText.Contains($mark)) { Add-Fail "MARKUP_LEAK[$($c[0])]" }
+        $a = New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' }; $raw = @()
+        try { $global:VerbosePreference = 'Continue'; $global:DebugPreference = 'Continue'; $raw = @(& $cmd @a *>&1) } catch { $raw += $_ } finally { $global:VerbosePreference = $vp; $global:DebugPreference = $dp }
+        $r = @($raw | Where-Object { $null -ne $_ -and $_ -isnot [Management.Automation.ErrorRecord] -and $null -ne $_.PSObject.Properties['schema'] })
+        if ($r.Count -ne 1 -or "$($r[0].outcome)" -cne 'ok') { Add-Fail "MARKUP_ASK_FAILED[$($c[0])]"; continue }
+        $d = $r[0].data
+        if (-not [string]::Equals([string]$d.answer, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
+        if ("$($d.answerMarkup)" -cne $c[3] -or $d.answerMarkupRemoved -isnot [int] -or $d.answerMarkupRemoved -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
+        $dump = @(foreach ($o in $raw) {
+                if ($o -is [string]) { $o }
+                elseif ($o -is [Management.Automation.ErrorRecord]) { "$o"; "$($o.Exception)"; "$($o.TargetObject)" }
+                elseif ($o -is [Management.Automation.InformationalRecord]) { $o.Message }
+                elseif ($o -is [Management.Automation.InformationRecord]) { "$($o.MessageData)" }
+                else { $o | ConvertTo-Json -Depth 10 -Compress } }) -join $nl
+        $rp = "$($Tg.Pos.Base)\results\px-active\$($d.recordId).json"
+        if (-not [IO.File]::Exists($rp)) { Add-Fail "MARKUP_JOURNAL_MISSING[$($c[0])]"; continue }
+        if ($dump.Contains($drop) -or [IO.File]::ReadAllText($rp).Contains($drop)) { Add-Fail "MARKUP_LEAK[$($c[0])]" }
     }
     $global:PxcT.Chat = ''
 }

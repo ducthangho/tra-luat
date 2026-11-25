@@ -42,12 +42,14 @@ px connect -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<T
 - Chỉ `connect` nhận `-Credential` (PSCredential); hành động khác không hỏi và không đọc thông tin đăng nhập.
 - Không suy diễn: `ask` khi chưa `use` (và không có `-Model`) báo `NoModelSelected`; model không được quảng bá báo
   `ModelNotAdvertised`. Không fallback sang model hay đích khác, không tự thử lại.
-- Kết quả `ask` (từ 2.2.0): `answer` đã bỏ mọi khối `<ElicitationsGroup …>…</ElicitationsGroup>` hoàn chỉnh (tên thẻ so Ordinal) và
-  khoảng trắng thừa ở cuối. `answerMarkup` là `none` (không có khối), `removed` (đã bỏ) hoặc `unterminated` (thẻ mở thiếu thẻ đóng hay
-  lồng sai: `answer` giữ nguyên, người gọi tự xử). `answerMarkupRemoved` là số khối đã bỏ. Nội dung đã bỏ không được trả lại: khối ấy
-  là gợi ý câu hỏi của giao diện Gemini và có thể nêu chủ đề lấy từ lịch sử trò chuyện của tài khoản Google (#1457 r2).
-- Chạy tự động với Gemini thì dùng `gemini:auto`: khi luồng treo (`stream stalled`), gateway chỉ thử lại bằng fallback cho `auto`, còn
-  model chỉ định trả HTTP 500 ngay (#1457 r2). Đây là hướng dẫn, module không chặn model nào.
+- Kết quả `ask` (từ 2.2.0): `answer` đã bỏ mọi khối `<ElicitationsGroup …>…</ElicitationsGroup>` hoàn chỉnh (tên thẻ so Ordinal);
+  khoảng trắng cuối chỉ bị cắt khi sau khối cuối cùng không còn gì ngoài khoảng trắng. `answerMarkup` là `none` (không có khối),
+  `removed` (đã bỏ) hoặc `unterminated` (thẻ mở cụt, thiếu thẻ đóng hay lồng sai: `answer` giữ nguyên, người gọi tự xử).
+  `answerMarkupRemoved` là số khối đã bỏ. Nội dung đã bỏ không được trả lại. Căn cứ: #1457 r2 kể đúng một câu trả lời Gemini qua gateway
+  có khối này, chứa gợi ý câu hỏi mà chủ đề có vẻ lấy từ lịch sử trò chuyện; hồ sơ ấy là lời khai chưa xác minh trong kho.
+- Chạy tự động với Gemini thì nên dùng `gemini:auto`. Căn cứ, cũng là lời khai chưa xác minh của #1457 r2: một lời gọi model chỉ định
+  (`gemini:3-5-flash-lite`) trả HTTP 500 vì luồng treo, còn một lời gọi `gemini:auto` trả được câu trả lời sau một lần treo. Đây là
+  hướng dẫn, module không chặn model nào.
 
 ## Xem trước (WhatIf)
 `px` gọi ShouldProcess TRƯỚC mọi tác động, kể cả truy vấn `status`/`models`; mọi hành động có `-WhatIf` và `-Confirm`, wrapper chuyển

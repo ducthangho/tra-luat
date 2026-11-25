@@ -1,6 +1,6 @@
-# wp1521 r4 — nợ B1a: `KHE_1460` báo ĐỎ trên nền không có khe chưa đo + lượt đột biến của Nghiệm thu 1 chỉ chạy khi byte đầu vào khác GỐC (NO-B1A-N2)
+# wp1521 r5 — nợ B1a: `KHE_1460` báo ĐỎ trên nền không có khe chưa đo + lượt đột biến của Nghiệm thu 1 chỉ chạy khi byte đầu vào khác GỐC (NO-B1A-N2)
 packet_id: wp1521
-revision: 4
+revision: 5
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
@@ -11,12 +11,15 @@ review_class: sensitive
 executor: claude
 environment: cloud (Linux)
 
-Trạng thái: r4. Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~08:5xZ, lựa chọn «+1 soạn, dùng review 4/4»). Thay r3 (`ops/wp1521-r1@2cf564c`, sha256 `4215a8bf…`). Review lượt 3 trên r3: N2-06 ĐÃ VÁ THẬT, N2-07 VÁ HỜ. Finding mới N2-08 (P2, lớp `mutation-cache-fingerprint-detached-from-inputs`): checkout nông giấu gốc hợp nhất, và hợp nhất đổi tên + sửa lọt qua diff. r4 bỏ hẳn diff và gốc hợp nhất ở bộ chọn K5, thay bằng so byte cây đang chạy với GỐC (2a–2c). r1 (`d2126b3a…`) được chủ kho duyệt trước review nhưng KHÔNG dùng để cấp lease. Chưa duyệt băm r4, chưa có lease.
+Trạng thái: r5 — bản sửa CÂU CHỮ của r4, không review lại. Review lượt 4/4 (cuối) trên r4 không còn P0–P2; chỉ còn N2-09 (P3, hai câu: dòng mục tiêu K5 còn mô tả theo diff; câu về `fetch-depth`). Chủ kho chọn «Sửa 4 câu, duyệt băm cả hai» (2026-11-25 ~09:2xZ). r5 chỉ đổi đúng các câu ấy cùng dòng tiêu đề, `revision`, đoạn Trạng thái và bảng Thay đổi; mọi phần quy định khác giữ nguyên byte so với r4. Diff r4→r5 nằm ở commit của nhánh. Chưa có lease.
+
+<!-- r4 trạng thái giữ làm lịch sử -->
+Trạng thái của r4 (lịch sử): Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~08:5xZ, lựa chọn «+1 soạn, dùng review 4/4»). Thay r3 (`ops/wp1521-r1@2cf564c`, sha256 `4215a8bf…`). Review lượt 3 trên r3: N2-06 ĐÃ VÁ THẬT, N2-07 VÁ HỜ. Finding mới N2-08 (P2, lớp `mutation-cache-fingerprint-detached-from-inputs`): checkout nông giấu gốc hợp nhất, và hợp nhất đổi tên + sửa lọt qua diff. r4 bỏ hẳn diff và gốc hợp nhất ở bộ chọn K5, thay bằng so byte cây đang chạy với GỐC (2a–2c). r1 (`d2126b3a…`) được chủ kho duyệt trước review nhưng KHÔNG dùng để cấp lease. Chưa duyệt băm r4, chưa có lease.
 
 ## Mục tiêu
 Đóng hai khoản nợ của B1a #1460 (hồ sơ `ops/land/pr1516-wp1460-land-evidence.yaml`, mục `no_ngoai_pham_vi`, khoản 3 và 5). Không đổi hợp đồng `bien_nhan_audit.v1`.
 - **K3.** Trên nền mà ca quét biên không chạm được giới hạn đệ quy, các ca và mutant gắn `KHE_1460` hiện tự biến mất, không báo gì. Sau packet này, nền ấy làm gate ĐỎ, trừ khi nền ấy nằm trong danh sách cho phép kèm phép đo đã ghi.
-- **K5.** `.claude/dev/ci_dang_ky_test.py --chay` không còn chạy 249 đột biến của khối «Lệnh kiểm» ở mỗi lượt. Lượt thường chạy khối ấy KHÔNG có `--dot-bien`. Lượt đầy đủ chỉ chạy khi diff đo được chạm vùng đầu vào, hoặc khi không đo được diff.
+- **K5.** `.claude/dev/ci_dang_ky_test.py --chay` không còn chạy 249 đột biến của khối «Lệnh kiểm» ở mỗi lượt. Lượt thường chạy khối ấy KHÔNG có `--dot-bien`. Lượt đầy đủ bị BỎ QUA chỉ khi mọi tệp đầu vào trong cây đang chạy trùng byte với blob tại GỐC, theo 2c. Thiếu dữ liệu để so hoặc lỗi bất kỳ ⇒ chạy đủ.
 
 ## Hợp đồng
 
@@ -86,7 +89,7 @@ Trạng thái: r4. Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026
 - Không sửa hai tệp `ops/specs/wp1460-r1/hop_dong/*`, `LENH_KIEM_HOP_DONG`, `BAM_HOP_DONG`, `DAU_RA_LENH_KIEM`, lệnh thu, `ci-dot-bien-du.yml`, `ci.yml`, `doc_diff`. Bộ chọn K5 KHÔNG gọi `doc_diff`.
 - Được phép đổi các bên tiêu dùng trạng thái mà 1d/1f nêu: `quet_bien`, `ca_wp1460`, `CON_1460`, bộ tổng hợp, bộ lọc mutant. Luật ĐẠT/GIẾT cũ giữ nguyên ý nghĩa.
 - Không đường nào biến một ca chưa đo thành ĐẠT. BỎ QUA chỉ sinh ra từ hai nguồn: bảng 1c, và điều kiện trùng byte ở 2c.
-- Tình trạng mạng: bộ chọn K5 chỉ gọi `git` cục bộ và đọc đĩa. Checkout của `gate-registry` dùng `fetch-depth: 0` (đo trong `ci.yml` lúc soạn r4), nên GỐC có mặt trên CI. Nếu sau này bỏ `fetch-depth: 0`, bộ chọn sẽ chạy đủ ở mọi lượt (fail-close): chỉ mất phần tiết kiệm, không mất tính đúng.
+- Tình trạng mạng: bộ chọn K5 chỉ gọi `git` cục bộ và đọc đĩa. Checkout của `gate-registry` dùng `fetch-depth: 0` (đo trong `ci.yml` lúc soạn r4), nên GỐC có mặt trên CI. Nếu sau này bỏ `fetch-depth: 0`: lượt nào thiếu đối tượng GỐC hoặc thiếu blob đầu vào sẽ chạy đủ (fail-close); lượt nào vẫn có đủ GỐC và blob để so mà bytes trùng thì vẫn được bỏ qua. Cả hai trường hợp đều không mất tính đúng.
 
 ## Nghiệm thu
 1. **Kiểm kê A/B trong MỘT lệnh.** Trên nền có khe (CI 3.12; nền executor), so base với head theo TÊN, với ĐÚNG MỘT ánh xạ đổi tên được phép (2c): `wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249` → hai ca `wp1460-hop-dong-lenh-kiem-fixture` và `wp1460-hop-dong-lenh-kiem-dot-bien`. Ngoài ánh xạ ấy:
@@ -194,6 +197,7 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp, ≤ 4
 | revision | thay đổi |
 |---|---|
 | r1 | bản đầu |
+| r5 | Sửa câu chữ theo N2-09 (P3, hai câu: dòng mục tiêu K5 còn mô tả theo diff; câu về `fetch-depth`) (review lượt 4/4). Không đổi hợp đồng, nghiệm thu, write set. |
 | r4 | Review lượt 3, N2-08 (`mutation-cache-fingerprint-detached-from-inputs`, lần thứ 3 của lớp: N2-05 → N2-07 → N2-08). Bỏ diff/gốc hợp nhất. Bộ chọn K5 so BYTE từng tệp của `V` (hợp danh sách trên đĩa và tại GỐC) giữa cây đang chạy và blob GỐC; lỗi bất kỳ ⇒ chạy đủ. Khai tiền đề tin GỐC (2d). Nghiệm thu 3 viết lại với các ca: nông, hợp nhất đổi tên + sửa, criss-cross, tệp có mặt ở một phía. Đột biến (xii)–(xviii), (xx) viết lại. |
 | r3 | Review lượt 2, 2 P2. `skip-state-consumer-contract-incomplete` (N2-06): nghiệm thu 1 khai đúng ánh xạ một tên cũ thành hai tên mới; 2(c)/(f) ghi số đếm đã đo (4/3; 2/2; 2/1). `mutation-cache-fingerprint-detached-from-inputs` (N2-07): chốt «đúng một gốc hợp nhất» ở bộ chọn K5, kèm ca criss-cross theo hai thứ tự cha và đối chứng tuyến tính; thêm 3 đột biến. |
 | r2 | Review lượt 1, 5 finding, sửa theo lớp:<br>• `skip-state-consumer-contract-incomplete` (N2-01): bốn ca chứ không phải hai; lan BỎ QUA sang ca bọc, mutant và baseline (1a, 1d, 1f).<br>• `skip-waiver-masks-measured-failure` (N2-02): bảng 1c đặt `dat_het` trước mọi quyết định bỏ qua; có hàng riêng cho kết quả lẫn và kết quả ném.<br>• `mutation-cache-enrollment-without-verified-evidence`, `self-referential-final-head-cache-bootstrap`, `mutation-cache-fingerprint-detached-from-inputs` (N2-03..05): bỏ bản ghi khoá; dùng `doc_diff()` có sẵn, vùng đầu vào tính theo `THU_MUC_HOP_DONG` thực tế; phụ thuộc bắc cầu khai là giới hạn KHÔNG ĐO ĐƯỢC (2d).<br>Nghiệm thu và bảng đột biến viết lại theo đó. |

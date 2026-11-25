@@ -72,8 +72,14 @@ write_set_hash: 16b061360dfd369f6b53b2a5eb3efe4cc483b5eb97020cb52d8904db0cef1a7f
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: 'Dung hai tep cua dot B theo bang write_set cua spec r12; phu thuoc dot A (da land 9d61d4e)'
 closure_status: 'Da quet ai-dang-giu NGUOI_GIU 0 truoc khi dang'
-tran_kich_thuoc: '<= 6 tep / <= 450 dong them (ADR-0053), do git diff --numstat origin/master...<head B>; vuot => DUNG truoc review (E2)'
-tran_loi_goi_codex: '4 loi goi Codex review ma cho dot B (chu kho, issuecomment-7129998930); luot bi cat van tinh (ADR-0052); cham tran ma chua approve => dung, hoi E2'
+tran_kich_thuoc: '<= 6 tep / <= 560 dong them, do git diff --numstat f602325...<head B>; vuot => DUNG truoc review (E2)'
+tran_loi_goi_codex: '6 loi goi Codex review ma cho dot B (chu kho nang 4 -> 6, issuecomment-7152104422); da dung 3; luot bi cat van tinh (ADR-0052); cham tran ma chua approve => dung, hoi E2'
+nang_tran:
+  tran_cu: '<= 6 tep / <= 450 dong them; 4 loi goi Codex'
+  tran_moi: '<= 6 tep / <= 560 dong them; 6 loi goi Codex'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7152104422
+  can_cu: 'Checkpoint §12 sau review ma luot 3 (B01 VA_MOT_PHAN lan 3, numstat 448/450); chu kho chon nang tran + them 2 luot Codex'
 windows: 'dot B: ADR-0060 M3 phan loai khi review ma theo dong them that (spec muc Kiem chung theo nen); neu required => Windows LOCAL tren may chu kho qua Desktop Commander (ADR-0057/58/59) tren exact head B; chu kho MIEN Windows CI cho dot B (issuecomment-7129998930); KHONG workflow_dispatch'
 coordination_paths:
 - ops/leases/wp1236-b-r12-g1-claude-20261124.yaml

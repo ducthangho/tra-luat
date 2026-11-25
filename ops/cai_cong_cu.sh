@@ -37,7 +37,7 @@ case "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet
 # wp868 (N1, Q1): ket qua ghi vao KENH RIENG `$KENH_KQ` (tep mktemp, bien KHONG export => trinh cai con khong biet duong
 # dan), KHONG in ra stdout: stdout di chung voi trinh cai nen moi dong canh/LF deu thua (F858-03, 4 duong). Noi dung
 # kenh: `GIU_PATH` (ten tran da DAT => khong doi PATH, Q3) hoac nhan + LF + thu muc (khong LF cuoi, doc nguyen van); nhan
-# la `DICH`, hoac `DICH_WIN` khi bo chon THAT SU duoc goi voi `--win` (wp1488 r4).
+# la `DICH`, hoac `DICH_WIN` khi bo chon THAT SU duoc goi voi `--win` (wp1488 r4). Kenh co byte NUL/0x01 => 7 (wp1488 r5).
 # `--win`: ung vien qua `cygpath -u`; dong $GITHUB_PATH qua `cygpath -w` o script chinh, theo nhan `DICH_WIN` (wp1488 r4),
 # chi khi ten tran chua DAT. Moi buoc
 # hong => `return 1` TUONG MINH vi cong thuc chay voi `errexit` tat (F858-01/04).
@@ -239,10 +239,14 @@ _tl1488_ghi_github_path() {  # <DICH cua lan doc kenh duy nhat> <che do: win | r
 }
 export -nf _tl1488_ghi_github_path
 # F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
+# wp1488 r5 (ops/specs/wp1488-r5.md B2, no WP1488-NUL-KENH, Codex luot 5 P2): `$( )` cua Bash BO byte NUL (chi canh bao),
+# nen `DICH_WIN\0\n<dir>` tung duoc nhan nhu `DICH_WIN\n<dir>`. Doi NUL thanh 0x01 TRONG CHINH lan doc duy nhat (pipefail:
+# loi `cat` van la loi doc => 7), roi tu choi moi 0x01 TRUOC moi phan nhanh: khong ghi $GITHUB_PATH, khong goi cygpath.
 if [ "$RC_CAI" -eq 0 ]; then
-KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
+KQ="$(cat -- "$KENH_KQ" | tr '\000' '\001' && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
 KQ="${KQ%x}"
 export -n KQ
+case "$KQ" in *$'\001'*) echo "cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi" >&2; exit 7 ;; esac
 case "$KQ" in
   DICH$'\n'?*) _tl1488_ghi_github_path "${KQ#DICH$'\n'}" "" || RC_CAI=1 ;;
   DICH_WIN$'\n'?*) _tl1488_ghi_github_path "${KQ#DICH_WIN$'\n'}" win || RC_CAI=1 ;;

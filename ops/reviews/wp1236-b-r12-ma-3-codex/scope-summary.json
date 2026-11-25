@@ -1,0 +1,54 @@
+{
+  "calls": 8396,
+  "positions": {
+    "header_free_text": {
+      "distinct": 2,
+      "values": {
+        "": 3833,
+        "luat dau hieu duong THEO BUOC ": 55
+      },
+      "empty_count": 3833,
+      "non_ascii_values": []
+    },
+    "skip_old_name": {
+      "distinct": 3,
+      "values": {
+        "x": 3838,
+        "2 x": 1,
+        " x": 1
+      },
+      "empty_count": 0,
+      "non_ascii_values": []
+    },
+    "skip_v3_name": {
+      "distinct": 4,
+      "values": {
+        "y": 3836,
+        "3 y": 1,
+        " y": 1,
+        "x": 1
+      },
+      "empty_count": 0,
+      "non_ascii_values": []
+    },
+    "labels": {
+      "distinct": 4,
+      "values": {
+        "nhan": 3836,
+        "1 ten [nhan": 1,
+        " ten [nhan": 1,
+        "ubuntu-latest": 2182
+      },
+      "empty_count": 0,
+      "non_ascii_values": []
+    }
+  },
+  "c35_files": 20,
+  "c35_invalid_utf8": 1,
+  "c35_rc": 0,
+  "ledger_equal": {
+    "b": 160,
+    "c36": 8396
+  },
+  "a125_grammar_positive": 348
+}

@@ -1,0 +1,134 @@
+[
+  {
+    "label": "control syntax valid",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 2 empty",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 2 nonBMP",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 2 delimiter inside name",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 3 empty",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 3 nonBMP",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "skip 3 delimiter inside name",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "header tail nonBMP",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "header tail embedded LF",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dau_tep_sai"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dau_tep_sai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "label empty",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "label nonBMP",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:bo_sinh_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "label forbidden bracket",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-10.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  }
+]

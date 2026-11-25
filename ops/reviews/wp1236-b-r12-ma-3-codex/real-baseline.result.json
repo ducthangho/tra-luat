@@ -1,0 +1,16 @@
+{
+  "name": "real-baseline",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b3-3-codex/work/baseline/ops/land_evidence_nguon_test.py",
+    "--mot-ca",
+    "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b3-3-codex/repo",
+  "rc": 0,
+  "seconds": 85.91,
+  "stdout_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "status": "passed",
+  "log": "logs/real-baseline.log"
+}

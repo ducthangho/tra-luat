@@ -1,0 +1,34 @@
+[
+  {
+    "id": "rename-small:a126_mien_ascii_qua_ho_so",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "cu": "def a126_mien_ascii_qua_ho_so():",
+    "moi": "def renamed_a126_mien_ascii_qua_ho_so():",
+    "status": "ngoai_bang_dong",
+    "not_in_B_manifest": true
+  },
+  {
+    "id": "rename-small:a129_ten_job_lazy_qua_ho_so",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "cu": "def a129_ten_job_lazy_qua_ho_so():",
+    "moi": "def renamed_a129_ten_job_lazy_qua_ho_so():",
+    "status": "ngoai_bang_dong",
+    "not_in_B_manifest": true
+  },
+  {
+    "id": "rename-small:a131_ten_tep_co_Z",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "cu": "def a131_ten_tep_co_Z():",
+    "moi": "def renamed_a131_ten_tep_co_Z():",
+    "status": "ngoai_bang_dong",
+    "not_in_B_manifest": true
+  },
+  {
+    "id": "rename-a134:a134_lop_dong_ten_tep_qua_ho_so",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "cu": "def a134_lop_dong_ten_tep_qua_ho_so():",
+    "moi": "def renamed_a134_lop_dong_ten_tep_qua_ho_so():",
+    "status": "ngoai_bang_dong",
+    "not_in_B_manifest": true
+  }
+]

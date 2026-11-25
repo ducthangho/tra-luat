@@ -515,8 +515,8 @@ _RE_SO_NOI_DONG = re.compile(r"(?<![\w.,])(?:\(\d+\)|\d+[^\S\n]*[.)])(?![\d\n]|$
 # Vì sao: `tach_khoan` đoán ranh giới từ văn bản THÔ, và mười lượt cross-review packet #1514 cho thấy trên văn bản thô
 # "khoản có điểm" và "lời dẫn nhóm + điểm là định nghĩa" có CÙNG hình dạng (nợ #1525). Google Doc đánh số TỰ ĐỘNG nên
 # export text/plain mất số; export .docx còn `w:numPr` (`w:numId` + `w:ilvl`) trên từng đoạn ⇒ ranh giới là DỮ LIỆU.
-# Chỉ thư viện chuẩn. Fail-closed: `KhongCauTruc` (Điều không có đoạn đánh số tự động — người gọi lùi về đường thô với
-# luật chặn của nó) hoặc `ValueError` (có cấu trúc nhưng mơ hồ/không hỗ trợ — DỪNG, không lùi về đoán).
+# Chỉ thư viện chuẩn. Fail-closed: `ValueError` khi cấu trúc mơ hồ/không hỗ trợ hoặc Điều không có đánh số tự động — DỪNG,
+# không lùi về đoán (r5, lượt 4 D1).
 _W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_member_bounded`
 
@@ -540,25 +540,16 @@ _CON_RUN_BO_QUA = {"rPr", "lastRenderedPageBreak", "commentReference", "annotati
 _TAT_OOXML = ("0", "false", "off")
 
 
-class KhongCauTruc(Exception):
-    """Điều không có đoạn nào được đánh số tự động — không có cấu trúc để đọc. `van_ban` mang chữ của Điều (mỗi đoạn một
-    dòng) để người gọi lùi về đường văn bản thô với luật chặn của nó."""
-
-    def __init__(self, ly_do, van_ban=""):
-        super().__init__(ly_do)
-        self.van_ban = van_ban
-
-
-def _nap_docx_markup():
+def _nap_doc_gioi_han():
+    """`read_member_bounded` (chống zip-bomb) khi nạp được; None ⇒ dùng trần `_TRAN_XML` tại chỗ."""
     goc = str(Path(__file__).resolve().parents[1])
     if goc not in sys.path:
         sys.path.insert(0, goc)
-    import docx_markup   # noqa: E402 — cùng bộ lọc markup với `tl extract`
     try:
         from tl_core.ingest_engine import read_member_bounded
     except Exception:  # noqa: BLE001
         read_member_bounded = None
-    return docx_markup, read_member_bounded
+    return read_member_bounded
 
 
 def _doc_thanh_phan(z, ten, doc_gioi_han):
@@ -597,6 +588,8 @@ def _doc_danh_so(z, doc_gioi_han):
             loi = "abstractNum numStyleLink khong ho tro"
         if an.find(_W + "styleLink") is not None:
             loi = "abstractNum styleLink khong ho tro"
+        if any(k.endswith("}restartNumberingAfterBreak") and v not in _TAT_OOXML for k, v in an.attrib.items()):
+            loi = "abstractNum restartNumberingAfterBreak (danh so lai sau ngat section) khong ho tro"   # r5 (lượt 4 D2)
         for lvl in an.findall(_W + "lvl"):
             il = int(lvl.get(_W + "ilvl", "0"))
             fmt = lvl.find(_W + "numFmt")
@@ -763,7 +756,7 @@ def _trong_bang(cha, can, bo_qua):
 
 
 def _phan_tich_doan(p, kieu):
-    """dict của một đoạn (sau `strip_markup`): chu, so (numId, ilvl)|None, so_tu_style, con_bo, ngat, la.
+    """dict của một đoạn (XML GỐC — r5 lọc chữ đã bỏ ngay tại đây): chu, so (numId, ilvl)|None, so_tu_style, ngat, la.
 
     r3 (lượt 2): duyệt TƯỜNG MINH theo danh sách cho phép (`_CON_DOAN_*`, `_CON_RUN_*`) thay cho `iter()` — phần tử không hiểu
     (ký hiệu `w:sym`, trường `w:fldChar`, hình, chú thích, `mc:AlternateContent`…) ⇒ `la` (B4). Gạch đơn/kép tính RIÊNG qua
@@ -774,7 +767,7 @@ def _phan_tich_doan(p, kieu):
     mac = kieu.get("", (None, None, None))
     nen = {t: bool(mac[k]) or _bat_trong_chuoi(kieu, psid, 3 if t == "strike" else 4)
            for k, t in ((0, "strike"), (1, "dstrike"))}
-    kq = {"phan": [], "con_bo": False, "ngat": False, "la": False}
+    kq = {"phan": [], "ngat": False, "la": False}
 
     def run(r):
         rpr = r.find(_W + "rPr")
@@ -797,13 +790,16 @@ def _phan_tich_doan(p, kieu):
                 chu_run.append(" ")
                 kq["ngat"] = True
             elif ten in ("delText",):
-                kq["con_bo"] = True
+                continue   # chữ đã xoá (track changes) — không vào nguyên văn
             elif ten in _CON_RUN_BO_QUA:
                 continue
             else:
                 kq["la"] = True   # B4: phần tử hiển thị chưa hiểu ⇒ không biết chữ thật
-        if (hl["strike"] or hl["dstrike"]) and "".join(chu_run).strip():
-            kq["con_bo"] = True   # A4/B3: chữ gạch ngang còn sau bộ lọc
+        if hl["strike"] or hl["dstrike"]:
+            # r5 (lượt 4 D3): chữ GẠCH NGANG hiệu lực (gạch đơn/kép, mọi tầng, theo namespace) là chữ ĐÃ BỎ của dự thảo ⇒ bỏ,
+            # như `tl extract --markup strip` — nhưng lọc theo CÂY, không qua regex của `docx_markup` (regex có thể nuốt ranh
+            # giới đoạn khi run rỗng tự đóng đứng trước run gạch).
+            return
         kq["phan"].extend(chu_run)
 
     def duyet(cha):
@@ -820,7 +816,7 @@ def _phan_tich_doan(p, kieu):
                 else:
                     duyet(nd)
             elif ten in ("del", "moveFrom"):
-                kq["con_bo"] = True
+                continue   # nội dung đã xoá/chuyển đi — không vào nguyên văn
             elif ten in _CON_DOAN_BO_QUA or ten in ("customXmlPr", "smartTagPr", "sdtPr", "sdtEndPr"):
                 continue
             else:
@@ -838,7 +834,7 @@ def _phan_tich_doan(p, kieu):
         il = int(e.get(_W + "val")) if e is not None else il
     so = None if nid in (None, "0") else (nid, il or 0)
     return {"chu": _gon_doan("".join(kq["phan"])), "so": so, "so_tu_style": tu_style and so is not None,
-            "con_bo": kq["con_bo"], "ngat": kq["ngat"], "la": kq["la"]}
+            "ngat": kq["ngat"], "la": kq["la"]}
 
 
 def _dieu_ke_tiep(dieu, dau):
@@ -859,29 +855,33 @@ def doc_dieu_docx(nguon, dieu):
     - `van_ban`: tiêu đề + câu dẫn + các khoản có nhãn — đưa cho model.
     - `cau_dan`: các đoạn KHÔNG đánh số đứng trước khoản đầu (người gọi xác thực — hàm này không quyết câu dẫn).
 
-    Ném `KhongCauTruc` khi Điều không có đoạn đánh số tự động; `ValueError` khi cấu trúc mơ hồ/không hỗ trợ."""
-    dm, doc_gioi_han = _nap_docx_markup()
+    Ném `ValueError` khi cấu trúc mơ hồ/không hỗ trợ — kể cả khi Điều không có đánh số tự động (r5, lượt 4 D1: không lùi về
+    đường thô, vì ranh giới cuối Điều trong .docx không đánh số chỉ có bằng chứng tiền tố)."""
+    doc_gioi_han = _nap_doc_gioi_han()
     import io
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
         goc_xml = _doc_thanh_phan(z, "word/document.xml", doc_gioi_han).decode("utf-8", errors="strict")
-        xml, _ = dm.strip_markup(goc_xml, "strip")   # chữ ĐÃ BỎ của dự thảo không vào nguyên văn (như `tl extract`)
         danh_so = _doc_danh_so(z, doc_gioi_han)
         kieu = _doc_kieu(z, doc_gioi_han)
+    goc_cay = ET.fromstring(goc_xml)
+    if goc_cay.tag != _W + "document":
+        # r5 (lượt 4 D5): .docx Strict (namespace purl.oclc.org) hay tệp lạ — giới hạn đã khai.
+        raise ValueError("document.xml khong phai WordprocessingML Transitional (vd .docx Strict) — luu lai dang Word Document")
     # r2 (lượt 1 A4): sửa đổi DẤU ĐOẠN (gộp/tách đoạn bằng track-changes) — bộ lọc bỏ dấu nhưng giữ hai `w:p` ⇒ ranh giới
     # đoạn KHÔNG còn là ranh giới thật. Đo trên XML GỐC, theo namespace (mọi tiền tố).
-    for rpr in ET.fromstring(goc_xml).iter(_W + "rPr"):
+    for rpr in goc_cay.iter(_W + "rPr"):
         if any(c.tag in (_W + "del", _W + "ins", _W + "moveFrom", _W + "moveTo") for c in rpr):
             raise ValueError("tai lieu co sua doi dau doan (track changes gop/tach doan) — ranh gioi doan khong tin duoc")
-    body = ET.fromstring(xml).find(_W + "body")
+    body = goc_cay.find(_W + "body")
     if body is None:
         raise ValueError("document.xml khong co w:body")
     # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số (kể cả trong bảng/sdt) — bộ đếm Word chạy suốt tài liệu theo numId.
     bo_dem_tl = {}
-    doan = []   # dict: chu, so (numId, ilvl)|None, dem, loai ("p"|"bang"|"la"), trong_bang, con_bo, ngat
+    doan = []   # dict: chu, so (numId, ilvl)|None, dem, loai ("p"|"bang"|"la"), trong_bang, ngat, la, so_tu_style
     for loai, el, trong_bang in _doan_trong(body):
         if loai != "p":
             doan.append({"chu": "", "so": None, "dem": None, "loai": loai, "trong_bang": trong_bang,
-                         "con_bo": False, "ngat": False, "la": loai == "la", "so_tu_style": False})
+                         "ngat": False, "la": loai == "la", "so_tu_style": False})
             continue
         pt = _phan_tich_doan(el, kieu)
         so = pt["so"]
@@ -910,21 +910,20 @@ def doc_dieu_docx(nguon, dieu):
         raise ValueError("doan tieu de Dieu duoc danh so tu dong")
     if doan[i0]["ngat"]:
         raise ValueError("doan tieu de Dieu co ngat dong mem")   # r4 (lượt 3 C1): kể cả khi chữ khớp mẫu tiêu đề
-    if not _RE_TIEU_DE_TRON.match(doan[i0]["chu"]) or doan[i0]["con_bo"] or doan[i0]["la"]:
+    if not _RE_TIEU_DE_TRON.match(doan[i0]["chu"]):
         # r3 (lượt 2 B1): tiêu đề DÍNH thân khoản — cùng danh sách cho phép với đường thô (`Điều N.` / `… Giải thích từ ngữ`).
         raise ValueError(f"tieu de Dieu ngoai hinh dang cho phep: {doan[i0]['chu'][:60]!r}")
+    if doan[i0]["la"]:
+        raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     if any(d["loai"] == "la" for d in doan[:i0]):
         # r3 (lượt 2 B2): khối chưa hiểu TRƯỚC Điều có thể che một mục của danh sách ⇒ bộ đếm không tin được.
         raise ValueError("khoi khong ho tro truoc Dieu — bo dem so khong tin duoc")
-    vung = []
-    for d in doan[i0 + 1:]:
+    vung, i_het = [], len(doan)
+    for i_d, d in enumerate(doan[i0 + 1:], i0 + 1):
         if d["loai"] == "p" and not d["trong_bang"] and (_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"])):
             if d["so"] is not None:
                 # lượt 1 A1: đoạn mở bằng "Điều/Chương/…" mà được đánh số tự động ⇒ có thể là khoản, không phải ranh giới.
                 raise ValueError(f"doan danh so tu dong mo bang tieu de: {d['chu'][:60]!r}")
-            if d["con_bo"]:
-                # r3 (lượt 2 B1): ranh giới mang chữ đã bỏ ⇒ có thể không phải tiêu đề thật.
-                raise ValueError(f"doan ranh gioi Dieu co chu da bo: {d['chu'][:60]!r}")
             if d["la"]:
                 raise ValueError(f"doan ranh gioi Dieu co phan tu la: {d['chu'][:60]!r}")
             if d["ngat"]:
@@ -933,17 +932,16 @@ def doc_dieu_docx(nguon, dieu):
             if md and not _dieu_ke_tiep(str(dieu), md.group(0)):
                 # r4 (lượt 3 C1): đoạn "Điều X." mà X KHÔNG phải Điều kế tiếp ⇒ có thể là trích dẫn trong thân ⇒ không đoán.
                 raise ValueError(f"doan mo bang 'Dieu' khong phai Dieu ke tiep: {d['chu'][:60]!r}")
+            i_het = i_d
             break
         vung.append(d)
     # Kiểm TRƯỚC khi lùi về đường thô (lượt 1 A1): bảng, khối lạ, chữ đã bỏ còn sót ⇒ dừng ở MỌI đường.
     if any(d["loai"] != "p" or d["trong_bang"] for d in vung):
         raise ValueError("Dieu chua bang hoac khoi khong ho tro")
-    if any(d["con_bo"] for d in vung):
-        raise ValueError("Dieu con chu gach ngang/da xoa sau bo loc markup — khong doc duoc nguyen van")
     if any(d["la"] for d in vung):
         raise ValueError("Dieu co phan tu khong ho tro (ky hieu, truong, hinh, chu thich…) — khong biet chu that")
     if any(d["ngat"] for d in vung):
-        # r3 (lượt 2 B1): ngắt dòng mềm trong đoạn có thể che ranh giới khoản (kể cả ở đường thô sau KhongCauTruc).
+        # r3 (lượt 2 B1): ngắt dòng mềm trong đoạn có thể che ranh giới khoản .
         raise ValueError("Dieu co ngat dong mem trong doan — ranh gioi khoan khong tin duoc")
     if any(d["so"] is not None and not d["chu"] for d in vung):
         raise ValueError("doan danh so tu dong rong trong Dieu")   # r3 (lượt 2 B1): quyết TRƯỚC khi bỏ đoạn rỗng
@@ -954,7 +952,7 @@ def doc_dieu_docx(nguon, dieu):
     tieu_de = doan[i0]["chu"]
     co_so = [d for d in vung if d["so"] is not None]
     if not co_so:
-        raise KhongCauTruc(f"Dieu {dieu} khong co doan danh so tu dong", "\n".join([tieu_de, *(d["chu"] for d in vung)]))
+        raise ValueError(f"Dieu {dieu} khong co doan danh so tu dong — dung tep van ban (--tep .txt) cho duong tho")
     for d in co_so:   # lượt 1 A5: chỉ xác thực các danh sách Điều đích DÙNG
         nid, il = d["so"]
         dn = danh_so.get(nid)
@@ -964,12 +962,16 @@ def doc_dieu_docx(nguon, dieu):
             raise ValueError(f"numId {nid}: {dn['loi']}")
     cap0 = min(d["so"][1] for d in co_so)
     nid0 = co_so[0]["so"][0]
+    if any(d["so"] is not None and d["so"][0] == nid0 for d in doan[i_het:]):
+        # r5 (lượt 4 D1): danh sách khoản CÒN TIẾP sau điểm cắt ⇒ điểm cắt (chỉ có bằng chứng tiền tố) có thể là đoạn trích
+        # trong thân, các khoản sau bị bỏ ⇒ không đoán.
+        raise ValueError("danh sach khoan con tiep sau diem cat Dieu — ranh gioi khong tin duoc")
     muc0 = danh_so[nid0]["muc"]
     fmt0, txt0, _ = muc0[cap0]
     if fmt0 != "decimal" or not re.fullmatch(rf"%{cap0 + 1}[.)]", txt0):
         # lượt 1 A2: nhãn khoản phải CHÍNH LÀ số của cấp khoản (`%N.`/`%N)`), không cố định/ghép cấp khác.
         raise ValueError(f"cap khoan co numFmt {fmt0!r}, lvlText {txt0!r} (can decimal, '%{cap0 + 1}.')")
-    cau_dan, khoan = [], []
+    cau_dan, khoan, diem_go_tay = [], [], set()
     for d in vung:
         chu = d["chu"]
         if d["so"] is None:
@@ -977,6 +979,7 @@ def doc_dieu_docx(nguon, dieu):
                 cau_dan.append(chu)   # trước khoản đầu: không phải khoản theo cấu trúc
             elif _RE_DIEM_GO_TAY_DOCX.match(chu):
                 khoan[-1][1] += "\n" + chu   # điểm gõ tay trong khoản đang mở
+                diem_go_tay.add(id(d))
             else:
                 # đoạn KHÔNG đánh số sau khoản đầu: có thể là khoản mất số, tiếp dòng hay lời dẫn nhóm ⇒ không đoán.
                 raise ValueError(f"doan khong danh so giua cac khoan: {chu[:60]!r}")
@@ -995,7 +998,7 @@ def doc_dieu_docx(nguon, dieu):
         raise ValueError(f"so khoan khong lien tuc tu 1: {[so for so, _, _ in khoan]}")
     dong = [tieu_de, *cau_dan] + [f"{so}. {txt}" for so, txt, _ in khoan]
     return {"van_ban": "\n".join(dong), "khoan": [(so, txt, dau) for so, txt, dau in khoan], "cau_dan": cau_dan,
-            "chu_doan": [d["chu"] for d in vung]}
+            "chu_doan": [(d["chu"], id(d) in diem_go_tay) for d in vung]}
 
 
 PHAM_VI_KIEM_CAU_TRUC = ("thuat ngu va dinh nghia khop nguyen van tung khoan; ranh gioi khoan doc tu CAU TRUC danh sach "
@@ -1004,13 +1007,13 @@ PHAM_VI_KIEM_CAU_TRUC = ("thuat ngu va dinh nghia khop nguyen van tung khoan; ra
 
 def doc_dieu_cau_truc(nguon, dieu):
     """#1525: Điều `dieu` từ .docx theo cấu trúc danh sách đánh số. Trả `(van_ban, khoan)` — `khoan` dùng cho
-    `lech_nguyen_van`. Ném `KhongCauTruc` (Điều không có đánh số tự động; `.van_ban` cho đường thô) hoặc
-    `ValueError` (cấu trúc mơ hồ). Câu dẫn (đoạn không số trước khoản đầu) phải là ĐÚNG MỘT câu dẫn chuẩn hoặc vắng."""
+    `lech_nguyen_van`. Ném `ValueError` khi cấu trúc mơ hồ/không hỗ trợ hoặc Điều không có đánh số tự động. Câu dẫn (đoạn không số trước khoản đầu) phải là ĐÚNG MỘT câu dẫn chuẩn hoặc vắng."""
     kq = doc_dieu_docx(nguon, dieu)
-    for chu in kq["chu_doan"]:
+    for chu, la_diem_go_tay in kq["chu_doan"]:
         # r4 (lượt 3 C3): cùng chốt dấu phân cách mơ hồ với đường thô — `_quet` không nhận cặp dấu ngoài danh sách nên "là"
         # trong `[…]`/`«…»` có thể bị lấy làm từ nối cấp khoản. Đo trên CHỮ đoạn (nhãn tự động không nằm trong chữ).
-        if _dong_mo_ho(_bo_dau_dong(chu) if _RE_DIEM_GO_TAY_DOCX.match(chu) else chu):
+        # r5 (lượt 4 D6): chỉ gỡ dấu điểm của ĐIỂM GÕ TAY (vai trò đã xác định), không gỡ ở đoạn đánh số tự động.
+        if _dong_mo_ho(_bo_dau_dong(chu) if la_diem_go_tay else chu):
             raise ValueError(f"doan co dau ngoac/trich dan mo ho: {chu[:60]!r}")
     cd = kq["cau_dan"]
     if len(cd) > 1 or (cd and not _RE_CAU_DAN_TRON.fullmatch(" ".join(cd[0].split()))):

@@ -3044,10 +3044,6 @@ def cmd_llm_khai_niem(a) -> int:
         try:
             van_ban, khoan_ct = lr.doc_dieu_cau_truc(Path(a.tep), dieu)
             nguon_vb = f"{a.tep} (docx, ranh gioi khoan tu cau truc danh sach)"
-        except lr.KhongCauTruc as e:
-            # Điều không có đánh số tự động ⇒ lùi về đường thô với ĐỦ luật chặn của nó (không đoán thêm).
-            print(f"[tl] {e} — dung duong van ban tho", file=sys.stderr)
-            van_ban, nguon_vb = e.van_ban, f"{a.tep} (docx, van ban tho)"
         except (ValueError, KeyError, OSError, zipfile.BadZipFile, lr.ET.ParseError) as e:
             print(f"[tl] khong doc duoc cau truc Dieu {dieu} tu {a.tep}: {type(e).__name__}: {e}", file=sys.stderr)
             return 2

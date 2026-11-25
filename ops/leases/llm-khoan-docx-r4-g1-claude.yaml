@@ -73,3 +73,5 @@ revision_ly_do: 'Cross-review luot 3 (C1-C4 P1, C5-C6 P2, C7 P3). Tran review ti
 review_calls_limit: 5
 review_calls_used_truoc: 3
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r5-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 4 (D1-D6); revision r5 (ops/specs/llm-khoan-docx-r5.md).'

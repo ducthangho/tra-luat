@@ -1129,6 +1129,55 @@ def _mau_loai_unicode(cam, bo_loai=()):
     return (*mau.values(), "𐐀")
 
 
+# #1539: MIỀN của `_mau_loai_unicode` chốt bằng HẰNG chép từ đặc tả bo-sinh-bat-bien r1 (Unicode 15.1), không tính bằng chính bộ sinh — c36 và c37
+# của `land_evidence_nguon_test.py` tái dùng bộ sinh này. Năm bộ đối số mà các ca ở đây gọi: (cam, bo_loai, số phần tử, category VẮNG).
+LOAI_UNICODE = tuple("Lu Ll Lt Lm Lo Mn Mc Me Nd Nl No Pc Pd Ps Pe Pi Pf Po Sm Sc Sk So Zs Zl Zp Cc Cf Cs Co Cn".split())
+BO_SINH_MONG = (("—", (), 31, ()), ("", ("Cs",), 30, ("Cs",)),
+                ("\n\r\v\f\x1c\x1d\x1e\x85" + chr(0x2028) + chr(0x2029) + " \t", (), 29, ("Zl", "Zp")),   # U+2028/U+2029: ký tự DUY NHẤT của Zl/Zp
+                ("", (), 31, ()), ("\r\n", ("Cs",), 30, ("Cs",)))
+
+
+def kiem_bo_sinh(bo_sinh):
+    """Kiểm MỘT bộ sinh (tham số, để a136 đưa bộ sinh giả vào) với năm bộ đối số trên; ĐỎ ở bộ đầu tiên lệch, nêu TÊN từng mệnh đề lệch."""
+    from unicodedata import category
+    for cam, bo_loai, so, vang in BO_SINH_MONG:
+        ra = tuple(bo_sinh(cam, bo_loai))
+        bmp = [category(c) for c in ra if ord(c) <= 0xFFFF]
+        lech = [ten for ten, dat in (("so_phan_tu", len(ra) == so), ("category_vang", sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)),
+                                     ("lap_category", len(bmp) == len(set(bmp))), ("thuoc_cam", not any(c in cam for c in ra)),
+                                     ("tu_0080", all(ord(c) >= 0x80 for c in ra)),
+                                     ("cuoi_ngoai_bmp", bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1)) if not dat]
+        bang(not lech, f"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}")
+
+
+@ca
+def a135_bo_sinh_dung_mien_dac_ta():
+    kiem_bo_sinh(_mau_loai_unicode)
+
+
+@ca
+def a136_a135_do_khi_bo_sinh_lech_mien():
+    """#1539 P7: chạy CHÍNH a135 với bộ sinh giả — bỏ một category, bỏ ký tự ngoài BMP, bỏ lọc `cam`, bỏ lọc `bo_loai`, và hai biến thể cho hai
+    mệnh đề còn lại (lặp category, đại diện ASCII) — mỗi biến thể phải ĐỎ ở đúng bộ đối số và đúng các mệnh đề; bộ sinh thật thì XANH."""
+    from unicodedata import category
+    from unittest.mock import patch
+    goc, a135, cam_3 = _mau_loai_unicode, "a135_bo_sinh_dung_mien_dac_ta", BO_SINH_MONG[2][0]
+    for ten, gia, dau in (
+        ("that", goc, None),
+        ("bo Mn", lambda cam, bo=(): tuple(c for c in goc(cam, bo) if category(c) != "Mn"), "('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']"),
+        ("bo ngoai BMP", lambda cam, bo=(): goc(cam, bo)[:-1], "('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"),
+        ("bo loc cam", lambda cam, bo=(): goc("", bo), f"({cam_3!r}, ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']"),
+        ("bo loc bo_loai", lambda cam, bo=(): goc(cam), "('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']"),
+        ("Mn thanh ban sao Mc", lambda cam, bo=(): tuple(next(d for d in goc(cam, bo) if category(d) == "Mc") if category(c) == "Mn" else c
+                                                         for c in goc(cam, bo)), "('—', ()) lệch đặc tả: ['category_vang', 'lap_category']"),
+        ("Lu thanh ASCII", lambda cam, bo=(): tuple("A" if category(c) == "Lu" and ord(c) <= 0xFFFF else c for c in goc(cam, bo)),
+         "('—', ()) lệch đặc tả: ['tu_0080']"),
+    ):
+        with patch.dict(globals(), {"_mau_loai_unicode": gia}):
+            rc, dong = chay_ca(a135)
+        bang((rc, dong) == ((0, "") if dau is None else (3, f"DO:{a135}:bộ sinh{dau}")), f"bộ sinh {ten}: rc={rc} {dong[:300]}")
+
+
 @ca
 def a129_ten_job_lazy_qua_ho_so():
     tep_goc, prov_goc, *_ = FX["T-v3-pass"]

@@ -1,0 +1,46 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1529
+packet_id: px-loc-markup
+revision: 2
+generation: 1
+lease_id: px-loc-markup-r2-g1-claude
+role: executor
+reviewer: 'Codex offline qua launcher.py truoc push (ADR-0060 M5/M12) + connector Codex tren PR khi con draft'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 7346ea0046b80fd291617f608f4f731cfd600c34
+target_hosts: []
+live_change: 'Khong co. Sua module proxima-control trong kho; 0 thao tac VM, 0 loi goi inference. Harness chay tren may Windows cua chu kho (N6).'
+spec_path: ops/specs/px-loc-markup-r2.md
+spec_hash: 5584a9f19b257de5e9896bc000e957945123d026305e3f7f23746ee783b91876
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/scripts/ProximaControl.psm1
+- .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+- ops/acceptance/px-loc-markup/r2/RESULTS.md
+- ops/leases/px-loc-markup-r2-g1-claude.yaml
+- ops/specs/px-loc-markup-r2.md
+write_set_hash: bd0ccf82d1fb9a53ea9ede9ce3e10fd334b5c7cc2fc2db48128845c83af9dde2
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+nang_tran:
+  ai_nang: ducthangho (chủ kho, thẩm quyền §2 protocol; ghi hộ issuecomment-7172063543)
+  can_cu: 'Chép từ đặc tả r2: 8 tệp / 329 dòng thêm (git diff --numstat d0868db..8776803); 5 tệp mã của module + 3 tệp sổ sách.'
+  tran_cu: 6 tệp / 450 dòng thêm (ADR-0053)
+  tran_moi: 8 tệp / 450 dòng thêm
+branch: ops/px-loc-markup-r1
+base_sha: 7346ea0046b80fd291617f608f4f731cfd600c34
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25-11-2026 "Toi duyet bam dac ta r2"; ghi ho https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7172132991'
+recorded_by: 'phien executor (vai executor cua packet px-loc-markup)'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Khong bia mo: lease r1 (nhanh cuc bo, chua push) da rut han ve 2026-11-25T19:25:58Z theo chi thi chu kho (issuecomment-7172238820); ai-dang-giu do 0 cho ca write set truoc khi cap.'
+leased_at_utc: '2026-11-25T19:28:04Z'
+heartbeat_at: '2026-11-25T19:28:04Z'
+lease_until: '2026-11-25T23:28:04Z'
+lease_expires_at_utc: '2026-11-25T23:28:04Z'
+max_lease_hours: 4
+native_runs_limit_per_host: 0
+inference_calls_limit_per_host: 0

@@ -1075,6 +1075,27 @@ def ca_wp1514_luot4(m):
          "D3 doi chung: mot cau dan o dong dau bi chan oan")
 
 
+def ca_wp1514_luot5(m):
+    """r5 (lượt 5): E1 dấu số dính thân trong thân khoản · E2 câu dẫn phải có đúng một `:` và không có chữ "là"."""
+    CD = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    # E1: tiểu mục nội dòng dính thân (`1.chuẩn bị`) ⇒ mơ hồ; đối chứng số thập phân và số dính thân ở ĐẦU dòng vẫn qua.
+    e1 = "Điều 3.\n1. Hồ sơ là tài liệu.\n2. Quy trình là các bước gồm 1.chuẩn bị và 2.thực hiện.\n3. Bàn giao là kết thúc."
+    bang(m.tach_khoan(e1) is None, f"E1: so dinh than noi dong phai mo ho: {m.tach_khoan(e1)}")
+    bang(m.tach_khoan("Điều 3.\n1.Hồ sơ là tài liệu nặng 1.5 kg.\n2.Quy trình là các bước.") is not None,
+         "E1 doi chung: so thap phan / so dinh than dau dong bi chan oan")
+    # E2a: dòng đầu có dấu `:` ở giữa (không chữ "là") ⇒ không phải câu dẫn ⇒ không được bỏ.
+    e2a = "Điều 3.\nDữ liệu: thông tin số được hiểu như sau:\nHồ sơ là tài liệu."
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu.")), e2a) != [], "E2a: dong dau co hai dau hai cham bi bo nhu cau dan")
+    # E2b: dòng đầu có "là" trong ngoặc (`_tu_noi` bỏ qua) ⇒ không được bỏ.
+    e2b = "Điều 3.\nDữ liệu (là thông tin số) được hiểu như sau:\nHồ sơ là tài liệu."
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu.")), e2b) != [], "E2b: dong dau co chu la trong ngoac bi bo nhu cau dan")
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu.")), f"Điều 3.\n{CD}\nHồ sơ là tài liệu.") == [],
+         "E2 doi chung: cau dan chuan bi chan oan")
+
+
 def ca_usage_thieu_truong(m):
     bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
     bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
@@ -1091,22 +1112,26 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
     # wp1514 lượt 2 (A1/A2/A3/A4).
-    ("wp1514_l2_cau_dan_bo_tu_noi", ('_RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None:', '_RE_CAU_DAN.search(" ".join(ln.split())):'), "ca_wp1514_luot2"),
+    ("wp1514_l2_cau_dan_bo_tu_noi", ('_RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None\n              and ln.count(":") == 1 and not _RE_LA_TU.search(ln)):', '_RE_CAU_DAN.search(" ".join(ln.split()))\n              and ln.count(":") == 1):'), "ca_wp1514_luot2"),
     ("wp1514_l2_cham_phay_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".;!?")'), "ca_wp1514_luot2"),
     ("wp1514_l2_hai_cham_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".!?:")'), "ca_wp1514"),
     ("wp1514_l2_bo_so_noi_dong", ("    if any(_RE_SO_NOI_DONG.search(txt) for _, txt in khoan):\n        return None", "    if False:\n        return None"), "ca_wp1514_luot2"),
-    ("wp1514_l2_so_noi_dong_nhan_thap_phan", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)]")'), "ca_wp1514_luot2"),
+    ("wp1514_l2_so_noi_dong_nhan_thap_phan", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n]|[^\W\d_])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)]")'), "ca_wp1514_luot2"),
     # r3 (lượt 3 C1/C2).
     ("wp1514_l3_tieu_de_chi_do_la", ('        if not _RE_TIEU_DE_TRON.match(" ".join(dong[0].split())):\n', '        if _RE_LA.search(dong[0]):\n'), "ca_wp1514_luot3"),
-    ("wp1514_l3_so_noi_dong_qua_dong", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")'), "ca_wp1514_luot3"),
+    ("wp1514_l3_so_noi_dong_qua_dong", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n]|[^\W\d_])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s|[^\W\d_])")'), "ca_wp1514_luot3"),
     # r4 (lượt 4 D1/D3).
-    ("wp1514_l4_chi_cach_ascii", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")'), "ca_wp1514_luot4"),
-    ("wp1514_l4_cau_dan_moi_vi_tri", ("        elif i_dong == 0 and _RE_CAU_DAN.search(", "        elif not khoan and _RE_CAU_DAN.search("), "ca_wp1514_luot4"),
+    ("wp1514_l4_chi_cach_ascii", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n]|[^\W\d_])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t]|[^\W\d_])")'), "ca_wp1514_luot4"),
+    # r5 (lượt 5 E1/E2).
+    ("wp1514_l5_so_dinh_than", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n]|[^\W\d_])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")'), "ca_wp1514_luot5"),
+    ("wp1514_l5_cau_dan_nhieu_hai_cham", ('              and ln.count(":") == 1 and not _RE_LA_TU.search(ln)):', '              and not _RE_LA_TU.search(ln)):'), "ca_wp1514_luot5"),
+    ("wp1514_l5_cau_dan_la_trong_ngoac", ('              and ln.count(":") == 1 and not _RE_LA_TU.search(ln)):', '              and ln.count(":") == 1):'), "ca_wp1514_luot5"),
+    ("wp1514_l4_cau_dan_moi_vi_tri", ("        elif (i_dong == 0 and _RE_CAU_DAN.search(", "        elif (not khoan and _RE_CAU_DAN.search("), "ca_wp1514_luot4"),
     ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
     ("wp1514_bo_x2", ("    if ln.count('\"') >= 3:\n        return True", "    if False:\n        return True"), "ca_wp1514"),

@@ -1,0 +1,76 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1514
+packet_id: llm-ranh-gioi-khoan
+revision: 5
+generation: 1
+lease_id: llm-ranh-gioi-khoan-r5-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+spec_path: ops/specs/llm-ranh-gioi-khoan-r5.md
+spec_hash: f0aa061a3651e585bb407ed328bad162cbef5e5e1d85d73152b1d0f0c2b9ef1c
+write_set:
+- CHANGELOG.md
+- RELEASE_MANIFEST.json
+- docs/GOI_AGENT_DA_NEN.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-1-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-2-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-3-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-4-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-5-codex/run.json
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-6-codex/PROMPT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-6-codex/VERDICT.md
+- ops/acceptance/llm-ranh-gioi-khoan/r1/review-6-codex/run.json
+- ops/leases/llm-ranh-gioi-khoan-r1-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r2-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r3-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r4-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r5-g1-claude.yaml
+- ops/specs/llm-ranh-gioi-khoan-r1.md
+- ops/specs/llm-ranh-gioi-khoan-r2.md
+- ops/specs/llm-ranh-gioi-khoan-r3.md
+- ops/specs/llm-ranh-gioi-khoan-r4.md
+- ops/specs/llm-ranh-gioi-khoan-r5.md
+- scripts/tl_core/llm_route.py
+- scripts/tl_core/llm_route_test.py
+- scripts/tl_selftest.py
+write_set_hash: e88a265549c46b4e0f2d848ebfd1d6600125b4ba708f7eacb79496df21b1fdb8
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Ho so review Codex dat trong ops/acceptance/llm-ranh-gioi-khoan/r1/review-N-codex/ (N<=6, dung tran). Khong sua ops_misc.py, command_registry.py, tl.py, ci.yml, launcher.py; tl_selftest.py THEM o r4 (dac ta §2.7). ai-dang-giu tren clone phan chieu 339/339 nhanh (25-11-2026): 5 tep ma/tai lieu NGUOI_GIU 0.'
+branch: ccr-89c0d2e2-inanqb
+base_sha: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25/11 trong phien session_015GtxrZQYT3Vt8PJdXrjEKg: "Xu ly cac no trong packet rieng di"; chon "Chan bao thu tren van ban tho" va tran review Codex 5; sau luot 5 nang tran len 6'
+recorded_by: 'phien session_015GtxrZQYT3Vt8PJdXrjEKg'
+revision_ly_do: 'Cross-review luot 5 APPROVE nhung con hai P2 (E1 so dinh than noi dong, E2 hinh dang cau dan); ADR-0060 M1 doi 0 P2 mo truoc merge. Chu kho chon 25/11 "Raise the cap to 6, fix E1/E2, run Codex round 6". Tran review tinh chung (da dung 5/6).'
+thay_the_cho: llm-ranh-gioi-khoan-r4-g1-claude
+leased_at_utc: '2026-11-25T05:37:00Z'
+heartbeat_at: '2026-11-25T05:37:00Z'
+lease_until: '2026-11-25T13:37:00Z'
+lease_expires_at_utc: '2026-11-25T13:37:00Z'
+max_lease_hours: 8
+review_calls_limit: 6
+review_calls_used_truoc: 5
+inference_calls_limit: 0

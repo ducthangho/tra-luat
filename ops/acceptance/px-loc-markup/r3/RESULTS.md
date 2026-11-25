@@ -1,7 +1,7 @@
-# PX-LOC-MARKUP r2 — `proxima-control` lọc khối `<ElicitationsGroup>` (kết quả thi công)
+# PX-LOC-MARKUP r3 — `proxima-control` lọc khối `<ElicitationsGroup>` (kết quả thi công)
 
-**Căn cứ:** đặc tả `ops/specs/px-loc-markup-r2.md` (sha256 `5584a9f19b257de5e9896bc000e957945123d026305e3f7f23746ee783b91876`,
-duyệt https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7172132991), lease `ops/leases/px-loc-markup-r2-g1-claude.yaml`,
+**Căn cứ:** đặc tả `ops/specs/px-loc-markup-r3.md` (sha256 `ebf6f2779f0759a9a3168037f9877e4546a027c752e10ef006e9934e47c1adda`,
+duyệt https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7174094220), lease `ops/leases/px-loc-markup-r3-g1-claude.yaml`,
 Issue #1529.
 
 ## 1. Lịch sử packet

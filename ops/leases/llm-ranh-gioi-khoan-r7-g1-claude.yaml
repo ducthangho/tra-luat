@@ -84,3 +84,5 @@ max_lease_hours: 8
 review_calls_limit: 8
 review_calls_used_truoc: 7
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r8-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 8 (H1 P2); revision r8 chot vai tro (ops/specs/llm-ranh-gioi-khoan-r8.md).'

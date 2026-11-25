@@ -382,8 +382,8 @@ biến môi trường của environment.
   từ ngữ` (tiêu đề tên khác, tiền tố viết HOA `ĐIỀU 3.`, hay tên xuống dòng riêng đều bị chặn); câu dẫn chỉ được bỏ khi
   nằm ở dòng ĐẦU và CẢ dòng đúng câu dẫn chuẩn `Trong|Tại <Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư
   liên tịch|Quyết định> này, <các|những> <từ ngữ|thuật ngữ> <dưới đây|sau đây> được <hiểu|giải thích> như sau:` (phân biệt hoa
-  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; ở nguồn mất số, dòng đầu kết `:` mà không phải câu
-  dẫn chuẩn ⇒ chặn cả nguồn); phép so giữ nguyên xuống dòng của
+  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; ở nguồn mất số không có câu dẫn chuẩn, dòng đầu có dòng
+  điểm nối vào ⇒ chặn cả nguồn, bất kể dấu kết dòng); phép so giữ nguyên xuống dòng của
   các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.

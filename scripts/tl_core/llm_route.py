@@ -538,12 +538,18 @@ def tach_khoan(van_ban):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
+    bo_cau_dan = False
     for i_dong, ln in enumerate(dong):
         m = _RE_SO_KHOAN.match(ln) if co_so else None
         if m:
             khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
         elif _RE_DIEM.match(ln):
             if not khoan:
+                return None
+            if not co_so and not bo_cau_dan and len(khoan) == 1:
+                # r8 (lượt 8 H1, thay chốt r7 G1 theo dấu `:`): nguồn mất số KHÔNG có câu dẫn chuẩn ⇒ dòng đầu có thể là câu dẫn lạ;
+                # gom dòng điểm vào nó là đoán ranh giới. Chặn theo VAI TRÒ (có điểm nối vào) thay vì theo ký tự kết dòng — r7 chỉ
+                # nhận `:` ASCII nên `：` (U+FF1A) hay dấu khác lọt.
                 return None
             khoan[-1][1] += "\n" + ln
         elif co_so and khoan and _RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None:
@@ -554,12 +560,9 @@ def tach_khoan(van_ban):
         elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):
             # r4 (lượt 4 D3): CHỈ đúng MỘT câu dẫn, ở dòng ĐẦU (ngay sau tiêu đề) — câu dẫn lặp hay câu dẫn muộn có thể che dòng mở khoản.
             # r6 (lượt 6 F2): và CẢ dòng phải đúng câu dẫn chuẩn (`_RE_CAU_DAN_TRON`) — câu dẫn khác ⇒ không bỏ ⇒ nguồn bị chặn.
+            bo_cau_dan = True
             continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
-            if i_dong == 0 and re.sub(r'[\s)"\u201d]+$', "", ln).endswith(":"):
-                # r7 (lượt 7 G1): nguồn mất số, dòng ĐẦU (sau tiêu đề) mở bằng `:` mà không phải câu dẫn chuẩn ⇒ có thể là câu dẫn lạ
-                # (bị giữ thành khoản rồi gom mọi dòng điểm vào) hoặc khoản đầu — không phân biệt được ⇒ chặn cả nguồn.
-                return None
             khoan.append([None, ln])
         else:
             return None

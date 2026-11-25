@@ -22,6 +22,8 @@
   bỏ khi CẢ dòng đúng câu dẫn chuẩn (F2); chốt đánh số nội dòng phủ trọn cú pháp số đầu dòng, gồm `1 .` và `1."` (F1).
 - r7 (sau cross-review lượt 7, đặc tả `ops/specs/llm-ranh-gioi-khoan-r7.md`): nguồn mất số có dòng đầu kết `:` mà không phải câu
   dẫn chuẩn ⇒ chặn cả nguồn, không gom các dòng điểm vào nó (G1).
+- r8 (sau cross-review lượt 8, đặc tả `ops/specs/llm-ranh-gioi-khoan-r8.md`): thay chốt theo dấu `:` của r7 bằng chốt VAI TRÒ —
+  nguồn mất số không có câu dẫn chuẩn mà dòng đầu có dòng điểm nối vào ⇒ chặn, bất kể dấu kết dòng (H1: `：` U+FF1A lọt chốt r7).
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

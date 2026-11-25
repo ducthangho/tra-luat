@@ -303,11 +303,15 @@ class _NguCanh:
         self.han, self.pha_dg, self.can_dg, self.can_tn, self.giai_nen, self.nho = 0.0, False, False, False, 0, {}
 
 def _mot_lan(c, pt, url, hd, than, timeout):
-    """MOT lan thu vat ly: gui, roi doc than theo khuc va dung o byte thu TRAN_GOI + 1."""
+    """MOT lan thu vat ly: gui, roi doc than theo khuc va dung o byte thu TRAN_GOI + 1. Han TUYET DOI cua lan thu rang buoc ca vong doc
+    (socket timeout cua transport that chi chan TUNG thao tac blocking, khong chan tong thoi gian tai)."""
+    het = c.dong_ho() + timeout
     ma, hd_ra, luong = c.transport(pt, url, hd, than, timeout)
     khuc, n = [], 0
     while True:
         b = luong.read(min(65536, c.tran["TRAN_GOI"] + 1 - n))
+        if c.dong_ho() >= het:  # f02:vong_doc
+            raise TimeoutError("vong doc vuot han tuyet doi cua lan thu")
         if not b:
             break
         n += len(b)
@@ -416,13 +420,22 @@ HINH_D1 = (
 )
 
 def _hinh_rest(run, jobs, arts):
-    """Truong bat buoc va kieu cua T1 (run, job, artifact)."""
+    """Mien cua T1 (K1 cua B3 ghim): MOT bo kiem chung cho run, job, artifact. So nguyen DUONG; `conclusion` va `digest` phai CO KHOA,
+    gia tri la chuoi hoac null (luot dang chay co `conclusion: null`; artifact co the co `digest: null`)."""
     chuoi = lambda o, *ks: all(isinstance(o.get(k), str) for k in ks)
-    return (all(_so_nguyen(run.get(k)) for k in ("id", "run_attempt", "workflow_id")) and "conclusion" in run
-            and chuoi(run, "status", "event", "head_sha", "head_branch", "path", "created_at")
-            and isinstance(_lay(run, "repository.full_name"), str) and _so_nguyen(_lay(run, "repository.id"))
-            and all(chuoi(j, "name", "status") and _so_nguyen(j.get("run_attempt")) and "conclusion" in j for j in jobs)
-            and all(chuoi(a, "name") and type(a.get("expired")) is bool and "digest" in a for a in arts))
+    duong = lambda v: _so_nguyen(v) and v > 0
+    rong = lambda o, k: k in o and isinstance(o[k], (str, type(None)))
+    return all((
+        all(duong(run.get(k)) for k in ("id", "workflow_id")) and duong(_lay(run, "repository.id")),  # k1:run_so
+        duong(run.get("run_attempt")),  # k1:run_attempt
+        rong(run, "conclusion"),  # k1:run_conclusion
+        chuoi(run, "status", "event", "head_sha", "head_branch", "path", "created_at") and isinstance(_lay(run, "repository.full_name"), str),  # k1:run_chuoi
+        all(duong(j.get("run_attempt")) for j in jobs),  # k1:job_attempt
+        all(rong(j, "conclusion") for j in jobs),  # k1:job_conclusion
+        all(chuoi(j, "name", "status") for j in jobs),  # k1:job_chuoi
+        all(rong(a, "digest") for a in arts),  # k1:art_digest
+        all(chuoi(a, "name") and type(a.get("expired")) is bool for a in arts),  # k1:art_khac
+    ))
 
 def _lech_lien_ket(d1, d2):
     return next((f"lien_ket_lech:{t}" for t in LIEN_KET if _lay(d1, t) != _lay(d2, t)), None)
@@ -674,12 +687,8 @@ def _danh_gia(c, T, goc, dong_den0, khung_dau, dong_tay):
         ds = [luot[r["id"]] for r in E if kc[r["id"]] == k]
         gop[k] = "dong_tay" if k in tay else _gop([x["phan_quyet"] for x in ds])  # d86
         kq["khung"][viet(k)] = {"gop": gop[k], "ly_do": tay[k]} if k in tay else {"gop": gop[k], "luot": ds}
-    if c.dong_ho() >= c.han:  # d99
-        c.can_dg = True
     if c.can_tn:
         return s1("het_tai_nguyen_danh_gia")
-    if c.can_dg:  # d14
-        return s1("het_ngan_sach_danh_gia")  # d140
     O = [k for k in R if not _da_dong(gop[k])]
     dong_den = dong_den0
     for k in R:
@@ -847,7 +856,9 @@ def _buoc_ghi(c, url, hinh, pt="GET", than=None):
         return None, "het_gio"
     return x, hd
 
-def _hinh_issue(v): return isinstance(v, dict) and isinstance(v.get("body"), (str, type(None))) and isinstance(v.get("state"), str)
+def _hinh_issue(v):
+    """Hinh cua Issue cho CA BA noi doc (W0, W3, W8): khoa `body` phai CO MAT (chuoi hoac null) — thieu khoa khac `body: null`."""
+    return isinstance(v, dict) and "body" in v and isinstance(v["body"], (str, type(None))) and isinstance(v.get("state"), str)  # f01:body
 
 def _ghi_than(c, issue, nt, T, khung_dau, ghi, a, b):
     """Tu kiem -> PATCH (MOT lan gui) -> doc lai. True <=> than doc lai bang tung ky tu va `state` la `open`."""
@@ -892,8 +903,10 @@ def chay(moi_truong, transport, goc=".", *, T=None, dong_ho=time.monotonic, ngu=
     t0 = c.dong_ho()
     c.han = t0 + NGAN_SACH_GHI
     iss, loi = _buoc_ghi(c, f"{API}/issues/{issue}", _hinh_issue)
-    w0_dung = c.dong_ho() - t0
     nt = ("khong_doc_duoc", "d10_loi:" + loi, None) if iss is None else doc_nhip_tim(iss["body"], T, kd)
+    if iss is not None and c.dong_ho() >= c.han:  # w0:tron_ven — TOAN BO W0 (doc + phan tich + kiem mien nhip tim) phai xong trong HAN_W0
+        iss, nt = None, ("khong_doc_duoc", "d10_loi:het_gio", None)
+    w0_dung = c.dong_ho() - t0  # w0:dung
     x0 = nt[2]
     dong_den0 = gio(x0["dong_den"]) if x0 else kd - BAY_NGAY  # d27
     da_bao0, cho_bao0 = (x0["da_bao"], x0["cho_bao"]) if x0 else (KHONG_BIET, None)
@@ -905,6 +918,10 @@ def chay(moi_truong, transport, goc=".", *, T=None, dong_ho=time.monotonic, ngu=
         F = khung_cron(T)
         kq = {"F": viet(F), "P": viet(F - BAY_NGAY), "khung": {}, "dong_den": viet(dong_den0), "nghia_vu": [], "sha_audit": None,
               "trang_thai": KHONG_DO_DUOC, "ma": _ma_nem("danh_gia", e)}
+    # Can ngan sach la TAT-CA-HOAC-KHONG va duoc quyet o MOT cho, sau phep tinh CUOI, tren MOI duong tra trang thai tong (luat thuong, moi duong S1, luoi an toan):
+    # co can (kiem TRUOC lan thu / lan cho) hoac dong ho luc HOAN TAT da toi han (bang han la da het).
+    if c.can_dg or c.dong_ho() >= c.han:  # d14 d99
+        kq.update(trang_thai=KHONG_DO_DUOC, ma="het_ngan_sach_danh_gia", sha_audit=None, dong_den=viet(dong_den0), nghia_vu=[])  # d140
     c.pha_dg = False
     c.han = c.dong_ho() + NGAN_SACH_GHI - w0_dung  # d15
     # D8, D9 — thong tin cho bao cao, khong doi S
@@ -929,12 +946,12 @@ def chay(moi_truong, transport, goc=".", *, T=None, dong_ho=time.monotonic, ngu=
         if cho_bao0 is not None:  # W1 d67
             cua_so = viet(gio(cho_bao0["khung"]) - LE_DOI_SOAT)  # d92
             ds, loi = _liet_ke(c, f"{API}/issues/{issue}/comments?since={cua_so}&per_page=100", None)  # d91
-            if ds is not None and c.dong_ho() >= c.han:
+            khop = [cm["id"] for cm in ds if _khop(cm, cho_bao0)] if ds is not None else []
+            if ds is not None and c.dong_ho() >= c.han:  # f02:d14 — kiem luc hoan tat SAU ca phep khop
                 ds, loi = None, "het_gio"
             if ds is None:
                 khoa_gui, loi_ghi, ghi["W1"] = True, True, "doi_soat_khong_tron" if loi == "khong_tron" else "doi_soat_loi:" + loi
             else:
-                khop = [cm["id"] for cm in ds if _khop(cm, cho_bao0)]
                 if khop:
                     da_bao1, da_giao = dict(cho_bao0, comment_id=min(khop)), True  # d144
                 ghi["W1"] = "da_giao" if khop else "chua_giao"

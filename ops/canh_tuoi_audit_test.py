@@ -6,6 +6,7 @@ Dung: `python ops/canh_tuoi_audit_test.py` (tat ca) · `--chi-tiet` (in them cap
 loi khac thoat 4. Dot bien chay tren BAN SAO tam, ten tep rieng, `-B`; chi GIET khi ca dich nem dung lop ay voi dung ten ca.
 Ra (bon dong cuoi): `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`."""
 import base64
+import contextlib
 import copy
 import datetime
 import hashlib
@@ -17,6 +18,8 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 import warnings
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
@@ -256,6 +259,14 @@ def dung_luot(rid, khung, att=1, sha="a" * 40, tre=3, sua=None):
     d2 = dict(rest["run"], event="schedule", created_at=tao, run_attempt=att, head_branch="master", workflow_id=7, updated_at=tao, status="completed", conclusion="success")
     return {"d1": copy.deepcopy(d2), "d2": d2, "d2_cuoi": None, "jobs": rest["jobs"], "arts": rest["artifacts"], "goi": goi, "bn": bn, "idb": idb}
 
+class LuongGia(io.BytesIO):
+    """Luong than cua phan hoi gia: dem lan `read()` KHONG kem kich thuoc (doc het mot lan thay vi theo khuc)."""
+    vo_han = 0
+
+    def read(self, n=-1):
+        LuongGia.vo_han += n is None or n < 0
+        return super().read(n)
+
 class Gia:
     """GitHub gia: Issue co than/state/comment that trong bo nho; POST luu comment TRUOC khi quyet dinh phan hoi; ghi nhat ky tung lan
     gui VAT LY (phuong thuc, URL, co Authorization khong, than, timeout, thoi diem don dieu luc bat dau); ton trong `timeout`."""
@@ -263,7 +274,7 @@ class Gia:
         self.t, self.nk, self.ngu_nk, self.luot, self.thu_tu, self.goi = 0.0, [], [], {}, [], {}
         self.wf, self.tree, self.master, self.ahead = dict.fromkeys(("a" * 40, "e" * 40), JOB_KV.encode()), dict.fromkeys(("a" * 40, "e" * 40), "b" * 40), "a" * 40, 0
         self.issue, self.id_cm, self.lech_gio, self.T, self.rid = {1520: {"body": "", "state": "open", "cm": []}}, 5000, 0, T0, 7001
-        self.sua, self.tre, self.sau, self.trang, self.so_d2 = [], [], [], 100, {}
+        self.sua, self.tre, self.nhay_json, self.trang, self.so_d2 = [], [], [], 100, {}
 
     def dong_ho(self): return self.t
 
@@ -297,10 +308,7 @@ class Gia:
             raise kq
         ma, tra, *hd_them = kq if kq is not None else self.xu_ly(pt, url, than)
         hd_ra = dict({"X-GitHub-Request-Id": "gia"} if "luu-tru.example" not in url else {}, **(hd_them[0] if hd_them else {}))
-        for i, (mau, p, lan, moc) in enumerate(self.sau):   # sau lan gui thu `lan` khop (mau, pt): dong ho nhay toi it nhat `moc`
-            if p == pt and re.search(mau, url):
-                self.sau[i], self.t = (mau, p, lan - 1, moc), (max(self.t, moc) if lan == 1 else self.t)
-        return ma, {k: v for k, v in hd_ra.items() if v is not None}, io.BytesIO(tra if isinstance(tra, bytes) else json.dumps(tra).encode())
+        return ma, {k: v for k, v in hd_ra.items() if v is not None}, (tra if hasattr(tra, "read") else LuongGia(tra if isinstance(tra, bytes) else json.dumps(tra).encode()))
 
     def trang_cua(self, url, ds, khoa):
         so = int((re.search(r"[?&]page=(\d+)", url) or [0, 1])[1])
@@ -359,8 +367,17 @@ def luot_wd(g, T=T0, **kw):
     env = kw.pop("env", None) or {"GH_TOKEN": "tok-gia", "B2_RUN_ID": str(g.rid), "B2_RUN_ATTEMPT": "1"}
     g.rid += 1
     kd = kw.pop("khung_dau", viet(P0))
-    ma, bc = M.chay(env, g, kw.pop("goc", str(ROOT)), T=T, dong_ho=g.dong_ho, ngu=g.ngu, issue=kw.pop("issue", 1520), khung_dau=kd,
-                    khung_dong_tay=kw.pop("dong_tay", {}), tran=kw.pop("tran", None))
+    def boc(goc):   # `nhay_json`: nguyen ham doc_json bi boc de dong ho gia nhay toi `moc` SAU khi phan tich xong phan hoi khop `dk` (moi muc mot lan)
+        def f(byte):
+            x = goc(byte)
+            for muc in [m for m in g.nhay_json if m[0](x)]:
+                g.nhay_json.remove(muc)
+                g.t = max(g.t, muc[1])
+            return x
+        return f
+    with thay_ten("_tho_json", boc):
+        ma, bc = M.chay(env, g, kw.pop("goc", str(ROOT)), T=T, dong_ho=g.dong_ho, ngu=g.ngu, issue=kw.pop("issue", 1520), khung_dau=kd,
+                        khung_dong_tay=kw.pop("dong_tay", {}), tran=kw.pop("tran", None))
     _SO_LUOT.append((bc, g.nk[dau:], kd))
     return ma, bc, g.nk[dau:]
 
@@ -379,7 +396,7 @@ def hau_kiem():
 
 def gh(f="dat", p="dat", **cu):
     """GitHub gia voi luot cua F (id 20), cua P (id 10) va cac khung cu `k<n>` = P - n tuan (id 10 - n). Gia tri: dat · do · kdd · chay · vang."""
-    g = Gia()
+    g, LuongGia.vo_han = Gia(), 0
     for khung, rid, kieu in [(P0 - TD(days=7 * int(k[1:])), 10 - int(k[1:]), v) for k, v in sorted(cu.items(), reverse=True)] + [(P0, 10, p), (F0, 20, f)]:
         them(g, rid, khung, kieu)
     return g
@@ -483,6 +500,7 @@ DB_M = []   # (ten, cach, tham so, cac ca dich)
 
 def db(ten, nhan, cu, moi, *ca_dich): DB_M.append((ten, "nhan", (nhan, cu, moi), ca_dich))        # doi `cu` -> `moi` tren DONG duy nhat mang `# nhan`
 def khong(ten, nhan, *ca_dich): DB_M.append((ten, "khong", nhan, ca_dich))                         # `if X:  # nhan` -> `if False:  # nhan`
+def xoa(ten, nhan, *ca_dich): DB_M.append((ten, "xoa", nhan, ca_dich))                             # xoa DONG duy nhat mang `# nhan`
 def tho(ten, neo, thay, *ca_dich): DB_M.append((ten, "tho", (neo, thay), ca_dich))                 # chuoi neo nguyen van
 
 def giai_db(nguon):
@@ -492,10 +510,10 @@ def giai_db(nguon):
         if cach == "tho":
             ra.append((ten, "M", ts[0], ts[1], ca_dich))
             continue
-        nhan = ts if cach == "khong" else ts[0]
+        nhan = ts if cach in ("khong", "xoa") else ts[0]
         dong = [d for d in nguon.split("\n") if re.search(rf"#.*(?<![\w:.]){re.escape(nhan)}(?![\w:.])", d)]
         neo = dong[0] if len(dong) == 1 else ""
-        thay = re.sub(r"^(\s*(?:el)?if ).*?(:\s+# )", r"\1False\2", neo) if cach == "khong" else neo.replace(ts[1], ts[2]) if ts[1] in neo else neo
+        thay = "" if cach == "xoa" else re.sub(r"^(\s*(?:el)?if ).*?(:\s+# )", r"\1False\2", neo) if cach == "khong" else neo.replace(ts[1], ts[2]) if ts[1] in neo else neo
         ra.append((ten, "M", neo, thay, ca_dich))
     return ra
 
@@ -625,7 +643,7 @@ for _f, _gt in LK:
         g, ma, bc, nk = mot(lambda g, lu: lech_d2(lu, f, gt))
         mong((phep(bc, 20, "T1"), lu_bc(bc, 20).get("ma"), phep(bc, 20, "T7")[0], S(bc)), ((KDD, "lien_ket_lech:" + f), "lien_ket_lech:" + f, "dat", (KDD, "khung_khong_do_duoc")), f)
     ca(_lk, "n1_lien_ket_" + _f)
-    tho("d01_02_" + _f, f'    "{_f}",  # lk', "", "n1_lien_ket_" + _f)
+    tho("d01_02_" + _f, f'    "{_f}",  # lk', "", "n1_lien_ket_" + _f, "n1_lien_ket_cuoi_" + _f)   # mot ham chung cho T1 va T7: chay tren ca cua CA HAI noi goi
 
 @ca
 def n1_lien_ket_cuoi():
@@ -704,7 +722,7 @@ def n1_s_vuot_tran():   # goi bien nhan luu KHONG nen de no la thu lon nhat tren
         g = gh()
         n = len(dat_goi(g, g.luot[20], [("bien_nhan_audit.json", json.dumps(g.luot[20]["bn"]).encode())], zipfile.ZIP_STORED))
         ma, bc, nk = luot_wd(g, tran={"TRAN_GOI": n + them})
-        mong(phep(bc, 20, "T2"), t2, f"TRAN_GOI = kich thuoc goi {them:+d}")
+        mong((phep(bc, 20, "T2"), LuongGia.vo_han), (t2, 0), f"TRAN_GOI = kich thuoc goi {them:+d}; than phai duoc doc THEO KHUC")
 
 @ca
 def n1_j_vuot_tran():
@@ -712,7 +730,7 @@ def n1_j_vuot_tran():
         g = gh()
         n = len(json.dumps(g.xu_ly("GET", "/actions/runs/20/artifacts", None)[1]).encode())
         ma, bc, nk = luot_wd(g, tran={"TRAN_GOI": n + them})
-        mong(phep(bc, 20, "T1"), t1, f"TRAN_GOI = than D4 {them:+d}")
+        mong((phep(bc, 20, "T1"), LuongGia.vo_han), (t1, 0), f"TRAN_GOI = than D4 {them:+d}; than phai duoc doc THEO KHUC")
 khong("d107", "d107", "n1_j_vuot_tran", "n1_s_vuot_tran")
 
 @ca
@@ -827,7 +845,9 @@ def n2_t5_ok_false():   # DO DUOC: schema GHIM-B1A cam `job`/`manh` khi `ok` la 
         dat_goi(g, lu, [("bien_nhan_audit.json", bn_byte(lu))])
         ma, bc, nk = luot_wd(g)
         mong((dem(nk, "GET", r"/actions/artifacts/20\d+/zip"), phep(bc, 20, "T5"), phep(bc, 20, "T6")), (1, ("dat", "dat"), ("khong_dat", t6)), ten)
-db("d134", "d134", ' and b["ok"] is True', "", "n2_t5_ok_false")
+# Dong 134 (T5 tai khi `ok` khac true): TUONG DUONG THEO SCHEMA, khong tinh vao mau so, khong duoc doi giet — chu kho mien quan sat tai
+# https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7157619068. Schema GHIM-B1A cam `job`/`manh` khi `ok` la false, nen quan sat
+# "0 -> >= 1 loi goi D5" cua dac ta khong dung duoc; ca n2_t5_ok_false van canh hai dau vao dung duoc.
 
 def _ca_tran(ten, qua, dung, tran_cua):
     """Tran tiem nho, ZIP that nen deflate: duoi va bang tran nhu doi chung hop le; tren tran la KHONG HOAN TAT (`goi_vuot_tran`), khong bao gio `khong_dat`."""
@@ -1536,7 +1556,7 @@ def n8_doi_soat_bien_tren():   # 1 001 comment trong cua so: khoa gui; bot 2 com
     mong((dem(nk, "POST"), ma, bc["ghi"]["W1"], nt_tren(g)["cho_bao"]), (0, 3, "doi_soat_khong_tron", e))
     del g.issue[1520]["cm"][:2]
     giao(g, luot_n(g, 2)[2], e)
-khong("d93", "d93", "n8_doi_soat_bien_tren")
+khong("d93", "d93", "n8_doi_soat_bien_tren", "n4_s1_khong_tron")   # bo phan trang dung chung: ca D14 lan D1
 
 @ca
 def n8_doi_soat_lech_dong_ho():   # may chu dong dau som hon dong ho runner 3 gio: comment van nam sau cua_so = khung - 24 h
@@ -1649,7 +1669,7 @@ def n15_can_ngan_sach_dong_den():   # luot dat cua P (id nho nhat) da danh gia x
     g = nen_can(dong_den=viet(w(1)))
     ma, bc, nk = luot_wd(g)
     mong((bc["ma_ly_do"], bc["dong_den"], nt_tren(g)["dong_den"], lu_bc(bc, 10).get("phan_quyet")), ("het_ngan_sach_danh_gia", viet(w(1)), viet(w(1)), "dat"))
-db("d140", "d140", 'return s1("het_ngan_sach_danh_gia")', 'return [kq.update(dong_den=viet(max([k for k in R if _da_dong(gop[k])], default=dong_den0))), s1("het_ngan_sach_danh_gia")][1]', "n15_can_ngan_sach_dong_den")
+db("d140", "d140", "dong_den=viet(dong_den0), ", "", "n15_can_ngan_sach_dong_den")
 
 @ca
 def n15_khong_goi_sau_han():
@@ -1658,11 +1678,11 @@ def n15_khong_goi_sau_han():
 khong("d105", "d105", "n15_khong_goi_sau_han")
 
 def nen_han(can, moc=599.0, ma_t7=None):
-    """F co luot A (id 20) dat va luot B (id 21, khong bien nhan). Dong ho nhay toi `moc` ngay truoc T7 cua B; D2 cua B can `can` giay."""
+    """F co luot A (id 20) dat va luot B (id 21, khong bien nhan). Dong ho nhay toi `moc` ngay truoc T7 cua B (luc phan tich xong D4 cua B); D2 cua B can `can` giay."""
     g = dat_than(gh(), nt_cu(T0))
     them(g, 21, F0, "do", sha="a" * 40)
     g.tre.append((r"/actions/runs/21$", can))
-    g.sau.append((r"/actions/runs/21/artifacts", "GET", 1, moc))
+    g.nhay_json.append((lambda x: isinstance(x, dict) and any("-21-" in a["name"] for a in x.get("artifacts") or []), moc))   # sau khi doc xong D4 cua B
     if ma_t7:
         g.loi(r"/actions/runs/21$", (ma_t7, {}), tu=2)
     return g
@@ -1688,7 +1708,7 @@ def n15_phan_tich_qua_han():   # phep phan tich CUOI cua pha danh gia vuot han, 
     with thay_ten("_tho_json", boc):
         ma, bc, nk = luot_wd(g)
     mong((S(bc), bc["sha_audit"], max(x["t"] for x in nk if re.search(DG, x["url"])) < 600), ((KDD, "het_ngan_sach_danh_gia"), None, True))
-khong("d99", "d99", "n15_phan_tich_qua_han")
+db("d99", "d99", "c.can_dg or c.dong_ho() >= c.han", "c.can_dg", "n15_phan_tich_qua_han", "n15_tinh_cuoi_qua_han")
 
 @ca
 def n15_kep_timeout():
@@ -1707,7 +1727,8 @@ def nen_w8(can):
     """S `khung_do` can `canh_bao`, giao xong; W8 (GET Issue thu ba) bat dau khi HAN_GHI con 1 s; moi GET Issue can `can` giay."""
     g = dat_than(dat_f(gh(), "do"), nt_cu(T8))
     g.tre.append((ISS, can))
-    g.sau.append((ISS, "PATCH", 2, 179.0))
+    dk = dem_lan(4)   # than Issue duoc phan tich lan thu tu = phan hoi PATCH cua W7
+    g.nhay_json.append((lambda x: isinstance(x, dict) and set(x) == {"body", "state"} and dk(), 179.0))
     return g
 
 @ca
@@ -1732,6 +1753,191 @@ def n15_han_cuoi_ghi_het_gio():   # W8 bat dau khi con 1 s, may chu can 2 s => t
     g = nen_w8(2)
     ma, bc, nk = luot_n(g)
     mong((ma, [x["timeout"] for x in nk if x["pt"] == "GET" and re.search(ISS, x["url"])][-1], bc["ghi"]["W8"]), (3, 1.0, "doc_lai_loi:het_gio"))
+
+# ---- Sau review ma luot 1. F01 `rest-response-domain-incomplete`: MOT bo kiem mien o bien cho moi hinh REST duoc tieu dung ----
+def ca_t1_mien(ten, sua, muon=(KDD, "rest_sai_hinh")):
+    def chay():
+        g, ma, bc, nk = mot(lambda g, lu: sua(lu))
+        mong((phep(bc, 20, "T1"), S(bc)[0] == "fresh"), (muon, muon[0] == "dat"), ten)
+    ca(chay, ten)
+
+def art_thua(lu, **kw): lu["arts"].append(dict({"id": 90909090, "name": "khong-duoc-chon", "expired": False, "digest": None}, **kw))
+
+K1 = (("run_so", lambda lu: lu["d2"].update(workflow_id="7")), ("run_attempt", lambda lu: lu["d2"].update(run_attempt=0)), ("run_conclusion", lambda lu: lu["d2"].update(conclusion=1)),
+      ("run_chuoi", lambda lu: lu["d2"].update(status=5)), ("job_attempt", lambda lu: lu["jobs"][0].update(run_attempt=0)), ("job_conclusion", lambda lu: lu["jobs"][0].update(conclusion=1)),
+      ("job_chuoi", lambda lu: lu["jobs"][0].update(name=5)), ("art_digest", lambda lu: art_thua(lu, digest=7)), ("art_khac", lambda lu: art_thua(lu, expired="no")))
+for _t, _s in K1:
+    ca_t1_mien("n1_t1_mien_" + _t, _s)
+    xoa("f01_k1_" + _t, "k1:" + _t, "n1_t1_mien_" + _t)
+ca_t1_mien("n1_t1_mien_job_attempt_am", lambda lu: lu["jobs"][2].update(run_attempt=-1))
+ca_t1_mien("n1_t1_mien_run_attempt_bool", lambda lu: lu["d2"].update(run_attempt=True))
+ca_t1_mien("n1_t1_mien_doi_chung", lambda lu: art_thua(lu), ("dat", "dat"))   # `digest: null` duoc K1 cho phep; `conclusion: null` cua luot dang chay: n1_chua_xong
+
+def ca_thieu_body(ten, lan, muon):
+    def chay():   # Issue THIEU khoa `body` (khac `body: null`) o lan doc thu `lan` cua luot: loi doc Issue vao luong loi ghi, van co bao cao
+        g = dat_than(dat_f(gh(), "do"), nt_cu(T8))
+        g.loi(ISS, (200, {"state": "open"}), tu=lan)
+        try:
+            ma, bc, nk = luot_n(g)
+        except KeyError as e:
+            bang(False, f"KeyError {e} lan khoi ham chinh, khong co bao cao")
+        mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), bc["trang_thai"]), (3, *muon, ST), ten)
+    ca(chay, ten)
+
+ca_thieu_body("n8_issue_thieu_body_w0", 1, (0, 0))
+ca_thieu_body("n8_issue_thieu_body_w3", 2, (1, 0))
+ca_thieu_body("n8_issue_thieu_body_w8", 3, (2, 1))
+db("f01_issue_body", "f01:body", '"body" in v and isinstance(v["body"]', 'isinstance(v.get("body")', "n8_issue_thieu_body_w0", "n8_issue_thieu_body_w3", "n8_issue_thieu_body_w8")
+
+@ca
+def n8_issue_body_null():   # doi chung: `body: null` la Issue rong hop le => nhip tim `vang`, luot van ghi
+    g = gh()
+    g.issue[1520]["body"] = None
+    ma, bc, nk = luot_n(g)
+    mong((bc["nhip_tim_truoc"]["trang_thai"], ma, dem(nk, "PATCH")), ("vang", 0, 2))
+
+# ---- F02 `bounded-evaluation-order-dependent`: han tuyet doi phu MOI duong ket thuc pha ----
+def nhay(g, moc=None, them=0.0, lan=1):
+    """Ham boc: o lan goi thu `lan`, dong ho gia nhay toi `moc` (hoac tien `them` giay) roi moi goi nguyen ban."""
+    dk = dem_lan(lan)
+    def boc(goc):
+        def f(*a, **k):
+            if dk():
+                g.t = max(g.t, moc) if moc is not None else g.t + them
+            return goc(*a, **k)
+        return f
+    return boc
+
+@ca
+def n15_tinh_cuoi_qua_han():   # phep tinh CUOI cua pha danh gia (nghia vu O) hoan tat o 599,5 / 600 / 600,5 s: bang han la da het
+    for moc, muon in ((599.5, (XANH, "a" * 40)), (600.0, ((KDD, "het_ngan_sach_danh_gia"), None)), (600.5, ((KDD, "het_ngan_sach_danh_gia"), None))):
+        g = gh()
+        with thay_ten("_da_dong", nhay(g, moc)):
+            ma, bc, nk = luot_wd(g)
+        mong((S(bc), bc["sha_audit"], bc["dong_den"] == bc["dong_den_truoc"] or muon[0] == XANH), (*muon, True), f"phep tinh cuoi xong o {moc} s")
+
+@ca
+def n15_w0_phan_tich_qua_han():   # TOAN BO W0 (ca phan tich va kiem mien nhip tim) tinh vao HAN_W0
+    for them, muon in ((181.0, ("d10_loi:het_gio", 0, 3)), (100.0, ("moi", 1, 0))):
+        g = dat_than(gh(), nt_cu(T0))
+        with thay_ten("kiem_nhip_tim", nhay(g, them=them)):
+            ma, bc, nk = luot_wd(g)
+        mong((bc["nhip_tim_truoc"]["ma"], dem(nk, "PATCH"), ma), muon, f"kiem mien nhip tim tieu {them} s")
+khong("f02_w0_tron_ven", "w0:tron_ven", "n15_w0_phan_tich_qua_han")
+
+@ca
+def n15_w0_tinh_ca_phan_tich():   # thoi gian phan tich o W0 bi TRU khoi ngan sach ghi con lai: W0 dung 170 s => lan gui dau cua pha ghi con 10 s
+    g = dat_than(gh(), nt_cu(T0))
+    with thay_ten("kiem_nhip_tim", nhay(g, them=170.0)):
+        ma, bc, nk = luot_wd(g)
+    mong(([x["timeout"] for x in nk if "/git/ref/heads/master" in x["url"]], ma), ([10.0], 0))
+db("f02_w0_dung", "w0:dung", "c.dong_ho() - t0", "0.0", "n15_w0_tinh_ca_phan_tich")
+
+class LuongCham:
+    """Luong than ma MOI lan `read` tieu `giay` giay don dieu (moi lan deu duoi timeout cua socket)."""
+    def __init__(self, g, byte, giay): self.g, self.khuc, self.giay = g, [byte[:10], byte[10:20], byte[20:], b""], giay
+    def read(self, n=-1):
+        self.g.t += self.giay
+        return self.khuc.pop(0) if self.khuc else b""
+
+@ca
+def n15_vong_doc_qua_han():   # ba khuc x 20 s: tung lan doc duoi 30 s nhung TONG vuot han cua lan thu => lan thu khong hoan tat
+    for giay, muon in ((20, (KDD, "transport_nem:builtins.TimeoutError", 3)), (5, ("fresh", "khung_xanh", 1))):
+        g = gh()
+        g.sua.append((D1U, "GET", lambda s, pt, url, than: (200, LuongCham(s, json.dumps(s.xu_ly(pt, url, than)[1]).encode(), giay))))
+        ma, bc, nk = luot_wd(g)
+        mong((bc["trang_thai"], bc["ma_chi_tiet"], dem(nk, "GET", D1U)), muon, f"moi lan doc {giay} s")
+khong("f02_vong_doc", "f02:vong_doc", "n15_vong_doc_qua_han")
+
+@ca
+def n15_d14_khop_qua_han():   # D14: kiem luc hoan tat dung SAU phep khop comment
+    g, e = nen_cho()
+    chen_cm(g, e)
+    with thay_ten("_khop", nhay(g, them=500.0)):
+        ma, bc, nk = luot_n(g, 1)
+    mong((dem(nk, "POST"), ma, bc["ghi"]["W1"], nt_tren(g)["cho_bao"]), (0, 3, "doi_soat_loi:het_gio", e))
+khong("f02_d14", "f02:d14", "n15_d14_khop_qua_han")
+
+# ---- F03 `mutant-oracles-non-discriminating`: tung truong D2/U6 rieng; adapter that va main ----
+for _f, _gt in LK:
+    def _lk_cuoi(f=_f, gt=_gt):
+        g, ma, bc, nk = mot(lambda g, lu: lech_d2(lu, f, gt, cuoi=True))
+        mong((phep(bc, 20, "T7"), phep(bc, 20, "T1")[0], lu_bc(bc, 20)["ma"]), ((KDD, "lien_ket_lech:" + f), "dat", "lien_ket_lech:" + f), f)
+    ca(_lk_cuoi, "n1_lien_ket_cuoi_" + _f)
+tho("r27_t7_bo_event", "lech = _lech_lien_ket(d1, cuoi)  # d03",
+    'lech = next((f"lien_ket_lech:{f}" for f in LIEN_KET if f != "event" and _lay(d1, f) != _lay(cuoi, f)), None)  # d03', "n1_lien_ket_cuoi_event")
+U6 = '("run_attempt", "status", "conclusion", "updated_at"))'
+for _f, _gt in (("run_attempt", 2), ("status", "queued"), ("conclusion", "failure"), ("updated_at", "2026-12-12T23:00:00Z")):
+    def _u6(f=_f, gt=_gt):
+        g, ma, bc, nk = mot(lambda g, lu: lech_d2(lu, f, gt, cuoi=True))
+        mong((phep(bc, 20, "T7"), lu_bc(bc, 20)["phan_quyet"]), ((KDD, "luot_doi_giua_chung"), KDD), f)
+    ca(_u6, "n1_u6_" + _f)
+    tho("r28_u6_bo_" + _f, U6, U6.replace(f'"{_f}", ', "").replace(f', "{_f}"', ""), "n1_u6_" + _f)
+
+@ca
+def n1_j_doc_theo_khuc():   # than vo tan: phai dung o byte thu TRAN_GOI + 1, khong bao gio goi `read()` khong kich thuoc
+    class VoTan:
+        da, vo_han = 0, False
+        def read(self, n=-1):
+            VoTan.vo_han |= n is None or n < 0
+            VoTan.da += max(n or 0, 0) if n and n > 0 else 10**6
+            return b"x" * (n if n and n > 0 else 10**6)
+    g = gh()
+    g.sua.append((D1U, "GET", lambda *a: (200, VoTan())))
+    ma, bc, nk = luot_wd(g, tran={"TRAN_GOI": 1000})
+    mong((VoTan.vo_han, VoTan.da <= 1001, bc["ma_chi_tiet"]), (False, True, "than_vuot_tran"))
+tho("r22_doc_khong_theo_khuc", 'b = luong.read(min(65536, c.tran["TRAN_GOI"] + 1 - n))', "b = luong.read()", "n1_j_doc_theo_khuc", "n1_j_vuot_tran", "n1_s_vuot_tran")
+
+class PhanHoiGia:
+    def __init__(self, ma, hd, byte): self.status, self.headers, self.than = ma, hd, io.BytesIO(byte)
+    def read(self, n=-1): return self.than.read(n)
+
+@ca
+def n16_transport_that():   # adapter urllib THAT qua lop mo gia (khong mang): timeout di toi `open`, KHONG tu theo chuyen huong, HTTPError thanh phan hoi
+    goi = []
+    def mo_gia(*lop):
+        class Mo:
+            def open(self, req, timeout=None):
+                goi.append((req.get_method(), req.full_url, dict(req.header_items()), req.data, timeout))
+                if "chuyen" in req.full_url:   # nhu urllib: handler chuyen huong tra None => HTTPError 302; tra Request => tu theo
+                    theo = [h().redirect_request(req, None, 302, "Found", {}, "https://luu-tru.example/dich") for h in lop] or [object()]
+                    if all(x is None for x in theo):
+                        raise urllib.error.HTTPError(req.full_url, 302, "Found", {"Location": "https://luu-tru.example/dich", "X-GitHub-Request-Id": "g"}, io.BytesIO(b""))
+                    return PhanHoiGia(200, {}, b"da tu theo chuyen huong")
+                if "khong-co" in req.full_url:
+                    raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {"X-GitHub-Request-Id": "g"}, io.BytesIO(b'{"message": "Not Found"}'))
+                return PhanHoiGia(200, {"X-GitHub-Request-Id": "g"}, b'{"ok": true}')
+        return Mo()
+    cu, urllib.request.build_opener = urllib.request.build_opener, mo_gia
+    try:
+        ma, hd, luong = M.transport_that("PATCH", "https://api.github.com/x", {"Authorization": "Bearer t"}, {"body": "b"}, 7)
+        mong((ma, hd, luong.read(4), goi[0][0], goi[0][3], goi[0][4], goi[0][2].get("Authorization")), (200, {"X-GitHub-Request-Id": "g"}, b'{"ok', "PATCH", b'{"body": "b"}', 7, "Bearer t"), "200")
+        ma, hd, luong = M.transport_that("GET", "https://api.github.com/chuyen", {}, None, 3.5)
+        mong((ma, hd.get("Location"), goi[1][3], goi[1][4]), (302, "https://luu-tru.example/dich", None, 3.5), "302 khong duoc tu theo")
+        ma, hd, luong = M.transport_that("GET", "https://api.github.com/khong-co", {}, None, 30)
+        mong((ma, luong.read(), goi[2][4]), (404, b'{"message": "Not Found"}', 30), "HTTPError thanh phan hoi")
+    finally:
+        urllib.request.build_opener = cu
+tho("r23_tu_theo_chuyen_huong", "def redirect_request(self, *a, **k):\n        return None", "def redirect_request(self, *a, **k):\n        return super().redirect_request(*a, **k)", "n16_transport_that")
+tho("r25_bo_timeout_adapter", ".open(req, timeout=timeout)", ".open(req, timeout=None)", "n16_transport_that")
+
+@ca
+def n9_main_ma_thoat():   # main(): ma thoat cua muc 9 di nguyen ven ra tien trinh; bao cao MOT dong JSON ASCII sort_keys; tom tat khi co GITHUB_STEP_SUMMARY
+    tom_tat = Path(tempfile.mkdtemp(prefix="cta_tt_")) / "tom_tat.md"
+    cu = os.environ.get("GITHUB_STEP_SUMMARY")
+    os.environ["GITHUB_STEP_SUMMARY"] = str(tom_tat)
+    try:
+        for ma_mong in (0, 1, 2, 3):
+            bc = {"loi": "gh_token_rong"} if ma_mong == 2 else {"trang_thai": "fresh", "ma_chi_tiet": "khung_xanh", "cau_master": "câu về master", "ghi": {"W0": "moi"}}
+            nhan, ra = [], io.StringIO()
+            with thay_ten("chay", lambda goc: lambda *a, **k: (nhan.append((a, k)), (ma_mong, bc))[1]), contextlib.redirect_stdout(ra):
+                ma = M.main()
+            mong((ma, ra.getvalue(), nhan[0][0][0] is os.environ, nhan[0][0][1] is M.transport_that, nhan[0][0][2], nhan[0][1]),
+                 (ma_mong, json.dumps(bc, ensure_ascii=True, sort_keys=True) + "\n", True, True, os.path.dirname(os.path.dirname(os.path.abspath(M.__file__))), {}), f"ma {ma_mong}")
+        mong(tom_tat.read_text(encoding="utf-8").count("câu về master"), 3, "tom tat ghi cho ba luot co trang_thai, bo qua luot cau hinh sai")
+    finally:
+        os.environ.pop("GITHUB_STEP_SUMMARY") if cu is None else os.environ.update(GITHUB_STEP_SUMMARY=cu)
+tho("r24_main_luon_0", "    return ma\n\nif __name__", "    return 0\n\nif __name__", "n9_main_ma_thoat")
 
 # ---- Nghiem thu 11: bon ca tu kiem bo phan hang (doi tuong thu la `_TK`) ----
 _TK = {"nguong": 3, "ten": "abc"}

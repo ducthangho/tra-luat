@@ -1,4 +1,4 @@
-# Bàn giao phiên điều phối — 2026-11-22 (Claude → Codex)
+# Bàn giao phiên điều phối — 2026-11-22, đo lại 2026-11-25 (Claude → Codex)
 
 **Từ:** phiên Claude Code web/remote `session_015GtxrapMSm976JLC7Fp1HM`. Vai **điều phối + executor packet nhỏ**. Phiên bắt
 đầu là phiên điều phối Mission #1238; sau khi mission đóng thì nhận thêm các packet công cụ.
@@ -12,9 +12,9 @@ của chủ kho.
 ## 1. Neo — một phép đo, đo cùng lúc
 
 ```yaml
-do_luc: '2026-11-22T02:48:38Z'
-origin_master: e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8   # đọc lại bằng `git rev-parse origin/master`; sẽ trôi
-nhanh_phien: ccr-8ee03d7f-vnmqk0                           # tại thời điểm đo = origin/master; không có commit riêng
+do_luc: '2026-11-25T03:32:49Z'                            # bản viết 22-11; mọi trường dưới đây đo LẠI cùng lúc ngày 25-11
+origin_master: 64b7f2c14776d5d0e1d34a6be4725490956f5bec   # đọc lại bằng `git rev-parse origin/master`; sẽ trôi
+nhanh_phien: ccr-8ee03d7f-vnmqk0                           # = origin/master + đúng một commit: chính tệp này
 pr_mo_tu_nhanh: []                                         # REST pulls?state=open&head=…
 lease_con_hieu_luc_cua_phien: []                           # mọi lease phiên cấp đều có withdrawn_at_utc
 ```
@@ -38,12 +38,14 @@ Ruleset `bao-ve-cong-dang-lease` (id 20856202) do chủ kho sửa ngày 20-11. P
 ## 3. Việc còn mở
 
 ### 3.1 Đã có phiên khác giữ — đừng nhận chồng
-Ba phiên con do phiên này mở ngày 20-11, theo yêu cầu chủ kho. Ngày 22-11, hai phiên còn chạy cũng đang tự đóng gói bàn
-giao cho Codex: **đọc bàn giao của CHÍNH chúng**, không suy từ tệp này.
-- **#1236** (cổng land/M8 đối chiếu `gate_output` với `provenance.yaml`): phiên `session_015GtxrYsNDbfLo32S39f5uY`, đang
-  chạy. #1257 (biến thể luật `duong_nhanh`) chỉ mở sau khi #1236 land.
-- **#1322** (CI-PROVENANCE-SONG-SONG): Issue **đã đóng** (completed). Phiên `session_015GtxrcJ94fBLh2n3he2BcS` đang đóng
-  gói bàn giao.
+Ba phiên con do phiên này mở ngày 20-11, theo yêu cầu chủ kho. Ngày 22-11 hai phiên còn chạy cũng tự đóng gói bàn giao cho
+Codex: **đọc bàn giao của CHÍNH chúng**, không suy từ tệp này. Trạng thái dưới đây đo ngày 25-11 03:3xZ.
+- **#1236** (cổng land/M8 đối chiếu `gate_output` với `provenance.yaml`): phiên `session_015GtxrYsNDbfLo32S39f5uY`
+  **đang bị chặn, chờ chủ kho trả lời một câu hỏi**. Theo tóm tắt của chính phiên đó: đợt B (L8) review lượt 3/4 vẫn
+  `changes_requested`, cùng một lớp lỗi ("thiếu ca nghiệm thu luật 4/8 qua L8") lặp ba lượt liền. Issue vẫn mở. #1257
+  (biến thể luật `duong_nhanh`) chỉ mở sau khi #1236 land.
+- **#1322** (CI-PROVENANCE-SONG-SONG): Issue **đã đóng** (completed). Phiên `session_015GtxrcJ94fBLh2n3he2BcS` đã xong.
+  Nó báo các mục 2–5 của việc dọn packet **#1475** chưa làm, đang chờ chủ kho quyết.
 - **gemini HTTP 500**: phiên `session_015GtxraqxgU6x1GshxzYCF4` đã xong. #1457 đóng; nguyên nhân r1 là profile Proxima chưa
   đăng nhập Google; r2 sau khi đăng nhập lại cho `fixed_partial`. Nợ còn lại ghi ở **#1471** (ghi nợ, chưa phải packet).
 
@@ -51,24 +53,28 @@ giao cho Codex: **đọc bàn giao của CHÍNH chúng**, không suy từ tệp 
 - **#1483 — cài `rg` từ GitHub Release thay apt** (`state:proposed`, **hoãn**). Issue ghi sẵn điều kiện mở lại đo được:
   sau #1482, có lượt CI mà bước cài vẫn đỏ sau đủ `thu lai lan 3/3`. Issue cũng ghi phạm vi đã đo: 5 tệp, 52 chỗ fixture
   trong `launcher_test.py`, không ghim phiên bản cứng. Đừng mở khi chưa có số đo ấy.
+  **Đo 25-11:** 119 lượt `ci.yml` từ lúc #1482 merge (21-11 03:51Z), 1 lượt có `run_attempt > 1`. Kiểm 7 attempt đỏ hoặc
+  chạy lại: **0** lần đỏ ở bước `cài rg` / `cài shellcheck` ⇒ điều kiện mở lại CHƯA xảy ra.
 - Hai việc nhỏ đã nêu với chủ kho, **chưa** có Issue:
   - trần 180 s/công cụ của khối `cong-cu-ban-ke` trong hook so với giãn cách tổng 105 s của `cai_cong_cu.sh`: lỗi apt kéo
     dài sẽ bị hook cắt trước lần thử lại cuối;
   - `ruff` chưa có trong bản kê `ops/cong_cu.yaml`: bản ghim chỉ nằm ở `ci.yml`, và hook đọc trực tiếp từ đó.
 
 ### 3.3 Việc của chủ kho (không phải packet)
-- **Credential Codex sắp hết:** `doctor` ngày 22-11 02:47Z báo `access_token=6.0h`, ảnh chụp cũ 234 h. Làm mới trước khi gọi
-  review chéo (`codex login --device-auth`, rồi cập nhật `agent_creds`).
-- Cookie NLM khoảng 22 ngày tuổi: hook khuyên re-stage sớm.
+- **Trả lời câu hỏi của phiên #1236** (mục 3.1): phiên ấy đứng yên tới khi có câu trả lời.
+- **Quyết các mục 2–5 dọn packet #1475** mà phiên #1322 nêu.
+- Credential Codex: đã làm mới. `doctor` ngày 25-11 03:31Z báo `access_token=221.5h`, `last_refresh` 24-11. Trạng thái
+  `CO_CREDENTIAL`, chưa ai gọi thật (`--kiem-song`).
+- Cookie NLM khoảng **25 ngày tuổi** (sống khoảng 2–4 tuần): hook khuyên re-stage sớm.
 
-## 4. Lease của người khác đang chặn tệp chung (đo 21/22-11 — đo lại bằng `ai-dang-giu` trước khi dùng)
-| tệp | lease | tới |
-|---|---|---|
-| `.github/workflows/ci.yml`, `ops/ci_duong_nhanh.py`, `ops/ci_duong_nhanh_test.py`, `ops/cong_cu_test.py` | `wp1448-r4-g5-claude` (#1448; PR #1492 vừa merge, lease có thể đã đổi) | 2026-11-25T08:00Z |
-| `.claude/dev/ci_dang_ky_test.py` | `wp1236-a-r10-g1-claude-20261121` | 2026-11-23T00:15Z |
+## 4. Lease của người khác trên tệp chung (đo 25-11 03:3xZ — đo lại bằng `ai-dang-giu` trước khi dùng)
+| tệp | đo 25-11 |
+|---|---|
+| `.github/workflows/ci.yml`, `ops/cong_cu_test.py` | `NGƯỜI_GIỮ 0` (lease `wp1448-*` ghi trong bản 22-11 nay không còn giữ) |
+| `.claude/dev/ci_dang_ky_test.py` | `NGƯỜI_GIỮ 1`: `wp1460-r9-g4-claude` |
 
-Hệ quả: một test MỚI dạng `*_test.py` không đăng ký được vào sổ CI cho tới khi lease thứ hai hết hạn. Hai packet #1474 và
-#1479 đã đặt ca test vào `.claude/dev/launcher_test.py` (tệp đã đăng ký) vì lý do này.
+Hệ quả: một test MỚI dạng `*_test.py` cần một dòng trong sổ `ci_dang_ky_test.py`, nên phải chờ lease ấy hết hạn hoặc xin
+người giữ. Hai packet #1474 và #1479 đã đặt ca test vào `.claude/dev/launcher_test.py` (tệp đã đăng ký) vì lý do này.
 
 ## 5. Bài học đo được trong phiên (chưa có cổng nào canh)
 1. **Đừng chạy bộ test dài trong lúc Codex sandbox đang chạy.** Trong lúc review Codex chạy song song, `launcher_test.py`

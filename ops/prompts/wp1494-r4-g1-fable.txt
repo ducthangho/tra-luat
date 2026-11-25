@@ -1,0 +1,53 @@
+You are the EXECUTOR for work packet wp1494 (B2, Mission #1172) of repository ducthangho/tra-luat, under lease wp1494-r4-g1-claude.
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments or Issues.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1494
+- Frozen spec: ops/specs/wp1494-r1/SPEC.md on branch ops/wp1494-r1 at commit 8c68b39153a62ff26a982dc72add5f079277e051, sha256 22d6a09277509c5462c955278da03696c6931ea8aa9fbcfe349df73c9e451740, revision 4.
+  First verify it with `git fetch origin ops/wp1494-r1 && git show 8c68b39153a62ff26a982dc72add5f079277e051:ops/specs/wp1494-r1/SPEC.md | sha256sum`. If the hash differs, STOP.
+- Owner hash approval: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7131562790
+- Construction parameters: Mission r109, ops/specs/wp1172-source-plan-r4/MCR-1172-r109.md on branch ops/wp1172-plan-r4 at 2e70d3b3dada5babd17e6c5e83f8c2b16cacc874, sha256 b9821d4d1749d21632a9df2ed88f1ef32d21f66b3645524e73d37f7276d80883 (installed at https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7154717495):
+  B = b4b79bf0cd301bb067a22c5245505d9a8ab232cb; ISSUE_THEO_DOI = 1520; KHUNG_DAU = 2026-11-28T19:17:00Z.
+- Lease: ops/leases/wp1494-r4-g1-claude-20261125.yaml on branch ops/wp1494-r1. Read it and obey its limits.
+- Read before coding: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §7, §8, §12), .claude/skills/work-packet/SKILL.md and the WHOLE spec, including the GHIM-B1A block, the mutant table and section "Baseline nghiệm thu".
+
+BASE AND BRANCH
+- Base B = b4b79bf0cd301bb067a22c5245505d9a8ab232cb (merge commit of B1a PR #1516). The repository must not be shallow (`git rev-parse --is-shallow-repository` = false; if true run `git fetch --unshallow origin`).
+- Before coding, measure YOURSELF every condition of B in spec section "Baseline nghiệm thu" (first-parent of origin/master; the two hop_dong sha256 equal GHIM-B1A; KHUNG_DAU equals khung_cron of the committer time of B; job bien-nhan-audit and the upload step in ci-dot-bien-du.yml at B; the three new files absent and no canh_tuoi_audit_test entry in ci_dang_ky_test.py at B). Also verify the three GHIM-B1A hashes, including the "Lệnh kiểm" code block hash d9c78e70…, against the B1a spec at d1b08c219227d4b8925702029cd20d4e0febed54. Any mismatch => STOP and report the measurement.
+- Work on the local branch `agent/wp1494-r4-g1-fable`, created from B. Commit locally. DO NOT PUSH: the owner audits the exact head before its first push.
+
+WRITE SET (exactly four files, no fifth)
+1. .github/workflows/canh-tuoi-audit.yml (new) — spec section 8.
+2. ops/canh_tuoi_audit.py (new) — spec sections 2–7 and 9; KHUNG_DAU = 2026-11-28T19:17:00Z, ISSUE_THEO_DOI = 1520, KHUNG_DONG_TAY empty; tieu_dung, khoa_tu_ten, doc_moc, khung_cron copied verbatim from the GHIM-B1A code block.
+3. ops/canh_tuoi_audit_test.py (new) — acceptance 1–11 and 15, mutant table; last four output lines as acceptance 12.
+4. .claude/dev/ci_dang_ky_test.py — ONLY add the one MOI entry the spec Write set gives, byte for byte.
+Needing any other file => STOP and report.
+
+SIZE
+Default sensitive cap: ≤ 6 files and ≤ 450 added lines, measured by `git diff --numstat b4b79bf0cd301bb067a22c5245505d9a8ab232cb HEAD` on a committed head. The spec itself says exceeding the cap is likely and is an expected stop, not an incident. Measure as you go. When the next piece of work would cross 450 added lines, commit what you have, STOP, and report: SHA and tree of that head, numstat per file, and the list of work still missing (spec items, cases, mutants). Do not cut cases, mutants or rules to fit, do not split the PR. The coordinator will ask the owner for a nang_tran block; you continue only under a lease that carries it.
+
+GATES (spec acceptance plus CLAUDE.md)
+- `git config core.abbrev 7` before running gates. Use clones whose .git is a directory for suites that need it.
+- actionlint on canh-tuoi-audit.yml with shellcheck present: rc 0. Record both versions.
+- `python3 ops/canh_tuoi_audit_test.py`: the last four lines must match the regex the spec puts into MOI, with equal numbers.
+- `python3 .claude/dev/ci_dang_ky_test.py` N/N, equal numbers, and its registration check accepts the new entry.
+- `python3 -m ruff check --select F` (pinned 0.15.15) delta 0 vs B on every changed .py.
+- Every acceptance item with its two-direction cases and its dedicated mutant; each mutant classified by the target case's own exception class and case name, as the spec requires.
+- No test writes to real GitHub: every GitHub call goes through the fake transport. Never write a real Issue or comment, never dispatch.
+- Never write the CI-skip marker (in any letter case or word order) in any file or commit message.
+
+STOP CONDITIONS
+A spec clause that is contradictory or impossible at B; a write outside the write set; the size cap; the same failure recurring three times with the same shape (§12). Report instead of working around.
+
+HANDOFF
+When done, or when stopped, write /tmp/wp1494-r4-g1-HANDOFF.yaml following protocol §7. It must contain:
+- packet wp1494, revision 4, generation 1, lease_id wp1494-r4-g1-claude;
+- provider, model, surface;
+- base SHA, head SHA and tree as full OIDs;
+- numstat per file and totals;
+- every gate: exact command, real exit code and the positive marker line;
+- mutant table: name, target case, killed-by-correct-reason yes/no;
+- what is not measured;
+- open questions.
+Then reply with: head SHA, tree, numstat totals, the gate summary and the handoff path.

@@ -497,7 +497,8 @@ _DAU_CAU_KET = frozenset(".!?")
 # r2 (lượt 2 A2): đánh số NỘI DÒNG trong thân khoản (`… 1) …`, `… 2. …`) — tiểu mục, ranh giới khoản không tin được.
 # r3 (lượt 3 C2): khoảng trắng hai bên CHỈ trong phạm vi một dòng (`[ \t]`, không `\s`) — số điều ở cuối một dòng điểm, theo sau
 # là xuống dòng, không phải số thứ tự nội dòng.
-_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")
+# r4 (lượt 4 D1): mọi khoảng trắng TRỪ xuống dòng (`[^\S\n]`) — gồm U+00A0 khoảng trắng không ngắt mà `[ \t]` bỏ sót.
+_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
@@ -529,7 +530,7 @@ def tach_khoan(van_ban):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
-    for ln in dong:
+    for i_dong, ln in enumerate(dong):
         m = _RE_SO_KHOAN.match(ln) if co_so else None
         if m:
             khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
@@ -542,7 +543,8 @@ def tach_khoan(van_ban):
             # ra một cách làm bộ quét báo "còn mở" sai. Khoản có ngoặc trải nhiều dòng ⇒ bị chặn (giới hạn đã khai).
             # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
-        elif not khoan and _RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None:
+        elif i_dong == 0 and _RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None:
+            # r4 (lượt 4 D3): CHỈ đúng MỘT câu dẫn, ở dòng ĐẦU (ngay sau tiêu đề) — câu dẫn lặp hay câu dẫn muộn có thể che dòng mở khoản.
             continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
             khoan.append([None, ln])

@@ -1059,6 +1059,22 @@ def ca_wp1514_luot3(m):
          == [], f"C2: so dieu cuoi dong diem bi chan oan: {m.tach_khoan(c2)}")
 
 
+def ca_wp1514_luot4(m):
+    """r4 (lượt 4): D1 đánh số nội dòng kề khoảng trắng không ngắt U+00A0 · D3 chỉ một câu dẫn, ở dòng đầu."""
+    CD = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    # D1: tiểu mục nội dòng dùng U+00A0 ⇒ vẫn mơ hồ.
+    d1 = f"Điều 3.\n{CD}\n1. Hồ sơ là tài liệu.\n2. Quy trình là các bước: 1.\u00a0chuẩn bị,\u00a02.\u00a0thực hiện.\n3. Bước kết thúc là bàn giao."
+    bang(m.tach_khoan(d1) is None, f"D1: danh so noi dong voi U+00A0 phai mo ho: {m.tach_khoan(d1)}")
+    # D3: câu dẫn LẶP (dòng thứ hai cũng kết bằng hậu tố câu dẫn) ⇒ không được bỏ ⇒ kết quả bỏ dòng ấy bị chặn.
+    d3 = f"Điều 3.\n{CD}\nCác thuật ngữ khác được hiểu như sau:\nDữ liệu là thông tin."
+    bang(m.lech_nguyen_van(kn(("Dữ liệu", "thông tin.")), d3) != [], "D3: cau dan thu hai bi bo")
+    bang(m.lech_nguyen_van(kn(("Dữ liệu", "thông tin.")), f"Điều 3.\n{CD}\nDữ liệu là thông tin.") == [],
+         "D3 doi chung: mot cau dan o dong dau bi chan oan")
+
+
 def ca_usage_thieu_truong(m):
     bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
     bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
@@ -1075,7 +1091,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1084,10 +1100,13 @@ DOT_BIEN = [
     ("wp1514_l2_cham_phay_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".;!?")'), "ca_wp1514_luot2"),
     ("wp1514_l2_hai_cham_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".!?:")'), "ca_wp1514"),
     ("wp1514_l2_bo_so_noi_dong", ("    if any(_RE_SO_NOI_DONG.search(txt) for _, txt in khoan):\n        return None", "    if False:\n        return None"), "ca_wp1514_luot2"),
-    ("wp1514_l2_so_noi_dong_nhan_thap_phan", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)]")'), "ca_wp1514_luot2"),
+    ("wp1514_l2_so_noi_dong_nhan_thap_phan", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)]")'), "ca_wp1514_luot2"),
     # r3 (lượt 3 C1/C2).
     ("wp1514_l3_tieu_de_chi_do_la", ('        if not _RE_TIEU_DE_TRON.match(" ".join(dong[0].split())):\n', '        if _RE_LA.search(dong[0]):\n'), "ca_wp1514_luot3"),
-    ("wp1514_l3_so_noi_dong_qua_dong", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")'), "ca_wp1514_luot3"),
+    ("wp1514_l3_so_noi_dong_qua_dong", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")'), "ca_wp1514_luot3"),
+    # r4 (lượt 4 D1/D3).
+    ("wp1514_l4_chi_cach_ascii", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n])")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|[ \t])\(?\d+[.)](?=[ \t])")'), "ca_wp1514_luot4"),
+    ("wp1514_l4_cau_dan_moi_vi_tri", ("        elif i_dong == 0 and _RE_CAU_DAN.search(", "        elif not khoan and _RE_CAU_DAN.search("), "ca_wp1514_luot4"),
     ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
     ("wp1514_bo_x2", ("    if ln.count('\"') >= 3:\n        return True", "    if False:\n        return True"), "ca_wp1514"),

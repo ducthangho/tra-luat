@@ -13,6 +13,9 @@
 - r3 (sau cross-review lượt 3, đặc tả `ops/specs/llm-ranh-gioi-khoan-r3.md`): dòng tiêu đề chỉ được bỏ khi cả dòng đúng hình
   dạng `Điều N.` / `Điều N. Giải thích từ ngữ` — danh sách cho phép thay cho dò chữ "là" (C1); chốt đánh số nội dòng chỉ xét trong
   một dòng (C2).
+- r4 (sau cross-review lượt 4 + đo Windows, đặc tả `ops/specs/llm-ranh-gioi-khoan-r4.md`): chốt đánh số nội dòng nhận mọi
+  khoảng trắng trừ xuống dòng, gồm U+00A0 (D1); chỉ câu dẫn ở dòng đầu được bỏ (D3); khai giới hạn tiêu đề viết HOA / tên xuống
+  dòng (D2); selftest `r380_llm_khai_niem_bien_dau_vao` chỉ kiểm giữ quyền 0644 trên POSIX (đỏ trên Windows bản địa, run 45542712141).
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

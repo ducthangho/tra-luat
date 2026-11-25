@@ -66,3 +66,5 @@ max_lease_hours: 8
 review_calls_limit: 5
 review_calls_used_truoc: 3
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r4-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 4 (D1, D3) + do Windows; revision r4 (ops/specs/llm-ranh-gioi-khoan-r4.md).'

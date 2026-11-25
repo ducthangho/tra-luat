@@ -32294,7 +32294,10 @@ def run() -> int:
                 _out2.write_text("{}", encoding="utf-8")
                 _os380.chmod(_out2, 0o644)
                 _rc_ghi, _ = _chay(tep=str(_t15), out=str(_out2))
-                _giu_quyen = (_out2.stat().st_mode & 0o777) == 0o644 and json.loads(_out2.read_text(encoding="utf-8"))["dieu"] == "15"
+                # wp1514 r4 (đo Windows bản địa, run 45542712141): `chmod` trên Windows chỉ bật/tắt cờ chỉ-đọc ⇒ `st_mode` luôn 0o666;
+                # phép kiểm giữ quyền 0644 chỉ có nghĩa trên POSIX.
+                _giu_quyen = ((_os380.name == "nt" or (_out2.stat().st_mode & 0o777) == 0o644)
+                              and json.loads(_out2.read_text(encoding="utf-8"))["dieu"] == "15")
                 # Lượt 3 M5: `--out` và `--nhat-ky` cùng một tệp ⇒ rc 2 TRƯỚC khi gọi model, byte cũ giữ nguyên.
                 _trung = _d / "trung.json"
                 _trung.write_text('{"cu": 1}', encoding="utf-8")

@@ -154,12 +154,15 @@ jobs:
           # So `commit.sha` đã DEREFERENCE (`repos/O/R/tags`), đủ 40 ký tự, mọi trang.
           # BA kết quả, in ra stdout: `giu` · `khong_giu` · `khong_do_duoc`. Lỗi `gh` ở BẤT
           # KỲ trang nào là `khong_do_duoc`, không phải `khong_giu` — `None ≠ False`.
+          # So SHA bằng CHUỖI, không bằng số: `awk` coi trường trông như số là số, nên hai
+          # SHA40 toàn chữ số khác nhau ở chữ số cuối thành BẰNG nhau sau khi mất độ chính
+          # xác (finding P1 cross-review lượt 1). Tiền tố `sha:` ép cả hai vế thành chuỗi.
           do_tag_luu_tru() {
             local ds
             if ! ds="$(gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[] | "\(.name) \(.commit.sha)"' 2>/dev/null)"; then
               echo khong_do_duoc; return 0
             fi
-            if printf '%s\n' "$ds" | awk -v s="$1" 'index(tolower($1), "luu-tru/") == 1 && $2 == s { f = 1 } END { exit !f }'; then
+            if printf '%s\n' "$ds" | awk -v s="$1" 'index(tolower($1), "luu-tru/") == 1 && ("sha:" $2) == ("sha:" s) { f = 1 } END { exit !f }'; then
               echo giu
             else
               echo khong_giu

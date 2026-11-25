@@ -644,10 +644,11 @@ vòng quanh nó (đo được 21-08-2026: 16 nhánh `ops/**` đã land hết mà
 `behind_by = 0` so với nhánh mặc định (mọi commit đã nằm trong đó) **hoặc** khi có tag `luu-tru/*` trỏ
 đúng đầu nhánh. Nhánh có tiền tố ngoài mọi danh sách (`coord/`, `ccr-*`, `do-ci/`…) nay chịu cùng phép đo
 với vùng làm việc: trước #1532 `case` không có nhánh mặc định nên chúng bị xoá mà KHÔNG đo gì (run
-`45677710837`). Chỉ tag `luu-tru/*` được tính vì tag tên khác xoá được qua chính workflow này.
+`45677710837`). Chỉ tag `luu-tru/*` được tính, vì tag tên thường (không thuộc `luu-tru/` và không mang
+tên vùng làm việc) xoá được qua chính workflow này.
 **Ba trạng thái, không phải hai**: là tổ tiên ·
-không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** mang tên các vùng ấy thì vẫn CẤM —
-tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM + **LEASE**: bước chốt ghi lại SHA đã đo, bước
+không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** dưới `luu-tru/` hay mang tên vùng làm
+việc thì vẫn CẤM — tag không có quan hệ tổ-tiên để mà đo; luật xoá tag tên thường KHÔNG đổi ở #1532. Kèm chốt GHIM + **LEASE**: bước chốt ghi lại SHA đã đo, bước
 làm xoá bằng `git push --force-with-lease=<ref>:<sha ghim> origin :<ref>` chứ KHÔNG bằng
 `DELETE /git/refs` — REST chỉ nhận TÊN ref, không có SHA kỳ vọng, tức không có CAS.
 **Bản đầu của mục này viết SAI và cross-review bắt được**: nó nói "đọc lại đầu nhánh rồi so" là
@@ -659,7 +660,8 @@ lẫn tag: lease neo SHA cũ ⇒ `! [rejected] … (stale info)`, `rc=1`, ref C�
 `- [deleted]`, `rc=0`, ref MẤT — và chạy được cả từ kho **0 object**, nên runner chỉ cần một remote
 có xác thực, không cần lịch sử. Bài học chung, không riêng chỗ này: **"thu hẹp" mà viết thành "đóng"
 là một lời khai rộng hơn phép đo** — đúng lớp lỗi mà chính tệp này dạy, và người viết câu sai là
-người vừa đọc nó. Phản chứng: `ops/don_ref_chot_test.sh` (105 ca; đột biến quay về REST DELETE làm
+người vừa đọc nó. Phản chứng: `ops/don_ref_chot_test.sh` (147 phép kiểm, đo 25-11-2026 sau #1532 — con số trôi, đọc lại
+dòng tổng `don_ref: N/N`; đột biến quay về REST DELETE làm
 ca "nhánh nhảy SHA giữa ĐO và XOÁ" ĐỎ đúng như reviewer đã dựng).
 
 **`luu-tru/*` là ref BỀN duy nhất** giữ các commit công bố verdict sau khi nhánh `ops/**` bị xoá — xem

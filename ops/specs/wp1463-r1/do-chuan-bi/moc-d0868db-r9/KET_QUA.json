@@ -1,0 +1,94 @@
+{
+ "sha": "d0868dbf7f6324755aa4ed0f3e02d4efa84866f0",
+ "them_Z": [
+  "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+  "ops/specs/wp1460-r1/hop_dong/fixture.json"
+ ],
+ "ket_luan": "SACH",
+ "phep": [
+  {
+   "ten": "phan_chung_nguyen",
+   "do_duoc": true,
+   "ly_do": [],
+   "tap": [
+    ".claude/dev/ci_dang_ky_test.py",
+    ".github/workflows/ci-dot-bien-du.yml",
+    ".github/workflows/ci.yml",
+    ".github/workflows/launcher-windows.yml",
+    "ops/bash_nen.py",
+    "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+    "ops/specs/wp1460-r1/hop_dong/fixture.json"
+   ],
+   "ngoai_vung": []
+  },
+  {
+   "ten": "phan_chung_bon",
+   "do_duoc": true,
+   "ly_do": [],
+   "tap": [
+    ".claude/dev/ci_dang_ky_test.py",
+    ".github/workflows/ci-dot-bien-du.yml",
+    ".github/workflows/ci.yml",
+    ".github/workflows/launcher-windows.yml",
+    "ops/bash_nen.py",
+    "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+    "ops/specs/wp1460-r1/hop_dong/fixture.json"
+   ],
+   "ngoai_vung": []
+  },
+  {
+   "ten": "phan_chung_go",
+   "do_duoc": true,
+   "ly_do": [],
+   "tap": [
+    ".claude/dev/ci_dang_ky_test.py",
+    ".github/workflows/ci-dot-bien-du.yml",
+    ".github/workflows/ci.yml",
+    ".github/workflows/launcher-windows.yml",
+    "ops/bash_nen.py",
+    "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json",
+    "ops/specs/wp1460-r1/hop_dong/fixture.json"
+   ],
+   "ngoai_vung": []
+  },
+  {
+   "ten": "bo_day_du",
+   "do_duoc": true,
+   "ly_do": [],
+   "tap": [
+    ".claude/dev/ci_dang_ky_test.py",
+    ".github/workflows/ops-do-workflow-definition.yml",
+    "ops/bash_nen.py",
+    "ops/ci_provenance.py",
+    "ops/ci_provenance_test.py"
+   ],
+   "ngoai_vung": []
+  }
+ ],
+ "python_con": {
+  "phan_chung_nguyen": [
+   79,
+   91
+  ],
+  "phan_chung_bon": [
+   79,
+   91
+  ],
+  "phan_chung_go": [
+   79,
+   91
+  ],
+  "bo_day_du": [
+   562,
+   562
+  ]
+ },
+ "bo_day_du_khoi_cuoi": [
+  "TIEN TRINH: 4",
+  "CA: 77/77 dat",
+  "DOT BIEN: 485/485 bi giet dung ly do",
+  "TU KIEM PHAN HANG: DAT (2 dot bien)",
+  "TONG: DAT"
+ ],
+ "so_tep_theo_doi": 18608
+}

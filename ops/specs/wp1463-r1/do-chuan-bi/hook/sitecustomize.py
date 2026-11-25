@@ -1,7 +1,10 @@
-# wp1463 do-chuan-bi: hook quan sat `open` cho MOI tien trinh Python thua ke PYTHONPATH.
-# Ghi moi dong "<pid>\t<kieu>\t<duong dan tuyet doi>"; kieu: BAT_DAU | MO | DIRFD | DIRFD_KHONG_GIAI.
-# os.open(..., dir_fd=fd) voi duong dan tuong doi: giai theo /proc/self/fd/<fd> (khong theo cwd);
-# su kien audit cung luot ay bi bo qua de khong ghi nham duong dan giai theo cwd.
+# wp1463 do-chuan-bi: hook quan sat cho MOI tien trinh Python thua ke PYTHONPATH.
+# Moi dong: "<pid>\t<kieu>\t<du lieu>". Kieu:
+#   BAT_DAU                     hook da cai trong tien trinh nay (truoc moi import cua ma duoc do)
+#   MO / THAT                   duong dan tuyet doi theo chu (lexical) / sau realpath, khi khac nhau
+#   DIRFD / DIRFD_KHONG_GIAI    os.open(ten tuong doi, dir_fd=fd): giai theo /proc/self/fd/<fd>, khong theo cwd
+#   SINH                        su kien tao tien trinh con (JSON: executable, argv)
+import json
 import os
 import sys
 import threading
@@ -17,9 +20,36 @@ if _LOG:
         except Exception:
             pass
 
+    def _ghi_duong(kieu, p):
+        _ghi(kieu, p)
+        try:
+            that = os.path.realpath(p)
+            if that != p:
+                _ghi("THAT", that)
+        except Exception:
+            pass
+
+    def _argv(x):
+        try:
+            return [os.fsdecode(a) for a in x] if isinstance(x, (list, tuple)) else [os.fsdecode(x)]
+        except Exception:
+            return [repr(x)]
+
     def _hook(ev, args):
-        if ev == "open" and args and isinstance(args[0], (str, bytes)) and not getattr(_tl, "dirfd", False):
-            _ghi("MO", os.path.abspath(os.fsdecode(args[0])))
+        if getattr(_tl, "trong", False):
+            return
+        _tl.trong = True
+        try:
+            if ev == "open" and args and isinstance(args[0], (str, bytes)) and not getattr(_tl, "dirfd", False):
+                _ghi_duong("MO", os.path.abspath(os.fsdecode(args[0])))
+            elif ev == "subprocess.Popen":
+                _ghi("SINH", json.dumps({"exe": os.fsdecode(args[0]) if args[0] else None, "argv": _argv(args[1])}))
+            elif ev in ("os.posix_spawn", "os.exec"):
+                _ghi("SINH", json.dumps({"exe": os.fsdecode(args[0]), "argv": _argv(args[1])}))
+            elif ev == "os.system":
+                _ghi("SINH", json.dumps({"exe": "/bin/sh", "argv": ["sh", "-c", os.fsdecode(args[0])]}))
+        finally:
+            _tl.trong = False
 
     _goc_open = os.open
 
@@ -28,7 +58,7 @@ if _LOG:
             return _goc_open(path, flags, mode, dir_fd=dir_fd)
         try:
             goc = os.readlink(f"/proc/self/fd/{dir_fd}")
-            _ghi("DIRFD", os.path.normpath(os.path.join(goc, os.fsdecode(path))))
+            _ghi_duong("DIRFD", os.path.normpath(os.path.join(goc, os.fsdecode(path))))
         except Exception:
             _ghi("DIRFD_KHONG_GIAI", os.fsdecode(path))
         _tl.dirfd = True

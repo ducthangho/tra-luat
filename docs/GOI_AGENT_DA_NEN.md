@@ -396,8 +396,10 @@ biến môi trường của environment.
   nội dung trước tiêu đề hay thêm tiêu đề Điều/Chương/Mục/Phần trong tệp, Điều không có đánh số tự động (dùng `--tep`
   tệp văn bản), đoạn không số sau khoản đầu, hai danh sách ở cấp khoản, số khoản không liên tục từ 1, số gõ tay lẫn số
   tự động, đánh số qua style, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
-  `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, số thứ tự trên 999, định dạng số ngoài
-  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm,
+  `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
+  không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
+  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột
+  được nhận),
   ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
   không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
   Word. Đường `<số hiệu>` (qua `tl extract`) vẫn là văn bản thô.

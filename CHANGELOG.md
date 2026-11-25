@@ -23,6 +23,8 @@
 - r7 (sau cross-review lượt 6, đặc tả `ops/specs/llm-khoan-docx-r7.md`): tệp `.docx` phải chỉ chứa ĐÚNG Điều cần đọc (bỏ mọi
   luật đoán điểm kết thúc Điều); điểm phải đánh số tự động (điểm gõ tay ⇒ chặn); ID danh sách chuẩn hoá số; số thứ tự trên 999
   ⇒ chặn; `ptab` đọc được; mốc phạm vi move phải cân.
+- r8 (sau cross-review lượt 7, đặc tả `ops/specs/llm-khoan-docx-r8.md`): ID danh sách phải là số nguyên; điểm nhảy cấp ⇒ chặn;
+  part numbering/styles theo `document.xml.rels`; ngắt trang/cột được nhận; tiêu đề viết hoa được nhận.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

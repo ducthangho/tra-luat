@@ -572,15 +572,34 @@ def _bat_ooxml(el):
 
 
 def _so_id(v):
-    """r7 (lượt 6 F3): ID đánh số OOXML là SỐ NGUYÊN — `01` và `1` là một. Chuẩn hoá về chữ số thập phân; không phải số ⇒ giữ
-    nguyên (sẽ không khớp định nghĩa nào ⇒ bị chặn ở bước xác thực)."""
-    try:
-        return str(int(str(v).strip()))
-    except (TypeError, ValueError):
-        return v
+    """r7 (lượt 6 F3): ID đánh số OOXML là SỐ NGUYÊN — `01` và `1` là một. Chuẩn hoá về chữ số thập phân.
+    r8 (lượt 7 G1): CHỈ nhận chữ số thập phân ASCII (`int()` còn nhận `+1`, `1_0`, chữ số Unicode…); khác ⇒ None (không hợp lệ)."""
+    v = str(v).strip() if v is not None else ""
+    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None
 
 
 _TRAN_SO = 999   # r7 (lượt 6 F4): trần SỐ THỨ TỰ (bộ đếm ≥ giá trị bắt đầu nên phủ cả `start`) — chặn nhãn chữ dài vô hạn
+
+
+def _phan_qua_quan_he(z, doc_gioi_han, loai, mac_dinh):
+    """r8 (lượt 7 G2): tên part (numbering/styles) lấy từ `word/_rels/document.xml.rels` — tài liệu có thể đặt tên khác mặc định.
+    Không có tệp quan hệ ⇒ tên mặc định. Quan hệ trỏ ra ngoài gói hay part vắng ⇒ ValueError. Không có quan hệ loại ấy ⇒ None."""
+    try:
+        rels = ET.fromstring(_doc_thanh_phan(z, "word/_rels/document.xml.rels", doc_gioi_han))
+    except KeyError:
+        return mac_dinh
+    ns = "{http://schemas.openxmlformats.org/package/2006/relationships}"
+    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).endswith("/" + loai)]
+    if not dich:
+        return None
+    if len(dich) > 1 or dich[0].get("TargetMode") == "External":
+        raise ValueError(f"quan he {loai} khong ho tro (nhieu hoac tro ra ngoai)")
+    import posixpath
+    t = dich[0].get("Target", "")
+    ten = posixpath.normpath(t.lstrip("/") if t.startswith("/") else posixpath.join("word", t))
+    if ten.startswith("..") or ten not in z.namelist():
+        raise ValueError(f"part {loai} {t!r} khong co trong goi")
+    return ten
 
 
 def _doc_danh_so(z, doc_gioi_han):
@@ -588,9 +607,12 @@ def _doc_danh_so(z, doc_gioi_han):
 
     r2 (lượt 1 A5): định nghĩa danh sách KHÔNG hỗ trợ không làm hỏng cả tài liệu — chỉ ghi `loi`, người gọi chặn khi Điều
     đích dùng danh sách ấy. Không hỗ trợ: `lvlOverride` ngoài `startOverride`, `w:lvlRestart`, `w:isLgl` (lượt 1 A2)."""
+    ten = _phan_qua_quan_he(z, doc_gioi_han, "numbering", "word/numbering.xml")
     try:
-        xml = _doc_thanh_phan(z, "word/numbering.xml", doc_gioi_han)
+        xml = _doc_thanh_phan(z, ten, doc_gioi_han) if ten else None
     except KeyError:
+        return {}
+    if xml is None:
         return {}
     goc = ET.fromstring(xml)
     truu_tuong = {}
@@ -618,6 +640,8 @@ def _doc_danh_so(z, doc_gioi_han):
                        txt.get(_W + "val") if txt is not None else "",
                        int(st.get(_W + "val")) if st is not None else 0)
         aid_an = _so_id(an.get(_W + "abstractNumId"))
+        if aid_an is None:
+            continue   # r8 (lượt 7 G1): abstractNumId không hợp lệ ⇒ không ghép được ⇒ danh sách trỏ tới nó bị chặn
         if aid_an in truu_tuong:
             loi = loi or f"abstractNumId {aid_an} trung sau chuan hoa"
         truu_tuong[aid_an] = (muc, loi)
@@ -625,6 +649,8 @@ def _doc_danh_so(z, doc_gioi_han):
     for num in goc.findall(_W + "num"):
         nid = _so_id(num.get(_W + "numId"))
         aid = num.find(_W + "abstractNumId")
+        if nid is None:
+            continue
         if nid in kq:
             kq[nid] = {"muc": {}, "loi": f"numId {nid} trung sau chuan hoa"}
             continue
@@ -650,9 +676,12 @@ def _doc_danh_so(z, doc_gioi_han):
 def _doc_kieu(z, doc_gioi_han):
     """styleId → (basedOn, numId|None, ilvl|None, strike|None, dstrike|None); khoá đặc biệt `""` = (docDefaults strike,
     dstrike, style đoạn mặc định). r3 (lượt 2 B3): gạch ĐƠN và gạch KÉP tính RIÊNG qua từng tầng, không gộp một cờ."""
+    ten = _phan_qua_quan_he(z, doc_gioi_han, "styles", "word/styles.xml")
     try:
-        goc = ET.fromstring(_doc_thanh_phan(z, "word/styles.xml", doc_gioi_han))
+        goc = ET.fromstring(_doc_thanh_phan(z, ten, doc_gioi_han)) if ten else None
     except KeyError:
+        goc = None
+    if goc is None:
         return {"": (None, None, None)}
 
     def gach(rpr, ten):
@@ -803,7 +832,8 @@ def _phan_tich_doan(p, kieu):
                 chu_run.append((c.text or "") if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten])
             elif ten in ("br", "cr"):
                 chu_run.append(" ")
-                kq["ngat"] = True
+                if c.get(_W + "type") not in ("page", "column"):
+                    kq["ngat"] = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT là trình bày, không phải ngắt dòng mềm
             elif ten in ("delText",):
                 continue   # chữ đã xoá (track changes) — không vào nguyên văn
             elif ten in _CON_RUN_BO_QUA:
@@ -845,6 +875,8 @@ def _phan_tich_doan(p, kieu):
         e = np_.find(_W + "numId")
         if e is not None:
             nid, tu_style = _so_id(e.get(_W + "val")), False
+            if nid is None:
+                kq["la"] = True   # r8 (lượt 7 G1): numId không hợp lệ ⇒ không biết danh sách
         e = np_.find(_W + "ilvl")
         il = int(e.get(_W + "val")) if e is not None else il
     so = None if nid in (None, "0") else (nid, il or 0)
@@ -910,8 +942,10 @@ def doc_dieu_docx(nguon, dieu):
                     raise ValueError(f"so thu tu numId {nid} cap {il} vuot {_TRAN_SO}")   # r7 (lượt 6 F4)
                 for k in [k for k in dem if k > il]:
                     del dem[k]
-                for k in range(il):
-                    dem.setdefault(k, muc.get(k, ("decimal", "", 0))[2])
+                if any(k not in dem for k in range(il)):
+                    # r8 (lượt 7 G1/G3): NHẢY cấp (cấp tổ tiên chưa có mục) — Word dựng nhãn tổ tiên từ giá trị khởi tạo, cách hiển
+                    # thị chưa đo được và giá trị ấy đi vòng qua trần số ⇒ không đoán.
+                    raise ValueError(f"numId {nid}: doan cap {il} nhay qua cap chua co muc")
                 dem_snap = dict(dem)
         doan.append({**pt, "dem": dem_snap, "loai": "p", "trong_bang": trong_bang})
     # r7 (lượt 6 F1, quyết định chủ kho "Docx must contain only that Article"): tệp chứa ĐÚNG Điều cần đọc — đoạn có nội dung
@@ -923,7 +957,7 @@ def doc_dieu_docx(nguon, dieu):
     if not co_nd:
         raise ValueError("tep khong co noi dung")
     i0 = co_nd[0]
-    re_dau = re.compile(rf"^Điều\s+{re.escape(str(dieu))}\s*[.:]")
+    re_dau = re.compile(rf"^Điều\s+{re.escape(str(dieu))}\s*[.:]", re.IGNORECASE)   # r8 (lượt 7 G6): như `_RE_TIEU_DE_TRON`
     if not re_dau.match(doan[i0]["chu"]):
         raise ValueError(f"doan dau tien cua tep phai la tieu de 'Dieu {dieu}.' (tep chi chua dung Dieu can doc): "
                          f"{doan[i0]['chu'][:60]!r}")

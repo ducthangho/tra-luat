@@ -48,8 +48,19 @@ echo "$DONG" >> "${GIA_LOG_CHOT:-/dev/null}"
 case "$DONG" in
   *"repos/$GITHUB_REPOSITORY --jq .default_branch"*) echo master; exit 0 ;;
   *"git/ref/heads/"*)
+      # GIA_SHA_MAP="ref=sha ref=sha": SHA RIENG cho tung nhanh (#1532, F5 luot 1) — de bat
+      # hoi quy dung lai ghim cua phan tu truoc cho phan tu sau. Ref khong co trong bang => loi.
+      if [ -n "${GIA_SHA_MAP:-}" ]; then
+        r="${DONG#*git/ref/heads/}"; r="${r%% *}"
+        for e in $GIA_SHA_MAP; do [ "${e%%=*}" = "$r" ] && { echo "${e#*=}"; exit 0; }; done
+        exit 1
+      fi
       # SHA cua nhanh luu-tru. GIA_SHA_NHANH= rong => coi nhu doc KHONG duoc.
       [ -n "${GIA_SHA_NHANH:-}" ] && { echo "$GIA_SHA_NHANH"; exit 0; }
+      exit 1 ;;
+  *"git/ref/tags/"*)
+      # SHA cua TAG (xoa-tag ten thuong). Rong => doc KHONG duoc. #1532
+      [ -n "${GIA_SHA_TAG:-}" ] && { echo "$GIA_SHA_TAG"; exit 0; }
       exit 1 ;;
   *"/compare/"*)
       # `behind_by` cua phep do to-tien. GIA_BEHIND rong => coi nhu KHONG DO DUOC.
@@ -58,12 +69,16 @@ case "$DONG" in
       [ -n "${GIA_BEHIND:-}" ] && { echo "$GIA_BEHIND"; exit 0; }
       exit 1 ;;
   *"repos/$GITHUB_REPOSITORY/tags"*)
-      # Danh sach tag DA dereference. GIA_TAG_SHAS = trang MOT, cach nhau bang khoang trang.
-      for s in ${GIA_TAG_SHAS:-}; do echo "$s"; done
+      # Danh sach tag DA dereference, moi dong "<ten> <sha>" (dung dang `--jq` cua chot).
+      # GIA_TAG_SHAS = trang MOT, cach nhau bang khoang trang. Moi phan tu la `ten=sha`,
+      # hoac `sha` tran (#1532) => ten mac dinh `luu-tru/gia`, de cac ca cu giu nguyen nghia.
+      # Chot nay doc TEN tag: tag ngoai `luu-tru/` KHONG duoc tinh, nen do gia phai tra ten.
+      in_tag() { case "$1" in *=*) echo "${1%%=*} ${1#*=}" ;; *) echo "luu-tru/gia $1" ;; esac; }
+      for s in ${GIA_TAG_SHAS:-}; do in_tag "$s"; done
       # TRANG HAI chi hien khi co `--paginate`. Nho no ma bo test khoa duoc chinh co ay:
       # bo `--paginate` thi mot tag nam o trang sau tro nen vo hinh, va nhanh co tag giu
       # se bi tu choi SAI.
-      case "$DONG" in *--paginate*) for s in ${GIA_TAG_SHAS_TRANG2:-}; do echo "$s"; done ;; esac
+      case "$DONG" in *--paginate*) for s in ${GIA_TAG_SHAS_TRANG2:-}; do in_tag "$s"; done ;; esac
       # Xuat mot phan roi HONG — ca nay khoa `pipefail`. Neu thieu pipefail thi `grep`
       # tra 0 va chot cho xoa trong khi danh sach tag CHUA doc tron ven.
       [ "${GIA_TAG_HONG_GIUA:-0}" = 1 ] && exit 1
@@ -108,6 +123,19 @@ doi_log_chot() {
   else HONG=$((HONG+1)); printf '  ĐỎ    %s  (đếm %s, mong %s)\n' "$ten" "$n" "$mong"; fi
 }
 
+# Khớp CHUỖI CỐ ĐỊNH (`grep -F`), có vế dương lẫn vế âm — #1532. `doi_ra` dùng regex nên
+# `luu-tru/*` trong mẫu là "không hoặc nhiều dấu /", tức khớp lỏng hơn câu thật.
+doi_ra_f() {
+  local ten="$1" mau="$2"
+  if grep -qF -- "$mau" "$TAM/out" 2>/dev/null; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
+  else HONG=$((HONG+1)); printf '  ĐỎ    %s  (không thấy %q trong đầu ra)\n' "$ten" "$mau"; sed 's/^/          /' "$TAM/out" | tail -3; fi
+}
+khong_ra_f() {
+  local ten="$1" mau="$2"
+  if grep -qF -- "$mau" "$TAM/out" 2>/dev/null; then HONG=$((HONG+1)); printf '  ĐỎ    %s  (VẪN thấy %q trong đầu ra)\n' "$ten" "$mau"; sed 's/^/          /' "$TAM/out" | tail -3
+  else QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"; fi
+}
+
 echo "chốt của ops-don-ref.yml — phản chứng"
 SHA_THAT=b4e5c5f9ef85e652fa2cc98bb3474036519d663c
 
@@ -117,7 +145,10 @@ ca "xac_nhan TAO cho lệnh XOÁ thì DỪNG"   2 xoa-nhanh tmp-probe-2 "" TAO
 # Từ bản vá CAS: MỌI ref sắp xoá đều được đọc SHA để ghim, vì bước làm xoá bằng lease.
 # Không cấp SHA giả ⇒ chốt DỪNG, và đó là hành vi ĐÚNG (không ghim được thì không xoá).
 S_THUONG=dddddddddddddddddddddddddddddddddddddddd
-ca "ref thường + XOA thì QUA"             0 xoa-nhanh tmp-probe-2 "" XOA GIA_SHA_NHANH="$S_THUONG"
+# #1532: ca này TỪNG khoá chính lỗ fail-open — ref ngoài mọi danh sách được xoá mà KHÔNG
+# đo gì. Nay tách hai: không phép đo nào cho qua ⇒ DỪNG; `behind_by = 0` ⇒ QUA.
+ca "ref thường, KHÔNG phép đo nào cho qua thì DỪNG" 2 xoa-nhanh tmp-probe-2 "" XOA GIA_SHA_NHANH="$S_THUONG"
+ca "ref thường + 0 commit ngoài mặc định thì QUA"  0 xoa-nhanh tmp-probe-2 "" XOA GIA_SHA_NHANH="$S_THUONG" GIA_BEHIND=0
 ca "ref thường mà KHÔNG đọc được SHA thì DỪNG" 2 xoa-nhanh tmp-probe-2 "" XOA
 ca "nhánh MẶC ĐỊNH thì DỪNG"              2 xoa-nhanh master "" XOA
 # BẤT BIẾN mới cho `luu-tru/**`: xoá NHÁNH được, nhưng CHỈ KHI commit của nó còn tag
@@ -145,6 +176,7 @@ S_VLV=cccccccccccccccccccccccccccccccccccccccc
 ca "ops/**: 0 commit ngoài mặc định thì QUA"   0 xoa-nhanh ops/wp55-r4-ho-so "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
 doi_log_chot "…và CÓ đọc SHA của nhánh"        "git/ref/heads/" 1
 doi_log_chot "…và CÓ gọi compare"              "/compare/" 1
+doi_log_chot "…và KHÔNG hỏi tag khi đã 0 commit ngoài" "tra-luat/tags" 0
 ca "claude/**: 0 commit ngoài mặc định thì QUA" 0 xoa-nhanh claude/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
 ca "codex/**: 0 commit ngoài mặc định thì QUA"  0 xoa-nhanh codex/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
 ca "agent/**: 0 commit ngoài mặc định thì QUA"  0 xoa-nhanh agent/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
@@ -162,6 +194,66 @@ doi_ra "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC"    "KHÔNG ĐO ĐƯỢC 
 # đúng cách một cổng biến "không có dữ liệu" thành "đạt".
 ca "ops/**: compare trả RÁC (không phải số) thì DỪNG" 2 xoa-nhanh ops/dang-lam "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND_RAC=1 NEO_TEP="$TAM/neo.txt"
 doi_ra "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC"    "KHÔNG ĐO ĐƯỢC quan hệ"
+# ═══ #1532: tag `luu-tru/*` giữ đúng đầu nhánh cũng cho xoá; nhánh `*)` hết fail-open ═══
+# Ca gốc: run 45677566316 chặn `ops/wp1475-r1-g1-lease` dù `luu-tru/wp1475-r1-leases` đã
+# giữ đúng SHA; run 45677710837 xoá hai nhánh `coord/*` mà không đo gì.
+S_OPS=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+S_OPS_GAN=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeef
+S_KHAC=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+ca "ops/**: còn commit ngoài mặc định NHƯNG tag luu-tru giữ thì QUA" 0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+doi_ra_f "…và nói ĐÚNG lý do: tag luu-tru/* giữ"   "tag luu-tru/* giữ đúng commit ấy"
+doi_ra_f "…và dòng CHO PHÉP nêu đúng ref + SHA"  "cho phép: 'ops/wp1475-x' ($S_OPS)"
+# F1 lượt 1 (P1): `awk` so trường trông như SỐ theo kiểu số ⇒ hai SHA40 toàn chữ số lệch ở
+# chữ số cuối thành BẰNG nhau. Fixture hex có chữ không bao giờ đi qua đường ấy.
+S_SO=1111111111111111111111111111111111111111
+S_SO_GAN=1111111111111111111111111111111111111112
+ca "ops/**: SHA toàn CHỮ SỐ lệch chữ số cuối thì DỪNG (so chuỗi, không so số)" 2 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_SO" GIA_BEHIND=3 GIA_TAG_SHAS="luu-tru/x=$S_SO_GAN" NEO_TEP="$TAM/neo.txt"
+ca "ops/**: SHA toàn CHỮ SỐ khớp đúng thì QUA" 0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_SO" GIA_BEHIND=3 GIA_TAG_SHAS="luu-tru/x=$S_SO" NEO_TEP="$TAM/neo.txt"
+# F2 lượt 1: `luu-tru/` phải là TIỀN TỐ của tên tag, không phải chuỗi con bất kỳ.
+ca "ops/**: tag chứa luu-tru/ GIỮA tên thì không tính" 2 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="other/luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "luu-tru/**: tag chứa luu-tru/ GIỮA tên thì không tính" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="other/luu-tru/x=$S_LT"
+# F4 lượt 1: compare KHÔNG ĐO ĐƯỢC nhưng tag luu-tru giữ đúng SHA ⇒ vẫn QUA (một phép đo đủ).
+ca "ops/**: compare lỗi NHƯNG tag luu-tru giữ thì QUA" 0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_TAG_SHAS="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "ops/**: compare trả RÁC NHƯNG tag luu-tru giữ thì QUA" 0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND_RAC=1 GIA_TAG_SHAS="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "ops/**: tag KHÔNG thuộc luu-tru/ thì không tính" 2 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="v9.9.9=$S_OPS" NEO_TEP="$TAM/neo.txt"
+doi_ra_f "…và nêu đường thứ nhất: merge vào nhánh mặc định" "Merge vào master trước, hoặc tạo tag luu-tru/*"
+doi_ra_f "…và chỉ ĐÚNG đường: tag luu-tru/* trỏ đúng SHA đầu nhánh" "tạo tag luu-tru/* trỏ đúng $S_OPS (hành động tao-tag), rồi mới xoá."
+khong_ra_f "…và KHÔNG còn câu mơ hồ cũ"            "tạo tag giữ chúng"
+ca "ops/**: tag luu-tru trỏ SHA KHÁC (lệch 1 ký tự) thì DỪNG" 2 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="luu-tru/x=$S_OPS_GAN" NEO_TEP="$TAM/neo.txt"
+ca "ops/**: gh hỏng giữa phân trang tag thì DỪNG" 2 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="luu-tru/x=$S_OPS" GIA_TAG_HONG_GIUA=1 NEO_TEP="$TAM/neo.txt"
+doi_ra_f "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC tag"  "KHÔNG ĐO ĐƯỢC danh sách tag luu-tru/*"
+ca "ops/**: tag luu-tru ở TRANG SAU vẫn QUA"  0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="v1=$S_KHAC" GIA_TAG_SHAS_TRANG2="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "ops/**: tên tag LUU-TRU/ viết hoa vẫn tính (cùng cách so của danh sách bảo vệ)" 0 xoa-nhanh ops/wp1475-x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=3 GIA_TAG_SHAS="LUU-TRU/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "luu-tru/**: tag KHÔNG thuộc luu-tru/ thì không tính" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="v9.9.9=$S_LT"
+ca "luu-tru/**: gh hỏng giữa phân trang thì nói KHÔNG ĐO ĐƯỢC" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT" GIA_TAG_HONG_GIUA=1
+doi_ra_f "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC tag"  "KHÔNG ĐO ĐƯỢC danh sách tag luu-tru/*"
+# Nhánh `*)`: tiền tố KHÔNG có tên trong danh sách nào.
+ca "tiền tố NGOÀI danh sách: không phép đo nào cho qua thì DỪNG" 2 xoa-nhanh coord/x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=2 NEO_TEP="$TAM/neo.txt"
+doi_log_chot "…và CÓ gọi compare"              "/compare/" 1
+doi_ra_f "…và chỉ ĐÚNG đường: tag luu-tru/* trỏ đúng SHA đầu nhánh" "tạo tag luu-tru/* trỏ đúng $S_OPS (hành động tao-tag), rồi mới xoá."
+doi_ra_f "…và nêu đường thứ nhất: merge vào nhánh mặc định" "Merge vào master trước, hoặc tạo tag luu-tru/*"
+khong_ra_f "…và KHÔNG còn câu mơ hồ cũ"            "tạo tag giữ chúng"
+ca "tiền tố NGOÀI danh sách: tag luu-tru giữ thì QUA" 0 xoa-nhanh coord/x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_BEHIND=2 GIA_TAG_SHAS="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+ca "tiền tố NGOÀI danh sách: compare lỗi NHƯNG tag luu-tru giữ thì QUA" 0 xoa-nhanh coord/x "" XOA GIA_SHA_NHANH="$S_OPS" GIA_TAG_SHAS="luu-tru/x=$S_OPS" NEO_TEP="$TAM/neo.txt"
+# F5 lượt 1: nhiều ref, MỖI ref một SHA riêng ⇒ tệp ghim phải có đúng từng cặp, không tái
+# dùng ghim của phần tử trước.
+S_A=a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1
+S_B=b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2
+: > "$TAM/neo2.txt"
+ca "nhiều ref, SHA khác nhau: QUA"          0 xoa-nhanh 'luu-tru/a,coord/b' "" XOA GIA_SHA_MAP="luu-tru/a=$S_A coord/b=$S_B" GIA_BEHIND=0 GIA_TAG_SHAS="luu-tru/giu-a=$S_A" NEO_TEP="$TAM/neo2.txt"
+if [ "$(sort "$TAM/neo2.txt" | tr '\n' ';')" = "coord/b $S_B;luu-tru/a $S_A;" ]; then
+  QUA=$((QUA+1)); printf '  QUA   %s\n' "…và ghim ĐÚNG từng cặp ref–SHA (2 dòng)"
+else
+  HONG=$((HONG+1)); printf '  ĐỎ    %s\n' "…và ghim ĐÚNG từng cặp ref–SHA (2 dòng)"; sed 's/^/          /' "$TAM/neo2.txt"
+fi
+ca "tiền tố NGOÀI danh sách: không đo được thì DỪNG" 2 xoa-nhanh coord/x "" XOA GIA_SHA_NHANH="$S_OPS" NEO_TEP="$TAM/neo.txt"
+doi_ra "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC"    "KHÔNG ĐO ĐƯỢC quan hệ"
+ca "tiền tố NGOÀI danh sách: không đọc được SHA thì DỪNG" 2 xoa-nhanh ccr-abc "" XOA GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+doi_log_chot "…và KHÔNG gọi compare (dừng sớm)" "/compare/" 0
+# Xoá TAG tên thường: giữ hành vi cũ (packet chỉ đổi luật xoá NHÁNH) — không đo tổ tiên, không hỏi tag.
+ca "xoá TAG tên thường: hành vi cũ, QUA"   0 xoa-tag tmp-tag "" XOA GIA_SHA_TAG="$S_KHAC" NEO_TEP="$TAM/neo.txt"
+doi_log_chot "…và KHÔNG gọi compare"           "/compare/" 0
+doi_log_chot "…và KHÔNG hỏi danh sách tag"     "tra-luat/tags" 0
 # TAG mang tên vùng làm việc: KHÔNG có quan hệ tổ-tiên để đo ⇒ phép đo không thay được
 # lệnh cấm, và lệnh cấm ở đó giữ nguyên.
 ca "xoá TAG tên vùng làm việc thì vẫn CẤM"     2 xoa-tag ops/x "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
@@ -185,7 +277,7 @@ ca "dấu phẩy ở CUỐI thì DỪNG"             2 xoa-nhanh 'a,' "" XOA
 ca "dấu phẩy ở ĐẦU thì DỪNG"              2 xoa-nhanh ',a' "" XOA
 ca "hai dấu phẩy liền thì DỪNG"           2 xoa-nhanh 'a,,b' "" XOA
 ca "sha có dấu phẩy cuối thì DỪNG"        2 tao-tag v1 "$SHA_THAT," TAO
-ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA GIA_SHA_NHANH="$S_THUONG"
+ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA GIA_SHA_NHANH="$S_THUONG" GIA_BEHIND=0
 ca "xoá TAG dưới luu-tru/ thì DỪNG"       2 xoa-tag luu-tru/wp55-r4-verdict-review-1 "" XOA GIA_SHA_NHANH=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa GIA_TAG_SHAS=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # Bốn ca dưới khoá finding P2 `protection-is-exact-case-only`. Git PHÂN BIỆT hoa thường
 # nên `Ops/x` đúng là nhánh khác `ops/x` — nhưng người đọc log thì không phân biệt, và
@@ -296,19 +388,33 @@ case "$DONG" in
   push*--force-with-lease=*)
       lease=$(printf '%s' "$DONG" | tr ' ' '\n' | sed -n 's/^--force-with-lease=//p')
       ref="${lease%%:*}"; mong="${lease##*:}"
+      # #1532 (F3 luot 1): ref BI XOA la DICH cua refspec `:<dich>`, khong phai ten trong
+      # lease. Git that chi ap lease cho ref trung ten voi dich; lease ten khac thi khong che
+      # duoc gi. Do gia truoc day xoa theo ten trong lease, nen doi dich refspec van xanh.
+      dich=$(printf '%s' "$DONG" | tr ' ' '\n' | sed -n 's/^://p' | tail -1)
+      [ -n "$dich" ] || { echo "git gia: push khong co refspec xoa" >&2; exit 1; }
       ST="${GIA_REF_STATE:-/dev/null}"
-      hien=$(awk -v k="$ref" '$1==k{print $2}' "$ST" 2>/dev/null | tail -1)
+      hien=$(awk -v k="$dich" '$1==k{print $2}' "$ST" 2>/dev/null | tail -1)
       if [ -z "$hien" ]; then
-        printf ' ! [remote rejected] (delete) -> %s (no such ref)\n' "${ref##*/}" >&2; exit 1
+        # G1 luot 2: khop git THAT (do 2.43.0, remote bare cuc bo). Lease cung ten voi dich
+        # ma dich khong ton tai => old-oid lech => `stale info`, rc=1. Lease ten KHAC thi git
+        # chi canh bao `deleting a non-existent ref` va tra THANH CONG, khong doi gi.
+        if [ "${lease%%:*}" = "$dich" ]; then
+          printf ' ! [rejected] (delete) -> %s (stale info)\n' "${dich##*/}" >&2; exit 1
+        fi
+        printf 'warning: deleting a non-existent ref\n' >&2; exit 0
       fi
-      if [ "$hien" != "$mong" ]; then
+      ref="$dich"
+      if [ "$lease" != "${lease%%:*}" ] && [ "${lease%%:*}" = "$dich" ] && [ "$hien" != "$mong" ]; then
         printf ' ! [rejected] (delete) -> %s (stale info)\n' "${ref##*/}" >&2; exit 1
       fi
       # GIA_PUSH_KHONG_AN_GI=1: lease KHOP, bao thanh cong, nhung KHONG doi trang thai.
       # Khoa phep "DO LAI sau khi xoa" — khong co no thi mot lenh xoa im lang vo hieu
       # van cho cong xanh.
       if [ "${GIA_PUSH_KHONG_AN_GI:-0}" != 1 ]; then
-        grep -v "^$ref " "$ST" > "$ST.tmp" 2>/dev/null; mv "$ST.tmp" "$ST" 2>/dev/null
+        # So KHOP NGUYEN TEN (awk `!=`), khong `grep` regex: dau `.` trong ten ref la ky tu
+        # dai dien cua regex, nen xoa `dot.x` tung xoa luon `dotax` (G1 luot 2).
+        awk -v k="$ref" '$1 != k' "$ST" > "$ST.tmp" 2>/dev/null; mv "$ST.tmp" "$ST" 2>/dev/null
         printf '%s\n' "${ref#refs/}" >> "${GIA_LOG}.daxoa"
       fi
       printf ' - [deleted]         %s\n' "${ref##*/}"
@@ -373,6 +479,19 @@ lam "xoá: có trước, mất sau -> XANH"      0 xoa-nhanh a "" false
 doi_log "xoá: ĐÚNG MỘT lệnh push có lease" "force-with-lease" 1
 doi_log "xoá: lease neo ĐÚNG refs/heads/a" "force-with-lease=refs/heads/a:" 1
 
+lam "xoá: tiền tố ngoài danh sách (coord/x)" 0 xoa-nhanh coord/x "" false
+doi_log "…và ĐÚNG MỘT push có lease neo refs/heads/coord/x" "force-with-lease=refs/heads/coord/x:" 1
+doi_log "…và refspec xoá trỏ ĐÚNG đích refs/heads/coord/x" "origin :refs/heads/coord/x$" 1
+# G1 lượt 2: đồ giả xoá theo NGUYÊN TÊN. Tên ref có dấu `.` không được kéo theo ref khác
+# mà regex `.` khớp (`dot.x` không được xoá mất `dotax`).
+printf 'refs/heads/dot.x %s\nrefs/heads/dotax %s\n' "$S1" "$S1" > "$TAM/rs_cham"
+printf 'dot.x %s\n' "$S1" > "$TAM/neo_cham"
+lam "xoá ref có dấu chấm: chỉ xoá đúng ref ấy" 0 xoa-nhanh dot.x "" false GIA_REF_STATE="$TAM/rs_cham" NEO_TEP="$TAM/neo_cham"
+if grep -qxF "refs/heads/dotax $S1" "$TAM/rs_cham" && ! grep -q '^refs/heads/dot\.x ' "$TAM/rs_cham"; then
+  QUA=$((QUA+1)); printf '  QUA   %s\n' "…và dotax CÒN, dot.x MẤT"
+else
+  HONG=$((HONG+1)); printf '  ĐỎ    %s\n' "…và dotax CÒN, dot.x MẤT"; sed 's/^/          /' "$TAM/rs_cham"
+fi
 lam "xoá HAI ref -> hai lệnh push"        0 xoa-nhanh 'a,b' "" false
 doi_log "xoá hai: đếm push có lease = 2"  "force-with-lease" 2
 

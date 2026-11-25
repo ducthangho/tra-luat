@@ -146,6 +146,64 @@ jobs:
             *,,*) echo "DỪNG: danh sách sha có dấu phẩy liền nhau"; exit 2 ;;
           esac
 
+          # ═══ PHÉP ĐO "có tag LƯU TRỮ giữ commit này không" — v1 #1532 ═══
+          # Dùng chung cho MỌI nhánh xoá được: `luu-tru/**`, vùng làm việc, và nhánh `*)`.
+          # CHỈ tính tag tên `luu-tru/*` (so thường-hoá, cùng cách danh sách bảo vệ so): tag
+          # tên khác xoá được qua chính workflow này (`xoa-tag`), nên nó không giữ được gì
+          # lâu dài; tag `luu-tru/*` thì workflow CẤM xoá. Bản trước nhận tag BẤT KỲ.
+          # So `commit.sha` đã DEREFERENCE (`repos/O/R/tags`), đủ 40 ký tự, mọi trang.
+          # BA kết quả, in ra stdout: `giu` · `khong_giu` · `khong_do_duoc`. Lỗi `gh` ở BẤT
+          # KỲ trang nào là `khong_do_duoc`, không phải `khong_giu` — `None ≠ False`.
+          # So SHA bằng CHUỖI, không bằng số: `awk` coi trường trông như số là số, nên hai
+          # SHA40 toàn chữ số khác nhau ở chữ số cuối thành BẰNG nhau sau khi mất độ chính
+          # xác (finding P1 cross-review lượt 1). Tiền tố `sha:` ép cả hai vế thành chuỗi.
+          do_tag_luu_tru() {
+            local ds
+            if ! ds="$(gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[] | "\(.name) \(.commit.sha)"' 2>/dev/null)"; then
+              echo khong_do_duoc; return 0
+            fi
+            if printf '%s\n' "$ds" | awk -v s="$1" 'index(tolower($1), "luu-tru/") == 1 && ("sha:" $2) == ("sha:" s) { f = 1 } END { exit !f }'; then
+              echo giu
+            else
+              echo khong_giu
+            fi
+          }
+
+          # Luật xoá NHÁNH cho vùng làm việc VÀ mọi tiền tố không có tên trong `case`
+          # (#1532). Bản trước: vùng làm việc chỉ nhận `behind_by = 0`, còn tiền tố lạ
+          # (`coord/`, `ccr-*`, `do-ci/`…) đi thẳng tới bước xoá mà KHÔNG đo gì — run
+          # 45677710837 xoá hai nhánh `coord/*` theo đúng đường ấy. Nay: cho xoá khi
+          # `behind_by = 0` HOẶC có tag `luu-tru/*` trỏ đúng đầu nhánh; mọi trường hợp khác
+          # DỪNG, kể cả khi một phép đo KHÔNG ĐO ĐƯỢC mà phép kia không cho qua.
+          do_nhanh_co_do() {
+            local r="$1" sau_lung tag
+            sha_nhanh="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$r" --jq .object.sha 2>/dev/null || true)"
+            if ! printf '%s' "$sha_nhanh" | grep -Eq '^[0-9a-f]{40}$'; then
+              echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của nhánh '$r' — không xoá mù một nhánh."; exit 2
+            fi
+            # So bằng SHA chứ không bằng TÊN trong đường dẫn `compare`: tên nhánh có `/`,
+            # và SHA GHIM phép đo vào đúng commit vừa đọc (bẫy `t53`). `behind_by` = số
+            # commit BASE (đầu nhánh) có mà HEAD (nhánh mặc định) không có. Đọc SỐ, không
+            # đọc chuỗi `status`.
+            sau_lung="$(gh api "repos/$GITHUB_REPOSITORY/compare/$sha_nhanh...$MAC_DINH" --jq .behind_by 2>/dev/null || true)"
+            if [ "$sau_lung" = 0 ]; then
+              echo "cho phép: '$r' ($sha_nhanh) — 0 commit ngoài $MAC_DINH"
+              sha_ghim="$sha_nhanh"; return 0
+            fi
+            tag="$(do_tag_luu_tru "$sha_nhanh")"
+            if [ "$tag" = giu ]; then
+              echo "cho phép: '$r' ($sha_nhanh) — tag luu-tru/* giữ đúng commit ấy"
+              sha_ghim="$sha_nhanh"; return 0
+            fi
+            if ! printf '%s' "$sau_lung" | grep -Eq '^[0-9]+$'; then
+              echo "DỪNG: KHÔNG ĐO ĐƯỢC quan hệ giữa '$r' ($sha_nhanh) và nhánh mặc định $MAC_DINH, và tag luu-tru/*: $tag — coi như CHƯA đo, không xoá."; exit 2
+            fi
+            if [ "$tag" = khong_do_duoc ]; then
+              echo "DỪNG: '$r' còn $sau_lung commit CHƯA có trong $MAC_DINH, và KHÔNG ĐO ĐƯỢC danh sách tag luu-tru/* — không xoá."; exit 2
+            fi
+            echo "DỪNG: '$r' còn $sau_lung commit CHƯA có trong $MAC_DINH. Xoá là làm chúng không tra được. Merge vào $MAC_DINH trước, hoặc tạo tag luu-tru/* trỏ đúng $sha_nhanh (hành động tao-tag), rồi mới xoá."; exit 2
+          }
+
           IFS=',' read -ra DS <<< "$REF"
           SO=0
           for r in "${DS[@]}"; do
@@ -206,12 +264,17 @@ jobs:
                   if ! printf '%s' "$sha_nhanh" | grep -Eq '^[0-9a-f]{40}$'; then
                     echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của nhánh '$r' — không xoá mù một ref lưu trữ."; exit 2
                   fi
-                  if gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[].commit.sha' 2>/dev/null | grep -qxF "$sha_nhanh"; then
-                    echo "cho phép: '$r' ($sha_nhanh) vẫn còn tag giữ commit ấy"
-                    sha_ghim="$sha_nhanh"
-                  else
-                    echo "DỪNG: '$r' trỏ $sha_nhanh mà KHÔNG tag nào giữ commit ấy. Xoá nhánh này là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được. Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá."; exit 2
-                  fi
+                  # #1532: chỉ tag `luu-tru/*` được tính (xem `do_tag_luu_tru`).
+                  tag="$(do_tag_luu_tru "$sha_nhanh")"
+                  case "$tag" in
+                    giu)
+                      echo "cho phép: '$r' ($sha_nhanh) vẫn còn tag luu-tru/* giữ commit ấy"
+                      sha_ghim="$sha_nhanh" ;;
+                    khong_giu)
+                      echo "DỪNG: '$r' trỏ $sha_nhanh mà KHÔNG tag luu-tru/* nào giữ commit ấy. Xoá nhánh này là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được. Tạo tag luu-tru/* trỏ đúng $sha_nhanh TRƯỚC (hành động tao-tag), rồi mới xoá."; exit 2 ;;
+                    *)
+                      echo "DỪNG: KHÔNG ĐO ĐƯỢC danh sách tag luu-tru/* cho '$r' ($sha_nhanh) — không xoá."; exit 2 ;;
+                  esac
                   ;;
                 ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
                   # ĐỔI TỪ LỆNH CẤM SANG PHÉP ĐO — cùng hình dạng bản vá đã làm cho
@@ -240,30 +303,16 @@ jobs:
                   if [ "$HANH_DONG" != xoa-nhanh ]; then
                     echo "DỪNG: '$r' là TAG mang tên vùng làm việc được bảo vệ. Phép đo tổ-tiên chỉ áp dụng cho NHÁNH; với tag không có gì để đo nên vẫn cấm."; exit 2
                   fi
-                  sha_nhanh="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$r" --jq .object.sha 2>/dev/null || true)"
-                  if ! printf '%s' "$sha_nhanh" | grep -Eq '^[0-9a-f]{40}$'; then
-                    echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của nhánh '$r' — không xoá mù một nhánh trong vùng làm việc."; exit 2
+                  do_nhanh_co_do "$r"
+                  ;;
+                *)
+                  # #1532: nhánh mặc định của `case`. Trước đây KHÔNG có nhánh này, nên mọi
+                  # tiền tố ngoài danh sách đi thẳng tới bước xoá mà không đo gì. Đảo thành
+                  # danh sách CHO PHÉP: chỉ xoá được khi đo được (`do_nhanh_co_do`).
+                  # Xoá TAG tên thường giữ hành vi cũ — packet này chỉ đổi luật xoá NHÁNH.
+                  if [ "$HANH_DONG" = xoa-nhanh ]; then
+                    do_nhanh_co_do "$r"
                   fi
-                  # So bằng SHA chứ không bằng TÊN trong đường dẫn `compare`: tên nhánh
-                  # ở đây có dấu `/` (`ops/x`), mà `compare/{base}...{head}` ghép thẳng
-                  # vào đường dẫn URL. Dùng SHA vừa tránh chuyện ấy, vừa GHIM phép đo
-                  # vào đúng commit ta vừa đọc — đo một thứ rồi xoá một thứ khác là
-                  # đúng cái bẫy `t53` đã ghi.
-                  #
-                  # `behind_by` = số commit mà BASE có còn HEAD không có. Base là đầu
-                  # nhánh, head là nhánh mặc định ⇒ `behind_by = 0` CHÍNH LÀ "mọi commit
-                  # của nhánh đã nằm trong nhánh mặc định". Đọc số, không đọc chuỗi
-                  # `status`: `identical`/`ahead`/`behind`/`diverged` là phân loại bằng
-                  # văn bản, và kho này đã trả giá vì phân loại bằng văn bản tự do.
-                  sau_lung="$(gh api "repos/$GITHUB_REPOSITORY/compare/$sha_nhanh...$MAC_DINH" --jq .behind_by 2>/dev/null || true)"
-                  if ! printf '%s' "$sau_lung" | grep -Eq '^[0-9]+$'; then
-                    echo "DỪNG: KHÔNG ĐO ĐƯỢC quan hệ giữa '$r' ($sha_nhanh) và nhánh mặc định $MAC_DINH — coi như CHƯA đo, không xoá."; exit 2
-                  fi
-                  if [ "$sau_lung" != 0 ]; then
-                    echo "DỪNG: '$r' còn $sau_lung commit CHƯA có trong $MAC_DINH. Xoá là làm chúng không tra được. Merge vào $MAC_DINH trước, hoặc tạo tag giữ chúng."; exit 2
-                  fi
-                  echo "cho phép: '$r' ($sha_nhanh) — 0 commit ngoài $MAC_DINH"
-                  sha_ghim="$sha_nhanh"
                   ;;
               esac
 

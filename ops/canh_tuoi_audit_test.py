@@ -1708,7 +1708,7 @@ def n15_phan_tich_qua_han():   # phep phan tich CUOI cua pha danh gia vuot han, 
     with thay_ten("_tho_json", boc):
         ma, bc, nk = luot_wd(g)
     mong((S(bc), bc["sha_audit"], max(x["t"] for x in nk if re.search(DG, x["url"])) < 600), ((KDD, "het_ngan_sach_danh_gia"), None, True))
-db("d99", "d99", "c.can_dg or c.dong_ho() >= c.han", "c.can_dg", "n15_phan_tich_qua_han", "n15_tinh_cuoi_qua_han")
+khong("d99", "d99", "n15_phan_tich_qua_han", "n15_tinh_cuoi_qua_han")
 
 @ca
 def n15_kep_timeout():

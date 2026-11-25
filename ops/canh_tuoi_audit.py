@@ -920,7 +920,9 @@ def chay(moi_truong, transport, goc=".", *, T=None, dong_ho=time.monotonic, ngu=
               "trang_thai": KHONG_DO_DUOC, "ma": _ma_nem("danh_gia", e)}
     # Can ngan sach la TAT-CA-HOAC-KHONG va duoc quyet o MOT cho, sau phep tinh CUOI, tren MOI duong tra trang thai tong (luat thuong, moi duong S1, luoi an toan):
     # co can (kiem TRUOC lan thu / lan cho) hoac dong ho luc HOAN TAT da toi han (bang han la da het).
-    if c.can_dg or c.dong_ho() >= c.han:  # d14 d99
+    if c.dong_ho() >= c.han:  # d99
+        c.can_dg = True
+    if c.can_dg:  # d14
         kq.update(trang_thai=KHONG_DO_DUOC, ma="het_ngan_sach_danh_gia", sha_audit=None, dong_den=viet(dong_den0), nghia_vu=[])  # d140
     c.pha_dg = False
     c.han = c.dong_ho() + NGAN_SACH_GHI - w0_dung  # d15

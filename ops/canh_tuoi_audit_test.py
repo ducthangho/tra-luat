@@ -1739,11 +1739,18 @@ def n15_kep_timeout():
 db("d100", "d100", "min(HAN_GOI, con)", "HAN_GOI", "n15_kep_timeout")
 
 @ca
-def n15_cho_qua_han():   # GET 500 khi con 0,5 s: khong cho, khong thu lai, ham ngu khong duoc goi
-    g = nen_han(0, moc=599.5, ma_t7=500)
+def n15_cho_qua_han():   # GET 500 khi con DUNG 1 s = thoi gian cho (bay gio + cho = han la da het): khong cho, khong thu lai, ham ngu khong duoc goi
+    g = nen_han(0, moc=599.0, ma_t7=500)
     ma, bc, nk = luot_wd(g)
     mong((g.ngu_nk, dem(nk, "GET", r"/runs/21$"), S(bc)), ([], 2, (KDD, "het_ngan_sach_danh_gia")))
 khong("d104", "d104", "n15_cho_qua_han")
+db("d104_bien", "d104", "cho >= c.han", "cho > c.han", "n15_cho_qua_han")
+
+@ca
+def n15_goi_dung_han():   # lan thu ke tiep (T7 cua B) den luot DUNG o han (con lai 0): khong gui
+    ma, bc, nk = luot_wd(nen_han(0, moc=600.0))
+    mong((dem(nk, "GET", r"/runs/21$"), S(bc)), (1, (KDD, "het_ngan_sach_danh_gia")))
+db("d105_bien", "d105", "con <= 0", "con < 0", "n15_goi_dung_han")
 
 def nen_w8(can):
     """S `khung_do` can `canh_bao`, giao xong; W8 (GET Issue thu ba) bat dau khi HAN_GHI con 1 s; moi GET Issue can `can` giay."""
@@ -1761,7 +1768,7 @@ def n15_han_cuoi_ghi():   # W8 thanh cong ve transport (xong o 179,5 s) nhung ph
             def f(byte):
                 x = goc(byte)
                 if isinstance(x, dict) and set(x) == {"body", "state"} and dk() and nhay:
-                    g.t = 181.0
+                    g.t = 180.0   # DUNG han (bang han la da het)
                 return x
             return f
         with thay_ten("_tho_json", boc):
@@ -1769,6 +1776,7 @@ def n15_han_cuoi_ghi():   # W8 thanh cong ve transport (xong o 179,5 s) nhung ph
         mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), [x["t"] for x in nk if x["pt"] == "GET" and re.search(ISS, x["url"])][-1]), (ma_mong, 2, 1, 179.0), f"nhay={nhay}")
         mong((dem(luot_n(g, 1)[2], "POST"), nt_tren(g)["da_bao"]["loai"]), (0, "canh_bao"), "luot sau doc nhip tim co da_bao = su kien")
 khong("d106", "d106", "n15_han_cuoi_ghi")
+db("d106_bien", "d106", ">= c.han", "> c.han", "n15_han_cuoi_ghi")
 
 @ca
 def n15_han_cuoi_ghi_het_gio():   # W8 bat dau khi con 1 s, may chu can 2 s => timeout 1, W8 het gio => ma 3
@@ -1802,6 +1810,27 @@ db("rv2_n02_digest_vang", "k1:art_digest", 'rong(a, "digest")', 'isinstance(a.ge
 db("rv2_n03_art_ten", "k1:art_khac", 'chuoi(a, "name") and ', "", "n1_t1_mien_art_ten")
 db("rv2_n04_conclusion_vang", "k1:run_conclusion", 'rong(run, "conclusion")', 'isinstance(run.get("conclusion"), (str, type(None)))', "n1_t1_mien_run_conclusion_vang")
 db("rv2_n05_job_status", "k1:job_chuoi", '"name", "status"', '"name"', "n1_t1_mien_job_status")
+# Kiem ke DU nhanh con cua K1 (cung lop voi N02-N05): moi khoa va moi ve (co mat / kieu / duong) cua mot chot co ca va dot bien go RIENG no
+for _k in ("id", "repository.id", "event", "head_sha", "head_branch", "path", "created_at", "repository.full_name"):
+    ca_t1_mien("n1_t1_mien_run_" + _k, lambda lu, k=_k: dat_truong(lu["d2"], k, [5]))
+SO3 = ("id", "workflow_id", "repository.id")
+for _k in SO3:
+    for _h, _gt in (("0", 0), ("bool", True)):
+        ca_t1_mien(f"n1_t1_mien_run_{_k}_{_h}", lambda lu, k=_k, gt=_gt: dat_truong(lu["d2"], k, gt))
+ca_t1_mien("n1_t1_mien_job_attempt_bool", lambda lu: lu["jobs"][0].update(run_attempt=True))
+ca_t1_mien("n1_t1_mien_job_conclusion_vang", lambda lu: lu["jobs"][0].pop("conclusion"))
+for _ten, _nhan, _cu, _moi in (
+        ("run_id", "run_so", '("id", "workflow_id")', '("workflow_id",)'), ("run_so", "run_so", '("id", "workflow_id")', '("id",)'),
+        ("run_repository.id", "run_so", ' and duong(_lay(run, "repository.id"))', ""), ("run_repository.full_name", "run_chuoi", ' and isinstance(_lay(run, "repository.full_name"), str)', ""),
+        ("run_chuoi", "run_chuoi", '"status", ', ""), *[("run_" + k, "run_chuoi", f', "{k}"', "") for k in ("event", "head_sha", "head_branch", "path", "created_at")],
+        ("job_chuoi", "job_chuoi", '"name", ', ""), ("art_khac", "art_khac", ' and type(a.get("expired")) is bool', ""),
+        ("job_conclusion_vang", "job_conclusion", 'rong(j, "conclusion")', 'isinstance(j.get("conclusion"), (str, type(None)))'),
+        ("run_conclusion", "run_conclusion", 'rong(run, "conclusion")', '"conclusion" in run'), ("job_conclusion", "job_conclusion", 'rong(j, "conclusion")', '"conclusion" in j'),
+        ("art_digest", "art_digest", 'rong(a, "digest")', '"digest" in a')):
+    db("f03_k1_nhanh_" + _ten, "k1:" + _nhan, _cu, _moi, "n1_t1_mien_" + _ten)
+DUONG = "duong = lambda v: _so_nguyen(v) and v > 0"   # MOT ham dung chung cho nam noi goi: moi ve mot dot bien, chay tren ca cua MOI noi goi
+tho("f03_k1_duong_ve_duong", DUONG, "duong = lambda v: _so_nguyen(v)", "n1_t1_mien_run_attempt", "n1_t1_mien_job_attempt", *[f"n1_t1_mien_run_{k}_0" for k in SO3])
+tho("f03_k1_duong_ve_kieu", DUONG, "duong = lambda v: isinstance(v, int) and v > 0", "n1_t1_mien_run_attempt_bool", "n1_t1_mien_job_attempt_bool", *[f"n1_t1_mien_run_{k}_bool" for k in SO3])
 ca_t1_mien("n1_t1_mien_doi_chung", lambda lu: art_thua(lu), ("dat", "dat"))   # `digest: null` duoc K1 cho phep; `conclusion: null` cua luot dang chay: n1_chua_xong
 
 def ca_thieu_body(ten, lan, muon):
@@ -1976,6 +2005,8 @@ khong("f02_nen_han", "f02:nen_han", *NEN4)
 db("f02_nen_han_bien", "f02:nen_han", "con <= 0", "con < 0", *NEN4)
 db("f02_nen_socket", "f02:nen_socket", "sock.settimeout(con)", "pass", *NEN4, "n16_socket_that")
 xoa("f02_nen_dong", "f02:nen_dong", *NEN4)
+db("f02_nen_nhieu_lan_doc", "f02:nen_mot_lan", "read1(", "read(", *NEN4)       # mot lan kiem han cho NHIEU lan doc nen
+db("f02_nen_con_co_dinh", "f02:nen_con", "het - c.dong_ho()", "timeout", *NEN4)   # thoi gian con lai khong giam theo dong ho
 db("f02_nen_loi", "f02:nen_loi", 'getattr(luong, "fp", None)', "None", "n15_nen_than_loi", "n16_socket_that")
 for _ten, _dk in (("get_api", 'not (pt == "GET" and urllib.parse.urlsplit(url).hostname == "api.github.com")'), ("get_kho", 'urllib.parse.urlsplit(url).hostname == "api.github.com"'),
                   ("patch", 'pt != "PATCH"'), ("post", 'pt != "POST"')):
@@ -1985,10 +2016,11 @@ for _ten, _dk in (("get_api", 'not (pt == "GET" and urllib.parse.urlsplit(url).h
 def n15_d14_khop_qua_han():   # D14: kiem luc hoan tat dung SAU phep khop comment
     g, e = nen_cho()
     chen_cm(g, e)
-    with thay_ten("_khop", nhay(g, them=500.0)):
+    with thay_ten("_khop", nhay(g, them=180.0)):   # phep khop xong DUNG o HAN_GHI (bang han la da het)
         ma, bc, nk = luot_n(g, 1)
     mong((dem(nk, "POST"), ma, bc["ghi"]["W1"], nt_tren(g)["cho_bao"]), (0, 3, "doi_soat_loi:het_gio", e))
 khong("f02_d14", "f02:d14", "n15_d14_khop_qua_han")
+db("f02_d14_bien", "f02:d14", ">= c.han", "> c.han", "n15_d14_khop_qua_han")
 
 # ---- F03 `mutant-oracles-non-discriminating`: tung truong D2/U6 rieng; adapter that va main ----
 for _f, _gt in LK:

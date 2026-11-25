@@ -318,7 +318,7 @@ class _NenCoHan(io.RawIOBase):
         sock = getattr(getattr(self.goc, "raw", None), "_sock", None)   # BufferedReader -> SocketIO -> socket; than khong nam tren socket thi None
         if sock is not None:
             sock.settimeout(con)  # f02:nen_socket
-        d = self.goc.read1(len(b))
+        d = self.goc.read1(len(b))  # f02:nen_mot_lan
         b[:len(d)] = d
         return len(d)
 
@@ -334,7 +334,7 @@ def _mot_lan(c, pt, url, hd, than, timeout):
     ma, hd_ra, luong = c.transport(pt, url, hd, than, timeout)
     r = luong if isinstance(luong, http.client.HTTPResponse) else getattr(luong, "fp", None)  # f02:nen_loi — HTTPError boc HTTPResponse trong `fp`
     if isinstance(r, http.client.HTTPResponse):  # f02:nen
-        r.fp = io.BufferedReader(_NenCoHan(r.fp, lambda: het - c.dong_ho()))
+        r.fp = io.BufferedReader(_NenCoHan(r.fp, lambda: het - c.dong_ho()))  # f02:nen_con
     khuc, n = [], 0
     while True:
         b = luong.read(min(65536, c.tran["TRAN_GOI"] + 1 - n))

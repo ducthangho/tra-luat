@@ -1,0 +1,222 @@
+{
+  "seconds": 84.48680056599994,
+  "baseline": {
+    "id": "baseline",
+    "rc": 0,
+    "giet": [],
+    "hong": [],
+    "dat": [
+      "c01_l1_luot1_mergeable_clean_khong_nguon",
+      "c02_l1_glob_va_thu_muc",
+      "c03_l1_token_khong_duoc_thoat_goc",
+      "c04_l1_measured_hoa_thuong_va_khong_phai_khai",
+      "c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van",
+      "c06_l3_luot2_moc_sau_merged_at",
+      "c07_l3_chi_doc_readback_cua_chinh_pr",
+      "c14_cli_moi_to_hop_duong_dan",
+      "c08_l4_khong_do_duoc_khong_bao_gio_dat",
+      "c09_l5_mien_tru_theo_bam",
+      "c13_bam_va_luat_tren_cung_mot_lan_doc",
+      "c10_l5_danh_sach_dong_bang",
+      "c11_cay_that_dat_va_mien_tru_du",
+      "c15_c11_tu_kiem_qua_dau_ra_gia",
+      "c16_l6_landed_true_phai_co_phan_hoan_tat",
+      "c17_l7_khai_dat_phai_do_thuc_thi",
+      "c18_l7_mien_tru_theo_bam",
+      "c19_l7_danh_sach_dong_bang",
+      "c20_l7r2_long_mapping_khong_khoi_goc",
+      "c21_l7r2_long_trong_list",
+      "c22_l7r2_khoi_goc_la_nguon_duy_nhat",
+      "c23_l7_model_effort_tuy_chon",
+      "c12_dong_cuoi_dung_dinh_dang"
+    ],
+    "assertion": "",
+    "phan_hang": "SONG",
+    "stderr_cuoi": ""
+  },
+  "paired": 6,
+  "results": [
+    {
+      "side": "base",
+      "sha256": "4523f1b9eeb45798ac8e7d609c31d5668ce69fb9b571373d1f46d5a88efac7e9",
+      "id": "c2:token_nguon:130:4",
+      "rc": 0,
+      "giet": [
+        "c14_cli_moi_to_hop_duong_dan"
+      ],
+      "hong": [
+        "HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:TypeError: 'NoneType' object is not iterable",
+        "HONG c02_l1_glob_va_thu_muc HONG:c02_l1_glob_va_thu_muc:TypeError: 'NoneType' object is not iterable",
+        "HONG c03_l1_token_khong_duoc_thoat_goc HONG:c03_l1_token_khong_duoc_thoat_goc:TypeError: 'NoneType' object is not iterable",
+        "HONG c04_l1_measured_hoa_thuong_va_khong_phai_khai HONG:c04_l1_measured_hoa_thuong_va_khong_phai_khai:TypeError: 'NoneType' object is not iterable"
+      ],
+      "dat": 3,
+      "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 oi_chieu.py\", line 212, in kiem_ho_so     if not any((phan_giai(t, goc, prov, tep) for t in tk)):                                                       ^^ TypeError: 'NoneType' object is not iterable ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "eeda5b32d7d297a5b7e603f45ce3ad9b1f5678961426d881605aaca40f6d3e94",
+      "id": "c2:token_nguon:197:4",
+      "rc": 0,
+      "giet": [
+        "c14_cli_moi_to_hop_duong_dan"
+      ],
+      "hong": [
+        "HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:TypeError: 'NoneType' object is not iterable",
+        "HONG c02_l1_glob_va_thu_muc HONG:c02_l1_glob_va_thu_muc:TypeError: 'NoneType' object is not iterable",
+        "HONG c03_l1_token_khong_duoc_thoat_goc HONG:c03_l1_token_khong_duoc_thoat_goc:TypeError: 'NoneType' object is not iterable",
+        "HONG c04_l1_measured_hoa_thuong_va_khong_phai_khai HONG:c04_l1_measured_hoa_thuong_va_khong_phai_khai:TypeError: 'NoneType' object is not iterable"
+      ],
+      "dat": 3,
+      "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 oi_chieu.py\", line 220, in kiem_ho_so     if not any((phan_giai(t, goc, prov, tep) for t in tk)):                                                       ^^ TypeError: 'NoneType' object is not iterable ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "base",
+      "sha256": "8575f057c7d1b1b962ed4840e6f5d54e9bcf60dd435f450229aed2c3aebf48b2",
+      "id": "a2:_la_nguon:142:4",
+      "rc": 0,
+      "giet": [
+        "c01_l1_luot1_mergeable_clean_khong_nguon"
+      ],
+      "hong": [],
+      "dat": 0,
+      "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:token trỏ tệp KHÔNG có: mong rc=1, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1 TỔNG: ĐẠT ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "3e0ebd6c9df6596269481c0786abfd8d20eaad947f431e5bc6d0ab1029c3cd3a",
+      "id": "a2:_la_nguon:209:4",
+      "rc": 0,
+      "giet": [
+        "c01_l1_luot1_mergeable_clean_khong_nguon"
+      ],
+      "hong": [],
+      "dat": 0,
+      "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:token trỏ tệp KHÔNG có: mong rc=1, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1 TỔNG: ĐẠT ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "base",
+      "sha256": "d447db531884713a3f54076ccfb1dc498a0d1ccd19e7514b269b068416b4ab86",
+      "id": "a2:duyet:167:4",
+      "rc": 0,
+      "giet": [
+        "c01_l1_luot1_mergeable_clean_khong_nguon"
+      ],
+      "hong": [],
+      "dat": 0,
+      "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:lượt 1 #771: mong rc=1, được 2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: $: kiểu YAML dict ngoài mô hình dict/list/vô hướng land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1 TỔNG: KHÔNG ĐO ĐƯỢC ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "65bf4bc9cace8e0c411d459a980211fd669b77b51d8bfd4a7ef22ed983d8b315",
+      "id": "a2:duyet:234:4",
+      "rc": 0,
+      "giet": [
+        "c01_l1_luot1_mergeable_clean_khong_nguon"
+      ],
+      "hong": [],
+      "dat": 0,
+      "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:lượt 1 #771: mong rc=1, được 2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: $: kiểu YAML dict ngoài mô hình dict/list/vô hướng land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1 TỔNG: KHÔNG ĐO ĐƯỢC ",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "base",
+      "sha256": "e43a0d4a02846d3815e6ac0fd68919e0abe8d9b9c994423b5e568f6278a0e429",
+      "id": "a2:_thoi_diem:179:4",
+      "rc": 0,
+      "giet": [
+        "c08_l4_khong_do_duoc_khong_bao_gio_dat"
+      ],
+      "hong": [
+        "HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:AttributeError: 'str' object has no attribute 'tzinfo'",
+        "HONG c07_l3_chi_doc_readback_cua_chinh_pr HONG:c07_l3_chi_doc_readback_cua_chinh_pr:AttributeError: 'str' object has no attribute 'tzinfo'",
+        "HONG c14_cli_moi_to_hop_duong_dan HONG:c14_cli_moi_to_hop_duong_dan:AttributeError: 'str' object has no attribute 'tzinfo'"
+      ],
+      "dat": 5,
+      "assertion": "DO:c08_l4_khong_do_duoc_khong_bao_gio_dat:ngày sai '2026-99-16T02:00:00Z' ⇒ rc=2: 1",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "28966247c3a2f77c54efb33c065e796fcea8fa0026770c9821f0d1752e5da1ef",
+      "id": "a2:_thoi_diem:246:4",
+      "rc": 0,
+      "giet": [
+        "c08_l4_khong_do_duoc_khong_bao_gio_dat"
+      ],
+      "hong": [
+        "HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:AttributeError: 'str' object has no attribute 'tzinfo'",
+        "HONG c07_l3_chi_doc_readback_cua_chinh_pr HONG:c07_l3_chi_doc_readback_cua_chinh_pr:AttributeError: 'str' object has no attribute 'tzinfo'",
+        "HONG c14_cli_moi_to_hop_duong_dan HONG:c14_cli_moi_to_hop_duong_dan:AttributeError: 'str' object has no attribute 'tzinfo'"
+      ],
+      "dat": 5,
+      "assertion": "DO:c08_l4_khong_do_duoc_khong_bao_gio_dat:ngày sai '2026-99-16T02:00:00Z' ⇒ rc=2: 1",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "base",
+      "sha256": "e6ce861b37315ece60a125c284884dae7383d843083486bae2cd4985c86bc77e",
+      "id": "c2:merged_at:208:4",
+      "rc": 0,
+      "giet": [
+        "c06_l3_luot2_moc_sau_merged_at"
+      ],
+      "hong": [],
+      "dat": 5,
+      "assertion": "DO:c06_l3_luot2_moc_sau_merged_at:pre '2026-10-16T02:58:54Z': mong rc=1, được 0   ghi chú ops/land/pr9001-thu-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at ĐẠT ops/land/pr9001-thu-land-evidence.yaml land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi ph",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "8110538c53ff55a3734a0130090a3400c55ec623ba0bf550a8dc6d3c73e55e11",
+      "id": "c2:merged_at:275:4",
+      "rc": 0,
+      "giet": [
+        "c06_l3_luot2_moc_sau_merged_at"
+      ],
+      "hong": [],
+      "dat": 5,
+      "assertion": "DO:c06_l3_luot2_moc_sau_merged_at:pre '2026-10-16T02:58:54Z': mong rc=1, được 0   ghi chú ops/land/pr9001-thu-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at ĐẠT ops/land/pr9001-thu-land-evidence.yaml land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi ph",
+      "phan_hang": "GIET",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "base",
+      "sha256": "3fedab07687fc13870d5f10f27762e207d83ea31f23f5f7edd14c119e5fd2d72",
+      "id": "c2:phan_giai:160:4",
+      "rc": 0,
+      "giet": [],
+      "hong": [],
+      "dat": 23,
+      "assertion": "",
+      "phan_hang": "SONG",
+      "stderr_cuoi": ""
+    },
+    {
+      "side": "head",
+      "sha256": "1268fa5246dec69e4f78eade3fdaaf946ffd14a42329cbfd960b25368dc1a5da",
+      "id": "c2:phan_giai:227:4",
+      "rc": 0,
+      "giet": [],
+      "hong": [],
+      "dat": 38,
+      "assertion": "",
+      "phan_hang": "SONG",
+      "stderr_cuoi": ""
+    }
+  ]
+}

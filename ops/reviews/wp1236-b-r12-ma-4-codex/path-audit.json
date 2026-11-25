@@ -1,0 +1,22 @@
+{
+  "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a": {
+    "max_suffix_len": 77,
+    "max_suffix": "/len_l8_t5vrn0oo/pr9001-thu-provenance/Z/danh-gia-gate-output-44669622916.txt",
+    "rc": 0,
+    "output": "",
+    "seconds": 44.471025837999946
+  },
+  "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong": {
+    "max_suffix_len": 80,
+    "max_suffix": "/len_cay_9afoccaf/kho/ops/land/pr9001-thu-provenance/danh-gia-gate-output-10.txt",
+    "rc": 0,
+    "output": "",
+    "seconds": 7.892850700999929
+  },
+  "c38_c36_do_khi_bang_cua_dot_a_mat_ca": {
+    "max_suffix_len": 0,
+    "rc": 0,
+    "output": "",
+    "seconds": 0.1361740559999589
+  }
+}

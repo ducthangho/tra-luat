@@ -1,0 +1,110 @@
+[
+  {
+    "domain": "tập 7 token và đầu vào không chuỗi/rỗng/ngoài tập",
+    "observed": "c32 67 ô (41 không L8/26 có L8); c36/a124 1733 (39/1694)",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "3 tên phi-lời-khai, chuẩn hóa khóa giữ số",
+    "observed": "c32: 10 ô khóa trong 67 ô, đủ 3 tên phi-lời-khai và giữ số",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "tập dấu phân cách và đầu/cuối LF",
+    "observed": "c32 + c36/a124: ASCII128, category, non-BMP, LF/cuối/đầu",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "3 dạng landed, True/1, ưu tiên khóa",
+    "observed": "c27 14 (10/4 theo L8; một rc1 do L6); a132 1280 (1200/80 theo L8; đúng chữ số→landed→L8)",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "URL 0/1/2, readback 0/1/2, 9 điều kiện miễn và thứ tự",
+    "observed": "c34 50 (6/44), 9 điều kiện và 7 cặp khả thi",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "dòng miễn strip/fullmatch, văn bản tự do ly_do",
+    "observed": "a126 52 (34/18); a133 1136 (124/1012), cùng c34",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "tệp đánh giá: điều kiện chung UTF-8 và CR/LF",
+    "observed": "c35 20 (3/17), byte không UTF8 1, CRLF/trộn/CR lẻ",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "tệp đánh giá: header/job/skipped cũ/skipped v3/tổng/rỗng",
+    "observed": "c35 22; c36/a125 3840 + a129 36; c37 648 = 636 đúng ngữ pháp / 12 âm, 4 vị trí × 128 ASCII + 29 category + ngoài BMP, 16 cấu trúc.",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  },
+  {
+    "domain": "tên tệp trích: đường tương đối/tuyệt đối/.., nhiều tệp",
+    "observed": "a131 1 dương; a134 318 có L8 (path thiếu/không trích tên), oracle phân biệt lớp bằng đường/lý do chính xác; c32 path dương và âm",
+    "status": "DA_DO_DU_TREN_HEAD_NGUYEN_VEN",
+    "evidence": [
+      "ledger-o.json",
+      "ledger-c36.jsonl",
+      "c37-audit.json",
+      "scope-probes.json",
+      "missing-probes.json"
+    ]
+  }
+]

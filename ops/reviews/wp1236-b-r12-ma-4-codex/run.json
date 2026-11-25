@@ -1,0 +1,76 @@
+{
+  "version": "1.6.2",
+  "run_id": "48945bd40ef04b6ea739e7a0144645fe",
+  "short_id": "48945bd4",
+  "ten": "wp1236-b-r1-review-4-codex",
+  "lenh": {
+    "chuong_trinh": "codex.js",
+    "so_doi_so": 12,
+    "van_tay": "091dddc52347adde"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-25T04:58:28.065059+00:00",
+  "ket_thuc_utc": "2026-11-25T05:17:53.544771+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 639,
+  "khoa_danh_tinh": "linux:9939",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b4-4-codex/repo",
+  "head": "bca55c1cd09c57180d60b05d5ca1813828ae1d10",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "72dafb2d9fa171d2b3e01a99c025339cc7f1bb379f86a7aed0b84076a36c472e",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "probe_da_chay": [
+    "ghi",
+    "spawn",
+    "workspace"
+  ],
+  "provider": "local_process",
+  "execution_surface": "subprocess",
+  "transport": "machine",
+  "transport_sha256": "e14fc83739c13c1074b12bd1acce4010c893c7f6fbfc1593b4a31d74cabb57af",
+  "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "thuc_thi_ly_do": null,
+  "thuc_thi_ung_vien_sau": [],
+  "agent_da_khai": null,
+  "agent_suy_ra": "khong",
+  "probe_bo_qua": [
+    "claude_trust"
+  ],
+  "chup_workspace": false,
+  "checkpoint_sha256": "6b40a9b9979e54c675697afbc922c41fa078d3d715d8a9c7869c41461042fa86",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b4-4-codex/run/48945bd4/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "log_bam_cay_da_chet": true,
+  "log_bam_cho_giay": 0.003,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 1165.48,
+  "log_bam_luc_utc": "2026-11-25T05:17:53.549178+00:00",
+  "stdout_byte": 1046796,
+  "stdout_sha256": "92c2ea59d1d3dd274f741277ba7ec6cefae2edd85f1bcad14f50889dde23b5ad",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

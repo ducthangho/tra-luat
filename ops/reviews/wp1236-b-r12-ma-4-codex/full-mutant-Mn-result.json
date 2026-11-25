@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b4-4-codex/work/adapter-copy/ops/land_evidence_nguon_test.py"
+  ],
+  "rc": 0,
+  "seconds": 292.69717254600005,
+  "stdout_sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+  "mutation": {
+    "path": "ops/gate_output_doi_chieu_test.py",
+    "cu": "if ky_tu not in cam and loai not in bo_loai:",
+    "moi": "if ky_tu not in cam and loai not in bo_loai and loai != \"Mn\":"
+  },
+  "setup": "base-full Git archive f602325 + exact HEAD B files; GIT_DIR original read-only for git archive only"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "omit-category-Mn",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "original_sha256": "752d463b8ae587b67e6ec5e219b52ffda1d9137afd3f0ac3c474bc4cc708adc8",
+    "mutant_normalized_sha256": "035cfb198effe3deaeb2b7fa210ec59cee791e62ba6c54a147523339c650c91d",
+    "phan_loai": "ngoai_bang_dong",
+    "reason": "Target is A test generator; not module B manifest; B historical bank supplied as empty.",
+    "raw_cu": "if ky_tu not in cam and loai not in bo_loai:",
+    "raw_moi": "if ky_tu not in cam and loai not in bo_loai and loai != \"Mn\":",
+    "cu": "        if ky_tu not in cam and loai not in bo_loai:\n",
+    "moi": "        if ky_tu not in cam and loai not in bo_loai and (loai != 'Mn'):\n",
+    "normalized_pair_verified": true
+  },
+  {
+    "id": "omit-lazy-backtracking",
+    "target": "ops/gate_output_doi_chieu_test.py",
+    "original_sha256": "752d463b8ae587b67e6ec5e219b52ffda1d9137afd3f0ac3c474bc4cc708adc8",
+    "mutant_normalized_sha256": "08329f5edbdc04bc2fa71899628d2137d32c75b0ad7c900b35cc33c00a4e3184",
+    "phan_loai": "ngoai_bang_dong",
+    "reason": "Target is A test generator; not module B manifest; B historical bank supplied as empty.",
+    "raw_cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+    "raw_moi": "",
+    "cu": "    kiem(dau + ' [khong khop]' + duoi, ten_goc + ' [khong khop]')\n",
+    "moi": "",
+    "normalized_pair_verified": true
+  }
+]

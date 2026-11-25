@@ -1,0 +1,3438 @@
+{
+  "independent_oracle": {
+    "dau": {
+      "n": 160,
+      "categories": [
+        "Cc",
+        "Cf",
+        "Cn",
+        "Co",
+        "Ll",
+        "Lm",
+        "Lo",
+        "Lt",
+        "Lu",
+        "Mc",
+        "Me",
+        "Mn",
+        "Nd",
+        "Nl",
+        "No",
+        "Pc",
+        "Pd",
+        "Pe",
+        "Pf",
+        "Pi",
+        "Po",
+        "Ps",
+        "Sc",
+        "Sk",
+        "Sm",
+        "So",
+        "Zl",
+        "Zp",
+        "Zs"
+      ],
+      "ASCII": 128,
+      "reasons": {
+        "bo_sinh_la": 158,
+        "dau_tep_sai": 1,
+        "cr_le": 1
+      }
+    },
+    "nhan": {
+      "n": 162,
+      "categories": [
+        "Cc",
+        "Cf",
+        "Cn",
+        "Co",
+        "Ll",
+        "Lm",
+        "Lo",
+        "Lt",
+        "Lu",
+        "Mc",
+        "Me",
+        "Mn",
+        "Nd",
+        "Nl",
+        "No",
+        "Pc",
+        "Pd",
+        "Pe",
+        "Pf",
+        "Pi",
+        "Po",
+        "Ps",
+        "Sc",
+        "Sk",
+        "Sm",
+        "So",
+        "Zl",
+        "Zp",
+        "Zs"
+      ],
+      "ASCII": 128,
+      "reasons": {
+        "bo_sinh_la": 158,
+        "dong_la": 3,
+        "cr_le": 1
+      }
+    },
+    "cu": {
+      "n": 163,
+      "categories": [
+        "Cc",
+        "Cf",
+        "Cn",
+        "Co",
+        "Ll",
+        "Lm",
+        "Lo",
+        "Lt",
+        "Lu",
+        "Mc",
+        "Me",
+        "Mn",
+        "Nd",
+        "Nl",
+        "No",
+        "Pc",
+        "Pd",
+        "Pe",
+        "Pf",
+        "Pi",
+        "Po",
+        "Ps",
+        "Sc",
+        "Sk",
+        "Sm",
+        "So",
+        "Zl",
+        "Zp",
+        "Zs"
+      ],
+      "ASCII": 128,
+      "reasons": {
+        "bo_sinh_la": 160,
+        "dong_la": 2,
+        "cr_le": 1
+      }
+    },
+    "v3": {
+      "n": 163,
+      "categories": [
+        "Cc",
+        "Cf",
+        "Cn",
+        "Co",
+        "Ll",
+        "Lm",
+        "Lo",
+        "Lt",
+        "Lu",
+        "Mc",
+        "Me",
+        "Mn",
+        "Nd",
+        "Nl",
+        "No",
+        "Pc",
+        "Pd",
+        "Pe",
+        "Pf",
+        "Pi",
+        "Po",
+        "Ps",
+        "Sc",
+        "Sk",
+        "Sm",
+        "So",
+        "Zl",
+        "Zp",
+        "Zs"
+      ],
+      "ASCII": 128,
+      "reasons": {
+        "bo_sinh_la": 160,
+        "dong_la": 2,
+        "cr_le": 1
+      }
+    }
+  },
+  "semantic_lazy_probes": [
+    {
+      "label": "label-backtracks",
+      "rc": 0,
+      "l8": [],
+      "passed": true
+    },
+    {
+      "label": "label-backtracks-wrong-identity",
+      "rc": 1,
+      "l8": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067207297"
+      ],
+      "passed": true
+    },
+    {
+      "label": "earliest-full-suffix",
+      "rc": 0,
+      "l8": [],
+      "passed": true
+    },
+    {
+      "label": "skip-invalid-delimiter",
+      "rc": 0,
+      "l8": [],
+      "passed": true
+    }
+  ],
+  "ledger_equal": {
+    "B": 810,
+    "c36": 8396
+  },
+  "rows": [
+    {
+      "label": "dau '\\x00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x01'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x02'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x03'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x04'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x05'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x06'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x07'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x08'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\t'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\n'",
+      "independent_reason": "dau_tep_sai",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x0b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x0c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\r'",
+      "independent_reason": "cr_le",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x0e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x0f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x10'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x11'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x12'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x13'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x14'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x15'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x16'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x17'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x18'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x19'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1d'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x1f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ' '",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '!'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\"'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '#'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '$'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '%'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '&'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau \"'\"",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '('",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ')'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '*'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '+'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ','",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '-'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '.'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '/'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '3'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '4'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '7'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '9'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ':'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ';'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '<'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '='",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '>'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '?'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '@'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'A'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'B'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'C'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'D'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'E'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'F'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'G'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'H'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'I'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'J'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'K'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'L'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'M'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'N'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'O'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'P'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'Q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'R'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'S'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'T'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'U'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'V'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'W'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'X'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'Y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'Z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '['",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\\\'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau ']'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '^'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '_'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '`'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'd'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'g'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'h'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'i'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'j'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'k'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'l'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'm'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'n'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'o'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'p'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'r'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 's'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 't'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'u'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'v'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'w'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'x'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '{'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '|'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '}'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '~'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x7f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\x80'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\xa0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00a1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00a2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00a6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00a8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00aa'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00ab'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00ac'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\xad'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00b2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00b5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00bb'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u00c0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u01c5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u02b0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0300'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\u0378'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0488'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u058a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0660'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0903'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0f3a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u0f3b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u16ee'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\u2028'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\u2029'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\u203f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\\ue000'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau '\ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x01'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x02'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x03'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x04'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x05'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x06'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x07'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x08'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\t'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\n'",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x0b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x0c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\r'",
+      "independent_reason": "cr_le",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x0e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x0f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x10'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x11'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x12'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x13'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x14'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x15'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x16'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x17'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x18'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x19'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1d'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x1f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ' '",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '!'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\"'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '#'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '$'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '%'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '&'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan \"'\"",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '('",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ')'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '*'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '+'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ','",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '-'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '.'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '/'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '3'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '4'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '7'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '9'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ':'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ';'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '<'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '='",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '>'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '?'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '@'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'A'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'B'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'C'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'D'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'E'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'F'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'G'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'H'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'I'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'J'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'K'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'L'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'M'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'N'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'O'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'P'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'Q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'R'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'S'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'T'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'U'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'V'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'W'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'X'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'Y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'Z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '['",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\\\'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ']'",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '^'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '_'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '`'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'd'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'g'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'h'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'i'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'j'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'k'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'l'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'm'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'n'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'o'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'p'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'r'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 's'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 't'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'u'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'v'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'w'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'x'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '{'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '|'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '}'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '~'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x7f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\x80'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\xa0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00a1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00a2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00a6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00a8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00aa'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00ab'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00ac'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\xad'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00b2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00b5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00bb'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u00c0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u01c5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u02b0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0300'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\u0378'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0488'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u058a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0660'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0903'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0f3a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u0f3b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u16ee'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\u2028'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\u2029'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\u203f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\\ue000'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan '\ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x01'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x02'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x03'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x04'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x05'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x06'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x07'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x08'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\t'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\n'",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x0b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x0c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\r'",
+      "independent_reason": "cr_le",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x0e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x0f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x10'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x11'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x12'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x13'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x14'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x15'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x16'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x17'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x18'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x19'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1d'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x1f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ' '",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '!'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\"'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '#'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '$'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '%'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '&'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu \"'\"",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '('",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ')'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '*'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '+'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ','",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '-'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '.'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '/'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '3'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '4'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '7'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '9'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ':'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ';'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '<'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '='",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '>'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '?'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '@'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'A'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'B'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'C'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'D'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'E'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'F'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'G'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'H'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'I'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'J'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'K'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'L'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'M'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'N'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'O'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'P'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'Q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'R'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'S'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'T'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'U'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'V'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'W'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'X'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'Y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'Z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '['",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\\\'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ']'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '^'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '_'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '`'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'd'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'g'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'h'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'i'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'j'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'k'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'l'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'm'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'n'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'o'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'p'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'r'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 's'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 't'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'u'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'v'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'w'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'x'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '{'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '|'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '}'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '~'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x7f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\x80'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\xa0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00a1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00a2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00a6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00a8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00aa'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00ab'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00ac'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\xad'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00b2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00b5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00bb'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u00c0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u01c5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u02b0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0300'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\u0378'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0488'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u058a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0660'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0903'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0f3a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u0f3b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u16ee'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\u2028'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\u2029'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\u203f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\\ue000'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu '\ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x01'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x02'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x03'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x04'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x05'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x06'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x07'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x08'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\t'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\n'",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x0b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x0c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\r'",
+      "independent_reason": "cr_le",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x0e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x0f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x10'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x11'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x12'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x13'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x14'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x15'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x16'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x17'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x18'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x19'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1d'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x1f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ' '",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '!'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\"'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '#'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '$'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '%'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '&'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 \"'\"",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '('",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ')'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '*'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '+'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ','",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '-'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '.'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '/'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '3'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '4'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '7'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '9'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ':'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ';'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '<'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '='",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '>'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '?'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '@'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'A'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'B'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'C'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'D'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'E'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'F'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'G'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'H'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'I'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'J'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'K'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'L'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'M'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'N'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'O'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'P'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'Q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'R'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'S'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'T'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'U'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'V'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'W'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'X'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'Y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'Z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '['",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\\\'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ']'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '^'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '_'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '`'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'c'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'd'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'e'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'g'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'h'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'i'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'j'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'k'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'l'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'm'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'n'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'o'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'p'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'q'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'r'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 's'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 't'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'u'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'v'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'w'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'x'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'y'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'z'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '{'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '|'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '}'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '~'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x7f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\x80'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\xa0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00a1'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00a2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00a6'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00a8'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00aa'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00ab'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00ac'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\xad'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00b2'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00b5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00bb'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u00c0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u01c5'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u02b0'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0300'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\u0378'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0488'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u058a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0660'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0903'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0f3a'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u0f3b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u16ee'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\u2028'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\u2029'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\u203f'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\\ue000'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 '\ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'x (danh_gia_gate.py sha256 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) '",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "dau 'caf\u00e9 \ud801\udc00 ) ('",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan ''",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'ubuntu-latest, x y ['",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'a]b'",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "nhan 'a] [b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu ''",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "v3 ''",
+      "independent_reason": "dong_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'a: skipped (khong tinh) b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'a: skipped -> not_measured (khong suy pass) b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'a: skipped (khong tinh)'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "cu 'caf\u00e9 \ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'a: skipped -> not_measured (khong suy pass) b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'a: skipped (khong tinh) b'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'a: skipped -> not_measured (khong suy pass)'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    },
+    {
+      "label": "v3 'caf\u00e9 \ud801\udc00'",
+      "independent_reason": "bo_sinh_la",
+      "passed": true
+    }
+  ]
+}

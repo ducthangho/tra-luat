@@ -24,8 +24,8 @@ executor_session: 'phien Claude cloud moi do dieu phoi tao (create_session); id 
 executor_ghi_chu: 'L8 + MIEN_TRU_L8 trong ops/land_evidence_nguon.py (do lai tap DO tren base cua dot B), ca B1-B8 trong ops/land_evidence_nguon_test.py'
 leased_at_utc: '2026-11-24T11:22:26Z'
 heartbeat_at: '2026-11-24T11:22:26Z'
-lease_until: '2026-11-27T11:22:26Z'
-lease_expires_at_utc: '2026-11-27T11:22:26Z'
+lease_until: '2026-11-25T18:33:55Z'
+lease_expires_at_utc: '2026-11-25T18:33:55Z'
 role: executor
 provider: claude
 executor: claude
@@ -98,3 +98,13 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'chu kho audit va duyet SHA cu the truoc merge (E5); dieu phoi merge khi kiem-merge rc=0'
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi/land Claude session_015GtxrYsNDbfLo32S39f5uY). Codex review ma dot B: 5/6 loi goi (luot 5 approve bca55c1, issues/1236#issuecomment-7164671225). Kich thuoc 2 tep, +506 dong (tran 560). Windows local M3 xanh (issuecomment-7161189686).'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-27T11:22:26Z'
+  han_moi_utc: '2026-11-25T18:33:55Z'
+  chi_thi: 'Audit E5 chu kho tu dang issues/1236#issuecomment-7165411240: uy quyen gom hau kiem, ghi so land, nha lease va dong WP neu hau kiem dat.'
+  ly_do: >-
+    Dot B cua packet GATE-OUTPUT-DOI-CHIEU (#1236) da MERGE: PR #1526 (head bca55c1cd09c57180d60b05d5ca1813828ae1d10) merge commit d0868dbf7f6324755aa4ed0f3e02d4efa84866f0 luc 2026-11-25T14:32:11Z.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi Claude session_015GtxrYsNDbfLo32S39f5uY'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

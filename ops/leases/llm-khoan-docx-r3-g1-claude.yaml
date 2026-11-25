@@ -71,3 +71,5 @@ revision_ly_do: 'Cross-review luot 2 (B1-B4 P1, B5-B7 P2, B8 P3) — doi sang da
 review_calls_limit: 5
 review_calls_used_truoc: 2
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r4-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 3 (C1-C7); revision r4 (ops/specs/llm-khoan-docx-r4.md).'

@@ -1,0 +1,75 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1525
+packet_id: llm-khoan-docx
+revision: 4
+generation: 1
+lease_id: llm-khoan-docx-r4-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+spec_path: ops/specs/llm-khoan-docx-r4.md
+spec_hash: 114ed997845edaf1cf9320c654a3fa28495e78229ab4a4a7c0d569ebf7ac06f7
+write_set:
+- CHANGELOG.md
+- RELEASE_MANIFEST.json
+- docs/GOI_AGENT_DA_NEN.md
+- ops/acceptance/llm-khoan-docx/r1/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-1-codex/PROMPT.md
+- ops/acceptance/llm-khoan-docx/r1/review-1-codex/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-1-codex/run.json
+- ops/acceptance/llm-khoan-docx/r1/review-2-codex/PROMPT.md
+- ops/acceptance/llm-khoan-docx/r1/review-2-codex/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-2-codex/run.json
+- ops/acceptance/llm-khoan-docx/r1/review-3-codex/PROMPT.md
+- ops/acceptance/llm-khoan-docx/r1/review-3-codex/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-3-codex/run.json
+- ops/acceptance/llm-khoan-docx/r1/review-4-codex/PROMPT.md
+- ops/acceptance/llm-khoan-docx/r1/review-4-codex/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-4-codex/run.json
+- ops/acceptance/llm-khoan-docx/r1/review-5-codex/PROMPT.md
+- ops/acceptance/llm-khoan-docx/r1/review-5-codex/VERDICT.md
+- ops/acceptance/llm-khoan-docx/r1/review-5-codex/run.json
+- ops/leases/llm-khoan-docx-r1-g1-claude.yaml
+- ops/leases/llm-khoan-docx-r2-g1-claude.yaml
+- ops/leases/llm-khoan-docx-r3-g1-claude.yaml
+- ops/leases/llm-khoan-docx-r4-g1-claude.yaml
+- ops/leases/llm-ranh-gioi-khoan-r9-g1-claude.yaml
+- ops/specs/llm-khoan-docx-r1.md
+- ops/specs/llm-khoan-docx-r2.md
+- ops/specs/llm-khoan-docx-r3.md
+- ops/specs/llm-khoan-docx-r4.md
+- references/golden/parser_surface.json
+- scripts/tl_core/command_registry.py
+- scripts/tl_core/llm_route.py
+- scripts/tl_core/llm_route_test.py
+- scripts/tl_core/ops_misc.py
+- scripts/tl_selftest.py
+write_set_hash: a76a4d07c1556acbd912b11ec833955ea98317b53a44f79121165fef652ffeae
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Lam tiep tren nhanh PR #1517 (packet #1514 dung o r9). Ho so review Codex trong ops/acceptance/llm-khoan-docx/r1/review-N-codex/ (N<=5). Khong sua tl.py, ci.yml, launcher.py.'
+branch: ccr-89c0d2e2-inanqb
+base_sha: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25/11 trong phien session_015GtxrZQYT3Vt8PJdXrjEKg: "Tiep di"; chon "Do .docx numPr, cap 5"'
+recorded_by: 'phien session_015GtxrZQYT3Vt8PJdXrjEKg'
+thay_the_cho: llm-khoan-docx-r3-g1-claude
+leased_at_utc: '2026-11-25T09:48:00Z'
+heartbeat_at: '2026-11-25T09:48:00Z'
+lease_until: '2026-11-25T17:48:00Z'
+lease_expires_at_utc: '2026-11-25T17:48:00Z'
+max_lease_hours: 8
+revision_ly_do: 'Cross-review luot 3 (C1-C4 P1, C5-C6 P2, C7 P3). Tran review tinh chung (da dung 3/5).'
+review_calls_limit: 5
+review_calls_used_truoc: 3
+inference_calls_limit: 0

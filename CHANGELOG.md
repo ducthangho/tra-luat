@@ -12,6 +12,9 @@
 - r3 (sau cross-review lượt 2, đặc tả `ops/specs/llm-khoan-docx-r3.md`): danh sách CHO PHÉP phần tử trong đoạn/run (ký hiệu,
   trường, hình ⇒ chặn; dấu nối không ngắt giữ); tiêu đề Điều phải đúng hình dạng; ngắt mềm/đoạn số rỗng/khối lạ ⇒ chặn; bảng
   lồng đếm một lần; gạch đơn/kép tính riêng qua mọi tầng; đánh số qua style trong Điều ⇒ chặn.
+- r4 (sau cross-review lượt 3, đặc tả `ops/specs/llm-khoan-docx-r4.md`): chỉ cắt vùng tại Điều KẾ TIẾP; hàng/ô bọc wrapper
+  được đếm; nhãn chữ sau z kiểu Word; chốt dấu phân cách mơ hồ áp cho đường cấu trúc; gạch theo style là toggle (bảo thủ);
+  content control nội dòng đọc được.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

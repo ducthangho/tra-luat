@@ -2048,7 +2048,7 @@ def con_lai(dau, giay):
 BA_KIEU = ((1, 1, False), (1, 1, True), (0, 4096, False), (0.875, 1, False))
 
 def ca_nen(i, cham, nhanh, han, hau="", w0=0.0, ma_ep=None):
-    """F02 tai MOT noi goi, qua lop doc co dem THAT: mot `HTTPResponse.read` chua nhieu lan doc nen 1 s. Han tuyet doi cua lan thu phai rang
+    """F02 tai MOT noi goi, qua lop doc co dem THAT: mot `HTTPResponse.read` chua nhieu lan doc nen (1 s, hoac 0,875 s). Han tuyet doi cua lan thu phai rang
     buoc TUNG lan doc nen: `settimeout` nhan dung thoi gian con lai (`han` = thoi luong tung lan thu), lan doc nen o hay sau han khong dien ra. Doi chung nhanh: than doc tron, luong goc dong."""
     ten, nen, mau, pt, xem = BON_DUONG[i]
     def chay():

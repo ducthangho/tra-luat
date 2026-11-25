@@ -13,7 +13,7 @@ model_family: claude
 execution_surface: claude_code
 transport: machine/local
 reviewer_model_family: openai
-reviewer_execution_surface: codex_service
+reviewer_execution_surface: codex_cli
 reviewer_transport: machine
 review_class: sensitive
 effective_review_class: sensitive

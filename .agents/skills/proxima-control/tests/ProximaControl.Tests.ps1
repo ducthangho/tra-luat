@@ -1070,8 +1070,10 @@ Invoke-Case 'X5-10' {
 Invoke-Case 'X5-11' {
     # px-loc-markup r1 #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
     # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, trims trailing whitespace only after a
-    # trailing block, and never surfaces the dropped text. Leak check: the RAW objects of every stream (output incl. strings, error, warning,
-    # verbose, debug, information; verbose/debug forced on) plus the journal record, which must exist. Separate markers for dropped/kept text.
+    # trailing block, and never surfaces the dropped text. Leak check: every RAW object of every stream (output incl. strings, error, warning,
+    # verbose, debug, information; verbose/debug forced on) serialized with PSSerializer depth 64 (keeps nested values, MessageData,
+    # TargetObject, Exception.Data, ErrorDetails), plus EVERY file under the target's results tree after a per-case journal reset; the call's
+    # own record must parse as JSON with state 'completed'. Separate markers for dropped/kept text.
     $drop = 'PXDROP7f3a'; $keepMk = 'PXKEEP7f3a'; $nl = [string][char]10; $crlf = [string][char]13 + $nl; $q = [string][char]34; $nb = [string][char]0xA0
     $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + 'l ' + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
     $open = '<ElicitationsGroup message=' + $q + 'x' + $q + '>'
@@ -1092,6 +1094,7 @@ Invoke-Case 'X5-11' {
     $cmd = $script:PxCmd; $vp = $global:VerbosePreference; $dp = $global:DebugPreference
     foreach ($c in $cases) {
         $global:PxcT.Chat = (@{ model = 'prov/served'; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
+        Clear-Journal $Tg.Pos.Base
         $a = New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' }; $raw = @()
         try { $global:VerbosePreference = 'Continue'; $global:DebugPreference = 'Continue'; $raw = @(& $cmd @a *>&1) } catch { $raw += $_ } finally { $global:VerbosePreference = $vp; $global:DebugPreference = $dp }
         $r = @($raw | Where-Object { $null -ne $_ -and $_ -isnot [Management.Automation.ErrorRecord] -and $null -ne $_.PSObject.Properties['schema'] })
@@ -1099,15 +1102,14 @@ Invoke-Case 'X5-11' {
         $d = $r[0].data
         if (-not [string]::Equals([string]$d.answer, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
         if ("$($d.answerMarkup)" -cne $c[3] -or $d.answerMarkupRemoved -isnot [int] -or $d.answerMarkupRemoved -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
-        $dump = @(foreach ($o in $raw) {
-                if ($o -is [string]) { $o }
-                elseif ($o -is [Management.Automation.ErrorRecord]) { "$o"; "$($o.Exception)"; "$($o.TargetObject)" }
-                elseif ($o -is [Management.Automation.InformationalRecord]) { $o.Message }
-                elseif ($o -is [Management.Automation.InformationRecord]) { "$($o.MessageData)" }
-                else { $o | ConvertTo-Json -Depth 10 -Compress } }) -join $nl
+        $dump = @(foreach ($o in $raw) { if ($null -ne $o) { [Management.Automation.PSSerializer]::Serialize($o, 64) } }) -join $nl
         $rp = "$($Tg.Pos.Base)\results\px-active\$($d.recordId).json"
         if (-not [IO.File]::Exists($rp)) { Add-Fail "MARKUP_JOURNAL_MISSING[$($c[0])]"; continue }
-        if ($dump.Contains($drop) -or [IO.File]::ReadAllText($rp).Contains($drop)) { Add-Fail "MARKUP_LEAK[$($c[0])]" }
+        $st = $null; try { $st = "$(([IO.File]::ReadAllText($rp) | ConvertFrom-Json).state)" } catch { $st = $null }
+        if ($st -cne 'completed') { Add-Fail "MARKUP_JOURNAL_BAD[$($c[0])]" }
+        $files = @([IO.Directory]::GetFiles("$($Tg.Pos.Base)\results", '*', [IO.SearchOption]::AllDirectories))
+        $inFiles = @($files | Where-Object { [IO.File]::ReadAllText($_).Contains($drop) }).Count
+        if ($dump.Contains($drop) -or $inFiles) { Add-Fail "MARKUP_LEAK[$($c[0])]" }
     }
     $global:PxcT.Chat = ''
 }

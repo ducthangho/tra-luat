@@ -44,3 +44,24 @@ Issue #1529.
 
 ## 5. Gate trước push (N5, N7, N8)
 Điền khi chạy trên SHA ứng viên; số ghi ở comment verdict và PR.
+
+## 6. Lượt Windows: N6 của đặc tả cộng điều kiện A/B của ADR-0060 M3
+Đặc tả r2 (đóng băng) định nghĩa N6 chỉ trên SHA ứng viên. Packet áp ADR-0060, nên lượt Windows còn phải đạt M3(a)–(c); hai yêu cầu
+cùng có hiệu lực, không cái nào thay cái nào (review lượt 2, lớp `windows-m3-baseline-omitted`). Biên nhận Windows ghi đủ cả hai vế:
+- **Nền B** = `base_sha` của lease r2; **ứng viên H** = head của PR tại lúc chạy. Cùng một máy Windows của chủ kho, dựng trong **một** lệnh:
+  hai cây Git riêng (B và H), chép harness của **H** ra thư mục ngoài cả hai cây, rồi chạy cùng lệnh với `-ModulePath` trỏ lần lượt vào
+  module của B và của H (harness nhận mọi cây qua `-ModulePath`, theo chú thích đầu tệp).
+- **Ma trận mỗi vế**: `ProximaControl.Tests.ps1` với PS 7 và PS 5.1, mỗi bản `en-US` và `tr-TR`; `-Counterexamples` ở PS 7 `en-US`
+  (chỉ vế H); `ProximaManifest.Tests.ps1` với PS 7 và PS 5.1 (`-AddonRoot` của từng cây). Mỗi lượt lưu báo cáo JSON ngoài cây, ghi
+  sha256 và danh sách id kèm kết quả.
+- **Đạt** khi đồng thời: (N6) mọi lượt của H rc 0, `passed == total`, mọi CX `credited`; (M3a) không thiếu lượt, không lỗi setup, không ca
+  bắt buộc `skipped`/`not_run`; (M3b) tập id đỏ của H ⊆ tập id đỏ của B; (M3c) nếu H có ca đỏ thuộc write set thì chủ kho quyết.
+  Dự kiến B đỏ `X5-11` (module cũ không lọc) và đỏ `PM*` về phiên bản 2.2.0 — đó là các ca đo hành vi mới, không phải hồi quy.
+- Trạng thái: **chưa đo**.
+
+## 7. Đính chính mốc hạn lease r1 (review lượt 2, lớp `lease-expiry-prerequisite-stale`)
+Đặc tả r2 (đóng băng, `luat_dung`) ghi lease r2 cấp sau khi lease r1 hết hạn **lúc 2026-11-25T22:45:09Z** — đó là hạn GỐC. Chủ kho
+sau đó rút hạn lease r1 (`issuecomment-7172238820`): hạn CÓ HIỆU LỰC là **2026-11-25T19:25:58Z** (`lease_expires_at_utc` và
+`thu_hoi_bang_rut_han.han_moi_utc` của blob lease r1 ở commit `6cba176`). Lease r2 cấp lúc **2026-11-25T19:28:04Z**: sau hạn có hiệu lực
+126 giây; trước hạn gốc 3 giờ 17 phút 05 giây. Điều kiện của đặc tả ("cấp sau khi lease r1 hết hạn") được giữ theo hạn có hiệu lực;
+chỉ mốc ghi trong đặc tả đã cũ. Đặc tả không sửa đè; đính chính ở đây.

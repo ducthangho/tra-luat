@@ -73,7 +73,13 @@ write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 J
 write_set_ghi_chu: 'Dung hai tep cua dot C theo bang write_set cua spec r12; phu thuoc dot A (da land 9d61d4e)'
 closure_status: 'Da quet ai-dang-giu NGUOI_GIU 0 truoc khi dang'
 tran_kich_thuoc: '<= 6 tep / <= 450 dong them (ADR-0053), do git diff --numstat origin/master...<head C>; vuot => DUNG truoc review (E2)'
-tran_loi_goi_codex: '4 loi goi Codex review ma cho dot C (chu kho, issuecomment-7129998930); luot bi cat van tinh (ADR-0052); cham tran ma chua approve => dung, hoi E2'
+tran_loi_goi_codex: '6 loi goi Codex review ma cho dot C (chu kho nang 4 -> 6, issuecomment-7170968907); da dung 3; luot bi cat van tinh (ADR-0052); cham tran ma chua approve => dung, hoi E2'
+nang_tran:
+  tran_cu: '<= 6 tep / <= 450 dong them; 4 loi goi Codex'
+  tran_moi: '<= 6 tep / <= 450 dong them; 6 loi goi Codex'
+  ai_nang: ducthangho
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7170968907
+  can_cu: 'M3 Windows local tap trung do cong_d2b_c4_symlink (symlink thu muc bung thanh symlink tep, fail-open chi tren Windows; issuecomment-7170894289); chu kho chon va trong dot C + nang tran Codex 4 -> 6'
 windows: 'dot C: ADR-0060 M3 required => Windows LOCAL tren may chu kho qua Desktop Commander (ADR-0057/58/59) tren exact head C; chu kho MIEN Windows CI cho dot C (issuecomment-7129998930); KHONG workflow_dispatch'
 coordination_paths:
 - ops/leases/wp1236-c-r12-g1-claude-20261124.yaml

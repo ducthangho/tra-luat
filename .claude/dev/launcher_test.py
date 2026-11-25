@@ -12095,6 +12095,9 @@ esac
              f"(h) allexport: kenh/thu muc tam lo cho trinh cai o lan cai lai: {doc(log)}")
 
 
+_R1488_DONG_NUL = "cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi"   # wp1488 r5: NGUYÊN dòng báo của chốt NUL
+
+
 @ca
 def r1488_github_path_chi_ghi_khi_thanh_cong():
     """wp1488 (ops/specs/wp1488-r3.md N1): chỉ lượt CUỐI thành công mới thêm dòng vào $GITHUB_PATH. Mỗi kịch bản chốt
@@ -12114,8 +12117,8 @@ def r1488_github_path_chi_ghi_khi_thanh_cong():
     và qua tab ⇒ `W:<dir>`; chuỗi `--win` chỉ nằm trong dữ liệu, hoặc nhánh có `--win` không chạy ⇒ `<dir>` POSIX; (I-win)
     như (I) trên nhánh `DICH_WIN`: `cygpath -w` hỏng ở công cụ tuỳ chọn dưới `--bat-buoc` ⇒ đi tiếp; (Q) nhãn GẦN đúng
     (`DICH_WINx`, `DICHx`) hoặc nhãn thiếu đường dẫn ⇒ rc 7 `kenh ket qua hong`, tệp rỗng, không gọi `cygpath` (Codex lượt 5). r5 (nợ WP1488-NUL-KENH):
-    (R) byte NUL ở nhãn `DICH`/`DICH_WIN`/`GIU_PATH`, NUL hoặc 0x01 giữa đường dẫn ⇒ rc 7, dòng báo NUL, tệp rỗng, không gọi
-    `cygpath`."""
+    (R) byte NUL ở nhãn `DICH`/`DICH_WIN`/`GIU_PATH`, NUL hoặc 0x01 giữa đường dẫn (cả nhãn `DICH_WIN` hợp lệ) ⇒ rc 7, đúng
+    dòng báo NUL, tệp rỗng, không gọi `cygpath`; (R-gp-vang) vắng `$GITHUB_PATH` vẫn 7, trước hậu kiểm (Codex lượt 6)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
@@ -12315,16 +12318,33 @@ def r1488_github_path_chi_ghi_khi_thanh_cong():
     # (R) r5 (nợ WP1488-NUL-KENH, Codex lượt 5 P2): byte NUL/0x01 trong kênh ⇒ 7 TRƯỚC mọi phân nhánh, dòng báo riêng.
     for nhan, ghi in (("R-dich-nul", "printf 'DICH\\000\\n%s' {u}"), ("R-win-nul", "printf 'DICH_WIN\\000\\n%s' {u}"),
                       ("R-giu-nul", "printf 'GIU_PATH\\000'"), ("R-nul-giua", "printf 'DICH\\n%s\\000x' {u}"),
-                      ("R-x01-giua", "printf 'DICH\\n%s\\001x' {u}")):
+                      ("R-x01-giua", "printf 'DICH\\n%s\\001x' {u}"),
+                      # Codex lượt 6 P3: nhãn Windows HỢP LỆ, đường dẫn hỏng byte ⇒ vẫn không gọi `cygpath`.
+                      ("R-win-nul-giua", "printf 'DICH_WIN\\n%s\\000x' {u}"), ("R-win-x01-giua", "printf 'DICH_WIN\\n%s\\001x' {u}")):
         with San() as s:
             log_c = s / "cygpath.log"
             cyg_r = (f'echo "$*" >> {q(str(log_c))}; [ "$1" = -w ] && {{ echo "W:$2"; exit 0; }}; '
                      'while [ "${1#-}" != "$1" ]; do shift; done; echo "$1"')
             p, gp, _uv, _x, _t = _wp868_chay(s, lenh=ghi.format(u=uvb) + ' > "$KENH_KQ"',
                                              ung_vien={str(s / "dau" / "cygpath"): cyg_r}, env_them=nhanh)
-            bang(p.returncode == 7 and "byte NUL hoac 0x01" in p.stderr and tep(s) == b"" and not log_c.exists(),
+            bang(p.returncode == 7 and _R1488_DONG_NUL in p.stderr.splitlines() and tep(s) == b"" and not log_c.exists(),
                  f"({nhan}) kenh co byte NUL/0x01 ma van duoc nhan: rc={p.returncode} GITHUB_PATH={tep(s)!r} "
                  f"cygpath={log_c.read_text() if log_c.exists() else ''!r} {p.stderr[-300:]}")
+    # (R-gp-vang) Codex lượt 6 P3: chốt NUL không phụ thuộc $GITHUB_PATH — vắng đích vẫn 7, dừng TRƯỚC hậu kiểm (rc 3).
+    with San() as s:
+        goc_run = subprocess.run
+
+        def run_gp_vang(args, **kw):   # như (E): đổi môi trường của CHÍNH lần chạy cai_cong_cu.sh
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                kw["env"] = {k: v for k, v in kw["env"].items() if k != "GITHUB_PATH"}
+            return goc_run(args, **kw)
+        subprocess.run = run_gp_vang
+        try:
+            p, gp, _uv, _x, _t = _wp868_chay(s, lenh="printf 'DICH\\n%s\\000' " + uvb + ' > "$KENH_KQ"', env_them=nhanh)
+        finally:
+            subprocess.run = goc_run
+        bang(p.returncode == 7 and _R1488_DONG_NUL in p.stderr.splitlines() and "chua DAT sau khi cai" not in p.stderr,
+             f"(R-gp-vang) vang $GITHUB_PATH thi chot NUL bi bo qua: rc={p.returncode} {p.stderr[-300:]}")
     for nhan, than_cat in (("K1", f'"{cat_that}" "$2"; exit 9'),   # in đủ nội dung kênh rồi lỗi
                            ("K2", None)):                          # lần đầu lỗi không in gì; lần sau (nếu có) đọc được
         with San() as s:
@@ -18672,6 +18692,12 @@ DOT_BIEN_HOOK = [
     ("wp1488_sh_bo_chot_nul", ('case "$KQ" in *$\'\\001\'*) echo', 'case "$KQ" in *KHONG_BAO_GIO_KHOP*) echo'),
      ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
     ("wp1488_sh_pipeline_nuot_loi_cat", ('KQ="$(cat -- "$KENH_KQ" | tr', 'KQ="$({ cat -- "$KENH_KQ" || :; } | tr'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 6 (P3): chốt NUL chỉ khi có đích · gọi `cygpath -w` trước chốt khi nhãn Windows hợp lệ.
+    ("wp1488_sh_chot_nul_chi_khi_co_dich", ('case "$KQ" in *$\'\\001\'*) echo', 'case "${GITHUB_PATH:+$KQ}" in *$\'\\001\'*) echo'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_cygpath_truoc_chot_nul", ('export -n KQ\ncase "$KQ" in *$\'\\001\'*)',
+                                         'export -n KQ\ncase "$KQ" in DICH_WIN$\'\\n\'?*) cygpath -w "${KQ#DICH_WIN$\'\\n\'}" >/dev/null || : ;; esac\ncase "$KQ" in *$\'\\001\'*)'),
      ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
     ("wp1488_sh_chot_nul_sau_ghi", ('case "$KQ" in *$\'\\001\'*) echo "cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi" >&2; exit 7 ;; esac\ncase "$KQ" in\n  DICH$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;\n  DICH_WIN$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH_WIN$\'\\n\'}" win || RC_CAI=1 ;;\nesac\n', 'case "$KQ" in\n  DICH$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;\n  DICH_WIN$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH_WIN$\'\\n\'}" win || RC_CAI=1 ;;\nesac\ncase "$KQ" in *$\'\\001\'*) echo "cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi" >&2; exit 7 ;; esac\n'),
      ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),

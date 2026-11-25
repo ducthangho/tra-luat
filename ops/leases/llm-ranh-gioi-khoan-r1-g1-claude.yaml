@@ -60,3 +60,5 @@ lease_expires_at_utc: '2026-11-25T11:40:00Z'
 max_lease_hours: 8
 review_calls_limit: 5
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r2-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 2 (A2, P1) can luat ngoai dac ta r1; revision r2 (ops/specs/llm-ranh-gioi-khoan-r2.md).'

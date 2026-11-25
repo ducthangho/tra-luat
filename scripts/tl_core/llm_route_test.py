@@ -81,6 +81,138 @@ def client_gia(data=None, loi=None, stop="end_turn", model="claude-haiku-5-5", n
 _VANG = object()
 
 
+# wp1514 §4.6 (lượt 2 A4): Điều 3 Luật 134/2025/QH15 THẬT (8 khoản, nguồn mất số) + ba kết quả đã lưu (tl/sub/api) của PR #1503.
+DIEU3_THAT = 'Điều 3. Giải thích từ ngữ\nTrong Luật này, các từ ngữ dưới đây được hiểu như sau:\nTrí tuệ nhân tạo là việc thực hiện bằng điện tử các năng lực trí tuệ của con người, bao gồm học tập, suy luận, nhận thức, phán đoán và hiểu ngôn ngữ tự nhiên.\nHệ thống trí tuệ nhân tạo là hệ thống dựa trên máy, được thiết kế để thực hiện các năng lực trí tuệ nhân tạo với các mức độ tự chủ khác nhau, có khả năng tự thích nghi sau khi được triển khai; căn cứ vào các mục tiêu được xác định rõ ràng hoặc được hình thành một cách ngầm định, hệ thống suy luận từ dữ liệu đầu vào để tạo ra các đầu ra như dự đoán, nội dung, khuyến nghị hoặc quyết định có thể gây ảnh hưởng tới môi trường vật lý hoặc môi trường số.\nNhà phát triển là tổ chức, cá nhân thực hiện việc thiết kế, xây dựng, huấn luyện, kiểm thử hoặc tinh chỉnh toàn bộ hoặc một phần mô hình, thuật toán hoặc hệ thống trí tuệ nhân tạo và có quyền kiểm soát trực tiếp đối với phương pháp kỹ thuật, dữ liệu huấn luyện hoặc tham số mô hình.\nNhà cung cấp là tổ chức, cá nhân đưa hệ thống trí tuệ nhân tạo ra thị trường hoặc đưa vào sử dụng dưới tên, thương hiệu hoặc nhãn hiệu của mình, không phụ thuộc hệ thống đó do họ tự phát triển hay được phát triển bởi bên thứ ba.\nBên triển khai là tổ chức, cá nhân sử dụng hệ thống trí tuệ nhân tạo thuộc phạm vi kiểm soát của mình trong hoạt động nghề nghiệp, thương mại hoặc cung cấp dịch vụ; không bao gồm trường hợp sử dụng cho mục đích cá nhân, phi thương mại.\nNgười sử dụng là tổ chức, cá nhân trực tiếp tương tác với hệ thống trí tuệ nhân tạo hoặc sử dụng kết quả đầu ra của hệ thống đó.\nNgười bị ảnh hưởng là tổ chức, cá nhân bị tác động trực tiếp hoặc gián tiếp đến quyền, lợi ích hợp pháp, tính mạng, sức khỏe, tài sản, uy tín hoặc cơ hội tiếp cận dịch vụ do việc triển khai hoặc do kết quả đầu ra của hệ thống trí tuệ nhân tạo.\nSự cố nghiêm trọng là sự kiện xảy ra trong hoạt động của hệ thống trí tuệ nhân tạo, gây ra hoặc có nguy cơ gây ra thiệt hại đáng kể đến tính mạng, sức khỏe, quyền con người, tài sản, an ninh mạng, trật tự công cộng, môi trường hoặc làm gián đoạn hoạt động của hệ thống thông tin quan trọng về an ninh quốc gia.\n'
+KN_DIEU3_THAT = {
+"kn_tl": [
+{
+"stt": 1,
+"thuat_ngu": "Trí tuệ nhân tạo",
+"dinh_nghia": "việc thực hiện bằng điện tử các năng lực trí tuệ của con người, bao gồm học tập, suy luận, nhận thức, phán đoán và hiểu ngôn ngữ tự nhiên."
+},
+{
+"stt": 2,
+"thuat_ngu": "Hệ thống trí tuệ nhân tạo",
+"dinh_nghia": "hệ thống dựa trên máy, được thiết kế để thực hiện các năng lực trí tuệ nhân tạo với các mức độ tự chủ khác nhau, có khả năng tự thích nghi sau khi được triển khai; căn cứ vào các mục tiêu được xác định rõ ràng hoặc được hình thành một cách ngầm định, hệ thống suy luận từ dữ liệu đầu vào để tạo ra các đầu ra như dự đoán, nội dung, khuyến nghị hoặc quyết định có thể gây ảnh hưởng tới môi trường vật lý hoặc môi trường số."
+},
+{
+"stt": 3,
+"thuat_ngu": "Nhà phát triển",
+"dinh_nghia": "tổ chức, cá nhân thực hiện việc thiết kế, xây dựng, huấn luyện, kiểm thử hoặc tinh chỉnh toàn bộ hoặc một phần mô hình, thuật toán hoặc hệ thống trí tuệ nhân tạo và có quyền kiểm soát trực tiếp đối với phương pháp kỹ thuật, dữ liệu huấn luyện hoặc tham số mô hình."
+},
+{
+"stt": 4,
+"thuat_ngu": "Nhà cung cấp",
+"dinh_nghia": "tổ chức, cá nhân đưa hệ thống trí tuệ nhân tạo ra thị trường hoặc đưa vào sử dụng dưới tên, thương hiệu hoặc nhãn hiệu của mình, không phụ thuộc hệ thống đó do họ tự phát triển hay được phát triển bởi bên thứ ba."
+},
+{
+"stt": 5,
+"thuat_ngu": "Bên triển khai",
+"dinh_nghia": "tổ chức, cá nhân sử dụng hệ thống trí tuệ nhân tạo thuộc phạm vi kiểm soát của mình trong hoạt động nghề nghiệp, thương mại hoặc cung cấp dịch vụ; không bao gồm trường hợp sử dụng cho mục đích cá nhân, phi thương mại."
+},
+{
+"stt": 6,
+"thuat_ngu": "Người sử dụng",
+"dinh_nghia": "tổ chức, cá nhân trực tiếp tương tác với hệ thống trí tuệ nhân tạo hoặc sử dụng kết quả đầu ra của hệ thống đó."
+},
+{
+"stt": 7,
+"thuat_ngu": "Người bị ảnh hưởng",
+"dinh_nghia": "tổ chức, cá nhân bị tác động trực tiếp hoặc gián tiếp đến quyền, lợi ích hợp pháp, tính mạng, sức khỏe, tài sản, uy tín hoặc cơ hội tiếp cận dịch vụ do việc triển khai hoặc do kết quả đầu ra của hệ thống trí tuệ nhân tạo."
+},
+{
+"stt": 8,
+"thuat_ngu": "Sự cố nghiêm trọng",
+"dinh_nghia": "sự kiện xảy ra trong hoạt động của hệ thống trí tuệ nhân tạo, gây ra hoặc có nguy cơ gây ra thiệt hại đáng kể đến tính mạng, sức khỏe, quyền con người, tài sản, an ninh mạng, trật tự công cộng, môi trường hoặc làm gián đoạn hoạt động của hệ thống thông tin quan trọng về an ninh quốc gia."
+}
+],
+"kn_sub": [
+{
+"stt": 1,
+"thuat_ngu": "Trí tuệ nhân tạo",
+"dinh_nghia": "là việc thực hiện bằng điện tử các năng lực trí tuệ của con người, bao gồm học tập, suy luận, nhận thức, phán đoán và hiểu ngôn ngữ tự nhiên."
+},
+{
+"stt": 2,
+"thuat_ngu": "Hệ thống trí tuệ nhân tạo",
+"dinh_nghia": "là hệ thống dựa trên máy, được thiết kế để thực hiện các năng lực trí tuệ nhân tạo với các mức độ tự chủ khác nhau, có khả năng tự thích nghi sau khi được triển khai; căn cứ vào các mục tiêu được xác định rõ ràng hoặc được hình thành một cách ngầm định, hệ thống suy luận từ dữ liệu đầu vào để tạo ra các đầu ra như dự đoán, nội dung, khuyến nghị hoặc quyết định có thể gây ảnh hưởng tới môi trường vật lý hoặc môi trường số."
+},
+{
+"stt": 3,
+"thuat_ngu": "Nhà phát triển",
+"dinh_nghia": "là tổ chức, cá nhân thực hiện việc thiết kế, xây dựng, huấn luyện, kiểm thử hoặc tinh chỉnh toàn bộ hoặc một phần mô hình, thuật toán hoặc hệ thống trí tuệ nhân tạo và có quyền kiểm soát trực tiếp đối với phương pháp kỹ thuật, dữ liệu huấn luyện hoặc tham số mô hình."
+},
+{
+"stt": 4,
+"thuat_ngu": "Nhà cung cấp",
+"dinh_nghia": "là tổ chức, cá nhân đưa hệ thống trí tuệ nhân tạo ra thị trường hoặc đưa vào sử dụng dưới tên, thương hiệu hoặc nhãn hiệu của mình, không phụ thuộc hệ thống đó do họ tự phát triển hay được phát triển bởi bên thứ ba."
+},
+{
+"stt": 5,
+"thuat_ngu": "Bên triển khai",
+"dinh_nghia": "là tổ chức, cá nhân sử dụng hệ thống trí tuệ nhân tạo thuộc phạm vi kiểm soát của mình trong hoạt động nghề nghiệp, thương mại hoặc cung cấp dịch vụ; không bao gồm trường hợp sử dụng cho mục đích cá nhân, phi thương mại."
+},
+{
+"stt": 6,
+"thuat_ngu": "Người sử dụng",
+"dinh_nghia": "là tổ chức, cá nhân trực tiếp tương tác với hệ thống trí tuệ nhân tạo hoặc sử dụng kết quả đầu ra của hệ thống đó."
+},
+{
+"stt": 7,
+"thuat_ngu": "Người bị ảnh hưởng",
+"dinh_nghia": "là tổ chức, cá nhân bị tác động trực tiếp hoặc gián tiếp đến quyền, lợi ích hợp pháp, tính mạng, sức khỏe, tài sản, uy tín hoặc cơ hội tiếp cận dịch vụ do việc triển khai hoặc do kết quả đầu ra của hệ thống trí tuệ nhân tạo."
+},
+{
+"stt": 8,
+"thuat_ngu": "Sự cố nghiêm trọng",
+"dinh_nghia": "là sự kiện xảy ra trong hoạt động của hệ thống trí tuệ nhân tạo, gây ra hoặc có nguy cơ gây ra thiệt hại đáng kể đến tính mạng, sức khỏe, quyền con người, tài sản, an ninh mạng, trật tự công cộng, môi trường hoặc làm gián đoạn hoạt động của hệ thống thông tin quan trọng về an ninh quốc gia."
+}
+],
+"kn_api": [
+{
+"stt": 1,
+"thuat_ngu": "Trí tuệ nhân tạo",
+"dinh_nghia": "việc thực hiện bằng điện tử các năng lực trí tuệ của con người, bao gồm học tập, suy luận, nhận thức, phán đoán và hiểu ngôn ngữ tự nhiên."
+},
+{
+"stt": 2,
+"thuat_ngu": "Hệ thống trí tuệ nhân tạo",
+"dinh_nghia": "hệ thống dựa trên máy, được thiết kế để thực hiện các năng lực trí tuệ nhân tạo với các mức độ tự chủ khác nhau, có khả năng tự thích nghi sau khi được triển khai; căn cứ vào các mục tiêu được xác định rõ ràng hoặc được hình thành một cách ngầm định, hệ thống suy luận từ dữ liệu đầu vào để tạo ra các đầu ra như dự đoán, nội dung, khuyến nghị hoặc quyết định có thể gây ảnh hưởng tới môi trường vật lý hoặc môi trường số."
+},
+{
+"stt": 3,
+"thuat_ngu": "Nhà phát triển",
+"dinh_nghia": "tổ chức, cá nhân thực hiện việc thiết kế, xây dựng, huấn luyện, kiểm thử hoặc tinh chỉnh toàn bộ hoặc một phần mô hình, thuật toán hoặc hệ thống trí tuệ nhân tạo và có quyền kiểm soát trực tiếp đối với phương pháp kỹ thuật, dữ liệu huấn luyện hoặc tham số mô hình."
+},
+{
+"stt": 4,
+"thuat_ngu": "Nhà cung cấp",
+"dinh_nghia": "tổ chức, cá nhân đưa hệ thống trí tuệ nhân tạo ra thị trường hoặc đưa vào sử dụng dưới tên, thương hiệu hoặc nhãn hiệu của mình, không phụ thuộc hệ thống đó do họ tự phát triển hay được phát triển bởi bên thứ ba."
+},
+{
+"stt": 5,
+"thuat_ngu": "Bên triển khai",
+"dinh_nghia": "tổ chức, cá nhân sử dụng hệ thống trí tuệ nhân tạo thuộc phạm vi kiểm soát của mình trong hoạt động nghề nghiệp, thương mại hoặc cung cấp dịch vụ; không bao gồm trường hợp sử dụng cho mục đích cá nhân, phi thương mại."
+},
+{
+"stt": 6,
+"thuat_ngu": "Người sử dụng",
+"dinh_nghia": "tổ chức, cá nhân trực tiếp tương tác với hệ thống trí tuệ nhân tạo hoặc sử dụng kết quả đầu ra của hệ thống đó."
+},
+{
+"stt": 7,
+"thuat_ngu": "Người bị ảnh hưởng",
+"dinh_nghia": "tổ chức, cá nhân bị tác động trực tiếp hoặc gián tiếp đến quyền, lợi ích hợp pháp, tính mạng, sức khỏe, tài sản, uy tín hoặc cơ hội tiếp cận dịch vụ do việc triển khai hoặc do kết quả đầu ra của hệ thống trí tuệ nhân tạo."
+},
+{
+"stt": 8,
+"thuat_ngu": "Sự cố nghiêm trọng",
+"dinh_nghia": "sự kiện xảy ra trong hoạt động của hệ thống trí tuệ nhân tạo, gây ra hoặc có nguy cơ gây ra thiệt hại đáng kể đến tính mạng, sức khỏe, quyền con người, tài sản, an ninh mạng, trật tự công cộng, môi trường hoặc làm gián đoạn hoạt động của hệ thống thông tin quan trọng về an ninh quốc gia."
+}
+]
+}
+
+
 AUTH_SUB = {"loggedIn": True, "authMethod": "claude.ai", "apiProvider": "firstParty"}
 _VANG_USAGE = object()
 
@@ -874,6 +1006,39 @@ def ca_wp1514(m):
          "X4: gop dong diem thanh mot dong phai lech")
 
 
+def ca_wp1514_luot2(m):
+    """Lượt 2 của packet #1514: A1 dòng có từ nối mà trùng hậu tố câu dẫn KHÔNG bị bỏ · A2 (r2) `;` không kết khoản, tiêu
+    đề có "là" bị từ chối, đánh số nội dòng bị từ chối · A3 dải đuôi khoảng trắng + dấu đóng · A4 Điều 3 THẬT 8/8."""
+    CD = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    # A1: dòng đầu có từ nối cấp khoản và kết bằng hậu tố câu dẫn ⇒ KHÔNG được bỏ như câu dẫn.
+    a1 = "Điều 3.\nHồ sơ là các tài liệu được hiểu như sau:\nbản chính là bản gốc."
+    bang(m.lech_nguyen_van(kn(("bản chính", "bản gốc.")), a1) != [], "A1: dong co tu noi bi bo nhu cau dan")
+    # A2a: ngắt dòng sau `;` giữa một định nghĩa dài, hai mảnh đều có "là" ⇒ chặn.
+    a2a = f"Điều 3.\n{CD}\nHồ sơ là tập tài liệu;\nbản chính là bản gốc của hồ sơ."
+    bang(m.tach_khoan(a2a) is None, f"A2a: khoan ket bang ';' phai mo ho: {m.tach_khoan(a2a)}")
+    # A2b: đánh số nội dòng trong thân khoản (tiểu mục) ⇒ chặn, kể cả khi số khoản liên tục và mọi khoản kết câu.
+    a2b = f"Điều 3.\n{CD}\n1. Hồ sơ là tài liệu.\n2. Quy trình là các bước: 1. chuẩn bị, 2. thực hiện.\n3. Bước kết thúc là bàn giao."
+    bang(m.tach_khoan(a2b) is None, f"A2b: danh so noi dong phai mo ho: {m.tach_khoan(a2b)}")
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu."), ("Mức phí", "1.5 triệu đồng.")),
+                           f"Điều 3.\n{CD}\n1. Hồ sơ là tài liệu.\n2. Mức phí là 1.5 triệu đồng.") == [],
+         "A2b doi chung: so thap phan bi chan oan")
+    # A2c: tiêu đề `Điều 3: …` dính khoản đầu (có chữ "là" sau dấu ":") ⇒ từ chối.
+    a2c = "Điều 3: Giải thích từ ngữ Hồ sơ là tài liệu.\nDữ liệu là thông tin."
+    bang(m.tach_khoan(a2c) is None, f"A2c: tieu de co 'la' phai mo ho: {m.tach_khoan(a2c)}")
+    # A3: dải đuôi xen khoảng trắng giữa các dấu đóng vẫn kết câu.
+    a3 = f"Điều 3.\n{CD}\nThông báo là văn bản (ghi \u201cĐã nhận.\u201d )"
+    bang(m.lech_nguyen_van(kn(("Thông báo", "văn bản (ghi \u201cĐã nhận.\u201d )")), a3) == [],
+         f"A3: dau dong xen khoang trang bi chan oan: {m.tach_khoan(a3)}")
+    # A4 (§4.6): Điều 3 THẬT + ba kết quả đã lưu ⇒ 8/8, không lệch.
+    bang(len(m.tach_khoan(DIEU3_THAT) or []) == 8, f"A4: Dieu 3 that phai tach 8 khoan: {m.tach_khoan(DIEU3_THAT)}")
+    for ten, kq in KN_DIEU3_THAT.items():
+        bang(len(kq) == 8 and m.lech_nguyen_van(m.chuan_hoa_khai_niem([dict(x) for x in kq]), DIEU3_THAT) == [],
+             f"A4: ket qua da luu {ten} phai dat 8/8")
+
+
 def ca_usage_thieu_truong(m):
     bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
     bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
@@ -890,21 +1055,25 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
+    # wp1514 lượt 2 (A1/A2/A3/A4).
+    ("wp1514_l2_cau_dan_bo_tu_noi", ('_RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None:', '_RE_CAU_DAN.search(" ".join(ln.split())):'), "ca_wp1514_luot2"),
+    ("wp1514_l2_cham_phay_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".;!?")'), "ca_wp1514_luot2"),
+    ("wp1514_l2_hai_cham_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".!?:")'), "ca_wp1514"),
+    ("wp1514_l2_bo_so_noi_dong", ("    if any(_RE_SO_NOI_DONG.search(txt) for _, txt in khoan):\n        return None", "    if False:\n        return None"), "ca_wp1514_luot2"),
+    ("wp1514_l2_so_noi_dong_nhan_thap_phan", (r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")', r'_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)]")'), "ca_wp1514_luot2"),
+    ("wp1514_l2_tieu_de_chi_tu_noi", ("        if _RE_LA.search(dong[0]):\n", "        if _tu_noi(dong[0]) is not None:\n"), "ca_wp1514_luot2"),
+    ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
     ("wp1514_bo_x2", ("    if ln.count('\"') >= 3:\n        return True", "    if False:\n        return True"), "ca_wp1514"),
     ("wp1514_bo_ket_cau", ("    if not all(_ket_thuc_cau(txt) for _, txt in khoan):\n        return None", "    if False:\n        return None"), "ca_wp1514"),
-    ("wp1514_hai_cham_ket_cau", ('_DAU_CAU_KET = frozenset(".;!?")', '_DAU_CAU_KET = frozenset(".;!?:")'), "ca_wp1514"),
     ("wp1514_cau_dan_moi_hai_cham", ('_RE_CAU_DAN.search(" ".join(ln.split()))', 'ln.endswith(":")'), "ca_wp1514"),
     ("wp1514_gon_gop_dong", ('    return "\\n".join(" ".join(ln.split()) for ln in str(s).split("\\n") if ln.strip())', '    return " ".join(str(s).split())'), "ca_wp1514"),
-    ("wp1514_khong_bo_dau_dong_cuoi", (".rstrip(')\"\\u201d')", ""), "ca_wp1514"),
     # Lượt 11 X1/X3.
     ("bo_nhay_don_thang", ('_DAU_KEP_PO = frozenset({"\'", ', "_DAU_KEP_PO = frozenset({"), "ca_nguon_mo_ho_luot8"),
-    ("tieu_de_dinh_khoan_dau", ("        if _tu_noi(dong[0]) is not None:\n            return None", "        if False:\n            return None"),
-     "ca_nguon_mo_ho_luot8"),
     # Lượt 9 V1: danh sách CHO PHÉP kiểu dấu.
     ("cho_dau_ngoai_danh_sach", ('            return True   # lượt 9 V1', '            pass   # lượt 9 V1'), "ca_nguon_mo_ho_luot8"),
     ("chi_xet_pi_pf", ('unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf")', 'unicodedata.category(c) in ("Pi", "Pf")'), "ca_nguon_mo_ho_luot8"),

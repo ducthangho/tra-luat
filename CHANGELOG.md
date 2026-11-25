@@ -7,6 +7,9 @@
 - Câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải thích như sau:` (X3).
 - `_gon` gộp khoảng trắng TRONG dòng, giữ ranh giới dòng (X4: định nghĩa dồn các dòng điểm thành một dòng nay lệch).
 - `can_nguoi_duyet: true` giữ nguyên.
+- r2 (sau cross-review lượt 2, đặc tả `ops/specs/llm-ranh-gioi-khoan-r2.md`): `;` không kết khoản (A2a); thân khoản có
+  đánh số nội dòng ⇒ mơ hồ (A2b); tiêu đề Điều có chữ "là" ⇒ mơ hồ (A2c). Cùng lượt: câu dẫn có từ nối không bị bỏ
+  (A1); bỏ cả dải đuôi khoảng trắng + dấu đóng khi xét kết câu (A3); test Điều 3 THẬT 8 khoản + ba kết quả đã lưu (A4).
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

@@ -376,9 +376,9 @@ biến môi trường của environment.
   ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
   nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`
-  trở lên; khoản không kết thúc bằng dấu câu kết `.` `;` `!` `?` (kể cả khoản kết thúc `:` mà không có điểm theo
-  sau); câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải thích như sau:`; phép so giữ nguyên xuống dòng của
-  các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  trở lên; khoản không kết thúc bằng `.` `!` `?` (`;` và `:` không kết khoản); thân khoản có đánh số nội dòng
+  (`… 1. …`, `… (2) …`); dòng tiêu đề Điều có chữ "là"; câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải
+  thích như sau:` và không có từ nối; phép so giữ nguyên xuống dòng của các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

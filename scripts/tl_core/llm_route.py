@@ -489,7 +489,10 @@ _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 # Câu dẫn chuẩn của Điều "Giải thích từ ngữ" (wp1514 X3): CHỈ dòng khớp mẫu này mới được bỏ như câu dẫn.
 _RE_CAU_DAN = re.compile(r"(?:được hiểu|được giải thích)\s+như\s+sau\s*:$", re.IGNORECASE)
-_DAU_CAU_KET = frozenset(".;!?")
+# r2 (lượt 2 A2): `;` KHÔNG kết khoản — ngắt dòng sau `;` giữa một định nghĩa dài từng tạo hai khoản đều qua kiểm.
+_DAU_CAU_KET = frozenset(".!?")
+# r2 (lượt 2 A2): đánh số NỘI DÒNG trong thân khoản (`… 1) …`, `… 2. …`) — tiểu mục, ranh giới khoản không tin được.
+_RE_SO_NOI_DONG = re.compile(r"(?:^|\s)\(?\d+[.)](?=\s)")
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
@@ -514,8 +517,10 @@ def tach_khoan(van_ban):
     if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
         return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
-        if _tu_noi(dong[0]) is not None:
-            return None   # lượt 11 X3: tiêu đề Điều DÍNH khoản đầu trên một dòng ⇒ bỏ dòng là bỏ luôn khoản ⇒ mơ hồ
+        if _RE_LA.search(dong[0]):
+            # lượt 11 X3 + r2 (lượt 2 A2): tiêu đề Điều có chữ "là" ⇒ có thể DÍNH khoản đầu ⇒ bỏ dòng là bỏ luôn khoản.
+            # Dò `_RE_LA` trên CẢ dòng: `_tu_noi` dừng ở dấu `:` của `Điều 3: …` nên từng bỏ sót.
+            return None
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
@@ -532,7 +537,7 @@ def tach_khoan(van_ban):
             # ra một cách làm bộ quét báo "còn mở" sai. Khoản có ngoặc trải nhiều dòng ⇒ bị chặn (giới hạn đã khai).
             # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
-        elif not khoan and _RE_CAU_DAN.search(" ".join(ln.split())):
+        elif not khoan and _RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None:
             continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
             khoan.append([None, ln])
@@ -542,14 +547,16 @@ def tach_khoan(van_ban):
         return None
     if not all(_ket_thuc_cau(txt) for _, txt in khoan):
         return None   # wp1514 X3b/X3c: khoản không kết thúc bằng dấu câu kết ⇒ ranh giới khoản không tin được
+    if any(_RE_SO_NOI_DONG.search(txt) for _, txt in khoan):
+        return None   # r2 (lượt 2 A2): tiểu mục đánh số trong thân khoản ⇒ số khoản kế có thể là tiểu mục
     return [(so, txt) for so, txt in khoan]
 
 
 def _ket_thuc_cau(txt) -> bool:
-    """Khoản kết thúc bằng dấu câu kết `.` `;` `!` `?` (bỏ khoảng trắng và dấu đóng `)` `"` `”` ở cuối). `:` KHÔNG kết
+    """Khoản kết thúc bằng dấu câu kết `.` `!` `?` (bỏ cả dải khoảng trắng + dấu đóng `)` `"` `”` ở cuối). `:` và `;` KHÔNG kết
     câu: khoản `… sau:` phải có các dòng điểm theo sau (wp1514 X3c: tiểu mục đánh số sau `:` bị nhận là khoản mới;
     X3b: dòng gãy giữa câu ở nguồn mất số thành một khoản)."""
-    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()
+    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))   # cả DẢI đuôi khoảng trắng + dấu đóng (lượt 2 A3: xen khoảng trắng)
     return bool(duoi) and duoi[-1] in _DAU_CAU_KET
 
 

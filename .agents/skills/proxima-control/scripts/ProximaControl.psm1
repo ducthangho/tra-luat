@@ -327,6 +327,9 @@ function Remove-PxcElicitation([string]$Text) {
     if ($tail.Trim().Length -eq 0) { $out = $sb.ToString().TrimEnd() } else { $out = $sb.ToString() + $tail }
     return @{ Text = $out; State = 'removed'; Removed = $n }
 }
+# px-loc-markup r2 #1529: the gateway-reported model id is echoed only when it is a plain model id (allowlist of characters), so markup or
+# free text in that field never reaches the result.
+function Test-PxcReportedModel($S) { return ($S -is [string]) -and [regex]::IsMatch($S, '\A[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}\z', [Text.RegularExpressions.RegexOptions]::CultureInvariant) }
 function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$Provider, [string]$Model, [string]$Prompt) {
     $url = Get-PxcGateway $Base
     if (-not (Test-PxcModel (Get-PxcAdvertised $url) $Provider $Model)) { Stop-Pxc 'ModelNotAdvertised' }
@@ -357,7 +360,7 @@ function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$
         $rec['state'] = $state; $final = $true
         try { Write-PxcRecord $rs.Stream $rec } catch { $final = $false }
         $outcome = $(if (-not $final) { 'finalize_failed' } elseif ($state -cne 'completed') { 'unknown' } elseif ($parsed) { 'ok' } else { 'response_unparsed' })
-        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $(if ($reported -is [string]) { $reported })
+        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $(if (Test-PxcReportedModel $reported) { $reported })
                     answer = $(if ($parsed) { $mk.Text }); answerMarkup = $mk.State; answerMarkupRemoved = [int]$mk.Removed; answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
                     recordState = $(if ($final) { $state } else { 'pending_finalize_failed' }) }))
     } finally { Close-PxcCtx $ctx }

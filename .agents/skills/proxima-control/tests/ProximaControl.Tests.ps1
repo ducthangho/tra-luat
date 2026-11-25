@@ -3,7 +3,7 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
 #     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
-# rc 0: all 28 mandatory IDs (with -Counterexamples also CX00-CX15) passed and cleanup was verified. rc 1: a case failed - an absent
+# rc 0: all 28 mandatory IDs (with -Counterexamples also CX00-CX16) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
 # Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service/TCP listener, service control, id) is
 # replaced in the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real
@@ -15,7 +15,7 @@
 # process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
 # script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
 # AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
-# -Counterexamples: CX00 unmodified control + CX01-CX15 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# -Counterexamples: CX00 unmodified control + CX01-CX16 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -1068,48 +1068,60 @@ Invoke-Case 'X5-10' {
     if ($post.Count - $n0 -ne 1 -or ([string]$post[-1]['Body'] | ConvertFrom-Json).model -cne 'gw:fast') { Add-Fail 'ASK_VARIANT_NOT_SENT' }
 }
 Invoke-Case 'X5-11' {
-    # px-loc-markup r1 #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
+    # px-loc-markup #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
     # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, trims trailing whitespace only after a
-    # trailing block, and never surfaces the dropped text. Leak check: every RAW object of every stream (output incl. strings, error, warning,
-    # verbose, debug, information; verbose/debug forced on) serialized with PSSerializer depth 64 (keeps nested values, MessageData,
-    # TargetObject, Exception.Data, ErrorDetails), plus EVERY file under the target's results tree after a per-case journal reset; the call's
-    # own record must parse as JSON with state 'completed'. Separate markers for dropped/kept text.
+    # trailing block. No-leak is proved STRUCTURALLY (allowlist, r2 after review round 3), not by searching representations for a marker:
+    # (1) with verbose/debug/information forced on, every stream together carries exactly ONE object, the px.result.v1 result;
+    # (2) that result has exactly the known top-level and data keys, each with its expected value (answer Ordinal, reportedModel a plain id);
+    # (3) after a per-case journal reset the target's results tree holds exactly one file, the call's record, with exactly the five known
+    #     keys and expected values. Nothing else can carry the dropped text.
     $drop = 'PXDROP7f3a'; $keepMk = 'PXKEEP7f3a'; $nl = [string][char]10; $crlf = [string][char]13 + $nl; $q = [string][char]34; $nb = [string][char]0xA0
     $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + 'l ' + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
     $open = '<ElicitationsGroup message=' + $q + 'x' + $q + '>'
+    # name, content, expected answer, answerMarkup, answerMarkupRemoved, gateway model, expected reportedModel ($null = absent)
     $cases = @(
-        @('none', ('plain answer' + $nl), ('plain answer' + $nl), 'none', 0),
-        @('one block', ('OK' + $nl + $nl + $g + $nl), 'OK', 'removed', 1),
-        @('two blocks', ('A ' + $g + ' B' + $nl + $g), 'A  B', 'removed', 2),
-        @('middle keeps tail', ('A' + $g + 'B  ' + $crlf), ('AB  ' + $crlf), 'removed', 1),
-        @('middle keeps nbsp', ('A' + $g + 'B' + $nb), ('AB' + $nb), 'removed', 1),
-        @('unterminated', ('OK' + $nl + $open + 'tail'), ('OK' + $nl + $open + 'tail'), 'unterminated', 0),
-        @('nested', ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), 'unterminated', 0),
-        @('opener without end', 'A <ElicitationsGroup </ElicitationsGroup> B', 'A <ElicitationsGroup </ElicitationsGroup> B', 'unterminated', 0),
-        @('opener open quote', ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), 'unterminated', 0),
-        @('self closing', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'unterminated', 0),
-        @('other name', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'none', 0),
-        @('case variant', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'none', 0),
-        @('kept outside', ('keep ' + $keepMk + $nl + $g), ('keep ' + $keepMk), 'removed', 1))
-    $cmd = $script:PxCmd; $vp = $global:VerbosePreference; $dp = $global:DebugPreference
+        @('none', ('plain answer' + $nl), ('plain answer' + $nl), 'none', 0, 'prov/served', 'prov/served'),
+        @('one block', ('OK' + $nl + $nl + $g + $nl), 'OK', 'removed', 1, 'prov/served', 'prov/served'),
+        @('two blocks', ('A ' + $g + ' B' + $nl + $g), 'A  B', 'removed', 2, 'prov/served', 'prov/served'),
+        @('middle keeps tail', ('A' + $g + 'B  ' + $crlf), ('AB  ' + $crlf), 'removed', 1, 'prov/served', 'prov/served'),
+        @('middle keeps nbsp', ('A' + $g + 'B' + $nb), ('AB' + $nb), 'removed', 1, 'prov/served', 'prov/served'),
+        @('unterminated', ('OK' + $nl + $open + 'tail'), ('OK' + $nl + $open + 'tail'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('nested', ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('opener without end', 'A <ElicitationsGroup </ElicitationsGroup> B', 'A <ElicitationsGroup </ElicitationsGroup> B', 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('opener open quote', ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('self closing', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('other name', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'none', 0, 'prov/served', 'prov/served'),
+        @('case variant', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'none', 0, 'prov/served', 'prov/served'),
+        @('kept outside', ('keep ' + $keepMk + $nl + $g), ('keep ' + $keepMk), 'removed', 1, 'prov/served', 'prov/served'),
+        @('model echo', ('OK ' + $g), 'OK', 'removed', 1, $g, $null))
+    $topKeys = 'action,data,dispatched,dryRun,mode,outcome,schema,targetFingerprint'
+    $dataKeys = 'answer,answerMarkup,answerMarkupRemoved,answerTrust,httpStatus,recordId,recordState,reportedModel,requestedModel'
+    $cmd = $script:PxCmd; $vp = $global:VerbosePreference; $dp = $global:DebugPreference; $ip = $global:InformationPreference
     foreach ($c in $cases) {
-        $global:PxcT.Chat = (@{ model = 'prov/served'; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
         Clear-Journal $Tg.Pos.Base
+        $global:PxcT.Chat = (@{ model = $c[5]; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
         $a = New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' }; $raw = @()
-        try { $global:VerbosePreference = 'Continue'; $global:DebugPreference = 'Continue'; $raw = @(& $cmd @a *>&1) } catch { $raw += $_ } finally { $global:VerbosePreference = $vp; $global:DebugPreference = $dp }
-        $r = @($raw | Where-Object { $null -ne $_ -and $_ -isnot [Management.Automation.ErrorRecord] -and $null -ne $_.PSObject.Properties['schema'] })
-        if ($r.Count -ne 1 -or "$($r[0].outcome)" -cne 'ok') { Add-Fail "MARKUP_ASK_FAILED[$($c[0])]"; continue }
-        $d = $r[0].data
+        try { $global:VerbosePreference = 'Continue'; $global:DebugPreference = 'Continue'; $global:InformationPreference = 'Continue'; $raw = @(& $cmd @a *>&1) }
+        catch { $raw += $_ } finally { $global:VerbosePreference = $vp; $global:DebugPreference = $dp; $global:InformationPreference = $ip }
+        $r = @($raw | Where-Object { $null -ne $_ -and $_ -isnot [Management.Automation.ErrorRecord] -and $_ -isnot [string] -and $null -ne $_.PSObject.Properties['schema'] })
+        if ($raw.Count -ne 1 -or $r.Count -ne 1) { Add-Fail "MARKUP_EXTRA_STREAM[$($c[0])]"; continue }
+        $x = $r[0]; $tk = @($x.PSObject.Properties | ForEach-Object { $_.Name }); [Array]::Sort($tk, [StringComparer]::Ordinal)
+        if (($tk -join ',') -cne $topKeys -or "$($x.schema)" -cne 'px.result.v1' -or "$($x.action)" -cne 'ask' -or "$($x.outcome)" -cne 'ok' -or
+            $x.dryRun -ne $false -or $x.dispatched -ne $true -or "$($x.targetFingerprint)" -cnotmatch '\A[0-9a-f]{64}\z') { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
+        $d = $x.data; $dk = @($(if ($d -is [Collections.IDictionary]) { $d.Keys } else { $d.PSObject.Properties | ForEach-Object { $_.Name } }) | ForEach-Object { [string]$_ })
+        [Array]::Sort($dk, [StringComparer]::Ordinal)
+        if (($dk -join ',') -cne $dataKeys -or "$($d.requestedModel)" -cne 'prov/m2' -or "$($d.answerTrust)" -cne 'untrusted_data' -or $d.httpStatus -ne 200 -or
+            "$($d.recordState)" -cne 'completed' -or "$($d.recordId)" -cnotmatch '\A[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\z') { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
         if (-not [string]::Equals([string]$d.answer, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
         if ("$($d.answerMarkup)" -cne $c[3] -or $d.answerMarkupRemoved -isnot [int] -or $d.answerMarkupRemoved -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
-        $dump = @(foreach ($o in $raw) { if ($null -ne $o) { [Management.Automation.PSSerializer]::Serialize($o, 64) } }) -join $nl
+        if ($(if ($null -eq $c[6]) { $null -ne $d.reportedModel } else { -not [string]::Equals([string]$d.reportedModel, [string]$c[6], [StringComparison]::Ordinal) })) { Add-Fail "MARKUP_REPORTED_MODEL[$($c[0])]" }
         $rp = "$($Tg.Pos.Base)\results\px-active\$($d.recordId).json"
-        if (-not [IO.File]::Exists($rp)) { Add-Fail "MARKUP_JOURNAL_MISSING[$($c[0])]"; continue }
-        $st = $null; try { $st = "$(([IO.File]::ReadAllText($rp) | ConvertFrom-Json).state)" } catch { $st = $null }
-        if ($st -cne 'completed') { Add-Fail "MARKUP_JOURNAL_BAD[$($c[0])]" }
         $files = @([IO.Directory]::GetFiles("$($Tg.Pos.Base)\results", '*', [IO.SearchOption]::AllDirectories))
-        $inFiles = @($files | Where-Object { [IO.File]::ReadAllText($_).Contains($drop) }).Count
-        if ($dump.Contains($drop) -or $inFiles) { Add-Fail "MARKUP_LEAK[$($c[0])]" }
+        if ($files.Count -ne 1 -or -not [string]::Equals([IO.Path]::GetFullPath($files[0]), [IO.Path]::GetFullPath($rp), [StringComparison]::OrdinalIgnoreCase)) { Add-Fail "MARKUP_JOURNAL_SHAPE[$($c[0])]"; continue }
+        $j = $null; try { $j = [IO.File]::ReadAllText($rp) | ConvertFrom-Json } catch { $j = $null }
+        $jk = @($(if ($null -ne $j) { $j.PSObject.Properties | ForEach-Object { $_.Name } })); [Array]::Sort($jk, [StringComparer]::Ordinal)
+        if ($null -eq $j -or ($jk -join ',') -cne 'action,requestedModel,schema,state,targetFingerprint' -or "$($j.schema)" -cne 'px.active.v1' -or "$($j.action)" -cne 'ask' -or
+            "$($j.requestedModel)" -cne 'prov/m2' -or "$($j.state)" -cne 'completed' -or "$($j.targetFingerprint)" -cne "$($x.targetFingerprint)") { Add-Fail "MARKUP_JOURNAL_SHAPE[$($c[0])]" }
     }
     $global:PxcT.Chat = ''
 }
@@ -1186,7 +1198,8 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX12'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider, [StringComparison]::Ordinal)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[prefix without separator]') },
     @{ id = 'CX13'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider + '':'', [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[provider case variant]', 'X5-10:MODELS_FILTER_CASE_LOOSE') },
     @{ id = 'CX14'; file = 'ProximaControl.psm1'; e = @('if ($parsed) { $mk = Remove-PxcElicitation $answer }', 'if ($parsed) { $mk = @{ Text = $answer; State = ''none''; Removed = 0 } }'); red = @('X5-11:MARKUP_ANSWER[one block]', 'X5-11:MARKUP_STATE[one block]') },
-    @{ id = 'CX15'; file = 'ProximaControl.psm1'; e = @('$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::Ordinal)', '$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-11:MARKUP_STATE[case variant]') })
+    @{ id = 'CX15'; file = 'ProximaControl.psm1'; e = @('$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::Ordinal)', '$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-11:MARKUP_STATE[case variant]') },
+    @{ id = 'CX16'; file = 'ProximaControl.psm1'; e = @('reportedModel = $(if (Test-PxcReportedModel $reported) { $reported })', 'reportedModel = $(if ($reported -is [string]) { $reported })'); red = @('X5-11:MARKUP_REPORTED_MODEL[model echo]') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

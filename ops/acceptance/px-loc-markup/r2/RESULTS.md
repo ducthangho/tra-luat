@@ -16,10 +16,10 @@ Issue #1529.
 Đường dẫn tính từ `.agents/skills/proxima-control/`.
 | tệp | nội dung |
 |---|---|
-| `scripts/ProximaControl.psm1` | `Find-PxcOpenTag`, `Find-PxcOpenEnd`, `Remove-PxcElicitation`; `Invoke-PxcAsk` lọc `answer`, thêm `answerMarkup`, `answerMarkupRemoved`; help của `px` |
+| `scripts/ProximaControl.psm1` | `Find-PxcOpenTag`, `Find-PxcOpenEnd`, `Remove-PxcElicitation`, `Test-PxcReportedModel`; `Invoke-PxcAsk` lọc `answer`, thêm `answerMarkup`, `answerMarkupRemoved`, chỉ trả `reportedModel` khi là model id thuần; help của `px` |
 | `scripts/ProximaControl.psd1` | `ModuleVersion` 2.1.0 → 2.2.0 |
-| `SKILL.md` | 2.2.0; hai trường mới và luật cắt đuôi; hướng dẫn `gemini:auto` neo đúng mức lời khai #1457 r2; hệ quả handshake Remote |
-| `tests/ProximaControl.Tests.ps1` | ca bắt buộc `X5-11` (27 → 28, 13 ca con, đo rò rỉ trên đối tượng thô mọi luồng, journal bắt buộc); `CX14`, `CX15`; giả lập `Chat` |
+| `SKILL.md` | 2.2.0; hai trường mới, luật cắt đuôi, luật `reportedModel`; hướng dẫn `gemini:auto` neo đúng mức lời khai #1457 r2; hệ quả handshake Remote |
+| `tests/ProximaControl.Tests.ps1` | ca bắt buộc `X5-11` (27 → 28, 14 ca con; không rò rỉ chứng minh bằng CẤU TRÚC: đúng một đối tượng trên mọi luồng, đúng tập khoá/giá trị của kết quả và của bản ghi, đúng một tệp journal); `CX14`, `CX15`, `CX16`; giả lập `Chat` |
 | `tests/ProximaManifest.Tests.ps1` | `$Want` và `CX04` theo 2.2.0 |
 
 ## 3. Nghiệm thu
@@ -49,14 +49,15 @@ Issue #1529.
 Đặc tả r2 (đóng băng) định nghĩa N6 chỉ trên SHA ứng viên. Packet áp ADR-0060, nên lượt Windows còn phải đạt M3(a)–(c); hai yêu cầu
 cùng có hiệu lực, không cái nào thay cái nào (review lượt 2, lớp `windows-m3-baseline-omitted`). Biên nhận Windows ghi đủ cả hai vế:
 - **Nền B** = `base_sha` của lease r2; **ứng viên H** = head của PR tại lúc chạy. Cùng một máy Windows của chủ kho, dựng trong **một** lệnh:
-  hai cây Git riêng (B và H), chép harness của **H** ra thư mục ngoài cả hai cây, rồi chạy cùng lệnh với `-ModulePath` trỏ lần lượt vào
-  module của B và của H (harness nhận mọi cây qua `-ModulePath`, theo chú thích đầu tệp).
-- **Ma trận mỗi vế**: `ProximaControl.Tests.ps1` với PS 7 và PS 5.1, mỗi bản `en-US` và `tr-TR`; `-Counterexamples` ở PS 7 `en-US`
-  (chỉ vế H); `ProximaManifest.Tests.ps1` với PS 7 và PS 5.1 (`-AddonRoot` của từng cây). Mỗi lượt lưu báo cáo JSON ngoài cây, ghi
-  sha256 và danh sách id kèm kết quả.
-- **Đạt** khi đồng thời: (N6) mọi lượt của H rc 0, `passed == total`, mọi CX `credited`; (M3a) không thiếu lượt, không lỗi setup, không ca
-  bắt buộc `skipped`/`not_run`; (M3b) tập id đỏ của H ⊆ tập id đỏ của B; (M3c) nếu H có ca đỏ thuộc write set thì chủ kho quyết.
-  Dự kiến B đỏ `X5-11` (module cũ không lọc) và đỏ `PM*` về phiên bản 2.2.0 — đó là các ca đo hành vi mới, không phải hồi quy.
+  hai cây Git riêng (B và H). **Mỗi vế chạy harness của CHÍNH cây ấy** (chép ra thư mục ngoài cây), trỏ `-ModulePath`/`-AddonRoot` vào
+  cây ấy — để mọi id của tập bắt buộc ở mỗi vế được thực thi thật. (Cách cũ dùng harness H cho module B: `ProximaManifest` dừng ở PM02 vì
+  B là 2.1.0 nên PM03/PM04/PM06 chỉ ghi `NOT_EXECUTED`, và `X5-11` dừng ở ca đầu vì B không có `answerMarkup` — review lượt 3 đo được.)
+- **Ma trận mỗi vế**: `ProximaControl.Tests.ps1` với PS 7 và PS 5.1, mỗi bản `en-US` và `tr-TR`; `-Counterexamples` ở PS 7 `en-US`;
+  `ProximaManifest.Tests.ps1` với PS 7 và PS 5.1. Mỗi lượt lưu báo cáo JSON ngoài cây, ghi sha256 và danh sách id kèm kết quả.
+- **Đạt** khi đồng thời: (N6) mọi lượt của H rc 0, `passed == total`, mọi CX của H `credited`; (M3a) không thiếu lượt nào ở cả hai vế,
+  không lỗi setup, không ca bắt buộc `skipped`/`not_run`/`NOT_EXECUTED`; (M3b) trên các id CHUNG của hai vế (27 id `X*` và `PM01`–`PM07`,
+  `CX00`–`CX13`), tập đỏ của H ⊆ tập đỏ của B; id chỉ H có (`X5-11`, `CX14`–`CX16`) xét theo N6; (M3c) H có ca đỏ thuộc write set thì
+  chủ kho quyết.
 - Trạng thái: **chưa đo**.
 
 ## 7. Đính chính mốc hạn lease r1 (review lượt 2, lớp `lease-expiry-prerequisite-stale`)

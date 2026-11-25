@@ -1,6 +1,6 @@
-# wp1522 r3 — nợ B1a: bỏ lời hứa toàn phần của lệnh thu (chỉ giữ tính chất an toàn) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
+# wp1522 r4 — nợ B1a: bỏ lời hứa toàn phần của lệnh thu (chỉ giữ tính chất an toàn) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
 packet_id: wp1522
-revision: 3
+revision: 4
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
@@ -11,7 +11,12 @@ review_class: sensitive
 executor: claude
 environment: cloud (Linux)
 
-Trạng thái: r3, lượt soạn cuối (3/3). Thay r2 (`ops/wp1522-r1@5826c84`, sha256 `07f7cf25…`). Review lượt 2 trên r2 trả `blocked`: N1-02 ĐÃ VÁ THẬT; N1-01 VÁ SINH LỖI MỚI; finding mới N1-03 P2 thuộc lớp `v1-not-fully-specified`, lần tái diễn thứ 6. Checkpoint §12: không vá tiếp; chủ kho chọn bỏ lời hứa toàn phần. r3 viết lại §1 thành MỘT tính chất an toàn, bỏ biên ngoài cùng và bản dự phòng. K2, K4 và hiện vật v2 không đổi byte. Chưa duyệt băm, chưa có lease.
+Trạng thái: r4. Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~09:1xZ, lựa chọn «+1 soạn, review 4/4»). Thay r3 (`ops/wp1522-r1@9298d8e`, sha256 `4a8033de…`). Review lượt 3 công nhận hướng (b), nhưng còn N1-04 (P2, `v1-not-fully-specified`, lần thứ 7) cùng hai P3 câu chữ (N1-05, N1-06). r4 chỉ sửa đúng ba chỗ ấy, KHÔNG đổi hướng (b):
+- chiều thuận của mã thoát (1b);
+- danh sách đóng các ca cũ bị thay (1f);
+- câu về bên tiêu dùng B2/C2 (1c) và câu về N2 (§5).
+
+K2, K4 và hiện vật không đổi. Nếu lượt review 4/4 còn finding lớp này: TÁCH — N1 chỉ còn K4+K2, K1 sang B1b. Chưa duyệt băm, chưa có lease.
 
 ## Mục tiêu
 Đóng ba khoản nợ của B1a #1460: khoản 1, 2 và 4 trong mục `no_ngoai_pham_vi` của `ops/land/pr1516-wp1460-land-evidence.yaml`. Lớp `v1-not-fully-specified` đã tái diễn sáu lần: B1-04 ở review đặc tả wp1460; F02, F02-R2, F02-R3 ở review mã PR #1516; N1-01, N1-03 ở review đặc tả của chính packet này. Theo L4 của skill soạn spec, số đếm hình dạng lỗi chép sang là **6**. Packet này làm ba việc:
@@ -32,16 +37,26 @@ Mục này thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một b
   - Ghi đi qua MỘT hàm ghi nguyên tử: tệp tạm cùng thư mục, `fsync`, rồi `os.replace`.
   - Kiểm không đạt, hoặc bộ kiểm không nạp được ⇒ KHÔNG ghi tệp ấy.
   - Không có trạng thái nào mà `ra` chứa bytes dở hay một tệp không hợp schema do lượt này để lại.
-- **1b. Mã thoát.**
-  - 0 ⇔ lượt này đã ghi xong một biên nhận `ok: true` ở `ra`.
-  - 1 khi đã ghi xong một biên nhận `ok: false`.
-  - Mọi kết cục khác — lỗi đối số (2, như cũ), ngoại lệ bất kỳ lan ra, không ghi được — cho mã khác 0, và `ra` có thể vắng.
-  - Mã 0 không bao giờ xuất hiện khi chưa ghi biên nhận xanh.
+- **1b. Mã thoát — chỉ có chiều THUẬN.**
+  - Mã 0 ⇒ trong CHÍNH lượt này, `os.replace` của hàm ghi nguyên tử đã thành công với một biên nhận `ok: true` đã qua kiểm 1a, và hàm CLI đã kết thúc BÌNH THƯỜNG (không ngoại lệ).
+  - Mã 1 khi kết thúc bình thường sau khi đã ghi xong một biên nhận `ok: false`.
+  - Lỗi đối số ⇒ mã 2. `ra` KHÔNG bị đụng: biên nhận cũ của lượt khác, nếu có, vẫn còn.
+  - Ngoại lệ lan ra ⇒ mã khác 0. Nếu ngoại lệ xảy ra SAU khi `os.replace` đã thành công (ví dụ dòng in chẩn đoán lỗi), `ra` vẫn giữ biên nhận hợp lệ CỦA CHÍNH lượt này, xanh hoặc không. Không xoá, không thay, không có bản dự phòng.
+  - KHÔNG có chiều ngược. Việc `ra` có một biên nhận xanh hợp lệ KHÔNG chứng minh lượt đã đạt: nó có thể là của lượt khác (lỗi đối số), hoặc của chính lượt này nhưng kết thúc bằng ngoại lệ. Bên tiêu dùng phải đòi thêm kết luận `success` của job thu qua REST, đúng như C2 vốn làm với biên nhận xanh.
 - **1c. Không còn lời hứa «luôn có biên nhận».** Lệnh thu KHÔNG bắt chung mọi ngoại lệ. Không có biên ngoài cùng, không có bản dự phòng. Một ngoại lệ bất ngờ lan ra, để traceback trong log job, và làm bước thu — tức job thu — đỏ.
   - Bước tải biên nhận lên có `if-no-files-found: error`, nên vắng tệp cũng làm job đỏ.
-  - Bên tiêu dùng thấy job thu đỏ ⇒ từ chối lượt ấy theo C2. B2 phán `khong_do_duoc` cho lượt không có biên nhận, như hợp đồng B2 đã có.
+  - Hệ quả phía tiêu dùng, theo đặc tả B2 r5 (`origin/ops/wp1494-r1`, U5/T2, đã đối chiếu ở review lượt 3):
+    - REST liệt kê artifact ĐẦY ĐỦ và nhất quán, cho thấy vắng biên nhận ⇒ `bien_nhan_vang` ⇒ lượt `khong_dat`. Khung có thể ra `stale_or_missing`.
+    - Danh sách artifact không đọc được hoặc không nhất quán ⇒ `khong_do_duoc`.
+    - Không trường hợp nào thành `fresh`.
+  - C2 áp khi việc phán đi tới một biên nhận XANH: nó từ chối biên nhận xanh của một lượt mà job thu đỏ (1b, ngoại lệ sau khi đã ghi). Với biên nhận vắng hoặc không xanh thì C1 hay U5 quyết, không phải C2.
 - **1d. Không để biên nhận cũ sống sót.** Ngay sau khi `doi_so_thu` trả về hợp lệ, lệnh thu xoá `ra` nếu có. Xoá lỗi ⇒ ngoại lệ lan ra, mã khác 0. Lỗi đối số ⇒ KHÔNG xoá.
-- **1e. Các chốt hẹp hiện có GIỮ nguyên:** F02-R2; F02-R3 (sáu lớp lỗi YAML); `_hop_le_du`; `_doc_json_du`; `_gt_du`; kiểm UTF-8 tên. Các ca hiện có của chúng (đầu vào hỏng ⇒ biên nhận không xanh) vẫn phải đạt. Từ đây chúng là HÀNH VI được kiểm bằng ca, KHÔNG phải một phần của lời hứa. Một đường hỏng mới mà không có chốt hẹp nào bắt thì cho kết cục ở 1c, và đó không phải vi phạm hợp đồng.
+- **1e. Các chốt hẹp hiện có GIỮ nguyên** (TRỪ các ca liệt kê ở 1f): F02-R2; F02-R3 (sáu lớp lỗi YAML); `_hop_le_du`; `_doc_json_du`; `_gt_du`; kiểm UTF-8 tên. Các ca hiện có của chúng (đầu vào hỏng ⇒ biên nhận không xanh) vẫn phải đạt. Từ đây chúng là HÀNH VI được kiểm bằng ca, KHÔNG phải một phần của lời hứa. Một đường hỏng mới mà không có chốt hẹp nào bắt thì cho kết cục ở 1c, và đó không phải vi phạm hợp đồng.
+- **1f. Ca cũ bị THAY vì trái 1a** («chưa kiểm được thì không ghi»). Đây là danh sách ĐÓNG, đo trong review lượt 3 (N1-04a/b). Mỗi ca giữ tên nhưng đổi kỳ vọng. Ánh xạ tên ở Nghiệm thu 5 là ánh xạ «cùng tên, đổi kỳ vọng».
+  - `wp1460-thu-am-khong-nap-duoc-schema-dong-bang`. Cũ: rc 1 kèm biên nhận không xanh. Mới: mã khác 0, `ra` vắng, kể cả khi `ra` có sẵn biên nhận cũ.
+  - `wp1460-thu-hinh-khong-xanh-bo-kiem-tran-de-quy-van-ghi` và ca bọc `wp1460-con-khong-vo-thu-hinh-khong-xanh-bo-kiem-tran-de-quy-van-ghi`. Cũ: vẫn ghi khi bộ kiểm đang hoạt động KHÔNG xác nhận được biên nhận đỏ cuối cùng. Mới: không ghi, mã khác 0, `ra` vắng. Ca bọc vẫn đòi tiến trình con KHÔNG vỡ vì `RecursionError` không bắt: lỗi phải là dừng có kiểm soát ở bước kiểm cuối, không phải traceback `RecursionError`.
+  - Đột biến `f02r3-bien-nhan-khong-xanh-is-valid-khong-chot` đổi sang neo vào ca mới tương ứng, và vẫn phải GIẾT. Đột biến này gỡ kiểm, cho phép ghi biên nhận không qua kiểm.
+  - Các ca «đầu vào hỏng ⇒ biên nhận không xanh» khác KHÔNG đổi, vì ở đó bộ kiểm hoạt động và XÁC NHẬN được biên nhận đỏ. Gồm: REST rác, hai ca biên parser, và schema đỏ chặt hơn mà vẫn hợp lệ.
 
 ### 2. Tài liệu parser từ chối (K2)
 - `_doc_json_du` coi mọi tài liệu mà `json.loads` không trả về được (gồm `RecursionError` vì độ sâu) là «không đọc được». Ở REST và ở mảnh ⇒ không xanh; ở definition ⇒ `not_measured`. Đây là hành vi hiện tại của chốt hẹp (1e), kiểm bằng ca ở Nghiệm thu 3. Nó không phải một lời hứa toàn phần.
@@ -87,8 +102,8 @@ Mục này thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một b
 - `BAM_HOP_DONG` đổi sang ba băm ở mục 3.
 - `DAU_RA_LENH_KIEM` đổi sang ba dòng ở mục 3.
 - `THU_MUC_HOP_DONG` trỏ `ops/specs/wp1522-r1/hop_dong/`.
-- Nếu #1521 (N2) đã land, khoá `DA_DO_DOT_BIEN_1460` phải nhận khoá mới bằng một lượt đầy đủ đo trên H.
-- Ca, đột biến và chốt hiện có của wp1460 giữ nguyên ý nghĩa. Ca nào phụ thuộc số đếm cũ thì cập nhật kèm A/B trong MỘT lệnh.
+- Quan hệ với #1521 (N2): bản N2 đang xin duyệt là r4. Bộ chọn K5 của nó so byte các tệp đầu vào với GỐC; không có bản ghi khoá nào. N1 đổi `ci_dang_ky_test.py` và thêm thư mục `ops/specs/wp1522-r1/hop_dong/`, nên trên PR của N1 lượt đột biến đầy đủ LUÔN chạy. Tập đầu vào của K5 gồm thư mục của `THU_MUC_HOP_DONG` ở cả cây đang chạy (wp1522) lẫn GỐC (wp1460). Nếu bản N2 được duyệt cuối cùng khác r4, đối chiếu lại câu này trước khi cấp lease N1.
+- Ca, đột biến và chốt hiện có của wp1460 giữ nguyên ý nghĩa, TRỪ danh sách đóng ở 1f. Ca nào phụ thuộc số đếm cũ thì cập nhật kèm A/B trong MỘT lệnh.
 
 ## Nghiệm thu
 1. **Hợp đồng máy.** Lưu khối «Lệnh kiểm» ra tệp ngoài kho, chạy `python3 -B <tệp> ops/specs/wp1522-r1/hop_dong --dot-bien` với `jsonschema==4.26.0` ⇒ đúng ba dòng ở mục 3, mã thoát 0. sha256 của ba hiện vật bằng bảng mục 3, trên nhánh đặc tả và trong PR.
@@ -96,24 +111,31 @@ Mục này thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một b
    - **(a)** Ngoại lệ (`RecursionError` / `KeyError` / `MemoryError`) từ giữa X2 / X4 / X5 ⇒ mã khác 0 và `ra` VẮNG, kể cả khi trước đó có biên nhận xanh cũ.
    - **(b)** Biên nhận dựng ra không hợp schema ở lần kiểm cuối ⇒ không ghi, mã khác 0, `ra` vắng. Tiêm lỗi bằng cách làm hỏng một trường của đối tượng ngay trước lần kiểm cuối.
    - **(c)** Tiêm lỗi giữa chừng trong hàm ghi nguyên tử, sau khi đã ghi một phần tệp tạm ⇒ `ra` vắng. Không còn tệp tạm nào trong thư mục, hoặc nếu còn thì tên của nó không trùng `ra`.
-   - **(d)** Bộ kiểm schema không nạp được ⇒ không ghi, mã khác 0.
-   - **(e)** Mã 0 ⇔ `ra` là biên nhận `ok: true` hợp schema. Kiểm trên MỌI ca dương và âm hiện có.
-   - **(f)** Lỗi đối số ⇒ mã 2, và biên nhận cũ ở `ra` KHÔNG bị xoá.
-   - **(g)** Mọi ca hiện có của wp1460 vẫn đạt, gồm các ca «đầu vào hỏng ⇒ biên nhận không xanh».
+   - **(d)** Bộ kiểm schema không nạp được ⇒ không ghi, mã khác 0, `ra` vắng. Đây là ca `wp1460-thu-am-khong-nap-duoc-schema-dong-bang` theo kỳ vọng mới ở 1f.
+   - **(e)** Bộ kiểm đang hoạt động không xác nhận được biên nhận đỏ cuối cùng (schema tự tham chiếu của ca cũ) ⇒ không ghi, mã khác 0, `ra` vắng, KHÔNG traceback `RecursionError`. Đây là hai ca 1f.
+   - **(f)** Chiều thuận của 1b, kiểm trên MỌI ca dương và âm hiện có: mã 0 ⇒ trong lượt ấy hàm ghi đã `os.replace` một biên nhận `ok: true`. Ca đo dùng spy trên hàm ghi; sự có mặt của tệp ở `ra` một mình không đủ làm bằng chứng.
+   - **(g)** Lỗi đối số với `ra` có sẵn biên nhận xanh cũ ⇒ mã 2, bytes của `ra` không đổi.
+   - **(h)** Tiêm ngoại lệ NGAY SAU `os.replace` thành công, ở dòng in chẩn đoán ⇒ mã khác 0. `ra` là biên nhận hợp lệ của chính lượt này (so `tao_luc`/`luot`). Không có tệp nào khác bị ghi.
+   - **(i)** Mọi ca hiện có của wp1460 vẫn đạt, theo kỳ vọng cũ hoặc kỳ vọng mới ở 1f. Các đối chứng giữ nguyên: REST rác, hai ca biên parser, schema đỏ chặt hơn mà vẫn hợp lệ.
 3. **K2.** Hai ca hiện có ở biên parser (dấu job sâu, `started_at`/`completed_at` sâu) vẫn đạt. Thêm một ca: trường KHÔNG dùng của `rest/run.json` sâu hơn giới hạn parser đo trên chính nền (tìm nhị phân như `quet_bien`) ⇒ rc 1, biên nhận không xanh hợp schema, `ly_do` nêu `rest/run.json`.
 4. **K4 bên thu.** Ca âm: một bản ghi `jobs` có `run_id` = lượt + 1 ⇒ rc 1, không xanh. Ca âm: `run_id` vắng ⇒ không xanh. Ba ca dương hiện có (lượt khoẻ, chạy lại job thu, chạy lại một mảnh) vẫn xanh, và `tieu_dung` v2 trên đầu vào của ca cho tập vi phạm rỗng.
-5. **Hồi quy.** Mọi ca hiện có của wp1460 đạt. Dựng A/B base/head trong MỘT lệnh; mọi chênh lệch số ca phải giải thích được bằng ca thêm hoặc bỏ có tên.
+5. **Hồi quy.** Dựng A/B base/head trong MỘT lệnh và so theo TÊN.
+   - Mọi ca hiện có của wp1460 vẫn có mặt và đạt.
+   - Riêng ba ca của danh sách đóng 1f đạt theo KỲ VỌNG MỚI. Đột biến đổi neo ở 1f vẫn phải GIẾT.
+   - Mọi chênh lệch khác phải giải thích được bằng một ca thêm hoặc bỏ, có tên.
+   - Không so tổng.
 6. **Đột biến riêng cho MỖI chốt mới.** Chạy trên BẢN SAO tạm, tên tệp riêng, tắt bytecode; phân hạng bằng lớp ngoại lệ riêng của ca đích, neo tên ca; chết vì lỗi vô can ⇒ tín dụng giả. Tối thiểu:
-   - (i) bỏ lần kiểm schema cuối trước khi ghi;
+   - (i) bỏ lần kiểm schema cuối trước khi ghi (phải chết ở 2(b) và 2(e));
    - (ii) ghi trực tiếp, không qua tệp tạm + `os.replace`;
    - (iii) bỏ bước xoá `ra` ở 1d;
    - (iv) xoá `ra` cả khi lỗi đối số;
    - (v) trả 0 khi biên nhận đã ghi là `ok: false`;
    - (vi) bắt chung `Exception` quanh bước chính và trả 0 hoặc 1 mà không ghi biên nhận;
    - (vii) bộ kiểm không nạp được mà vẫn ghi;
-   - (viii) bỏ X1 `run_id`;
-   - (ix) X1 chấp nhận `run_id` kiểu `float` bằng giá trị;
-   - (x) `_khung_du` dùng lại `strftime`.
+   - (viii) lấy «`ra` có biên nhận xanh» làm bằng chứng cho mã 0 (phải chết ở 2(g) hoặc 2(h));
+   - (ix) bỏ X1 `run_id`;
+   - (x) X1 chấp nhận `run_id` kiểu `float` bằng giá trị;
+   - (xi) `_khung_du` dùng lại `strftime`.
 
    Mỗi đột biến neo đúng ca đích ở mục 2 hoặc mục 4.
    Đòi `n/n` giết thật.
@@ -439,5 +461,6 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp và �
 | revision | thay đổi |
 |---|---|
 | r1 | bản đầu |
+| r4 | Review lượt 3, ba finding. N1-04 (P2, lần thứ 7 của lớp): mã thoát chỉ giữ chiều thuận; sau khi đã ghi xong thì `ra` giữ biên nhận của chính lượt này; lỗi đối số không đụng `ra`; danh sách đóng 1f gồm ba ca cũ và một đột biến bị thay. N1-05 (P3): câu về B2 sửa theo U5/T2 thật. N1-06 (P3): câu về N2 trỏ bản r4 so byte, không còn bản ghi khoá. Nghiệm thu 2(d)–(i) và đột biến (i)–(xi) viết lại theo đó. |
 | r3 | Checkpoint §12 sau N1-03 (`v1-not-fully-specified`, lần thứ 6). Quyết định chủ kho (b): §1 chỉ còn tính chất an toàn (1a–1e); bỏ biên ngoài cùng, bản dự phòng và lời hứa «luôn có biên nhận». Nghiệm thu 2 và bảng đột biến viết lại. Hiện vật `hop_dong/` và khối «Lệnh kiểm» không đổi. |
 | r2 | Review lượt 1, 2 finding P2.<br>• `v1-not-fully-specified` (N1-01; lần tái diễn thứ 5): §1 viết lại — khoảng phủ 1a; lời hứa 1b không đặt điều kiện «hàm trả về»; danh sách loại trừ đóng 1c; bản dự phòng đủ trường bắt buộc, chỉ hai mốc `null` (1d); thứ tự gồm xoá `ra`, ghi nguyên tử, dự phòng, chẩn đoán làm hết sức (1e); lỗi đối số không xoá `ra` (1f). Nghiệm thu 2 viết lại thành 13 ca, mỗi ca chạy với `ra` vắng và với `ra` chứa sẵn biên nhận xanh; đột biến 15 mục.<br>• `mutant-oracles-non-discriminating` (N1-02): sửa ca 0999 cho khung đúng lịch; thêm ca `run_id` float và ca thiếu `run_id`; thêm hai đột biến đích, đã đo là bị giết; X1 dùng cùng miền kiểu. |

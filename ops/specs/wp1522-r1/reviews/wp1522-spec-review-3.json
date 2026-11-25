@@ -1,0 +1,536 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1522",
+  "generation": 3,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "launcher.py run",
+  "session_id": null,
+  "model_reviewer_identity": "Codex, OpenAI GPT-6 family. Exact served model and reasoning effort: KHONG_DO_DUOC inside this child run; transport is assignment-declared.",
+  "github_submitter_identity": null,
+  "reviewed_sha": "9298d8e2e1dd91bf8c23b1cde7c6022b84c43e6d",
+  "reviewed_file_sha256": "4a8033deb96d1df4597d1bf06ce8aefd4961600ddedf722830cb5bbf109648db",
+  "reviewed_tree": "5c19589b6cf492da22bd8bdbaff6a3d29ab30108",
+  "observed_base_sha": "437257a3cad68bdec7c646aa99ccd4f5fd4256da",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "blocked",
+  "findings": [
+    {
+      "id": "N1-04",
+      "class_slug": "v1-not-fully-specified",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "lines": [
+          31,
+          33,
+          36,
+          38,
+          40,
+          44,
+          91,
+          99,
+          100,
+          101,
+          102,
+          105
+        ],
+        "related_paths": [
+          ".claude/dev/ci_dang_ky_test.py:1811",
+          ".claude/dev/ci_dang_ky_test.py:2280",
+          ".claude/dev/ci_dang_ky_test.py:2302"
+        ]
+      },
+      "claim": "The safety-only choice is legitimate, but r3 still specifies incompatible outcomes. Unchanged legacy acceptance requires writing without successful validation, and the biconditional exit rule does not account for retained old receipts or errors after commit.",
+      "manifestations": [
+        {
+          "id": "N1-04a",
+          "detail": "Section 1a and acceptance 2(d) forbid a write when the validator cannot load. Sections 1e/5 and acceptance 2(g)/5 preserve the meaning and success of every wp1460 case. Existing wp1460-thu-am-khong-nap-duoc-schema-dong-bang requires rc=1 AND a non-null red receipt even with an unavailable schema. These requirements cannot both be retained."
+        },
+        {
+          "id": "N1-04b",
+          "detail": "Existing wp1460-thu-hinh-khong-xanh-bo-kiem-tran-de-quy-van-ghi, its subprocess wrapper, and f02r3-bien-nhan-khong-xanh-is-valid-khong-chot rely on writing after the active validator cannot validate the final red receipt. The injected self-referential schema continues returning false through _hop_le_du after timestamp repair. Revalidating at the final boundary must stop that write; otherwise the new safety gate is bypassed. Preserve genuine malformed-input recovery, but explicitly migrate this validator-failure test and mutant."
+        },
+        {
+          "id": "N1-04c",
+          "detail": "Section 1b says both green-write implies exit 0 and arbitrary escaping exceptions produce nonzero. A diagnostic exception after a successful atomic replacement leaves a valid current green receipt with rc=1. Current collector diagnostics execute after writing. The proposed atomic-write mechanism alone does not close this path, and acceptance omits a post-commit fault. The required disposition must be made explicit without restoring a fallback receipt."
+        },
+        {
+          "id": "N1-04d",
+          "detail": "Acceptance 2(e) literally equates rc=0 with the presence of a schema-valid green ra on every existing positive and negative case. But 2(f) requires rc=2 while preserving an old green ra. Section 1b correctly says this invocation; 2(e) must carry the same freshness condition."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+          "rc": 0,
+          "observed": "Both legacy validator-failure cases return True on baseline. At the actual write boundary: unavailable case has validator_available=false; recursive case has active_validator_accepts=false. Enforcing the stated final validation boundary stops both with FinalValidationStopped. Four controls, including malformed REST and both parser-boundary cases, pass before and after enforcement. This is instrumentation of existing tests, not a wp1522 implementation."
+        },
+        {
+          "command": "python3 -B /tmp/wp1522-review-r3/safety_model.py",
+          "rc": 0,
+          "observed": "34 subprocess scenarios. Atomic green write followed by OSError: rc=1, exists=true, valid=true, green=true for fresh and old output. Invalid args with old valid green output: rc=2, file preserved, literal 2(e) false. A direct-write mutant leaves 12 invalid bytes; the atomic control leaves ra absent."
+        },
+        {
+          "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+          "rc": 0,
+          "observed": "Actual current collector with only print replaced by an OSError raiser leaves a schema-valid green receipt and raises OSError after writing. Actual invalid-argument call returns 2 and retains a schema-valid old green receipt."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Revise SPEC 1a/1b/1e, section 5 and acceptance 2/5 together; implementation and affected legacy tests/mutants belong to .claude/dev/ci_dang_ky_test.py.",
+        "how": "Keep the owner's safety-only decision. Explicitly list legacy validator-failure expectations superseded by no-write-on-unvalidated-output; preserve ordinary malformed-input red receipts. Define the post-commit outcome and the scope of the reverse implication, preferably distinguishing normal completion from exceptional termination. State that success must concern a green receipt committed by this invocation. Do not restore an outer catch or fallback.",
+        "locking_test_and_mutant": "Run missing/unloadable schema, recursive validator and invalid final object with fresh and old-green ra; each must fail closed. A bypass-final-validation mutant must fail its named test. Keep malformed REST, both parser-boundary and stricter-but-valid red-schema controls. Inject a post-replace diagnostic fault and assert the chosen contract. Invalid args must preserve old bytes with rc=2; a mutant using old-green existence as evidence of current success must die.",
+        "what_the_fix_may_spawn": "A second unpinned validator, silently changing the old tests' meaning, swallowing programming errors, deleting old output on invalid args, or hiding a failed job behind a green artifact. Preserve the inherited class and recurrence count; r3 is the last authorized author revision, so this report grants no further patch attempt."
+      }
+    },
+    {
+      "id": "N1-05",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "lines": [
+          40,
+          41,
+          42
+        ],
+        "related_paths": [
+          "ops/specs/wp1494-r1/SPEC.md:133",
+          "ops/specs/wp1494-r1/SPEC.md:152",
+          "ops/specs/wp1494-r1/SPEC.md:156",
+          "ops/specs/wp1494-r1/SPEC.md:158"
+        ]
+      },
+      "claim": "The documented downstream result is wrong: B2 does not generally classify an absent receipt as khong_do_duoc, nor does C2 run on every such failure.",
+      "evidence": [
+        {
+          "command": "sed -n '129,158p' /tmp/wp1522-review-r3/wp1494-r1-SPEC.md",
+          "rc": 0,
+          "observed": "Frozen B2 r5 U5: zero matching artifacts => khong_dat with suffix _vang. T2 applies this as bien_nhan_vang. With T1/T7 readable and consistent, the completed-run aggregate is khong_dat; T6/C2 is not evaluated because T2 failed. Its current-frame aggregate can reach S2 stale_or_missing/khung_do."
+        },
+        {
+          "command": "python3 -B /tmp/wp1522-review-r3/cross_probes.py",
+          "rc": 0,
+          "observed": "Both pinned v1 and proposed v2 return C2 for a valid green receipt with failed collector/run REST conclusions. A red receipt or absent receipt passed directly to either oracle returns C1, not C2. Actual B2 implementation was unavailable; the missing-artifact conclusion is from its explicit U5/T2/aggregation contract."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC 1c, where N1 describes the consequence of its new no-receipt path.",
+        "how": "Describe the actual B2 distinction: a complete consistent REST listing proving absence yields khong_dat/bien_nhan_vang; unavailable or inconsistent measurement yields khong_do_duoc. State that C2 rejects a green receipt from a failed run when evaluation reaches it. Keep B2 v1 and the owner's no-fallback decision.",
+        "locking_test_and_mutant": "Use a completed failed collector with a complete empty matching-artifact set and stable T1/T7: expect khong_dat/bien_nhan_vang. Contrast an unreadable artifact listing: expect khong_do_duoc. A mutant mapping proven absence to khong_do_duoc must fail. This can be a read-only consumer-contract check; no B2 production edit is authorized here.",
+        "what_the_fix_may_spawn": "Do not change B2's frozen reducer, fabricate a missing receipt, or convert an unobservable failure into proven absence. The measured mismatch is documentation/contract precision; no false-fresh result was demonstrated."
+      }
+    },
+    {
+      "id": "N1-06",
+      "class_slug": "sibling-spec-version-drift",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "lines": [
+          90
+        ],
+        "related_paths": [
+          "ops/specs/wp1521-r1/SPEC.md:53",
+          "ops/specs/wp1521-r1/SPEC.md:58"
+        ]
+      },
+      "claim": "N1's ordering instruction targets a retired N2 design: it requires updating DA_DO_DOT_BIEN_1460, while the currently supplied wp1521 r3 explicitly removes that recorded key and selects mutations from the input diff.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1522-review-r3/cross_probes.py",
+          "rc": 0,
+          "observed": "N2 r3 at local origin/ops/wp1521-r1=2cf564ccc82963339c7602594b78c8083ad2dd4f, SPEC sha256=4215a8bf7b2bd373b8668b72fc0e0dc7be1284e5f248d4f1d430d773b8d225a5: retired key occurrences=0; explicit no-recorded-key replacement rule present. N1 still has one required reference."
+        },
+        {
+          "command": "GitHub fetch_file ops/specs/wp1521-r1/SPEC.md ref=ops/wp1521-r1 lines=1..14",
+          "rc": null,
+          "observed": "Read succeeded, blob c1dab5538b1c6e1feeb80ea50ce8a536953967e8. Header confirms r3 and says the previously approved r1 is not usable for granting a lease. r3 itself is not yet owner hash-approved; this review does not treat it as execution authority."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC section 5 and its dependency/ordering statement before freeze and lease.",
+        "how": "Identify the admitted N2 revision and describe its actual integration contract. If the current diff-based design lands first, require the complete oracle mutation run because ci_dang_ky_test.py changes, with both old and new THU_MUC_HOP_DONG directories included. Remove the instruction to populate a nonexistent recorded key.",
+        "locking_test_and_mutant": "On the admitted N2 baseline, change only the oracle or contract directory and verify selection runs the full mutation suite; a selector mutant omitting the changed input must fail. Do not add a cache field merely to satisfy stale prose.",
+        "what_the_fix_may_spawn": "Accidentally resurrecting the rejected self-referential cache, using draft N2 as execution authority, or omitting the old directory during migration. Lease ordering must remain exclusive for ci_dang_ky_test.py."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "N1-03",
+      "class_slug": "v1-not-fully-specified",
+      "prior_reviewed_sha": "5826c847a4a456ca698f5502399c61d995e50330",
+      "label": "VÁ SINH LỖI MỚI",
+      "evidence": "Compared r2 finding with r3 lines 26-44 and 93-119. The backup preparation/enriched-recovery requirements and old 2(h)/(i) are gone; ordinary construction failures may now escape with no receipt, consistent with owner option (b). However the replacement contract conflicts with preserved legacy validator-failure tests and leaves the post-commit biconditional inconsistent: independently measured N1-04. This label does not demand restoration of totality."
+    },
+    {
+      "id": "N1-01",
+      "class_slug": "v1-not-fully-specified",
+      "source": "Inherited finding carried in round-2 prior_findings_check",
+      "label": "VÁ SINH LỖI MỚI",
+      "evidence": "Backup metadata/reason conflicts are no longer operative. Fresh/stale atomic-write controls now have coherent pre-commit outcomes, but N1-04 remains in the same cause class."
+    },
+    {
+      "id": "N1-02",
+      "class_slug": "mutant-oracles-non-discriminating",
+      "source": "Inherited finding marked fixed in round 2",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": "Independent oracle_probes.py: removing the year floor and removing only exact-int run_id checking each produce rc=1, FIXTURE 489/490 and exactly one correctly named LECH. Traces isolate C9.khung and C4.rest_run_id; C3 rewrite isolates only C3.run_id. No revival of these two prior manifestations."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "label": "VÁ SINH LỖI MỚI",
+      "open_ids": [
+        "N1-04"
+      ],
+      "historical_occurrences_including_this_review": 7,
+      "history": [
+        "B1-04",
+        "F02",
+        "F02-R2",
+        "F02-R3",
+        "N1-01",
+        "N1-03",
+        "N1-04"
+      ],
+      "closure_ratio_from_round_2": "0/1 open prior classes closed; the accepted change of objective does not erase the history."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "ĐÃ VÁ THẬT",
+      "open_ids": [],
+      "scope": "Prior year-floor and integer-type fixture defects only. Future implementation mutations still require their own evidence."
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "N1-04"
+      ],
+      "manifestations": [
+        "N1-04a",
+        "N1-04b",
+        "N1-04c",
+        "N1-04d"
+      ],
+      "highest_open_severity": "P2",
+      "source": "wp1460 B1-04/F02/F02-R2/F02-R3; wp1522 rounds 1-3, current exact reviewed SHA",
+      "common_fix": "Reconcile the safety outcome table, retained regression expectations and invocation freshness in one spec revision authorized by the checkpoint.",
+      "closure_test": "Unavailable/recursive validator, ordinary malformed input, invalid arguments with old green output, and post-commit exception must have mutually consistent expectations and targeted mutants."
+    },
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [
+        "N1-05"
+      ],
+      "manifestations": [
+        "Proven absence misclassified",
+        "C2 evaluation claimed before prerequisites"
+      ],
+      "highest_open_severity": "P3",
+      "source": "Current N1 versus B2 r5 at 41692997a477b7deb880d6e8760a254568c42de1; preserves the established B1 consumer-contract class name.",
+      "common_fix": "Align the N1 consequence statement with B2 U5/T2/T6 and completed-run aggregation.",
+      "closure_test": "Contrast proven absence, unreadable listing, red receipt and failed-run green receipt."
+    },
+    {
+      "class_slug": "sibling-spec-version-drift",
+      "finding_ids": [
+        "N1-06"
+      ],
+      "manifestations": [
+        "Retired N2 recorded-key dependency"
+      ],
+      "highest_open_severity": "P3",
+      "source": "Current N1 section 5 versus current supplied N2 r3 source and GitHub blob.",
+      "common_fix": "Pin the admitted sibling design and state its actual full-run selection obligation.",
+      "closure_test": "Oracle/path migration selects full mutation work without creating a retired key."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "finding_ids": [
+        "N1-02"
+      ],
+      "manifestations": [
+        "Historical year-floor and exact-int mutants"
+      ],
+      "highest_open_severity": null,
+      "source": "Round 1, independently rechecked on current SHA",
+      "common_fix": "Already fixed for the prior manifestations.",
+      "closure_test": "Both formerly surviving mutants now fail exactly their designated fixture."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Final-validator failure versus retained regression",
+      "hypothesis": "Preserved tests still require unvalidated writes.",
+      "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+      "rc": 0,
+      "output": "Missing-schema and recursive-validator cases pass baseline, but both stop at the enforced final validation boundary; malformed-input controls remain passing.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-04"
+      ]
+    },
+    {
+      "direction": "Exception after atomic commit",
+      "hypothesis": "A successful green replacement does not imply process exit 0.",
+      "command": "python3 -B /tmp/wp1522-review-r3/safety_model.py",
+      "rc": 0,
+      "output": "post_commit, fresh and stale: rc=1, exists=true, valid=true, green=true. Real collector post-write print fault independently leaves a valid green receipt.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-04"
+      ]
+    },
+    {
+      "direction": "Invocation identity on invalid arguments",
+      "hypothesis": "An old green file falsifies the unqualified acceptance biconditional.",
+      "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+      "rc": 0,
+      "output": "invalid_args_preserve_stale: rc=2, exists=true, ok=true, schema_valid=true.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-04"
+      ]
+    },
+    {
+      "direction": "Partial-write and stale-output fault isolation",
+      "hypothesis": "Atomic replacement and pre-clear cannot be distinguished by practical tests.",
+      "command": "python3 -B /tmp/wp1522-review-r3/safety_model.py",
+      "rc": 0,
+      "output": "Atomic partial-write controls leave ra absent; direct-write mutants leave 12 invalid bytes. Omitted clear is detected with an old-green file. Tests require no production hook.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Calendar domain and exact cron boundaries",
+      "hypothesis": "The corrected oracle rejects the wrong date or computes the wrong Saturday.",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle_probes.py",
+      "rc": 0,
+      "output": "12 independent ordinal-calendar controls agree, including 0001, 0999, cross-year 1000, exact boundary, ±1 second, 2000/2024 leap days, invalid 1900 leap day and year 9999.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Fixture isolation within and across predicates",
+      "hypothesis": "New negative cases pass because a different predicate fires.",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle_probes.py",
+      "rc": 0,
+      "output": "Six traced cases: C3 case only C3.run_id; 0001/0999 only C9.khung; unequal/float/missing job run_id only C4.rest_run_id. Each shape remains valid.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Mutation-credit forgery and exception identity",
+      "hypothesis": "An unrelated exception can be counted as a kill.",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle_probes.py; python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+      "rc": 0,
+      "output": "KeyError, AssertionError and a same-name impostor each receive 0/250 oracle kills. Collector classifier rejects wrong class and wrong target. Deliberately raising the real trusted oracle sentinel can claim 250/250; hashes and trusted runner code remain the boundary, not cryptographic authentication.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Extra mutants outside the frozen runner",
+      "hypothesis": "Whole-predicate deletion hides subcondition weaknesses.",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle_probes.py",
+      "rc": 0,
+      "output": "Drop year floor: 489/490; drop exact-int: 489/490; drop C4.rest_run_id: 487/490; swapped expectation: one mismatch. Remove overflow handling: OverflowError rc=1, not a valid named mutation kill. Revert formatter to strftime: survives 490/490 because reachable frames are >=1000; a direct year-0999 formatter probe distinguishes it.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "B2 failure-state propagation",
+      "hypothesis": "N1's stated khong_do_duoc outcome matches B2.",
+      "command": "sed -n '129,158p' /tmp/wp1522-review-r3/wp1494-r1-SPEC.md; python3 -B /tmp/wp1522-review-r3/cross_probes.py",
+      "rc": 0,
+      "output": "Complete consistent missing-artifact evidence maps to khong_dat/bien_nhan_vang; C2 only rejects when T6 is reached.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-05"
+      ]
+    },
+    {
+      "direction": "Producer/oracle migration on healthy reruns",
+      "hypothesis": "Changing the oracle necessarily breaks the existing valid rerun scenarios.",
+      "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+      "rc": 0,
+      "output": "Oracle/path-only swap: 0/3 healthy scenarios pass because synthetic jobs omit run_id. Adding the real REST field to the test generator restores 3/3. This is an in-write-set harness migration, not an unsatisfiable requirement.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Sibling ordering against current source",
+      "hypothesis": "The required N2 cache key still exists.",
+      "command": "python3 -B /tmp/wp1522-review-r3/cross_probes.py; GitHub fetch_file for N2 r3",
+      "rc": 0,
+      "output": "N2 r3 has zero DA_DO_DOT_BIEN_1460 occurrences and explicitly replaces recorded keys with diff selection.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-06"
+      ]
+    },
+    {
+      "direction": "Live lease overlap",
+      "hypothesis": "Local refs are complete enough to assert the current holder.",
+      "command": "git ls-remote --heads origin",
+      "rc": 128,
+      "output": "Failed to connect to 127.0.0.1 port 42971. Local refs count is 348, but remote name-set equality cannot be established. ai-dang-giu was not run.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "measurement": "Frozen identity",
+      "result": "HEAD and SPEC SHA-256 exactly match assignment; tree=5c19589b6cf492da22bd8bdbaff6a3d29ab30108.",
+      "status": "passed"
+    },
+    {
+      "measurement": "Three artifact hashes",
+      "result": {
+        "schema": "844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46",
+        "fixture": "19dc7fd172be2d32c1aff8d0d2bdeb300df3fcb6ccb8d846bef3e15cd667e832",
+        "oracle": "da8e032fdef3429711a75796886b6e97d3ae60e8428e16efac0968db4cda9519",
+        "schema_equals_v1_bytes": true
+      },
+      "status": "passed"
+    },
+    {
+      "measurement": "Frozen runner",
+      "result": "490/490 fixtures; 250/250 mutations; 58 predicates; 192 schema relaxations; TONG: DAT; rc=0.",
+      "status": "passed"
+    },
+    {
+      "measurement": "Legacy compatibility probes",
+      "result": "Two incompatible validator-failure expectations; four malformed-input/schema controls remain passing. Three healthy reruns require the synthetic job generator to include run_id.",
+      "status": "passed",
+      "scope": "Adversarial measurements, not implementation acceptance."
+    },
+    {
+      "measurement": "B2 pins and historical schema",
+      "result": "All three GHIM-B1A hashes unchanged; 120/120 old shape expectations preserved. Standard matching-integer REST jobs pass v1 and v2. V2 rejects missing/foreign/float run_id while v1 remains intentionally weaker.",
+      "status": "passed",
+      "limit": "No exhaustive replay of historical real artifact payloads; no B2 implementation execution."
+    },
+    {
+      "measurement": "Write set and size",
+      "result": "All implementation/test changes map to ci_dang_ky_test.py; two artifacts are the other two delivery paths. Artifacts total 34+166=200 added lines, leaving 250 of the 450-line cap. Oracle delta alone adds 15 and deletes 4 lines; roughly 235 added lines remain for other changes. Three delivery files fit the six-file cap.",
+      "status": "passed",
+      "limit": "Line-budget feasibility is plausible but tight; actual implementation numstat is not_run. Spec branch metadata is not the product PR diff."
+    },
+    {
+      "measurement": "Existing mutation table applicability",
+      "result": "118 entries inspected; changing only oracle/path/hash/output assignments introduces no new missing anchors. One pre-existing intentionally absent anchor is the classifier self-test.",
+      "status": "passed",
+      "limit": "Not a full mutation replay; writer/schema/cron implementation changes still require rederiving affected mutants."
+    },
+    {
+      "measurement": "Current producer source",
+      "result": "Local HEAD and origin/master ci_dang_ky_test.py blob both be072cdeb61e33219df34be1d764efc42856a207; GitHub master fetch returned the same blob.",
+      "status": "passed",
+      "limit": "This verifies current file bytes, not every remote ref or lease."
+    },
+    {
+      "measurement": "Read-only snapshot",
+      "result": "Recorded beginning/end HEAD/tree, status, tracked diff and index diff are equal. Pre-existing ignored .codex/ remains listed.",
+      "status": "passed",
+      "limit": "No initial byte inventory of .codex internals; no claim about unobserved source repositories or every instant between snapshots. Sandbox is workspace-write, with repository read-only by reviewer discipline."
+    },
+    {
+      "measurement": "Budget/process",
+      "result": "This is authorized spec review generation 3 of r3, not an execution lease. Owner choice (b) is accepted. Seven inherited class occurrences are retained; no new revision, execution, push or review call is authorized by this result.",
+      "status": "passed",
+      "limit": "Global live Mission allowance/lease freshness not independently measured. The SPEC's later '4 times' sentence is stale history; the opening correctly records six before this round."
+    }
+  ],
+  "tests": [
+    {
+      "name": "Frozen Lệnh kiểm",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle.py ops/specs/wp1522-r1/hop_dong --dot-bien",
+      "rc": 0,
+      "output": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 250/250 · vi tu 58 · noi long schema 192\nTONG: DAT\n",
+      "stdout_sha256": "c541512886e62065ed780ed85d42486d983ce7b8242285cb1cc0d0c2e933e78d"
+    },
+    {
+      "name": "Independent oracle, mutation and calendar probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/oracle_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r3/oracle-probes.json"
+    },
+    {
+      "name": "Legacy collector, real injection seams and migration A/B",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/collector_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r3/collector-probes.json"
+    },
+    {
+      "name": "Safety outcome countermodels",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/safety_model.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r3/safety-model.json",
+      "scope": "34 subprocess scenarios against a spec model; not production acceptance."
+    },
+    {
+      "name": "Cross-packet semantics and frozen pins",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/cross_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r3/cross-probes.json"
+    },
+    {
+      "name": "Mutation anchor inventory",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r3/integration_inventory.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r3/integration-inventory.json"
+    },
+    {
+      "name": "Live remote reference inventory",
+      "status": "failed",
+      "command": "git ls-remote --heads origin",
+      "rc": 128,
+      "reason": "Infrastructure: configured proxy endpoint unreachable. No empty-holder claim inferred."
+    },
+    {
+      "name": "Lease scan",
+      "status": "not_run",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py",
+      "rc": null,
+      "reason": "Required prior remote/local reference-set equality was not established."
+    },
+    {
+      "name": "Implementation/release/environment gates",
+      "status": "not_run",
+      "command": "Full ci_dang_ky_test.py --chay; full collector mutation suite; Ruff pin/probe and bare lint; Windows; PR CI; LIVE",
+      "rc": null,
+      "reason": "Spec-only candidate; no wp1522 implementation or execution lease. No workflow dispatch or GitHub writes authorized. No not_run or skipped check counted as passing."
+    }
+  ],
+  "acceptance_feasibility": {
+    "3": "Both existing parser-boundary cases pass the measured stricter final gate. The additional unused deeply nested run field is feasible by generating raw bytes around the measured parser boundary; no nonrecursive parser or production hook is needed.",
+    "2a": "Real X2/X4/X5 seams independently raise RecursionError/KeyError/MemoryError without production hooks. To kill catch-and-return-1 in 6(vi), additionally assert the expected escaping exception/traceback: rc!=0 plus absent ra alone passes that mutant.",
+    "2b_2c_2d": "Invalid-object and validator-load injection plus partial temporary-file failure are feasible with module/library monkeypatches. Fresh and old-green controls kill validation bypass, direct writing and omitted pre-clear.",
+    "2e_2f_2g": "Blocked by N1-04: clarify invocation freshness and superseded validator-failure regression expectations.",
+    "4_6viii_6ix": "Normalize synthetic jobs with real run_id, then add unequal, absent and matching-float producer controls. The three valid reruns were restored by the generator-only change.",
+    "6x": "A strftime reversion is observationally equivalent over accepted frames >=1000 on this platform. Use a formatter dependency spy/direct formatting contract to lock the intended implementation, and report equivalent mutants honestly rather than counting an unrelated exception as a kill."
+  },
+  "runtime": {
+    "python": "3.13.18",
+    "jsonschema": "4.26.0",
+    "platform": "Linux x86_64, glibc 2.39",
+    "core_abbrev": 7,
+    "sandbox": "workspace-write; repository treated read-only; scratch under /tmp",
+    "model_effort_measurement": "KHONG_DO_DUOC; terminal launcher receipt is external to this child"
+  },
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": "Blocked under protocol 3.2 because the specification itself requires reconciliation; not a request to reinstate totality. Three findings, three open cause classes, one P2 and two P3; no approval/merge/land assurance. Used cross-review adapters in .agents/skills/cross-review/SKILL.md and .claude/skills/cross-review/SKILL.md. Owner option (b) is accepted from the explicit assignment and SPEC; fetched issue comment 7156987442 documents the checkpoint/options, not an independent owner approval receipt. REST job run_id is confirmed by GitHub's primary API documentation: https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28 . No sensitive path-escape payload authored. All reviewer scripts and outputs are under /tmp/wp1522-review-r3; no repository edits, commits, pushes, GitHub writes or workflow dispatches. This final author revision has exhausted the declared drafting budget; route the evidence to the existing checkpoint without automatic rework."
+}

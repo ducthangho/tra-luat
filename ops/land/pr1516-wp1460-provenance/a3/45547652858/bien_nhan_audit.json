@@ -1,0 +1,361 @@
+{
+ "cong_cu": {
+  "duong_dan": ".claude/dev/ci_dang_ky_test.py",
+  "sha256": "ad654fe145fb6defaf62a1a00cff99e864f583ea7c818383fa5b700557c850e7"
+ },
+ "dau_hieu_duong": {
+  "job_truoc_success": "10/10",
+  "manh": "8/8"
+ },
+ "dinh_danh_definition": {
+  "blob_oid": "e59b0767e112996bae6b944084c27a4882cc90e6",
+  "sha256": "16d12f5f8e46398343702411c231b6ac5028c272a447bacccd85e7b9aa12d7de",
+  "trang_thai": "measured",
+  "workflow_sha": "f5af7469c03e7fe421a3704c731f390842260304"
+ },
+ "job": [
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:11:59Z",
+   "dau_job": {
+    "digest": "sha256:d65c291d476a3641d217db86441b3ec9d356d572cebf7f7f32ff28bebb67b866",
+    "id": 14992056512,
+    "sha256_noi_dung": "c6e46bf78cf26e5f8b5cea4d0a7aeb65acb41da79eb0398a7e89b353925a91bf",
+    "ten": "dau-job-45547652858-1-dot-bien-du"
+   },
+   "job_id": 138981023372,
+   "ket_luan": "success",
+   "khoa": "dot-bien-du",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:03Z",
+   "ten": "dot-bien-du",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:03:15Z",
+   "dau_job": {
+    "digest": "sha256:9037aca410ebcd813a6b51ee34ac5eacb608e26bd684920f61a65248716e71ce",
+    "id": 14991951905,
+    "sha256_noi_dung": "ebb2b9079918f6997046c17422b1269d5d690874091d33d2964d90549977b0dc",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-0"
+   },
+   "job_id": 138981023849,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-0",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:02Z",
+   "ten": "dot-bien-manh (0)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:02:45Z",
+   "dau_job": {
+    "digest": "sha256:11f70f1f57c16ed6830056968ee398c630eb1111e0cb918c3b5be9b91045894b",
+    "id": 14992331318,
+    "sha256_noi_dung": "47cf16235bc6eaa8ec56a467b64a62ddde6778b907b55344b7f36dab9997b510",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-1"
+   },
+   "job_id": 138981023882,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-1",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:02Z",
+   "ten": "dot-bien-manh (1)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:01:02Z",
+   "dau_job": {
+    "digest": "sha256:d3fa6cb02f1e9c2a2cfc610482a021a86fb0d33fc83b01cd0eb29919ff9a69d1",
+    "id": 14992730545,
+    "sha256_noi_dung": "373844b1a0cf7b5c2f8feca8940f5b04b2d6f8ea3f337576fd4189d30207f33c",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-2"
+   },
+   "job_id": 138981024172,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-2",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:03Z",
+   "ten": "dot-bien-manh (2)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:02:52Z",
+   "dau_job": {
+    "digest": "sha256:4b9ef8b40db58933ba9f0a6843266e79bb75658fe444d31c044c0dd5a501c64a",
+    "id": 14991684431,
+    "sha256_noi_dung": "4db67776d069bdb9f1ae137267466b2e088701d852b00c9fd01e42f738b42ea8",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-3"
+   },
+   "job_id": 138981023673,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-3",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:03Z",
+   "ten": "dot-bien-manh (3)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:02:49Z",
+   "dau_job": {
+    "digest": "sha256:8f0fbdece0b8c1746b1e859d5ab10db6ee408c915a49397eef9439a841255eef",
+    "id": 14992970269,
+    "sha256_noi_dung": "d7149572e47bfe9d9555c4f92dbca72aee378daff5f7d8053b7fcfae9351898e",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-4"
+   },
+   "job_id": 138981023747,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-4",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:02Z",
+   "ten": "dot-bien-manh (4)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:01:48Z",
+   "dau_job": {
+    "digest": "sha256:2e26d3f8765984e4830f8f3a2fc94fbc0e33cc11251911f911d1eb696c096a61",
+    "id": 14991842596,
+    "sha256_noi_dung": "19a4ca7370e32fa7985032e0c2441827a48b4a6bc9589a6e3951958a27c907d1",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-5"
+   },
+   "job_id": 138981023892,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-5",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:02Z",
+   "ten": "dot-bien-manh (5)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:03:13Z",
+   "dau_job": {
+    "digest": "sha256:5799d7888d54560ee6ee5e2f2a6609f012153a01089af569d8e9726353d6f298",
+    "id": 14992625747,
+    "sha256_noi_dung": "1aa5bc5e2c9ae3172cf46496306d6875829a4d47967c0cff96a265aa36e51713",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-6"
+   },
+   "job_id": 138981023688,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-6",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:03Z",
+   "ten": "dot-bien-manh (6)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:00:44Z",
+   "dau_job": {
+    "digest": "sha256:ab1dade89b22a81dfc31c95e590ead1a8d0e3c3fd2cb4835765e297ecaedf74b",
+    "id": 14992855346,
+    "sha256_noi_dung": "602e497913f89fb01eb0629480ff3314225f6fe395972c1087f30ea9948f1eaa",
+    "ten": "dau-job-45547652858-1-dot-bien-manh-7"
+   },
+   "job_id": 138981023668,
+   "ket_luan": "success",
+   "khoa": "dot-bien-manh-7",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T04:34:02Z",
+   "ten": "dot-bien-manh (7)",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": "2026-11-25T05:03:34Z",
+   "dau_job": {
+    "digest": "sha256:ee998488e2a06390bd3fe063ab7aec67e9ec514bba1e2f1064c29c63e248501f",
+    "id": 14994160378,
+    "sha256_noi_dung": "3426efa8d10a6c5bb39cc78517f2b194ff1677bf5743858e3f9bac90f3e0c3e6",
+    "ten": "dau-job-45547652858-1-dot-bien-gop"
+   },
+   "job_id": 138991547477,
+   "ket_luan": "success",
+   "khoa": "dot-bien-gop",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T05:03:17Z",
+   "ten": "dot-bien-gop",
+   "tu_than": false
+  },
+  {
+   "checkout_sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "checkout_tree": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+   "completed_at": null,
+   "dau_job": {
+    "digest": "sha256:ac7036db03aedf85b940c00a03d6ffbcc5756ec9c1e0a3314497919a7f0af530",
+    "id": 14993722630,
+    "sha256_noi_dung": "e0bed9a90d526df9ef079a7e9fc254fda839f1d962877d8e333016c562a58f56",
+    "ten": "dau-job-45547652858-1-bien-nhan-audit"
+   },
+   "job_id": 138994763463,
+   "ket_luan": null,
+   "khoa": "bien-nhan-audit",
+   "run_attempt": 1,
+   "started_at": "2026-11-25T05:12:02Z",
+   "ten": "bien-nhan-audit",
+   "tu_than": true
+  }
+ ],
+ "kho": "ducthangho/tra-luat",
+ "kho_id": 1289195917,
+ "kiem_ke_job": {
+  "ky_vong": [
+   "bien-nhan-audit",
+   "dot-bien-du",
+   "dot-bien-gop",
+   "dot-bien-manh (0)",
+   "dot-bien-manh (1)",
+   "dot-bien-manh (2)",
+   "dot-bien-manh (3)",
+   "dot-bien-manh (4)",
+   "dot-bien-manh (5)",
+   "dot-bien-manh (6)",
+   "dot-bien-manh (7)"
+  ],
+  "thuc_co": [
+   "bien-nhan-audit",
+   "dot-bien-du",
+   "dot-bien-gop",
+   "dot-bien-manh (0)",
+   "dot-bien-manh (1)",
+   "dot-bien-manh (2)",
+   "dot-bien-manh (3)",
+   "dot-bien-manh (4)",
+   "dot-bien-manh (5)",
+   "dot-bien-manh (6)",
+   "dot-bien-manh (7)"
+  ]
+ },
+ "luot": {
+  "run_attempt": 1,
+  "run_id": 45547652858
+ },
+ "manh": [
+  {
+   "artifact": {
+    "digest": "sha256:8d43b1b6b965e86274070e26265575d067d1038af77994cd551ef52c71986437",
+    "id": 14994025460,
+    "sha256_noi_dung": "107dc6dbc14fc41e216890fd8ad6bf76fae52b3cc143f52128ca51d5dc4066bb",
+    "ten": "dot-bien-manh-45547652858-1-0"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-0",
+   "manh": 0
+  },
+  {
+   "artifact": {
+    "digest": "sha256:cda22370914c2aef3a26eacce05b10e50a7a9b79fffb74a4bc1ff65d08cbece3",
+    "id": 14994175235,
+    "sha256_noi_dung": "6ebd4f0fee63258272863af6d5bd93068ee168f5573159270d09324def874c2a",
+    "ten": "dot-bien-manh-45547652858-1-1"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-1",
+   "manh": 1
+  },
+  {
+   "artifact": {
+    "digest": "sha256:4e266b8ff0453eff6b495d49965aebcfdc117cf5d075b18d3e337c54e0a2b1ac",
+    "id": 14993094466,
+    "sha256_noi_dung": "4a39d0a7a1c5c64aac1868ca0305aa0b94747f00ba1dae04511ff9b8f4f4b4bd",
+    "ten": "dot-bien-manh-45547652858-1-2"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-2",
+   "manh": 2
+  },
+  {
+   "artifact": {
+    "digest": "sha256:cdf820fcaa7325e8d1be6379a24fc76edc06f4386102d28fe6a8e42d82404c75",
+    "id": 14992594332,
+    "sha256_noi_dung": "40508717b885367ec6e6da3e65f414f4df0ce3445774911117672aba6e250cfc",
+    "ten": "dot-bien-manh-45547652858-1-3"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-3",
+   "manh": 3
+  },
+  {
+   "artifact": {
+    "digest": "sha256:0fea14f3f45305a611534140ec4587c870a9f07805cd03caaa1ed8e6bb2cd51b",
+    "id": 14994120336,
+    "sha256_noi_dung": "0903eb09dc4b363860a616af71a5810b9f3ac051937e17299204747edf54f5ec",
+    "ten": "dot-bien-manh-45547652858-1-4"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-4",
+   "manh": 4
+  },
+  {
+   "artifact": {
+    "digest": "sha256:1c1f2915c5f3ad15b6b597e85ea6e8d1f851ba170ab4dcc49f7b3dd0c7b22477",
+    "id": 14994000371,
+    "sha256_noi_dung": "ca79ec29c9f93da3f3b45954ffe2172954c507d9361c9ae7dffee1f6f29f422b",
+    "ten": "dot-bien-manh-45547652858-1-5"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-5",
+   "manh": 5
+  },
+  {
+   "artifact": {
+    "digest": "sha256:fbdca5b6f8ac066e29439a268f21ea9a9f1ac3026f78efb685dc0fed18b8f681",
+    "id": 14993371815,
+    "sha256_noi_dung": "12d9097f16d4b1db05aebd7c090483689d284024dd9ccdaa8334bc0d7d68a59e",
+    "ten": "dot-bien-manh-45547652858-1-6"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-6",
+   "manh": 6
+  },
+  {
+   "artifact": {
+    "digest": "sha256:f5f31b05a8447badc2e9fe54842f482553eb833a60a8d4b0f6ac4a24a702b573",
+    "id": 14993501043,
+    "sha256_noi_dung": "9c783f432d91c0a29c40f39329705ecde72a36d67a9772a848742822b5622e4b",
+    "ten": "dot-bien-manh-45547652858-1-7"
+   },
+   "attempt_ben_san_xuat": 1,
+   "head": "f5af7469c03e7fe421a3704c731f390842260304",
+   "khoa_job": "dot-bien-manh-7",
+   "manh": 7
+  }
+ ],
+ "ok": true,
+ "schema": "bien_nhan_audit.v1",
+ "su_kien": {
+  "ref": "refs/heads/agent/wp1460-r9-g4-fable",
+  "run_created_at": "2026-11-25T04:33:59Z",
+  "sha": "f5af7469c03e7fe421a3704c731f390842260304",
+  "ten": "workflow_dispatch"
+ },
+ "tao_luc": "2026-11-25T05:12:29.107Z",
+ "workflow": {
+  "duong_dan": ".github/workflows/ci-dot-bien-du.yml",
+  "workflow_ref": "ducthangho/tra-luat/.github/workflows/ci-dot-bien-du.yml@refs/heads/agent/wp1460-r9-g4-fable"
+ }
+}

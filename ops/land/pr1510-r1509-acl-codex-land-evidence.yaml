@@ -38,12 +38,12 @@ post_merge_checks:
     nguon: [readback-run-45418608352.json, readback-jobs-45418608352.json, readback-check-runs-a03a28e-all.json]
 provenance_10_2_2:
   run: {trang_thai: measured, nguon: [readback-run-45418608259.json, readback-run-45418608352.json, readback-jobs-45418608259.json, readback-jobs-45418608352.json], ghi_chu: 'REST head_sha a03a28e, event push, conclusion success.'}
-  checkout: {trang_thai: measured, nguon: log-markers-a03a28e.txt, ghi_chu: 'log 41/41 job tai ve (0 rong, sha256 tung log ghi trong tep); 58 dong marker chua a03a28ef… (checkout/rev-parse).'}
+  checkout: {trang_thai: measured, nguon: [do_lai.py, do_lai.out.txt, logs/, merge-commit-a03a28e.txt, log-markers-a03a28e.txt], ghi_chu: 'log GOC 41/41 job luu nen o logs/*.log.gz (sha256 bytes khop 41/41 voi log-markers); do_lai.py: 41/41 job co lenh `git log -1 --format=%H` cua actions/checkout in DUNG a03a28e, attempt 1, runner_id khac 0. Tree 1c3dfd0b… va parents [5259239, 3ff6eda] la noi dung CO DINH cua commit OID a03a28e (merge-commit-a03a28e.txt, git log -1 --format=%H %T %P); log khong in tree/parents rieng. Cross-review #1518 luot 1 P2 checkout-khong-giu-du-receipt-job.'}
   workflow_definition:
     trang_thai: measured
-    nguon: [graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj2gw.json, graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj24A.json, readback-contents-launcher-windows.yml-a03a28e.json, readback-contents-ci.yml-a03a28e.json, git-rev-parse-blob-a03a28e.txt]
-    ghi_chu: 'WorkflowRun.file.path + checkSuite.commit.oid = a03a28e cho ca hai run; blob REST = git rev-parse: launcher-windows.yml 0a0f77ff…, ci.yml a1db88d9….'
-  gate_output: {trang_thai: measured, nguon: log-markers-a03a28e.txt, ghi_chu: 'marker duong: launcher DOT BIEN 596/596 (windows) va 786/786 (ubuntu); "ok": true / TONG: DAT; 0 dong exit code khac 0 tren 41 log.'}
+    nguon: [graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj2gw.json, graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj24A.json, readback-contents-launcher-windows.yml-a03a28e.json, readback-contents-ci.yml-a03a28e.json, git-rev-parse-blob-a03a28e.txt, workflow-bytes-sha256-a03a28e.txt]
+    ghi_chu: 'WorkflowRun.file.path + repositoryFileUrl ghim a03a28e cho ca hai run; blob REST = git rev-parse: launcher-windows.yml 0a0f77ff…, ci.yml a1db88d9…; SHA-256 bytes (git cat-file blob a03a28e:<path>): ci.yml d1201a76… (80203 byte), launcher-windows.yml 0895a8b2… (13180 byte). Cross-review #1518 luot 1 P2 workflow-definition-thieu-sha256-bytes.'
+  gate_output: {trang_thai: measured, nguon: [do_lai.py, do_lai.out.txt, logs/, readback-jobs-45418608259.json, readback-jobs-45418608352.json, readback-artifacts-45418608259.json, readback-artifacts-45418608352.json], ghi_chu: 'dem lai tu log GOC (khong tu ban trich): 41/41 job conclusion success, 0 dong `Process completed with exit code` khac 0, 158 dong marker duong (DOT BIEN n/n, "ok": true, TONG: DAT, "returncode": 0); launcher DOT BIEN 596/596 (windows) va 786/786 (ubuntu). Artifact: run ci.yml co 33 artifact, ID + digest sha256 trong readback-artifacts-45418608352.json; run launcher-windows.yml 0 artifact. Cross-review #1518 luot 1 P2 gate-output-khong-do-lai-duoc-so-loi.'}
 trang_thai_packet:
   merged: true
   landed: true

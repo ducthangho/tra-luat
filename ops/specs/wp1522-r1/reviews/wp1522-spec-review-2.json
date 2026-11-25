@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1522",
+  "generation": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "launcher.py run",
+  "session_id": null,
+  "model_reviewer_identity": "Codex, OpenAI GPT-6 family; exact served model and effort KHONG_DO_DUOC inside this run",
+  "github_submitter_identity": null,
+  "reviewed_sha": "5826c847a4a456ca698f5502399c61d995e50330",
+  "reviewed_file_sha256": "07f7cf25a535252bf2d1e61c453bc881099da2cb2ab2b916963b75e689c8c10b",
+  "reviewed_tree": "3b25a6f7ac8c9691562314a7492c3cda803e2fce",
+  "observed_master_sha": "437257a3cad68bdec7c646aa99ccd4f5fd4256da",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "blocked",
+  "findings": [
+    {
+      "id": "N1-03",
+      "class_slug": "v1-not-fully-specified",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "lines": [
+          27,
+          30,
+          32,
+          36,
+          43,
+          48,
+          52,
+          53,
+          54,
+          114
+        ]
+      },
+      "claim": "The r2 recovery state machine still contradicts its totality promise. Acceptance 2(h) requires an outcome forbidden by 1b, and the final diagnostic can itself escape the prescribed catch. The specification needs revision under protocol 3.2.",
+      "manifestations": [
+        {
+          "id": "N1-03a",
+          "detail": "1d permits backup preparation to fail; 1e(c) can then fail for an ordinary KeyError too. With no backup, 1e(e) and acceptance 2(h) require rc=1 and absent ra. Yet 1b explicitly requires ordinary programming exceptions outside 1c to produce a valid receipt, and restricts absence to failed I/O writes. The measured path makes zero write attempts and has no I/O, resource-exhaustion, schema-load or BaseException exemption. One persistently failing shared dependency suffices: _gio_utc is required by preparation, current main construction and enriched recovery."
+        },
+        {
+          "id": "N1-03b",
+          "detail": "1e(e) mandates try/except OSError around stderr, but writing to a closed text stream raises ValueError. After the no-backup/no-recovery path this escapes instead of returning 1. The 1c closed list does not exclude it. BrokenPipeError coverage in 2(i) fixes one manifestation only; no finite terminal disposition is specified for other ordinary diagnostic exceptions."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1522-review-r2/boundary_model.py",
+          "rc": 0,
+          "observed": "Executable model of r2, fresh and existing-green output: three_construction_failures_no_IO => trace 1d,1e(b),1e(c),1e(e); rc=1; write_attempts=0; receipt_exists=false; diagnostic_lines=1. three_failures_closed_stderr => escaped ValueError; no rc or receipt. These are specification countermodels, not an implemented wp1522 candidate."
+        },
+        {
+          "command": "python3 -B /tmp/wp1522-review-r2/extra_probes.py",
+          "rc": 0,
+          "observed": "Replacing only current _gio_utc with a KeyError raiser makes both required_backup_time and real_main_body raise KeyError. This corroborates a shared dependency capable of reaching the contradictory state; enriched recovery is specified to use that same timestamp source."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Revise 1b, the closed exclusions in 1c, terminal branches in 1d/1e, and acceptance 2(h)/(i), together. Keep the v1 schema unchanged.",
+        "how": "Define one finite outcome table for preparation/main/enriched/backup/cleanup/diagnostic failures. Either guarantee a usable reserve before promising a receipt, or explicitly permit rc=1 plus absent ra for the enumerated exhausted-construction path, not only I/O failure. Then remove the conflicting unconditional programming-error sentence. Make diagnostics best effort for ordinary Exception without swallowing BaseException. Record the exact failed phases so the narrower promise is measurable; do not replace the closed list with an undefined environment-failure exemption.",
+        "locking_test_and_mutant": "Use one persistently failing clock or encoding helper with fresh and old-green ra; assert the selected terminal state, rc and phase trace. Add closed-stderr ValueError beside BrokenPipeError. Mutants that skip the recovery/backup attempt, return success, retain an old green receipt, or let the final ordinary diagnostic exception escape must each fail its named assertion. Preserve the existing successful-preparation, successful-main and successful-recovery controls.",
+        "what_the_fix_may_spawn": "Avoid an infinite recovery loop, fabricated timestamps/tool hashes, leaking exception messages, deleting old output on invalid arguments, or a blanket catch of KeyboardInterrupt/SystemExit. Any weakened promise needs the corresponding spec revision and authority; do not silently redefine the acceptance baseline or reset the inherited recurrence count."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "N1-01",
+      "class_slug": "v1-not-fully-specified",
+      "prior_reviewed_sha": "2669618f7b2cc2af4fcc2c911c0b7c4e1c6fcaa1",
+      "label": "VÁ SINH LỖI MỚI",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1522-review-r2/boundary_model.py; python3 -B /tmp/wp1522-review-r2/extra_probes.py",
+        "rc": 0,
+        "observed": "Old manifestations improve: preparation failure followed by healthy main succeeds; enriched failure writes exact generic backup bytes; metadata validates; atomic partial-write controls leave no partial ra; old-green files are removed on write failure; BrokenPipeError is contained; post-green failure replaces it with valid red. Each filesystem scenario was run fresh and pre-existing. However r2 now explicitly mandates the no-I/O absent-file path that 1b forbids, and closed stderr still escapes as ValueError. See N1-03."
+      },
+      "scope_limit": "Measured r2 transition model and existing production seams, not a future implementation or full repository gate."
+    },
+    {
+      "id": "N1-02",
+      "class_slug": "mutant-oracles-non-discriminating",
+      "prior_reviewed_sha": "2669618f7b2cc2af4fcc2c911c0b7c4e1c6fcaa1",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1522-review-r2/mutant_cli_probe.py; python3 -B /tmp/wp1522-review-r2/oracle_probes.py",
+        "rc": 0,
+        "observed": "Both prior surviving mutants now exit 1 with 489/490 and exactly one named LECH: removing the year floor fails luat-C9-khung-nam-0999-khong-bieu-dien; removing only the exact-int conjunct fails luat-C4-rest-job-run-id-float-bang-gia-tri. Correct 0999 frame is 0999-11-16T19:17:00Z. Predicate traces isolate C9.khung and C4.rest_run_id; missing-ID control is also present. C3 rewrite fails only C3.run_id."
+      },
+      "scope_limit": "Closes the two round-1 fixture/oracle manifestations. Future producer X1 implementation and its float mutant still require execution evidence."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "label": "VÁ SINH LỖI MỚI",
+      "open_ids": [
+        "N1-03"
+      ],
+      "historical_occurrences_including_this_review": 6
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "ĐÃ VÁ THẬT",
+      "open_ids": []
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "N1-03"
+      ],
+      "manifestations": [
+        "N1-03a",
+        "N1-03b"
+      ],
+      "highest_open_severity": "P2",
+      "sources": [
+        "B1-04",
+        "F02",
+        "F02-R2",
+        "F02-R3",
+        "N1-01@2669618f7b2cc2af4fcc2c911c0b7c4e1c6fcaa1",
+        "N1-03@5826c847a4a456ca698f5502399c61d995e50330"
+      ],
+      "common_fix": "Make the terminal-state promise and its complete failure transition table agree.",
+      "closure_test": "Every covered phase combination must satisfy one allowed rc/file-state outcome, including persistent ordinary shared-dependency and diagnostic failures.",
+      "unmeasured": "Production implementation is absent; future gates, CI and Windows evidence remain outstanding."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "finding_ids": [
+        "N1-02"
+      ],
+      "manifestations": [
+        "N1-02a",
+        "N1-02b"
+      ],
+      "highest_open_severity": null,
+      "sources": [
+        "N1-02@2669618f7b2cc2af4fcc2c911c0b7c4e1c6fcaa1",
+        "independent r2 mutation measurements@5826c847a4a456ca698f5502399c61d995e50330"
+      ],
+      "common_fix": "Otherwise-correct 0999 frame plus equal-value float and missing-ID fixtures.",
+      "closure_test": "Both separately removed guards fail exactly their intended named fixture; verified."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Frozen identity",
+      "hypothesis": "Candidate or artifact bytes drifted.",
+      "command": "git rev-parse HEAD HEAD^{tree}; git show <reviewed_sha>:<path>; hashlib.sha256 on SPEC, both artifacts and fenced bytes",
+      "real_output": "Exact assigned head/tree; all four SHA-256 values match; working bytes match frozen blobs; schema byte-equals wp1460.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Complete frozen runner",
+      "hypothesis": "Published counts are not reproducible.",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_v2.py ops/specs/wp1522-r1/hop_dong --dot-bien",
+      "real_output": "rc=0; 490/490; 250/250; 58 predicates; 192 schema mutations; TONG: DAT.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Calendar semantics",
+      "hypothesis": "Overflow, year floor or cron/leap boundary is wrong.",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_probes.py",
+      "real_output": "11/11 independent backward-calendar comparisons match, covering 0001, 0999, 1000, exact boundary, one second before, leap dates and 9999; 1900-02-29 rejected. Year-floor mutant now fails its single named case.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "REST identity and fixture isolation",
+      "hypothesis": "C3 rewrite or new C4 cases pass because another predicate fires.",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_probes.py; python3 -B /tmp/wp1522-review-r2/cross_packet_probes.py",
+      "real_output": "C3 case fails only C3.run_id. All three new job-ID cases fail only C4.rest_run_id. Matching int passes; missing/string/float/foreign ID return C4 in v2.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Recovery closure",
+      "hypothesis": "No-reserve recovery can violate the totality promise.",
+      "command": "python3 -B /tmp/wp1522-review-r2/boundary_model.py; python3 -B /tmp/wp1522-review-r2/extra_probes.py",
+      "real_output": "No-I/O construction failures => absent file with rc=1; closed stderr => ValueError escapes. Real shared clock dependency raises in required backup-time expression and current main body. N1-03.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Prior filesystem and metadata counterexamples",
+      "hypothesis": "Old green/partial output or incomplete backup remains allowed.",
+      "command": "python3 -B /tmp/wp1522-review-r2/boundary_model.py",
+      "real_output": "Fresh/existing controls: atomic partial writes never expose partial ra; cleanup removes old green; post-write exception replaces green with valid red; backup equality and required metadata controls pass in the r2 model. Actual filesystem races/special paths are not certified.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Kill-signal authenticity",
+      "hypothesis": "Unrelated failures can obtain mutation credit.",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_probes.py; python3 -B /tmp/wp1522-review-r2/extra_probes.py",
+      "real_output": "Oracle ordinary AssertionError and foreign same-named class receive 0/58. Real runner LechDauTien injected by replacing trusted chay receives 58/58 without any target assertion. Collector classifier rejects foreign identity, subclass and wrong target; accepts exact class+target. No data-only forge demonstrated; arbitrary runner-code rewriting is outside these controls.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": "Production injection and K2",
+      "hypothesis": "Tests require production hooks or parser refusal loses the receipt.",
+      "command": "python3 -B /tmp/wp1522-review-r2/collector_probes.py",
+      "real_output": "Existing single-function seams reach X2 RecursionError, X4 KeyError and X5 MemoryError. Measured array depth boundary=9998; deeper unused run field yields rc=1, red receipt and reason naming rest/run.json.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Legacy integration and catch masking",
+      "hypothesis": "The specified integration cannot be completed within the declared test file.",
+      "command": "python3 -B /tmp/wp1522-review-r2/collector_probes.py; python3 -B /tmp/wp1522-review-r2/guard_interaction_probe.py",
+      "real_output": "All three healthy/rerun synthetic controls fail consumer v2 until REST jobs gain run_id; then all pass. Three old cron mutant anchors require re-derivation. Removing narrow parser/validator catches can pass three old target assertions under a generic fallback model. Strengthening named reasons/targets is necessary within the existing test file and is already required by regression/mutation acceptance.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "B2 compatibility and historical receipts",
+      "hypothesis": "Keeping consumer v1 makes ordinary new producer output incompatible.",
+      "command": "python3 -B /tmp/wp1522-review-r2/cross_packet_probes.py; read B2 GHIM-B1A",
+      "real_output": "Old pins unchanged; 480/480 old checks pass v2 with API-conformant synthetic jobs and C3 isolation. Both historical canary receipts remain schema-valid; all 11 jobs in each have matching run_id. v1 remains weaker on inconsistent REST. Full historical replay lacks downloaded artifact payloads.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Formatter dependency",
+      "hypothesis": "strftime mutant is killed by ordinary admitted dates.",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_cli_probe.py; python3 -B /tmp/wp1522-review-r2/collector_probes.py",
+      "real_output": "strftime mutant survives 490/490; explicit format equals strftime for all 9000 admitted years on this glibc. Requirement 6(xv) needs a dependency/structural probe, e.g. a datetime spy rejecting strftime, not a false behavioral kill claim.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Write set, sizing and sibling ordering",
+      "hypothesis": "Acceptance needs an unauthorized delivery path or unsafe overlap.",
+      "command": "git diff --numstat origin/master HEAD; read write set, Mission r96 and frozen sibling refs",
+      "real_output": "Delivery maps to the three declared files. Artifacts are 200 lines, leaving 250 additions; oracle replacement is +15/-4. Feasible but tight, not certified before implementation. wp1521 r1 key includes oracle hash; cached ref now has an unapproved r2 using doc_diff instead, so final installed revision must be reconciled before lease. Serialization remains required.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": "Live lease coverage",
+      "hypothesis": "Local refs omit an active overlapping lease.",
+      "command": "git ls-remote --heads origin; git for-each-ref refs/remotes/origin; GitHub GET git/ref/heads/master",
+      "real_output": "ls-remote rc=128: proxy 127.0.0.1:42971 unreachable. Local name count=347; full remote/local name-set equality unavailable. GitHub read-only API confirms master 437257a3cad68bdec7c646aa99ccd4f5fd4256da. ai-dang-giu not run because its precondition failed.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "measure": "Frozen SHA-256",
+      "status": "passed",
+      "rc": 0,
+      "command": "hashlib.sha256 of frozen/current blobs and fenced oracle bytes",
+      "value": {
+        "SPEC": "07f7cf25a535252bf2d1e61c453bc881099da2cb2ab2b916963b75e689c8c10b",
+        "schema": "844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46",
+        "fixture": "19dc7fd172be2d32c1aff8d0d2bdeb300df3fcb6ccb8d846bef3e15cd667e832",
+        "oracle": "da8e032fdef3429711a75796886b6e97d3ae60e8428e16efac0968db4cda9519"
+      }
+    },
+    {
+      "measure": "Full runner",
+      "status": "passed",
+      "rc": 0,
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_v2.py ops/specs/wp1522-r1/hop_dong --dot-bien",
+      "value": {
+        "seconds": 220.98325226399993,
+        "stdout": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 250/250 · vi tu 58 · noi long schema 192\nTONG: DAT\n",
+        "stderr": ""
+      }
+    },
+    {
+      "measure": "Environment",
+      "status": "passed",
+      "rc": 0,
+      "command": "Python sys.version/platform/importlib.metadata; git config --get core.abbrev",
+      "value": "Linux x86_64, glibc 2.39, Python 3.13.18, jsonschema 4.26.0, core.abbrev=7. workspace-write sandbox; approval never. Repository read-only is reviewer discipline, not an OS read-only mount."
+    },
+    {
+      "measure": "Size",
+      "status": "passed",
+      "rc": 0,
+      "command": "git diff --numstat origin/master HEAD; count artifact LF lines",
+      "value": "Draft: SPEC +464, schema +34, fixture +166. SPEC excluded from delivery. Correct r2 artifact subtotal=200, not prompt historical 198. Remaining delivery allowance=250 added lines; no implemented diff yet."
+    },
+    {
+      "measure": "Class convergence",
+      "status": "failed",
+      "rc": null,
+      "command": "Independent prior-finding and whole-candidate scan",
+      "value": "Open classes=1; findings=1; manifestations=2; highest P2. Prior classes closed=1/2=50%; new classes=0. Historical v1-not-fully-specified occurrence count=6. This is not a <50% transition and does not erase the separate recurrence checkpoint."
+    },
+    {
+      "measure": "Authority and budget",
+      "status": "not_measured",
+      "rc": null,
+      "command": "Read SPEC process section, protocol 3.2/7/8/12, Mission r96 per_new_packet",
+      "value": "Spec review only, revision 2/generation 2 as assigned; no execution lease claimed. Mission allowance: 5 spec-author calls, 6 spec-review calls, 3 executor attempts, 3 source reviews, 3 Ubuntu runs, 1 M9, 2 connector, 1 rerun, 0 Windows CI. Actual remaining allowance and live leases are not established. Packet windows requirement needs exact-H waiver or authorized native evidence."
+    },
+    {
+      "measure": "Read-only endpoint snapshot",
+      "status": "passed",
+      "rc": 0,
+      "command": "Repeat snapshot-before.json commands; compare snapshot-after.json",
+      "value": "HEAD/tree, tracked diff, index diff, untracked/ignored inventories match. No repository edits, commits, pushes, GitHub writes, dispatches or LIVE calls. Endpoint equality is not proof of every historical filesystem event."
+    }
+  ],
+  "tests": [
+    {
+      "name": "Frozen runner",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_v2.py ops/specs/wp1522-r1/hop_dong --dot-bien",
+      "rc": 0,
+      "positive_evidence": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 250/250 · vi tu 58 · noi long schema 192\nTONG: DAT\n",
+      "artifact": "/tmp/wp1522-review-r2/oracle-result.json"
+    },
+    {
+      "name": "Independent probes",
+      "status": "passed",
+      "command": "Run oracle_probes.py, collector_probes.py, cross_packet_probes.py, guard_interaction_probe.py, boundary_model.py and extra_probes.py separately with python3 -B under /tmp/wp1522-review-r2",
+      "rc": 0,
+      "positive_evidence": "Each harness completed; raw outputs and controls retained. Harness success means measurement completed, not that every candidate property passed."
+    },
+    {
+      "name": "External mutant: remove_overflow",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_remove_overflow.py /tmp/claude-0/-home-user-tra-luat/2bb32969-9e23-5188-8bfd-2464d2a75ca4/scratchpad/rv1522/wp1522-clone/ops/specs/wp1522-r1/hop_dong",
+      "rc": 1,
+      "classification": "ERROR_NOT_CREDITED_AS_KILL",
+      "observed": "OverflowError: date value out of range"
+    },
+    {
+      "name": "External mutant: strftime",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_strftime.py /tmp/claude-0/-home-user-tra-luat/2bb32969-9e23-5188-8bfd-2464d2a75ca4/scratchpad/rv1522/wp1522-clone/ops/specs/wp1522-r1/hop_dong",
+      "rc": 0,
+      "classification": "SURVIVED",
+      "observed": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nTONG: DAT\n"
+    },
+    {
+      "name": "External mutant: drop_rest_run_id",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_drop_rest_run_id.py /tmp/claude-0/-home-user-tra-luat/2bb32969-9e23-5188-8bfd-2464d2a75ca4/scratchpad/rv1522/wp1522-clone/ops/specs/wp1522-r1/hop_dong",
+      "rc": 1,
+      "classification": "KILLED_BY_NAMED_MISMATCH",
+      "observed": "FIXTURE: 487/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C4-rest-job-cua-luot-khac: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nLECH: NGU NGHIA luat-C4-rest-job-run-id-float-bang-gia-tri: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nLECH: NGU NGHIA luat-C4-rest-job-thieu-run-id: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nTONG: DO\n"
+    },
+    {
+      "name": "External mutant: drop_year_floor",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_drop_year_floor.py /tmp/claude-0/-home-user-tra-luat/2bb32969-9e23-5188-8bfd-2464d2a75ca4/scratchpad/rv1522/wp1522-clone/ops/specs/wp1522-r1/hop_dong",
+      "rc": 1,
+      "classification": "KILLED_BY_NAMED_MISMATCH",
+      "observed": "FIXTURE: 489/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C9-khung-nam-0999-khong-bieu-dien: vi pham [] canh bao [] moc 0999-11-16T19:17:00Z\nTONG: DO\n"
+    },
+    {
+      "name": "External mutant: drop_run_id_type",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r2/mutant_drop_run_id_type.py /tmp/claude-0/-home-user-tra-luat/2bb32969-9e23-5188-8bfd-2464d2a75ca4/scratchpad/rv1522/wp1522-clone/ops/specs/wp1522-r1/hop_dong",
+      "rc": 1,
+      "classification": "KILLED_BY_NAMED_MISMATCH",
+      "observed": "FIXTURE: 489/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C4-rest-job-run-id-float-bang-gia-tri: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nTONG: DO\n"
+    },
+    {
+      "name": "External mutant: swapped_expectation",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r2/oracle_v2.py /tmp/wp1522-review-r2/swapped_fixture",
+      "rc": 1,
+      "classification": "KILLED_BY_NAMED_MISMATCH",
+      "observed": "FIXTURE: 489/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C4-rest-job-cua-luot-khac: vi pham ['C4'] canh bao [] moc 2026-11-21T09:59:50Z\nTONG: DO\n"
+    },
+    {
+      "name": "Unrun implementation/environment gates",
+      "status": "not_run",
+      "command": "Full ci_dang_ky_test.py --chay; Ruff pin/probe and lint; CI PR; Windows; live ai-dang-giu; full historical artifact replay",
+      "rc": null,
+      "reason": "Spec-only review; implementation absent. No lease-scan precondition, authorized Windows run or complete historical artifact payloads. Nothing unrun/skipped is counted as passed."
+    }
+  ],
+  "acceptance_feasibility": {
+    "2a_2b_2c": "Measured existing seams job_ky_vong_du, _hop_le_du and _doc_json_du. Outer-catch-removal mutant must fail all three named subprocess cases on intended behavior.",
+    "2d_2e_2f": "Harmless exception sentinel; stateful recovery-validation failure after valid backup; wrapper throwing after real green write. Expected mutants: repr leakage, changed backup bytes, omitted red replacement.",
+    "2g_2h": "One-shot preparation helper failure leaves main normal; persistent shared-helper failure reaches exhausted construction. Existing seams suffice, but 2(h) cannot satisfy current 1b simultaneously: N1-03.",
+    "2i_2j": "Writer/library-method injection can fail before or partway through temporary writes with fresh/existing output. Direct-write, omitted cleanup and omitted diagnostic catch need separate targets. Add closed-stderr ValueError.",
+    "2k_2l_2m": "KeyboardInterrupt propagation, invalid-argument rc=2 with old file preservation, and schema-required metadata checks are feasible without production hooks.",
+    "mutation_caveats": "Backup-validation and ordering mutants need call-order/dependency observations. Merely wrapping doi_so_thu while retaining its inner ValueError handler can be equivalent; define a discriminating exact mutant or structural assertion. strftime needs a dependency spy. Producer float mutant needs its own matching-float negative control. No future acceptance gate is claimed as run."
+  },
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": "Blocked is the protocol 3.2 outcome for a deficient specification; the frozen oracle itself passes. No approval/land assurance is issued. Review used .agents/skills/cross-review/SKILL.md and .claude/skills/cross-review/SKILL.md. Provider codex follows the requested protocol schema (runtime family openai); transport is assignment-declared, with terminal launcher receipt/model evidence unavailable inside the child. Session_id remains null as requested. Scope is the assigned frozen candidate; observed origin/master bytes match current GitHub master. Sibling ref movement is not substituted for authority: wp1521 r1=15f5437c30a66620305f14492a287ea688a9f25b; cached r2=5e8731f8b1af097d8ba5d7fc05f55e79de265dd9. Legacy harness integration failures above are executor obligations already covered by regression/mutation acceptance, not extra spec findings. B2 v1 remains intentionally weaker; no universal compatibility claim for arbitrary inconsistent historical REST snapshots. Real workflow-job responses contain run_id, corroborated by committed canaries and [GitHub workflow-job API](https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28). No sensitive path-escape payload was authored. Scratch evidence and hashes are under /tmp/wp1522-review-r2/evidence-manifest.json."
+}

@@ -83,3 +83,5 @@ revision_ly_do: 'Cross-review luot 5 (E1-E3 P1, E4-E6 P2); chu kho nang tran len
 review_calls_limit: 7
 review_calls_used_truoc: 5
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r7-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 6 (F1-F6); revision r7 (ops/specs/llm-khoan-docx-r7.md).'

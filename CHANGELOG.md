@@ -20,6 +20,9 @@
   sau ngắt section và .docx Strict ⇒ chặn có chẩn đoán.
 - r6 (sau cross-review lượt 5, đặc tả `ops/specs/llm-khoan-docx-r6.md`): tiêu đề ranh giới phải duy nhất và không kết `:`;
   gạch toggle đếm theo tầng (nhiều tầng ⇒ chặn); hàng/ô bảng sửa đổi ⇒ chặn, `tcPr` hợp lệ; cấp danh sách ngoài 0–8 ⇒ chặn.
+- r7 (sau cross-review lượt 6, đặc tả `ops/specs/llm-khoan-docx-r7.md`): tệp `.docx` phải chỉ chứa ĐÚNG Điều cần đọc (bỏ mọi
+  luật đoán điểm kết thúc Điều); điểm phải đánh số tự động (điểm gõ tay ⇒ chặn); ID danh sách chuẩn hoá số; số thứ tự trên 999
+  ⇒ chặn; `ptab` đọc được; mốc phạm vi move phải cân.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

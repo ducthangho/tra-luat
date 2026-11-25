@@ -388,20 +388,18 @@ biến môi trường của environment.
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Đường `.docx` (#1525):** `tl llm-khai-niem --tep <tệp.docx> --dieu N` đọc ranh giới khoản từ danh sách đánh số TỰ
-  ĐỘNG của Word/Google Doc (`w:numPr`): đoạn cấp khoản (`%N.`/`%N)`, định dạng `decimal`) mở khoản, đoạn cấp con cùng
-  danh sách và điểm gõ tay (`a)`, `-`) nối vào khoản đang mở. Chữ gạch ngang (đơn/kép, trực tiếp hay theo style — gạch
-  theo style là thuộc tính bật/tắt: bật ở đúng một tầng ⇒ gạch; bật ở nhiều tầng ⇒ không giải được ⇒ chặn) và chữ đã xoá/đã
-  chuyển đi của dự thảo bị LỌC khỏi nguyên văn. Chặn (rc 2):
-  Điều KHÔNG có đánh số tự động (dùng `--tep` tệp văn bản), đoạn không số giữa các khoản, hai danh sách ở cấp khoản, số
-  khoản không liên tục từ 1 (danh sách chạy tiếp từ Điều trước), danh sách khoản còn tiếp SAU điểm cắt Điều, số gõ tay lẫn
-  số tự động, đoạn TRONG Điều đánh số qua style (đánh số qua style NGOÀI Điều vẫn được đếm), `lvlOverride` ngoài
-  `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/`styleLink`/đánh số lại sau ngắt section, định dạng
-  số ngoài `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, tiêu đề Điều ngoài `Điều N.` /
-  `Điều N. Giải thích từ ngữ`, đoạn `Điều X.` giữa Điều mà X không phải Điều kế tiếp, tiêu đề Điều kế tiếp không duy nhất
-  trong tài liệu hoặc kết bằng `:`/`;`, bảng/khối lạ (kể cả hàng/ô bảng sửa đổi bằng track changes trước Điều), cấp
-  danh sách ngoài 0–8, ngắt dòng mềm,
-  ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn (track changes gộp/
-  tách đoạn), `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
+  ĐỘNG của Word/Google Doc (`w:numPr`). **Tệp phải chỉ chứa ĐÚNG Điều cần đọc**: đoạn có nội dung đầu tiên là tiêu đề
+  `Điều N.` / `Điều N. Giải thích từ ngữ`, mọi đoạn sau thuộc Điều ấy (chép Điều sang một Google Doc/.docx riêng rồi tải
+  về). Đoạn cấp khoản (`%N.`/`%N)`, định dạng `decimal`) mở khoản; điểm phải là cấp con TỰ ĐỘNG cùng danh sách (điểm gõ
+  tay `a)`, `-` bị chặn). Chữ gạch ngang hiệu lực (đơn/kép, trực tiếp hay theo style; gạch theo style là bật/tắt — bật ở
+  một tầng ⇒ gạch, nhiều tầng ⇒ không giải được ⇒ chặn) và chữ đã xoá/đã chuyển đi bị LỌC khỏi nguyên văn. Chặn (rc 2):
+  nội dung trước tiêu đề hay thêm tiêu đề Điều/Chương/Mục/Phần trong tệp, Điều không có đánh số tự động (dùng `--tep`
+  tệp văn bản), đoạn không số sau khoản đầu, hai danh sách ở cấp khoản, số khoản không liên tục từ 1, số gõ tay lẫn số
+  tự động, đánh số qua style, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
+  `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, số thứ tự trên 999, định dạng số ngoài
+  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm,
+  ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
+  không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
   Word. Đường `<số hiệu>` (qua `tl extract`) vẫn là văn bản thô.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả

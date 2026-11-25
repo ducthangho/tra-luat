@@ -1763,6 +1763,8 @@ def n15_phan_tich_qua_han():   # phep phan tich CUOI cua pha danh gia vuot han, 
         ma, bc, nk = luot_wd(g)
     mong((S(bc), bc["sha_audit"], max(x["t"] for x in nk if re.search(DG, x["url"])) < 600), ((KDD, "het_ngan_sach_danh_gia"), None, True))
 khong("d99", "d99", "n15_phan_tich_qua_han", "n15_tinh_cuoi_qua_han")
+db("d99_bien", "d99", ">= c.han", "> c.han", "n15_tinh_cuoi_qua_han")       # giet boi dau vao 600,0 s cua ca dich
+db("d99_chi_bang", "d99", ">= c.han", "== c.han", "n15_tinh_cuoi_qua_han", "n15_phan_tich_qua_han")   # giet boi dau vao 600,5 s / 601 s
 
 @ca
 def n15_kep_timeout():
@@ -1770,19 +1772,33 @@ def n15_kep_timeout():
     mong([x["timeout"] for x in nk if re.search(r"/runs/21$", x["url"])], [30, 5.0])
 db("d100", "d100", "min(HAN_GOI, con)", "HAN_GOI", "n15_kep_timeout")
 
-@ca
-def n15_cho_qua_han():   # GET 500 khi con DUNG 1 s = thoi gian cho (bay gio + cho = han la da het): khong cho, khong thu lai, ham ngu khong duoc goi
-    g = nen_han(0, moc=599.0, ma_t7=500)
-    ma, bc, nk = luot_wd(g)
-    mong((g.ngu_nk, dem(nk, "GET", r"/runs/21$"), S(bc)), ([], 2, (KDD, "het_ngan_sach_danh_gia")))
-khong("d104", "d104", "n15_cho_qua_han")
-db("d104_bien", "d104", "cho >= c.han", "cho > c.han", "n15_cho_qua_han")
+def ca_cho(hau, nen, muon):
+    """Chot d104 (kiem truoc lan CHO thu lai) tai MOT dau vao: T7 cua B tra 500; quan sat (cac lan ngu, so GET D2 cua B, S)."""
+    def chay():
+        g = nen()
+        ma, bc, nk = luot_wd(g)
+        mong((g.ngu_nk, dem(nk, "GET", r"/runs/21$"), S(bc)), muon, hau)
+    ca(chay, "n15_cho_" + hau)
+
+KHONG_CHO = ([], 2, (KDD, "het_ngan_sach_danh_gia"))   # khong cho, khong thu lai, ham ngu khong duoc goi
+ca_cho("qua_han", lambda: nen_han(0, moc=599.5, ma_t7=500), KHONG_CHO)    # nghiem thu 15: GET 500 khi con 0,5 s (bay gio + cho = 600,5 QUA han)
+ca_cho("dung_han", lambda: nen_han(0, moc=599.0, ma_t7=500), KHONG_CHO)   # con DUNG 1 s = thoi gian cho (bay gio + cho = han la da het)
+ca_cho("con_han", lambda: nen_han(0, moc=598.5, ma_t7=500), ([1], 3, XANH))   # con 1,5 s: cho 1 s roi thu lai o 599,5 s, xong truoc han
+khong("d104", "d104", "n15_cho_qua_han", "n15_cho_dung_han")
+db("d104_bien", "d104", "cho >= c.han", "cho > c.han", "n15_cho_dung_han")
+db("d104_chi_bang", "d104", "cho >= c.han", "cho == c.han", "n15_cho_qua_han")   # RV3 Q01: chot chi chan DUNG han, cho qua khi QUA han
 
 @ca
 def n15_goi_dung_han():   # lan thu ke tiep (T7 cua B) den luot DUNG o han (con lai 0): khong gui
     ma, bc, nk = luot_wd(nen_han(0, moc=600.0))
     mong((dem(nk, "GET", r"/runs/21$"), S(bc)), (1, (KDD, "het_ngan_sach_danh_gia")))
 db("d105_bien", "d105", "con <= 0", "con < 0", "n15_goi_dung_han")
+
+@ca
+def n15_goi_qua_han():   # lan thu ke tiep (T7 cua B) den luot khi da QUA han 0,5 s (con lai AM): khong gui; con han: n15_kep_timeout
+    ma, bc, nk = luot_wd(nen_han(0, moc=600.5))
+    mong((dem(nk, "GET", r"/runs/21$"), S(bc)), (1, (KDD, "het_ngan_sach_danh_gia")))
+db("d105_chi_bang", "d105", "con <= 0", "con == 0", "n15_goi_qua_han")
 
 def nen_w8(can):
     """S `khung_do` can `canh_bao`, giao xong; W8 (GET Issue thu ba) bat dau khi HAN_GHI con 1 s; moi GET Issue can `can` giay."""
@@ -1792,23 +1808,31 @@ def nen_w8(can):
     g.nhay_json.append((lambda x: isinstance(x, dict) and set(x) == {"body", "state"} and dk(), 179.0))
     return g
 
-@ca
-def n15_han_cuoi_ghi():   # W8 thanh cong ve transport (xong o 179,5 s) nhung phep phan tich sau no vuot HAN_GHI => chi kiem luc hoan tat bat duoc
-    for nhay, ma_mong in ((True, 3), (False, 1)):
-        g, dk = nen_w8(0.5), dem_lan(5)   # than Issue duoc phan tich nam lan: W0, W2 (PATCH), W3, W7 (PATCH), W8
-        def boc(goc):
-            def f(byte):
-                x = goc(byte)
-                if isinstance(x, dict) and set(x) == {"body", "state"} and dk() and nhay:
-                    g.t = 180.0   # DUNG han (bang han la da het)
-                return x
-            return f
-        with thay_ten("_tho_json", boc):
-            ma, bc, nk = luot_n(g)
-        mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), [x["t"] for x in nk if x["pt"] == "GET" and re.search(ISS, x["url"])][-1]), (ma_mong, 2, 1, 179.0), f"nhay={nhay}")
-        mong((dem(luot_n(g, 1)[2], "POST"), nt_tren(g)["da_bao"]["loai"]), (0, "canh_bao"), "luot sau doc nhip tim co da_bao = su kien")
-khong("d106", "d106", "n15_han_cuoi_ghi")
-db("d106_bien", "d106", ">= c.han", "> c.han", "n15_han_cuoi_ghi")
+def ca_han_cuoi_ghi(ten, qua):
+    """W8 thanh cong ve transport (xong o 179,5 s) nhung phep phan tich sau no dua dong ho toi HAN_GHI + `qua` giay => chi kiem luc hoan tat
+    bat duoc (ma 3); doi chung khong nhay (con han) => ma 1."""
+    def chay():
+        for nhay, ma_mong in ((True, 3), (False, 1)):
+            g, dk = nen_w8(0.5), dem_lan(5)   # than Issue duoc phan tich nam lan: W0, W2 (PATCH), W3, W7 (PATCH), W8
+            def boc(goc):
+                def f(byte):
+                    x = goc(byte)
+                    if isinstance(x, dict) and set(x) == {"body", "state"} and dk() and nhay:
+                        g.t = 180.0   # DUNG han (bang han la da het)
+                        g.t += qua
+                    return x
+                return f
+            with thay_ten("_tho_json", boc):
+                ma, bc, nk = luot_n(g)
+            mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), [x["t"] for x in nk if x["pt"] == "GET" and re.search(ISS, x["url"])][-1]), (ma_mong, 2, 1, 179.0), f"nhay={nhay}")
+            mong((dem(luot_n(g, 1)[2], "POST"), nt_tren(g)["da_bao"]["loai"]), (0, "canh_bao"), "luot sau doc nhip tim co da_bao = su kien")
+    ca(chay, ten)
+
+ca_han_cuoi_ghi("n15_han_cuoi_ghi", 1.0)        # nghiem thu 15: phan tich W8 nhay QUA han (181 s)
+ca_han_cuoi_ghi("n15_han_cuoi_ghi_bien", 0.0)   # DUNG han (180 s)
+khong("d106", "d106", "n15_han_cuoi_ghi", "n15_han_cuoi_ghi_bien")
+db("d106_bien", "d106", ">= c.han", "> c.han", "n15_han_cuoi_ghi_bien")
+db("d106_chi_bang", "d106", ">= c.han", "== c.han", "n15_han_cuoi_ghi")   # RV3 Q02
 
 @ca
 def n15_han_cuoi_ghi_het_gio():   # W8 bat dau khi con 1 s, may chu can 2 s => timeout 1, W8 het gio => ma 3
@@ -1920,6 +1944,7 @@ def n15_w0_phan_tich_qua_han():   # TOAN BO W0 (ca phan tich va kiem mien nhip t
             ma, bc, nk = luot_wd(g)
         mong((bc["nhip_tim_truoc"]["ma"], dem(nk, "PATCH"), ma), muon, f"kiem mien nhip tim tieu {them} s")
 khong("f02_w0_tron_ven", "w0:tron_ven", "n15_w0_phan_tich_qua_han")
+db("w0_chi_bang", "w0:tron_ven", ">= c.han", "== c.han", "n15_w0_phan_tich_qua_han")   # giet boi dau vao 181 s (QUA han) cua ca dich
 
 @ca
 def n15_w0_bien():   # N09: W0 hoan tat DUNG o HAN_W0 (180 s) la da het (bang han la het): nhip tim khong duoc dung; quan sat o MA doc truoc, khong o ma thoat
@@ -1981,6 +2006,7 @@ ca_vong_doc(2, ("chua_xac_nhan:" + TMO, "dat", 1))                          # PA
 ca_vong_doc(3, (3, 1, "chua_xac_nhan", False, None))                        # N07: POST vuot 30 s => khong ack, su kien con cho
 khong("f02_vong_doc", "f02:vong_doc", "n15_vong_doc_qua_han", "n15_vong_doc_get_kho", "n15_vong_doc_patch", "n15_vong_doc_post")
 db("rv2_n01_vong_doc_bien", "f02:vong_doc", ">= het", "> het", "n15_vong_doc_bien")
+db("vong_doc_chi_bang", "f02:vong_doc", ">= het", "== het", "n15_vong_doc_qua_han", "n15_vong_doc_get_kho", "n15_vong_doc_patch", "n15_vong_doc_post")   # 20 s/lan doc: QUA han
 db("rv2_n08_vong_doc_mien_kho", "f02:vong_doc", ">= het", '>= het and urllib.parse.urlsplit(url).hostname == "api.github.com"', "n15_vong_doc_get_kho")
 db("f02_vong_doc_mien_patch", "f02:vong_doc", ">= het", '>= het and pt != "PATCH"', "n15_vong_doc_patch")
 db("rv2_n07_vong_doc_mien_post", "f02:vong_doc", ">= het", '>= het and pt != "POST"', "n15_vong_doc_post")
@@ -2014,12 +2040,15 @@ def phan_hoi_that(g, ds, ma, than, giay, k, chunked, loi):
     ds.append(n)
     return urllib.error.HTTPError("https://x.example/", ma, "X", r.headers, r) if loi else r
 
-HAN_30 = [float(i) for i in range(30, 0, -1)]   # thoi gian CON LAI ap len socket truoc tung lan doc nen cua mot lan thu 30 s, moi lan doc nen 1 s
-BA_KIEU = ((1, 1, False), (1, 1, True), (0, 4096, False))   # cham Content-Length · cham chunked (ca dong kich co khuc) · nhanh (doi chung)
+def con_lai(dau, giay):
+    """Thoi gian CON LAI ap len socket truoc tung lan doc nen cua mot lan thu `dau` giay, moi lan doc nen `giay` giay: dung khi con lai <= 0."""
+    return [dau - giay * i for i in range(-int(-dau // giay))]
+# cham Content-Length (lan doc nen thu 31 den DUNG han: con lai 0) · cham chunked (ca dong kich co khuc) · nhanh (doi chung) · 0,875 s/lan (lan thu 36 den khi da QUA han: con lai -0,625)
+BA_KIEU = ((1, 1, False), (1, 1, True), (0, 4096, False), (0.875, 1, False))
 
 def ca_nen(i, cham, nhanh, han, hau="", w0=0.0, ma_ep=None):
     """F02 tai MOT noi goi, qua lop doc co dem THAT: mot `HTTPResponse.read` chua nhieu lan doc nen 1 s. Han tuyet doi cua lan thu phai rang
-    buoc TUNG lan doc nen: `settimeout` nhan dung thoi gian con lai `han`, lan doc nen o han khong dien ra. Doi chung nhanh: than doc tron, luong goc dong."""
+    buoc TUNG lan doc nen: `settimeout` nhan dung thoi gian con lai (`han` = thoi luong tung lan thu), lan doc nen o hay sau han khong dien ra. Doi chung nhanh: than doc tron, luong goc dong."""
     ten, nen, mau, pt, xem = BON_DUONG[i]
     def chay():
         for giay, k, chunked in BA_KIEU:
@@ -2027,18 +2056,19 @@ def ca_nen(i, cham, nhanh, han, hau="", w0=0.0, ma_ep=None):
             boc_than(g, mau, pt, lambda s, ma, byte: phan_hoi_that(s, ds, ma, byte, giay, k, chunked, bool(ma_ep)), ma_ep)
             with thay_ten("kiem_nhip_tim", nhay(g, them=w0)):   # `w0` giay cua W0 => lan thu cua pha ghi bi kep theo han cua PHA
                 kq = xem(g, *luot_wd(g))
-            mong((kq, [n.han for n in ds] if giay else all(n.dem.closed for n in ds)), (cham, han) if giay else (nhanh, True), f"{pt} {ten}: {giay} s/lan doc nen, chunked={chunked}")
+            mong((kq, [n.han for n in ds] if giay else all(n.dem.closed for n in ds)), (cham, [con_lai(d, giay) for d in han]) if giay else (nhanh, True), f"{pt} {ten}: {giay} s/lan doc nen, chunked={chunked}")
     ca(chay, f"n15_nen_{hau or ten}")
 
-ca_nen(0, (TMO, 3), ("khung_xanh", 1), [HAN_30] * 3)
-ca_nen(1, (KDD, TMO), ("dat", "dat"), [HAN_30] * 3)
-ca_nen(2, ("chua_xac_nhan:het_gio", "doc_lai_loi:het_gio", 1), ("da_gui", "dat", 1), [HAN_30[20:]], w0=170.0)   # pha ghi con 10 s => han cua PHA kep lan thu
-ca_nen(3, (3, 1, "chua_xac_nhan", False, None), (1, 1, "da_gui", True, "canh_bao"), [HAN_30])
-ca_nen(0, (TMO, 3), ("http_github:403", 1), [HAN_30] * 3, "than_loi", ma_ep=403)   # than cua HTTPError (adapter tra chinh HTTPError lam luong)
+ca_nen(0, (TMO, 3), ("khung_xanh", 1), [30.0] * 3)
+ca_nen(1, (KDD, TMO), ("dat", "dat"), [30.0] * 3)
+ca_nen(2, ("chua_xac_nhan:het_gio", "doc_lai_loi:het_gio", 1), ("da_gui", "dat", 1), [10.0], w0=170.0)   # pha ghi con 10 s => han cua PHA kep lan thu
+ca_nen(3, (3, 1, "chua_xac_nhan", False, None), (1, 1, "da_gui", True, "canh_bao"), [30.0])
+ca_nen(0, (TMO, 3), ("http_github:403", 1), [30.0] * 3, "than_loi", ma_ep=403)   # than cua HTTPError (adapter tra chinh HTTPError lam luong)
 NEN4, NEN_R = [f"n15_nen_{d[0]}" for d in BON_DUONG], "isinstance(r, http.client.HTTPResponse)"
 khong("f02_nen", "f02:nen", *NEN4, "n15_nen_than_loi")
 khong("f02_nen_han", "f02:nen_han", *NEN4, "n16_socket_that")
 db("f02_nen_han_bien", "f02:nen_han", "con <= 0", "con < 0", *NEN4, "n16_socket_that")
+db("f02_nen_han_chi_bang", "f02:nen_han", "con <= 0", "con == 0", *NEN4)   # giet boi dau vao 0,875 s/lan doc nen (con lai AM)
 db("f02_nen_socket", "f02:nen_socket", "sock.settimeout(con)", "pass", *NEN4, "n16_socket_that")
 xoa("f02_nen_dong", "f02:nen_dong", *NEN4)
 db("f02_nen_nhieu_lan_doc", "f02:nen_mot_lan", "read1(", "read(", *NEN4)       # mot lan kiem han cho NHIEU lan doc nen
@@ -2048,15 +2078,22 @@ for _ten, _dk in (("get_api", 'not (pt == "GET" and urllib.parse.urlsplit(url).h
                   ("patch", 'pt != "PATCH"'), ("post", 'pt != "POST"')):
     db("f02_nen_mien_" + _ten, "f02:nen", NEN_R, f"{NEN_R} and {_dk}", "n15_nen_" + _ten)
 
-@ca
-def n15_d14_khop_qua_han():   # D14: kiem luc hoan tat dung SAU phep khop comment
-    g, e = nen_cho()
-    chen_cm(g, e)
-    with thay_ten("_khop", nhay(g, them=180.0)):   # phep khop xong DUNG o HAN_GHI (bang han la da het)
-        ma, bc, nk = luot_n(g, 1)
-    mong((dem(nk, "POST"), ma, bc["ghi"]["W1"], nt_tren(g)["cho_bao"]), (0, 3, "doi_soat_loi:het_gio", e))
-khong("f02_d14", "f02:d14", "n15_d14_khop_qua_han")
-db("f02_d14_bien", "f02:d14", ">= c.han", "> c.han", "n15_d14_khop_qua_han")
+def ca_d14(hau, qua, muon=(0, 3, "doi_soat_loi:het_gio", True)):
+    """D14: kiem luc hoan tat dung SAU phep khop comment; phep khop xong o HAN_GHI + `qua` giay. Quan sat (POST, ma, W1, su kien con cho)."""
+    def chay():
+        g, e = nen_cho()
+        chen_cm(g, e)
+        with thay_ten("_khop", nhay(g, them=qua)), thay_ten("_khop", nhay(g, them=180.0)):   # phep khop: + HAN_GHI (180 s) + `qua`
+            ma, bc, nk = luot_n(g, 1)
+        mong((dem(nk, "POST"), ma, bc["ghi"]["W1"], nt_tren(g)["cho_bao"] == e), muon, hau)
+    ca(chay, "n15_d14_khop_" + hau)
+
+ca_d14("qua_han", 320.0)                            # QUA han (phep khop tieu 500 s)
+ca_d14("dung_han", 0.0)                             # DUNG o HAN_GHI (bang han la da het)
+ca_d14("con_han", -1.0, (0, 1, "da_giao", False))   # xong o 179 s: doi soat duoc dung, su kien duoc danh dau da giao
+khong("f02_d14", "f02:d14", "n15_d14_khop_qua_han", "n15_d14_khop_dung_han")
+db("f02_d14_bien", "f02:d14", ">= c.han", "> c.han", "n15_d14_khop_dung_han")
+db("f02_d14_chi_bang", "f02:d14", ">= c.han", "== c.han", "n15_d14_khop_qua_han")   # RV3 Q03
 
 # ---- F03 `mutant-oracles-non-discriminating`: tung truong D2/U6 rieng; adapter that va main ----
 for _f, _gt in LK:

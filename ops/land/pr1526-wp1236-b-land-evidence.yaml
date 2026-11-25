@@ -38,7 +38,8 @@ authorization_ghi_chu: >-
   2026-11-25T14:32:11Z, merge_commit_sha d0868db (MCP merge_pull_request voi expectedHeadSha bca55c1). CAVEAT #566: ai bam merge khong do duoc.
 ngoai_le_windows: >-
   khong mien — M3 required (diff cham ops/**/*.py, them dong subprocess/encoding). Windows LOCAL DESKTOP-T9R33P2 xanh tren bca55c1
-  (readback-windows-m3-7161189686.json); chu kho mien Windows CI cho dot B (issuecomment-7129998930).
+  (readback-windows-m3-7161189686.json). Mien Windows CI cho dot B: loi_khai_co_neo — issuecomment-7129998930 la ban GHI HO (app claude)
+  lua chon cua chu kho, khong phai chu kho tu dang; khong co readback trong ho so nay.
 land_operator: 'measured — readback-pr-1526.json: merged_at 2026-11-25T14:32:11Z, merge_commit_sha d0868db, state closed.'
 merge_method: merge
 merge_commit: d0868dbf7f6324755aa4ed0f3e02d4efa84866f0
@@ -173,7 +174,7 @@ trang_thai_packet:
   landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate: run 45635133079 tren CHINH d0868db bon moc run/checkout/gate_output/workflow_definition measured passed.
-    (2) lease nha: DAT (2 duong dan NGUOI_GIU 0). (3) bookkeeping: ho so nay + M8 tren #1236. (4) review neo bca55c1: Codex luot 5 approve
+    (2) lease nha: DAT (2 duong dan NGUOI_GIU 0). (3) bookkeeping: ho so nay + lease rut han (M8 tren #1236 dang SAU khi ho so len master, xem bookkeeping). (4) review neo bca55c1: Codex luot 5 approve
     (measured qua run.json/stdout) + connector khong finding truoc merge + kiem-merge K0-K7 rc 0 + audit E5 chu kho. (5) uy quyen: audit tu dang
     7165411240; mien P3 B02 neo SHA. (6) muc tieu: bo test dot B 38/38, 145/145 do lai tren merge; CI selftest. (7) tran: 2/6 tep, 506/560 dong.
   canh_bao_cho_chu_kho: >-

@@ -1,0 +1,16 @@
+{
+  "reviewed_sha": "2439922c67a091c53e277c9e0b13d8fc04089453",
+  "product_sha256": "7d447c68f743fb525c537489e842a726554426a35bf3e65408094c9c1d76414c",
+  "linux_control": {
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b mien:readback\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  "case_insensitive_simulation": {
+    "rc": 0,
+    "stdout": "D2b ĐẠT mien ops/land/pr1440-wp1319-provenance/A@a2dec9ea0413771083c7565907449d592b4b2ea9\nĐÓNG ĐƯỢC WP P — merge 2654e3c56c15af43a081a44c4441cdc8eb306907\n",
+    "stderr": "",
+    "scope": "Only archive name and path lookup case folding; all Git operations, bytes, schema, D1-D4, module and D2b code are real."
+  },
+  "tree": "040000 tree 7ca71bdaeede3811483d3d9a3dcaed6a048ff5e3\tops\n040000 tree bcdc1d3a5a2db812b356337f77e4d041a14ed7ad\tops/land\n040000 tree d3e87c2bd31fb5445efe132e706602a7cb66c36a\tops/land/pr1440-wp1319-provenance\n040000 tree 684edb2731dd47859a9c6d66a5aaa70bc005dcee\tops/land/pr1440-wp1319-provenance/A\n100644 blob 519dd581e50e5b45d3b3c76c3172e9c3ec293488\tops/land/pr1440-wp1319-provenance/A/note.txt\n040000 tree 2d02ab7c4bf2e0df649dfd7ff0808eb30a090637\tops/land/pr1440-wp1319-provenance/a\n100644 blob 51f9c160041a78a7c1a3c3c8511286942e83b890\tops/land/pr1440-wp1319-provenance/a/readback-wp-issuecomment-7.json"
+}

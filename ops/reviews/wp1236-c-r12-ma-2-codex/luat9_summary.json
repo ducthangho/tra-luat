@@ -1,0 +1,56 @@
+{
+  "rc": 0,
+  "counts": {
+    "GIET": 200,
+    "SONG": 3
+  },
+  "baseline": {
+    "neo": {
+      "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "test": "18d9acfc31d0b0e5cb6e41165fe11b35da17ca0d386c0a068b9042dd74c4cea5",
+      "goc": "59ca8b4db01fac6b086c8cb3f4d4b71b5d73000a99d1071cc4a131f19b12230f",
+      "manifest": "5b904f51ccab3a0cccbe2035130c45a204deb275b199741de54cb14b1115b534",
+      "python": "3.13.18",
+      "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline": "SONG",
+    "baseline_ca_dat": [
+      "cong_d2b_c1_passed_dat",
+      "cong_d2b_c2_thieu_nguon",
+      "cong_d2b_c3_attempt_kieu",
+      "cong_d2b_c3_neo",
+      "cong_d2b_c4_kiem_tep",
+      "cong_d2b_c4_symlink",
+      "cong_d2b_c5_duong_dan",
+      "cong_d2b_c5_mien_ky_tu",
+      "cong_d2b_c5_mode",
+      "cong_d2b_c6_mien",
+      "cong_d2b_c7_module_vang",
+      "cong_d2b_c7_module_khong_nap",
+      "cong_d2b_c7_module_nem",
+      "cong_d2b_c7_git_loi",
+      "cong_d2b_c9_oid",
+      "cong_d2b_c9_oid_khong_phai_commit"
+    ],
+    "tap_con": false
+  },
+  "manifest_equal": true,
+  "classification_target_delta": [],
+  "non_killed": [
+    {
+      "id": "g:_d2b_kiem:44:49",
+      "classification": "SONG",
+      "diff": "--- \n\n+++ \n\n@@ -37,3 +37,3 @@\n\n         return b'' if rc else o\n-    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)', hoi=True)\n+    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)~', hoi=True)\n     if git('cat-file', '-t', oid, hoi=True) != b'commit\\n' or not any((r.startswith(b'refs/remotes/origin/') for r in ref.split(b'\\n'))):"
+    },
+    {
+      "id": "i7:_d2b_kiem:30:90",
+      "classification": "SONG",
+      "diff": "--- \n\n+++ \n\n@@ -23,3 +23,3 @@\n\n     khoa = ('oid', 'tep') if passed else ('oid', 'chuoi', 'readback_thu_muc')\n-    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n+    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.match(ng['oid']) else ['thieu_nguon']\n     if passed and (not (type(ra) is int and ra >= 1)):"
+    },
+    {
+      "id": "j1:_d2b_kiem:31:23",
+      "classification": "SONG",
+      "diff": "--- \n\n+++ \n\n@@ -24,3 +24,3 @@\n\n     vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n-    if passed and (not (type(ra) is int and ra >= 1)):\n+    if passed and (not (type(ra) == int and ra >= 1)):\n         vp.append('attempt_kieu')"
+    }
+  ]
+}

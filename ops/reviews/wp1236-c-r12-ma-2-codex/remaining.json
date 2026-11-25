@@ -1,0 +1,43 @@
+[
+  {
+    "name": "gitlink_corrected",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp cây của oid')\n",
+    "ls_tree": "160000 commit 283160bcfb080baecf4c7554ade08f3879910799\tops/land/pr1440-wp1319-provenance/submodule"
+  },
+  {
+    "name": "gitlink_corrected_mien",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp cây của oid')\n",
+    "ls_tree": "160000 commit 283160bcfb080baecf4c7554ade08f3879910799\tops/land/pr1440-wp1319-provenance/submodule"
+  },
+  {
+    "name": "a112_symlink",
+    "result": "passed",
+    "scope": "existing module fixture; not a new D2b escape payload"
+  },
+  {
+    "name": "a116_yaml_la_trong_thu_muc",
+    "result": "passed",
+    "scope": "existing module fixture; not a new D2b escape payload"
+  },
+  {
+    "name": "ruff_contract",
+    "errors": [],
+    "count": 3
+  },
+  {
+    "name": "help_outside_block",
+    "rc": 0,
+    "has_D2b": true
+  },
+  {
+    "name": "block_bytes",
+    "trimmed_match": true,
+    "splice_exact": true,
+    "removed_separator_LF": 2,
+    "handoff_block_match": true
+  }
+]

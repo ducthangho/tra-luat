@@ -1,0 +1,546 @@
+{
+  "reviewed_sha": "2439922c67a091c53e277c9e0b13d8fc04089453",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 2,
+  "dot": "C",
+  "findings": [
+    {
+      "id": "C01",
+      "class_slug": "archive-loc-mat-du-lieu-kiem",
+      "severity": "P1",
+      "vi_tri": ".claude/dev/packet_loop.py:3974-3978 (_d2b_kiem)",
+      "van_de": "Đối chiếu tên chỉ liệt kê leaf (ls-tree -r không -t), bỏ collision ở thư mục; A/note.txt và a/readback-… có tên leaf khác nhau sau casefold, nhưng thư mục A/a gộp trên hệ tệp không phân biệt hoa thường. owner_waived cho A có thể nhận readback chỉ có trong a của Git OID.",
+      "bang_chung": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp python3 -B <work>/probe_case_directory.py",
+        "script_rc": 0,
+        "artifact": "work/case_directory.json",
+        "control": "Linux: rc12, THIẾU D2b mien:readback. Cây Git có A/note.txt và a/readback-wp-issuecomment-7.json; A và a là hai tree riêng.",
+        "measurement": "Cùng dữ liệu và mã gốc, mô phỏng extraction/lookup không phân biệt hoa/thường: cmd kiem-dong-wp rc0, D2b ĐẠT mien .../A@OID và ĐÓNG ĐƯỢC WP. Blob mọi tệp vẫn khớp; tập leaf NFC+casefold không trùng nên bản vá không phát hiện thư mục gộp.",
+        "limit": "Mô phỏng trên Linux, chưa chạy Windows native. Không sửa mã sản phẩm; không symlink/đường dẫn thoát cây; không phải đột biến mã ngoài manifest."
+      },
+      "de_xuat": {
+        "o_dau": "Bước kiểm danh mục cây ở _d2b_kiem, ranh giới Git → archive.",
+        "cach_va": "Đối chiếu namespace đầy đủ gồm thư mục và các tiền tố, loại collision chuẩn hóa giữa directory/directory và directory/file trước validator; giữ kiểm blob/mode và hành vi fail-closed. Khi namespace không tái lập duy nhất được, giữ đường lỗi đo rc8; không đổi miền cú pháp E3 hay thêm tên lý do rc12 mới.",
+        "kiem_dong": "Hai thư mục khác case với tên con khác nhau: A không readback phải không lấy readback từ a; đối chứng thư mục đơn đạt. Đo lại native Windows và mô phỏng trên Linux.",
+        "rui_ro": "Tránh coi các tiền tố dùng chung hợp lệ là trùng; giữ symlink/readback phạm vi K2, không vô tình cấm tệp 100755 nội bộ."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "archive-loc-mat-du-lieu-kiem",
+      "manifestations": [
+        "C01 lượt 1: symlink YAML bị lọc làm provenance sai được nhận — đã đóng trên Linux",
+        "C01 lượt 1: lý do symlink biến thành provenance_0 — đã đóng",
+        "Thư mục symlink trong provenance — ca sẵn có đã đạt đúng lý do; readback symlink và symlink ngoài K2 không bị chặn oan",
+        "export-ignore/eol/ident/export-subst/filter thay byte hoặc mất tệp — bị rc8",
+        "Nền không tạo symlink — mô phỏng rc8; branch not_measured:symlink chưa đo trên nền không hỗ trợ",
+        "Collision leaf case/NFC-NFD — bị rc8",
+        "C01 lượt 2: collision directory A/a với leaf khác nhau — còn mở, mô phỏng toàn CLI rc0 sai phạm vi readback"
+      ],
+      "highest_open_severity": "P1",
+      "common_fix": "Đối chiếu namespace đầy đủ gồm thư mục và các tiền tố, loại collision chuẩn hóa giữa directory/directory và directory/file trước validator; giữ kiểm blob/mode và hành vi fail-closed. Khi namespace không tái lập duy nhất được, giữ đường lỗi đo rc8; không đổi miền cú pháp E3 hay thêm tên lý do rc12 mới.",
+      "closing_check": "Hai thư mục khác case với tên con khác nhau: A không readback phải không lấy readback từ a; đối chứng thư mục đơn đạt. Đo lại native Windows và mô phỏng trên Linux.",
+      "source": {
+        "vong": 1,
+        "reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+      }
+    },
+    {
+      "slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "manifestations": [
+        "C02: LF trong passed",
+        "C02: LF trong owner_waived",
+        "C02: LF trong symlink_hoac_mode",
+        "Cửa rc8: ngoại lệ chứa xuống dòng",
+        "Bốn vị trí regex + thứ tự kiểm chuỗi thô"
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Miền ASCII E3 [!-.0-~]+ trên chuỗi thô; repr ngoại lệ ở rc8.",
+      "closing_check": "probe_behavior + probe_more + 31/31 targeted; extra.json: bốn vị trí × 1,114,111 codepoint (không tính separator /) khớp đúng 93 ký tự; 160 gọi âm không gọi git. Module lý do chỉ literal/số ID/tên exception dựng sẵn.",
+      "source": {
+        "vong": 1,
+        "reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+      }
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "archive-loc-mat-du-lieu-kiem",
+      "finding_cu": "C01",
+      "luot_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "work/behavior.json + targeted.log: symlink YAML/thư mục và lý do K2 đã sửa. work/case_directory.json: toàn kiem-dong-wp mô phỏng case-insensitive rc0 sai, Linux control rc12; giữ C01 mở.",
+      "chua_do_duoc": [
+        "Windows native"
+      ],
+      "source_reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+    },
+    {
+      "slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "finding_cu": "C02",
+      "luot_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "Probe LF hai nhánh rc12, regex 4 vị trí × mọi codepoint Unicode trừ separator: đúng 93 ASCII; 160 negative calls không gọi git.",
+      "chua_do_duoc": [],
+      "source_reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+    }
+  ],
+  "verdict": "changes_requested",
+  "hoi_tu": {
+    "luot1_sang_2": "1/2",
+    "lop_lap_lan_ba": []
+  },
+  "reviewed_tree": "b2ba746fdbe08bff82d66467c0e9b0306fad38cd",
+  "base_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+  "provider": "openai_codex",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "fb13277a68b84805b3e641486bcf86db",
+  "role": "reviewer",
+  "review_class": "sensitive",
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "model_served": "KHONG_DO_DUOC",
+  "effort_served": "KHONG_DO_DUOC",
+  "effort_requested": "high",
+  "independent_from_executor_session": true,
+  "github_submitter_identity": null,
+  "review_status": "complete",
+  "identity_evidence": {
+    "launcher": "run/fb13277a/run.json: executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js; envelope local_process/subprocess/machine. Serving model/effort absent; not inferred from requested effort or GitHub account.",
+    "sandbox": "workspace-write, network restricted, approval never. Repo read-only by task discipline; sandbox grants workspace write, so not an OS-enforced read-only mount.",
+    "environment": "Linux, Python 3.13.18, Git 2.43.0, Ruff 0.15.15; cache/temp/output under work, Python -B/no-bytecode and Ruff --no-cache.",
+    "scope": "Offline only; no GitHub/network. Supplied origin/master resolves f602325, not a measurement of live master (prompt says 64b7f2c).",
+    "executor": "Claude Fable 5.2 high, session_015GtxrZsYAFm7iLa11eWogL, claude_code/machine-local per handoff; not independently serving-model attested."
+  },
+  "lech_spec": [
+    {
+      "muc": "Luật 9 trên khối D2b, ba dòng ngoài khối",
+      "phan_quyet": "Chấp nhận cách đo có điều kiện đã được điều phối cấp; không hiểu là full-file mutation scan.",
+      "bang_chung": "remaining.json: block bytes khớp, chỉ bỏ 2 LF phân cách; splice khôi phục exact source. Import tarfile: mutant ngoài khối đã GIET ở C1 (more.json); lời gọi _d2b có mutant d2b_mC1_khong_chay và C1; help đo rc0 có D2b #1236. Kết quả do và A/B ghi ở luat9."
+    },
+    {
+      "muc": "Fixture chỉ chép đánh giá + YAML và đổi head thành merge kho tạm",
+      "phan_quyet": "Chấp nhận: bảo toàn tính chất cần đo ở C1/C4/C5c.",
+      "bang_chung": "behavior.json: original/adapted T-v3 passed/[], T-fail failed/[], mọi header khớp M tạm; C4 rc12 chỉ kiem_tep:failed:-. more.json C5c rc12 duong_dan_sai. D2b vẫn đọc git archive O; C1 working tree ở master không có dữ liệu O."
+    },
+    {
+      "muc": "Hợp đồng đầu ra riêng packet_loop_test.py",
+      "phan_quyet": "Chấp nhận giữ producer/consumer của harness tích hợp.",
+      "bang_chung": "Audit A/B đủ positive completion, partition/CA_DAI/target IDs; chưa gọi các kết quả reviewer bị sandbox chặn là passed."
+    },
+    {
+      "muc": "Regex [^/]+ trong r12 thay bằng miền E3",
+      "phan_quyet": "Chấp nhận theo quyết định chủ kho được prompt cung cấp (#1236 issuecomment-7134458601); spec hash giữ nguyên theo authority ấy.",
+      "bang_chung": "extra.json exhaustive raw-regex checks; targeted C5 bảng âm/dương; probe LF cũ nay rc12."
+    },
+    {
+      "muc": "Hai lỗi: đường dẫn sai + OID không trên remote",
+      "phan_quyet": "Chấp nhận chỉ báo duong_dan_sai: chốt cú pháp D2b dừng trước phép đo Git; không báo một vi phạm remote chưa được đo. Các chốt neo độc lập khi đủ dữ liệu vẫn tích lũy từng dòng.",
+      "bang_chung": "two_errors.log: cả passed/miễn rc12 duong_dan_sai; đối chứng chỉ OID sai rc12 oid_khong_tren_remote. 160 negative _d2b_kiem calls gọi Git 0 lần; phạm vi thứ tự là D2b, D3 trước D2b không nhận raw path này."
+    },
+    {
+      "muc": "khac_huong_reviewer_goi_y: bung trung thực rồi đối chiếu ls-tree",
+      "phan_quyet": "Hướng thiết kế chấp nhận được, nhưng triển khai hiện tại chưa đủ để đóng C01.",
+      "bang_chung": "Giữ symlink giúp K2 tự quyết đúng phạm vi; các thuộc tính và mode có đối chứng. Thiếu directory namespace trong ls-tree -r gây phép đo C01 rc0 sai trên mô phỏng. rc8 khi không tái lập được dữ liệu là hợp lý."
+    },
+    {
+      "muc": "Handoff nói C5(b) dưới mC11 không ra ĐẠT như lượt 1",
+      "phan_quyet": "Lời khai đã cũ; đo lượt 2 trên đúng fixture hiện tại cho ĐẠT, phù hợp kỳ vọng đặc tả. Không xem kết quả probe dùng đường dẫn fixture cũ đã biến mất là evidence chốt mode.",
+      "bang_chung": "work/probe_more.py đã thích nghi path lk5-provenance; more.json mC11 rc0 và D2b ĐẠT. probe_more.log lưu lượt đầu dùng path cũ; probe_more_adapted.log là phép đo áp dụng."
+    }
+  ],
+  "m3_windows": {
+    "ket_luan": "required",
+    "can_cu": "ADR-0060 M3 bước 2: cả hai tệp trong .claude/dev/**; spec r12 Kiểm chứng theo nền. Windows local not_run trong review offline. Waiver Windows CI của chủ kho theo prompt/lease không miễn Windows local.",
+    "rui_ro_can_do": [
+      "Symlink không tạo được: archive có thể sao chép đích; bản vá phải rc8. Các biến thể sym đổi kỳ vọng theo capability không đo được nhánh kiem_tep:not_measured:symlink; không được dùng chúng để chứng nhận nhánh ấy trên Windows.",
+      "NTFS không phân biệt hoa/thường: phải đo collision thư mục A/a có leaf khác tên (C01), cả directory/file aliases; ca GHI.txt/ghi.txt đơn thuần không đủ.",
+      "NFC/NFD và tên có dấu chấm cuối/tên dành riêng/colon/backslash có thể ánh xạ khác trên Windows; cần kiểm namespace thật, không suy từ POSIX.",
+      "core.autocrlf=true: archive trên commit thiếu attributes có thể LF→CRLF; reviewer đo Git 2.43.0 xác nhận. Hash blob phải chặn rc8; test fixture cô lập global/system config nên không thay phép đo cấu hình máy chủ kho.",
+      "MAX_PATH: fixture rút gọn chỉ giảm độ dài; tmp/case/mutation nesting trên root Windows thật vẫn cần đo.",
+      "Python 3.12 CI so 3.13.18 đang đo: tarfile data_filter/link normalization/fallback và quyền tạo symlink cần đối chiếu."
+    ],
+    "native_tests": "not_run",
+    "merge_state": "CHƯA ĐỦ ĐIỀU KIỆN MERGE: C01 P1 mở; Windows local và các gate/authority sau review chưa được chứng nhận."
+  },
+  "independent_class_scan": {
+    "mode": "Read-only original code, harmless fixture variants in scratch; no new escape/symlink attack payloads.",
+    "archive": [
+      "100755 main evaluation file: rc12 symlink_hoac_mode; internal executable provenance: passed; owner_waived unaffected by unrelated executable evaluation file.",
+      "160000 gitlink: corrected setup in remaining.json has ls-tree proof and rc8 on both branches. Initial extra.json gitlink setup was removed by fixture git add -A; its rc0 is INVALID_SETUP, superseded, not a product result.",
+      "NFC/NFD duplicate leaf: rc8 both branches; case leaf tested by cong_d2b_c4_symlink.",
+      "ident and export-subst: rc8 both branches; nonidentity smudge filter changed archive to UNCHANGED while blob unchanged: rc8 both branches (filter.json).",
+      "Absolute/out-of-tree symlink: verbal inspection of installed tarfile data_filter rejects absolute/outside links; existing a112/a116 counterexamples executed unchanged at module boundary. No newly authored D2b escape payload; native Windows not measured.",
+      "Fresh TemporaryDirectory isolates extraction; Git OID fixes source bytes and module code is from origin/master. No independent same-UID concurrent tamper/TOCTOU proof. The filesystem namespace collision found is an actual mismatch mechanism before validator; no assertion of complete bijection after current checks.",
+      "Link target bytes are not hashed (only is_symlink), and tarfile may normalize targets; complex link topology remains unmeasured under no-new-payload constraint.",
+      "Additional archive files: normal git archive selected tree into empty temp has no independently supplied extra entries; no injected-archive proof claimed. Directory coalescing demonstrably introduces foreign readback into requested scope (C01)."
+    ],
+    "output": "Module kiem_tep reasons inspected: literals, parsed integer job IDs, builtin exception type names, fixed check names; kiem_mien returns fixed condition names. No additional raw path output bypass found.",
+    "ngoai_manifest": "No new open outside-manifest mutation. Previous import-tarfile deletion remeasured GIET by existing C1; C01 is behavior of unmodified product, not mutation-survival finding."
+  },
+  "da_do_khop": [
+    {
+      "name": "preflight/spec/write set/numstat/diff check",
+      "status": "passed",
+      "rc": 0,
+      "command": "git rev-parse HEAD HEAD^{tree}; git show f602325:ops/specs/wp1236-r12.md; git diff --numstat f602325 HEAD; git diff --check f602325 HEAD",
+      "evidence": "preflight.json: exact SHA/tree/blob/spec bytes match; 2 files +374/-13, within 450."
+    },
+    {
+      "name": "D2b + D cũ + CRLF qua chay_suite",
+      "status": "passed",
+      "rc": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp python3 -B <bang_chung>/cong_cu/chay_ca.py <repo> ca cong_d2b_ cong_c_d cong_c_fixture_crlf",
+      "evidence": "targeted.log: 31/31 dat; 17 D2b and 14 legacy."
+    },
+    {
+      "name": "prior probes and fixture equivalence",
+      "status": "passed",
+      "rc": 0,
+      "command": "python3 -B work/probe_behavior.py; python3 -B work/probe_more.py",
+      "evidence": "behavior.json, more.json; raw/adapted logs retained."
+    },
+    {
+      "name": "independent behavior/character/mode/attribute probes",
+      "status": "passed",
+      "rc": 0,
+      "command": "python3 -B work/probe_extra.py; python3 -B work/probe_remaining.py; python3 -B work/probe_filter.py",
+      "evidence": "extra.json, remaining.json, filter.json; invalid first gitlink setup explicitly superseded."
+    },
+    {
+      "name": "C01 directory-collision counterexample",
+      "status": "passed",
+      "rc": 0,
+      "command": "python3 -B work/probe_case_directory.py",
+      "evidence": "case_directory.json: script successfully reproduces product false pass rc0 under explicit filesystem simulation; control rc12.",
+      "product_contract": "failed"
+    },
+    {
+      "name": "Ruff bare F",
+      "status": "failed",
+      "rc": 1,
+      "command": "python3 -B -m ruff check --no-cache --select F --output-format json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py (base and head cwd)",
+      "evidence": "ruff_base/head.json: 16 each; normalized diagnostic multiset delta 0 (only embedded source line numbers changed). ruff_delta.json. Criterion delta passed; bare lint not green."
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "rc": 0,
+      "command": "ci_dang_ky_test.loi_ruff_ci()",
+      "evidence": "remaining.json errors=[] count=3; distinct scope from bare lint."
+    },
+    {
+      "name": "A/B supplied evidence independent audit",
+      "status": "passed",
+      "rc": 0,
+      "command": "python3 -B work/auditor/audit_logs.py; python3 -B bang_chung/ab/cong_cu/ab_so.py bang_chung/ab work/ab_recomputed.md",
+      "evidence": "auditor/audit_logs.json: 64 complete shard logs, 2009 old mutations unchanged, no name/target/control regression; same 38 skips and 1 skipped mutation. r1187_spec_packet_type failed in both."
+    },
+    {
+      "name": "autocrlf external-script initial setup",
+      "status": "failed",
+      "rc": 1,
+      "command": "python3 -B bang_chung/cong_cu/do_autocrlf.py",
+      "evidence": "autocrlf.log: scratch git commit rc128 with inherited config; not a product failure."
+    },
+    {
+      "name": "autocrlf isolated-config measurement",
+      "status": "passed",
+      "rc": 0,
+      "command": "GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null python3 -B bang_chung/cong_cu/do_autocrlf.py",
+      "evidence": "autocrlf_isolated.log: true converts LF to CRLF; false/input preserve LF."
+    },
+    {
+      "name": "Windows native and GitHub gates",
+      "status": "not_run",
+      "evidence": "Offline review; no network authorization and no Windows native execution."
+    },
+    {
+      "name": "Full tl selftest / CI registration gate",
+      "status": "not_run",
+      "evidence": "Executor tail logs inspected only; reviewer independently measured Ruff contract, not entire selftest/registration suite."
+    },
+    {
+      "name": "Luật 9 do + ledger",
+      "status": "passed",
+      "rc": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp WP1236C_GOC=<repo> python3 -B <repo>/ops/reviews/wp1236-r10-soan/quet_dot_bien.py do <work>/d2b_trich.py <bang_chung>/luat9/d2b_noi.py <bang_chung>/luat9/kho_rong.jsonl --thu-muc-ra <work>/D --song-song 4",
+      "evidence": "luat9.log HOAN_TAT; luat9_summary.json; ledger_A.tsv: 203 = 200 GIET + 3 TUONG_DUONG, ID/target same as executor."
+    },
+    {
+      "name": "Independent baseline shards on base/head",
+      "status": "failed",
+      "command": "python3 -B .claude/dev/packet_loop_test_manh.py --manh i/16 --ra <artifact>, i=2..15 on both work/rig checkouts",
+      "rc_by_job": {
+        "nen/manh/2": 1,
+        "sau/manh/2": 1,
+        "nen/manh/3": 1,
+        "sau/manh/3": 1,
+        "nen/manh/4": 1,
+        "sau/manh/4": 1,
+        "nen/manh/5": 1,
+        "sau/manh/5": 1,
+        "nen/manh/6": 1,
+        "sau/manh/6": 1,
+        "nen/manh/7": 1,
+        "sau/manh/7": 1,
+        "nen/manh/8": 1,
+        "sau/manh/8": 1,
+        "nen/manh/9": 1,
+        "sau/manh/9": 1,
+        "nen/manh/10": 1,
+        "sau/manh/10": 1,
+        "nen/manh/11": 1,
+        "sau/manh/11": 1,
+        "nen/manh/12": 1,
+        "sau/manh/12": 1,
+        "nen/manh/13": 1,
+        "sau/manh/13": 1,
+        "nen/manh/14": 1,
+        "sau/manh/14": 1,
+        "nen/manh/15": 1,
+        "sau/manh/15": 1
+      },
+      "evidence": "shards_summary.json and per-job receipts. Socket PermissionError is not a pass. D2b 17/17 passed; old failed/skip sets compared by name."
+    },
+    {
+      "name": "Independent mutation shard 4/16 on base/head",
+      "status": "failed",
+      "command": "python3 -B .claude/dev/packet_loop_test_manh.py --dot-bien 4/16",
+      "rc_by_job": {
+        "nen/dot-bien/4": 1,
+        "sau/dot-bien/4": 0
+      },
+      "evidence": "shards_summary.json; per-ID output and actual rc in work/shards/*dot-bien-4.log and receipts."
+    },
+    {
+      "name": "Native-only tests in Linux shards",
+      "status": "skipped",
+      "evidence": "38 native Windows/pwsh cases per side; same IDs. They are not counted passed."
+    },
+    {
+      "name": "Final read-only snapshot",
+      "status": "passed",
+      "rc": 0,
+      "command": "git rev-parse HEAD HEAD^{tree}; git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --binary; git diff --cached --binary; git diff --check f602325 HEAD",
+      "evidence": "postflight.json: head/tree/status/diff/index unchanged; scope and ignored-hash timing limitation stated."
+    }
+  ],
+  "luat9": {
+    "delta": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp WP1236C_GOC=<repo> python3 -B <repo>/ops/reviews/wp1236-r10-soan/quet_dot_bien.py do <work>/d2b_trich.py <bang_chung>/luat9/d2b_noi.py <bang_chung>/luat9/kho_rong.jsonl --thu-muc-ra <work>/D --song-song 4",
+      "rc": 0,
+      "completed": true,
+      "positive_marker": "HOAN_TAT",
+      "manifest_count": 203,
+      "GIET": 200,
+      "TUONG_DUONG": 3,
+      "VO_CAN": 0,
+      "LOI_CHAY": 0,
+      "baseline_cases": [
+        "cong_d2b_c1_passed_dat",
+        "cong_d2b_c2_thieu_nguon",
+        "cong_d2b_c3_attempt_kieu",
+        "cong_d2b_c3_neo",
+        "cong_d2b_c4_kiem_tep",
+        "cong_d2b_c4_symlink",
+        "cong_d2b_c5_duong_dan",
+        "cong_d2b_c5_mien_ky_tu",
+        "cong_d2b_c5_mode",
+        "cong_d2b_c6_mien",
+        "cong_d2b_c7_module_vang",
+        "cong_d2b_c7_module_khong_nap",
+        "cong_d2b_c7_module_nem",
+        "cong_d2b_c7_git_loi",
+        "cong_d2b_c9_oid",
+        "cong_d2b_c9_oid_khong_phai_commit"
+      ],
+      "neo": {
+        "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+        "test": "18d9acfc31d0b0e5cb6e41165fe11b35da17ca0d386c0a068b9042dd74c4cea5",
+        "goc": "59ca8b4db01fac6b086c8cb3f4d4b71b5d73000a99d1071cc4a131f19b12230f",
+        "manifest": "5b904f51ccab3a0cccbe2035130c45a204deb275b199741de54cb14b1115b534",
+        "python": "3.13.18",
+        "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "manifest_equal_bytes": true,
+      "classification_target_delta": [],
+      "kho_B_count": 0,
+      "ledger_command": "python3 -B <bang_chung>/luat9/ledger.py <work>/D <work>/d2b_trich.py <work>/ledger_A.tsv",
+      "ledger_rc": 0
+    },
+    "khong_hoi_quy": {
+      "supplied_evidence_independently_audited": {
+        "base_cases": 1786,
+        "head_cases": 1803,
+        "base_passed": 1748,
+        "head_passed": 1765,
+        "same_skipped_case_count": 38,
+        "missing_old_cases": 0,
+        "case_regressions": 0,
+        "base_mutants": 2009,
+        "head_mutants": 2051,
+        "base_killed": 2007,
+        "head_killed": 2049,
+        "same_mutant_skip": "luong_canonical_chay_that_dao_os_name",
+        "same_mutant_failure": "r1187_spec_packet_type",
+        "old_mutant_anchor_replacement_target_changes": 0,
+        "mutant_regressions": 0,
+        "evidence": "work/auditor/audit_logs.json; full counts include CA_DAI at db-0; audit is not an independent rerun."
+      },
+      "reviewer_rerun": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c2-2-codex/work/run_shards.py",
+        "driver_rc": 0,
+        "completed_jobs": 30,
+        "baseline_shards": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "mutation_shards": [
+          4
+        ],
+        "results": {
+          "nen": {
+            "baseline": {
+              "passed": 1579,
+              "skipped": 38,
+              "failed": 15
+            },
+            "mutation_shard_4": {
+              "killed": 125,
+              "failed": 1
+            },
+            "failed_baseline_ids": [
+              "cong_b4_vc_eof_tre_trong_han",
+              "cong_b4_vc_loi_ket_noi",
+              "cong_b4_vc_khuc_cuoi_tre",
+              "cong_b4_vc_han_socket",
+              "cong_b4_vc_404_nguyen_ma",
+              "cong_b4_vc_khuc_cuoi_tre_trong_han",
+              "cong_b4_vc_han_tuong",
+              "cong_b4_vc_khong_chuyen_huong",
+              "cong_b4_vc_proxy",
+              "cong_b4_vc_trong_han_tuong",
+              "cong_b4_vc_eof_tre",
+              "cong_b4_vc_get_header",
+              "cong_b4_gt4_chan_va_dem",
+              "cong_b4_vc_500_khong_thu_lai",
+              "cong_b4_vc_tran_byte"
+            ],
+            "skipped_mutants": [],
+            "failed_mutants": [
+              "b4_vc_bo_han_tuong"
+            ]
+          },
+          "sau": {
+            "baseline": {
+              "passed": 1596,
+              "skipped": 38,
+              "failed": 15
+            },
+            "mutation_shard_4": {
+              "killed": 128
+            },
+            "failed_baseline_ids": [
+              "cong_b4_vc_loi_ket_noi",
+              "cong_b4_vc_get_header",
+              "cong_b4_gt4_chan_va_dem",
+              "cong_b4_vc_proxy",
+              "cong_b4_vc_tran_byte",
+              "cong_b4_vc_khuc_cuoi_tre_trong_han",
+              "cong_b4_vc_khuc_cuoi_tre",
+              "cong_b4_vc_han_tuong",
+              "cong_b4_vc_khong_chuyen_huong",
+              "cong_b4_vc_500_khong_thu_lai",
+              "cong_b4_vc_eof_tre_trong_han",
+              "cong_b4_vc_han_socket",
+              "cong_b4_vc_trong_han_tuong",
+              "cong_b4_vc_eof_tre",
+              "cong_b4_vc_404_nguyen_ma"
+            ],
+            "skipped_mutants": [],
+            "failed_mutants": []
+          }
+        },
+        "comparison": {
+          "missing_base_cases": [],
+          "passed_regressions": [],
+          "failed_sets_equal": true,
+          "skipped_sets_equal": true
+        },
+        "d2b_passed": 17,
+        "all_baseline_failures_socket_permission": true,
+        "mutation_limitation": "Base shard 4 has b4_vc_bo_han_tuong failed: three target cases die by CLI crash (false kill credit), matching socket-blocked B4 targets in baseline. It is not a killed mutant. Head shard 4 passes all 128; ordinal partition membership differs by version, so this alone does not prove same-ID non-regression; full-ID audit supplies that comparison.",
+        "all_shard_receipts": "work/shards/receipts.json",
+        "positive_evidence": "Every selected shard has MẢNH completion matching actual exit code; baseline registered case IDs present; D2b 17/17 passed; work/shards_summary.json. No full-suite green claim."
+      }
+    },
+    "tuong_duong_da_kiem": [
+      {
+        "id": "g:_d2b_kiem:44:49",
+        "proof": "Only suffix ~ appended to each Git ref line. Consumer only tests startswith refs/remotes/origin/; suffix never changes prefix; legal Git refs cannot contain LF. No other use of ref bytes."
+      },
+      {
+        "id": "i7:_d2b_kiem:30:90",
+        "proof": "SHA_RE neo ^[0-9a-f]{40}\\Z; match và fullmatch nhận đúng cùng tập chuỗi. Guard kiểm str trước khi gọi."
+      },
+      {
+        "id": "j1:_d2b_kiem:31:23",
+        "proof": "ra comes from restricted YAML safe loader, whose values have builtin normal-metaclass types. Equality of type(ra) to builtin int is identity equality on this domain; bool remains rejected. No arbitrary user metaclass admitted."
+      }
+    ],
+    "chua_do_duoc": [
+      "Native Windows M3 and Python 3.12 runtime",
+      "Reviewer full baseline shards 0/1 and CA_DAI; full legacy mutation 2009/2051 rerun (supplied evidence audited)",
+      "GitHub/live remote authority and CI checks",
+      "Same-UID concurrent tamper / newly authored complex symlink payloads excluded from testing"
+    ],
+    "equivalence_probe": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B <work>/check_equivalents.py",
+      "rc": 0,
+      "artifact": "equivalents.json",
+      "scope": "10 biên SHA, 13 giá trị của safe YAML, 417 refs; bổ sung chứng minh theo miền, không thay bằng vét cạn đầu vào."
+    }
+  },
+  "revision": 12,
+  "generation": 1,
+  "lease_id": "wp1236-c-r12-g1-claude-20261124",
+  "completed_at_utc": "2026-11-25T04:24:50.295342+00:00",
+  "evidence_hashes": {
+    "case_directory.json": "2a161dce5ad00fa286724a409381ecc2c6b1d6efe653bd438cee7f81bf88f7c5",
+    "probe_case_directory.py": "ea8af152903aeec0bc37e21c43d3a06a8e13aef1c11105cb5a41f788cf1a42cc",
+    "targeted.log": "b35f47a196ec989af614755eab1e6f2a8660e8b9dc523fd8e85fdd9a81f1658f",
+    "behavior.json": "fd2451545eb2ed9c566611bd8596a1daa700d5494b365f50ef8c9edd1ebe815b",
+    "more.json": "a8660315dcef0219ea485c274fd53320341343803327c98f0746bce8da20d849",
+    "extra.json": "0ea8ab65292ac61c9613d87d6761a2f63d9ab93db8cabd9a23d6fb0c58422e00",
+    "remaining.json": "4f62f7545bf911aef7b5470ef229f80bf4fa56d4af46d223c105554df96c138b",
+    "filter.json": "2d8534bbc49fd8b548f259e7d3beb1e39d689994d2c7ad8b8dfaf3d787505d54",
+    "luat9.log": "204597b958e94f844b4d833b628f86084255d94d0c124afd871d81c44b235c03",
+    "luat9_summary.json": "8643db90896bbf6702d184081021fce90eeb8ad084f3855eb12d71fdaa18b7c2",
+    "ledger_A.tsv": "78a9d9b92f382c9daa2c89e217e26001c184adfec705f0942d1c7a7ddd429908",
+    "shards_summary.json": "554aad92de4b29e86a4d5e6db205203a2848dc8cc0d474682153ea3b38e8f7f8",
+    "postflight.json": "9745d5368de2f11a8b47eaf33e426d665b0d8b1e647fcce95532a8c989407fbe"
+  }
+}

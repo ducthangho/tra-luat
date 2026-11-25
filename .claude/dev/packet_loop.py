@@ -41,6 +41,7 @@ import io
 import json
 import os
 import platform
+import posixpath
 import re
 import secrets
 import shutil
@@ -3981,7 +3982,11 @@ def _d2b_kiem(root: Path, bb: dict) -> list:
         if any(k != "d" and _d2b_blob(os.fsencode(os.readlink(cay / t)) if k == "l" else (cay / t).read_bytes()) != sha for t, (k, sha) in muc.items()):
             raise OSError("bản bung git archive không khớp nội dung của oid")
         if passed:
-            tt, ly = mod.kiem_tep(cay / dd, cay / thu)
+            # K2 hỏi CÂY trước khi hỏi đĩa: symlink (120000) mà đích, tính trên danh mục cây, là thư mục ⇒ `symlink`, dù nền bung nó thành loại gì. Windows
+            # gắn loại cho symlink lúc TẠO: đích chưa bung thì nó là symlink TỆP, `os.walk` của module xếp nó vào tệp và K2 bỏ sót (M3, issuecomment-7170894289).
+            thu_cay = {"."} | {t for t, (k, _) in muc.items() if k == "d"}  # "." là gốc bản bung
+            tro = {posixpath.normpath(posixpath.join(posixpath.dirname(t), os.readlink(cay / t))) for t, (k, _) in muc.items() if k == "l"}
+            tt, ly = ("not_measured", ["symlink"]) if thu_cay & tro else mod.kiem_tep(cay / dd, cay / thu)
             if tt != "passed":
                 vp.append(f"kiem_tep:{tt}:{ly[0] if ly else '-'}")
             if d := mod.doc_danh_gia((cay / dd).read_bytes())[0]:

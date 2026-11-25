@@ -369,14 +369,16 @@ biến môi trường của environment.
   nghĩa khớp nguyên văn TỪNG KHOẢN theo phân đoạn của bộ quét; ranh giới khoản tách từ văn bản THÔ thì không chứng
   minh được — 11 lượt cross-review (PR #1503) lượt nào cũng tìm ra một cách phân đoạn sai mới. Kết quả luôn mang
   `"can_nguoi_duyet": true` kèm `pham_vi_kiem`; người dùng phải duyệt số khoản và ranh giới trước khi dùng. Các lỗ
-  đã biết mà chưa vá (trích dẫn hai tầng bị làm phẳng thành `"`, khoản dài ngắt dòng trước một mệnh đề có "là" ở
-  nguồn mất số, tiểu mục đánh số trùng số khoản kế tiếp, xuống dòng của điểm bị gộp khi so) ghi nợ ở issue riêng.
+  đã biết của #1512 được chặn bảo thủ ở packet #1514 (xem gạch dưới); cờ `can_nguoi_duyet` vẫn giữ.
 - **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
   số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
   thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản. Nguồn có BẤT KỲ dòng nào mà
   ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
-  nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`
+  trở lên; khoản không kết thúc bằng dấu câu kết `.` `;` `!` `?` (kể cả khoản kết thúc `:` mà không có điểm theo
+  sau); câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải thích như sau:`; phép so giữ nguyên xuống dòng của
+  các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

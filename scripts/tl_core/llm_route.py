@@ -487,6 +487,9 @@ _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 _RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
+# Câu dẫn chuẩn của Điều "Giải thích từ ngữ" (wp1514 X3): CHỈ dòng khớp mẫu này mới được bỏ như câu dẫn.
+_RE_CAU_DAN = re.compile(r"(?:được hiểu|được giải thích)\s+như\s+sau\s*:$", re.IGNORECASE)
+_DAU_CAU_KET = frozenset(".;!?")
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
@@ -499,7 +502,8 @@ def tach_khoan(van_ban):
 
     Ranh giới do CẤU TRÚC dòng quyết, KHÔNG do chữ "là" (Review Rescue Checkpoint sau lượt 5: năm lượt liên tiếp
     tìm ra một cửa mới trong phép đoán theo từ nối — F1→N1→M1→Q1→R1):
-    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:`) đứng TRƯỚC khoản đầu.
+    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn CHUẨN (`… được hiểu/giải thích như sau:`) đứng TRƯỚC khoản đầu.
+    - Mỗi khoản phải kết thúc bằng dấu câu kết (`_ket_thuc_cau`, wp1514).
     - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Ở nguồn CÓ số, dòng là TIẾP DÒNG chỉ khi khoản đang mở CHƯA có
       từ nối và dòng mở bằng "là" (lượt 4 Q3); ngoặc/trích dẫn trải nhiều dòng ⇒ chặn (lượt 7 T1).
     - Nguồn CÓ số: dòng mang số mở khoản; số phải LIÊN TỤC từ 1 (lượt 5 R1: khoản mất số ở giữa); mọi dòng
@@ -528,19 +532,31 @@ def tach_khoan(van_ban):
             # ra một cách làm bộ quét báo "còn mở" sai. Khoản có ngoặc trải nhiều dòng ⇒ bị chặn (giới hạn đã khai).
             # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
-        elif not khoan and ln.endswith(":") and _tu_noi(ln) is None:
-            continue   # câu dẫn: kết thúc ":" và KHÔNG có từ nối (khoản "X là … sau:" có điểm thì không phải câu dẫn)
+        elif not khoan and _RE_CAU_DAN.search(" ".join(ln.split())):
+            continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
             khoan.append([None, ln])
         else:
             return None
     if co_so and [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):
         return None
+    if not all(_ket_thuc_cau(txt) for _, txt in khoan):
+        return None   # wp1514 X3b/X3c: khoản không kết thúc bằng dấu câu kết ⇒ ranh giới khoản không tin được
     return [(so, txt) for so, txt in khoan]
 
 
+def _ket_thuc_cau(txt) -> bool:
+    """Khoản kết thúc bằng dấu câu kết `.` `;` `!` `?` (bỏ khoảng trắng và dấu đóng `)` `"` `”` ở cuối). `:` KHÔNG kết
+    câu: khoản `… sau:` phải có các dòng điểm theo sau (wp1514 X3c: tiểu mục đánh số sau `:` bị nhận là khoản mới;
+    X3b: dòng gãy giữa câu ở nguồn mất số thành một khoản)."""
+    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()
+    return bool(duoi) and duoi[-1] in _DAU_CAU_KET
+
+
 def _gon(s) -> str:
-    return " ".join(str(s).split())
+    """Gộp khoảng trắng TRONG mỗi dòng, GIỮ ranh giới dòng (wp1514 X4: gộp cả `\n` từng cho định nghĩa dồn các dòng
+    điểm thành một dòng vẫn qua kiểm); bỏ dòng rỗng."""
+    return "\n".join(" ".join(ln.split()) for ln in str(s).split("\n") if ln.strip())
 
 
 # DANH SÁCH CHO PHÉP các dấu phân cách mà `_dong_mo_ho`/`_quet` hiểu. Mọi dấu khác thuộc nhóm ngoặc/trích dẫn
@@ -562,6 +578,8 @@ def _dong_mo_ho(ln) -> bool:
     lượt 8 U3: số thứ tự trong trích dẫn nhiều dòng bị nhận là số khoản), dấu `)` không có `(`, hoặc trích dẫn cong
     LỒNG cùng kiểu dấu (lượt 8 U1: dấu đóng của cụm trong khép nhầm cụm ngoài). Ký tự bên trong một cụm trích dẫn là
     nội dung, trừ dấu mở cong `“` (lồng ⇒ mơ hồ). Chốt BẢO THỦ: chặn oan được, nhận nhầm thì không."""
+    if ln.count('"') >= 3:
+        return True   # wp1514 X2: hai tầng trích dẫn bị làm phẳng thành `"` không phân biệt được với hai cụm độc lập
     sau, trich = 0, None
     for c in ln:
         if c not in _DAU_HIEU_DUOC and (unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf") or c in _DAU_KEP_PO):

@@ -1,3 +1,13 @@
+# ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
+
+Đặc tả `ops/specs/llm-ranh-gioi-khoan-r1.md`, lease `ops/leases/llm-ranh-gioi-khoan-r1-g1-claude.yaml`. Không bump VERSION.
+- `_dong_mo_ho`: dòng có từ 3 dấu `"` trở lên ⇒ nguồn mơ hồ (X2: hai tầng trích dẫn bị làm phẳng).
+- `tach_khoan`: mỗi khoản phải kết thúc bằng dấu câu kết `.` `;` `!` `?` — `:` không kết câu (X3b dòng gãy ở nguồn mất
+  số; X3c tiểu mục đánh số sau `:` hoặc sau khoản chưa kết câu).
+- Câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải thích như sau:` (X3).
+- `_gon` gộp khoảng trắng TRONG dòng, giữ ranh giới dòng (X4: định nghĩa dồn các dòng điểm thành một dòng nay lệch).
+- `can_nguoi_duyet: true` giữ nguyên.
+
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 
 Chủ kho cần chạy tác vụ trích xuất bằng Claude ngay trong skill (cả Cowork), dùng subscription hoặc API key

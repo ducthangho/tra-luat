@@ -490,19 +490,23 @@ _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 _RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
-# r5 (lượt 5 E2): chữ "là" đứng riêng ở BẤT KỲ đâu (kể cả sát ngoặc/dấu câu) — dùng cho câu dẫn, không dùng để tách khoản.
-_RE_LA_TU = re.compile(r"(?<!\w)là(?!\w)")
-# Câu dẫn chuẩn của Điều "Giải thích từ ngữ" (wp1514 X3): CHỈ dòng khớp mẫu này mới được bỏ như câu dẫn.
-_RE_CAU_DAN = re.compile(r"(?:được hiểu|được giải thích)\s+như\s+sau\s*:$", re.IGNORECASE)
+# Câu dẫn của Điều "Giải thích từ ngữ" — r6 (lượt 6 F2, Review Rescue sau sáu lượt cùng lớp): DANH SÁCH CHO PHÉP NGUYÊN DÒNG.
+# Năm bản trước dò HẬU TỐ `… như sau:` rồi loại dần hình dạng xấu (từ nối X3/A1, vị trí D3, dấu `:` và chữ "là" E2) — lượt nào
+# cũng còn một dạng lọt. Nay dòng chỉ được bỏ khi CẢ dòng (gộp khoảng trắng, phân biệt hoa thường) đúng câu dẫn chuẩn.
+_RE_CAU_DAN_TRON = re.compile(
+    r"(?:Trong|Tại) (?:Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư liên tịch|Quyết định) này, "
+    r"(?:các|những) (?:từ ngữ|thuật ngữ) (?:dưới đây|sau đây) được (?:hiểu|giải thích) như sau:")
 # r2 (lượt 2 A2): `;` KHÔNG kết khoản — ngắt dòng sau `;` giữa một định nghĩa dài từng tạo hai khoản đều qua kiểm.
 _DAU_CAU_KET = frozenset(".!?")
 # r2 (lượt 2 A2): đánh số NỘI DÒNG trong thân khoản (`… 1) …`, `… 2. …`) — tiểu mục, ranh giới khoản không tin được.
 # r3 (lượt 3 C2): khoảng trắng hai bên CHỈ trong phạm vi một dòng (`[ \t]`, không `\s`) — số điều ở cuối một dòng điểm, theo sau
 # là xuống dòng, không phải số thứ tự nội dòng.
 # r4 (lượt 4 D1): mọi khoảng trắng TRỪ xuống dòng (`[^\S\n]`) — gồm U+00A0 khoảng trắng không ngắt mà `[ \t]` bỏ sót.
-# r5 (lượt 5 E1): dấu số DÍNH thân (`… 2.Abc`) cũng là đánh số nội dòng — `_RE_SO_KHOAN` nhận `1.Hồ sơ` ở đầu dòng, nên chốt nội dòng
-# phải nhận cùng cú pháp; `[^\W\d_]` là chữ cái (không số: "1.5" vẫn là số thập phân).
-_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\S\n])\(?\d+[.)](?=[^\S\n]|[^\W\d_])")
+# r5 (lượt 5 E1): dấu số DÍNH thân (`… 2.Abc`) cũng là đánh số nội dòng.
+# r6 (lượt 6 F1): chốt nội dòng PHỦ trọn cú pháp `_RE_SO_KHOAN` thay cho liệt kê dạng theo sau dấu số — `(N)` hoặc `N` + khoảng trắng
+# tuỳ ý + `.`/`)`, rồi BẤT KỲ ký tự nào trừ chữ số (số thập phân `1.5`), xuống dòng hay hết chuỗi (số điều cuối dòng điểm, C2);
+# đứng trước không phải chữ/số, `.` hay `,` (`A1.`, `1.2.3`).
+_RE_SO_NOI_DONG = re.compile(r"(?<![\w.,])(?:\(\d+\)|\d+[^\S\n]*[.)])(?![\d\n]|$)")
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
@@ -515,7 +519,7 @@ def tach_khoan(van_ban):
 
     Ranh giới do CẤU TRÚC dòng quyết, KHÔNG do chữ "là" (Review Rescue Checkpoint sau lượt 5: năm lượt liên tiếp
     tìm ra một cửa mới trong phép đoán theo từ nối — F1→N1→M1→Q1→R1):
-    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn CHUẨN (`… được hiểu/giải thích như sau:`) đứng TRƯỚC khoản đầu.
+    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn CHUẨN (`_RE_CAU_DAN_TRON`, nguyên dòng) đứng TRƯỚC khoản đầu.
     - Mỗi khoản phải kết thúc bằng dấu câu kết (`_ket_thuc_cau`, wp1514).
     - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Ở nguồn CÓ số, dòng là TIẾP DÒNG chỉ khi khoản đang mở CHƯA có
       từ nối và dòng mở bằng "là" (lượt 4 Q3); ngoặc/trích dẫn trải nhiều dòng ⇒ chặn (lượt 7 T1).
@@ -547,11 +551,9 @@ def tach_khoan(van_ban):
             # ra một cách làm bộ quét báo "còn mở" sai. Khoản có ngoặc trải nhiều dòng ⇒ bị chặn (giới hạn đã khai).
             # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
-        elif (i_dong == 0 and _RE_CAU_DAN.search(" ".join(ln.split())) and _tu_noi(ln) is None
-              and ln.count(":") == 1 and not _RE_LA_TU.search(ln)):
+        elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):
             # r4 (lượt 4 D3): CHỈ đúng MỘT câu dẫn, ở dòng ĐẦU (ngay sau tiêu đề) — câu dẫn lặp hay câu dẫn muộn có thể che dòng mở khoản.
-            # r5 (lượt 5 E2): câu dẫn có đúng MỘT dấu `:` (ở cuối) và KHÔNG có chữ "là" ở bất kỳ đâu — `_tu_noi` dừng ở `:` đầu tiên
-            # và bỏ qua "là" trong ngoặc, nên dòng mở khoản `X: … như sau:` hay `X (là …) … như sau:` từng bị bỏ như câu dẫn.
+            # r6 (lượt 6 F2): và CẢ dòng phải đúng câu dẫn chuẩn (`_RE_CAU_DAN_TRON`) — câu dẫn khác ⇒ không bỏ ⇒ nguồn bị chặn.
             continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
             khoan.append([None, ln])

@@ -377,10 +377,12 @@ biến môi trường của environment.
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
   nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`
   trở lên; khoản không kết thúc bằng `.` `!` `?` (`;` và `:` không kết khoản); thân khoản có đánh số nội dòng
-  (`… 1. …`, `… (2) …`, `… 1.chữ` dính thân, trong phạm vi một dòng); dòng tiêu đề Điều có phần dư ngoài `Điều N.` / `Điều N. Giải thích
+  (`… 1. …`, `… (2) …`, `… 1.chữ`, `… 1 .`, `… 1."…`: mọi dạng số theo sau bởi ký tự khác chữ số, trong phạm vi một dòng —
+  kể cả mã biểu mẫu kiểu `… 2.A …`); dòng tiêu đề Điều có phần dư ngoài `Điều N.` / `Điều N. Giải thích
   từ ngữ` (tiêu đề tên khác, tiền tố viết HOA `ĐIỀU 3.`, hay tên xuống dòng riêng đều bị chặn); câu dẫn chỉ được bỏ khi
-  nằm ở dòng ĐẦU, khớp `… được hiểu/được giải thích như sau:`, có đúng một dấu `:` (ở cuối) và không có chữ "là" ở
-  bất kỳ đâu (kể cả trong ngoặc); phép so giữ nguyên xuống dòng của
+  nằm ở dòng ĐẦU và CẢ dòng đúng câu dẫn chuẩn `Trong|Tại <Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư
+  liên tịch|Quyết định> này, <các|những> <từ ngữ|thuật ngữ> <dưới đây|sau đây> được <hiểu|giải thích> như sau:` (phân biệt hoa
+  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn); phép so giữ nguyên xuống dòng của
   các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.

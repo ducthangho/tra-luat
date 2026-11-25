@@ -74,3 +74,5 @@ max_lease_hours: 8
 review_calls_limit: 6
 review_calls_used_truoc: 5
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r6-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 6 (F1, F2 P2); revision r6 danh sach cho phep (ops/specs/llm-ranh-gioi-khoan-r6.md).'

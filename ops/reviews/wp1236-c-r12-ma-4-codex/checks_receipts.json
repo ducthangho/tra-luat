@@ -1,0 +1,15 @@
+[
+  {
+    "name": "declared",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c5-4-codex/bang_chung/cong_cu/chay_ca.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c5-4-codex/repo",
+      "db",
+      "d2b_"
+    ],
+    "rc": 0,
+    "sha256": "25927147111fb700eeec94ac8704a8d1dcea2bc638c724208b9af3c09d2d4714"
+  }
+]

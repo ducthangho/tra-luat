@@ -1,0 +1,288 @@
+{
+  "reviewed_sha": "d5a7d8510af03e0d08545f677ad5de687e0264f4",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 4,
+  "dot": "C",
+  "findings": [
+    {
+      "id": "C03",
+      "class_slug": "archive-loc-mat-du-lieu-kiem",
+      "severity": "P1",
+      "vi_tri": ".claude/dev/packet_loop.py:3987-3989",
+      "van_de": "So sánh đích với danh mục cây bằng chuỗi chính xác bỏ sót alias của thư mục trên hệ tệp khác: case-insensitive và dấu phân cách Windows. Khi link bị phân loại là tệp, K2 của module bỏ qua tên không .yaml và CLI báo D2b ĐẠT. NFC chỉ đo như mô hình hệ tệp tương đương tên, không khẳng định NTFS chuẩn hoá NFC.",
+      "bang_chung": [
+        "models.json: case plain rc12; case tep rc0 có D2b ĐẠT và ĐÓNG ĐƯỢC WP; raw_target giữ nguyên, referent_is_directory=true; product không đột biến.",
+        "paths-3.13.18.json và paths-3.12.3.json: cùng chữ, chuỗi, thư mục con, dấu / và gốc được chặn rc12 dưới mô hình tep; tên khác chữ vẫn rc0.",
+        "Chỉ là mô hình semantics; chưa đo Windows native cho ca alias mới.",
+        "models.json: backslash plain rc12; backslash tep previous/head rc0, có D2b ĐẠT; raw separator Windows được bảo toàn, referent_is_directory=true trong mô hình alias."
+      ],
+      "de_xuat": {
+        "vi_tri": "Bộ phân giải đích trước phép giao thu_cay & tro.",
+        "cach_va": "Phân giải từng thành phần trên inventory Git với chính sách tên/separator đa nền tường minh; không dựa loại symlink trên đĩa, không chỉ casefold/normpath toàn chuỗi. Giữ raw bytes để kiểm hash.",
+        "khoa_lai": "Thêm oracle rc12 cho alias case và separator Windows dưới mô hình tep, đối chứng native Windows link tạo trước đích. Thêm ca NFC theo nền phù hợp; ca nonyaml-file vẫn rc0. Đưa các mutant resolver vào manifest theo Luật 9.",
+        "rui_ro": "Gộp tên/separator vô điều kiện có thể chặn oan trên POSIX; phải định nghĩa miền hỗ trợ và giữ kiểm va chạm."
+      }
+    },
+    {
+      "id": "C04",
+      "class_slug": "archive-loc-mat-du-lieu-kiem",
+      "severity": "P2",
+      "vi_tri": ".claude/dev/packet_loop.py:3988",
+      "van_de": "normpath xoá thành phần trước .. mà không xác minh thành phần ấy tồn tại và là thư mục. Một symlink hỏng không .yaml có thể bị biến thành đích thư mục trên giấy và bị chặn, trái phạm vi K2 đã được giữ.",
+      "bang_chung": [
+        "models.json: missing và file_parent, cả plain/tep: previous rc0 có D2b ĐẠT -> head rc12 kiem_tep:not_measured:symlink; referent_exists=false, referent_is_directory=false, is_symlink=true.",
+        "Mô hình giữ linkname sau data-filter safety, mô phỏng bộ giải nén giữ chuỗi đích. Linux native Python3.13.18/3.12.3 đổi linkname nên cả previous/head rc8; không gọi đây là hồi quy đã đo native Linux/Windows.",
+        "audit.json: ops/land tại HEAD có 0 symlink; real_previous.tsv = real_head.tsv, 71 hồ sơ local không hồi quy. Chưa có hồ sơ thật trong corpus được cấp bị chặn oan."
+      ],
+      "de_xuat": {
+        "vi_tri": "Cùng resolver đích của C03.",
+        "cach_va": "Chỉ xử lý .. sau khi xác định thành phần trước là thư mục theo cây/link resolution; giữ phân biệt dangling, file và directory. Không siết mọi symlink.",
+        "khoa_lai": "Thêm cặp oracle với bộ lọc giữ linkname: thành phần tồn tại là thư mục -> rc12; thiếu hoặc là tệp thường -> rc0 nếu K1/K2 khác hợp lệ. Đo lại Windows3.12.10 và Python được hỗ trợ.",
+        "rui_ro": "Thay đổi cách phân giải ảnh hưởng chuỗi/vòng và đường ra ngoài gốc; giữ giới hạn bước, kiểm an toàn tar và hash byte nguyên trạng."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "archive-loc-mat-du-lieu-kiem",
+      "manifestations": [
+        "C01 vòng1: lọc mất symlink",
+        "C01 vòng2: bỏ thư mục trong va chạm tên",
+        "vòng4: symlink-tren-dia-lech-cay (alias)",
+        "C03",
+        "C04"
+      ],
+      "highest_open_severity": "P1",
+      "common_fix": "Bảo toàn inventory/nội dung Git khi bung và phân giải chính xác đối tượng K2 trên cây theo semantics đa nền, không dùng xấp xỉ chuỗi.",
+      "closing_check": "C01 probe cũ + toàn bộ C4 + alias case/separator/NFC và intermediate missing/file; model và native Windows, K2 nonyaml-file vẫn rc0."
+    },
+    {
+      "slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "manifestations": [
+        "C02 vòng1: đường dẫn LF làm nhiều dòng stdout"
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Giữ miền ASCII được owner phê chuẩn trước mọi đọc/in đường dẫn.",
+      "closing_check": "passed/waived đường dẫn LF rc12 duong_dan_sai; toàn bộ c5_mien_ky_tu và mutant tương ứng."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "archive-loc-mat-du-lieu-kiem",
+      "finding_cu": [
+        "C01"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        4
+      ],
+      "status": "VA_MOT_PHAN",
+      "nhan_protocol": "VÁ SINH LỖI MỚI",
+      "evidence": "Probe C01 cũ hiện rc12 (yaml link) và rc8 (directory collision); same-case Windows model đã vá; C03 còn lọt, C04 mới chặn thừa.",
+      "chua_do_duoc": "Ca alias/intermediate trên Windows native; không suy từ M3 cũ."
+    },
+    {
+      "slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "finding_cu": [
+        "C02"
+      ],
+      "luot_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "nhan_protocol": "ĐÃ VÁ THẬT",
+      "evidence": "prior_behavior.log + targeted.json + declared.log: LF cả passed/waived rc12; miền ký tự và mutant đạt.",
+      "chua_do_duoc": "Không chạy full suite Windows; không cần mở lại C02 từ hạn chế này."
+    },
+    {
+      "slug": "symlink-tren-dia-lech-cay",
+      "finding_cu": [
+        "C01",
+        "M3 sau lượt3"
+      ],
+      "luot_xuat_hien": [
+        4
+      ],
+      "status": "VA_MOT_PHAN",
+      "alias_of": "archive-loc-mat-du-lieu-kiem",
+      "nhan_protocol": "VÁ SINH LỖI MỚI",
+      "evidence": "Gộp C01: cùng nguyên nhân biểu diễn cây/bản bung không đủ cho K2; chốt mới xử lý direct/slash/root nhưng còn C03,C04.",
+      "chua_do_duoc": "Windows native của các biểu hiện mới."
+    }
+  ],
+  "verdict": "changes_requested",
+  "environment": {
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "os": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "sandbox": "workspace-write",
+    "read_only": "operational constraint; no repository writes"
+  },
+  "hoi_tu": {
+    "luot3_sang_4": "N/A (0/0)",
+    "F": 0,
+    "U": 0,
+    "can_cu": "Lượt3 approve, không có lớp mở ở cuối lượt3. Không chia cho 0 hay ghi 100%; C01 được mở lại sau M3.",
+    "lop_lap_lan_ba": [
+      "archive-loc-mat-du-lieu-kiem"
+    ],
+    "quyet_dinh": "Owner đã cho Vá + nâng trần6 tại issuecomment-7170968907; không tự mở thêm vòng hoặc mở rộng write set."
+  },
+  "status": "complete",
+  "reviewed_tree": "241bd084f5979b02a1221d7d645e113227feee59",
+  "base_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+  "previous_sha": "dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+  "revision": 12,
+  "generation": 1,
+  "identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "cli_version": "0.170.0",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "effort_requested": "high",
+    "run_id": "f21c6446bf6741959a71c4ca1a4ca208",
+    "basis": "Run ghi thuc_thi_duong_dan tới codex.js; wrapper generic local_process/subprocess/machine, không suy model/effort từ tên phiên. Runtime model/effort fields không có.",
+    "independence": "Reviewer context/checkout được cấp riêng; không executor, không subagent."
+  },
+  "m3_windows": {
+    "ket_luan": "Vá được cơ chế cùng tên đã đo; chưa đóng toàn lớp. M3 Windows native không được reviewer đo lại.",
+    "can_cu": [
+      "Đo độc lập Linux: direct/slash/root/nested/chain dưới mô hình tep chuyển previous rc0 -> head rc12; matrix29×4 giết đủ4 mutant mới.",
+      "Lời khai điều phối exact head d5a7d8510af03e0d08545f677ad5de687e0264f4, Windows Python3.12.10: base118/118, head135/135, tạo symlink được; không suy full suite hay ca alias mới đã pass.",
+      "models.json: case/backslash/nfc có đích thư mục nhưng tep vẫn rc0. NFC chỉ là mô hình tên tương đương, không khẳng định Windows có semantics này."
+    ],
+    "not_run": [
+      "Native Windows của reviewer",
+      "Full suite Windows",
+      "CI Windows (owner miễn theo Packet)",
+      "Rebase/merge với master mới"
+    ]
+  },
+  "luat9": {
+    "delta": {
+      "manifest_regenerated": 229,
+      "manifest_equal": true,
+      "extracted_block_exact": true,
+      "tool_sha256": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "executor_audited": "229 = 226 GIET + 3 SONG được ledger phân loại TUONG_DUONG; ledger tái tạo byte-identical, rc0.",
+      "independent_sample": "TAP_CON 12: 9 mutant ở đoạn guard mới GIET bằng ChotB4, 3 tương đương SONG sạch; baseline16/16, LOI_CHAY0, CHI_LOI_VO_CAN0; rc0. Không khai đã chạy lại đủ229.",
+      "declared_mutants": "53/53 d2b_* GIET, oan=[]; matrix29×4 chốt đúng assertion.",
+      "outside_manifest": "Không tạo mutant sản phẩm ngoài manifest; mô hình OS/input probes không phải sửa mã sản phẩm. Không có P3 ngoai_bang_dong mới.",
+      "import_posixpath": "Nằm ngoài khối quét90dòng. Adapter ghép vào whole module có import; các ca có link chạy tới guard. Không suy AST scan bao phủ mutation của import."
+    },
+    "ke_thua_hoi_quy": {
+      "independent": "14 ca D1–D4/CRLF trên base và HEAD đều pass, 17D2b pass, corpus local71 dòng identical, probe C01/C02 cũ vẫn đóng biểu hiện cũ.",
+      "artifact_audit": "Base1784->HEAD1801,38skipped mỗi bên; mutants2009->2062,1skipped và r1187_spec_packet_type đỏ ở cả hai; không mất ca/kill đã có. Đây là audit log, không phải reviewer chạy full suite.",
+      "empty_inheritance_pool": "kho_rong.jsonl rỗng là miền mới D2b; không thay bằng chứng A/B của mã kế thừa."
+    },
+    "tuong_duong_da_kiem": [
+      {
+        "id": "g:_d2b_kiem:44:49",
+        "proof": "Thêm ~ ở cuối ref không đổi predicate startswith refs/remotes/origin/."
+      },
+      {
+        "id": "i7:_d2b_kiem:30:90",
+        "proof": "SHA_RE neo ^ và \\Z nên match/fullmatch tương đương."
+      },
+      {
+        "id": "j1:_d2b_kiem:31:23",
+        "proof": "type(ra) là lớp builtin từ YAML; so ==int và is int cùng kết quả trong miền này."
+      }
+    ]
+  },
+  "da_do_khop": [
+    {
+      "check": "Preflight exact head/tree/spec/lease/write set/numstat",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "snapshot_before.json, snapshot_after.json identical; audit.json; +420/-13 đúng2tệp."
+    },
+    {
+      "check": "17 cong_d2b_*",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "targeted.json, targeted.log;17/17 không skip."
+    },
+    {
+      "check": "53 d2b_*",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "declared.log, checks_receipts.json;53GIET oan=[]"
+    },
+    {
+      "check": "29variants ×4new mutants",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "matrix.log;baseline0lệch, mutant4/4 bị ChotB4"
+    },
+    {
+      "check": "Legacy14×2",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "legacy.json"
+    },
+    {
+      "check": "Ruff lint two files",
+      "status": "failed",
+      "rc": 1,
+      "evidence": "ruff_actual.json;16lỗi nền, delta0 so base; audit_final.json"
+    },
+    {
+      "check": "Ruff delta và CI pin/probe",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "audit_final.json: new=[], removed=[], errors=[],count3"
+    },
+    {
+      "check": "Diff whitespace",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "snapshot_after.json: git diff --check f602325 HEAD"
+    },
+    {
+      "check": "Luật9 sample12 / ledger",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "luat9_sample.log, ledger.log"
+    },
+    {
+      "check": "Models safety oracle",
+      "status": "failed",
+      "probe_rc": 0,
+      "evidence": "models.json: C03 unexpected gate0, C04 unexpected gate12; probe process rc0 chỉ nghĩa đo hoàn tất"
+    },
+    {
+      "check": "Full suites Linux/Windows reviewer, CI/live master/network",
+      "status": "not_run",
+      "rc": null,
+      "evidence": "Ngoài yêu cầu phép đo offline; không đánh dấu pass."
+    },
+    {
+      "check": "Executor full suite skips",
+      "status": "skipped",
+      "rc": null,
+      "evidence": "38ca và1mutant mỗi vế; audit log không biến skip thành pass."
+    }
+  ],
+  "limits": [
+    "core.abbrev chưa pin (git config --get rc1); không sửa checkout read-only, không chứng nhận golden/full gates phụ thuộc short hash.",
+    "Không kiểm authority GitHub hoặc master mới bằng mạng; đối chiếu bundle được cấp và local refs.",
+    "Snapshot Git trước/sau không phải attestation byte snapshot mọi file ignored; .codex/ ignored có sẵn, không phát sinh tracked/untracked change.",
+    "Sensitive chưa đủ để approve: C03P1 và C04P2 mở. Không cấp cross_approved/human_audited, merge/land authorization."
+  ],
+  "artifact_sha256": {
+    "models.json": "77798d2c7a6afb933203a8dce3da7337ef7042aec3522e677766629920026435",
+    "probe_models.py": "38b06b30aa86d31f2264c69462da7bb2e3ab8e8c38e2f65697a19975e7930065",
+    "targeted.json": "45cea38ca509d5fa10a68fe7df1ceb6ed5879cd4a6383924cec411d98b3e2163",
+    "declared.log": "25927147111fb700eeec94ac8704a8d1dcea2bc638c724208b9af3c09d2d4714",
+    "matrix.log": "b840a5500b652c6333b8c0699ec6fd8e89200cce3c40509024172b0bcfd4acfc",
+    "audit_final.json": "bd1f237e5776fe7aa4484c479a423f41e0e01dc27b23538a0cb67e94bb5e05a7",
+    "luat9_sample.jsonl": "93d6b3ed01374090ec1bee74a42cb5958070387547cb1bbfcd4396b76b1f30a0",
+    "ledger.tsv": "7b05886ed01f467af95f8fa85c8fde704388c0c9420ca54c69154b3a5fc98df9",
+    "snapshot_before.json": "bbaff47f9df0f687233fb2cd834e3f1a2fff822dae683a12c5d751825a35c021",
+    "snapshot_after.json": "bbaff47f9df0f687233fb2cd834e3f1a2fff822dae683a12c5d751825a35c021",
+    "real_head.tsv": "b316c68f70291fbe60d336d42e39f6734b4d67dbace00cc0f3faed46ea6eeb7f"
+  }
+}

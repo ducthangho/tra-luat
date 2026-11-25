@@ -1,0 +1,386 @@
+[
+  {
+    "case": "direct",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "direct",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "direct",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "direct",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "case_target",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@1114863fdefcaaa8bd4a5c4de84b7a3f577218c5\nĐÓNG ĐƯỢC WP P — merge bdd1f9e26f6a0401a9a29e7951cc32c45856c765\n",
+    "stderr": ""
+  },
+  {
+    "case": "case_target",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "case_target",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@1114863fdefcaaa8bd4a5c4de84b7a3f577218c5\nĐÓNG ĐƯỢC WP P — merge bdd1f9e26f6a0401a9a29e7951cc32c45856c765\n",
+    "stderr": ""
+  },
+  {
+    "case": "case_target",
+    "code": "head",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "nfc_target",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@15e59feaa724af40d48d2d0e6413d1e478025674\nĐÓNG ĐƯỢC WP P — merge c40a1947543c08281da3bb62dbf363e5d7ceee1f\n",
+    "stderr": ""
+  },
+  {
+    "case": "nfc_target",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "nfc_target",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@15e59feaa724af40d48d2d0e6413d1e478025674\nĐÓNG ĐƯỢC WP P — merge c40a1947543c08281da3bb62dbf363e5d7ceee1f\n",
+    "stderr": ""
+  },
+  {
+    "case": "nfc_target",
+    "code": "head",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "chain",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "chain",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "chain",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "chain",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "cycle",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@fce31a779220f304c430f1726520ac130d0f7b27\nĐÓNG ĐƯỢC WP P — merge 85f2aa4ec9bc06199d1ebda593dd33238b50c7d1\n",
+    "stderr": ""
+  },
+  {
+    "case": "cycle",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "cycle",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@fce31a779220f304c430f1726520ac130d0f7b27\nĐÓNG ĐƯỢC WP P — merge 85f2aa4ec9bc06199d1ebda593dd33238b50c7d1\n",
+    "stderr": ""
+  },
+  {
+    "case": "cycle",
+    "code": "head",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "nested",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "nested",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "nested",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "nested",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "missing_component",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "missing_component",
+    "code": "previous",
+    "model": "tep",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "missing_component",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "missing_component",
+    "code": "head",
+    "model": "tep",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "file_component",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "file_component",
+    "code": "previous",
+    "model": "tep",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "file_component",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "file_component",
+    "code": "head",
+    "model": "tep",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp nội dung của oid')\n"
+  },
+  {
+    "case": "file_link",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@44c94e4875db26bc7a8e7af63e75635f2475ff1b\nĐÓNG ĐƯỢC WP P — merge ff2e4b9bc2f46c0caa8388c86498925e91ac1f84\n",
+    "stderr": ""
+  },
+  {
+    "case": "file_link",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "file_link",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@44c94e4875db26bc7a8e7af63e75635f2475ff1b\nĐÓNG ĐƯỢC WP P — merge ff2e4b9bc2f46c0caa8388c86498925e91ac1f84\n",
+    "stderr": ""
+  },
+  {
+    "case": "file_link",
+    "code": "head",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "yaml_link",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "yaml_link",
+    "code": "previous",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "yaml_link",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "yaml_link",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "slash_target",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "slash_target",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "slash_target",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "slash_target",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "root",
+    "code": "previous",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "root",
+    "code": "previous",
+    "model": "tep",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "root",
+    "code": "head",
+    "model": "native_linux",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "case": "root",
+    "code": "head",
+    "model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  }
+]

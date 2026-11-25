@@ -1,0 +1,68 @@
+{
+  "f602325": {
+    "rc": 1,
+    "diagnostics": {
+      "F841": 3,
+      "F401": 8,
+      "F541": 2,
+      "F811": 3
+    }
+  },
+  "HEAD": {
+    "rc": 1,
+    "diagnostics": {
+      "F841": 3,
+      "F401": 8,
+      "F541": 2,
+      "F811": 3
+    }
+  },
+  "symlinks_ops_land": [],
+  "spec_blob_hash": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "handoff_hash": "a695c91fcad84adebad892e2764f84a5532d2956c829913bc87f40831ea8d3cf",
+  "luat9_neo": {
+    "neo": {
+      "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "test": "18d9acfc31d0b0e5cb6e41165fe11b35da17ca0d386c0a068b9042dd74c4cea5",
+      "goc": "57a9bd551b7b80d0a8ce341d16c74d9e264bd36e8574edd6778ba597107daa05",
+      "manifest": "18bdeec1c0551871ff6241b29aace6077649863f011ed9d6ccfa7958f956491d",
+      "python": "3.13.18",
+      "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline": "SONG",
+    "baseline_ca_dat": [
+      "cong_d2b_c1_passed_dat",
+      "cong_d2b_c2_thieu_nguon",
+      "cong_d2b_c3_attempt_kieu",
+      "cong_d2b_c3_neo",
+      "cong_d2b_c4_kiem_tep",
+      "cong_d2b_c4_symlink",
+      "cong_d2b_c5_duong_dan",
+      "cong_d2b_c5_mien_ky_tu",
+      "cong_d2b_c5_mode",
+      "cong_d2b_c6_mien",
+      "cong_d2b_c7_module_vang",
+      "cong_d2b_c7_module_khong_nap",
+      "cong_d2b_c7_module_nem",
+      "cong_d2b_c7_git_loi",
+      "cong_d2b_c9_oid",
+      "cong_d2b_c9_oid_khong_phai_commit"
+    ],
+    "tap_con": false
+  },
+  "luat9_row_example": {
+    "id": "c2:_d2b_blob:20:4",
+    "rc": 0,
+    "giet": [
+      "cong_d2b_c1_passed_dat"
+    ],
+    "hong": [],
+    "dat": 0,
+    "assertion": "ChotB4: ('cong_d2b_c1_passed_dat', 'doi_chung_dat: đòi (0, [], [\\'D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@744eb4f94ac5ce12e46465c1c757c8cedf243f34\\']), được (8, [\"KHÔNG ĐO ĐƯỢC: D2b OSError(\\'bản bung git archive không khớp nội dung của oid\\')\"], []); stderr=\"K",
+    "phan_hang": "GIET",
+    "stderr_cuoi": "",
+    "op": "c2",
+    "dong": 20,
+    "sha256": "52c141d81e57a3c2c504c5c1635e44fe320e017b28f3329441849194c6d0a155"
+  }
+}

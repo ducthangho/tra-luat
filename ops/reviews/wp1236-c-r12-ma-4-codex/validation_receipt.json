@@ -1,0 +1,8 @@
+{
+  "command": "python3 -B ../kiem_verdict_lop.py ../work/VERDICT.json --vong 4",
+  "rc": 0,
+  "stdout": "HOP_LE (§8.3): 2 finding, 2 lop\n",
+  "final_line_matches": true,
+  "evidence_hashes_match": true,
+  "head_unchanged": true
+}

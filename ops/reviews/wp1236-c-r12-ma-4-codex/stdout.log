@@ -1,0 +1,5 @@
+Đã hoàn tất review và lưu [VERDICT.md](../work/VERDICT.md), [VERDICT.json](../work/VERDICT.json). Validator trả `HOP_LE`.
+
+Có 2 finding mở: C03 P1 và C04 P2; báo cáo phân biệt rõ bằng chứng mô hình với Windows native chưa đo. Repository không thay đổi.
+
+KET_LUAN: changes_requested

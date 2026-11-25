@@ -1,0 +1,68 @@
+{
+  "ruff": {
+    "command": "python3 -m ruff check --no-cache --select F --output-format json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py",
+    "rc": 1,
+    "head_count": 16,
+    "base_count": 16,
+    "new": [],
+    "removed": []
+  },
+  "ruff_ci_pin_probe": [
+    [],
+    3
+  ],
+  "real_corpus_identical": true,
+  "law9": {
+    "manifest_identical": true,
+    "manifest_records": 229,
+    "executor_classes": {
+      "GIET": 226,
+      "SONG": 3
+    },
+    "sample_classes": {
+      "GIET": 9,
+      "SONG": 3
+    },
+    "sample_survivors": [
+      {
+        "id": "g:_d2b_kiem:44:49",
+        "rc": 0,
+        "giet": [],
+        "hong": [],
+        "dat": 16,
+        "assertion": "",
+        "phan_hang": "SONG",
+        "stderr_cuoi": "",
+        "op": "g",
+        "dong": 44,
+        "sha256": "cea5b5bb4235e79119edf2026eef2c2e238c562fde42c3ddc9e1e92b28f7e265"
+      },
+      {
+        "id": "i7:_d2b_kiem:30:90",
+        "rc": 0,
+        "giet": [],
+        "hong": [],
+        "dat": 16,
+        "assertion": "",
+        "phan_hang": "SONG",
+        "stderr_cuoi": "",
+        "op": "i7",
+        "dong": 30,
+        "sha256": "fd482255cbfae23daeb5996477a5e14c974eb0fb5ab030686ec4d4c8c1522e65"
+      },
+      {
+        "id": "j1:_d2b_kiem:31:23",
+        "rc": 0,
+        "giet": [],
+        "hong": [],
+        "dat": 16,
+        "assertion": "",
+        "phan_hang": "SONG",
+        "stderr_cuoi": "",
+        "op": "j1",
+        "dong": 31,
+        "sha256": "c1430808c663bf377cecf88bffea63cd5e70fc6fe0751fa85ceb6fc55c2ef2c3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+[
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}",
+      "HEAD^"
+    ],
+    "rc": 0,
+    "stdout": "d5a7d8510af03e0d08545f677ad5de687e0264f4\n241bd084f5979b02a1221d7d645e113227feee59\ndbe650d2a3c3fb6da9573ea485adc65934efdc78\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "rc": 0,
+    "stdout": "!! .codex/\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "f602325",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "94\t1\t.claude/dev/packet_loop.py\n326\t12\t.claude/dev/packet_loop_test.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "f602325",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "f602325:ops/specs/wp1236-r12.md"
+    ],
+    "rc": 0,
+    "stdout": "e5583bc042448517b94eadda57231dfc60e0a284\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "branch",
+      "--show-current"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "config",
+      "--get",
+      "core.abbrev"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  }
+]

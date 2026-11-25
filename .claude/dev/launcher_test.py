@@ -16163,7 +16163,44 @@ def r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha():
          "ca thừa kế phải NÉM ngay trong nhánh if (fail-closed), không continue/bỏ qua")
 
 
+@ca
+def r1511_doctor_khong_snapshot_van_noi_ly_do_acl():
+    """r1511 (cross-review #1534 lượt 1, P2): KHÔNG có CODEX_AUTH_JSON (auth.json do `codex login` ghi) mà kho đọc
+    lỗi ACL ⇒ _do_codex vẫn CHUA_XAC_THUC (fail-closed) NHƯNG mang nguyên nhân + lệnh icacls, không chỉ "CHỜ snapshot"."""
+    m = _tai_launcher_thu()
+    thong_diep = ("credential ACL inherits CodexSandboxUsers read from the Codex home (Codex rewrote the file); "
+                  "fix: " + m._lenh_sua_acl_tep("S-1-5-21-1-2-3-1001"))
+
+    class KhoHong:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            raise OSError(thong_diep)
+
+        def __exit__(self, *a):
+            return False
+
+    with tempfile.TemporaryDirectory() as tam:
+        m._KhoCodex = KhoHong
+        ly = m._ly_do_cho_snapshot(Path(tam))
+        bang(ly is not None and m._dang_cho_snapshot(Path(tam)), "lỗi đọc kho phải vẫn là CHẶN (fail-closed)")
+        bang("inherits CodexSandboxUsers" in ly and "/grant:r" in ly, f"lý do ACL phải tới người dùng: {ly!r}")
+        m.shutil.which = lambda ten: "codex"
+        m._co_chan_codex = lambda: None
+        m._codex_home_hieu_luc = lambda: Path(tam)
+        nhan, chi_tiet = m._do_codex()[:2]
+        bang(nhan == "CHUA_XAC_THUC" and "inherits CodexSandboxUsers" in chi_tiet and "icacls" in chi_tiet,
+             f"doctor không snapshot phải nói lý do ACL: {nhan} {chi_tiet!r}")
+
+
 DOT_BIEN = [
+    ("r1511_nuot_ly_do_khong_snapshot", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return _CHO_SNAPSHOT'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
+    ("r1511_doctor_bo_ly_do", ('        return ("CHUA_XAC_THUC", ly_do_cho)', '        return ("CHUA_XAC_THUC", _CHO_SNAPSHOT)'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
+    ("r1511_loi_doc_kho_thanh_tha", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return None'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
     # r1511: mỗi chốt một đột biến.
     ("r1511_nhan_ca_tuong_minh", ('    return "ID" in flags and _ace_sandbox', '    return True and _ace_sandbox'),
      ["r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha"]),

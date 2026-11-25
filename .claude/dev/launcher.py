@@ -2696,7 +2696,7 @@ def lenh_run(a) -> int:
                        + "".join(f" — {x.get('cach')}" for x in (ket or ()) if not x.get("ok")))
     if _la_codex(qd):
         if _cho_snapshot_hoac_chan():
-            raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
+            raise Chan(MA_CHUA_XAC_THUC, _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)
     try:
         probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd, dinh_danh)
     except Chan as e:
@@ -4320,16 +4320,26 @@ def _danh_dau_auth_hong(home: Path, da_probe: bytes | None = None) -> bool:
         return False
 
 
-def _dang_cho_snapshot(home: Path) -> bool:
+_CHO_SNAPSHOT = "CHỜ snapshot Codex mới; không lặp credential đã thất bại"
+
+
+def _ly_do_cho_snapshot(home: Path):
+    """None = không phải chờ; chuỗi = lý do chặn. r1511 (cross-review #1534 lượt 1, P2): lỗi đọc kho KHÔNG
+    snapshot (auth.json do `codex login` ghi) từng bị nuốt thành câu "CHỜ snapshot" — mất nguyên nhân ACL."""
     try:
         with _KhoCodex(home) as store:
             rejected, _ = _doc_rejected(store)
             data = store.read()
-            return data is not None and _credential_id(data) in rejected
+            return _CHO_SNAPSHOT if data is not None and _credential_id(data) in rejected else None
     except FileNotFoundError:
-        return False
-    except (OSError, ValueError, UnicodeError):
-        return True  # unreadable recovery state is not permission to retry
+        return None
+    except (OSError, ValueError, UnicodeError) as e:
+        # unreadable recovery state is not permission to retry
+        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"
+
+
+def _dang_cho_snapshot(home: Path) -> bool:
+    return _ly_do_cho_snapshot(home) is not None
 
 
 def _probe_snapshot(data: bytes):
@@ -4641,8 +4651,9 @@ def _do_codex(kiem_song: bool = False,
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
-    if _dang_cho_snapshot(_codex_home_hieu_luc()):
-        return ("CHUA_XAC_THUC", "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
+    ly_do_cho = _ly_do_cho_snapshot(_codex_home_hieu_luc())
+    if ly_do_cho is not None:
+        return ("CHUA_XAC_THUC", ly_do_cho)
     try:
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy

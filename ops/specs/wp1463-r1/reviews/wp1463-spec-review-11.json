@@ -1,0 +1,576 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "mission_id": "gh-1172",
+  "revision": 10,
+  "generation": null,
+  "round": 11,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "189442c7edbc4b5a9c411979a654c478",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "189442c7edbc4b5a9c411979a654c478",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "source": "Current task is independent Codex reviewer. Supplied launcher run.json attests openai_codex/codex_cli/machine and run ID; no serving-model or effort measurement fields were present. No identity inferred from GitHub."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+  "reviewed_tree": "705bc65e75a751878dd48d80d08ee30b33966225",
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "a3f5d56ac137a5e29cd3560e47b2c1a0b988b1bd74c24236f0d7c2670c93415c",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "review_class": "sensitive",
+  "tests": [
+    {
+      "name": "Exact object and clean checkout",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git status --porcelain=v1; sha256 of git show HEAD:ops/specs/wp1463-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_output": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f tree=705bc65e75a751878dd48d80d08ee30b33966225; clean; spec sha256=a3f5d56ac137a5e29cd3560e47b2c1a0b988b1bd74c24236f0d7c2670c93415c"
+    },
+    {
+      "name": "Registry, frozen table, fingerprints and removal counterexamples",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/measure.py",
+      "exit_code": 0,
+      "observed_output": "30 rows; frozen hash 0aba13e7b73bee2a09d4a5aac541dfba76dbe4497edde2d77a938ac04a375e58; selector and oracle mismatches=[]; 7/7 individual removals detected; installed fingerprint true/true/true/true,count=7; removed false/false/false/false,count=0; 30 effective rollback modes day_du, other entries unchanged.",
+      "artifact": "/tmp/wp1463-r11-audit/registry.json"
+    },
+    {
+      "name": "Fingerprint and every-row contract prototype; approved-r6 regression",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/contract_checks.py",
+      "exit_code": 0,
+      "observed_output": "Fingerprint 5/5: two healthy accepted, go-as-nguyen/go-as-bon/no-removal rejected. Single-row mismatch inputs 30/30 rejected; each matching skip-row mutant distinguishable. Contract sections 1,2,4,6, Acceptance 2, predecessor evidence and decision ledger text byte-identical to approved r6. Sections 3/5 changed only frozen zone/table and related K6/K8 counts.",
+      "artifacts": [
+        "/tmp/wp1463-r11-audit/contract-prototype.json",
+        "/tmp/wp1463-r11-audit/regression.json"
+      ],
+      "limit": "Prototype demonstrates checkable spec obligations, not adequacy of an implementation that does not exist yet."
+    },
+    {
+      "name": "Observation coverage adversarial probe",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/measure.py",
+      "exit_code": 0,
+      "observed_output": "The measurement command succeeds in reproducing three false SACH outcomes; this is failed acceptance coverage, not a shell error.",
+      "artifact": "/tmp/wp1463-r11-audit/coverage.json"
+    },
+    {
+      "name": "Size and blob comparison",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/measure.py",
+      "exit_code": 0,
+      "observed_output": "Reference driver=503 lines (458 nonblank/noncomment); hook=76 (62 nonblank/noncomment); all 11 Z blobs equal d0868db at supplied origin/master 7346ea0046b80fd291617f608f4f731cfd600c34.",
+      "artifact": "/tmp/wp1463-r11-audit/metrics.json"
+    },
+    {
+      "name": "Initial prototype attempt",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/measure.py",
+      "exit_code": 1,
+      "observed_output": "Reviewer prototype indexed ke_hoach after removing NHE entry and got KeyError. Corrected prototype to use the registry caller’s day_du fallback; no repository change and no candidate failure inferred."
+    },
+    {
+      "name": "Full ci_provenance suite and do_vung_pr2.py do",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed_output": "Explicitly prohibited for this round; no full-suite or implementation acceptance claimed."
+    },
+    {
+      "name": "Real phan_chung executions",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed_output": "Prior round records roughly 382–387 seconds per probe, outside the requested few-minute cheap-measurement scope. Registry module loads and selector/fingerprint checks ran without phan_chung."
+    },
+    {
+      "name": "Bare Ruff, release gates, CI, Windows, live authority refresh",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed_output": "Spec review with no code changes or dispatch authorization. No implementation H or lease exists; GitHub state and future B2 base not certified."
+    },
+    {
+      "name": "Final read-only/exact-object verification",
+      "status": "passed",
+      "command": "python -B /tmp/wp1463-r11-audit/finalize.py",
+      "exit_code": 0,
+      "observed_output": "HEAD/tree, tracked diff, index diff, indexed paths and status including untracked/ignored equal before and after; exact spec SHA256 unchanged.",
+      "artifacts": [
+        "/tmp/wp1463-r11-audit/snapshot-before.json",
+        "/tmp/wp1463-r11-audit/snapshot-after.json"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR2-S13",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 224,
+        "related": [
+          "SPEC.md:455 (historical evidence of surplus starts)",
+          "do-chuan-bi/do_vung_pr2.py:126-189 (reference only)"
+        ]
+      },
+      "claim": "Acceptance 4 uses aggregate child-spawn versus hook-start counts to establish observation coverage. Extra starts from other children can mask an unobserved directly spawned Python child; the mandatory -I/-S/-E tests are not required to include this mixed-child case. The defect remains in the active vung contract after the auxiliary admission tool is retired.",
+      "hostile_input": "Within one measured phase, launch a healthy Python process through a shell, then directly launch Python with -S (also reproduced with -I and -E) to read a tracked out-of-zone sentinel. The first child contributes a hook start but no counted Python spawn; the second contributes a counted spawn but no hook start. All processes exit zero and the phase prints its positive result.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/measure.py",
+          "exit_code": 0,
+          "observed_output": "masked_S, masked_I, masked_E: READ_OK:sentinel; python_children=1, hook_child_starts=1; observed only the in-zone ci.yml witness; reasons=[]; outside=[]; classification=SACH. Control hidden_S without surplus: KHONG_DO_DUOC. Direct, alias and dir_fd controls: NGOAI_VUNG.",
+          "artifact": "/tmp/wp1463-r11-audit/coverage.json"
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Change Acceptance 4 observation-coverage and self-test requirements together. This is the current vung acceptance rule, not a request to repair or reinstate the retired auxiliary admission script.",
+        "how": "Require each relevant Python spawn to be associated with its own observer startup (or fail closed when association is not measurable); unrelated, duplicate or shell-origin starts must not discharge another child’s coverage obligation. Preserve separate phase logs and the declared non-Python boundary.",
+        "locking_test_and_mutant": "Add the mixed-child input above for each phase, with -S/-I/-E variants and successful-read evidence; expect KHONG_DO_DUOC. Healthy matched children must remain measurable. A mutant replacing association with aggregate counts must die for the missing child observer.",
+        "regression_risk": "PID reuse, fork/exec semantics, failed launches and duplicate hook imports can cause false coverage or false rejection. Do not solve this by rejecting all healthy shell-mediated children or by widening Z."
+      }
+    },
+    {
+      "id": "PR2-S16",
+      "class_slug": "prelease-zone-gate-stale-active-contract",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 303,
+        "related": [
+          "SPEC.md:248",
+          "SPEC.md:344",
+          "SPEC.md:466"
+        ]
+      },
+      "claim": "The active spec still orders zone measurements before lease even though revision 10 says the only pre-lease zone operation is a non-blocking blob comparison. Line 303 first requires rerunning the fixture table and Số đo on the new base; line 248 still promises a pre-lease zone gate; line 344 says registry-opened files will be measured before lease. The supersession note at line 466 covers historical change/Số đo sections, not these active statements.",
+      "hostile_input": "A new B2 base has a changed registry blob. Following the first active instruction at line 303 requires rerunning old measurements before lease; following the revision-10 paragraph requires granting lease after blob comparison and implementing vung first. These are different executable sequences.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-r11-audit/contract_checks.py",
+          "exit_code": 0,
+          "observed_output": "Active references remain: line 248 chốt vùng trước lease; line 303 chạy lại bảng fixture vùng và các số ở mục Số đo ... then Phép kiểm rẻ duy nhất ... KHÔNG chặn lease; line 344 đo lại trước lease. Line 466 explicitly supersedes historical sections only.",
+          "artifact": "/tmp/wp1463-r11-audit/active-contract-quotes.json"
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Reconcile the three active cross-references in Chỗ khác chữ kế hoạch, Quy trình và quyền, and chua_do_duoc. The replacement paragraph already gives the intended arrangement.",
+        "how": "Point all active statements to the non-blocking blob comparison before lease, the conditional first executor vung run on base plus four data changes, and mandatory Acceptance 4 on H. Keep dated historical measurements and mark their former gate status as superseded.",
+        "locking_test_and_mutant": "Walk both giong and khac/khong_do_duoc cases from admission through early execution and final H. There must be one consistent ordering and no requirement for the retired auxiliary gate; reintroducing any active pre-lease measurement mandate should fail the consistency review.",
+        "regression_risk": "Do not remove the B1a/B2 landed prerequisites, lease exclusion checks, or the early stop on NGOAI_VUNG/KHONG_DO_DUOC while removing stale references."
+      }
+    }
+  ],
+  "verdict": "blocked",
+  "content_disposition": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_notes": "Independent cross-family review completed with open findings; no cross_approved state, implementation approval or land authority. Final review call 11/11 and recurring S13 require the protocol checkpoint; no automatic additional call.",
+  "evidence_url": null,
+  "class_table": [
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-S13"
+      ],
+      "highest_open_severity": "P2",
+      "source_rounds": [
+        8,
+        9,
+        11
+      ],
+      "source_sha": "cc87416a2be3894f900045340553056c8cd60c96",
+      "manifestations": [
+        "Unrelated child startup masks missing observer for -S, -I and -E"
+      ],
+      "common_fix": "Require each relevant Python spawn to be associated with its own observer startup (or fail closed when association is not measurable); unrelated, duplicate or shell-origin starts must not discharge another child’s coverage obligation. Preserve separate phase logs and the declared non-Python boundary.",
+      "closure_check": "Add the mixed-child input above for each phase, with -S/-I/-E variants and successful-read evidence; expect KHONG_DO_DUOC. Healthy matched children must remain measurable. A mutant replacing association with aggregate counts must die for the missing child observer."
+    },
+    {
+      "class_slug": "prelease-zone-gate-stale-active-contract",
+      "finding_ids": [
+        "PR2-S16"
+      ],
+      "highest_open_severity": "P3",
+      "source_rounds": [
+        11
+      ],
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "manifestations": [
+        "Active old-gate references at lines 248,303,344"
+      ],
+      "common_fix": "Point all active statements to the non-blocking blob comparison before lease, the conditional first executor vung run on base plus four data changes, and mandatory Acceptance 4 on H. Keep dated historical measurements and mark their former gate status as superseded.",
+      "closure_check": "Walk both giong and khac/khong_do_duoc cases from admission through early execution and final H. There must be one consistent ordering and no requirement for the retired auxiliary gate; reintroducing any active pre-lease measurement mandate should fail the consistency review."
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "PR2-S11",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "label": "VÁ SINH LỖI MỚI",
+      "scope": "Specification-level admission redesign and explicit Acceptance 4 obligations; not a claim that the old script was repaired or that future do_pr2.py passes.",
+      "evidence": "Original auxiliary admission defects are removed from authority and their behavioral obligations are retained in Acceptance 4. The executable fingerprint prototype accepts two healthy states, rejects go-as-nguyen/go-as-bon/no-removal, and all 30 row-mismatch inputs distinguish their skip-row mutants. However, replacing the admission gate leaves three contradictory active ordering statements (new PR2-S16). This label does not claim the retired script was repaired.",
+      "fix_induced_other_class": [
+        "prelease-zone-gate-stale-active-contract"
+      ],
+      "source_round": 9,
+      "source_sha": "cc87416a2be3894f900045340553056c8cd60c96"
+    },
+    {
+      "id": "PR2-S13",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "label": "VÁ HỜ",
+      "scope": "Current Acceptance 4 coverage rule",
+      "evidence": "Realpath and dir_fd controls detect the target, but aggregate child counts permit the measured mixed-child -S/-I/-E escapes. Relocating the measurement does not close this active acceptance defect.",
+      "source_round": 9,
+      "source_sha": "cc87416a2be3894f900045340553056c8cd60c96"
+    },
+    {
+      "id": "PR2-S14",
+      "class_slug": "zone-mutation-count-stale",
+      "label": "ĐÃ VÁ THẬT",
+      "scope": "Active zone cardinality, K6, table and Acceptance 7",
+      "evidence": "Section 3 tuple=7, Z=11, active plan-difference paragraph says BẢY, K6 demands seven removals, table=30 and exact hash matches; all seven removals produce selector mismatches. Historical five-element records are dated.",
+      "source_round": 9,
+      "source_sha": "cc87416a2be3894f900045340553056c8cd60c96"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [
+        "PR2-S01"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Section 4 unchanged from approved r6: structured child results and ordered composition preserve baseline failures and cache status. K5a same except unrelated counts."
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [
+        "PR2-S02"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Section 4 and K5b retain independent plan identity, duplicates, ordering and empty-plan checks."
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [
+        "PR2-S03"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Section 4 and K5c retain verbatim name-bound reason/confirming identity fields."
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Section 4 and Acceptance 2 byte-identical to r6: raw cu, nine independent predicates, per-input expected vectors, E-aware implication."
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [
+        "PR2-S05"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "K8 retains in-place deletion of all four entries. Current prototype verifies other entries unchanged and consumer default day_du on 30/30 rows; real phan_chung not rerun."
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [
+        "PR2-S06"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Predecessor evidence text byte-identical to r6: B1a/B2 landed with four anchors and bookkeeping; write exclusion separate."
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [
+        "PR2-S07"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Active ADR0060/0062 paragraph retains default applicability, exact-H Windows requirement/waiver, K7 and no opt-in bypass."
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "finding_ids": [
+        "PR2-S08"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Active counters match assignment: author 10/10, review 10/11 before call; author increases 5+1+2+1+1=10, review 6+2+1+1+1=11 (the earlier extra review to 7 included). No live authority revalidation claimed."
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [
+        "PR2-S09"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Five-decision ledger section byte-identical to approved r6; references retained. No live receipt validity claim."
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [
+        "PR2-S10"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Both workflows and both B1a fixture paths present in Z; seven removal mutants detected. Future B2/H dependency closure still requires vung."
+    },
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-S11"
+      ],
+      "status": "VÁ SINH LỖI MỚI",
+      "scope": "Admission redesign and mandatory phase-specific obligations checked; new ordering contradiction PR2-S16 is reported separately."
+    },
+    {
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "finding_ids": [
+        "PR2-S12"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Predecessor section byte-identical to approved r6; combined same-run/attempt/head/job/log evidence retained; collector not_measured preserved."
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-S13"
+      ],
+      "status": "VÁ HỜ",
+      "scope": "Mixed-child counterexamples retain this class open; path controls pass."
+    },
+    {
+      "class_slug": "zone-mutation-count-stale",
+      "finding_ids": [
+        "PR2-S14"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "All active cardinalities agree: VUNG_THEM 7, Z 11, table 30, K6 seven removals, Acceptance 7 exact hash."
+    },
+    {
+      "class_slug": "registry-unchanged-evidence-overclaim",
+      "finding_ids": [
+        "PR2-S15"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Dated drift section distinguishes eleven unchanged definitions from changed MOI; no all-twelve-unchanged claim."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Admission order and B2 drift",
+      "method": "Non-blocking blob comparison, giong/khac/khong_do_duoc paths, early base+four data changes, mandatory H run",
+      "result": "PR2-S16: stale active pre-lease instructions; replacement paragraph itself stops on drift."
+    },
+    {
+      "direction": "Closed phase set and liveness",
+      "method": "Three named phases, own rc/positive result/witness; no union before per-phase checks",
+      "result": "Required at spec level; implementation not yet present."
+    },
+    {
+      "direction": "Registry state identity",
+      "method": "Load real origin/master module, install four entries, remove in place, compare fingerprints",
+      "result": "Healthy installed and rollback states distinguished from wrong/no-removal states."
+    },
+    {
+      "direction": "Path and process observation",
+      "method": "Direct, alias, dir_fd, isolated child and mixed-child controls using actual reference hook",
+      "result": "PR2-S13: surplus starts mask unseen direct child."
+    },
+    {
+      "direction": "Frozen zone semantics and every-row table",
+      "method": "Parse SPEC table independently, recompute hash, run actual selector and seven individual removal mutants",
+      "result": "30/30 match, 7/7 detected, exact hash."
+    },
+    {
+      "direction": "Regression of A+3 and preservation classes",
+      "method": "Compare active contracts 1–6 to approved r6 and prior verdicts; inspect structured results, cu, independent nine-vector comparator",
+      "result": "No regression identified; not an implementation run."
+    },
+    {
+      "direction": "Authority, dependency and budgets",
+      "method": "Inspect landed versus lease exclusion, combined four provenance anchors, current author/review counters",
+      "result": "Author 10/10 and review 10/11 before this call; this call consumes 11/11. No new authority granted."
+    },
+    {
+      "direction": "Write set and size feasibility",
+      "method": "Four deliverable files; reference line counts; cap and measured-overflow stop",
+      "result": "579 physical reference lines alone; copy-as-is cannot fit 450. This is not a lower bound for a new implementation; actual H size remains unmeasured."
+    }
+  ],
+  "measure_table": [
+    {
+      "quantity": "Frozen fixture",
+      "measured": "30 rows; hash 0aba13e7b73bee2a09d4a5aac541dfba76dbe4497edde2d77a938ac04a375e58",
+      "artifact": "/tmp/wp1463-r11-audit/registry.json"
+    },
+    {
+      "quantity": "Zone",
+      "measured": "Z 11; VUNG_THEM 7; 7/7 removal counterexamples detected",
+      "artifact": "/tmp/wp1463-r11-audit/registry.json"
+    },
+    {
+      "quantity": "Fingerprints",
+      "measured": "installed [true,true,true,true],7; rollback [false,false,false,false],0",
+      "artifact": "/tmp/wp1463-r11-audit/registry.json"
+    },
+    {
+      "quantity": "Child coverage",
+      "measured": "3 mixed-child escapes report SACH; isolated missing child correctly reports KHONG_DO_DUOC",
+      "artifact": "/tmp/wp1463-r11-audit/coverage.json"
+    },
+    {
+      "quantity": "Reference size",
+      "measured": "503+76=579 physical lines; 458+62=520 nonblank/noncomment; delivery cap 450 additions",
+      "artifact": "/tmp/wp1463-r11-audit/metrics.json"
+    },
+    {
+      "quantity": "Supplied master drift",
+      "measured": "11/11 Z blobs equal d0868db at 7346ea0046b80fd291617f608f4f731cfd600c34; not a future B2/lease base claim",
+      "artifact": "/tmp/wp1463-r11-audit/metrics.json"
+    },
+    {
+      "quantity": "Budgets",
+      "measured": "Spec author 10/10; review 10/11 before this call, 11/11 with it. Source is assignment and active spec; no new GitHub authority readback."
+    },
+    {
+      "quantity": "Every-row negative and fingerprint prototype",
+      "measured": "30 single-row inputs reject; 30 matching skip mutants distinguishable; 2 healthy/3 faulty fingerprint cases match expected.",
+      "artifact": "/tmp/wp1463-r11-audit/contract-prototype.json"
+    }
+  ],
+  "notes": [
+    "Read-only assigned checkout; all new artifacts under /tmp; no GitHub writes, workflow dispatch, commit, push, merge or LIVE.",
+    "Sandbox is workspace-write, not a mechanically read-only filesystem; reviewer complied with the stricter read-only task scope.",
+    "Retired reference tool was used only to reproduce the aggregate coverage rule still explicitly required by Acceptance 4. The finding does not reinstate that tool as a gate.",
+    "Reference line counts demonstrate copy-as-is infeasibility, not that every implementation exceeds the cap. Preserve the existing measured-size stop and owner-authorized revision path; do not cut acceptance to fit.",
+    "This is spec review, not acceptance of do_pr2.py or a claim that code exists. No full suite or 40-minute measurement was run.",
+    "All coverage counterexamples use an actual scratch Git index and git ls-files; the reviewed repository was not modified.",
+    "K8 full mode is the existing consumer fallback when ke_hoach has no entry after deletion; direct indexing is not required."
+  ],
+  "created_at_utc": "2026-11-25T19:42:36.524521+00:00",
+  "read_only_verification": {
+    "before": "/tmp/wp1463-r11-audit/snapshot-before.json",
+    "after": "/tmp/wp1463-r11-audit/snapshot-after.json",
+    "equal": true,
+    "scope": "Assigned checkout HEAD/tree, tracked/index diffs, index entries, untracked/ignored status. No source checkout beyond this clone was observed. Endpoint equality does not prove no transient write; no repository mutations were issued."
+  },
+  "environment": {
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "sandbox_mode": "workspace-write",
+    "tool_versions": {
+      "git": [
+        "git version 2.43.0"
+      ],
+      "actionlint": [
+        "1.7.7",
+        "installed by downloading from release page"
+      ],
+      "shellcheck": [
+        "ShellCheck - shell script analysis tool",
+        "version: 0.9.0"
+      ]
+    }
+  },
+  "budget": {
+    "author_used": 10,
+    "author_limit": 10,
+    "spec_review_used_before": 10,
+    "spec_review_used_including_this_run": 11,
+    "spec_review_limit": 11,
+    "authority_basis": "User assignment and active frozen review object; no additional invocation authorized."
+  },
+  "cause_counts": {
+    "open_classes": 2,
+    "open_findings": 2,
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 1,
+    "recurrent_classes": [
+      "zone-audit-open-coverage-incomplete"
+    ],
+    "new_classes": [
+      "prelease-zone-gate-stale-active-contract"
+    ]
+  },
+  "next_role": "human",
+  "manual_next_action": "Review Rescue Checkpoint under protocol §12: examine the recurring coverage design and reconcile active admission instructions. Any further drafting/review requires the appropriate owner-backed budget/authority; do not start executor lease from this verdict.",
+  "first_complete_verdict_at_utc": "2026-11-25T19:42:36.524521+00:00",
+  "updated_at_utc": "2026-11-25T19:46:08.117767+00:00",
+  "artifact_manifest": [
+    {
+      "path": "/tmp/wp1463-r11-audit/measure.py",
+      "sha256": "961865e095ad066be34232bb800cc1d7b6be4f3e25c854e06381a87ea6af2b82",
+      "bytes": 6516
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/contract_checks.py",
+      "sha256": "99109d2f3abd1cfff1afc859a92516cad328fa4ef1f584606a4001ab342825f6",
+      "bytes": 4200
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/registry.json",
+      "sha256": "cdb46b2b7370f2088c9a1dd5bee5740ea620497938fcc96bb6898480c789a2ff",
+      "bytes": 1426
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/metrics.json",
+      "sha256": "ab3ffffd0c5d190a0a67612938870f046b08b54f296c34f19eabc1fcba321a34",
+      "bytes": 2277
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/coverage.json",
+      "sha256": "4a88a0692d5295adc3c4fe7cf538b215308b72eaed219c2b56df9895610580f9",
+      "bytes": 2972
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/contract-prototype.json",
+      "sha256": "ce78e0855604a35a77107528380a87992b5cda7b68ce138fe487804a47eb3663",
+      "bytes": 5183
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/regression.json",
+      "sha256": "afe8f059d676212b2b03e8c93cfe257c01a9a74a00cf7e6af395aba0664f77d2",
+      "bytes": 1879
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/environment.json",
+      "sha256": "f6959ee114181c83a6013c3999e381f8f027eb2576c67c2a8be27d44b535bed5",
+      "bytes": 690
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/snapshot-before.json",
+      "sha256": "9f2e577d30ae2cf2d43e52999a4bf5e9877f4a946491e71be885e107e1744f6c",
+      "bytes": 520
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/snapshot-after.json",
+      "sha256": "9f2e577d30ae2cf2d43e52999a4bf5e9877f4a946491e71be885e107e1744f6c",
+      "bytes": 520
+    },
+    {
+      "path": "/tmp/wp1463-r11-audit/active-contract-quotes.json",
+      "sha256": "706c272abc5d7aa93f8d9d12ab61af8f6a7641938818723ccf1d46461bd3624d",
+      "bytes": 3814
+    }
+  ],
+  "prior_class_status_scope": "Specification regression only: prior closed classes retained after r10 comparison and the listed independent measurements. Future implementation, full phan_chung and live authority/land facts are not certified."
+}

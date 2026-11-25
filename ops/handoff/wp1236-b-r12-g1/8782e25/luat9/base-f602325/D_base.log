@@ -1,0 +1,219 @@
+HOI_QUY 0 · AP_DUNG 0 · KHONG_AP_DUNG 0
+SONG c2:phan_giai:160:4 
+SONG f:_la_nguon:143:8 
+VO_CAN c2:_thoi_diem:180:8 HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:AttributeError: 'datetime.datetime' object has n
+VO_CAN f:_thoi_diem:180:8 HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:TypeError: '>=' not supported between instances 
+SONG i7:merged_at:192:9 
+SONG j1:kiem_ho_so:291:7 
+VO_CAN b:_khai_tuy_chon:366:11:ve0 HONG c17_l7_khai_dat_phai_do_thuc_thi HONG:c17_l7_khai_dat_phai_do_thuc_thi:TypeError: expected string or bytes-like obj
+VO_CAN c2:_chuan_hoa_81:372:8 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:TypeError: normalize() argument 2 must be str,
+VO_CAN a2:main:387:11 HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:TypeError: 'NoneType' object
+SONG a2:token_nguon:0:0:bo_if0 
+SONG c2:_trong_goc:138:8 
+SONG f:_trong_goc:138:8 
+VO_CAN a2:phan_giai:154:12 HONG c02_l1_glob_va_thu_muc HONG:c02_l1_glob_va_thu_muc:IndexError: list index out of range
+SONG a2:_thoi_diem:180:15 
+VO_CAN a2:_thoi_diem:183:15 HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:TypeError: can't compare offset-naive and offset
+VO_CAN b:merged_at:203:11:ve0 HONG c08_l4_khong_do_duoc_khong_bao_gio_dat HONG:c08_l4_khong_do_duoc_khong_bao_gio_dat:TypeError: expected string or by
+SONG b:merged_at:203:11:ve1 
+SONG d:map_khong_trung:218:39 
+VO_CAN a2:kiem_ho_so:0:0:if0#1 HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:AttributeError: 'str' object
+VO_CAN a2:kiem_ho_so:0:0:bo_if0#1 HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:AttributeError: 'str' object
+SONG b:kiem_ho_so:260:8:ve1 
+VO_CAN b:kiem_ho_so:274:11:ve0 HONG c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van HONG:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:TypeEr
+SONG b:kiem_ho_so:274:11:ve1 
+SONG j1:kiem_ho_so:293:11 
+SONG b:kiem_ho_so:317:15:ve0 
+SONG j1:kiem_ho_so:318:11 
+SONG g:_chuan_hoa_81:373:18 
+SONG g:_chuan_hoa_81:373:26 
+SONG c2:main:386:8 
+SONG f:main:386:8 
+SONG a2:main:390:15 
+SONG j1:main:397:11 
+SONG e:main:415:13 
+SONG g:token_nguon:129:29 
+SONG b:token_nguon:130:30:ve0 
+SONG b:token_nguon:130:30:ve1 
+SONG b:_la_nguon:145:39:ve0 
+SONG j1:merged_at:201:11 
+SONG b:merged_at:201:83:ve0 
+SONG j1:nap_yaml:243:46 
+SONG j1:kiem_ho_so:317:15 
+SONG g:main:377:45 
+SONG g:main:379:59 
+SONG e:main:386:15 
+SONG c:main:394:12 
+VO_CAN e:main:418:21 HONG c14_cli_moi_to_hop_duong_dan HONG:c14_cli_moi_to_hop_duong_dan:IndexError: tuple index out of range
+SONG g:duyet:168:35 
+SONG g:duyet:168:69 
+SONG g:duyet:172:66 
+SONG g:duyet:172:70 
+SONG g:_thoi_diem:182:62 
+SONG i7:merged_at:203:41 
+SONG g:merged_at:207:28 
+SONG g:merged_at:207:65 
+SONG j1:nap_yaml:233:35 
+SONG g:kiem_ho_so:259:17 
+SONG g:kiem_ho_so:261:28 
+SONG g:kiem_ho_so:261:69 
+SONG g:kiem_ho_so:261:96 
+SONG g:kiem_ho_so:278:17 
+SONG g:kiem_ho_so:278:23 
+SONG g:kiem_ho_so:278:45 
+VO_CAN b:kiem_ho_so:278:86:ve0 HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:AttributeError: 'NoneType' o
+SONG b:kiem_ho_so:278:86:ve1 
+VO_CAN b:kiem_ho_so:279:15:ve0 HONG c01_l1_luot1_mergeable_clean_khong_nguon HONG:c01_l1_luot1_mergeable_clean_khong_nguon:AttributeError: 'NoneType' o
+SONG b:kiem_ho_so:279:15:ve1 
+SONG a2:kiem_ho_so:286:29 
+SONG g:kiem_ho_so:294:23 
+SONG a2:kiem_ho_so:296:56 
+VO_CAN g:kiem_ho_so:307:16 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:KeyError: 'landed~'
+SONG e:main:394:17 
+SONG e:main:407:17 
+SONG g:main:416:16 
+SONG g:main:416:67 
+VO_CAN e:phan_giai:155:28 HONG c02_l1_glob_va_thu_muc HONG:c02_l1_glob_va_thu_muc:IndexError: list index out of range
+SONG g:_thoi_diem:185:28 
+SONG g:_thoi_diem:185:39 
+SONG a2:merged_at:0:0:bo_if0 
+SONG g:merged_at:204:40 
+SONG g:merged_at:204:87 
+SONG d:map_khong_trung:221:48 
+SONG g:nap_yaml:237:37 
+SONG g:nap_yaml:240:37 
+SONG g:kiem_ho_so:253:28 
+SONG g:kiem_ho_so:253:58 
+SONG a2:kiem_ho_so:262:29 
+SONG g:kiem_ho_so:267:30 
+SONG g:kiem_ho_so:268:72 
+SONG g:kiem_ho_so:275:24 
+SONG g:kiem_ho_so:275:30 
+SONG j1:kiem_ho_so:278:86 
+SONG j1:kiem_ho_so:279:15 
+SONG g:kiem_ho_so:282:46 
+SONG g:kiem_ho_so:282:55 
+VO_CAN g:kiem_ho_so:285:42 HONG c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van HONG:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:KeyErr
+SONG k2:kiem_ho_so:286:81 
+VO_CAN a2:kiem_ho_so:299:26 HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:AttributeError: 'dict' object has no attribute '
+VO_CAN g:kiem_ho_so:305:29 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:KeyError: 'landed~'
+SONG g:kiem_ho_so:306:24 
+VO_CAN a2:kiem_ho_so:0:0:if0#3 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:KeyError: slice(None, 60, None)
+VO_CAN a2:kiem_ho_so:0:0:bo_if0#3 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:KeyError: slice(None, 60, None)
+SONG g:kiem_ho_so:319:23 
+SONG g:kiem_ho_so:320:28 
+SONG g:kiem_ho_so:322:24 
+SONG g:kiem_ho_so:333:62 
+SONG g:main:385:16 
+SONG g:main:385:56 
+SONG g:main:403:20 
+SONG g:main:403:45 
+SONG g:main:411:20 
+SONG g:main:411:37 
+SONG g:main:413:98 
+SONG g:main:419:34 
+SONG g:duyet:174:22 
+SONG i7:merged_at:194:54 
+SONG g:merged_at:200:40 
+SONG g:merged_at:200:60 
+SONG g:kiem_ho_so:262:29 
+SONG a2:kiem_ho_so:268:34 
+SONG b:kiem_ho_so:274:29:ve0 
+SONG b:kiem_ho_so:274:29:ve1 
+SONG g:kiem_ho_so:284:32 
+SONG g:kiem_ho_so:286:95 
+SONG g:kiem_ho_so:289:28 
+SONG g:kiem_ho_so:289:34 
+SONG g:kiem_ho_so:289:56 
+SONG g:kiem_ho_so:298:40 
+SONG g:kiem_ho_so:298:62 
+SONG b:kiem_ho_so:310:24:ve0 
+SONG g:kiem_ho_so:312:21 
+SONG g:kiem_ho_so:312:27 
+SONG g:kiem_ho_so:312:84 
+VO_CAN b:kiem_ho_so:313:38:ve0 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:TypeError: argument of type 'int' is not itera
+SONG g:kiem_ho_so:324:51 
+SONG g:kiem_ho_so:326:51 
+VO_CAN b:kiem_ho_so:327:48:ve0 HONG c17_l7_khai_dat_phai_do_thuc_thi HONG:c17_l7_khai_dat_phai_do_thuc_thi:KeyError: 'model'
+SONG g:main:395:20 
+SONG g:main:395:46 
+SONG g:main:395:66 
+SONG g:main:401:24 
+SONG g:main:401:43 
+SONG g:main:408:20 
+SONG g:main:408:46 
+SONG g:main:413:16 
+SONG g:main:413:39 
+SONG g:merged_at:198:48 
+SONG g:map_khong_trung:224:74 
+SONG g:kiem_ho_so:268:59 
+SONG k1:kiem_ho_so:268:79 
+VO_CAN g:kiem_ho_so:306:85 HONG c16_l6_landed_true_phai_co_phan_hoan_tat HONG:c16_l6_landed_true_phai_co_phan_hoan_tat:KeyError: 'landed~'
+VO_CAN b:kiem_ho_so:325:44:ve0 HONG c17_l7_khai_dat_phai_do_thuc_thi HONG:c17_l7_khai_dat_phai_do_thuc_thi:KeyError: 'sandbox_mode'
+VO_CAN a:kiem_ho_so:327:48 HONG c17_l7_khai_dat_phai_do_thuc_thi HONG:c17_l7_khai_dat_phai_do_thuc_thi:KeyError: 'model'
+SONG g:kiem_ho_so:337:31 
+SONG g:kiem_ho_so:339:30 
+VO_CAN g:_chuan_hoa_81:373:53 HONG c11_cay_that_dat_va_mien_tru_du HONG:c11_cay_that_dat_va_mien_tru_du:ValueError: invalid normalization form
+VO_CAN e:merged_at:193:71 HONG c06_l3_luot2_moc_sau_merged_at HONG:c06_l3_luot2_moc_sau_merged_at:IndexError: no such group
+SONG e:kiem_ho_so:268:90 
+SONG g:kiem_ho_so:311:43 
+SONG e:kiem_ho_so:322:114 
+SONG g:main:413:63 
+SONG g:kiem_ho_so:268:34 
+SONG g:kiem_ho_so:302:40 
+SONG g:kiem_ho_so:302:46 
+SONG g:kiem_ho_so:302:57 
+SONG e:kiem_ho_so:312:93 
+SONG e:kiem_ho_so:324:122 
+SONG e:kiem_ho_so:326:132 
+SONG g:kiem_ho_so:302:95 
+SONG e:kiem_ho_so:311:121 
+SONG h2:L7_KHOA_TUY_CHON 
+SONG h2:L7_MUC_DAT 
+SONG i3:RE_KHAI_DO:nhanh@11 bo '—' 
+SONG i3:RE_KHAI_DO:nhanh@11 bo '-' 
+SONG i3:RE_KHAI_DO:nhanh@11 bo ':' 
+SONG i3:RE_KHAI_KHONG_DO:nhanh@15 bo '—' 
+SONG i3:RE_KHAI_KHONG_DO:nhanh@15 bo '-' 
+SONG i3:RE_DUOI_NGUON:nhanh@2 bo 'sh' 
+SONG i5:RE_DUOI_NGUON:escape@0 \.→. 
+SONG i1:RE_SO_POS:lop@25 bo 'A-Z' 
+SONG i1:RE_SO_POS:lop@25 bo 'a-z' 
+SONG i1:RE_SO_POS:lop@25 bo '0-9' 
+SONG i1:RE_SO_POS:lop@25 bo '_' 
+SONG i4:RE_SO_POS:luong_tu@9 +→* 
+SONG i4:RE_SO_POS:luong_tu@45 +→* 
+SONG i5:RE_SO_POS:escape@49 \d→. 
+SONG i6:RE_SO_POS:lookaround@0 bo 
+SONG i6:RE_SO_POS:lookaround@14 bo 
+SONG i6:RE_SO_POS:lookaround@21 bo 
+SONG i6:RE_SO_POS:lookaround@46 bo 
+SONG i1:RE_MOC:lop@17 bo 't' 
+SONG i1:RE_MOC:lop@17 bo ' ' 
+SONG i2:RE_MOC:lop@17 thanh . 
+SONG i1:RE_MOC:lop@57 bo 'z' 
+SONG i2:RE_MOC:lop@57 thanh . 
+SONG i2:RE_MOC:lop@62 thanh . 
+SONG i1:RE_MOC:lop@83 bo '\\d' 
+SONG i2:RE_MOC:lop@83 thanh . 
+SONG i4:RE_MOC:luong_tu@2 {4}→* 
+SONG i4:RE_MOC:luong_tu@8 {2}→* 
+SONG i4:RE_MOC:luong_tu@14 {2}→* 
+SONG i4:RE_MOC:luong_tu@24 {2}→* 
+SONG i4:RE_MOC:luong_tu@30 {2}→* 
+SONG i4:RE_MOC:luong_tu@49 +→* 
+SONG i4:RE_MOC:luong_tu@68 {2}→* 
+SONG i4:RE_MOC:luong_tu@75 {2}→* 
+SONG i5:RE_MOC:escape@0 \d→. 
+SONG i5:RE_MOC:escape@6 \d→. 
+SONG i5:RE_MOC:escape@12 \d→. 
+SONG i5:RE_MOC:escape@22 \d→. 
+SONG i5:RE_MOC:escape@28 \d→. 
+SONG i5:RE_MOC:escape@45 \.→. 
+SONG i5:RE_MOC:escape@47 \d→. 
+SONG i5:RE_MOC:escape@66 \d→. 
+SONG i5:RE_MOC:escape@73 \d→. 
+SONG i5:RE_MOC:escape@84 \d→. 
+TONG 550 · GIET 335 · SONG_SACH 187 · CHI_LOI_VO_CAN 28 · LOI_CHAY 0
+HOAN_TAT neo={"cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c", "goc": "628b8cc310f286c4d26114878100fdb173bf4b4793e8ffd8f88504d656fcb35e", "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "manifest": "abdeec1b218c8aafc52aa9e3ac33dbcefb096e0cfad4b821c74a972019876a2a", "python": "3.13.18", "test": "3bbeea803f2506b146e5502ba7e5858bbb67da28882abad592b43291a3910f55"}
+rc=0

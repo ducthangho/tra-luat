@@ -1,0 +1,2034 @@
+[
+ {
+  "ca": "c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia",
+  "o": "B2 lời khai dương chỉ trích kiem-gate",
+  "ho_so": "moc_gate_output: 'measured — kiem-gate-output.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: duong_khong_tep_danh_gia"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: duong_khong_tep_danh_gia"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia",
+  "o": "đối chứng: not_measured không đòi gì",
+  "ho_so": "moc_gate_output: 'not_measured — kiem-gate-output.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c26_b6_l8_duong_khop_tep_danh_gia",
+  "o": "B6 dương khớp tệp đánh giá và provenance",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c26_b6_l8_duong_khop_tep_danh_gia",
+  "o": "landed có lời khai dương hợp lệ",
+  "ho_so": "trang_thai_packet: {landed: true}\npost_merge_checks: [{name: g}]\nbookkeeping: [{item: x}]\nmoc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c26_b6_l8_duong_khop_tep_danh_gia",
+  "o": "đối chứng: thiếu provenance của run",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': {'landed': True}}",
+  "ho_so": "{\"trang_thai_packet\": {\"landed\": true}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed': True}",
+  "ho_so": "{\"landed\": true, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': {'landed': False}, 'landed_20261124': {'landed': True}}",
+  "ho_so": "{\"trang_thai_packet\": {\"landed\": false}, \"landed_20261124\": {\"landed\": true}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': {'landed': 1}}",
+  "ho_so": "{\"trang_thai_packet\": {\"landed\": 1}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed': 1}",
+  "ho_so": "{\"landed\": 1, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed_20261124': {'landed': 1}}",
+  "ho_so": "{\"landed_20261124\": {\"landed\": 1}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': {'landed': False}, 'landed': True}",
+  "ho_so": "{\"trang_thai_packet\": {\"landed\": false}, \"landed\": true, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': 'x', 'landed': True}",
+  "ho_so": "{\"trang_thai_packet\": \"x\", \"landed\": true, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed_2026112': {'landed': True}}",
+  "ho_so": "{\"landed_2026112\": {\"landed\": true}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed_20261124x': {'landed': True}}",
+  "ho_so": "{\"landed_20261124x\": {\"landed\": true}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'xlanded_20261124': {'landed': True}}",
+  "ho_so": "{\"xlanded_20261124\": {\"landed\": true}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'landed_20261124': True}",
+  "ho_so": "{\"landed_20261124\": true, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed {'trang_thai_packet': {'landed': False}}",
+  "ho_so": "{\"trang_thai_packet\": {\"landed\": false}, \"post_merge_checks\": [{\"name\": \"g\"}], \"bookkeeping\": [{\"item\": \"x\"}], \"landed_dieu_kien\": \"Gate output DAT 39/39\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c27_b7_l8_landed_khong_loi_khai",
+  "o": "landed + lời khai dương VI PHẠM: cả hai vi phạm",
+  "ho_so": "trang_thai_packet: {landed: true}\npost_merge_checks: [{name: g}]\nbookkeeping: [{item: x}]\nmoc_gate_output: 'measured — kiem-gate-output.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: duong_khong_tep_danh_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: duong_khong_tep_danh_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c29_b3_l8_mien_tru_theo_ten_va_bam",
+  "o": "bản sao NGUYÊN BYTE: được miễn L8 (rc 1 là của L1, bản sao không mang provenance)",
+  "ho_so": "# HO SO LAND — packet #943 wp943 r1 g1 (kich hoat van hanh ADR-0056), ma qua PR #963. Khuon: ops/land/pr950-wp834-land-e... (15742 ky tu)",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c29_b3_l8_mien_tru_theo_ten_va_bam",
+  "o": "B3 sửa một byte ⇒ mất miễn trừ, L8 áp",
+  "ho_so": "# HO SO LAND — packet #943 wp943 r1 g1 (kich hoat van hanh ADR-0056), ma qua PR #963. Khuon: ops/land/pr950-wp834-land-e... (15743 ky tu)",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc",
+  "o": "đối chứng: module CỦA GỐC ĐANG KIỂM được dùng (không phải bản cạnh bộ kiểm)",
+  "ho_so": "moc_gate_output: 'measured — kiem-gate-output.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$: dau_rieng"
+  ],
+  "l8_do": [
+   "$: dau_rieng"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c31_b8_l8_chay_sau_chot_cutover",
+  "o": "mất miễn trừ L5 (băm lệch) ⇒ kiểm đủ luật, gồm L8",
+  "ho_so": "# HO SO LAND — packet #676 T131-DEADLINE-DEM-SPAWN, qua PR #680.\n# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi \"Lan... (14056 ky tu)",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.post_merge_checks[1].moc_gate_output: dinh_dang_loi_khai",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.post_merge_checks[1].moc_gate_output: dinh_dang_loi_khai",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'passed — danh-gia-gate-output-44669622916.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"passed \\u2014 danh-gia-gate-output-44669622916.txt\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'Measured: ./danh-gia-gate-output-44669622916.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"Measured: ./danh-gia-gate-output-44669622916.txt\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'failed — khong trich tep'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"failed \\u2014 khong trich tep\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'failed — danh-gia-gate-output-44669622916.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"failed \\u2014 danh-gia-gate-output-44669622916.txt\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: danh_gia_khong_failed:danh-gia-gate-output-44669622916.txt:passed:-"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: danh_gia_khong_failed:danh-gia-gate-output-44669622916.txt:passed:-"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'measured — kiem-gate-output.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"measured \\u2014 kiem-gate-output.txt\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: duong_khong_tep_danh_gia"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: duong_khong_tep_danh_gia"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'passed — x/../danh-gia-gate-output-44669622916.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"passed \\u2014 x/../danh-gia-gate-output-44669622916.txt\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:x/../danh-gia-gate-output-44669622916.txt"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:x/../danh-gia-gate-output-44669622916.txt"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'passed — /danh-gia-gate-output-44669622916.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"passed \\u2014 /danh-gia-gate-output-44669622916.txt\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:/danh-gia-gate-output-44669622916.txt"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:/danh-gia-gate-output-44669622916.txt"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'passed — danh-gia-gate-output-44669622916.txt danh-gia-gate-output-1.txt'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"passed \\u2014 danh-gia-gate-output-44669622916.txt danh-gia-gate-output-1.txt\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:danh-gia-gate-output-1.txt"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: tep_danh_gia_khong_hop_le:danh-gia-gate-output-1.txt"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'owner_waived — khong co url'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"owner_waived \\u2014 khong co url\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: waiver_khong_co_can_cu:url"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: waiver_khong_co_can_cu:url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 5",
+  "ho_so": "{\"a\": [{\"Gate-Output\": 5}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai None",
+  "ho_so": "{\"a\": [{\"Gate-Output\": null}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ''",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'da do'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"da do\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'pass'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"pass\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run\\tx'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\\tx\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run—x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\\u2014x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run-x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run-x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run:x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run:x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run(x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run(x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run,x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run,x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run.x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run.x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run;x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run;x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run\\n'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\\n\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED\\tx'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED\\tx\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED—x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED\\u2014x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED-x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED-x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED:x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED:x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED(x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED(x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED,x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED,x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED.x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED.x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED;x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED;x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai ' \\tNOT_MEASURED\\n'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \" \\tNOT_MEASURED\\n\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped\\tx'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped\\tx\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped—x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped\\u2014x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped-x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped-x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped:x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped:x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped(x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped(x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped,x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped,x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped.x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped.x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped;x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped;x\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'skipped\\n'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"skipped\\n\"}]}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run1'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run1\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_runx'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_runx\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run_'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run_\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run!x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run!x\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run/x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run/x\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run=x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run=x\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run\\nx'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\\nx\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'not_run–x'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"not_run\\u2013x\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai '\\nnot_run'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"\\nnot_run\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "lời khai 'x not_run'",
+  "ho_so": "{\"a\": [{\"Gate-Output\": \"x not_run\"}]}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.a[0].Gate-Output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate_output'",
+  "ho_so": "{\"gate_output\": \"da do\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.gate_output: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'MOC GATE-OUTPUT 2'",
+  "ho_so": "{\"MOC GATE-OUTPUT 2\": \"da do\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.MOC GATE-OUTPUT 2: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.MOC GATE-OUTPUT 2: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate_out_put'",
+  "ho_so": "{\"gate_out_put\": \"da do\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_out_put: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.gate_out_put: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate_output_nguon2'",
+  "ho_so": "{\"gate_output_nguon2\": \"da do\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output_nguon2: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.gate_output_nguon2: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'x_gate_output_nguon'",
+  "ho_so": "{\"x_gate_output_nguon\": \"da do\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.x_gate_output_nguon: dinh_dang_loi_khai"
+  ],
+  "l8_do": [
+   "$.x_gate_output_nguon: dinh_dang_loi_khai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate_output_nguon'",
+  "ho_so": "{\"gate_output_nguon\": \"da do\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'Gate-Output Nguon_va_gioi_han'",
+  "ho_so": "{\"Gate-Output Nguon_va_gioi_han\": \"da do\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'moc_gate_output_rc_disposition'",
+  "ho_so": "{\"moc_gate_output_rc_disposition\": \"da do\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate2output'",
+  "ho_so": "{\"gate2output\": \"da do\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+  "o": "khoá 'gate_outpu'",
+  "ho_so": "{\"gate_outpu\": \"da do\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn hợp lệ, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=False: 'ed — d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=True: 'ed — d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=False: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=True: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=False: 'hangho/tra-luat/issues/1236#issuecomment-1234'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-1234\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn url, landed=True: 'hangho/tra-luat/issues/1236#issuecomment-1234'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-1234\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn readback, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:readback"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:readback"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn readback, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn readback, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:readback"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:readback"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn readback, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn doc_readback, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:doc_readback"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:doc_readback"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn doc_readback, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:doc_readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:doc_readback",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn html_url, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn html_url, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn html_url, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn html_url, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:html_url",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn tac_gia, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:tac_gia",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn dong_mien, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:dong_mien",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn han, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:han"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:han"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn han, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:han",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:han",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn han, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:han"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:han"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn han, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:han",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:han",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn os, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:os"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:os"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn os, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:os",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:os",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn os, landed=False: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:os"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:os"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn os, landed=True: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:os",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:os",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn sha, landed=False: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:sha"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:sha"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn sha, landed=True: 'thangho/tra-luat/issues/1236#issuecomment-123'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:sha",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:sha",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn sha, landed=False: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\"}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:sha"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:sha"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c34_l8_ma_tran_mien_qua_cong",
+  "o": "miễn sha, landed=True: '-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe'",
+  "ho_so": "{\"gate_output\": \"owner_waived \\u2014 https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 d8cf2ab57f9f25a93cefedcebfb315826b6b78fe\", \"landed\": true}",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.gate_output: waiver_khong_co_can_cu:sha",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "l8_do": [
+   "$.gate_output: waiver_khong_co_can_cu:sha",
+   "$: landed_khong_loi_khai_gate_output"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'T: passed (39/39 job co dau hieu duong)\\n'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ': passed (39/39 job co dau hieu duong)\\r\\n'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ': [ops/ci_duong_nhanh.py] che_do=day_du\\n'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 0,
+  "rc_do": 0,
+  "l8_mong": [],
+  "l8_do": [],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá '# Danh giá'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá '\\n# Danh gia'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ' attempt x'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 's: [ops/ci_duong_nhanh.py] che_do=day_du'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'd: [ops/ci_duong_nhanh.py] che_do=day_du'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'd: [ops/ci_duong_nhanh.py] che_do=day_du'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'd: [ops/ci_duong_nhanh.py] che_do=day_du'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lap"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lap"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'nhanh.py] che_do=day_du\\nJOB 1 x: skipped'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá '_do=day_du\\nJOB 1 x: skipped (khong tinh)'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:tap_skip_lech,dong_skip_sai_phien_ban,moc_lech"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:tap_skip_lech,dong_skip_sai_phien_ban,moc_lech"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'skipped -> not_measured (khong suy pass)'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:tap_skip_lech,moc_lech"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:tap_skip_lech,moc_lech"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'PUT passed (39/39 job co dau hieu duong)'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ''",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:thieu_moc"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:thieu_moc"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'UT: passed (39/39 job co dau hieu duong)'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:moc_lap"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:moc_lap"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá 'T: passed (39/39 jobs co dau hieu duong)'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ': [ops/ci_duong_nhanh.py] che_do=day_du\\r'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:xuong_dong_tron"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:xuong_dong_tron"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá ' [ops/ci_duong_nhanh.py] che_do=day_du\\rx'",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:cr_le"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:cr_le"
+  ],
+  "dat": true
+ },
+ {
+  "ca": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+  "o": "tệp đánh giá có BYTE không phải UTF-8",
+  "ho_so": "moc_gate_output: 'measured — danh-gia-gate-output-44669622916.txt'\n",
+  "rc_mong": 1,
+  "rc_do": 1,
+  "l8_mong": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_utf8"
+  ],
+  "l8_do": [
+   "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_utf8"
+  ],
+  "dat": true
+ }
+]

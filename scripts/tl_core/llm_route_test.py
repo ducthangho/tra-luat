@@ -1337,6 +1337,13 @@ def ca_cau_truc_docx_dat(m):
     # r8 G5: abstractNumId viết khác (`00` ↔ `0`).
     _, cap21, _ = _doc_hop_le(m, lam_docx(H, A, numbering=_NUMBERING_CHUAN.replace('w:abstractNumId="0">', 'w:abstractNumId="00">')))
     bang(cap21 == [(1, "Hồ sơ là tài liệu.")], f"abstractNumId dang chu so khac bi chan: {cap21}")
+    # r9 H2: part CHÍNH đổi tên qua `_rels/.rels`; bản `word/document.xml` cũ còn trong gói KHÔNG được dùng.
+    goc_rels = ('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" '
+                'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/chinh.xml"/>'
+                '</Relationships>')
+    chinh = f'<w:document {_WNS}><w:body>{H}{p_docx("Dữ liệu là thông tin.", 1)}</w:body></w:document>'
+    _, cap22, _ = _doc_hop_le(m, lam_docx(H, A, them={"_rels/.rels": goc_rels, "word/chinh.xml": chinh}))
+    bang(cap22 == [(1, "Dữ liệu là thông tin.")], f"doc nham part chinh cu: {cap22}")
     # .docx Strict ⇒ ValueError có chẩn đoán rõ.
     import io as _io
     import zipfile as _zip
@@ -1362,6 +1369,31 @@ def ca_cau_truc_docx_bang(m):
     raise TinHieuChotCa("bang trong tep phai bi chan")
 
 
+def ca_cau_truc_docx_diem_gach(m):
+    """r9 (lượt 8 H3): điểm gõ tay dạng GẠCH (riêng, không lẫn mẫu khác) ⇒ chặn."""
+    try:
+        m.doc_dieu_cau_truc(lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu gồm:", 1), p_docx("- bản sao.")), 3)
+    except ValueError:
+        return
+    raise TinHieuChotCa("diem go tay dang gach phai bi chan")
+
+
+def ca_cau_truc_docx_abstract_id(m):
+    """r9 (lượt 8 H3): `abstractNumId` viết khác (`00` ↔ `0`) — riêng, numId giữ nguyên dạng chuẩn."""
+    _, cap, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1),
+                                        numbering=_NUMBERING_CHUAN.replace('w:abstractNumId="0">', 'w:abstractNumId="00">')))
+    bang(cap == [(1, "Hồ sơ là tài liệu.")], f"abstractNumId dang khac bi chan: {cap}")
+
+
+def ca_cau_truc_docx_numbering_ten_khac(m):
+    """r9 (lượt 8 H3): part numbering ĐỔI TÊN qua quan hệ — phải đọc đúng part ấy."""
+    rels = ('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" '
+            'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="dso.xml"/></Relationships>')
+    _, cap, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1), numbering=None,
+                                        them={"word/_rels/document.xml.rels": rels, "word/dso.xml": _NUMBERING_CHUAN}))
+    bang(cap == [(1, "Hồ sơ là tài liệu.")], f"numbering ten khac bi bo qua: {cap}")
+
+
 def ca_cau_truc_docx_chan(m):
     """#1525: cấu trúc mơ hồ/không hỗ trợ, tệp không chỉ chứa Điều cần đọc, hoặc không có đánh số tự động ⇒ ValueError."""
     def chan(docx, ly_do, dieu=3):
@@ -1375,7 +1407,6 @@ def ca_cau_truc_docx_chan(m):
     H, A, B = p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1), p_docx("Dữ liệu là thông tin.", 1)
     chan(lam_docx(H, A, p_docx("Tổ chức là đơn vị."), B), "doan khong so giua cac khoan")
     chan(lam_docx(H, p_docx("Hồ sơ là tài liệu gồm:", 1), p_docx("a) bản chính.")), "diem go tay chu (F2)")
-    chan(lam_docx(H, p_docx("Hồ sơ là tài liệu gồm:", 1), p_docx("- bản sao.")), "diem go tay gach (F2, G5)")
     # r8 G1: ID không phải số nguyên thập phân; điểm NHẢY cấp.
     chan(lam_docx(H, p_docx("Hồ sơ là tài liệu.", "1a"), numbering=_NUMBERING_CHUAN.replace('w:numId="1"', 'w:numId="1a"')), "numId khong phai so")
     sau = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)") + _lvl(2, "lowerLetter", "%3)"))
@@ -1386,6 +1417,19 @@ def ca_cau_truc_docx_chan(m):
               '<Relationship Id="r2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" '
               'Target="numbering.xml"/></Relationships>')
     chan(lam_docx(H, A, them={"word/_rels/document.xml.rels": rels_x}), "quan he styles tro part vang")
+    # r9 H1: tiêu đề Điều VIẾT HOA ở cấp con cùng danh sách.
+    chan(lam_docx(H, A, p_docx("ĐIỀU 4. Phạm vi.", 1, 1)), "tieu de Dieu viet hoa o cap con")
+    # r9 H2: quan hệ gốc trỏ part chính vắng.
+    rels_g = ('<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" '
+              'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/vang.xml"/>'
+              '</Relationships>')
+    chan(lam_docx(H, A, them={"_rels/.rels": rels_g}), "quan he goc tro part chinh vang")
+    # r9 H4: style khai numId LỖI dùng cho câu dẫn.
+    kl = (f'<w:styles {_WNS}><w:style w:styleId="L"><w:pPr><w:numPr><w:numId w:val="x1"/></w:numPr></w:pPr></w:style></w:styles>')
+    chan(lam_docx(H, p_docx(CD_CHUAN, kieu="L"), A, styles=kl), "numId loi khai qua style")
+    # r9 H5: chữ SAU ngắt trang trong cùng đoạn (che số khoản gõ tay).
+    chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t><w:br w:type="page"/><w:t>2. Dữ liệu là thông tin.</w:t></w:r>')),
+         "chu sau ngat trang")
     chan(lam_docx(H, p_docx("Hồ sơ gồm các tài liệu sau:"), A, B), "doan truoc khoan dau khong phai cau dan chuan")
     chan(lam_docx(H, p_docx(CD_CHUAN), p_docx(CD_CHUAN), A, B), "hai cau dan")
     chan(lam_docx(H, p_docx("1. Hồ sơ là tài liệu.", 1), B), "so go tay trong doan danh so")
@@ -1490,7 +1534,8 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9, ca_cau_truc_docx_dat, ca_cau_truc_docx_chan, ca_cau_truc_docx_bang]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9, ca_cau_truc_docx_dat, ca_cau_truc_docx_chan, ca_cau_truc_docx_bang, ca_cau_truc_docx_diem_gach,
+      ca_cau_truc_docx_abstract_id, ca_cau_truc_docx_numbering_ten_khac]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1529,7 +1574,6 @@ DOT_BIEN = [
     ('wp1525_nhan_style_trong_dieu', ('    if any(d["so_tu_style"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_style_danh_so', ('    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)', '    nid, il = None, None'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_khong_danh_so', ('        raise ValueError(f"Dieu {dieu} khong co doan danh so tu dong', '        raise IndexError(f"Dieu {dieu} khong co doan danh so tu dong'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_gop_doan_khong_so', ('                raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")', '                khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_so_go_tay_nuot_thap_phan', ('_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)](?!\\d)")', '_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)]")'), 'ca_cau_truc_docx_dat'),
     ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
@@ -1570,13 +1614,19 @@ DOT_BIEN = [
     ('wp1525_cau_dan_nhieu', ('    if len(cd) > 1 or (cd and not _RE_CAU_DAN_TRON', '    if False or (cd and not _RE_CAU_DAN_TRON'), 'ca_cau_truc_docx_chan'),
     ('wp1525_cau_dan_tu_do', ('(cd and not _RE_CAU_DAN_TRON.fullmatch(" ".join(cd[0].split())))', 'False'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_dau_mo_ho_cau_truc', ('        if _dong_mo_ho(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_id_khong_chuan_hoa', ('    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None', '    return v or None'), 'ca_cau_truc_docx_dat'),
     ('wp1525_id_long_leo', ('    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None', '    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else (v or None)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_nhay_cap', ('                if any(k not in dem for k in range(il)):', '                if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_styles_ten_mac_dinh', ('    ten = _phan_qua_quan_he(z, doc_gioi_han, "styles", "word/styles.xml")', '    ten = "word/styles.xml"'), 'ca_cau_truc_docx_dat'),
     ('wp1525_quan_he_part_vang', ('    if ten.startswith("..") or ten not in z.namelist():', '    if ten.startswith(".."):'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ngat_trang_la_ngat_mem', ('                if c.get(_W + "type") not in ("page", "column"):', '                if True:'), 'ca_cau_truc_docx_dat'),
     ('wp1525_tieu_de_phan_biet_hoa', ('    re_dau = re.compile(rf"^Điều\\s+{re.escape(str(dieu))}\\s*[.:]", re.IGNORECASE)', '    re_dau = re.compile(rf"^Điều\\s+{re.escape(str(dieu))}\\s*[.:]")'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_styles_ten_mac_dinh', ('    ten = _phan_qua_quan_he(z, doc_gioi_han, "styles", "word/styles.xml", chinh)', '    ten = "word/styles.xml"'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_numbering_ten_mac_dinh', ('    ten = _phan_qua_quan_he(z, doc_gioi_han, "numbering", "word/numbering.xml", chinh)', '    ten = "word/numbering.xml"'), 'ca_cau_truc_docx_numbering_ten_khac'),
+    ('wp1525_gop_doan_khong_so', ('                raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")', '                khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_diem_gach'),
+    ('wp1525_id_khong_chuan_hoa', ('    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None', '    return v or None'), 'ca_cau_truc_docx_abstract_id'),
+    ('wp1525_dieu_phan_biet_hoa', ('_RE_DIEU_BAT_KY = re.compile(r"^Điều\\s+\\d+[a-zđ]?\\s*[.:]", re.IGNORECASE)', '_RE_DIEU_BAT_KY = re.compile(r"^Điều\\s+\\d+[a-zđ]?\\s*[.:]")'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_phan_chinh_mac_dinh', ('        chinh = _phan_chinh(z, doc_gioi_han)', '        chinh = "word/document.xml"'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_numid_style_loi_la_vang', ('            nid = (_so_id(e.get(_W + "val")) or "!") if e is not None else None', '            nid = _so_id(e.get(_W + "val")) if e is not None else None'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_chu_sau_ngat_trang', ('                if kq["sau_ngat_trang"] and chu.strip():', '                if False:'), 'ca_cau_truc_docx_chan'),
     # #1525: đường thô không nhận dòng điểm.
     ('wp1525_tho_nhan_diem', ('        elif _RE_DIEM.match(ln):\n            # #1525', '        elif False:\n            # #1525'), 'ca_wp1514_luot9'),
     # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.

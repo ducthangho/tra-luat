@@ -25,6 +25,8 @@
   ⇒ chặn; `ptab` đọc được; mốc phạm vi move phải cân.
 - r8 (sau cross-review lượt 7, đặc tả `ops/specs/llm-khoan-docx-r8.md`): ID danh sách phải là số nguyên; điểm nhảy cấp ⇒ chặn;
   part numbering/styles theo `document.xml.rels`; ngắt trang/cột được nhận; tiêu đề viết hoa được nhận.
+- r9 (sau cross-review lượt 8, đặc tả `ops/specs/llm-khoan-docx-r9.md`): part chính theo `_rels/.rels`; tiêu đề Điều viết hoa trong
+  vùng ⇒ chặn; ngắt trang có chữ sau ⇒ chặn; numId lỗi qua style ⇒ chặn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

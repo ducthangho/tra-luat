@@ -521,7 +521,7 @@ _W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_member_bounded`
 
 # Tiêu đề Điều / ranh giới cấu trúc lớn: chỉ xét ở ĐẦU đoạn (sau khi gộp khoảng trắng).
-_RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]")
+_RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]", re.IGNORECASE)   # r9 (lượt 8 H1): như tiêu đề đích
 _RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\s+[IVXLCDM\d]+\b", re.IGNORECASE)
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
@@ -581,11 +581,11 @@ def _so_id(v):
 _TRAN_SO = 999   # r7 (lượt 6 F4): trần SỐ THỨ TỰ (bộ đếm ≥ giá trị bắt đầu nên phủ cả `start`) — chặn nhãn chữ dài vô hạn
 
 
-def _phan_qua_quan_he(z, doc_gioi_han, loai, mac_dinh):
-    """r8 (lượt 7 G2): tên part (numbering/styles) lấy từ `word/_rels/document.xml.rels` — tài liệu có thể đặt tên khác mặc định.
-    Không có tệp quan hệ ⇒ tên mặc định. Quan hệ trỏ ra ngoài gói hay part vắng ⇒ ValueError. Không có quan hệ loại ấy ⇒ None."""
+def _giai_quan_he(z, doc_gioi_han, tep_rels, thu_muc, loai, mac_dinh):
+    """Part đích của quan hệ `loai` trong `tep_rels` (đường dẫn tương đối `thu_muc`). Không có tệp quan hệ ⇒ `mac_dinh`; không có
+    quan hệ loại ấy ⇒ None; nhiều quan hệ, trỏ ra ngoài gói, hay part vắng ⇒ ValueError."""
     try:
-        rels = ET.fromstring(_doc_thanh_phan(z, "word/_rels/document.xml.rels", doc_gioi_han))
+        rels = ET.fromstring(_doc_thanh_phan(z, tep_rels, doc_gioi_han))
     except KeyError:
         return mac_dinh
     ns = "{http://schemas.openxmlformats.org/package/2006/relationships}"
@@ -596,18 +596,36 @@ def _phan_qua_quan_he(z, doc_gioi_han, loai, mac_dinh):
         raise ValueError(f"quan he {loai} khong ho tro (nhieu hoac tro ra ngoai)")
     import posixpath
     t = dich[0].get("Target", "")
-    ten = posixpath.normpath(t.lstrip("/") if t.startswith("/") else posixpath.join("word", t))
+    ten = posixpath.normpath(t.lstrip("/") if t.startswith("/") else posixpath.join(thu_muc, t))
     if ten.startswith("..") or ten not in z.namelist():
         raise ValueError(f"part {loai} {t!r} khong co trong goi")
     return ten
 
 
-def _doc_danh_so(z, doc_gioi_han):
+def _phan_chinh(z, doc_gioi_han):
+    """r9 (lượt 8 H2): part CHÍNH theo quan hệ gốc `_rels/.rels` (`officeDocument`) — không mở cứng `word/document.xml` (gói có thể
+    đổi tên part chính và còn để bản XML cũ ở tên mặc định). Gói tối giản không có `_rels/.rels` ⇒ tên mặc định."""
+    ten = _giai_quan_he(z, doc_gioi_han, "_rels/.rels", "", "officeDocument", "word/document.xml")
+    if ten is None:
+        raise ValueError("goi khong khai quan he officeDocument")
+    return ten
+
+
+def _phan_qua_quan_he(z, doc_gioi_han, loai, mac_dinh, chinh="word/document.xml"):
+    """r8 (lượt 7 G2): tên part (numbering/styles) lấy từ tệp quan hệ của PART CHÍNH (r9: theo `_phan_chinh`) — tài liệu có thể đặt
+    tên khác mặc định. Không có tệp quan hệ ⇒ tên mặc định. Quan hệ trỏ ra ngoài gói hay part vắng ⇒ ValueError. Không có quan hệ
+    loại ấy ⇒ None."""
+    import posixpath
+    thu_muc, ten_chinh = posixpath.split(chinh)
+    return _giai_quan_he(z, doc_gioi_han, posixpath.join(thu_muc, "_rels", ten_chinh + ".rels"), thu_muc, loai, mac_dinh)
+
+
+def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
     """numId → {"muc": {ilvl: (numFmt, lvlText, start)}, "loi": lý do không hỗ trợ | None}.
 
     r2 (lượt 1 A5): định nghĩa danh sách KHÔNG hỗ trợ không làm hỏng cả tài liệu — chỉ ghi `loi`, người gọi chặn khi Điều
     đích dùng danh sách ấy. Không hỗ trợ: `lvlOverride` ngoài `startOverride`, `w:lvlRestart`, `w:isLgl` (lượt 1 A2)."""
-    ten = _phan_qua_quan_he(z, doc_gioi_han, "numbering", "word/numbering.xml")
+    ten = _phan_qua_quan_he(z, doc_gioi_han, "numbering", "word/numbering.xml", chinh)
     try:
         xml = _doc_thanh_phan(z, ten, doc_gioi_han) if ten else None
     except KeyError:
@@ -673,10 +691,10 @@ def _doc_danh_so(z, doc_gioi_han):
     return kq
 
 
-def _doc_kieu(z, doc_gioi_han):
+def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
     """styleId → (basedOn, numId|None, ilvl|None, strike|None, dstrike|None); khoá đặc biệt `""` = (docDefaults strike,
     dstrike, style đoạn mặc định). r3 (lượt 2 B3): gạch ĐƠN và gạch KÉP tính RIÊNG qua từng tầng, không gộp một cờ."""
-    ten = _phan_qua_quan_he(z, doc_gioi_han, "styles", "word/styles.xml")
+    ten = _phan_qua_quan_he(z, doc_gioi_han, "styles", "word/styles.xml", chinh)
     try:
         goc = ET.fromstring(_doc_thanh_phan(z, ten, doc_gioi_han)) if ten else None
     except KeyError:
@@ -695,7 +713,7 @@ def _doc_kieu(z, doc_gioi_han):
         nid = il = None
         if np_ is not None:
             e = np_.find(_W + "numId")
-            nid = _so_id(e.get(_W + "val")) if e is not None else None
+            nid = (_so_id(e.get(_W + "val")) or "!") if e is not None else None   # r9 (lượt 8 H4): "!" = ID lỗi, khác vắng
             e = np_.find(_W + "ilvl")
             il = int(e.get(_W + "val")) if e is not None else None
         rpr = st.find(_W + "rPr")
@@ -802,7 +820,7 @@ def _phan_tich_doan(p, kieu):
     # TIẾP trên run là tuyệt đối.
     dem_nen = {t: (1 if mac[k] else 0) + _dem_bat_trong_chuoi(kieu, psid, 3 if t == "strike" else 4)
                for k, t in ((0, "strike"), (1, "dstrike"))}
-    kq = {"phan": [], "ngat": False, "la": False}
+    kq = {"phan": [], "ngat": False, "la": False, "sau_ngat_trang": False}
 
     def run(r):
         rpr = r.find(_W + "rPr")
@@ -829,11 +847,16 @@ def _phan_tich_doan(p, kieu):
         for c in r:
             ten = c.tag[len(_W):] if c.tag.startswith(_W) else None
             if ten in _CON_RUN_CHU:
-                chu_run.append((c.text or "") if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten])
+                chu = (c.text or "") if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten]
+                if kq["sau_ngat_trang"] and chu.strip():
+                    kq["ngat"] = True   # r9 (lượt 8 H5): có chữ SAU ngắt trang/cột ⇒ có thể che số khoản gõ tay ⇒ như ngắt mềm
+                chu_run.append(chu)
             elif ten in ("br", "cr"):
                 chu_run.append(" ")
                 if c.get(_W + "type") not in ("page", "column"):
-                    kq["ngat"] = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT là trình bày, không phải ngắt dòng mềm
+                    kq["ngat"] = True
+                else:
+                    kq["sau_ngat_trang"] = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT ở CUỐI đoạn là trình bày
             elif ten in ("delText",):
                 continue   # chữ đã xoá (track changes) — không vào nguyên văn
             elif ten in _CON_RUN_BO_QUA:
@@ -879,6 +902,8 @@ def _phan_tich_doan(p, kieu):
                 kq["la"] = True   # r8 (lượt 7 G1): numId không hợp lệ ⇒ không biết danh sách
         e = np_.find(_W + "ilvl")
         il = int(e.get(_W + "val")) if e is not None else il
+    if nid == "!":
+        kq["la"], nid = True, None   # r9 (lượt 8 H4): numId lỗi khai qua style ⇒ đoạn lạ
     so = None if nid in (None, "0") else (nid, il or 0)
     # r7 (lượt 6 F5): cấp ngoài miền ở ĐOẠN không cần chốt riêng — chỉ đếm khi cấp có trong định nghĩa (đã giới hạn 0–8),
     # và bước xác thực chặn đoạn trỏ cấp không có định nghĩa.
@@ -899,9 +924,10 @@ def doc_dieu_docx(nguon, dieu):
     doc_gioi_han = _nap_doc_gioi_han()
     import io
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
-        goc_xml = _doc_thanh_phan(z, "word/document.xml", doc_gioi_han).decode("utf-8", errors="strict")
-        danh_so = _doc_danh_so(z, doc_gioi_han)
-        kieu = _doc_kieu(z, doc_gioi_han)
+        chinh = _phan_chinh(z, doc_gioi_han)
+        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han).decode("utf-8", errors="strict")
+        danh_so = _doc_danh_so(z, doc_gioi_han, chinh)
+        kieu = _doc_kieu(z, doc_gioi_han, chinh)
     goc_cay = ET.fromstring(goc_xml)
     if goc_cay.tag != _W + "document":
         # r5 (lượt 4 D5): .docx Strict (namespace purl.oclc.org) hay tệp lạ — giới hạn đã khai.

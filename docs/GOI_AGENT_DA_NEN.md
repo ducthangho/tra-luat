@@ -399,7 +399,7 @@ biến môi trường của environment.
   `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
   không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
   `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột
-  được nhận),
+  được nhận khi đứng CUỐI đoạn), part chính/numbering/styles khai sai trong tệp quan hệ,
   ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
   không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
   Word. Đường `<số hiệu>` (qua `tl extract`) vẫn là văn bản thô.

@@ -29,6 +29,8 @@
   vùng ⇒ chặn; ngắt trang có chữ sau ⇒ chặn; numId lỗi qua style ⇒ chặn.
 - r10 (sau cross-review lượt 9, đặc tả `ops/specs/llm-khoan-docx-r10.md`): style mang `ilvl` cũng là đánh số qua style;
   `mc:AlternateContent` trong định dạng ⇒ chặn; `lvlText` có chữ ⇒ chặn; chữ gạch sau ngắt trang không còn làm chặn oan.
+- r11 (sau cross-review lượt 10, đặc tả `ops/specs/llm-khoan-docx-r11.md`): phần tử `mc:` ở bất kỳ part nào ⇒ chặn; tiêu đề
+  `Phần thứ …` nhận diện được; `lvlText` theo danh sách cho phép toàn chuỗi.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

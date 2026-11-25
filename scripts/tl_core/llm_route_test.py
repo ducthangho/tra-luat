@@ -1344,6 +1344,9 @@ def ca_cau_truc_docx_dat(m):
     chinh = f'<w:document {_WNS}><w:body>{H}{p_docx("Dữ liệu là thông tin.", 1)}</w:body></w:document>'
     _, cap22, _ = _doc_hop_le(m, lam_docx(H, A, them={"_rels/.rels": goc_rels, "word/chinh.xml": chinh}))
     bang(cap22 == [(1, "Dữ liệu là thông tin.")], f"doc nham part chinh cu: {cap22}")
+    # r11 K2 đối chứng: khoản mở bằng "Mục tiêu" (không phải tiêu đề) đạt.
+    _, cap24, _ = _doc_hop_le(m, lam_docx(H, p_docx("Mục tiêu là đích cần đạt.", 1)))
+    bang(cap24 == [(1, "Mục tiêu là đích cần đạt.")], f"khoan 'Muc tieu' bi chan oan: {cap24}")
     # r10 J5: chữ GẠCH NGANG sau ngắt trang bị lọc, không làm đoạn thành "ngắt mềm".
     _, cap23, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t><w:br w:type="page"/></w:r>'
                                                 '<w:r><w:rPr><w:strike/></w:rPr><w:t>2. CŨ</w:t></w:r>')))
@@ -1459,6 +1462,15 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(H, A, styles=kmc), "mc trong styles")
     chan(lam_docx(H, f'<w:p><w:pPr><mc:AlternateContent {mc}/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>'
                      '<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r></w:p>'), "mc trong pPr")
+    # r11 K1: `mc:` trong numbering.
+    nmc = _NUMBERING_CHUAN.replace('<w:num w:numId="2">', f'<mc:AlternateContent {mc}/><w:num w:numId="2">')
+    chan(lam_docx(H, A, numbering=nmc), "mc trong numbering")
+    # r11 K2: tiêu đề Phần với số thứ tự viết bằng chữ ở cấp con.
+    chan(lam_docx(H, A, p_docx("Phần thứ hai", 1, 1)), "tieu de 'Phan thu hai' o cap con")
+    # r11 K3: lvlText ngoài danh sách cho phép (chữ số trần, `%` lẻ).
+    for lt in ("1.", "%2%"):
+        chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "decimal", lt))),
+             f"lvlText {lt!r}")
     # r10 J3: nhãn cấp con có CHỮ (tiêu đề sinh từ lvlText).
     chan(lam_docx(H, A, p_docx("Phạm vi.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "decimal", "Điều %2."))),
          "lvlText co chu")
@@ -1506,8 +1518,8 @@ def ca_cau_truc_docx_chan(m):
     rs = _NUMBERING_CHUAN.replace('<w:abstractNum w:abstractNumId="0">', '<w:abstractNum w:abstractNumId="0" '
                                   'xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" w15:restartNumberingAfterBreak="1">')
     chan(lam_docx(H, A, B, numbering=rs), "restartNumberingAfterBreak")
-    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerRoman", "-"))),
-         "numFmt khong ho tro o cap con")
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerRoman", "%1)"))),
+         "numFmt khong ho tro o cap con (lvlText khong tham chieu cap minh)")
     chan(lam_docx(H, A, B, numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(9, "decimal", "%10."))), "ilvl ngoai mien (lvl)")
     chan(lam_docx(H, A, B, numbering=numbering(_lvl(0, "decimal", "%1."), nums=[(1, 0, '<w:lvlOverride w:ilvl="9">'
                                                                                   '<w:startOverride w:val="1"/></w:lvlOverride>')])),
@@ -1663,12 +1675,11 @@ DOT_BIEN = [
     ('wp1525_numid_style_loi_la_vang', ('            nid = (_so_id(e.get(_W + "val")) or "!") if e is not None else None', '            nid = _so_id(e.get(_W + "val")) if e is not None else None'), 'ca_cau_truc_docx_chan'),
     ('wp1525_chu_sau_ngat_trang', ('                if kq["sau_ngat_trang"] and chu.strip():', '                if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_style_chi_ilvl_bo_qua', ('    tu_style = nid is not None or il is not None', '    tu_style = nid is not None'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_mc_trong_rpr_bo_qua', ('            if any(not str(e.tag).startswith(_W) for e in rpr):\n                kq["la"] = True', '            if False:\n                kq["la"] = True'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_mc_trong_styles_bo_qua', ('    if any(not str(e.tag).startswith(_W) for st in goc.iter() if st.tag in (_W + "rPr", _W + "pPr") for e in st):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_mc_trong_ppr_bo_qua', ('    if ppr is not None and any(not str(e.tag).startswith(_W) for x in (ppr, ppr.find(_W + "numPr")) if x is not None for e in x):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_lvltext_co_chu', ('    if re.search(r"[^\\W\\d_]", re.sub(r"%\\d", "", txt)):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_rels_part_chinh_mac_dinh', ('    thu_muc, ten_chinh = posixpath.split(chinh)', '    thu_muc, ten_chinh = posixpath.split("word/document.xml")'), 'ca_cau_truc_docx_rels_part_chinh'),
     ('wp1525_gach_sau_ngat_la_ngat', ('                    chu_sau_ngat = True   # r9', '                    kq["ngat"] = True   # r9'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_mc_bo_qua', ('    if any(str(e.tag).startswith(_MC) for e in goc.iter()):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_ranh_gioi_lon_chi_so', ('_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\\s+(?:[IVXLCDM]+|\\d+|thứ\\s+\\w+|[A-ZĐ])\\b", re.IGNORECASE)', '_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\\s+[IVXLCDM\\d]+\\b", re.IGNORECASE)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_lvltext_tu_do', ('    if not re.fullmatch(r"(?:%[1-9]|[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*", txt):', '    if False:'), 'ca_cau_truc_docx_chan'),
     # #1525: đường thô không nhận dòng điểm.
     ('wp1525_tho_nhan_diem', ('        elif _RE_DIEM.match(ln):\n            # #1525', '        elif False:\n            # #1525'), 'ca_wp1514_luot9'),
     # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.

@@ -522,7 +522,8 @@ _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_mem
 
 # Tiêu đề Điều / ranh giới cấu trúc lớn: chỉ xét ở ĐẦU đoạn (sau khi gộp khoảng trắng).
 _RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]", re.IGNORECASE)   # r9 (lượt 8 H1): như tiêu đề đích
-_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\s+[IVXLCDM\d]+\b", re.IGNORECASE)
+# r11 (lượt 10 K2): số thứ tự của tiêu đề cấu trúc còn có dạng viết bằng chữ (`Phần thứ nhất`) và chữ cái đơn.
+_RE_RANH_GIOI_LON = re.compile(r"^(?:Chương|Mục|Phần)\s+(?:[IVXLCDM]+|\d+|thứ\s+\w+|[A-ZĐ])\b", re.IGNORECASE)
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
 _RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)](?!\d)")
@@ -538,6 +539,14 @@ _CON_DOAN_DI_VAO = {"ins", "moveTo", "hyperlink", "smartTag", "customXml"}   # b
 _CON_RUN_CHU = {"t": None, "tab": " ", "ptab": " ", "noBreakHyphen": "-", "softHyphen": ""}   # r7 F6: ptab   # phần tử → chữ hiển thị (None = .text)
 _CON_RUN_BO_QUA = {"rPr", "lastRenderedPageBreak", "commentReference", "annotationRef"}
 _TAT_OOXML = ("0", "false", "off")
+_MC = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
+
+
+def _chan_mc(goc, ten_part):
+    """r11 (lượt 10 K1): BẤT KỲ phần tử markup-compatibility (`mc:AlternateContent`…) ở đâu trong part ⇒ không giải được nhánh
+    tương thích nào có hiệu lực (style, cấp, chữ) ⇒ dừng. Danh sách cho phép: không hỗ trợ `mc` ở mọi tầng."""
+    if any(str(e.tag).startswith(_MC) for e in goc.iter()):
+        raise ValueError(f"{ten_part} co phan tu markup-compatibility (mc:) — khong ho tro")
 
 
 def _nap_doc_gioi_han():
@@ -633,6 +642,7 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
     if xml is None:
         return {}
     goc = ET.fromstring(xml)
+    _chan_mc(goc, "numbering")
     truu_tuong = {}
     for an in goc.findall(_W + "abstractNum"):
         muc, loi = {}, None
@@ -701,10 +711,7 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
         goc = None
     if goc is None:
         return {"": (None, None, None)}
-    if any(not str(e.tag).startswith(_W) for st in goc.iter() if st.tag in (_W + "rPr", _W + "pPr") for e in st):
-        # r10 (lượt 9 J2): thuộc tính ngoài namespace w (vd `mc:AlternateContent`) trong rPr/pPr của styles — không giải được
-        # nhánh tương thích nào có hiệu lực ⇒ dừng.
-        raise ValueError("styles co thuoc tinh ngoai namespace w (mc:AlternateContent…) — khong ho tro")
+    _chan_mc(goc, "styles")
 
     def gach(rpr, ten):
         e = rpr.find(_W + ten) if rpr is not None else None
@@ -783,9 +790,10 @@ def _nhan(muc, ilvl, bo_dem):
         raise ValueError(f"numFmt {f!r} khong ho tro")
     if fmt not in ("decimal", "lowerLetter", "upperLetter"):
         raise ValueError(f"numFmt {fmt!r} khong ho tro")
-    if re.search(r"[^\W\d_]", re.sub(r"%\d", "", txt)):
-        # r10 (lượt 9 J3): `lvlText` có CHỮ (vd "Điều %2.") ⇒ nhãn có thể là tiêu đề/khác điểm ⇒ chỉ nhận placeholder + dấu.
-        raise ValueError(f"lvlText {txt!r} co chu — khong ho tro")
+    if not re.fullmatch(r"(?:%[1-9]|[.)(\-–\s])*%[1-9](?:%[1-9]|[.)(\-–\s])*", txt):
+        # r10 (lượt 9 J3) → r11 (lượt 10 K3): DANH SÁCH CHO PHÉP toàn chuỗi — chỉ placeholder `%N` (ít nhất một), các dấu `.` `)`
+        # `(` `-` `–` và khoảng trắng; chữ, chữ số trần, `%` lẻ, ký tự vô hình ⇒ không hỗ trợ.
+        raise ValueError(f"lvlText {txt!r} ngoai danh sach cho phep — khong ho tro")
     nhan = re.sub(r"%(\d)", thay, txt)
     if not nhan.strip():
         raise ValueError("lvlText rong")
@@ -834,8 +842,6 @@ def _phan_tich_doan(p, kieu):
         dem = dict(dem_nen)
         truc_tiep = {}
         if rpr is not None:
-            if any(not str(e.tag).startswith(_W) for e in rpr):
-                kq["la"] = True   # r10 (lượt 9 J2): thuộc tính ngoài namespace w (mc:AlternateContent…) ⇒ không biết có gạch
             rs = rpr.find(_W + "rStyle")
             if rs is not None:
                 for t, ci in (("strike", 3), ("dstrike", 4)):
@@ -917,8 +923,7 @@ def _phan_tich_doan(p, kieu):
         il = int(e.get(_W + "val")) if e is not None else il
     if nid == "!":
         kq["la"], nid = True, None   # r9 (lượt 8 H4): numId lỗi khai qua style ⇒ đoạn lạ
-    if ppr is not None and any(not str(e.tag).startswith(_W) for x in (ppr, ppr.find(_W + "numPr")) if x is not None for e in x):
-        kq["la"] = True   # r10 (lượt 9 J2): pPr/numPr có phần tử ngoài namespace w
+    # r10 (lượt 9 J2) → r11 (lượt 10 K1): phần tử `mc:` ở rPr/pPr nay bị `_chan_mc` chặn cho CẢ part.
     so = None if nid in (None, "0") else (nid, il or 0)
     # r7 (lượt 6 F5): cấp ngoài miền ở ĐOẠN không cần chốt riêng — chỉ đếm khi cấp có trong định nghĩa (đã giới hạn 0–8),
     # và bước xác thực chặn đoạn trỏ cấp không có định nghĩa.
@@ -944,6 +949,7 @@ def doc_dieu_docx(nguon, dieu):
         danh_so = _doc_danh_so(z, doc_gioi_han, chinh)
         kieu = _doc_kieu(z, doc_gioi_han, chinh)
     goc_cay = ET.fromstring(goc_xml)
+    _chan_mc(goc_cay, "document")
     if goc_cay.tag != _W + "document":
         # r5 (lượt 4 D5): .docx Strict (namespace purl.oclc.org) hay tệp lạ — giới hạn đã khai.
         raise ValueError("document.xml khong phai WordprocessingML Transitional (vd .docx Strict) — luu lai dang Word Document")

@@ -359,7 +359,9 @@ def _h4_chay(t, env_them):
 def h4_cong_cu_ban_ke_thu_lai_apt_mot_lan():
     _posix()
     for env_them, mong, sau in (({}, ["1"], "SAU=VANG"), ({"CAI_CONG_CU_THU_LAI": "3"}, ["3"], "SAU=3"),
-                                ({"CAI_CONG_CU_THU_LAI": "0"}, ["0"], "SAU=0")):
+                                ({"CAI_CONG_CU_THU_LAI": "0"}, ["0"], "SAU=0"),
+                                # Codex lượt 1 F1523-01: rỗng ⇒ `:-1` cho 1, cha vẫn rỗng; không phải số ⇒ chuyển NGUYÊN VĂN (trình cài tự lo)
+                                ({"CAI_CONG_CU_THU_LAI": ""}, ["1"], "SAU="), ({"CAI_CONG_CU_THU_LAI": "abc"}, ["abc"], "SAU=abc")):
         with tempfile.TemporaryDirectory() as t:
             rc, ra, nhan = _h4_chay(t, env_them)
         bang(rc == 0 and nhan == mong and "cong-cu-ban-ke: DAT (1 cong cu)" in ra and sau in ra.split("\n"),
@@ -800,6 +802,8 @@ DOT_BIEN = (
     ("H4_ep_cung_1", "hook", 'CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash', 'CAI_CONG_CU_THU_LAI=1 bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
     ("H4_export_ra_hook", "hook", '    ma=0; _cc_chay_tran "$con" env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash',
      '    export CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}"; ma=0; _cc_chay_tran "$con" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_rong_khong_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"${CAI_CONG_CU_THU_LAI-1}" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_ep_khong_phai_so_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"$(case "${CAI_CONG_CU_THU_LAI:-1}" in *[!0-9]*) echo 1;; *) echo "${CAI_CONG_CU_THU_LAI:-1}";; esac)" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
     ("H4_xoa_ten_nang_luc", "hook", " cong-cu-apt-thu-lai-1\n", "\n", "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
     ("P3A1_bo_kiem_remote", "ma", '    if env.get("CLAUDE_CODE_REMOTE") != "true":\n        kq["v"] = ("BỎ QUA", "không phải phiên cloud")\n    elif', "    if", "p3a1_khong_phai_cloud"),

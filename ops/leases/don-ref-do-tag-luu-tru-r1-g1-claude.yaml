@@ -49,9 +49,9 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc.'
 leased_at_utc: '2026-11-25T19:06:02Z'
-heartbeat_at: '2026-11-25T19:06:02Z'
-lease_until: '2026-11-26T03:06:02Z'
-lease_expires_at_utc: '2026-11-26T03:06:02Z'
+heartbeat_at: '2026-11-25T20:28:52Z'
+lease_until: '2026-11-25T20:28:52Z'
+lease_expires_at_utc: '2026-11-25T20:28:52Z'
 max_lease_hours: 8
 review_calls_limit: 10
 review_calls_basis: 'ADR-0055 (dong khai tran_loi_goi_codex trong dac ta).'
@@ -60,3 +60,6 @@ nang_tran: []
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho.'
 push_policy: 'ADR-0060 M5/M12: chi day nhanh thi cong sau khi review offline approve va verdict da dang len Issue #1532; mo PR draft.'
+withdrawn_at_utc: '2026-11-25T20:28:52Z'
+withdrawn_by: 'phien session_015GtxrcJ94fBLh2n3he2BcS (chu kho duyet thu hoi 25-11-2026)'
+withdrawn_reason: 'packet land: PR #1537 merge 2026-11-25T20:28:52Z boi ducthangho, merge commit c4d707e2a3b513f57467f1f396f018d5c0c13620. Cross-review Codex offline 4/10 loi goi, luot 4 approve, 0 finding mo (ops/acceptance/don-ref-do-tag-luu-tru/r1/VERDICT.md); connector Codex tren b6c825f khong finding; CI 41/41. Kiem sau land: run 45695408308 thu kho ops/wp1475-r1-g1-lease => cho phep. Han cu 2026-11-26T03:06:02Z.'

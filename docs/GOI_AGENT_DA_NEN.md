@@ -396,9 +396,9 @@ biến môi trường của environment.
   nội dung trước tiêu đề hay thêm tiêu đề Điều/Chương/Mục/Phần trong tệp, Điều không có đánh số tự động (dùng `--tep`
   tệp văn bản), đoạn không số sau khoản đầu, hai danh sách ở cấp khoản, số khoản không liên tục từ 1, số gõ tay lẫn số
   tự động, đánh số qua style (kể cả style chỉ mang `ilvl`), nhãn cấp (`lvlText`, trừ định dạng `bullet` luôn thành `-`) ngoài
-  `%N` + dấu `.` `)` `(` `-` `–` + khoảng trắng, phần tử tương thích `mc:` ở bất kỳ đâu, tiêu đề Điều thiếu dấu sau số
-  (`Điều 4 Phạm vi`, kể cả có dấu câu giữa tên, `Điều 4 Phạm vi, đối tượng`) trong thân — đoạn mở bằng `Điều <số>` chỉ được coi
-  là dẫn chiếu khi KẾT bằng dấu câu, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
+  `%N` + dấu `.` `)` `(` `-` `–` + khoảng trắng, phần tử tương thích `mc:` ở bất kỳ đâu, MỌI đoạn trong thân mở bằng
+  `Điều <số>` (mọi hình dạng: `Điều 4 Phạm vi`, `Điều4`, `Điều 4_…`, sau nháy/ký hiệu đầu đoạn — kể cả điểm/khoản MỞ BẰNG dẫn
+  chiếu `Điều 5 của Luật này;`: viết lại thành `quy định tại Điều 5 …`), khối/wrapper ngoài namespace Word, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
   `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
   không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
   `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột

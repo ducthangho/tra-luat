@@ -35,6 +35,9 @@
   ⇒ chặn; số thứ tự chữ/La Mã chặt hơn (không nuốt thuật ngữ); giá trị số thiếu ⇒ lỗi có kiểm soát; part chính đọc theo mã hoá khai.
 - r13 (sau cross-review lượt 12, đặc tả `ops/specs/llm-khoan-docx-r13.md`): tiêu đề Điều thiếu dấu xét riêng tiền tố và dấu câu CUỐI
   (dấu câu giữa tên không còn lọt); `ilvl`/mốc move thiếu giá trị ⇒ lỗi có kiểm soát (rc 2) thay vì `TypeError`.
+- r14 (sau cross-review lượt 13, đặc tả `ops/specs/llm-khoan-docx-r14.md`): đổi sang CẤM TIỀN TỐ — mọi đoạn trong thân mở bằng
+  `Điều <số>` ⇒ chặn (kể cả dẫn chiếu đầu đoạn); ID danh sách chuẩn hoá bằng chuỗi (ID quá dài ở định nghĩa không dùng không còn
+  làm hỏng lần đọc); khối/wrapper ngoài namespace Word ⇒ khối lạ.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

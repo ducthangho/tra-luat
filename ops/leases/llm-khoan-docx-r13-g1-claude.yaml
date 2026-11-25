@@ -115,3 +115,5 @@ revision_ly_do: 'Cross-review luot 12 (M1 P1, M2 P2); sua trong tran 13 da duyet
 review_calls_limit: 13
 review_calls_used_truoc: 12
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r14-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 13 (N1-N3); revision r14 (ops/specs/llm-khoan-docx-r14.md), tran 14.'

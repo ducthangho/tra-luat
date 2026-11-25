@@ -521,7 +521,6 @@ _W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_member_bounded`
 
 # Tiêu đề Điều / ranh giới cấu trúc lớn: chỉ xét ở ĐẦU đoạn (sau khi gộp khoảng trắng).
-_RE_DIEU_BAT_KY = re.compile(r"^Điều\s+\d+[a-zđ]?\s*[.:]", re.IGNORECASE)   # r9 (lượt 8 H1): như tiêu đề đích
 # r11 (lượt 10 K2): số thứ tự của tiêu đề cấu trúc còn có dạng viết bằng chữ (`Phần thứ nhất`) và chữ cái đơn.
 # r12 (lượt 11 L3): số thứ tự viết bằng chữ chỉ là TỪ SỐ (`thứ nhất`…`thứ mười…`); La Mã và chữ cái đơn phải VIẾT HOA (không
 # nuốt `Mục vi phạm`, `Phần thứ cấp`).
@@ -531,13 +530,22 @@ _RE_RANH_GIOI_LON = re.compile(
 # dấu câu cuối; dẫn chiếu trong thân điểm/khoản kết bằng `;` `.` …).
 # r13 (lượt 12 M1): TIỀN TỐ và HẬU TỐ xét RIÊNG — tên Điều được có dấu câu GIỮA tên (`Điều 5 Phạm vi, đối tượng`); chỉ dấu câu
 # CUỐI đoạn (bỏ qua ngoặc/nháy đóng) phân biệt dẫn chiếu với tiêu đề. Số theo sau không phải chữ/số (`Điều 5—Phạm vi` cũng khớp).
-_RE_DIEU_KHONG_DAU = re.compile(r"^Điều\s+\d+[a-zđ]?(?!\w)", re.IGNORECASE)
-_RE_KET_DAU_CAU = re.compile(r"[.;:,!?][\s\"'”’»)\]]*$")
+# r14 (lượt 13 N1, Review Rescue Checkpoint §12): lớp `ranh-gioi-khoan` lặp qua L2 → M1 → N1 — mỗi lần vá MỘT hình dạng tiêu đề
+# thì lộ hình dạng khác (dấu cuối, dấu giữa tên, gạch dưới…). Đổi từ "nhận diện tiêu đề" sang "cấm tiền tố": trong thân Điều,
+# MỌI đoạn mà (sau khi bỏ ký tự không phải chữ/số ở đầu, chuẩn hoá NFC) mở bằng `Điều` + số ⇒ chặn, bất kể ký tự sau số hay dấu câu
+# cuối đoạn. Cái giá đã khai: điểm/khoản MỞ BẰNG dẫn chiếu `Điều 5 …` cũng bị chặn (rc 2, không ghép sai).
+_RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\s*\d", re.IGNORECASE)
+_RE_DAU_KHONG_CHU = re.compile(r"^[\W_]+")
 
 
-def _la_tieu_de_khong_dau(chu):
-    """r13 (lượt 12 M1): đoạn mở bằng `Điều <số>` (không cần dấu sau số) và KHÔNG kết bằng dấu câu ⇒ hình dạng tiêu đề Điều."""
-    return bool(_RE_DIEU_KHONG_DAU.match(chu)) and not _RE_KET_DAU_CAU.search(chu)
+def _dau_doan(chu):
+    """r14 (lượt 13 N1): đầu đoạn để dò tiền tố cấu trúc — chuẩn hoá NFC, bỏ ký tự không phải chữ/số ở đầu (nháy, gạch dưới…)."""
+    return _RE_DAU_KHONG_CHU.sub("", unicodedata.normalize("NFC", chu))
+
+
+def _mo_bang_dieu(chu):
+    """r14 (lượt 13 N1): đoạn mở bằng `Điều <số>` ở bất kỳ hình dạng nào."""
+    return bool(_RE_DIEU_TRONG_THAN.match(_dau_doan(chu)))
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
 _RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)](?!\d)")
@@ -598,7 +606,9 @@ def _so_id(v):
     """r7 (lượt 6 F3): ID đánh số OOXML là SỐ NGUYÊN — `01` và `1` là một. Chuẩn hoá về chữ số thập phân.
     r8 (lượt 7 G1): CHỈ nhận chữ số thập phân ASCII (`int()` còn nhận `+1`, `1_0`, chữ số Unicode…); khác ⇒ None (không hợp lệ)."""
     v = str(v).strip() if v is not None else ""
-    return str(int(v)) if re.fullmatch(r"[0-9]+", v) else None
+    # r14 (lượt 13 N2): chuẩn hoá bằng CHUỖI (bỏ số 0 đầu) — `int()` ném ValueError với chuỗi quá trần độ dài của Python, làm hỏng
+    # cả lần đọc dù định nghĩa ấy không được dùng (A5).
+    return (v.lstrip("0") or "0") if re.fullmatch(r"[0-9]+", v) else None
 
 
 def _so_nguyen(v):
@@ -845,8 +855,11 @@ def _doan_trong(cha, trong_bang=False):
     """Duyệt khối theo THỨ TỰ tài liệu (r2, lượt 1 A1/A2): `w:p` ⇒ ("p", el, trong_bang); `w:tbl` ⇒ ("bang", …) rồi các
     đoạn trong ô (để ĐẾM số); `w:sdt`/`w:customXml` ⇒ đi vào nội dung; khối lạ ⇒ ("la", …) — không bỏ nội dung nào."""
     for el in cha:
-        ten = el.tag[len(_W):] if el.tag.startswith(_W) else el.tag
-        if ten == "p":
+        # r14 (lượt 13 N3): so QName ĐẦY ĐỦ — khối ngoài namespace Word (kể cả trùng tên cục bộ `p`/`sdt`/`customXml`) ⇒ khối lạ.
+        ten = el.tag[len(_W):] if isinstance(el.tag, str) and el.tag.startswith(_W) else None
+        if ten is None:
+            yield ("la", el, trong_bang)
+        elif ten == "p":
             yield ("p", el, trong_bang)
         elif ten == "tbl":
             # r7: tệp chỉ chứa Điều cần đọc ⇒ bảng ở BẤT KỲ đâu bị chặn; không cần duyệt ô để đếm số trước Điều.
@@ -1066,7 +1079,7 @@ def doc_dieu_docx(nguon, dieu):
     if doan[i0]["la"]:
         raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     vung = doan[i0 + 1:]
-    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _la_tieu_de_khong_dau(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):
+    if any(_mo_bang_dieu(d["chu"]) or _RE_RANH_GIOI_LON.match(_dau_doan(d["chu"])) for d in vung):
         raise ValueError("tep chua them tieu de Dieu/Chuong/Muc/Phan — chi de dung Dieu can doc trong tep")
     if any(d["la"] for d in vung):
         raise ValueError("Dieu co phan tu khong ho tro (ky hieu, truong, hinh, chu thich…) — khong biet chu that")

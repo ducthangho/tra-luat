@@ -1,0 +1,203 @@
+c2:_d2b_blob:20:4	c2	GIET cong_d2b_c1_passed_dat
+f:_d2b_blob:20:4	f	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:26:4	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:31:4	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:36:4	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:45:4	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:51:4	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:78:4	a2	GIET cong_d2b_c1_passed_dat
+c2:_d2b_kiem:80:4	c2	GIET cong_d2b_c1_passed_dat
+f:_d2b_kiem:80:4	f	GIET cong_d2b_c1_passed_dat
+c:_d2b:14:8	c	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:25:13	a	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:26:7:ve0	b	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:26:7:ve1	b	GIET cong_d2b_c2_thieu_nguon
+c2:_d2b_kiem:27:8	c2	GIET cong_d2b_c1_passed_dat
+f:_d2b_kiem:27:8	f	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:29:11	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:30:9	a2	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:31:7:ve0	b	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:31:7:ve1	b	GIET cong_d2b_c1_passed_dat
+c:_d2b_kiem:32:8	c	GIET cong_d2b_c2_thieu_nguon
+a:_d2b_kiem:33:7	a	GIET cong_d2b_c1_passed_dat
+c2:_d2b_kiem:34:8	c2	GIET cong_d2b_c2_thieu_nguon
+f:_d2b_kiem:34:8	f	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:36:7:ve0	b	GIET cong_d2b_c5_duong_dan
+b:_d2b_kiem:36:7:ve1	b	GIET cong_d2b_c5_duong_dan
+b:_d2b_kiem:36:7:ve2	b	GIET cong_d2b_c5_duong_dan
+c2:_d2b_kiem:37:8	c2	GIET cong_d2b_c5_duong_dan
+f:_d2b_kiem:37:8	f	GIET cong_d2b_c5_duong_dan
+a2:git:41:8	a2	GIET cong_d2b_c1_passed_dat
+c2:git:43:8	c2	GIET cong_d2b_c1_passed_dat
+f:git:43:8	f	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:45:7:ve0	b	GIET cong_d2b_c9_oid_khong_phai_commit
+b:_d2b_kiem:45:7:ve1	b	GIET cong_d2b_c9_oid
+c2:_d2b_kiem:46:8	c2	GIET cong_d2b_c9_oid
+f:_d2b_kiem:46:8	f	GIET cong_d2b_c9_oid
+c2:_d2b_kiem:52:8	c2	GIET cong_d2b_c5_mien_ky_tu
+f:_d2b_kiem:52:8	f	GIET cong_d2b_c5_mien_ky_tu
+a2:_d2b_kiem:55:8	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:65:8	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:69:8	a2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:25:19	g	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:26:22	a	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:30:15:ve0	b	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:30:15:ve1	b	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:30:15:ve2	b	GIET cong_d2b_c2_thieu_nguon
+g:_d2b_kiem:33:7	g	GIET cong_d2b_c2_thieu_nguon
+a:_d2b_kiem:36:72	a	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:36:96	a	GIET cong_d2b_c1_passed_dat
+d:git:39:20	d	GIET cong_d2b_c7_git_loi
+b:git:41:11:ve0	b	GIET cong_d2b_c1_passed_dat
+b:git:41:11:ve1	b	GIET cong_d2b_c7_module_vang
+a2:git:43:15	a2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:44:14	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:44:24	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:44:30	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:44:49	g	TUONG_DUONG dau ra cua `git branch` chi duoc doc qua `r.startswith(b'refs/remotes/origin/')`; them `~` SAU ten ref khong doi tien to cua dong nao
+a:_d2b_kiem:45:7	a	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:47:18	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:47:29	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:47:35	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:47:46	g	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:65:11:ve0	b	GIET cong_d2b_c4_symlink
+b:_d2b_kiem:65:11:ve1	b	GIET cong_d2b_c4_symlink
+a2:_d2b_kiem:73:12	a2	GIET cong_d2b_c3_attempt_kieu
+c:_d2b_kiem:77:12	c	GIET cong_d2b_c6_mien
+g:_d2b_kiem:24:35	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:24:54	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:24:71	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:26:28	g	GIET cong_d2b_c2_thieu_nguon
+a2:_d2b_kiem:28:20	a2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:28:83	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:29:12	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:29:19	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:29:42	g	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:29:49	g	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:29:58	g	GIET cong_d2b_c4_symlink
+i7:_d2b_kiem:30:90	i7	TUONG_DUONG SHA_RE = ^[0-9a-f]{40}\Z da neo ca hai dau, nen match va fullmatch nhan cung tap chuoi
+g:_d2b_kiem:30:124	g	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:31:23:ve0	b	GIET cong_d2b_c2_thieu_nguon
+b:_d2b_kiem:31:23:ve1	b	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:32:18	g	GIET cong_d2b_c2_thieu_nguon
+g:_d2b_kiem:35:17	g	GIET cong_d2b_c1_passed_dat
+i7:_d2b_kiem:36:11	i7	GIET cong_d2b_c5_duong_dan
+g:_d2b_kiem:36:72	g	GIET cong_d2b_c5_duong_dan
+g:_d2b_kiem:36:96	g	GIET cong_d2b_c5_duong_dan
+g:git:40:30	g	GIET cong_d2b_c1_passed_dat
+d:_d2b_kiem:44:76	d	GIET cong_d2b_c9_oid_khong_phai_commit
+a2:_d2b_kiem:0:0:if0	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:0:0:bo_if0	a2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:58:30	g	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:65:11	a	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:71:15	a	GIET cong_d2b_c1_passed_dat
+c:_d2b_kiem:72:16	c	GIET cong_d2b_c4_kiem_tep
+c:_d2b_kiem:75:16	c	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:24:21	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:28:20	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:28:55	g	GIET cong_d2b_c4_symlink
+a:_d2b_kiem:31:23	a	GIET cong_d2b_c1_passed_dat
+j1:_d2b_kiem:31:23	j1	TUONG_DUONG `type(ra)` la mot lop dung san (gia tri dung tu YAML); `==` giua hai lop la so danh tinh, bang `is`
+a:_d2b_kiem:31:43	a	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:36:88	g	GIET cong_d2b_c5_duong_dan
+g:_d2b_kiem:36:113	g	GIET cong_d2b_c5_duong_dan
+g:_d2b_kiem:37:21	g	GIET cong_d2b_c5_duong_dan
+g:_d2b_kiem:45:11	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:45:23	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:46:21	g	GIET cong_d2b_c9_oid
+a2:_d2b_kiem:49:13	a2	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:50:56	e	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:68:26	g	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:71:21	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:79:16	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:79:58	g	GIET cong_d2b_c1_passed_dat
+g:_d2b:14:23	g	GIET cong_d2b_c2_thieu_nguon
+g:_d2b:16:25	g	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:30:110	g	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:31:49	e	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:35:34	e	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:36:12	a2	GIET cong_d2b_c4_symlink
+g:git:42:28	g	GIET cong_d2b_c7_git_loi
+d:_d2b_kiem:45:38	d	GIET cong_d2b_c9_oid_khong_phai_commit
+k2:_d2b_kiem:45:70	k2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:48:51	g	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:49:26:ve0	b	GIET cong_d2b_c4_symlink
+b:_d2b_kiem:49:26:ve1	b	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:50:24	e	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:52:23	g	GIET cong_d2b_c5_mien_ky_tu
+g:_d2b_kiem:54:62	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:55:25	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:56:29	g	GIET cong_d2b_c7_module_vang
+g:_d2b_kiem:56:85	g	GIET cong_d2b_c7_module_vang
+g:_d2b_kiem:60:37	g	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:64:30	e	GIET cong_d2b_c4_symlink
+e:_d2b_kiem:73:62	e	GIET cong_d2b_c3_attempt_kieu
+a2:_d2b_kiem:0:0:if0#1	a2	GIET cong_d2b_c1_passed_dat
+a2:_d2b_kiem:0:0:bo_if0#1	a2	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:77:21	g	GIET cong_d2b_c6_mien
+a2:_d2b_kiem:79:28	a2	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:49:37	a	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:54:80	g	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:54:86	e	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:55:35	g	GIET cong_d2b_c1_passed_dat
+d:_d2b_kiem:55:81	d	GIET cong_d2b_c7_module_vang
+e:_d2b_kiem:64:49	e	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:64:90	e	GIET cong_d2b_c1_passed_dat
+k1:_d2b_kiem:65:16	k1	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:72:28	g	GIET cong_d2b_c4_kiem_tep
+g:_d2b_kiem:72:41	g	GIET cong_d2b_c4_kiem_tep
+g:_d2b_kiem:74:24	g	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:74:61	g	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:74:96	g	GIET cong_d2b_c3_attempt_kieu
+b:_d2b_kiem:75:47:ve0	b	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:75:47:ve1	b	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:79:46	g	GIET cong_d2b_c4_symlink
+e:git:42:35	e	GIET cong_d2b_c7_git_loi
+e:_d2b_kiem:52:46	e	GIET cong_d2b_c5_mien_ky_tu
+g:_d2b_kiem:59:49	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:59:60	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:59:81	g	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:64:53	e	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:66:42	a	GIET cong_d2b_c1_passed_dat
+b:_d2b_kiem:66:65:ve0	b	GIET cong_d2b_c4_symlink
+b:_d2b_kiem:66:65:ve1	b	GIET cong_d2b_c4_symlink
+a2:_d2b_kiem:72:43	a2	GIET cong_d2b_c4_kiem_tep
+g:_d2b_kiem:74:37	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:74:48	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:74:78	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:74:110	g	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:75:47	a	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:77:57	g	GIET cong_d2b_c4_symlink
+g:_d2b_kiem:64:121	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:64:132	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:64:138	g	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:64:149	g	GIET cong_d2b_c1_passed_dat
+a:_d2b_kiem:66:89	a	GIET cong_d2b_c1_passed_dat
+g:_d2b_kiem:72:60	g	GIET cong_d2b_c4_kiem_tep
+b:_d2b_kiem:75:63:ve0	b	GIET cong_d2b_c3_attempt_kieu
+b:_d2b_kiem:75:63:ve1	b	GIET cong_d2b_c3_neo
+g:_d2b_kiem:65:38	g	GIET cong_d2b_c1_passed_dat
+e:_d2b_kiem:72:46	e	GIET cong_d2b_c4_kiem_tep
+a:_d2b_kiem:75:63	a	GIET cong_d2b_c3_attempt_kieu
+a:_d2b_kiem:75:86	a	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:75:68	g	GIET cong_d2b_c3_attempt_kieu
+g:_d2b_kiem:75:86	g	GIET cong_d2b_c3_attempt_kieu
+i1:D2B_TEP_RE:lop@9 bo '!-.'	i1	GIET cong_d2b_c1_passed_dat
+i1:D2B_TEP_RE:lop@9 bo '0-~'	i1	GIET cong_d2b_c1_passed_dat
+i2:D2B_TEP_RE:lop@9 thanh .	i2	GIET cong_d2b_c5_duong_dan
+i1:D2B_TEP_RE:lop@33 bo '!-.'	i1	GIET cong_d2b_c5_mien_ky_tu
+i1:D2B_TEP_RE:lop@33 bo '0-~'	i1	GIET cong_d2b_c5_mien_ky_tu
+i2:D2B_TEP_RE:lop@33 thanh .	i2	GIET cong_d2b_c5_duong_dan
+i2:D2B_TEP_RE:lop@66 thanh .	i2	GIET cong_d2b_c5_duong_dan
+i4:D2B_TEP_RE:luong_tu@17 +→*	i4	GIET cong_d2b_c5_duong_dan
+i4:D2B_TEP_RE:luong_tu@41 +→*	i4	GIET cong_d2b_c5_duong_dan
+i4:D2B_TEP_RE:luong_tu@71 +→*	i4	GIET cong_d2b_c5_duong_dan
+i5:D2B_TEP_RE:escape@72 \.→.	i5	GIET cong_d2b_c5_duong_dan
+i1:D2B_READBACK_RE:lop@9 bo '!-.'	i1	GIET cong_d2b_c5_mien_ky_tu
+i1:D2B_READBACK_RE:lop@9 bo '0-~'	i1	GIET cong_d2b_c4_symlink
+i2:D2B_READBACK_RE:lop@9 thanh .	i2	GIET cong_d2b_c5_duong_dan
+i1:D2B_READBACK_RE:lop@33 bo '!-.'	i1	GIET cong_d2b_c5_mien_ky_tu
+i1:D2B_READBACK_RE:lop@33 bo '0-~'	i1	GIET cong_d2b_c5_mien_ky_tu
+i2:D2B_READBACK_RE:lop@33 thanh .	i2	GIET cong_d2b_c5_duong_dan
+i4:D2B_READBACK_RE:luong_tu@17 +→*	i4	GIET cong_d2b_c5_duong_dan
+i4:D2B_READBACK_RE:luong_tu@41 +→*	i4	GIET cong_d2b_c5_duong_dan

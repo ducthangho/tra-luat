@@ -1,0 +1,18 @@
+## nen HEAD=f602325574c62184caf16309631f5f680ca5cee2 · ruff 0.15.15
+8	F401	[*] unused-import
+3	F811	[ ] redefined-while-unused
+3	F841	[ ] unused-variable
+2	F541	[*] f-string-missing-placeholders
+Found 16 errors.
+[*] 10 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1
+0
+## sau HEAD=2439922c67a091c53e277c9e0b13d8fc04089453 · ruff 0.15.15
+8	F401	[*] unused-import
+3	F811	[ ] redefined-while-unused
+3	F841	[ ] unused-variable
+2	F541	[*] f-string-missing-placeholders
+Found 16 errors.
+[*] 10 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1
+0

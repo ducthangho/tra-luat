@@ -1,0 +1,10 @@
+## rig_ab/sau HEAD=ac523aebd876640b369e94511fd44e81bace0908 sach=0
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+[duong_dan_sai + oid_khong_tren_remote] rc=12 | stdout: [] | stderr: ['THIẾU  D2b oid_khong_tren_remote', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+[chi oid_khong_tren_remote] rc=12 | stdout: [] | stderr: ['THIẾU  D2b oid_khong_tren_remote', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+[mien: duong dan sai + oid] rc=12 | stdout: [] | stderr: ['THIẾU  D2b oid_khong_tren_remote', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+## rig_ab2/sau HEAD=2439922c67a091c53e277c9e0b13d8fc04089453 sach=0
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+[duong_dan_sai + oid_khong_tren_remote] rc=12 | stdout: [] | stderr: ['THIẾU  D2b duong_dan_sai', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+[chi oid_khong_tren_remote] rc=12 | stdout: [] | stderr: ['THIẾU  D2b oid_khong_tren_remote', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']
+[mien: duong dan sai + oid] rc=12 | stdout: [] | stderr: ['THIẾU  D2b duong_dan_sai', 'CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b']

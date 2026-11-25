@@ -1,0 +1,190 @@
+schema_version: 1
+packet_id: wp1236
+packet_issue: 1236
+packet_slug: GATE-OUTPUT-DOI-CHIEU
+dot: C
+revision: 12
+generation: 1
+luot_handoff: 2
+tra_loi_verdict: 'review mã lượt 1/4 (Codex, run 818363af, ac523ae, changes_requested: C01 P1 + C02 P2) — ops/reviews/wp1236-c-r12-ma-1-codex/ trên ops/wp1236-bc-lease @ 8ccc146; biên nhận #1236 issuecomment-7134458601'
+lease_id: wp1236-c-r12-g1-claude-20261124
+lease_ref: 'refs/heads/ops/wp1236-bc-lease @ aa27e927931ec78f89dc9413874f7b4ba8f984e2 (ops/leases/wp1236-c-r12-g1-claude-20261124.yaml); lease_expires_at_utc 2026-11-27T11:22:26Z'
+spec_path: ops/specs/wp1236-r12.md
+spec_blob: e5583bc042448517b94eadda57231dfc60e0a284
+spec_hash: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+quyet_dinh_chu_kho_ap_dung:
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7134458601', noi_dung: 'E3 cho C02: mỗi thành phần đường dẫn của tep và readback_thu_muc chỉ nhận ASCII in được 0x21–0x7E trừ "/"; ngoài miền ⇒ duong_dan_sai; đường dẫn in nguyên văn, luôn một dòng; không mở revision đặc tả mới'}
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7130670276', noi_dung: 'luật 9 = miền DELTA + nghĩa vụ không hồi quy'}
+provider: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: remote
+operating_system: Linux
+python: 3.13.18
+role: executor
+session_id: session_015GtxrZsYAFm7iLa11eWogL
+base_sha: f602325574c62184caf16309631f5f680ca5cee2
+head_sha: 2439922c67a091c53e277c9e0b13d8fc04089453
+head_tree: b2ba746fdbe08bff82d66467c0e9b0306fad38cd
+tested_sha: 2439922c67a091c53e277c9e0b13d8fc04089453
+head_sha_bang_tested_sha: true
+commits:
+  - {sha: ac523aebd876640b369e94511fd44e81bace0908, cha: f602325574c62184caf16309631f5f680ca5cee2, noi_dung: 'ứng viên lượt 1 (đã review, KHÔNG sửa)'}
+  - {sha: 2439922c67a091c53e277c9e0b13d8fc04089453, cha: ac523aebd876640b369e94511fd44e81bace0908, noi_dung: 'vá theo lớp C01 + C02; so với ac523ae: packet_loop.py +30 −18 · packet_loop_test.py +91 −43'}
+commit_message_sai_mot_so: 'thông điệp commit 2439922 ghi "16 ca cong_d2b_*"; đo được 17 (16 ca hành vi + cong_d2b_tu_kiem_phan_hang). Không amend: mọi gate đã chạy trên đúng SHA này'
+pushed: false        # nhánh code claude/wp1236-c-r12-g1 CHƯA push, CHƯA có PR (ADR-0060 M5/M12); ứng viên giao bằng bundle
+bundle:
+  path: ops/handoff/wp1236-c-r12-g1/2439922/wp1236-c-2439922.bundle
+  sha256: 14b379beb1c8b08c08f0f734200a2aef498795fc1f30bf506919a23f75502ce4
+  bytes: 17654
+  range: f602325574c62184caf16309631f5f680ca5cee2..refs/heads/claude/wp1236-c-r12-g1
+  verify: 'git bundle verify rc 0 (gate/bundle_verify.log)'
+  dung: 'git fetch <bundle> claude/wp1236-c-r12-g1:claude/wp1236-c-r12-g1  (cần base f602325 trong kho)'
+status: needs_review
+summary: >-
+  Vá hai lớp của verdict lượt 1. (1) archive-loc-mat-du-lieu-kiem: bản bung git archive nay phải ĐÚNG là cây của oid — bung cả symlink để
+  validator của đợt A tự thấy và tự từ chối theo K2, rồi đối chiếu TỪNG mục của git ls-tree -r với bản bung (symlink vẫn là symlink, tệp khớp
+  băm blob, không hai tên chỉ khác hoa/thường hay dạng chuẩn hoá); lệch ⇒ rc 8. (2) hop-dong-dau-ra-duong-dan-tu-do: theo quyết định E3 của
+  chủ kho, mỗi thành phần đường dẫn chỉ nhận ASCII 0x21–0x7E trừ "/", kiểm trên chuỗi thô trước mọi lệnh git và mọi dòng in; thông điệp rc 8
+  in repr của ngoại lệ.
+changed_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_khop_lease: true
+numstat: {lenh: 'git diff --numstat origin/master...HEAD', tep: 2, them: 374, xoa: 13, chi_tiet: 'packet_loop.py +85 −1 · packet_loop_test.py +289 −12', tran: '<= 6 tệp, <= 450 dòng thêm', con_lai_toi_tran: 76}
+master_da_tien: 'origin/master lúc viết = 5dc92e2145593aed4cf014f65eec43ca3e95badd (lease ghi base f602325). git diff --stat f602325 origin/master trên hai tệp write set và ops/gate_output_doi_chieu.py: rỗng. git merge-tree --write-tree origin/master 2439922: rc 0. Numstat ba chấm không đổi. Gate KHÔNG chạy lại trên bản ghép với master mới.'
+sha256_tep_tai_head:
+  .claude/dev/packet_loop.py: 7d447c68f743fb525c537489e842a726554426a35bf3e65408094c9c1d76414c
+  .claude/dev/packet_loop_test.py: ebdd09637eccd9652da9d553f86be6a9d5fbbc449851c8b33cabcd5a8abb4eaf
+gate_checkout_chinh: {bat_dau: '2026-11-25T03:14:14Z', ket_thuc: '2026-11-25T03:41:29Z', head: 2439922c67a091c53e277c9e0b13d8fc04089453, cay_sach_truoc_sau: true}
+tests:   # Linux, Python 3.13.18, core.abbrev 7, kho không shallow. Mỗi mục ghi rõ chạy ở checkout chính hay ở clone A/B; cây sạch trước và sau
+  - name: 'không hồi quy base ↔ head — packet_loop_test ĐỦ (16 mảnh nền + job gom + 16 mảnh đột biến) trên mỗi vế'
+    status: passed
+    evidence: >-
+      ab/bang_so.md. Hai clone đầy đủ dựng trong MỘT lệnh (ab/cong_cu/ab_dung.sh; ab/ab2_dung.log: nen f602325 tree 99e13c5f…, sau 2439922 tree
+      b2ba746f…, .git là thư mục, không shallow), chạy xen kẽ trong một lệnh (ab/cong_cu/ab_du.sh), 15:37Z → 17:14Z 24-11.
+      (i) nền: base 1784 ca = 1746 đạt + 38 BỎ QUA · head 1801 ca = 1763 đạt + 38 BỎ QUA; 0 ca của base vắng ở head; 0 ca đạt ở base mà không đạt ở
+      head; 17 ca chỉ có ở head đều là cong_d2b_*, đều đạt. Job gom: base "GOM: ĐẠT · 16 mảnh · 1784 ca bắt buộc (sổ 1786 − CA_DAI)" · head "GOM: ĐẠT ·
+      16 mảnh · 1801 ca bắt buộc (sổ 1803 − CA_DAI)". Hai ca CA_DAI chạy ở mảnh đột biến 0: 2/2 đạt cả hai vế.
+      (ii) đột biến khai báo: base 2009 = 2007 giết + 1 đỏ + 1 BỎ QUA · head 2051 = 2049 giết + 1 đỏ + 1 BỎ QUA; 0 đột biến bị giết ở base mà không bị
+      giết ở head; 42 đột biến chỉ có ở head đều là d2b_*, đều bị giết.
+      (iii) số từng mảnh: hai bảng trong ab/bang_so.md.
+  - name: 'đột biến đỏ có sẵn (đỏ ở CẢ HAI vế, delta 0)'
+    status: failed
+    evidence: 'r1187_spec_packet_type: "ca [r1187_spec_packet_int] chỉ chết vì CLI SẬP ⇒ TÍN DỤNG GIẢ" — base mảnh đột biến 9 rc 1 (ab/nen/db-9.log), head mảnh 3 rc 1 (ab/sau/db-3.log). Không thuộc write set mục tiêu của đợt C; không vá. Môi trường đo: Python 3.13.18 (CI ghim 3.12 — chưa đo ở 3.12)'
+  - name: 'BỎ QUA (tách riêng, không tính là đạt)'
+    status: skipped
+    evidence: 'nền: 38 ca mỗi vế, cùng tập tên — 37 "ca native Windows (kernel32) — nền Linux không đo" + 1 "chỉ đo lệnh pwsh trên Windows". Đột biến: luong_canonical_chay_that_dao_os_name BỎ QUA ở cả hai vế. Ca socket bị sandbox chặn (reviewer lượt 1 gặp 15 ca B4): môi trường executor KHÔNG gặp, 0 ca đỏ.'
+  - name: 'ca D2b (cong_d2b_*) tại head'
+    status: passed
+    evidence: '17/17 đạt (16 hành vi + tự kiểm phân hạng), nằm trong 16 mảnh của vế sau'
+  - name: 'đột biến khai báo — họ d2b_ + ba họ dùng chung fixture/nhánh phân hạng (checkout chính tại 2439922)'
+    status: passed
+    evidence: 'gate/dot_bien_khai_bao.log: rc 0, 210 giết đúng ca đích, 0 đỏ (d2b_ 42 · c1106_ 22 · wp1124_ 3 · b4_ 143); dòng cuối: dot bien: 210'
+  - name: 'luật 9 miền DELTA — quet_dot_bien.py do trên khối D2b (checkout chính tại 2439922)'
+    status: passed
+    evidence: 'luat9/do.log: "TONG 203 · GIET 200 · SONG_SACH 3 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0" + dòng HOAN_TAT, rc 0; luat9/ledger_A.tsv (203 ID, rc 0): GIET 200 · TUONG_DUONG 3. Neo: goc 59ca8b4db01fac6b086c8cb3f4d4b71b5d73000a99d1071cc4a131f19b12230f · manifest 5b904f51ccab3a0cccbe2035130c45a204deb275b199741de54cb14b1115b534 · python 3.13.18. 3 đột biến sống đều có chứng minh tương đương: g:_d2b_kiem:44:49 (dau ra cua `git branch` chi duoc doc qua `r.startswith(b''refs/remotes/origin/'')`; them `~` SAU ten ref khong doi tien to cua dong nao); i7:_d2b_kiem:30:90 (SHA_RE = ^[0-9a-f]{40}\Z da neo ca hai dau, nen match va fullmatch nhan cung tap chuoi); j1:_d2b_kiem:31:23 (`type(ra)` la mot lop dung san (gia tri dung tu YAML); `==` giua hai lop la so danh tinh, bang `is`)'
+  - name: 'luật 9 — kho hồi quy'
+    status: not_applicable
+    evidence: 'kho của đợt C rỗng (luat9/kho_rong.jsonl 0 byte): "HOI_QUY 0 · AP_DUNG 0 · KHONG_AP_DUNG 0". Nghĩa vụ không hồi quy đo bằng mục A/B ở trên'
+  - name: 'python3 scripts/tl.py --selftest'
+    status: passed
+    evidence: 'gate/selftest.tail.log: rc 0, == tl selftest 1786/1786 =='
+  - name: 'python3 .claude/dev/ci_dang_ky_test.py'
+    status: passed
+    evidence: 'gate/ci_dang_ky.tail.log: rc 0, PHẢN CHỨNG: 1226/1226 đỏ đúng TỔNG: ĐẠT'
+  - name: 'ruff F delta so master (python3 -m ruff 0.15.15)'
+    status: passed
+    evidence: 'gate/ruff_nen.log (hai clone A/B, cùng lệnh --no-cache --select F --statistics trên hai tệp write set): base F541×2 F811×3 F841×3 F401×8 · head F541×2 F811×3 F841×3 F401×8 ⇒ delta 0. Cả hai vế rc 1 (đỏ sẵn 16 chẩn đoán), không gọi là lint xanh'
+  - name: 'git diff --check origin/master...HEAD · adr-song · doctrine-scan'
+    status: passed
+    evidence: 'gate/gate2.tong: git diff --check rc 0 · adr-song rc 0 · doctrine-scan rc 0; numstat: 85 1 .claude/dev/packet_loop.py;289 12 .claude/dev/packet_loop_test.py;'
+  - name: 'Windows native (ADR-0060 M3 required)'
+    status: not_run
+    evidence: 'việc của điều phối trên máy chủ kho. Bộ ca D2b CHƯA từng chạy trên Windows; hệ quả biết trước ở he_qua_windows'
+  - name: 'CI GitHub'
+    status: not_run
+    evidence: 'chưa push (M5)'
+bang_doi_chieu_lop:   # executor KHÔNG tự gán nhãn đóng lớp; cột phep_kiem_dong là phép đo để reviewer đối chiếu
+  - slug: archive-loc-mat-du-lieu-kiem
+    finding: 'C01 (P1)'
+    co_che: 'validator của đợt A đọc một BẢN BUNG trên đĩa; bản bung khác cây của oid ở đâu thì validator kết luận trên dữ liệu không phải của oid ở đó'
+    bieu_hien:
+      - {nguon: reviewer, mo_ta: 'bộ lọc tar bỏ symlink: YAML thường hợp lệ kèm YAML symlink ⇒ module not_measured [symlink] mà D2b ĐẠT', ca: 'cong_d2b_c4_symlink/yaml_thuong_kem_yaml_symlink ⇒ rc 12 kiem_tep:not_measured:symlink'}
+      - {nguon: reviewer, mo_ta: 'ca cũ chỉ có symlink nên lý do đầu bị đổi thành provenance_0', ca: 'cong_d2b_c4_symlink/yaml_chi_la_symlink ⇒ kiem_tep:not_measured:symlink'}
+      - {nguon: 'reviewer (suy từ mã, chưa đo)', mo_ta: 'thư mục symlink trong cây provenance', ca: 'cong_d2b_c4_symlink/yaml_thuong_kem_thu_muc_symlink ⇒ kiem_tep:not_measured:symlink'}
+      - {nguon: 'executor tự tìm', mo_ta: '.gitattributes của CHÍNH oid có export-ignore ⇒ git archive ẩn tệp khỏi bản bung (validator thấy thiếu tệp)', ca: 'cong_d2b_c4_symlink/an_tep_bang_export_ignore ⇒ rc 8'}
+      - {nguon: 'executor tự tìm', mo_ta: '.gitattributes của oid có eol=crlf ⇒ git archive đổi byte của tệp (cả tệp đánh giá lẫn readback)', ca: 'doi_byte_bang_eol · doi_byte_bang_eol_mien ⇒ rc 8'}
+      - {nguon: 'executor tự tìm', mo_ta: 'nền không tạo được symlink: tarfile chép ĐÍCH của liên kết thành tệp thường ⇒ symlink lại biến mất', ca: 'nen_khong_tao_duoc_symlink[0..2] (os.symlink bị ép ném) ⇒ rc 8'}
+      - {nguon: 'executor tự tìm', mo_ta: 'hai tên chỉ khác hoa/thường (hoặc dạng chuẩn hoá Unicode): trên hệ tệp không phân biệt, tệp sau đè tệp trước', ca: 'hai_ten_chi_khac_hoa_thuong ⇒ rc 8'}
+    cach_va_chung: >-
+      Một bất biến thay cho bộ lọc: BẢN BUNG = CÂY CỦA OID. tarfile.extractall(filter="data") giữ symlink; sau khi bung, mỗi mục của
+      git ls-tree -r -z <oid> -- <thư mục provenance> được đối chiếu với đĩa: mode 120000 ⇒ phải là symlink; mục khác ⇒ phải là tệp và
+      sha1 "blob <n>\0<byte>" khớp OID của mục; tập tên không được trùng sau NFC + casefold. Lệch bất kỳ ⇒ rc 8
+      "KHÔNG ĐO ĐƯỢC: D2b OSError('bản bung git archive không khớp cây của oid')". Việc symlink nào là vi phạm vẫn do module đợt A quyết (K2).
+    phep_kiem_dong: >-
+      ca cong_d2b_c4_symlink 12 biến thể (so đúng bộ rc + lý do + dòng D2b); đột biến d2b_loc_mat_symlink (dựng lại bộ lọc cũ) ·
+      d2b_tin_ban_bung (bỏ đối chiếu) · d2b_bo_bam_blob · d2b_gop_ten_khac_hoa_thuong · d2b_tin_ban_chep_cua_symlink, mỗi cái bị giết đúng ca đích;
+      luật 9 trên khối. Đối chứng không siết oan: symlink_ngoai_pham_vi_k2 (symlink không phải *.yaml) và mien_readback_kem_symlink vẫn ĐẠT.
+    khac_huong_reviewer_goi_y: >-
+      VERDICT gợi ý "kiểm entry/mode trước giải nén, không cần dựng symlink". Đã chọn bung trung thực: kiểm mode trước khi bung buộc D2b chép lại
+      phạm vi K2 của module (symlink nào tính, symlink nào không), hai bản sẽ trôi lệch — đúng rủi ro "siết oan nhánh miễn" VERDICT đã nêu.
+      Giá phải trả: nền không tạo được symlink thì oid có symlink trong thư mục provenance ra rc 8 thay vì lý do của module (xem he_qua_windows).
+    chua_do_duoc:
+      - 'symlink trỏ ra ngoài thư mục bung hoặc trỏ tuyệt đối: theo tài liệu tarfile, filter="data" ném ⇒ rc 8. KHÔNG có ca (không soạn đường dẫn thoát cây)'
+      - 'mục gitlink (mode 160000) trong thư mục provenance: suy từ mã ra rc 8 (không phải tệp); không có ca'
+      - 'tên hợp lệ trong git nhưng không hợp lệ trên NTFS (tên dành riêng, dấu chấm cuối): suy ra extractall ném ⇒ rc 8; không có ca, chưa đo trên Windows'
+  - slug: hop-dong-dau-ra-duong-dan-tu-do
+    finding: 'C02 (P2)'
+    co_che: 'chuỗi tự do của biên bản đi thẳng vào một dòng in; ký tự tách dòng trong chuỗi phá hợp đồng "một lý do = một dòng"'
+    bieu_hien:
+      - {nguon: reviewer, mo_ta: 'D2b ĐẠT <tep>@<oid> tách dòng khi thành phần đường dẫn chứa LF', ca: 'cong_d2b_c5_mien_ky_tu/sai[*] ⇒ rc 12 duong_dan_sai (một dòng)'}
+      - {nguon: reviewer, mo_ta: 'D2b ĐẠT mien <thư mục>@<oid> tách dòng', ca: 'cong_d2b_c5_mien_ky_tu/sai_mien[*]'}
+      - {nguon: reviewer, mo_ta: 'THIẾU  D2b symlink_hoac_mode:<đường dẫn> tách dòng', ca: 'cùng hai nhóm trên: chuỗi ngoài miền không tới được chốt cây git'}
+      - {nguon: 'executor tự tìm', mo_ta: 'cửa thứ tư: dòng rc 8 "KHÔNG ĐO ĐƯỢC: D2b …" chèn str(ngoại lệ); thông điệp ngoại lệ mang LF tách dòng', ca: 'cong_d2b_c7_module_nem ⇒ đúng một dòng …RuntimeError(''x\ny'')'}
+      - {nguon: 'executor tự tìm', mo_ta: 'ký tự tách dòng ngoài LF: CR, TAB, NUL, DEL, NEL U+0085, U+2028/U+2029, NBSP, zero-width, toàn bộ non-ASCII', ca: 'quét ĐỦ 0x00–0x20 + 0x7F và 11 đại diện non-ASCII ở thành phần giữa, cả hai nhánh'}
+      - {nguon: 'executor tự tìm', mo_ta: 'lý do báo cho một biên bản sai CÚ PHÁP phụ thuộc trạng thái kho (chốt OID chạy trước chốt đường dẫn)', ca: 'cong_d2b_c9_oid/hai_loi_khoa_thu_tu ⇒ duong_dan_sai'}
+    cach_va_chung: >-
+      Danh sách CHO PHÉP theo quyết định chủ kho: lớp ký tự [!-.0-~]+ (0x21–0x7E trừ "/") ở cả BỐN vị trí thành phần của hai regex
+      (D2B_TEP_RE, D2B_READBACK_RE); chốt chạy trên chuỗi THÔ, trước mọi lệnh git và mọi dòng in, nên chuỗi nào tới được một dòng in thì chắc chắn
+      không chứa ký tự tách dòng. Dòng rc 8 dùng repr(ngoại lệ).
+    phep_kiem_dong: >-
+      ca cong_d2b_c5_mien_ky_tu 116 biến thể: phần ÂM quét đủ ở thành phần giữa (45 ký tự × 2 nhánh) + bảng 11 ký tự ở thành phần …-provenance
+      (× 2 nhánh); phần DƯƠNG: cả 93 ký tự 0x21–0x7E trừ "/" trong MỘT thành phần đi qua ngữ pháp và tới chốt cây git; biên 0x21 và 0x7E đạt thật ở
+      cả hai nhánh. Mỗi biến thể so đúng danh sách dòng (nên một dòng bị tách là lệch). Đột biến: d2b_mien_ky_tu_noi_tep_1/_2 ·
+      d2b_mien_ky_tu_noi_readback_1/_2 (nới từng vị trí lớp ký tự) · d2b_duong_dan_sau_git · d2b_thong_diep_nhieu_dong.
+    chua_do_duoc:
+      - 'các dòng in của D1/D3/D4 và dòng "ĐÓNG ĐƯỢC WP" có chèn chuỗi tự do nào khác của biên bản không: KHÔNG rà (ngoài mục tiêu D2b của đợt C)'
+      - 'phần tử ly[0] trong kiem_tep:<trạng thái>:<ly[0]> và tên trong mien:<tên> đến từ module đợt A; D2b chuyển tiếp nguyên văn, không tự kiểm rằng chúng là một dòng'
+      - 'thành phần chứa "\" (0x5C, trong miền cho phép): git for Windows có thể coi là dấu phân cách — chưa đo trên Windows'
+lech_so_voi_chu_dac_ta:
+  - {muc: 'regex đường dẫn của mục D2b chi tiết ([^/]+)', da_lam: '[!-.0-~]+ ở bốn vị trí', vi_sao: 'quyết định E3 của chủ kho (#1236 issuecomment-7134458601), không mở revision đặc tả; spec_hash của lease giữ nguyên'}
+  - {muc: 'thứ tự chốt khi biên bản VỪA sai đường dẫn VỪA có OID không trên remote', da_lam: 'ac523ae in đúng một dòng "THIẾU  D2b oid_khong_tren_remote"; 2439922 in đúng một dòng "THIẾU  D2b duong_dan_sai" (cả nhánh passed lẫn nhánh miễn) — đo ở gate/hai_loi.log, cùng script trên hai clone', vi_sao: 'mọi chốt thuần chuỗi chạy trước mọi phép đo trên kho: không lệnh git nào chạy khi chuỗi của biên bản chưa hợp lệ, và lý do của một biên bản sai cú pháp không phụ thuộc kho đã fetch hay chưa. Nói cho đúng: ở ac523ae cũng không lệnh git nào NHẬN đường dẫn trước khi regex chạy (cat-file/branch chỉ nhận oid đã qua SHA_RE); thứ thay đổi là thứ tự và tính tất định của lý do. Khoá bằng ca hai_loi_khoa_thu_tu + đột biến d2b_duong_dan_sau_git'}
+  - {muc: 'C5(b) dưới mC11 "b ra ĐẠT"', da_lam: 'dưới đột biến bỏ kiểm mode, biến thể symlink không ra ĐẠT', vi_sao: 'reviewer lượt 1 đã chấp nhận phép đo hẹp này (VERDICT mục 4); lượt 2 không đổi'}
+  - {muc: 'luật 9 trên khối D2b · fixture rút gọn và đổi head · hợp đồng đầu ra riêng của packet_loop_test', da_lam: 'như lượt 1', vi_sao: 'reviewer lượt 1 đã chấp nhận cả ba (VERDICT "Phán quyết các chỗ lệch" 1–3)'}
+quyet_dinh_thiet_ke_can_reviewer_soi:
+  - 'Lệch giữa bản bung và cây của oid ra rc 8 (KHÔNG ĐO ĐƯỢC), không phải rc 12: thứ hỏng là dụng cụ đo trên nền này, không phải biên bản.'
+  - 'Phép đối chiếu bản bung chạy cho CẢ thư mục ops/land/<x>-provenance của oid (ba thành phần đầu của đường dẫn), cả nhánh passed lẫn nhánh miễn, kể cả tệp không liên quan tới validator: một .gitattributes hay một cặp tên trùng ở bất kỳ đâu trong thư mục ấy làm rc 8.'
+  - 'git(): lệnh HỎI (cat-file, branch, show) rc khác 0 coi như trả rỗng ⇒ oid_khong_tren_remote hoặc "không đọc được module trên origin/master"; lệnh còn lại (ls-tree, archive) rc khác 0 là lỗi đo ⇒ rc 8. Đột biến d2b_bo_rc_git_do · d2b_bo_rc_git_hoi khoá hai nửa.'
+  - 'Băm blob dùng hashlib.sha1: kho định dạng sha256 sẽ không khớp (oid 40 hex đã bị SHA_RE ép từ đầu).'
+  - 'tarfile.extractall(filter="data") cần Python ≥ 3.12 (CI ghim 3.12; đo ở 3.13.18).'
+  - 'Các điểm của lượt 1 không đổi: D2b chỉ chạy khi D1 đạt; module nạp lười; attempt_kieu bắn thì neo_attempt không bắn kèm; dòng D2b ĐẠT in cả khi D3/D4 đỏ.'
+he_qua_windows:   # biết trước từ mã và tài liệu, CHƯA đo trên Windows
+  - 'Nền không có quyền tạo symlink: mọi oid có symlink (mode 120000) ở bất kỳ đâu trong thư mục ops/land/<x>-provenance ra rc 8 "bản bung … không khớp cây của oid", không ra lý do của module. Đo trên origin/master 5dc92e2: 0 mục 120000 và 0 gitlink trên 10140 mục của ops/land; 0 tên chứa byte ngoài 0x21–0x7E — tức chưa hồ sơ thật nào chạm đường này.'
+  - 'Bộ ca tự dò khả năng tạo symlink (_d2b_symlink_duoc): nền không tạo được thì 6 biến thể đánh dấu sym chuyển kỳ vọng sang rc 8. Trên nền ấy các biến thể đó KHÔNG đo lý do kiem_tep:not_measured:symlink nữa — một lượt Windows xanh không chứng minh nhánh ấy.'
+  - 'Hệ tệp không phân biệt hoa/thường: ca hai_ten_chi_khac_hoa_thuong ra rc 8 nhờ chốt trùng tên (chạy trước khi đọc tệp); trên Linux cùng chốt ấy bắn. Hành vi thật của tarfile khi hai tên va nhau trên NTFS: chưa đo.'
+  - 'core.autocrlf của MÁY CHẠY đổi đầu ra git archive — ĐO trên kho tạm không có .gitattributes (gate/autocrlf.log, git 2.43.0): autocrlf=true ⇒ LF thành CRLF; false/input ⇒ nguyên byte. Với kho thật thì không: git archive origin/master (5dc92e2) -- ops/land dưới autocrlf=false VÀ =true đều cho 10140/10140 tệp khớp băm blob, 0 tệp vắng (gate/archive_that.log) — nhờ ".gitattributes: * text=auto eol=lf" của chính commit. Hệ quả: oid KHÔNG mang .gitattributes ấy + máy autocrlf=true ⇒ rc 8 (trước lượt 2 thì validator đọc byte đã đổi mà không ai biết). Bộ ca chạy git với GIT_CONFIG_GLOBAL/SYSTEM = os.devnull nên không ăn cấu hình máy; git for Windows thật: chưa đo.'
+chua_do_duoc:
+  - 'Windows: chưa chạy ca nào của lượt 2.'
+  - 'Python 3.12 (bản CI ghim): mọi phép đo ở 3.13.18.'
+  - 'Hai lệnh git branch -r --contains và cat-file chạy trên object store cục bộ: không chứng minh remote THẬT còn giữ oid lúc chạy.'
+  - 'Đột biến NGOÀI bộ toán tử của quet_dot_bien.py và ngoài 42 đột biến khai báo.'
+  - 'Bản ghép 2439922 với master mới 5dc92e2: chỉ đo merge-tree rc 0, không chạy gate.'
+  - 'Tài liệu ngoài write set vẫn ghi "D1–D4" cho kiem-dong-wp (ADR-0060 mục Cưỡng chế, bảng §20 protocol).'
+van_hanh:
+  - 'Heartbeat trễ: comment executor liền trước là 13:18Z 24-11; worker khởi động lại, nhắc hẹn 18:51Z chỉ tới phiên lúc 03:11Z 25-11; heartbeat đăng 03:14Z (issuecomment-7151729803). Khoảng cách vượt mức 360 phút của lease.'
+remaining_work:
+  - 'điều phối: review Codex offline lượt 2 trên 2439922; Windows local base/head (M3)'
+  - 'executor: nhận finding theo bảng lớp ⇒ vá theo lớp, commit mới, handoff mới. Lớp nào lặp lần ba ⇒ dừng, báo E1–E5'
+  - 'sau APPROVE trên SHA X: push đúng X lên claude/wp1236-c-r12-g1, mở PR draft vào master'

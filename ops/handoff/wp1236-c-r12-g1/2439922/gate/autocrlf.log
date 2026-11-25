@@ -1,0 +1,7 @@
+git version 2.43.0
+(kho: autocrlf=false)                      -> b'a\nb\n'
+core.autocrlf=false                        -> b'a\nb\n'
+core.autocrlf=true                         -> b'a\r\nb\r\n'
+core.autocrlf=input                        -> b'a\nb\n'
+core.autocrlf=false core.eol=crlf          -> b'a\nb\n'
+core.eol=crlf                              -> b'a\nb\n'

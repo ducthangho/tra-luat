@@ -1,0 +1,159 @@
+/tmp/claude-0/-home-user-tra-luat/5967f379-4bdf-59e4-8c2d-d41c6965cf15/scratchpad/rig_ab2/sau/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+nền: 0/0 đạt · BỎ QUA: 0
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+  ok  adr_gom_map_de_bi_nuot → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bien_nhan_root_xuong_dong_tach_tu_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_cung_hoa_stdout → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_tag_html → giết 5 ca đích · 3 đối chứng khác họ còn sống
+  ok  doctor_bo_ky_anh → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_bo_hook_hang_ngoai_json → giết 6 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_n1_bo_kiem_dang → giết 6 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_f01_bo_suite_khoi_danh_tinh → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r3_name_casefold → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_d1_bo_head_khoi_danh_tinh → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_k26_canh_bao_ra_stdout → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r2_tc_trang_dau → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r4_head_nfkc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r4_ten_hau_to → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r4_dt_ten_strip → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_kieu_id_float → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_kieu_status_int → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_trang_bo_thieu_check_runs_sau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_danh_tinh_xen_ke → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_head_arg_lstrip → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_r5_xanh_id_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_id_str_ep_chuoi_so_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_name_list_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_head_sha_dict_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_status_vang_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_check_suite_bool_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_check_suite_id_null_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_check_suite_id_vang_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_phan_tu_list_ep_cap_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_trang_list_ep_cap_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_check_runs_vang_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t1_total_count_dict_bo_qua → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_status_bo_dau_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_status_sap_xep_phai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_conclusion_bo_dau_hai_phia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_conclusion_sap_xep_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_head_nfkc_trai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_head_sap_xep_hai_phia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_ten_rstrip_hai_phia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_ten_bo_cuoi_trai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_canh_bao_casefold_phai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_canh_bao_nfkc_phai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_canh_bao_sap_xep_hai_phia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_ten_lstrip_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_ten_nfkc_phai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_ten_sap_xep_trai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_head_lstrip_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_head_nfkc_phai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dt_head_sap_xep_trai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dedup_strip_phai → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dedup_nfc_phai_hoac → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t2_dedup_bo_giua_hai_phia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t3_dt_suite_str → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t3_id_canh_bao_abs → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t3_id_canh_bao_bat_dau_xy → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t5_bat_buoc_rstrip_dong_chay → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_trang_cat_bo_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_ten_mau_cat_hai_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_khai_cat_bo_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_id_dem_cat_hai_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_cung_suite_cat_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_id_max_cung_cat_bo_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_xanh_join_cat_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_trang_tc_vang_chi_hai_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_run_schema_chi_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  kg_t4_ten_doi_so_chi_cuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+/tmp/packet_loop_test_u4lhj8ox/mut_4b28db1280182b1c/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  t822_mutant_kg_ngoai_bang → giết 1 ca đích · 3 đối chứng khác họ còn sống
+/tmp/packet_loop_test_u4lhj8ox/mut_fc168cbf80c02320/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  t856_ho_nuot_sap → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  pl_m1_bo_kiem_so_duong → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  pl_c12_can_cu_doan → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_bo_nguoi_giu → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_bo_packet → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_bo_role_lease → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_branch_rong_lot → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r4_init_tu_cap → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r6_unhandled_argv_valueerror → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r7_lease_init_identity → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r8_bo_snapshot_lease → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r834_pending_la_xong → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r834_jobs_total_toan_cuc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r834_bo_head_job → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r813_bo_ci_do → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r813_tap_con_lot → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r813_bo_head_checkpoint → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  c1106_k3_bo_connector → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  d2b_doc_cay_lam_viec → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  d2b_thong_diep_nhieu_dong → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  d2b_mC14_in_dat_khi_vi_pham → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  m9_bo_kieu_run_attempt → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  m9_kieu_chi_job_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  m9_workflow_bo_gach → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r1187_drop_audit_assurance → giết 1 ca đích · 8 đối chứng khác họ còn sống
+  ok  r1187_drop_p2 → giết 1 ca đích · 8 đối chứng khác họ còn sống
+  ok  r1187_drop_unknown → giết 1 ca đích · 8 đối chứng khác họ còn sống
+  ok  r1187_drop_human_rollout → giết 1 ca đích · 8 đối chứng khác họ còn sống
+  ok  r1187_drop_neither → giết 1 ca đích · 8 đối chứng khác họ còn sống
+  ok  r1187_format_ignore_invalid → giết 3 ca đích · 8 đối chứng khác họ còn sống
+  ok  wp1254_reject_issue_source → giết 1 ca đích · 3 đối chứng khác họ còn sống
+/tmp/packet_loop_test_u4lhj8ox/mut_c208c41138ef9044/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  m1174_credit_wrapped_crash → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_trust_git_env_git_config_key_0 → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_drop_candidate_root → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_adopt_abandon_cutover → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_lifecycle_human_negative → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_ungate_begin_attempt → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_ungate_accept → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_field_type_base → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_field_type_enrollment_magic → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_field_type_operation_adoption_id → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_seed_owner → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_alias_witness_path_state_path → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_lease_drop_ref_binding → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_activity_cursor_repository → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1393_comparator_value_types_unchecked → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  m1174_r12_recovery_mission → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  m1174_readonly_v3_denied → giết 1 ca đích · 5 đối chứng khác họ còn sống
+source same-family policy required before load
+  ok  m1174_source_quota_checkpoint → giết 1 ca đích · 5 đối chứng khác họ còn sống
+  ok  wp1303_target_main_context → giết 1 ca đích · 3 đối chứng khác họ còn sống
+/tmp/packet_loop_test_u4lhj8ox/mut_49d2a1db60b785a4/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  wp1303_snapshot_bytes → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  k3s_bo_mau_thuan → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_bc_bo_manh_dau → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_bc_bo_buoc_kia → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_goc_la_base → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_object_vao_kho → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_goc_la_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_nhan_khoa_lap → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_json_tu_byte → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_bo_header_phien_ban → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  b4_vc_bo_proxy → giết 1 ca đích · 3 đối chứng khác họ còn sống
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 41 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1803
+  đột biến         : 2051
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+MẢNH: ca - · đột biến 11/16 · 0/0 ca · 124 lượt đột biến · carrier=không · 283s · rc=0

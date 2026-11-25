@@ -1,0 +1,480 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1522",
+  "generation": 4,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "launcher.py run",
+  "session_id": null,
+  "model_reviewer_identity": "Codex, OpenAI GPT-6 family. Exact served model and effort: KHONG_DO_DUOC; the available in-progress launcher receipt has no measured values. Transport is assignment-declared.",
+  "github_submitter_identity": null,
+  "reviewed_sha": "3bb3eac787fc797444027d456c6b5738e549894f",
+  "reviewed_file_sha256": "651b5e41757865d8ec3122aad3a3e9e072424b5f7bd57e823e4b7804c5edbe7a",
+  "reviewed_tree": "45885cc1b9f49e926723f3050b4a1d8ffe6952ec",
+  "observed_base_sha": "437257a3cad68bdec7c646aa99ccd4f5fd4256da",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "blocked",
+  "findings": [
+    {
+      "id": "N1-07",
+      "class_slug": "v1-not-fully-specified",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "line": 23,
+        "related_lines": [
+          39,
+          44,
+          45,
+          120
+        ]
+      },
+      "claim": "The objective still promises exit 0 iff a green receipt was written. Section 1b explicitly removes the reverse implication, and acceptance 2(h) requires a current green receipt with nonzero exit after a diagnostic exception. The detailed r4 contract is coherent, but the same file still states the incompatible old promise.",
+      "evidence": [
+        {
+          "command": "rg -n '⇔|KHÔNG có chiều ngược' ops/specs/wp1522-r1/SPEC.md",
+          "rc": 0,
+          "observed": "Line 23 retains mã 0 ⇔ đã ghi biên nhận xanh; line 45 says KHÔNG có chiều ngược."
+        },
+        {
+          "command": "python3 -B /tmp/wp1522-review-r4/safety_model.py",
+          "rc": 0,
+          "observed": "34 subprocess scenarios; all 20 unmutated controls satisfy the detailed r4 contract. Both post_commit controls have rc=1, valid current green receipt and one successful replace; r4_2h_pass=true, objective_iff_pass=false. The actual collector print-failure probe independently leaves a valid green receipt and raises OSError."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC objective K1 at line 23, checked against section 1 and acceptance 2 as one contract.",
+        "how": "Use the same one-way, current-invocation rule as 1b. Keep the owner-approved safety-only design, post-commit receipt retention and no catch-all/fallback. This is a residual wording defect, not a demand to restore totality.",
+        "locking_test_and_mutant": "Keep the fresh/old-output post-replace fault controls and invalid-argument control; a mutant returning 0 merely because a green file exists must fail. Review the objective and detailed outcome table together so restoring the biconditional is rejected.",
+        "what_the_fix_may_spawn": "Do not make diagnostics best-effort, delete a committed receipt, or restore an outer recovery boundary to satisfy the stale summary. No fifth authoring round is authorized; apply the declared checkpoint/split policy."
+      }
+    },
+    {
+      "id": "N1-08",
+      "class_slug": "sibling-spec-version-drift",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1522-r1/SPEC.md",
+        "line": 105,
+        "related_path": "origin/ops/wp1521-r1:ops/specs/wp1521-r1/SPEC.md:59-66"
+      },
+      "claim": "The replacement N2 paragraph still misstates the sibling contract. N2 r4 enumerates the running THU_MUC_HOP_DONG directory on disk and the SAME directory path at GOC. It does not read GOC's old THU_MUC_HOP_DONG value or union the wp1460 directory with wp1522. The conclusion that N1 runs the full suite remains correct because ci_dang_ky_test.py changes bytes.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1522-review-r4/cross_probes.py; inspect N2 r4 lines 59-66 and N1 line 105",
+          "rc": 0,
+          "observed": "Local N2 ref=9f9ca46a956af85bbabcbad74540cdca4c91f819; SPEC sha256=bcb858dea1d56b6bfce2acc655d34493c509e8d1bf9efe5d761d7165a5654b78. N2 says cùng thư mục ấy tại GỐC and separately explains directory migration via changed script bytes. Both specs have zero retired-key references."
+        },
+        {
+          "command": "git ls-tree -r --name-only origin/master -- ops/specs/wp1522-r1/hop_dong; git ls-tree -r --name-only origin/master -- ops/specs/wp1460-r1/hop_dong",
+          "rc": 0,
+          "observed": "New-directory listing is empty; old-directory listing has two files. These are different input sets. GitHub fetch_file for the sibling returned matching blob 84b30d2c64b9eafbad71e813cd55f4226bb162b6 and the same selector wording."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC section 5, the sentence defining N2 K5 inputs.",
+        "how": "Describe the running directory path at both trees, and explain that a directory change forces the full run through the changed ci_dang_ky_test.py bytes. Do not impose an old-directory union absent from N2.",
+        "locking_test_and_mutant": "Against admitted N2, enumerate a directory migration using the same current path at GOC and verify full selection from changed script bytes. A selector mutant omitting the script comparison must fail; separately compare the documented input set with N2 section 2b.",
+        "what_the_fix_may_spawn": "Avoid widening N2 implementation, resurrecting a cache key, or treating draft sibling text as lease authority. The mismatch is P3 documentation; no skipped mutation run was demonstrated."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "N1-04",
+      "class_slug": "v1-not-fully-specified",
+      "prior_reviewed_sha": "9298d8e2e1dd91bf8c23b1cde7c6022b84c43e6d",
+      "label": "VÁ HỜ",
+      "evidence": "The four detailed manifestations were addressed: missing/recursive validator expectations are explicitly superseded; final-gate controls retain valid malformed-input receipts; 1b/2(f) require current invocation; 2(g)/(h) cover old files and post-commit exceptions. The 132-case write scan found only the two listed underlying unconfirmed-write cases and their listed wrapper. However the old biconditional remains at objective line 23, independently falsified by the required 2(h) control: N1-07. The class is not fully closed."
+    },
+    {
+      "id": "N1-05",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "prior_reviewed_sha": "9298d8e2e1dd91bf8c23b1cde7c6022b84c43e6d",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": "cross_probes.py reread B2 r5 U5/T2/T6 and the ordered aggregate. N1 now distinguishes proven absence -> khong_dat/bien_nhan_vang from unobservable/inconsistent listing -> khong_do_duoc. Both oracle versions give C2 for failed-run green receipts and C1 for red/absent receipt inputs. This checks the frozen consumer contract, not an unimplemented B2 service."
+    },
+    {
+      "id": "N1-06",
+      "class_slug": "sibling-spec-version-drift",
+      "prior_reviewed_sha": "9298d8e2e1dd91bf8c23b1cde7c6022b84c43e6d",
+      "label": "VÁ SINH LỖI MỚI",
+      "evidence": "The retired key is removed and the revision now correctly says r4/byte comparison. Rechecking local sibling HEAD and the GitHub blob exposes a new inaccurate description of its directory set: N1-08. Full-run selection for N1 is still correctly stated."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "label": "VÁ HỜ",
+      "open_ids": [
+        "N1-07"
+      ],
+      "history": [
+        "B1-04",
+        "F02",
+        "F02-R2",
+        "F02-R3",
+        "N1-01",
+        "N1-03",
+        "N1-04",
+        "N1-07"
+      ],
+      "historical_occurrences_including_this_review": 8,
+      "limit": "Current residual is P3 prose. Accepted abandonment of totality is preserved; it does not erase history."
+    },
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "label": "ĐÃ VÁ THẬT",
+      "open_ids": []
+    },
+    {
+      "class_slug": "sibling-spec-version-drift",
+      "label": "VÁ SINH LỖI MỚI",
+      "open_ids": [
+        "N1-08"
+      ]
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "ĐÃ VÁ THẬT",
+      "open_ids": [],
+      "scope": "Inherited N1-02 year-floor and exact-int fixtures. Each targeted mutant again produces exactly one named LECH; predicate traces isolate the intended predicate."
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "N1-07"
+      ],
+      "manifestations": [
+        "Objective biconditional contradicts detailed post-commit outcome"
+      ],
+      "highest_open_severity": "P3",
+      "source": "3bb3eac787fc797444027d456c6b5738e549894f",
+      "common_fix": "One consistent current-invocation, one-way outcome contract.",
+      "closure_test": "All detailed controls plus whole-file comparison of objective/contract/acceptance; no contradictory reverse implication."
+    },
+    {
+      "class_slug": "sibling-spec-version-drift",
+      "finding_ids": [
+        "N1-08"
+      ],
+      "manifestations": [
+        "Sibling input-directory set described incorrectly"
+      ],
+      "highest_open_severity": "P3",
+      "source": "N1 exact reviewed SHA versus N2 9f9ca46a956af85bbabcbad74540cdca4c91f819",
+      "common_fix": "Describe the admitted sibling selector precisely.",
+      "closure_test": "Same-current-directory inventory at both trees and changed-script full-run control."
+    },
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [
+        "N1-05"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source": "B2 41692997a477b7deb880d6e8760a254568c42de1",
+      "common_fix": "Completed in r4 prose.",
+      "closure_test": "Proven absence versus missing measurement; C1 versus C2 prerequisites."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "finding_ids": [
+        "N1-02"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source": "Inherited rounds 1-3; measured again on r4",
+      "common_fix": "Previously corrected fixture isolation.",
+      "closure_test": "Year-floor and integer-type mutants fail their own single fixture."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Closed-list completeness",
+      "hypothesis": "Another retained collector case requires writing without a confirming validator.",
+      "command": "python3 -B /tmp/wp1522-review-r4/closed_list_scan.py",
+      "rc": 0,
+      "output": "314 total names; 132 direct collector cases all pass; 225 observed writes. Exactly two unconfirmed-write cases: missing schema and recursive red validator. Their affected subprocess wrapper is listed in 1f.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limit": "Direct cases instrumented; subprocess wrapper mapping inspected. This is not a full mutation run."
+    },
+    {
+      "direction": "Post-commit and invocation identity",
+      "hypothesis": "The old reverse implication survived elsewhere in the candidate.",
+      "command": "python3 -B /tmp/wp1522-review-r4/safety_model.py",
+      "rc": 0,
+      "output": "20/20 unmutated controls satisfy detailed r4 rules. Both post-commit controls violate objective line 23 while satisfying 2(h). Invalid args retain old bytes with rc=2.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-07"
+      ]
+    },
+    {
+      "direction": "Final gate versus narrow recovery",
+      "hypothesis": "Final validation also destroys ordinary malformed-input red receipts.",
+      "command": "python3 -B /tmp/wp1522-review-r4/collector_probes.py",
+      "rc": 0,
+      "output": "Missing/recursive validators stop at the enforced final boundary. REST junk, both parser-boundary cases and stricter valid red-schema control still pass. X2/X4/X5 injection seams raise the intended exception without production hooks.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Partial writes, stale output and catch-all",
+      "hypothesis": "Required fault controls cannot distinguish unsafe implementations.",
+      "command": "python3 -B /tmp/wp1522-review-r4/safety_model.py",
+      "rc": 0,
+      "output": "Direct-write mutant leaves 12 invalid bytes; atomic control leaves ra absent. Omitted pre-clear retains an old receipt. Catch-and-return-1 passes only rc/absence checks but fails the separate 1c traceback/no-catch assertion.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limit": "Spec model, not production acceptance. The eventual 2(a) test must assert 1c as well as rc/absence."
+    },
+    {
+      "direction": "Calendar semantics",
+      "hypothesis": "Year floor, cron equality or leap-day computation is wrong.",
+      "command": "python3 -B /tmp/wp1522-review-r4/oracle_probes.py",
+      "rc": 0,
+      "output": "12 independent ordinal-calendar controls agree: 0001/0999 return no frame; 1000 transition, exact boundary and ±1 second are correct; 2000/2024 leap days work; 1900-02-29 is rejected.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Predicate isolation",
+      "hypothesis": "New negative cases pass because another predicate fails.",
+      "command": "python3 -B /tmp/wp1522-review-r4/oracle_probes.py",
+      "rc": 0,
+      "output": "C3 rewrite fails only C3.run_id. Two year cases fail only C9.khung. Wrong/float/missing job run_id cases fail only C4.rest_run_id. All six receipts pass shape validation.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Kill-signal authenticity",
+      "hypothesis": "An unrelated exception or same-named fake signal receives kill credit.",
+      "command": "python3 -B /tmp/wp1522-review-r4/oracle_probes.py; python3 -B /tmp/wp1522-review-r4/collector_probes.py",
+      "rc": 0,
+      "output": "Oracle KeyError, AssertionError and same-name impostor each score 0/250. Collector also rejects wrong-target and same-name signals. Deliberately raising the actual oracle sentinel scores 250/250: the classifier trusts runner code and is not unforgeable against its replacement.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limit": "No claim of cryptographic authenticity. Frozen bytes and trusted harness are the boundary."
+    },
+    {
+      "direction": "B2 compatibility",
+      "hypothesis": "Stricter N1 production makes B2 reject previously valid receipt shapes or accept N1 failure as fresh.",
+      "command": "python3 -B /tmp/wp1522-review-r4/cross_probes.py",
+      "rc": 0,
+      "output": "120/120 old shape expectations preserved; schema byte-identical. Both versions reject failed-run green receipts with C2. v1 lacks the new run_id predicate, an explicitly deferred consumer upgrade; stricter producer output remains consumable.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Sibling revision and selector",
+      "hypothesis": "Section 5 accurately describes N2 r4.",
+      "command": "Read N2 origin/ops/wp1521-r1 lines 59-66; compare GitHub fetch_file blob 84b30d2c64b9eafbad71e813cd55f4226bb162b6",
+      "rc": 0,
+      "output": "N2 selects the current directory path at both trees. N1 instead names wp1522 and old wp1460 directories. Changed script bytes still force the full run.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "N1-08"
+      ]
+    },
+    {
+      "direction": "Oracle migration feasibility",
+      "hypothesis": "Path/oracle replacement necessarily breaks existing positive cases or mutation anchors.",
+      "command": "python3 -B /tmp/wp1522-review-r4/collector_probes.py; python3 -B /tmp/wp1522-review-r4/integration_inventory.py",
+      "rc": 0,
+      "output": "Three positive cases fail with old synthetic jobs lacking run_id; adding run_id in the shared fixture generator restores 3/3. All 118 mutation anchor counts unchanged, including the deliberately absent anchor control.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limit": "Anchor applicability is not a kill result; production edits may require reanchoring."
+    },
+    {
+      "direction": "Live lease coverage",
+      "hypothesis": "Local refs are sufficient to certify no overlapping lease.",
+      "command": "git ls-remote --heads origin",
+      "rc": 128,
+      "output": "Failed to connect to configured proxy 127.0.0.1:42971. Local origin name-set contains 347 branch refs; remote equality cannot be established.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "measurement": "Candidate identity",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; hash local bytes and HEAD blobs",
+      "result": "Head/tree unchanged at start/end; SPEC hash matches assignment; production script bytes equal origin/master."
+    },
+    {
+      "measurement": "Frozen artifacts",
+      "status": "passed",
+      "command": "sha256 over schema, fixture and exact extracted Python block",
+      "result": {
+        "schema": "844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46",
+        "fixture": "19dc7fd172be2d32c1aff8d0d2bdeb300df3fcb6ccb8d846bef3e15cd667e832",
+        "oracle": "da8e032fdef3429711a75796886b6e97d3ae60e8428e16efac0968db4cda9519"
+      }
+    },
+    {
+      "measurement": "Write-set coverage and size",
+      "status": "passed",
+      "command": "Inspect SPEC write set and acceptance; count frozen file lines",
+      "result": "Acceptance 1 maps to two frozen artifacts plus embedded oracle in ci_dang_ky_test.py; acceptance 2-6 maps to that same Python file; acceptance 7 adds no production path. Artifacts use 34+166=200 added lines, leaving 250 of the 450-line cap. Three delivery files are within the six-file cap. Implementation size is plausible but not yet measured; remeasure before code review."
+    },
+    {
+      "measurement": "Regression meaning",
+      "status": "passed",
+      "command": "closed_list_scan.py; collector_probes.py; integration_inventory.py",
+      "result": "Listed validator-failure exceptions exhaust observed unconfirmed-write cases. Ordinary recovery controls survive the gate. Shared synthetic jobs need run_id normalization. No extra production path is needed."
+    },
+    {
+      "measurement": "Budget and authority",
+      "status": "passed",
+      "command": "Compare assignment, SPEC process section and protocol 3.2/8.3/12",
+      "result": "This is the explicitly granted final spec review 4/4, not an execution lease. Prior open classes closed: 1/3; two remain open. No additional review, implementation, GitHub write or workflow dispatch authorized. Same-class residual triggers the specified K4+K2 / K1-to-B1b split checkpoint."
+    },
+    {
+      "measurement": "Lease overlap",
+      "status": "not_measured",
+      "command": "git ls-remote --heads origin before python3 -B ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py",
+      "result": "Remote inventory failed rc=128; prerequisite name-set equality missing, so lease scan not_run. No empty-holder or lease-ready claim."
+    },
+    {
+      "measurement": "Repository observation",
+      "status": "passed",
+      "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --binary; git diff --cached --binary; git ls-files --others with ignored/nonignored variants",
+      "result": "Start/end tracked and index diffs empty; no untracked or ignored files listed. Same ignored empty .codex directory reported. Candidate blobs verified against HEAD. This proves no observed endpoint delta, not continuous write surveillance."
+    }
+  ],
+  "independent_mutants": [
+    {
+      "name": "drop_overflow",
+      "rc": 1,
+      "stdout": "",
+      "stderr_last": [
+        "OverflowError: date value out of range"
+      ]
+    },
+    {
+      "name": "strftime",
+      "rc": 0,
+      "stdout": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nTONG: DAT\n",
+      "stderr_last": []
+    },
+    {
+      "name": "drop_run_id",
+      "rc": 1,
+      "stdout": "FIXTURE: 487/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C4-rest-job-cua-luot-khac: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nLECH: NGU NGHIA luat-C4-rest-job-run-id-float-bang-gia-tri: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nLECH: NGU NGHIA luat-C4-rest-job-thieu-run-id: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nTONG: DO\n",
+      "stderr_last": []
+    },
+    {
+      "name": "drop_year_floor",
+      "rc": 1,
+      "stdout": "FIXTURE: 489/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C9-khung-nam-0999-khong-bieu-dien: vi pham [] canh bao [] moc 0999-11-16T19:17:00Z\nTONG: DO\n",
+      "stderr_last": []
+    },
+    {
+      "name": "drop_run_id_type",
+      "rc": 1,
+      "stdout": "FIXTURE: 489/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nLECH: NGU NGHIA luat-C4-rest-job-run-id-float-bang-gia-tri: vi pham [] canh bao [] moc 2026-11-21T09:59:50Z\nTONG: DO\n",
+      "stderr_last": []
+    },
+    {
+      "name": "swapped_expectation",
+      "mismatches": [
+        "NGU NGHIA luat-C4-rest-job-cua-luot-khac: vi pham ['C4'] canh bao [] moc 2026-11-21T09:59:50Z"
+      ],
+      "total": 490
+    }
+  ],
+  "acceptance_feasibility": {
+    "2a": "Existing module helper seams inject RecursionError/KeyError/MemoryError at X2/X4/X5. Add the 1c escaping-error assertion to kill catch-and-return-1; rc!=0 alone is insufficient.",
+    "2b_2c_2d_2e": "Final-object corruption, unavailable/recursive validator and partial temporary-write faults are feasible through loaded-module/library substitutions, without production hooks. Controlled stop for recursive validation is compatible with preserving the narrow catch.",
+    "2f_2g_2h": "Spy on successful os.replace; retain invocation identity, invalid-argument old-byte comparison and post-commit diagnostic fault. Detailed r4 outcomes passed the model; objective wording remains inconsistent.",
+    "2i_3_4_5": "Direct legacy controls and normalized positive fixtures are feasible in the single Python write-set file. Retain by-name A/B evidence; no implementation completion claimed.",
+    "6xi": "strftime reversal survives the frozen end-to-end oracle fixtures: accepted cron frames have year >=1000. A direct chuoi_moc(0999) probe distinguishes formatting, but does not prove a _khung_du kill. A meaningful formatter-dependency probe or explicit treatment of an equivalent mutant is needed at implementation; do not count an unrelated crash as a kill."
+  },
+  "tests": [
+    {
+      "name": "Frozen oracle full run",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/oracle.py ops/specs/wp1522-r1/hop_dong --dot-bien",
+      "rc": 0,
+      "output": "FIXTURE: 490/490 phep kiem dung ky vong · hinh 125 · ngu nghia 123 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 250/250 · vi tu 58 · noi long schema 192\nTONG: DAT\n",
+      "stdout_sha256": "c541512886e62065ed780ed85d42486d983ce7b8242285cb1cc0d0c2e933e78d"
+    },
+    {
+      "name": "Legacy collector and migration probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/collector_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/collector-probes.json"
+    },
+    {
+      "name": "Safety model, 34 subprocess scenarios",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/safety_model.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/safety-model.json"
+    },
+    {
+      "name": "Cross-packet probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/cross_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/cross-probes.json"
+    },
+    {
+      "name": "Independent oracle probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/oracle_probes.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/oracle-probes.json"
+    },
+    {
+      "name": "Exhaustive direct collector write scan",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/closed_list_scan.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/closed-list-scan.json"
+    },
+    {
+      "name": "Mutation anchor inventory",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1522-review-r4/integration_inventory.py",
+      "rc": 0,
+      "evidence": "/tmp/wp1522-review-r4/integration-inventory.json"
+    },
+    {
+      "name": "Live remote inventory",
+      "status": "failed",
+      "command": "git ls-remote --heads origin",
+      "rc": 128,
+      "reason": "Infrastructure: configured proxy connection failed."
+    },
+    {
+      "name": "Lease scan",
+      "status": "not_run",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py",
+      "rc": null,
+      "reason": "Remote/local ref name-set equality not established."
+    },
+    {
+      "name": "Implementation and release gates",
+      "status": "not_run",
+      "command": "Full ci_dang_ky_test.py --chay; full collector mutation run; Ruff pin/probe and bare lint; Windows; PR CI; release/LIVE",
+      "rc": null,
+      "reason": "Spec-only review; no implementation or execution lease. Not counted as passing."
+    }
+  ],
+  "runtime": {
+    "python": "3.13.18",
+    "jsonschema": "4.26.0",
+    "platform": "Linux",
+    "core_abbrev": 7,
+    "sandbox": "workspace-write, restricted network; repository treated read-only, scratch under /tmp",
+    "model_effort": "KHONG_DO_DUOC"
+  },
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": "Two P3 findings, two open cause classes; zero P0/P1/P2. Blocked because the specification itself still needs reconciliation (protocol 3.2), and this is the last authorized round. The owner's option (b) is accepted without re-litigation. No automatic fifth round or repository patch. The declared fallback is K4+K2 in N1 and K1 to B1b, subject to the existing checkpoint authority; this review does not execute that split. Evidence directory: /tmp/wp1522-review-r4. REST job run_id confirmed in GitHub primary documentation: [Workflow jobs REST API](https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28). No sensitive path-escape payload authored. Used .agents/skills/cross-review/SKILL.md and .claude/skills/cross-review/SKILL.md. No repository edits, commits, pushes, GitHub writes or workflow dispatches. Terminal launcher rc/stdout receipt must be finalized outside this child; no merge/land assurance claimed."
+}

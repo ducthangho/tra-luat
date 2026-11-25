@@ -1,6 +1,6 @@
-# wp1522 r4 — nợ B1a: bỏ lời hứa toàn phần của lệnh thu (chỉ giữ tính chất an toàn) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
+# wp1522 r5 — nợ B1a: bỏ lời hứa toàn phần của lệnh thu (chỉ giữ tính chất an toàn) + oracle «Lệnh kiểm» v2 (năm 0001, `jobs[].run_id`) (NO-B1A-N1)
 packet_id: wp1522
-revision: 4
+revision: 5
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
@@ -11,7 +11,10 @@ review_class: sensitive
 executor: claude
 environment: cloud (Linux)
 
-Trạng thái: r4. Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~09:1xZ, lựa chọn «+1 soạn, review 4/4»). Thay r3 (`ops/wp1522-r1@9298d8e`, sha256 `4a8033de…`). Review lượt 3 công nhận hướng (b), nhưng còn N1-04 (P2, `v1-not-fully-specified`, lần thứ 7) cùng hai P3 câu chữ (N1-05, N1-06). r4 chỉ sửa đúng ba chỗ ấy, KHÔNG đổi hướng (b):
+Trạng thái: r5 — bản sửa CÂU CHỮ của r4, không review lại. Review lượt 4/4 (cuối) trên r4 không còn P0–P2; chỉ còn N1-07 (P3, dòng mục tiêu K1 còn «mã 0 ⇔») và N1-08 (P3, câu §5 mô tả quan hệ với N2). Chủ kho chọn «Sửa 4 câu, duyệt băm cả hai» (2026-11-25 ~09:2xZ). r5 chỉ đổi đúng các câu ấy cùng dòng tiêu đề, `revision`, đoạn Trạng thái và bảng Thay đổi; mọi phần quy định khác giữ nguyên byte so với r4. Diff r4→r5 nằm ở commit của nhánh. Chưa có lease.
+
+<!-- r4 trạng thái giữ làm lịch sử -->
+Trạng thái của r4 (lịch sử): Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~09:1xZ, lựa chọn «+1 soạn, review 4/4»). Thay r3 (`ops/wp1522-r1@9298d8e`, sha256 `4a8033de…`). Review lượt 3 công nhận hướng (b), nhưng còn N1-04 (P2, `v1-not-fully-specified`, lần thứ 7) cùng hai P3 câu chữ (N1-05, N1-06). r4 chỉ sửa đúng ba chỗ ấy, KHÔNG đổi hướng (b):
 - chiều thuận của mã thoát (1b);
 - danh sách đóng các ca cũ bị thay (1f);
 - câu về bên tiêu dùng B2/C2 (1c) và câu về N2 (§5).
@@ -20,7 +23,7 @@ K2, K4 và hiện vật không đổi. Nếu lượt review 4/4 còn finding l�
 
 ## Mục tiêu
 Đóng ba khoản nợ của B1a #1460: khoản 1, 2 và 4 trong mục `no_ngoai_pham_vi` của `ops/land/pr1516-wp1460-land-evidence.yaml`. Lớp `v1-not-fully-specified` đã tái diễn sáu lần: B1-04 ở review đặc tả wp1460; F02, F02-R2, F02-R3 ở review mã PR #1516; N1-01, N1-03 ở review đặc tả của chính packet này. Theo L4 của skill soạn spec, số đếm hình dạng lỗi chép sang là **6**. Packet này làm ba việc:
-- **K1** — bỏ lời hứa toàn phần; chỉ giữ tính chất AN TOÀN «tệp đã ghi thì hợp lệ, mã 0 ⇔ đã ghi biên nhận xanh» (quyết định chủ kho, phương án (b) của checkpoint §12).
+- **K1** — bỏ lời hứa toàn phần; chỉ giữ tính chất AN TOÀN «tệp đã ghi thì hợp lệ; mã 0 ⇒ CHÍNH lượt này đã ghi xong biên nhận xanh và kết thúc bình thường» (chỉ chiều thuận, xem 1b) (quyết định chủ kho, phương án (b) của checkpoint §12).
 - **K2** — tài liệu mà chính parser từ chối (kể cả vì độ sâu) được khai thẳng là «không đọc được». Đây là hành vi của chốt hẹp `_doc_json_du`, kiểm bằng ca.
 - **K4** — oracle «Lệnh kiểm» v2: không ném ở năm 0001, định dạng mốc không phụ thuộc nền, thêm luật đối chiếu chéo `jobs[].run_id`. Bên thu thêm điều kiện tương ứng ở X1.
 
@@ -102,7 +105,7 @@ Mục này thay câu «Với đối số hợp lệ lệnh thu LUÔN ghi một b
 - `BAM_HOP_DONG` đổi sang ba băm ở mục 3.
 - `DAU_RA_LENH_KIEM` đổi sang ba dòng ở mục 3.
 - `THU_MUC_HOP_DONG` trỏ `ops/specs/wp1522-r1/hop_dong/`.
-- Quan hệ với #1521 (N2): bản N2 đang xin duyệt là r4. Bộ chọn K5 của nó so byte các tệp đầu vào với GỐC; không có bản ghi khoá nào. N1 đổi `ci_dang_ky_test.py` và thêm thư mục `ops/specs/wp1522-r1/hop_dong/`, nên trên PR của N1 lượt đột biến đầy đủ LUÔN chạy. Tập đầu vào của K5 gồm thư mục của `THU_MUC_HOP_DONG` ở cả cây đang chạy (wp1522) lẫn GỐC (wp1460). Nếu bản N2 được duyệt cuối cùng khác r4, đối chiếu lại câu này trước khi cấp lease N1.
+- Quan hệ với #1521 (N2): bản N2 đang xin duyệt là r4. Bộ chọn K5 của nó so byte các tệp đầu vào với GỐC; không có bản ghi khoá nào. Các tệp được so là `ci_dang_ky_test.py`, `ci.yml`, `requirements.txt`, và các tệp dưới ĐƯỜNG DẪN thư mục mà `THU_MUC_HOP_DONG` của cây đang chạy trỏ tới — lấy ở cả hai cây: trên đĩa và tại GỐC, cùng đường dẫn ấy. Khi N1 đổi `THU_MUC_HOP_DONG` sang `ops/specs/wp1522-r1/hop_dong/`, `ci_dang_ky_test.py` khác byte GỐC, nên trên PR của N1 lượt đột biến đầy đủ LUÔN chạy. Thư mục cũ `wp1460-r1` không nằm trong tập so. Nếu bản N2 được duyệt cuối cùng khác r4, đối chiếu lại câu này trước khi cấp lease N1.
 - Ca, đột biến và chốt hiện có của wp1460 giữ nguyên ý nghĩa, TRỪ danh sách đóng ở 1f. Ca nào phụ thuộc số đếm cũ thì cập nhật kèm A/B trong MỘT lệnh.
 
 ## Nghiệm thu
@@ -461,6 +464,7 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp và �
 | revision | thay đổi |
 |---|---|
 | r1 | bản đầu |
+| r5 | Sửa câu chữ theo N1-07 (P3, dòng mục tiêu K1 còn «mã 0 ⇔») và N1-08 (P3, câu §5 mô tả quan hệ với N2) (review lượt 4/4). Không đổi hợp đồng, nghiệm thu, write set. |
 | r4 | Review lượt 3, ba finding. N1-04 (P2, lần thứ 7 của lớp): mã thoát chỉ giữ chiều thuận; sau khi đã ghi xong thì `ra` giữ biên nhận của chính lượt này; lỗi đối số không đụng `ra`; danh sách đóng 1f gồm ba ca cũ và một đột biến bị thay. N1-05 (P3): câu về B2 sửa theo U5/T2 thật. N1-06 (P3): câu về N2 trỏ bản r4 so byte, không còn bản ghi khoá. Nghiệm thu 2(d)–(i) và đột biến (i)–(xi) viết lại theo đó. |
 | r3 | Checkpoint §12 sau N1-03 (`v1-not-fully-specified`, lần thứ 6). Quyết định chủ kho (b): §1 chỉ còn tính chất an toàn (1a–1e); bỏ biên ngoài cùng, bản dự phòng và lời hứa «luôn có biên nhận». Nghiệm thu 2 và bảng đột biến viết lại. Hiện vật `hop_dong/` và khối «Lệnh kiểm» không đổi. |
 | r2 | Review lượt 1, 2 finding P2.<br>• `v1-not-fully-specified` (N1-01; lần tái diễn thứ 5): §1 viết lại — khoảng phủ 1a; lời hứa 1b không đặt điều kiện «hàm trả về»; danh sách loại trừ đóng 1c; bản dự phòng đủ trường bắt buộc, chỉ hai mốc `null` (1d); thứ tự gồm xoá `ra`, ghi nguyên tử, dự phòng, chẩn đoán làm hết sức (1e); lỗi đối số không xoá `ra` (1f). Nghiệm thu 2 viết lại thành 13 ca, mỗi ca chạy với `ra` vắng và với `ra` chứa sẵn biên nhận xanh; đột biến 15 mục.<br>• `mutant-oracles-non-discriminating` (N1-02): sửa ca 0999 cho khung đúng lịch; thêm ca `run_id` float và ca thiếu `run_id`; thêm hai đột biến đích, đã đo là bị giết; X1 dùng cùng miền kiểu. |

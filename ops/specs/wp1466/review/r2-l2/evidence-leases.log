@@ -1,0 +1,16 @@
+AT 2026-11-20T19:19:00+00:00 RECORDS 541 LIVE 13 TOMBSTONED 7 ACTIVE 6
+ACTIVE_LEASE px-gemini-500-r2-g1-operator SCHEMA 2 EXPIRES 2026-11-20T20:41:00Z WRITE_SET ['ops/acceptance/px-gemini-500/r2/RESULTS.md', 'ops/leases/px-gemini-500-r2-g1-operator.yaml', 'ops/specs/px-gemini-500-r2.md']
+ACTIVE_LEASE wp433-r9-g3-claude SCHEMA 2 EXPIRES 2026-11-21T18:49:54Z WRITE_SET ['.githooks/eol_policy_test.py', 'references/golden/workflow_audit.json', 'RELEASE_MANIFEST.json', 'scripts/test_fragments/wp433_bundled_tach_manh.py', 'scripts/tl_core/release.py', 'scripts/tl_core/test_fragments.py', 'scripts/tl_selftest.py', 'scripts/tl_test_fragments_bundled.py', 'scripts/tl_test_fragments_bundled_2.py']
+ACTIVE_LEASE wp1236-a-r9-g1-claude-20261120 SCHEMA 2 EXPIRES 2026-11-22T15:35:00Z WRITE_SET ['.claude/dev/ci_dang_ky_test.py', 'ops/gate_output_doi_chieu.py', 'ops/gate_output_doi_chieu_test.py']
+ACTIVE_LEASE wp1322-r1-g2-claude SCHEMA 2 EXPIRES 2026-11-22T11:25:00Z WRITE_SET ['ops/ci_provenance_test.py']
+ACTIVE_LEASE wp1448-r4-g3-claude SCHEMA 2 EXPIRES 2026-11-23T08:00:00Z WRITE_SET ['.github/workflows/ci.yml', 'ops/ci_duong_nhanh.py', 'ops/ci_duong_nhanh_test.py', 'ops/cong_cu_test.py', 'ops/specs/wp1448-r2/do/']
+ACTIVE_LEASE wp1462-r7-g1-claude SCHEMA 2 EXPIRES 2026-11-24T08:00:00Z WRITE_SET ['.claude/dev/packet_loop.py', '.claude/dev/packet_loop_test.py', 'ops/specs/wp1462-r1/']
+HOLDERS docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md []
+HOLDERS docs/PROTOCOL_DA_PHIEN.md []
+HOLDERS .claude/dev/packet_loop.py ['wp1462-r7-g1-claude']
+HOLDERS .claude/dev/packet_loop_test.py ['wp1462-r7-g1-claude']
+HOLDERS .claude/dev/ci_dang_ky_test.py ['wp1236-a-r9-g1-claude-20261120']
+GLOBS []
+ADR_0068_PLUS 0 OF 385 []
+REPLACE_REFS 
+LOCAL_AND_OTHER_REFS refs/heads/ops/wp1466-spec 69bf08715d9bd43643b72f5a6da0d8daac174e67

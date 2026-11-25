@@ -1,0 +1,4 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/prototype/.claude/dev/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+COUNTS {"new": 24, "old": 132, "mut_new": 17, "mut_old": 21, "cases": 1606, "mutants": 1881}
+CASES_RESULT 156 156 {}

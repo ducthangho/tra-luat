@@ -1,0 +1,35 @@
+BLOCK_UNCHANGED khoa True
+BLOCK_UNCHANGED p1-moi True
+BLOCK_UNCHANGED p2-moi True
+BLOCK_UNCHANGED p3-moi True
+BLOCK_UNCHANGED p4-cu True
+BLOCK_UNCHANGED p4-moi True
+BLOCK_UNCHANGED p5-cu True
+BLOCK_UNCHANGED p5-moi True
+BLOCK_UNCHANGED p6-moi True
+SPEC_LINES 913 UNUSUAL 0
+AUDIT 0 62
+MATRIX_POINTS 23
+HISTORY_SLUGS 18
+THREE_ANCHORS [('packet_loop.py', '    proto_words = _doc_nguon_protocol(root)', 1), ('packet_loop.py', '9 bảng ADR §20 lệch với docs/adr/', 1), ('packet_loop_test.py', 'protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding=', 1)]
+BUNDLE_CHECKSUMS 20 20
+PATCH_LINES_HASH 532 838bbccba7309c0989fb22b0433b7e33c683677129061bd0a9bef5b203123b55
+BLOCK_SCRIPT_BYTES do_pham_vi.py True
+BLOCK_SCRIPT_BYTES so_dang_ky.py True
+BLOCK_SCRIPT_BYTES tien_kiem.py True
+MUTANT_OK_LINES moi 26 THREE_CONTROLS 26
+BASE_LINE ['nền: 60/60 đạt · BỎ QUA: 0']
+MUTANT_OK_LINES cu 21 THREE_CONTROLS 21
+BASE_LINE ['nền: 132/132 đạt · BỎ QUA: 0']
+RAW_MATCHER tien_to_thu_muc 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER tien_to_khong_gach 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER khac_kieu_chu 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER chi_effective 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER planned_gach_nguoc 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER lien_ket_thu_muc 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER policy_co_mat 0 NGƯỜI_GIỮ 0: không có
+CI_ADMISSION docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md'")
+CI_ADMISSION docs/PROTOCOL_DA_PHIEN.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/PROTOCOL_DA_PHIEN.md'")
+CI_ADMISSION .claude/dev/packet_loop.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop.py'")
+CI_ADMISSION .claude/dev/packet_loop_test.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop_test.py'")
+CI_MASTER_ADMISSION ('chay', 'PACKET_LOOP: chay vi push nhanh mac dinh: chay bo ca packet-loop hau merge')

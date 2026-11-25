@@ -1,0 +1,69 @@
+AT 2026-11-21T01:27:02.659942+00:00
+SPEC_HASH d248c37823e4b07a89fcc652b79c345e375337beeb5f76e21db719f6f64d4b13 BLOB_EQUALS True
+HEAD_TREE ['937d135d903fe71a1660b138ebb2234cbc10bdbc', '005cba332fa093792eaecd6ff22678c3ecfe25ad']
+SHALLOW_ABBREV false 7
+REFS_TOTAL 388
+BRANCHES 387
+MASTER e02d748d29cd5165fc29fa1a5a8e9b94593874c7 COMMITS 17
+MASTER_CHANGED 110
+MEASURED_PATHS_CHANGED []
+OPTIN 0055 0 128 True
+OPTIN 0053 0 128 True
+ADR_BASE 66 67
+ADR_68_PLUS 0
+ADR_LINES 143
+INV_COUNTS 28 15 15 12 1 18 DEBTS 27 REF_DEBTS 25 MISSING []
+INV_SOURCE 1 True
+INV_SOURCE 2 True
+INV_SOURCE 3 True
+INV_SOURCE 4 True
+INV_SOURCE 5 True
+INV_SOURCE 6 True
+INV_SOURCE 7 True
+INV_SOURCE 8 True
+INV_SOURCE 9 True
+INV_SOURCE 10 True
+LOCK K01 ADDRESS_COUNT 1 BYTE_HASH 607431f20721e3700adb72ba501b5220cab4e2ff96864ff8bbe9094bb4740531 MATCH True
+LOCK K02 ADDRESS_COUNT 1 BYTE_HASH e67103c29f0a0fea824a4089291008044aad3ed9e8bc93b8fbaa5fa0398dad0a MATCH True
+LOCK K03 ADDRESS_COUNT 1 BYTE_HASH 22716893ace46188ae892ee1f58ac2acad8bdd731dbaaeeafed9bc9f2d5b71df MATCH True
+LOCK K04 ADDRESS_COUNT 1 BYTE_HASH 6faf0af7b34cd8e8a5b4033a3efbd6c5b8a003d68e624e5e9290b4b289a1ee73 MATCH True
+LOCK K05 ADDRESS_COUNT 1 BYTE_HASH 31820977356049aac3c810dbf26933fd93ee491e9f3bfda0ad875a81289776b9 MATCH True
+LOCK K06 ADDRESS_COUNT 1 BYTE_HASH 8e35ce2dc3bb5cac3dbd9855d35bc80a558b47bce8cafaaeff3de9a9ba0a9f51 MATCH True
+LOCK K07 ADDRESS_COUNT 1 BYTE_HASH 3188510c14bb84bb6cc4a881e2bd190e01bc863f55a869b12adcfb884f9671ef MATCH True
+N8_LINES_NONBLANK 92 SUPPLIED_EQUAL True
+INSERT_ANCHORS [1, 1, 1, 1, 1, 1]
+PROTO_EXACT_RECONSTRUCTION True
+VECTOR bang_lop [0, 7, 0, 0, 0, 0]
+VECTOR class_slug [0, 0, 0, 0, 0, 0]
+VECTOR review_verdict [0, 0, 0, 0, 0, 0]
+VECTOR KET_LUAN [0, 2, 0, 0, 0, 0]
+VECTOR numstat [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0068|INV_|_inv_ [0, 0, 0, 0, 0, 0]
+VECTOR ai-dang-giu|ai_dang_giu|RC_DANG_GIU [11, 5, 0, 0, 0, 0]
+VECTOR refs/pull/ [0, 1, 1, 0, 0, 0]
+VECTOR eol|EOL|gitattributes [0, 0, 0, 0, 24, 0]
+VECTOR RC_PROVIDER [0, 9, 0, 0, 0, 0]
+VECTOR reviewed_sha|reviewing_head_sha [4, 49, 0, 0, 0, 0]
+VECTOR spec_hash|spec_sha256 [0, 28, 0, 0, 0, 0]
+VECTOR model_family|ho_model [15, 33, 0, 0, 0, 0]
+VECTOR effective_review_class|_kiem_lop_review|RC_LOP [15, 0, 0, 0, 0, 0]
+VECTOR chup-workspace|chup_workspace|ghi_workspace [0, 0, 21, 0, 0, 0]
+VECTOR MOC_10_2_2|moc_10_2_2 [0, 3, 0, 0, 0, 0]
+VECTOR codex_review_calls|RC_TRAN [0, 34, 0, 0, 0, 0]
+VECTOR NGUOI_CO_THAM_QUYEN|RC_TU_CAP [13, 15, 0, 0, 0, 1]
+VECTOR doctrine [1, 27, 5, 0, 5, 1]
+VECTOR mien_p3 [0, 3, 0, 0, 0, 0]
+VECTOR \bLIVE\b [0, 0, 0, 0, 0, 0]
+VECTOR changed_paths [0, 0, 0, 0, 0, 0]
+VECTOR tested_sha [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0067|uy_quyen_quyet_dinh [0, 0, 0, 0, 0, 0]
+VECTOR Drive MCP|Sheets MCP [0, 0, 0, 0, 0, 0]
+VECTOR integration [0, 1, 0, 0, 0, 0]
+VECTOR label|assignee|board [1, 2, 8, 6, 1, 0]
+VECTOR diff --check [0, 0, 0, 0, 1, 0]
+VECTOR push_them|so_lan_push|M5 [0, 5, 3, 0, 0, 0]
+VECTOR writer_slot|hai writer|max_writers|executor_writers [0, 0, 1, 0, 0, 0]
+VECTOR_CANDIDATE_ADR [0, 15, 0, 0, 0, 0]
+RECEIPTS 352 BANG_LOP 0
+NUMSTAT 74	1	.claude/dev/packet_loop.py; 132	1	.claude/dev/packet_loop_test.py; 46	2	docs/PROTOCOL_DA_PHIEN.md ADR 143 TOTAL_ADDED 395
+DIFF_CHECK 0

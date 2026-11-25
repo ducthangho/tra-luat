@@ -1,0 +1,20 @@
+<unknown>:3802: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3802: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3802: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3802: SyntaxWarning: invalid escape sequence '\d'
+ma_tail_boundary ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   nút sẵn có đã đổi hoặc mất: _doc_nguon_protocol |   dòng thêm ngoài vùng cho phép: 1708: pass
+ma_adr_song ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   nút sẵn có đã đổi hoặc mất: cmd_adr_song |   dòng thêm ngoài vùng cho phép: 2074: pass
+ma_doctrine_tail ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   cmd_doctrine_scan: chỉ được một chỗ sửa đúng mốc, thấy 2 chỗ hoặc sai mốc |   dòng thêm ngoài vùng cho phép: 1792: loi_inv = _inv_kiem_protocol(root) |   dòng thêm ngoài vùng cho phép: 1793: if loi_inv: |   dòng thêm ngoài vùng cho phép: 1794: for x in loi_inv: |   dòng thêm ngoài vùng cho phép: 1795: print(f"doctrine-scan: {x}", file=sys.stderr) |   dòng thêm ngoài vùng cho phép: 1796: _die(RC_ADR, f"{len(loi_inv)} chỗ đơn vị khoá của
+ma_rebind ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   nút mới gán lại tên cũ hoặc ngoài họ tên cho phép: RC_ADR |   dòng thêm ngoài vùng cho phép: 1710: # --- ADR-0068: các đơn vị khoá của protocol (§1,  |   dòng thêm ngoài vùng cho phép: 1711: # Chữ của luật ở protocol, KHÔNG chép vào đây: mã  |   dòng thêm ngoài vùng cho phép: 1712: # ⇒ phải sửa băm ở đây, tức đi qua một packet có r |   dòng thêm ngoài vùng cho phép: 1713: RC_ADR = 9
+ma_other_function ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   nút mới gán lại tên cũ hoặc ngoài họ tên cho phép: review_note |   dòng thêm ngoài vùng cho phép: 1710: # --- ADR-0068: các đơn vị khoá của protocol (§1,  |   dòng thêm ngoài vùng cho phép: 1711: # Chữ của luật ở protocol, KHÔNG chép vào đây: mã  |   dòng thêm ngoài vùng cho phép: 1712: # ⇒ phải sửa băm ở đây, tức đi qua một packet có r |   dòng thêm ngoài vùng cho phép: 1713: def review_note(): |   dòng thêm ngoài vùng cho phép: 1714: pass
+ma_anonymous ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   câu lệnh mới không tên ở mức module, dòng 1713 |   dòng thêm ngoài vùng cho phép: 1710: # --- ADR-0068: các đơn vị khoá của protocol (§1,  |   dòng thêm ngoài vùng cho phép: 1711: # Chữ của luật ở protocol, KHÔNG chép vào đây: mã  |   dòng thêm ngoài vùng cho phép: 1712: # ⇒ phải sửa băm ở đây, tức đi qua một packet có r |   dòng thêm ngoài vùng cho phép: 1713: pass
+ma_detached_comment ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   dòng thêm ngoài vùng cho phép: 1673: # reviewer comment outside inserted module block
+ma_old_comment ma rc 1 PHẠM VI [ma]: KHÔNG ĐẠT |   nút sẵn có đã đổi hoặc mất: _doc_nguon_protocol |   dòng thêm ngoài vùng cho phép: 1707: # reviewer comment inside old function
+test_old_case test rc 1 PHẠM VI [test]: KHÔNG ĐẠT |   nút sẵn có đã đổi hoặc mất: case_anh_doctor_lam_moi |   dòng thêm ngoài vùng cho phép: 163: pass
+test_old_mutant test rc 1 PHẠM VI [test]: KHÔNG ĐẠT |   nút sẵn có đã đổi hoặc mất: MUTANTS |   dòng thêm ngoài vùng cho phép: 3609: # reviewer comment changes old mutant node bytes
+test_repo_gia test rc 1 PHẠM VI [test]: KHÔNG ĐẠT |   _repo_gia: chỉ được một chỗ sửa đúng mốc, thấy 2 chỗ hoặc sai mốc |   dòng thêm ngoài vùng cho phép: 1520: pass |   dòng thêm ngoài vùng cho phép: 1529: protocol if protocol is not None else _proto_co_kh
+test_rebind test rc 1 PHẠM VI [test]: KHÔNG ĐẠT |   nút mới gán lại tên cũ hoặc ngoài họ tên cho phép: _doi |   dòng thêm ngoài vùng cho phép: 1493: _doi = _doi
+NEGATIVE_MATRIX 12 12
+positive_ma ma rc 0 PHẠM VI [ma]: ĐẠT
+positive_test test rc 0 PHẠM VI [test]: ĐẠT
+POSITIVE_MATRIX 2 2

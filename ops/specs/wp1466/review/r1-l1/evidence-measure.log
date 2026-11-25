@@ -1,0 +1,85 @@
+TIME 2026-11-20T18:37:04.969041+00:00
+LINES ops/lease_publish.py 2732 LF 2732
+LINES .claude/dev/packet_loop.py 7284 LF 7284
+LINES .claude/dev/launcher.py 6220 LF 6220
+LINES .claude/dev/gate_lifecycle.py 1688 LF 1688
+LINES .github/workflows/ci.yml 1221 LF 1221
+LINES .github/workflows/ops-publish-lease.yml 277 LF 277
+REFS 382
+SHALLOW false ABBREV 7
+OID 55 0 128 0
+OID 53 0 128 0
+SCAN ai-dang-giu|ai_dang_giu|RC_DANG_GIU 11·5·0·0·0·0
+SCAN \bLIVE\b 0·0·0·0·0·0
+SCAN refs/pull/ 0·1·1·0·0·0
+SCAN eol|EOL|gitattributes 0·0·0·0·24·0
+SCAN RC_PROVIDER 0·9·0·0·0·0
+SCAN reviewed_sha|reviewing_head_sha 4·49·0·0·0·0
+SCAN spec_hash|spec_sha256 0·28·0·0·0·0
+SCAN changed_paths 0·0·0·0·0·0
+SCAN (diff|changed).*write_set|write_set.*(diff|changed) 0·0·0·0·0·0
+SCAN tested_sha 0·0·0·0·0·0
+SCAN model_family|ho_model 15·33·0·0·0·0
+SCAN bang_lop 0·7·0·0·0·0
+SCAN class_slug 0·0·0·0·0·0
+SCAN effective_review_class|_kiem_lop_review|RC_LOP 15·0·0·0·0·0
+SCAN chup-workspace|chup_workspace|ghi_workspace 0·0·21·0·0·0
+SCAN MOC_10_2_2|moc_10_2_2 0·3·0·0·0·0
+SCAN codex_review_calls|RC_TRAN 0·34·0·0·0·0
+SCAN ADR-0067|uy_quyen_quyet_dinh 0·0·0·0·0·0
+SCAN Drive MCP|Sheets MCP 0·0·0·0·0·0
+SCAN NGUOI_CO_THAM_QUYEN|RC_TU_CAP 13·15·0·0·0·1
+SCAN doctrine 1·27·5·0·5·1
+SCAN mien_p3 0·3·0·0·0·0
+SCAN doi_chieu_luot 0·0·0·0·0·0
+SCAN KET_LUAN 0·2·0·0·0·0
+SCAN review_verdict 0·0·0·0·0·0
+SCAN numstat 0·0·0·0·0·0
+SCAN tran_loi_goi_codex 0·0·0·0·0·0
+SCAN tran_kich_thuoc_sensitive 0·0·0·0·0·0
+SCAN ghi hộ|ghi_ho 0·1·0·1·0·0
+ADR 66 MAX docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+RECEIPTS 352 bang_lop_text 0
+BIEN_NHAN_bang_lop 0
+RECEIPTS_bang_lop_KEY 0
+JSON 4561 PARSE 4559 VALID_V1 [] INVALID_JSON ['ops/land/pr1051-wp1006-t27-provenance/verdicts/reviews/cr-1051-r5/launcher-out.json', 'ops/land/pr1328-wp1266-provenance/windows/chan-doan-linux.json'] REQUIRED 16
+PR 836 f1979a5ddd5b04562e054cc87beb5f28c7a7e934 FILES 3 ADD 1275 DEL 40
+PR 1116 aeecf9f675bb1b6c9db5db35c49a803d118c9efb FILES 5 ADD 452 DEL 7
+PR 1127 f2102fc388a884d994f7bfeb29ef6863b9972b66 FILES 5 ADD 318 DEL 18
+PR 1317 426d1b06e292a7db272a0f942bef0794479b58a6 FILES 3 ADD 367 DEL 15
+SECTION20 66 A 50 B 16
+A_LABELS Counter({'co nhac': 17, '0 cong': 12, 'cu the': 12, 'chua do': 6, 'khong cong': 3})
+WORKFLOWS [('kiem-merge', 0), ('adr-song', 0)]
+1172 8
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv1.ysch/cay-kho/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+REGISTRY 1582 1864 ADR_CASES 40 DOCTRINE_CASES 17 ADR_MUTANTS 19
+ADR_BLOCK_LINES 138
+BLOCK_LINES p1-moi 4
+BLOCK_LINES p2-moi 27
+BLOCK_LINES p3-moi 1
+BLOCK_LINES p4-moi 3
+BLOCK_LINES p5-moi 2
+BLOCK_LINES p6-moi 1
+NEW_CASES 44 NEW_MUTANTS 33
+NEW_CASE_NAMES r1466_adr_0068_vang r1466_bang_o_muc_2 r1466_bang_trong_comment_html r1466_bang_trong_rao_ma r1466_bat_bien_rong r1466_ca_chi_la_tien_to r1466_ca_khong_ton_tai r1466_chua_do_ngoai_danh_sach r1466_cong_khong_kem_ca r1466_doi_hau_to_neo r1466_dong_gia_ngoai_bang r1466_duong_dan_ca_thoat_goc r1466_hai_dang_mot_o r1466_hai_tep_0068 r1466_id_la r1466_id_trung r1466_kho_that_xanh r1466_neo_chi_con_trong_rao_ma r1466_nfd_van_xanh r1466_ngat_dong_lai_van_xanh r1466_nhan_tu_dat r1466_no_khong_co_trong_adr r1466_o_cong_rong r1466_phan_hang_loi_la r1466_phan_hang_loi_la_bi_doi_kieu r1466_phan_hang_tin_hieu r1466_phan_hang_tin_hieu_ca_khac r1466_protocol_khong_utf8 r1466_protocol_vang r1466_rao_khong_dong r1466_so_dem_theo_bang r1466_tep_ca_khong_utf8 r1466_tep_ca_vang r1466_tep_cong_vang r1466_thieu_cot r1466_xoa_dong r1466_xoa_neo_1 r1466_xoa_neo_2 r1466_xoa_neo_3 r1466_xoa_neo_4 r1466_xoa_neo_5 r1466_xoa_neo_6 r1466_xoa_neo_7 r1466_xoa_neo_8
+NEW_MUTANT_NAMES inv_adr_vang_la_dat inv_bo_che_khong_render inv_bo_kiem_bon_o inv_bo_kiem_ca inv_bo_kiem_la inv_bo_kiem_no inv_bo_kiem_tep_cong inv_bo_kiem_thieu inv_bo_kiem_trung inv_bo_neo_1 inv_bo_neo_2 inv_bo_neo_3 inv_bo_neo_4 inv_bo_neo_5 inv_bo_neo_6 inv_bo_neo_7 inv_bo_neo_8 inv_bo_nfc inv_ca_khop_chuoi_con inv_cho_duong_dan_thoat inv_chua_do_cho_moi_id inv_cong_khong_can_ca inv_dem_moi_dong_giong_hang inv_dong_dat_ghi_cung inv_neo_doc_ca_vung_khong_render inv_neo_khong_noi_dong inv_neo_khop_tien_to inv_nhan_moi_o_cong inv_o_cong_khop_tien_to inv_protocol_vang_la_dat inv_tep_ca_vang_la_dat inv_tim_bang_ca_tep t1466_moi_do_la_giet
+INV_CASE_REFS 18 GATE_ROWS 15
+CASE_REF .claude/dev/packet_loop_test.py r812_nguoi_giu_khac True
+CASE_REF .claude/dev/packet_loop_test.py r812_nguoi_giu_prefix_giao_nhau True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_k0_pr_head True
+CASE_REF .githooks/eol_policy_test.py case_new_file_crlf_bi_chan True
+CASE_REF .claude/dev/packet_loop_test.py init_cung_provider_thoat_4 True
+CASE_REF .claude/dev/packet_loop_test.py review_phai_neo_head_da_dua_ra_review True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_k4_head True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_k1_hash True
+CASE_REF ops/bien_nhan_v2_test.py c49_cross_approved_cung_ho_model_phai_bi_tu_choi True
+CASE_REF ops/lease_publish_test.py t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA True
+CASE_REF .claude/dev/launcher_test.py r1252_ghi_trong_git True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_d2_not_measured True
+CASE_REF .claude/dev/packet_loop_test.py pl_m3_codex True
+CASE_REF .claude/dev/packet_loop_test.py tu_cap_lease_bang_ten_provider_bi_chan True
+CASE_REF .claude/dev/packet_loop_test.py lease_authority_ten_gia_mao_bi_chan True
+CASE_REF .claude/dev/packet_loop_test.py doctrine_scan_chep_tron_5_1_bi_chan True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_k3_p1 True
+CASE_REF .claude/dev/packet_loop_test.py cong_c_k5_p3_khong_mien True

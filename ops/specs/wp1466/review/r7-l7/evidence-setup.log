@@ -1,0 +1,13 @@
+UTC 2026-11-21T05:11:07.762871+00:00
+SOURCE_SNAPSHOT_SAVED
+SPEC_BLOB_EQUALS True SHA256 baf01d45ba30512e768466fd077842346644db730d69471a44efb2a40b6b9139
+FENCES 13 13 CHANGED ['tien-kiem']
+PATCH_UNCHANGED True SHA256 838bbccba7309c0989fb22b0433b7e33c683677129061bd0a9bef5b203123b55
+TIEN_KIEM_SPEC_EQUALS_SCRIPT True NONEMPTY 137
+TREE_READY base 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+TREE_READY prototype 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+TREE_READY master 4e56f005785db1b04e043bb71fc694a674a8dc9f
+PYTHON 3.13.18 (main, Oct 26 2026, 15:28:15) [GCC 13.3.0]
+/usr/lib/python3/dist-packages/yaml/__init__.py
+['/usr/local/lib/python3.13/dist-packages', '/usr/lib/python3/dist-packages', '/usr/lib/python3.13/dist-packages']
+

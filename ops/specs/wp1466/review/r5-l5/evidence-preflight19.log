@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv5.2eOI/out/sc/fx_tien_kiem.py", line 82, in <module>
+    rc, out = dung(ten, **kw)
+              ~~~~^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv5.2eOI/out/sc/fx_tien_kiem.py", line 38, in dung
+    g(k, "add", "-A"); g(k, "commit", "-q", "-m", "nen")
+                       ~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv5.2eOI/out/sc/fx_tien_kiem.py", line 13, in g
+    assert r.returncode == 0, (a, r.stderr)
+           ^^^^^^^^^^^^^^^^^
+AssertionError: (('commit', '-q', '-m', 'nen'), 'error: Debug: Namespace set to "git" (ignored)\nDebug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)\nMCP server request failed (attempt 1/3), retrying in 111.528249ms: failed to send request: Post "http://127.0.0.1:36701/mcp": dial tcp 127.0.0.1:36701: socket: operation not permitted\nMCP server request failed (attempt 2/3), retrying in 253.699135ms: failed to send request: Post "http://127.0.0.1:36701/mcp": dial tcp 127.0.0.1:36701: socket: operation not permitted\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:36701/mcp": dial tcp 127.0.0.1:36701: socket: operation not permitted\nUsage:\n  environment-runner code-sign [flags]\n\nFlags:\n  -h, --help   help for code-sign\n\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:36701/mcp": dial tcp 127.0.0.1:36701: socket: operation not permitted\n\nfatal: failed to write commit object\n')

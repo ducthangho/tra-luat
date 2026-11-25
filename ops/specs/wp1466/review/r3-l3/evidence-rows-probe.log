@@ -1,0 +1,3 @@
+canonical 9 "doctrine-scan: dòng `INV` nằm ngoài tiểu mục §1.1 đã khoá: 1 dòng\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)"
+no_space 0 "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine"
+plain_id 0 "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine"

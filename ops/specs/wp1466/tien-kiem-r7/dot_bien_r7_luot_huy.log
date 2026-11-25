@@ -1,0 +1,9 @@
+BAT_DAU 2026-11-21T04:50:42Z
+KHOI_R7_NGUYEN_VAN: ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', '[fx_r7.py: TONG 20 kịch bản r7: đúng 20 · sai 0]']
+M1_quet_trong_cay_lam_viec: đỏ ['rieng_nhanh_cuc_bo', 'rieng_remote_phu', 'rieng_packed_refs', 'rieng_replace', 'rieng_nhanh_cuc_bo_sau_dang', 'rieng_remote_phu_sau_dang', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 27 · sai 6]', '[fx_r7.py: TONG 20 kịch bản r7: đúng 20 · sai 0]']
+M2_bo_kiem_B_thuoc_anh_chup: đỏ ['b_la_sha_rieng', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 32 · sai 1]', 'v_graft_qua_bien_moi_truong', 'v_graft_trong_clone', '[fx_r7.py: TONG 20 kịch bản r7: đúng 18 · sai 2]']
+M3_nap_lp_tu_cay_lam_viec: đỏ ['lp_cay_lam_viec_bi_sua', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 32 · sai 1]', '[fx_r7.py: TONG 20 kịch bản r7: đúng 20 · sai 0]']
+M4_bo_policy_tren_master_V: đỏ ['policy_co_mat', 'schema_policy_co_mat', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 31 · sai 2]', 'e_policy_them_sau_B', 'e_policy_them_sau_B_sau_dang', 'e_schema_them_sau_B_sau_dang', '[fx_r7.py: TONG 20 kịch bản r7: đúng 17 · sai 3]']
+M5_bo_policy_doi_trong_B_master: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'e_policy_xoa_sau_B', 'e_policy_them_roi_xoa_sau_B', 'e_policy_qua_nhanh_phu_merge', '[fx_r7.py: TONG 20 kịch bản r7: đúng 17 · sai 3]']
+M5b_bo_full_history: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', '[fx_r7.py: TONG 20 kịch bản r7: đúng 20 · sai 0]']
+M6_bo_tu_chay_lai_voi_I: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'f_khong_I_pythonpath_clone', 'f_khong_I_script_trong_clone', 'f_khong_I_pyc_khong_nguon', '[fx_r7.py: TONG 20 kịch bản r7: đúng 17 · sai 3]']

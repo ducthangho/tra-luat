@@ -1,0 +1,53 @@
+BAT_DAU 2026-11-21T05:13:23Z
+RUN tien_kiem fx_tien_kiem.py RC 0
+RUN tien_kiem fx_r7.py RC 0
+KHOI_R7_NGUYEN_VAN: ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', '[fx_r7.py: TONG 21 kịch bản r7: đúng 21 · sai 0]']
+RUN M1_quet_trong_cay_lam_viec fx_tien_kiem.py RC 1
+RUN M1_quet_trong_cay_lam_viec fx_r7.py RC 0
+M1_quet_trong_cay_lam_viec: đỏ ['rieng_nhanh_cuc_bo', 'rieng_remote_phu', 'rieng_packed_refs', 'rieng_replace', 'rieng_nhanh_cuc_bo_sau_dang', 'rieng_remote_phu_sau_dang', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 27 · sai 6]', '[fx_r7.py: TONG 21 kịch bản r7: đúng 21 · sai 0]']
+RUN M2_bo_kiem_B_thuoc_anh_chup fx_tien_kiem.py RC 1
+RUN M2_bo_kiem_B_thuoc_anh_chup fx_r7.py RC 1
+M2_bo_kiem_B_thuoc_anh_chup: đỏ ['b_la_sha_rieng', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 32 · sai 1]', 'v_graft_qua_bien_moi_truong', 'v_graft_trong_clone', '[fx_r7.py: TONG 21 kịch bản r7: đúng 19 · sai 2]']
+RUN M3_nap_lp_tu_cay_lam_viec fx_tien_kiem.py RC 1
+RUN M3_nap_lp_tu_cay_lam_viec fx_r7.py RC 0
+M3_nap_lp_tu_cay_lam_viec: đỏ ['lp_cay_lam_viec_bi_sua', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 32 · sai 1]', '[fx_r7.py: TONG 21 kịch bản r7: đúng 21 · sai 0]']
+RUN M4_bo_policy_tren_master_V fx_tien_kiem.py RC 1
+RUN M4_bo_policy_tren_master_V fx_r7.py RC 0
+M4_bo_policy_tren_master_V: đỏ ['policy_co_mat', 'schema_policy_co_mat', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 31 · sai 2]', '[fx_r7.py: TONG 21 kịch bản r7: đúng 21 · sai 0]']
+RUN M5_bo_policy_doi_trong_B_master fx_tien_kiem.py RC 0
+RUN M5_bo_policy_doi_trong_B_master fx_r7.py RC 1
+M5_bo_policy_doi_trong_B_master: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'e_policy_xoa_sau_B', 'e_policy_them_roi_xoa_sau_B', 'e_policy_qua_nhanh_phu_merge', 'e_policy_xoa_trong_commit_gop', '[fx_r7.py: TONG 21 kịch bản r7: đúng 17 · sai 4]']
+RUN M5b_bo_m_cua_log fx_tien_kiem.py RC 0
+RUN M5b_bo_m_cua_log fx_r7.py RC 1
+M5b_bo_m_cua_log: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'e_policy_qua_nhanh_phu_merge', 'e_policy_xoa_trong_commit_gop', '[fx_r7.py: TONG 21 kịch bản r7: đúng 19 · sai 2]']
+RUN M6_bo_tu_chay_lai_voi_I fx_tien_kiem.py RC 0
+RUN M6_bo_tu_chay_lai_voi_I fx_r7.py RC 1
+M6_bo_tu_chay_lai_voi_I: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'f_khong_I_pythonpath_clone', 'f_khong_I_script_trong_clone', 'f_khong_I_pyc_khong_nguon', '[fx_r7.py: TONG 21 kịch bản r7: đúng 18 · sai 3]']
+RUN M7_bo_kiem_vi_tri_pyyaml fx_tien_kiem.py RC 0
+RUN M7_bo_kiem_vi_tri_pyyaml fx_r7.py RC 1
+M7_bo_kiem_vi_tri_pyyaml: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'f_pth_yaml_trong_clone', 'f_thieu_pyyaml', '[fx_r7.py: TONG 21 kịch bản r7: đúng 19 · sai 2]']
+RUN M8_bo_kiem_moi_module fx_tien_kiem.py RC 0
+RUN M8_bo_kiem_moi_module fx_r7.py RC 1
+M8_bo_kiem_moi_module: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'f_pth_import_module_clone', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN M9a_bo_kiem_git_truoc_T1 fx_tien_kiem.py RC 0
+RUN M9a_bo_kiem_git_truoc_T1 fx_r7.py RC 1
+M9a_bo_kiem_git_truoc_T1: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'g_git_trong_clone', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN M9b_bo_kiem_git_sau_T1 fx_tien_kiem.py RC 0
+RUN M9b_bo_kiem_git_sau_T1 fx_r7.py RC 1
+M9b_bo_kiem_git_sau_T1: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'g_git_cay_chinh_tu_worktree_phu', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN M10_git_cuc_bo_dung_moi_truong_nguoi_goi fx_tien_kiem.py RC 0
+RUN M10_git_cuc_bo_dung_moi_truong_nguoi_goi fx_r7.py RC 1
+M10_git_cuc_bo_dung_moi_truong_nguoi_goi: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'v_graft_qua_bien_moi_truong', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN M11_bo_T6 fx_tien_kiem.py RC 0
+RUN M11_bo_T6 fx_r7.py RC 1
+M11_bo_T6: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 't6_may_chu_doi_trong_luc_do', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN M12_kiem_to_tien_trong_clone fx_tien_kiem.py RC 0
+RUN M12_kiem_to_tien_trong_clone fx_r7.py RC 1
+M12_kiem_to_tien_trong_clone: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'v_graft_trong_clone', '[fx_r7.py: TONG 21 kịch bản r7: đúng 20 · sai 1]']
+RUN tien_kiem_r6 fx_tien_kiem.py RC 0
+RUN tien_kiem_r6 fx_r7.py RC 1
+KHOI_tien_kiem_r6.py: đỏ ['[fx_tien_kiem.py: TONG 33 kịch bản: đúng 33 · sai 0]', 'e_policy_them_sau_B', 'e_policy_them_sau_B_sau_dang', 'e_schema_them_sau_B_sau_dang', 'e_policy_xoa_sau_B', 'e_policy_them_roi_xoa_sau_B', 'e_policy_qua_nhanh_phu_merge', 'e_policy_xoa_trong_commit_gop', 'f_khong_I_pythonpath_clone', 'f_khong_I_script_trong_clone', 'f_khong_I_pyc_khong_nguon', 'f_pth_yaml_trong_clone', 'f_pth_import_module_clone', 'f_thieu_pyyaml', 'g_git_trong_clone', 'g_git_cay_chinh_tu_worktree_phu', 'v_graft_qua_bien_moi_truong', 't6_may_chu_doi_trong_luc_do', '[fx_r7.py: TONG 21 kịch bản r7: đúng 4 · sai 17]']
+RUN tien_kiem_r5 fx_tien_kiem.py RC 1
+RUN tien_kiem_r5 fx_r7.py RC 1
+KHOI_tien_kiem_r5.py: đỏ ['rieng_nhanh_cuc_bo', 'rieng_remote_phu', 'rieng_packed_refs', 'rieng_replace', 'rieng_nhanh_cuc_bo_sau_dang', 'rieng_remote_phu_sau_dang', 'b_bi_che_boi_tag', 'lp_cay_lam_viec_bi_sua', 'b_la_sha_rieng', '[fx_tien_kiem.py: TONG 33 kịch bản: đúng 24 · sai 9]', 'e_policy_them_sau_B', 'e_policy_them_sau_B_sau_dang', 'e_schema_them_sau_B_sau_dang', 'e_policy_xoa_sau_B', 'e_policy_them_roi_xoa_sau_B', 'e_policy_qua_nhanh_phu_merge', 'e_policy_xoa_trong_commit_gop', 'f_khong_I_pythonpath_clone', 'f_khong_I_script_trong_clone', 'f_khong_I_pyc_khong_nguon', 'f_pth_yaml_trong_clone', 'f_pth_import_module_clone', 'f_thieu_pyyaml', 'g_git_trong_clone', 'g_git_cay_chinh_tu_worktree_phu', 'v_graft_qua_bien_moi_truong', 'v_graft_trong_clone', 't6_may_chu_doi_trong_luc_do', '[fx_r7.py: TONG 21 kịch bản r7: đúng 3 · sai 18]']
+KET_THUC 2026-11-21T05:23:35Z

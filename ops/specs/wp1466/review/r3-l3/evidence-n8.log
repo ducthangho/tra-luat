@@ -1,0 +1,13 @@
+clean_ma rc 0 PHẠM VI [ma]: ĐẠT 
+clean_test rc 0 PHẠM VI [test]: ĐẠT 
+old_boundary_pass rc 1 PHẠM VI [ma]: KHÔNG ĐẠT
+  nút sẵn có đã đổi hoặc mất: _doc_nguon_protocol
+  dòng thêm ngoài vùng cho phép: 1708: pass 
+new_named_constant rc 0 PHẠM VI [ma]: ĐẠT 
+same_value_chained_binding rc 0 PHẠM VI [ma]: ĐẠT 
+same_value_annotation rc 0 PHẠM VI [ma]: ĐẠT 
+old_case_pass rc 1 PHẠM VI [test]: KHÔNG ĐẠT
+  _repo_gia: chỉ được một chỗ sửa đúng mốc, thấy 1 chỗ hoặc sai mốc
+  dòng thêm ngoài vùng cho phép: 1528: protocol if protocol is not None else _proto_co_kh
+  dòng thêm ngoài vùng cho phép: 1529: pass 
+SAME_VALUE_BINDING stores RC_ADR, validator must reject even though value is unchanged

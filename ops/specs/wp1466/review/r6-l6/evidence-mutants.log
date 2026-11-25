@@ -1,0 +1,4 @@
+M1_quet_trong_cay_lam_viec: rc=1 · TONG 33 kịch bản: đúng 27 · sai 6 · đỏ: ['rieng_nhanh_cuc_bo', 'rieng_remote_phu', 'rieng_packed_refs', 'rieng_replace', 'rieng_nhanh_cuc_bo_sau_dang', 'rieng_remote_phu_sau_dang']
+M2_bo_kiem_B_thuoc_anh_chup: rc=1 · TONG 33 kịch bản: đúng 31 · sai 2 · đỏ: ['b_bi_che_boi_tag', 'b_la_sha_rieng']
+M3_nap_lp_tu_cay_lam_viec: rc=1 · TONG 33 kịch bản: đúng 32 · sai 1 · đỏ: ['lp_cay_lam_viec_bi_sua']
+KHOI_R5_NGUYEN_VAN: rc=1 · TONG 33 kịch bản: đúng 24 · sai 9 · đỏ: ['rieng_nhanh_cuc_bo', 'rieng_remote_phu', 'rieng_packed_refs', 'rieng_replace', 'rieng_nhanh_cuc_bo_sau_dang', 'rieng_remote_phu_sau_dang', 'b_bi_che_boi_tag', 'lp_cay_lam_viec_bi_sua', 'b_la_sha_rieng']

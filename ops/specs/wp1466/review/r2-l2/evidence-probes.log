@@ -1,0 +1,23 @@
+INTACT (0, 'doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine', '')
+REMOVE N01 RC 9 LABELS ['N01']
+REMOVE N02 RC 9 LABELS ['N02']
+REMOVE N03 RC 9 LABELS ['N03']
+REMOVE N04 RC 9 LABELS ['N04']
+REMOVE N05 RC 9 LABELS ['N05']
+REMOVE N06 RC 9 LABELS ['N06']
+REMOVE N07 RC 9 LABELS ['N07']
+REMOVE N08 RC 9 LABELS ['N08']
+REMOVE N09 RC 9 LABELS ['N09']
+REMOVE N10 RC 9 LABELS ['N10']
+REMOVE N11 RC 9 LABELS ['N11']
+REMOVE N12 RC 9 LABELS ['N12']
+REMOVE N13 RC 9 LABELS ['N13']
+REMOVE N14 RC 9 LABELS ['N14']
+REMOVE_8_3 (9, '', 'doctrine-scan: neo N01 (tieu_de) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N02 (cau) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N03 (cau) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N04 (cau) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N05 (cau) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N06 (cau) vắng hoặc đã đổi trong protocol\ndoctrine-scan: neo N08 (cau) vắng hoặc đã đổi trong protocol\n7 chỗ bảng bất biến §1.1 hoặc câu neo của protocol lệch mã cổng (ADR-0068)')
+TABLE_BLANK_LINE (0, 'doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine', '')
+TABLE_BLANK_EVERY_ROW (0, 'doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine', '')
+TABLE_DELETE (9, '', 'doctrine-scan: bảng bất biến §1.1 lệch băm trong mã cổng: thấy f59debca5495b93e713cc51c153cd3ae8a25be1ffe58417705095dc1810c2969\n1 chỗ bảng bất biến §1.1 hoặc câu neo của protocol lệch mã cổng (ADR-0068)')
+N8_OLD_FUNCTION_CHANGED True HUNKS 3 3 NUMSTAT 81	1	.claude/dev/packet_loop.py
+R1_CUTOVER_CONTRACT ngày của H không tham gia; bốn ô đều theo start >= T
+R1_SCHEMA_CONTRACT v2 độc lập; google_antigravity + họ model + surface + transport; chưa có schema hợp đồng r2
+LEASE_NORMALIZATION_SPEC_CASEFOLD False

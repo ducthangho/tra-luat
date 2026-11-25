@@ -1,0 +1,46 @@
+OK  r4   pass_cuoi_ham_cu_sat_khoi_chen           rc=1   nút mới ở vị trí không được phép: dòng 1744
+OK  r4   gan_nhieu_dich_co_ten_cu                 rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r4   gan_bo_co_ten_cu                         rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r4   import_de_ten_cu                         rc=1   nút mới ngoài ngữ pháp cho phép (Import): dòng 1780
+OK  r4   pass_trong_cmd_adr_song                  rc=1   nút mới ở vị trí không được phép: dòng 2239
+OK  r4   pass_cuoi_cmd_doctrine_scan              rc=1   cmd_doctrine_scan: AST đổi ngoài đúng chỗ được phép
+OK  r4   ham_moi_ten_la                           rc=1   nút mới khai tên đã có trong mã nền hoặc ngoài họ cho phép: ['ham_la'] dòng 1780
+OK  r4   cau_lenh_moi_khong_ten                   rc=1   nút mới ngoài ngữ pháp cho phép (Expr): dòng 1780
+OK  r4   ham_ho_inv_sai_vi_tri                    rc=1   nút mới ở vị trí không được phép: dòng 7362
+OK  r4   comment_roi_giua_ham_cu                  rc=1   dòng thêm nằm ngoài nút mới và ngoài chỗ sửa được phép: dòng [644]
+OK  r4   doi_comment_trong_ham_cu                 rc=1   dòng xoá: cần đúng 1, thấy 2 (kể cả dòng chú thích và dòng trống)
+OK  r4   sua_hang_chuoi_khac_trong_parser         rc=1   dòng xoá: cần đúng 1, thấy 2 (kể cả dòng chú thích và dòng trống)
+OK  r4   ham_ho_inv_dung_vi_tri (dat)             rc=0 PHẠM VI [ma]: ĐẠT
+OK  rv4  new_function_default_binding             rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 1780
+OK  rv4  new_function_annotation_binding          rc=1   H không biên dịch được: named expression cannot be used within an annotation dòng 1780
+OK  rv4  new_function_decorator_binding           rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 1782
+OK  rv4  new_class_body_binding                   rc=1   nút mới ngoài ngữ pháp cho phép (ClassDef): dòng 1780
+OK  rv4  except_binding                           rc=1   nút mới ngoài ngữ pháp cho phép (Try): dòng 1780
+OK  rv4  old_function_decorator                   rc=1   cmd_doctrine_scan: AST đổi ngoài đúng chỗ được phép
+OK  r5   lambda_mac_dinh_walrus                   rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r5   lambda_mac_dinh_ten                      rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r5   gan_goi_ham                              rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r5   gan_comprehension_walrus                 rc=1   nút mới ngoài ngữ pháp cho phép (Assign): dòng 1780
+OK  r5   gan_co_chu_thich                         rc=1   nút mới ngoài ngữ pháp cho phép (AnnAssign): dòng 1780
+OK  r5   gan_tang_ten_cu                          rc=1   nút mới ngoài ngữ pháp cho phép (AugAssign): dòng 1780
+OK  r5   ham_moi_global_trong_than                rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 1780
+OK  r5   ham_moi_global_long                      rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 1780
+OK  r5   ham_moi_mac_dinh_ten_cu                  rc=1   nút mới ngoài ngữ pháp cho phép (FunctionDef): dòng 1780
+OK  r5   ham_async_moi                            rc=1   nút mới ngoài ngữ pháp cho phép (AsyncFunctionDef): dòng 1780
+OK  r5   lop_moi_khong_global                     rc=1   nút mới ngoài ngữ pháp cho phép (ClassDef): dòng 1780
+OK  r5   def_trong_if                             rc=1   nút mới ngoài ngữ pháp cho phép (If): dòng 1780
+OK  r5   for_dich_ten_cu                          rc=1   nút mới ngoài ngữ pháp cho phép (For): dòng 1780
+OK  r5   with_as_ten_cu                           rc=1   nút mới ngoài ngữ pháp cho phép (With): dòng 1780
+OK  r5   match_bat_ten_cu                         rc=1   nút mới ngoài ngữ pháp cho phép (Match): dòng 1780
+OK  r5   del_ten_cu                               rc=1   nút mới ngoài ngữ pháp cho phép (Delete): dòng 1780
+OK  r5   kieu_type_alias                          rc=1   nút mới ngoài ngữ pháp cho phép (TypeAlias): dòng 1780
+OK  r5   chen_global_trong_doctrine_scan          rc=1   cmd_doctrine_scan: AST đổi ngoài đúng chỗ được phép
+OK  r5   chen_gan_bien_cu                         rc=1   cmd_doctrine_scan: AST đổi ngoài đúng chỗ được phép
+OK  r5   chen_doi_ten_bien                        rc=1   cmd_doctrine_scan: AST đổi ngoài đúng chỗ được phép
+OK  r5   chen_doi_loi_nhan (dat)                  rc=0 PHẠM VI [ma]: ĐẠT
+OK  r5   hang_moi_dung_ho (dat)                   rc=0 PHẠM VI [ma]: ĐẠT
+OK  r5   ham_moi_mac_dinh_hang (dat)              rc=0 PHẠM VI [ma]: ĐẠT
+TONG ma r4: 13 biến thể · đỏ 12 · đạt 1 · đúng kỳ vọng 13
+TONG ma rv4: 6 biến thể · đỏ 6 · đạt 0 · đúng kỳ vọng 6
+TONG ma r5: 23 biến thể · đỏ 20 · đạt 3 · đúng kỳ vọng 23
+TONG ma: dung 42 sai 0

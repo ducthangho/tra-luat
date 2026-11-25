@@ -1,0 +1,24 @@
+policy 3A_BASE 44a1da4385652628334d40fe31866a81c1230ada 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+policy_3E_before_master_change rc 0 base 44a1da4385652628334d40fe31866a81c1230ada = 44a1da438565 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+policy PAIRS_EQUAL_BEFORE_3E True
+policy_3E_old_B_after_master_change rc 0 base 44a1da4385652628334d40fe31866a81c1230ada = 44a1da438565 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+policy_3E_current_master_after_master_change rc 1 base origin/master = d1fff208e9e3 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1 | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên base: ['.github/coordination/change-impact.v1.json'] — phải tính closure trước khi cấp lease (revision đặc tả)
+schema 3A_BASE 81f6b81d426a577a2e5a38384ecf06f1637b67b0 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+schema_3E_before_master_change rc 0 base 81f6b81d426a577a2e5a38384ecf06f1637b67b0 = 81f6b81d426a · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+schema PAIRS_EQUAL_BEFORE_3E True
+schema_3E_old_B_after_master_change rc 0 base 81f6b81d426a577a2e5a38384ecf06f1637b67b0 = 81f6b81d426a · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+schema_3E_current_master_after_master_change rc 1 base origin/master = fe3a08aae689 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1 | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên base: ['.github/coordination/schemas/change-impact.v1.schema.json'] — phải tính closure trước khi cấp lease (revision đặc tả)
+irrelevant 3A_BASE c0de905cb1d60a2df87826606dc44477930f941f 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+irrelevant_3E_before_master_change rc 0 base c0de905cb1d60a2df87826606dc44477930f941f = c0de905cb1d6 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+irrelevant PAIRS_EQUAL_BEFORE_3E True
+irrelevant_3E_old_B_after_master_change rc 0 base c0de905cb1d60a2df87826606dc44477930f941f = c0de905cb1d6 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+irrelevant_3E_current_master_after_master_change rc 0 base origin/master = c9369da021f0 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+imports_clean_local_script rc 0 base origin/master = a4ae58401f44 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+imports_clean_local_script LOCAL_DEPENDENCY True TRACE ['# code object from /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/followup/imports_clean/kho/yaml/__init__.py']
+imports_clean_local_script_isolated rc 0 base origin/master = a4ae58401f44 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+imports_clean_local_script_isolated LOCAL_DEPENDENCY False TRACE []
+imports_clean_external_pythonpath rc 0 base origin/master = a4ae58401f44 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+imports_clean_external_pythonpath LOCAL_DEPENDENCY True TRACE ['# code object from /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/followup/imports_clean/kho/yaml/__init__.py']
+imports_clean_external_pythonpath_isolated rc 0 base origin/master = a4ae58401f44 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0 | TIỀN KIỂM: ĐẠT
+imports_clean_external_pythonpath_isolated LOCAL_DEPENDENCY False TRACE []
+ALTERNATES_REFSET_EXACT True REF_COUNT 2 PRIVATE_OBJECT_READABLE commit PRIVATE_REF_VISIBLE False

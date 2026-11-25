@@ -1,0 +1,86 @@
+7:Trạng thái: `proposed`, CHƯA đóng băng, chưa có lease. Đặc tả này không cấp việc: phải có Issue và leas
+7: 0 lớp tái mở; hội tụ 0/1) và sau quyết định E2 của chủ kho tách khối tiền kiểm (mục 0); r8 chỉ rút khối ấy và thu hẹp điều kiện bắt đầu về công cụ s
+23:| công cụ tiền kiểm lease toàn kho: closure của §5 khi policy tồn tại, chuẩn hoá và so ti
+23:nh cấp lease; gồm giới hạn G1 đến G10 ở mục 1 | Issue #1484 | `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` |
+25:at/issues/1466#issuecomment-7053593553. Thẩm quyền của việc tách khối tiền kiểm: chủ kho chọn "Tách khối ra (Recommended)" (mã E2), ghi hộ ở https://
+32:2. Khoá văn bản đổi sang danh sách cho phép CẤU TRÚC: địa chỉ, duy nhất, rồi băm byte; không nhận dạng viết tương
+34:4. Tiền kiểm lease thu về đúng phép đo kho đang có, phần còn lại ghi nợ có tên (mụ
+40:dong-xoa-khong-do-hanh-vi` (F08.c): N8 nhận nút mới theo một NGỮ PHÁP ĐÓNG (danh sách cho phép các dạng cú pháp), cùng một luật cho hai chế độ; 
+41:3. `tien-kiem-lease-chua-du` (F11.b/c): r5 đặt việc vắng policy change-impact trên 
+41:base làm điều kiện bắt đầu, và dựng một khối tiền kiểm cho phần chuẩn hoá và so tiền tố của §5 mà `ai-dang-giu` không làm đư
+43:g có lớp mới, không có lớp tái mở; lớp duy nhất còn mở ở bảng (i) là `tien-kiem-lease-chua-du`. r6 và r7 chỉ sửa lớp ấy, bằng cách mở rộng khối tiền 
+45:view lượt 7: lần thứ bảy của cùng một lớp, và quyết định E2 tách khối tiền kiểm.** Lượt 7 cho hội tụ 0/1: U là lớp duy nhất của bảng (i) cuối lượt 6;
+45: F là 0. F11.e và các đường PyYAML cụ thể của F11.f được xếp đã đóng, nhưng lượt 7 đo được ba biểu hiện mới trong cùng lớp. F11.g: đối số 
+45:`--sau-dang` loại một người giữ theo `lease_id` tự khai, không đối chiếu với leas
+47:1. Xoá khối `tien-kiem`, bảng *Đầu vào của khối* (V1 đến V11, P1 đến P5), các bước T0 đến T7, bất biến `I-NGUON`, các
+47: kịch bản và đột biến của khối, cùng mọi lời khai rằng khối đóng hay dừng khi không đo được.
+48:y được ghi thẳng ở bảng G1 đến G10 của mục 1. Bước số ADR đổi nhãn từ 3f thành 3d, vì bước 3d cũ (khối) đã rút.
+49: đầu phát hiện mọi lease giao write set. Phần còn thiếu là nợ `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`: tên đã có sẵn trong ADR-0068, mục *Nợ*, và 
+51:l §8.3, chuyển biểu hiện ra ngoài phạm vi KHÔNG được tính là vá. Lớp `tien-kiem-lease-chua-du` vì vậy không được r8 gọi là đã vá; nó chuyển sang bảng
+62:| packet sau | #1469 rồi #1470 (mục 0); #1484 nhận nợ tiền kiểm lease (mục 0, mục 14) |
+74: cụ sẵn có, kèm giới hạn ghi ở bảng ngay dưới. Nó không phải một chốt đóng ranh giới của §5, và wp1466 không hứa gì về các giới hạn ấy.
+81:6 không đo, không vá và không hứa gì về chúng. Chúng thuộc nợ `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` (ADR-0068, mục *Nợ*), giao cho Issue #1484 t
+107:e56f00`; S18 là phép đo lại của r8. Các ô S1, S4, S16, S17 nhắc khối `tien-kiem` là số đo lịch sử của r5 đến r7; khối đã rút ở r8, và không số đo nào
+111:origin '+refs/heads/*:refs/remotes/origin/*'`, bằng bước T1 của khối `tien-kiem`: 392 tên nhánh máy chủ, 392 tên cục bộ, cặp (tên, SHA) lệch 0 và 0; 
+114:| S4 | lease và tiền kiểm | 03:24:55Z, bằng các hàm quét của `ops/lease_publish.py`: 549 bản gh
+114: `packet_loop_test.py` 1, cùng là `wp1462-r8-g2-claude`, rc 11. Khối `tien-kiem` trên `5a152c1` (03:24:05Z): 392 nhánh, 549 bản ghi, policy 0, liên k
+114:ết tượng trưng 0, `TIỀN KIỂM: DỪNG` với đúng một lý do là lease ấy |
+126:62-r8-g2-claude`, `wp1475-r1-g1-claude`, `wp433-r9-g5-claude`). Khối `tien-kiem` r6 (04:09:55Z–04:10:01Z): 392 nhánh máy chủ = 392 ref kho tạm, 550 b
+126:ản ghi, 5 còn hiệu lực, liên kết tượng trưng 0, policy 0, `TIỀN KIỂM: DỪNG` với đúng một lý do là `wp1462-r8-g2-claude`, rc 1. Kho chính `
+127:ia mộ, và `wp1448-r4-g5-claude` thay cho `wp1448-r6-g6-claude`. Khối `tien-kiem` r7 bằng `/usr/bin/python3 -I` (04:57:23Z–04:57:29Z): 392 nhánh máy c
+127:ghi, 5 còn hiệu lực, liên kết tượng trưng 0, policy 0+0, 136 module, `TIỀN KIỂM: DỪNG` với đúng một lý do là `wp1462-r8-g2-claude`, rc 1. Cùng khối b
+135:ế branch và worktree riêng của §1 (2): `INV-02-NHANH-WORKTREE-RIENG`; tiền kiểm trước khi cấp: `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` (Issue #148
+146:RC_TU_CAP`: 13·15·0·0·0·1 | cổng đăng lease so TÊN ở `granted_by` với danh sách cho phép: chỉ vế cấp lease của §1 (4) | `INV-19-TEN-KHAI-KHONG-PHAI-DANH-TINH`
+281:- `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`: trước khi cấp lease chỉ có `ai-dang-giu`, s
+301:19-TEN-KHAI-KHONG-PHAI-DANH-TINH`: cổng so TÊN ghi ở `granted_by` với danh sách cho phép; phiên agent chạy bằng
+369:_giao_nhau` · còn nợ: `INV-02-NHANH-WORKTREE-RIENG` · còn nợ: `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` · còn nợ: `CONG-TREN-DUONG-STATE-KHONG-BAT-B
+375:| `INV-08` | Packet Spec đóng băng bằng `spec_hash`; đổi hợp đồng thì revision mới | §3.2 | cổng: `
+380:| `INV-13` | Review Class tính fail-closed; executor không hạ lớp | §8 | cổng: `ops/lease_publish.py` `_kiem_lop
+384:| `INV-17` | Agent chỉ hỏi chủ kho theo danh sách đóng E1–E5 | §12 | kỷ luật, 0 cổng · nợ: `INV-17-DANH-SACH-DONG-0-CONG` |
+388:| `INV-21` | Finding P0, P1, P2 còn mở chặn merge; P3 phải đóng có bằng chứng hoặc được miễn neo SHA | §8 | cổng: `.claude/dev/packet
+450:(1) hoặc (2); che nó TẠI CHỖ bằng một comment HTML mở ở khối trước và đóng ở khối sau thì hỏng phép (2) dù băm giữ nguyên; nhân đôi nó ở chỗ hiể
+508: một đơn vị; `nằm ngoài tiểu mục`; `trỏ ra ngoài --root`; `không được đóng` (rào hỏng); `khối HTML`. Ca KĐĐ đòi lý do của CHÍNH chốt nó đo, khôn
+526:| N8 | M3, M4 | **Phạm vi sửa, đo bằng AST và bằng một ngữ pháp đóng cho nút mới.** Chạy khối `do-pham-vi` dưới đây hai lần: chế độ `ma` t
+542:- (4) Mỗi nút mới thuộc đúng một dạng của NGỮ PHÁP ĐÓNG dưới đây; nút ngoài ngữ pháp thì đỏ.
+729:, tự audit exact-H trước lần đẩy đầu của H, và tự bấm merge; không tự đóng băng, không cấp lease theo uỷ quyền thường trực, không tự merge.
+735:h dạng *vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba* (CLAUDE.md): r4 đóng gán nhiều đích nhưng bỏ sót giá trị mặc định và decorator. Revision 5
+735:danh sách biểu hiện mà tự liệt kê mọi đường vào cùng cơ chế trước khi đóng, và cho mỗi đường một ca hay một biến thể đỏ riêng: với byte, cả bốn 
+735:uộc tên ở module, chỗ chèn được phép, tên dựng sẵn, và ghi đè sổ. Với tiền kiểm, r5 đến r7 cũng tự liệt kê đường vào (sáu bước của §5, rồi nguồn dữ l
+745:| #1484 | `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`, gồm giới hạn G1 đến G10 ở mục 1 và các biểu
+745: hiện F11.b đến F11.i của lớp `tien-kiem-lease-chua-du` (mục 19). Issue ấy hiện ghi tên nợ khác (`INV-02-TIEN-
+806:| D9 | N8 so AST của từng nút sẵn có, nhận nút mới theo một NGỮ PHÁP ĐÓNG cùng một luật cho hai chế độ, so khối chèn với mẫu `CHEN`, và chỉ cho
+809: sau khi đăng) và khai giới hạn G1 đến G10; wp1466 không dựng công cụ tiền kiểm riêng | quyết định E2 ở https://github.com/ducthangho/tra-luat/issues
+809:/1466#issuecomment-7058057029. Lịch sử: r5 đến r7 dựng một khối tiền kiểm và mở rộng nó qua ba revision, mỗi lượt review 5 đến 7 vẫn tìm ra biể
+814:| D17 | nợ của #1484 dùng tên đã có `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`, không đặt tên mới; mối nối tới #1484 nằm ở 
+824: hai URL ở mục 0; đổi người soạn từ r5 (E2), URL ở đầu tệp; tách khối tiền kiểm sang #1484 (E2), URL ở mục 0. Revision 5 đến 8 không có câu hỏi mới. 
+824:Hai quyết định thiết kế của r5 còn lại trong đặc tả (ngữ pháp đóng của N8, cách nhận dạng hiển thị của chốt ID) không gắn được mã E nào:
+824: quyết và ghi lý do ở mục 16 (D9, D5). Quyết định thứ ba của r5, khối tiền kiểm, đã rút theo E2 (D12).
+829:-f5d8-5c81-a6c4-b24675398aaa/scratchpad/r6`: `sc/tien_kiem.py` (khối `tien-kiem` r6, trùng từng byte với khối của đặc tả r6, sha256 `51b23a72ece9ea4d
+830:a6c4-b24675398aaa/scratchpad/r7`, ngoài kho: `sc/tien_kiem.py` (khối `tien-kiem` r7, trùng từng byte với khối của đặc tả r7 `3c89d87`), `sc/fx_tien_k
+837:- Khối `tien-kiem` của r5 đến r7 và mọi số đo răng của nó (r5: 19 kịch bản; r6: 33 kịch
+859:ừ tệp tới băm. Các đường vào cùng cơ chế mà người soạn tự liệt kê rồi đóng cả loạt: lớp văn bản gộp CR LF, `rstrip` cuối mục, dòng chỉ khoảng tr
+862: bảng (i)) | r5, F08.c: bỏ hàm `gan`; nút mới phải thuộc một NGỮ PHÁP ĐÓNG (F, A, R) cùng một luật cho hai chế độ; tên mới không trùng định danh
+862:N`; H phải biên dịch được. Các đường vào mà người soạn tự liệt kê rồi đóng: giá trị mặc định, decorator, chú thích kiểu, thân lớp, `global` tron
+865:| `tien-kiem-lease-chua-du` · P2 | mới → VÁ HỜ → còn mở → VÁ HỜ; lượt 5, 6, 7 đều 
+865:VÁ HỜ (mục 0) | r8: không còn gì. wp1466 không hứa tiền kiểm; điều kiện bắt đầu 3a đến 3e chỉ chạy công cụ sẵn có và khai giới hạn
+865: G1 đến G10 (mục 1). r5 đến r7 từng đo lớp này bằng một khối tiền kiểm, đã rút ở r8 | toàn bộ lớp, gồm F11.b đến F11.i và G1 đến G10: #1484 
+865:· `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`. Thẩm quyền: quyết định E2 tách khối (mục 0)
+874:ĐÃ VÁ THẬT; `tieu-chi-dong-xoa-khong-do-hanh-vi` (F08.c) ĐÃ VÁ THẬT; `tien-kiem-lease-chua-du` VÁ HỜ (F11.b ĐÃ VÁ THẬT; F11.c VÁ HỜ; F11.d mới trong 
+874:bảng (ii) CHƯA VÁ, đúng như đã chuyển sang #1469 và #1470. Các lớp đã đóng trước r5 được reviewer soi lại và giữ. Hội tụ r4→r5 là 2/3 (66,67%): 
+874:g U = 6 như đoạn cuối mục này ở r5. Không lớp mới, không lớp tái mở. `tien-kiem-lease-chua-du` có mặt ở cả năm lượt; lượt 5 là lần thứ năm. Lịch sử c
+874:→ VÁ HỜ → VÁ HỜ. Ở r6 lớp ấy vẫn ở bảng (i), vì wp1466 khi đó còn hứa tiền kiểm ở mục 1. Cách chữa của r6, ghi ở mục 0 và mục 1 của đặc tả r6 (các bư
+874:ớc 3c, 3d, 3e theo đánh số r6): bất biến `I-NGUON`, cùng một bất biến cho trước và sau đăng. Người soạn r6 tự liệt kê c
+874:hín đường vào, cộng hai đường khai là chưa đóng: máy chủ đổi sau T1, và cấu hình hay môi trường của người chạy. Có 33
+876:**Lượt 6 (r6 `6c4ffe9`) và r7.** Nhãn của lượt 6: `tien-kiem-lease-chua-du` VÁ HỜ (F11.d ĐÃ VÁ THẬT; F11.e và F11.f mới trong cùng
+876:bảng (ii) CHƯA VÁ, đúng như đã chuyển sang #1469 và #1470; các lớp đã đóng trước r6 được giữ. Hội tụ r5→r6 là 0/1: U là 1, F là 0, vì reviewer k
+876:hông tính việc đóng riêng F11.d thành F = 1. Không lớp mới, không lớp tái mở. Lớp ấy có m
+876:sues/1466#issuecomment-7057370281: thôi vá theo từng đường, thay bằng danh sách cho phép đóng của mọi đầu vào, và đầu vào ngoài danh sách là DỪNG. Mục sổ ấy k
+876:n mã E nào. r7 làm theo hướng ấy (mục 0 và mục 1 của đặc tả r7, bảng *Đầu vào của khối*): mười một dòng đầu vào có chốt, ca và đột biến riêng, cộng năm dòng
+878:**Lượt 7 (r7 `3c89d87`) và r8.** Nhãn của lượt 7: `tien-kiem-lease-chua-du` VÁ HỜ (F11.e ĐÃ VÁ THẬT; các đường PyYAML cụ thể của F
+878:11.f đã đóng nhưng F11.f vẫn VÁ HỜ; F11.g, F11.h, F11.i mới trong cùng lớp); bốn n
+878:bảng (ii) CHƯA VÁ, đúng như đã chuyển sang #1469 và #1470; các lớp đã đóng trước r7 được giữ. Hội tụ r6→r7 là 0/1: U là 1, F là 0. Không lớp mới
+878:h khối ra (Recommended)". r8 làm đúng quyết định ấy (mục 0): rút khối tiền kiểm, chỉ giữ công cụ sẵn có làm điều kiện cấp lease, khai giới hạn G1 đến
+878: G10, và chuyển lớp sang bảng (ii) với nợ `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` của Issue #1484. Theo protocol §8.3, chuyển 
+878:ệnh và output ở `r8/do/grep_r8.log`, mục 18): mọi câu còn nhắc khối, `I-NGUON`, "fail-closed" hay "đóng" trong phạm vi tiền kiểm đều là lịch sử của
+882:e` và nhóm F05.b/c của `kiem-chuoi-khong-doc-cau-truc` KHÔNG THỂ được đóng bằng bất kỳ revision nào của đặc tả này: chúng chỉ đóng được khi #146
+882: reviewer xếp phần bảng (i) của `kiem-chuoi-khong-doc-cau-truc` là đã đóng, và 2/6 nếu không. Thước tiến triển mà mục sổ checkpoint thứ hai đã c

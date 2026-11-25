@@ -1,0 +1,26 @@
+UTC 2026-11-21T05:55:09.386659+00:00
+H1_SAME_NAMES True PAIRS_MISSING_EXTRA 1 1
+H1_FETCH_PAIR_EQUAL True
+H1_NO_PRUNE_EXTRA 1
+H1_PRUNE_EXTRA 0
+H2_PRESENT 1
+H2_WITHDRAWN 0 HISTORY_COMMITS 2
+H3_BEFORE rc 0 LAST NGƯỜI_GIỮ 0: không có ERR 
+H3_AFTER rc 11 LAST NGƯỜI_GIỮ 1: wp999901-r1-g1-claude ERR 
+H3_POST_PREDICATE True
+H3_TWO rc 11 LAST NGƯỜI_GIỮ 2: wp999901-r1-g1-claude, wp999902-r1-g1-claude ERR 
+H3_TWO_POST_PREDICATE False
+H4_ONE_SIDED rc 12 LAST PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN ERR CHAN [12]: KHÔNG_XÁC_ĐỊNH: bia mộ một chiều 'wp999901-r1-g1-claude' -> 'wp999902-r1-g1-claude' tại refs/remotes/origin/lease:ops/leases/old.yaml; không tìm thấy lease thay thế trỏ ngược bằng thay_the_cho
+H4_TWO_SIDED rc 11 LAST NGƯỜI_GIỮ 1: wp999902-r1-g1-claude ERR 
+H4_OLD_MARKED True NEW_POST True
+H5_wrong_shape rc 12 LAST PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN ERR CHAN [12]: KHÔNG_XÁC_ĐỊNH: lease không phải ánh xạ tại refs/remotes/origin/lease:ops/leases/data.yaml
+H5_wrong_time rc 12 LAST PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN ERR CHAN [12]: KHÔNG_XÁC_ĐỊNH: lease_expires_at_utc không đọc được: 'unknown' (cần ISO8601, ví dụ 2026-08-14T07:00:00Z)
+H5_expired rc 0 LAST NGƯỜI_GIỮ 0: không có ERR 
+H6_PREFIX rc 0 LAST NGƯỜI_GIỮ 0: không có ERR 
+H6_DECLARED_G2 True
+H7_LOCAL_COPY rc 11 LAST NGƯỜI_GIỮ 1: wp999901-r1-g1-claude ERR 
+H7_POST_PREDICATE False
+H7_ROWS ['CÒN_HẠN\twp999901-r1-g1-claude\trefs/heads/local-copy:ops/leases/one.yaml']
+H8_DEFAULT PATH_EQUAL False SUFFIX_LOG False
+H8_NUL PATH_EQUAL True SUFFIX_LOG True
+DONE 192 commands; fixture authority=NONE

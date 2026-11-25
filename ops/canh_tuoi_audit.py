@@ -942,7 +942,8 @@ def chay(moi_truong, transport, goc=".", *, T=None, dong_ho=time.monotonic, ngu=
             can = _thong_bao_can(kq["trang_thai"], C, da_bao1, nt[0])  # d65
             if cho_bao0 is not None and not da_giao:
                 cho_bao1 = cho_bao0  # d71 d88 d89
-                hoan = {"loai": can, "bo": list(C)} if can else None
+                khac = (can, C) != (cho_bao0["loai"], (cho_bao0["trang_thai"], cho_bao0["khung"], cho_bao0["ma_ly_do"]))
+                hoan = {"loai": can, "bo": list(C)} if can and khac else None   # su kien KHAC bi hoan; cung loai cung bo thi chinh la su kien dang cho
             else:
                 cho_bao1 = _su_kien(rid, ratt, can, C) if can else None  # d90
         ok = _ghi_than(c, issue, nhip(None if da_bao1 is KHONG_BIET else da_bao1, cho_bao1), T, kd, ghi, "W2", "W3")  # d66

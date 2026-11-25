@@ -1833,21 +1833,25 @@ tho("f03_k1_duong_ve_duong", DUONG, "duong = lambda v: _so_nguyen(v)", "n1_t1_mi
 tho("f03_k1_duong_ve_kieu", DUONG, "duong = lambda v: isinstance(v, int) and v > 0", "n1_t1_mien_run_attempt_bool", "n1_t1_mien_job_attempt_bool", *[f"n1_t1_mien_run_{k}_bool" for k in SO3])
 ca_t1_mien("n1_t1_mien_doi_chung", lambda lu: art_thua(lu), ("dat", "dat"))   # `digest: null` duoc K1 cho phep; `conclusion: null` cua luot dang chay: n1_chua_xong
 
-def ca_thieu_body(ten, lan, muon):
-    def chay():   # Issue THIEU khoa `body` (khac `body: null`) o lan doc thu `lan` cua luot: loi doc Issue vao luong loi ghi, van co bao cao
+def ca_thieu_body(ten, lan, muon, than={"state": "open"}):
+    def chay():   # Issue SAI HINH (mac dinh: THIEU khoa `body`, khac `body: null`) o lan doc thu `lan` cua luot: loi doc Issue vao luong loi ghi, van co bao cao
         g = dat_than(dat_f(gh(), "do"), nt_cu(T8))
-        g.loi(ISS, (200, {"state": "open"}), tu=lan)
+        g.loi(ISS, (200, than), tu=lan)
         try:
             ma, bc, nk = luot_n(g)
-        except KeyError as e:
-            bang(False, f"KeyError {e} lan khoi ham chinh, khong co bao cao")
-        mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), bc["trang_thai"]), (3, *muon, ST), ten)
+        except (KeyError, AttributeError) as e:
+            bang(False, f"{type(e).__name__} {e} lan khoi ham chinh, khong co bao cao")
+        mong((ma, dem(nk, "PATCH"), dem(nk, "POST"), bc["trang_thai"], bc["ghi"][muon[2]]), (3, *muon[:2], ST, muon[3]), ten)
     ca(chay, ten)
 
-ca_thieu_body("n8_issue_thieu_body_w0", 1, (0, 0))
-ca_thieu_body("n8_issue_thieu_body_w3", 2, (1, 0))
-ca_thieu_body("n8_issue_thieu_body_w8", 3, (2, 1))
-db("f01_issue_body", "f01:body", '"body" in v and isinstance(v["body"]', 'isinstance(v.get("body")', "n8_issue_thieu_body_w0", "n8_issue_thieu_body_w3", "n8_issue_thieu_body_w8")
+BA_NOI_DOC = (("w0", 1, (0, 0, "W0", "d10_loi:json_sai_kieu")), ("w3", 2, (1, 0, "W3", "doc_lai_loi:json_sai_kieu")), ("w8", 3, (2, 1, "W8", "doc_lai_loi:json_sai_kieu")))
+for _hau, _than in (("thieu_body", {"state": "open"}), ("body_sai_kieu", {"body": 5, "state": "open"}), ("thieu_state", {"body": ""}), ("state_sai_kieu", {"body": "", "state": 5})):
+    for _noi, _lan, _muon in BA_NOI_DOC:   # moi ve cua `_hinh_issue` tai CA BA noi doc (luat noi goi)
+        ca_thieu_body(f"n8_issue_{_hau}_{_noi}", _lan, _muon, _than)
+def ba_noi_doc(*hau): return [f"n8_issue_{h}_{n[0]}" for h in hau for n in BA_NOI_DOC]
+db("f01_issue_body", "f01:body", '"body" in v and isinstance(v["body"]', 'isinstance(v.get("body")', *ba_noi_doc("thieu_body"))
+db("f03_issue_body_kieu", "f01:body", ' and isinstance(v["body"], (str, type(None)))', "", *ba_noi_doc("body_sai_kieu"))
+db("f03_issue_state", "f01:body", ' and isinstance(v.get("state"), str)', "", *ba_noi_doc("thieu_state", "state_sai_kieu"))
 
 @ca
 def n8_issue_body_null():   # doi chung: `body: null` la Issue rong hop le => nhip tim `vang`, luot van ghi

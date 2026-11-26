@@ -1,0 +1,167 @@
+{
+  "base": [
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `current_lock` is assigned to but never used"
+    ],
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `n` is assigned to but never used"
+    ],
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `spec` is assigned to but never used"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`argparse` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`contextlib` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`contextlib` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`io` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`unittest.mock.patch` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F541",
+      "f-string without any placeholders"
+    ],
+    [
+      "packet_loop_test.py",
+      "F541",
+      "f-string without any placeholders"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ]
+  ],
+  "head": [
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `current_lock` is assigned to but never used"
+    ],
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `n` is assigned to but never used"
+    ],
+    [
+      "packet_loop.py",
+      "F841",
+      "Local variable `spec` is assigned to but never used"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`argparse` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`contextlib` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`contextlib` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`copy` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`io` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F401",
+      "`unittest.mock.patch` imported but unused"
+    ],
+    [
+      "packet_loop_test.py",
+      "F541",
+      "f-string without any placeholders"
+    ],
+    [
+      "packet_loop_test.py",
+      "F541",
+      "f-string without any placeholders"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ],
+    [
+      "packet_loop_test.py",
+      "F811",
+      "Redefinition of unused `lock_fd` from line N: `lock_fd` redefined here"
+    ]
+  ],
+  "equal": true
+}

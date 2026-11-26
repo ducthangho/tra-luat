@@ -1,0 +1,482 @@
+[
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 14,
+      "row": 1905
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "_n",
+          "end_location": {
+            "column": 14,
+            "row": 1905
+          },
+          "location": {
+            "column": 13,
+            "row": 1905
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `n`"
+    },
+    "location": {
+      "column": 13,
+      "row": 1905
+    },
+    "message": "Local variable `n` is assigned to but never used",
+    "noqa_row": 1905,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 42,
+      "row": 6637
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop.py",
+    "fix": null,
+    "location": {
+      "column": 30,
+      "row": 6637
+    },
+    "message": "Local variable `current_lock` is assigned to but never used",
+    "noqa_row": 6637,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 13,
+      "row": 6718
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 16,
+            "row": 6718
+          },
+          "location": {
+            "column": 9,
+            "row": 6718
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `spec`"
+    },
+    "location": {
+      "column": 9,
+      "row": 6718
+    },
+    "message": "Local variable `spec` is assigned to but never used",
+    "noqa_row": 6718,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 20,
+      "row": 12037
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12038
+          },
+          "location": {
+            "column": 1,
+            "row": 12037
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy`"
+    },
+    "location": {
+      "column": 16,
+      "row": 12037
+    },
+    "message": "`copy` imported but unused",
+    "noqa_row": 12037,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F541",
+    "end_location": {
+      "column": 76,
+      "row": 12542
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"\\nSỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):\"",
+          "end_location": {
+            "column": 76,
+            "row": 12542
+          },
+          "location": {
+            "column": 11,
+            "row": 12542
+          }
+        }
+      ],
+      "message": "Remove extraneous `f` prefix"
+    },
+    "location": {
+      "column": 11,
+      "row": 12542
+    },
+    "message": "f-string without any placeholders",
+    "noqa_row": 12542,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/f-string-missing-placeholders"
+  },
+  {
+    "cell": null,
+    "code": "F541",
+    "end_location": {
+      "column": 36,
+      "row": 12547
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "\"  ngoại lệ AC 18   : 0\"",
+          "end_location": {
+            "column": 36,
+            "row": 12547
+          },
+          "location": {
+            "column": 11,
+            "row": 12547
+          }
+        }
+      ],
+      "message": "Remove extraneous `f` prefix"
+    },
+    "location": {
+      "column": 11,
+      "row": 12547
+    },
+    "message": "f-string without any placeholders",
+    "noqa_row": 12547,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/f-string-missing-placeholders"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 73,
+      "row": 12804
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": null,
+    "location": {
+      "column": 66,
+      "row": 12804
+    },
+    "message": "Redefinition of unused `lock_fd` from line 12794: `lock_fd` redefined here",
+    "noqa_row": 12804,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 69,
+      "row": 13280
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": null,
+    "location": {
+      "column": 62,
+      "row": 13280
+    },
+    "message": "Redefinition of unused `lock_fd` from line 13270: `lock_fd` redefined here",
+    "noqa_row": 13280,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 73,
+      "row": 13427
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": null,
+    "location": {
+      "column": 66,
+      "row": 13427
+    },
+    "message": "Redefinition of unused `lock_fd` from line 13418: `lock_fd` redefined here",
+    "noqa_row": 13427,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 13850
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import multiprocessing",
+          "end_location": {
+            "column": 32,
+            "row": 13850
+          },
+          "location": {
+            "column": 5,
+            "row": 13850
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy`"
+    },
+    "location": {
+      "column": 28,
+      "row": 13850
+    },
+    "message": "`copy` imported but unused",
+    "noqa_row": 13850,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 36,
+      "row": 14187
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 14188
+          },
+          "location": {
+            "column": 1,
+            "row": 14187
+          }
+        }
+      ],
+      "message": "Remove unused import: `unittest.mock.patch`"
+    },
+    "location": {
+      "column": 31,
+      "row": 14187
+    },
+    "message": "`unittest.mock.patch` imported but unused",
+    "noqa_row": 14187,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 22,
+      "row": 14443
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import copy",
+          "end_location": {
+            "column": 30,
+            "row": 14443
+          },
+          "location": {
+            "column": 5,
+            "row": 14443
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 12,
+      "row": 14443
+    },
+    "message": "`contextlib` imported but unused",
+    "noqa_row": 14443,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 14443
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import copy",
+          "end_location": {
+            "column": 30,
+            "row": 14443
+          },
+          "location": {
+            "column": 5,
+            "row": 14443
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 23,
+      "row": 14443
+    },
+    "message": "`io` imported but unused",
+    "noqa_row": 14443,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 28,
+      "row": 15962
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import contextlib, io",
+          "end_location": {
+            "column": 32,
+            "row": 15962
+          },
+          "location": {
+            "column": 5,
+            "row": 15962
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy`"
+    },
+    "location": {
+      "column": 24,
+      "row": 15962
+    },
+    "message": "`copy` imported but unused",
+    "noqa_row": 15962,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 36,
+      "row": 16189
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import contextlib, io",
+          "end_location": {
+            "column": 36,
+            "row": 16189
+          },
+          "location": {
+            "column": 5,
+            "row": 16189
+          }
+        }
+      ],
+      "message": "Remove unused import: `argparse`"
+    },
+    "location": {
+      "column": 28,
+      "row": 16189
+    },
+    "message": "`argparse` imported but unused",
+    "noqa_row": 16189,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 22,
+      "row": 17265
+    },
+    "filename": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c7-6-codex/work/ruff/head/packet_loop_test.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import copy",
+          "end_location": {
+            "column": 27,
+            "row": 17265
+          },
+          "location": {
+            "column": 5,
+            "row": 17265
+          }
+        }
+      ],
+      "message": "Remove unused import: `contextlib`"
+    },
+    "location": {
+      "column": 12,
+      "row": 17265
+    },
+    "message": "`contextlib` imported but unused",
+    "noqa_row": 17265,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  }
+]

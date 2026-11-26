@@ -1,0 +1,330 @@
+[
+  {
+    "scenario": "case",
+    "code": "previous",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "SUB",
+        "physical_target": "sub",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "case",
+    "code": "previous",
+    "walk_model": "tep",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@1b10f47045c227e2b63100d251964aa2c0768cc8\nĐÓNG ĐƯỢC WP P — merge ada438ede80b4225ddea1741c9be3c80c674b9e4\n",
+    "stderr": "",
+    "observed": [
+      {
+        "raw_target": "SUB",
+        "physical_target": "sub",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "case",
+    "code": "head",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "SUB",
+        "physical_target": "sub",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "case",
+    "code": "head",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "SUB",
+        "physical_target": "sub",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "nfc",
+    "code": "previous",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "é",
+        "physical_target": "é",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "nfc",
+    "code": "previous",
+    "walk_model": "tep",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@13315ac75696d3d1e4cf2b7d7596c286d1b9c737\nĐÓNG ĐƯỢC WP P — merge 0afded6e114c0bc3809f712a184f5602cc115e9d\n",
+    "stderr": "",
+    "observed": [
+      {
+        "raw_target": "é",
+        "physical_target": "é",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "nfc",
+    "code": "head",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "é",
+        "physical_target": "é",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "nfc",
+    "code": "head",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "é",
+        "physical_target": "é",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "backslash",
+    "code": "previous",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "sub\\leaf",
+        "physical_target": "sub/leaf",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "backslash",
+    "code": "previous",
+    "walk_model": "tep",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@6ac19e065fb0edb23c86ca9f98133f74800286ed\nĐÓNG ĐƯỢC WP P — merge e972d3fd38e312394bb7c72b71d15c3cf581ee64\n",
+    "stderr": "",
+    "observed": [
+      {
+        "raw_target": "sub\\leaf",
+        "physical_target": "sub/leaf",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "backslash",
+    "code": "head",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "sub\\leaf",
+        "physical_target": "sub/leaf",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "backslash",
+    "code": "head",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "sub\\leaf",
+        "physical_target": "sub/leaf",
+        "referent_is_directory": true
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "missing",
+    "code": "previous",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "absent/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "missing",
+    "code": "previous",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "absent/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "missing",
+    "code": "head",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "absent/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "missing",
+    "code": "head",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "absent/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "file_parent",
+    "code": "previous",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "note.txt/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "file_parent",
+    "code": "previous",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "note.txt/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "file_parent",
+    "code": "head",
+    "walk_model": "plain",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "note.txt/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  },
+  {
+    "scenario": "file_parent",
+    "code": "head",
+    "walk_model": "tep",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:symlink\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n",
+    "observed": [
+      {
+        "raw_target": "note.txt/../sub",
+        "referent_is_directory": false,
+        "is_symlink": true,
+        "referent_exists": false
+      }
+    ],
+    "model": "retained link text; case/NFC referent alias when requested; walk_model names separate file classification model"
+  }
+]

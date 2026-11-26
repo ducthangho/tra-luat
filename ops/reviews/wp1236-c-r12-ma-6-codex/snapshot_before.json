@@ -1,0 +1,93 @@
+{
+  "head": {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "45944c7c3f4c75beaa87f36138b2bba9fb9198a3\n66a0f315c1cf27eaac67beae06ee20cd1789f23a\n",
+    "stderr": ""
+  },
+  "status": {
+    "command": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "rc": 0,
+    "stdout": "!! .codex/\n",
+    "stderr": ""
+  },
+  "diff": {
+    "command": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "index": {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "origin": {
+    "command": [
+      "git",
+      "remote",
+      "get-url",
+      "origin"
+    ],
+    "rc": 0,
+    "stdout": "https://github.com/ducthangho/tra-luat\n",
+    "stderr": ""
+  },
+  "branch": {
+    "command": [
+      "git",
+      "symbolic-ref",
+      "--short",
+      "-q",
+      "HEAD"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "config": {
+    "command": [
+      "git",
+      "config",
+      "--get",
+      "core.abbrev"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "refs": {
+    "command": [
+      "git",
+      "show-ref"
+    ],
+    "rc": 0,
+    "stdout": "45944c7c3f4c75beaa87f36138b2bba9fb9198a3 refs/remotes/b/claude/wp1236-c-r12-g1\n3f86257d2aace0f5860ebcb5d92b33cd5fe2c383 refs/tags/archive/rasoat-design-docs-2026-07-26\n5a4fcc21de8bd3f7978acb54dc25c462743a8b65 refs/tags/luu-tru/238-verdict-1\n9729f5f0720fa045e52785844e70cf511ca831a7 refs/tags/luu-tru/238-verdict-2\na0ab3b88f08be7fccbba4d9f8e0374dff2a1d8cc refs/tags/luu-tru/238-verdict-3\n4920113a639d81385c0f98b1488c0f497776d2ff refs/tags/luu-tru/doctor-github-mcp-verdict-6\nde86c2475c1410f73874fb3f75f233ee3eecc962 refs/tags/luu-tru/doctor-github-mcp-verdict-9\nbd17773077bb05f3d936063a34db21faa6420728 refs/tags/luu-tru/nhanh/agent/wp1170-g4-codex\n328b2d49a66e425b294e18dcfb225280e869557a refs/tags/luu-tru/nhanh/agent/wp1176-r2-g1-codex\n9a0ad6415a9bad34abb1e09848ea64e399defb95 refs/tags/luu-tru/nhanh/fix/wp1174-connector-k3\n45820767d816f81ab1a82f9ac228d23ae2b77b39 refs/tags/luu-tru/nhanh/fix/wp1174-connector-k3-ci\n7b452718ee5990eef426a074b612238196fd3c93 refs/tags/luu-tru/nhanh/ops/pkg-windows\n80ebcfbd99fb1fcef5bd2ea5acce03a8e5155119 refs/tags/luu-tru/nhanh/ops/wp943-spec\n9d3e3e9e399397ee958e0f87c1af60f8cf2621fb refs/tags/luu-tru/tao-tag-luu-tru-verdict-1\n356a27e1378b2162bbc0be2ec06ff08fdacbdead refs/tags/luu-tru/wp1021-g1-claude\nab94c4fb01d0d122d2f00a1f2c386c6a191349c5 refs/tags/luu-tru/wp929-merge-ab94c4f\nef909d137b59539ca6bb39b5eb8baaa42faf07c5 refs/tags/v1.29.7\nc4417eecdf1833229164fb509d235d00a7878966 refs/tags/v1.33.0\nf43997b65c37666a307944a1da52e6129cdf7bf6 refs/tags/v1.33.1\n0e234e9a79138102a24f33e3f037803438cec25a refs/tags/v1.33.10\n31ea4610e5c2ce015e7265da820dd50462ba26cd refs/tags/v1.33.11\n985c262a4d4a4fba60e59aa8db24548c054aa7c3 refs/tags/v1.33.12\n526493a7421bf5af268919b27cebb0cd4de1d030 refs/tags/v1.33.13\n294c50a73dc5fbc7585402527f145d7be0d0b0b2 refs/tags/v1.33.14\n969d5aeadfa149fb7654890c099e2b599b1e19d0 refs/tags/v1.33.2\nc41d24cdcbc77c4c9f1f7e53c0954d5770ca4230 refs/tags/v1.33.3\n2b4376ab8db1fd7790a0610d7429dabfcc840481 refs/tags/v1.33.4\n3abedd28c1e026227ebb28aba5a6edc5b47179ff refs/tags/v1.33.5\n7f4de7d2af0a1a96dc6ab721abc20a53a6af8ead refs/tags/v1.33.6\n06ac2f034342b7673532012f0220aeb9848c2e3c refs/tags/v1.33.7\n34f76ac8994948384bcb3ec7493fce19b42edbc0 refs/tags/v1.33.8\n590f9f6fd2bbf51a2cf7652783cf05859f352d47 refs/tags/v1.33.9\n",
+    "stderr": ""
+  },
+  "hashes": {
+    ".claude/dev/packet_loop.py": "e339eb42480d782731dcd7719e40ca1c91cb0e5bdcbeaab0844e9a4942acb4d7",
+    ".claude/dev/packet_loop_test.py": "732b70ecb82571b71c66c018b7f837171512ac869ec3383870cd2135fcd85905"
+  }
+}

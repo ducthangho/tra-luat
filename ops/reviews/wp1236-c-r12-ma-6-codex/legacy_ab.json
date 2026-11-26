@@ -1,0 +1,42 @@
+[
+  {
+    "label": "base",
+    "cases": {
+      "cong_c_dong_du": null,
+      "cong_c_d2_not_measured": null,
+      "cong_c_d2_landed_false": null,
+      "cong_c_d2_nghiem_thu": null,
+      "cong_c_d2_ci_master": null,
+      "cong_c_d1_generation_bool": null,
+      "cong_c_d1_nghiem_thu_rong": null,
+      "cong_c_d3_cha": null,
+      "cong_c_d4_tuong_lai": null,
+      "cong_c_d1_khoa_trung": null,
+      "cong_c_d4_khong_nhay": null,
+      "cong_c_d1_tag_hong": null,
+      "cong_c_d3_git_loi": null
+    },
+    "passed": 13,
+    "total": 13
+  },
+  {
+    "label": "head",
+    "cases": {
+      "cong_c_dong_du": null,
+      "cong_c_d2_not_measured": null,
+      "cong_c_d2_landed_false": null,
+      "cong_c_d2_nghiem_thu": null,
+      "cong_c_d2_ci_master": null,
+      "cong_c_d1_generation_bool": null,
+      "cong_c_d1_nghiem_thu_rong": null,
+      "cong_c_d3_cha": null,
+      "cong_c_d4_tuong_lai": null,
+      "cong_c_d1_khoa_trung": null,
+      "cong_c_d4_khong_nhay": null,
+      "cong_c_d1_tag_hong": null,
+      "cong_c_d3_git_loi": null
+    },
+    "passed": 13,
+    "total": 13
+  }
+]

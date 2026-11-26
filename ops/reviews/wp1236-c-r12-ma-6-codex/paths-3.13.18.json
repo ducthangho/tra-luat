@@ -1,0 +1,273 @@
+[
+  {
+    "scenario": "regular",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@31bbfc0d6879465a2cfbf446ed79e2bd6843a366\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge 2b05dccbd991f068bf2ddd8b2782b4336cafbde6\n",
+    "stderr": ""
+  },
+  {
+    "scenario": "executable",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@8728f1b20b740533cf4632d77b7aa789857e5086\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge 9e0ab87d00aafc6a487ffffcb84ea3eed4b8b57a\n",
+    "stderr": ""
+  },
+  {
+    "scenario": "nested",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@96d952b73fd3c32cb4ddb380a53d5038bf0d48cb\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge 450d84fa2539dc4e9eaeeb1e1a8cd47ffb08c131\n",
+    "stderr": ""
+  },
+  {
+    "scenario": "dot",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "dot",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "./note.txt",
+        "exists": true,
+        "is_file": true,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "double_slash",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "double_slash",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "sub//keep.txt",
+        "exists": true,
+        "is_file": true,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "parent",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "parent",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "sub/../note.txt",
+        "exists": true,
+        "is_file": true,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "missing_parent",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "missing_parent",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "absent/../note.txt",
+        "exists": false,
+        "is_file": false,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "file_parent",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "file_parent",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "note.txt/../note.txt",
+        "exists": false,
+        "is_file": false,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "chain_parent",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "chain_parent",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/first",
+        "target": "note.txt",
+        "exists": true,
+        "is_file": true,
+        "is_dir": false
+      },
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "first/../note.txt",
+        "exists": false,
+        "is_file": false,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "literal_backslash",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "backslash_parent",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "backslash_parent",
+    "mode": "retained_safe_link_text",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "observed": [
+      {
+        "name": "ops/land/pr1440-wp1319-provenance/link",
+        "target": "a\\b/../note.txt",
+        "exists": true,
+        "is_file": true,
+        "is_dir": false
+      }
+    ]
+  },
+  {
+    "scenario": "case",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "nfd",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "homoglyph",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "nonutf_exact",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@ff97a175dcd6c742d7ceb482b2b20eb94c2c7185\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge c731e87d6f1a0b4e0e4861cd0e9ce5276dd87844\n",
+    "stderr": ""
+  },
+  {
+    "scenario": "nonutf_missing",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "empty",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp n\u1ed9i dung c\u1ee7a oid')\n"
+  },
+  {
+    "scenario": "gitlink",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n"
+  },
+  {
+    "scenario": "export_ignore",
+    "runtime": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "mode": "native",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp danh m\u1ee5c c\u00e2y c\u1ee7a oid')\n"
+  }
+]

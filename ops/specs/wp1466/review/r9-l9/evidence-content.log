@@ -1,0 +1,17 @@
+COMMAND ["python", "-B", "out/content_checks.py"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+PROTOCOL_BLOCK p1-moi 1
+PROTOCOL_BLOCK p2-moi 1
+PROTOCOL_BLOCK p3-moi 1
+PROTOCOL_BLOCK p4-moi 1
+PROTOCOL_BLOCK p5-moi 1
+PROTOCOL_BLOCK p6-moi 1
+OLD_BLOCK p4-cu 0
+OLD_BLOCK p5-cu 0
+CODE_CONSTANT_EQUALS_INDEPENDENT 7/7
+ADR_STATUS - **Trạng thái:** Accepted (2026-11-21, chủ kho `ducthangho` duyệt `spec_hash` `98790505d927224bc5e1e42e8f9460376a911a913e2e1d1b12bdf36c5eb20834` của đặc tả `wp1466` r8 trên Issue #1466: https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7058374374)
+ADR_COUNTS [0, 11, 0, 0, 0, 0] MATCH True
+SOURCE_SECTION1 [('`INV-01`', 1, True), ('`INV-02`', 2, True), ('`INV-03`', 3, True), ('`INV-04`', 5, True), ('`INV-05`', 6, True), ('`INV-06`', 8, True), ('`INV-07`', 9, True), ('`INV-19`', 4, True), ('`INV-22`', 10, True), ('`INV-23`', 7, True)]
+DEBT_REFERENCED 25 REGISTERED 27 MISSING []
+
+RC 0 ELAPSED 0.18

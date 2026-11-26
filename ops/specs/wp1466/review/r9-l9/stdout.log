@@ -1,0 +1,5 @@
+Đã hoàn tất review và ghi [out/VERDICT.md](out/VERDICT.md).
+
+Kết luận: **approve**, 0 finding P0–P3 mở. Ba cổng đều xanh; 29 đột biến mới và 21 đột biến cũ đạt. Kho nguồn không thay đổi.
+
+Các phần chưa đo, gồm full CI và Windows, đã ghi rõ trong verdict.

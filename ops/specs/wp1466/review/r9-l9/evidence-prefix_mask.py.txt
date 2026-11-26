@@ -1,0 +1,13 @@
+from pathlib import Path
+import subprocess,sys,json
+O=Path(__file__).resolve().parent;C=O/'candidate';R=O/'prefix-mask-root';(R/'docs').mkdir(parents=True,exist_ok=True)
+p=R/'docs/PROTOCOL_DA_PHIEN.md';b=(C/'docs/PROTOCOL_DA_PHIEN.md').read_bytes();rows=[]
+for k in ['K02','K04','K05','K06','K07']:
+ u=(O/(k+'.raw')).read_bytes()
+ for kind,prefix in [('comment',b'<!--\n# Example\n-->\n\n'),('fence',b'```text\n# Example\n```\n\n')]:
+  p.write_bytes(prefix+u+b'\n'+b)
+  cmd=[sys.executable,'-B',str(C/'.claude/dev/packet_loop.py'),'doctrine-scan','--root',str(R)]
+  r=subprocess.run(cmd,capture_output=True,text=True);ok=r.returncode==9 and k+' : có 2 bản' in r.stderr
+  print(k,kind,'RC',r.returncode,'EXPECTED_REASON',ok);assert ok
+  rows.append(dict(key=k,kind=kind,cmd=cmd,rc=r.returncode,stderr=r.stderr))
+(O/'prefix-mask.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2));print('MASKED_HEADING_BOUNDARY 10/10 PASS')

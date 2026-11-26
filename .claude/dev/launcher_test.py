@@ -11808,7 +11808,8 @@ def _r1547_chay(s, shim_tu, lenh=None):
              f'if [ $n -ge {shim_tu} ]; then mkdir -p {q(str(shim))}; '
              f'cp {q(str(s / "rg-tot"))} {q(str(shim / "rg"))}; chmod +x {q(str(shim / "rg"))}; fi; exit 0')
     lenh = lenh or f'choco install ripgrep --yes --no-progress && chon_thu_muc_chay_duoc rg {q(str(shim))}'
-    p, gp, _uv, _x, _t = _wp868_chay(s, lenh=lenh, env_them={"CAI_CONG_CU_CHO_GIAY": "2"},
+    p, gp, _uv, _x, _t = _wp868_chay(s, apt=f'echo "$*" >> {q(str(s / "apt.log"))}; exit 0', lenh=lenh,
+                                      env_them={"CAI_CONG_CU_CHO_GIAY": "2"},
                                       ung_vien={str(s / "dau" / "choco"): choco,
                                                 str(s / "dau" / "sleep"): f'echo "$1" >> {q(str(ngu))}'})
     return p, gp, shim, (ngu.read_text().split() if ngu.exists() else [])
@@ -11857,7 +11858,8 @@ def r1547_choco_luon_khong_shim_het_tran():
              f"khoi stdout phai la cua tung luot: {_r1547_khoi(p.stderr)}")
         bang([d.split("lan ")[-1] for d in p.stderr.splitlines() if "thu lai choco lan " in d] == ["1/3", "2/3", "3/3"],
              f"dong bao thu lai choco sai: {p.stderr[-500:]}")
-        bang("apt-get update" not in p.stderr, f"choco ma chay apt-get update: {p.stderr[-500:]}")
+        bang("apt-get update" not in p.stderr and not (s / "apt.log").exists(),
+             f"choco ma goi apt-get: {p.stderr[-500:]}")
 
 
 @ca
@@ -18608,6 +18610,8 @@ DOT_BIEN_HOOK = [
      ['r1547_choco_khong_shim_roi_thu_lai_duoc', 'r1547_choco_luon_khong_shim_het_tran', 'r1547_khong_choco_khong_apt_khong_thu_lai'], "cai_sh"),
     ('wp1547_in_stdout_sai_luot', ('    _tl1547_in_stdout\n    echo "cai_cong_cu: \'$TEN\' cai loi (rc=$RC_CAI); cho ${_tl1547_s}s roi thu lai choco lan $_tl1547_k/$_tl1547_n" >&2\n    sleep "$_tl1547_s" || echo "cai_cong_cu: sleep ${_tl1547_s}s loi (rc=$?) — thu lai ngay" >&2\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n    export -n KENH_KQ\n    : > "$KENH_KQ"\n    rm -f -- "$TAM_CAI/stdout"\n    _wp1404_chay_cong_thuc "$@"\n', '    echo "cai_cong_cu: \'$TEN\' cai loi (rc=$RC_CAI); cho ${_tl1547_s}s roi thu lai choco lan $_tl1547_k/$_tl1547_n" >&2\n    sleep "$_tl1547_s" || echo "cai_cong_cu: sleep ${_tl1547_s}s loi (rc=$?) — thu lai ngay" >&2\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n    export -n KENH_KQ\n    : > "$KENH_KQ"\n    rm -f -- "$TAM_CAI/stdout"\n    _wp1404_chay_cong_thuc "$@"\n    _tl1547_in_stdout\n'),
      ['r1547_choco_khong_shim_roi_thu_lai_duoc', 'r1547_choco_luon_khong_shim_het_tran'], "cai_sh"),
+    ("wp1547_choco_goi_apt_giu_thong_bao", ('    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n', '    apt-get update -qq >&2 || true\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n'),
+     ["r1547_choco_luon_khong_shim_het_tran"], "cai_sh"),
     ('wp1547_choco_chay_apt_update', ('      _tl1547_thu_lai_choco "$@" ;;\n', '      _tl1479_thu_lai_apt "$@" ;;\n'),
      ['r1547_choco_luon_khong_shim_het_tran'], "cai_sh"),
     ("wp1404_sh_tran_update_loi_dung", ('*) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;',

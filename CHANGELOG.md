@@ -71,6 +71,8 @@
 - r28 (sau cross-review lượt 27 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r28.md`): một ngữ pháp nhãn nhiều thành phần (số–số,
   số–chữ, chữ–số, nhiều dấu nối) xét trước mọi cửa nhận số đơn.
 - r29 (sau cross-review lượt 28 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r29.md`): nhãn có dấu đứng ĐẦU (`.1.1.`, `.a`, `(.a)`) ⇒ chặn.
+- r30 (sau cross-review lượt 29, đặc tả `ops/specs/llm-khoan-docx-r30.md`): `pStyle` trỏ style không có ⇒ chặn; nhãn một placeholder
+  nhiều dấu (`1..`, `a).`) ⇒ chặn trước nhánh số khoản.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

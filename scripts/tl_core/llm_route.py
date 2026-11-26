@@ -529,6 +529,8 @@ _RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
     rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\d+|{_chu_rieng(5)})",
     # số–chữ liền nhau phải có dấu `lvlText` ngay sau (`1a.`, `a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
     rf"\d+{_chu_rieng(3)}{_KC}[.)(\-–]",
+    # r30 (lượt 29 F1): MỘT placeholder rồi HAI dấu `lvlText` trở lên (`1..`, `1.)`, `a).`) — nhãn, không phải số khoản `1.`.
+    rf"(?:\d+|{_chu_rieng(6)})(?:{_KC}[.)(\-–]){{2,}}",
     rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
@@ -1093,7 +1095,9 @@ def _phan_tich_doan(p, kieu):
     # TIẾP trên run là tuyệt đối.
     dem_nen = {t: (1 if mac[k] else 0) + _dem_bat_trong_chuoi(kieu, psid, 3 if t == "strike" else 4)
                for k, t in ((0, "strike"), (1, "dstrike"))}
-    kq = {"phan": [], "ngat": False, "la": False, "sau_ngat_trang": False}
+    # r30 (lượt 29 F2): `pStyle` trỏ style KHÔNG CÓ trong part styles — Word lùi về style đoạn mặc định (có thể mang gạch), bộ đọc thì
+    # coi như không style ⇒ chữ gạch có thể lọt. Không đoán fallback: đoạn ấy là "lạ" (chặn nếu nằm trong Điều).
+    kq = {"phan": [], "ngat": False, "la": ps is not None and psid not in kieu, "sau_ngat_trang": False}
 
     def run(r):
         rpr = r.find(_W + "rPr")

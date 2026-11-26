@@ -710,7 +710,9 @@ def ca_khoan_mat_so_co_diem_dat(m):
               "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a. Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2).1 Dữ liệu là thông tin.",
               # r29 (lượt 28 E1): dấu ở ĐẦU nhãn (`.1.1.`, `.1`, `(.a)`, `.a`).
               sach.replace("Dữ liệu", ".1.1. Dữ liệu"), sach.replace("Dữ liệu", ".1 Dữ liệu"), sach.replace("Dữ liệu", "(.a) Dữ liệu"),
-              sach.replace("Dữ liệu", ".a Dữ liệu")):
+              sach.replace("Dữ liệu", ".a Dữ liệu"),
+              # r30 (lượt 29 F1): một placeholder rồi nhiều dấu, kể cả khi số trùng số khoản kế.
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.. Dữ liệu là thông tin.", sach.replace("Dữ liệu", "a). Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
@@ -1705,6 +1707,10 @@ def ca_cau_truc_docx_chan(m):
          "sdt noi dong co con la")
     kst = f'<w:styles {_WNS}><w:style w:styleId="G"/><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     chan(lam_docx(H, A, styles=kst), "styleId khai hai lan")
+    # r30 F2: `pStyle` trỏ style KHÔNG CÓ (style đoạn mặc định mang gạch) ⇒ chặn, không đoán fallback.
+    kdut = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:default="1" w:styleId="MD"><w:rPr><w:strike/></w:rPr></w:style>'
+            '<w:style w:type="paragraph" w:styleId="TD"/></w:styles>')
+    chan(lam_docx(p_docx("Điều 3.", kieu="TD"), p_docx("Hồ sơ là tài liệu.", 1, kieu="KhongCo"), styles=kdut), "pStyle tro style vang")
     # r24 Z4: metadata content control đơn trị — mỗi ca vi phạm đúng MỘT trường.
     chan(lam_docx(H, f'<w:sdt><w:sdtPr/><w:sdtPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtPr")
     chan(lam_docx(H, f'<w:sdt><w:sdtEndPr/><w:sdtEndPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtEndPr")
@@ -1926,12 +1932,14 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r30 (lượt 29 F1/F2).
+    ('wp1525_mot_cho_hai_dau', ('{_chu_rieng(6)})(?:{_KC}[.)(\\-–]){{2,}}",', '{_chu_rieng(6)})(?:{_KC}[.)(\\-–]){{3,}}",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and psid not in kieu,', '"la": False,'), 'ca_cau_truc_docx_chan'),
     # r29 (lượt 28 E1): tiền tố dấu của nhãn.
     ('wp1525_tien_to_chi_ngoac', ('_TIEN_TO = rf"(?:{_KC}[.)(\\-–])*{_KC}"', '_TIEN_TO = rf"\\(?{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_nhan_dau_dau', ('    rf"{_TIEN_TO_DAU}(?:\\d+|{_chu_rieng(7)})', '    r"(?!)(?:\\d+|{_chu_rieng(7)})'), 'ca_khoan_mat_so_co_diem_dat'),
     # r28 (lượt 27 D1): ngữ pháp nhãn nhiều thành phần — mỗi nhánh một đột biến.
     ('wp1525_nhieu_cap_noi_chi_cham', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.])+{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_nhieu_cap_mot_dau', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–]){_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_so_chu', ('    rf"\\d+{_NOI_NHIEU}(?:\\d+|{_chu_rieng(2)}{_KC}[.)(\\-–])",', '    rf"\\d+{_NOI_NHIEU}\\d+",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_chu_truoc', ('    rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\\d+|{_chu_rieng(5)})",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_so_dinh_chu', ('    rf"\\d+{_chu_rieng(3)}{_KC}[.)(\\-–]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),

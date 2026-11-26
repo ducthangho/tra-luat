@@ -3,7 +3,7 @@
   do_pr2.py vung [--root KHO] [--luu DIR]            Nghiệm thu 4 (rc 0 SACH · 4 NGOAI_VUNG · 3 KHONG_DO_DUOC)
   do_pr2.py ab <SHA_BASE> [--root KHO] [--luu DIR]   Nghiệm thu 1, 2, 5 (hai clone dựng trong MỘT lệnh; chín phép của bộ so)
   do_pr2.py registry [--root KHO] [--tu DIR]         Nghiệm thu 3 (`--tu` = thư mục `--luu` của `ab`, khỏi chạy lại bộ)
-  do_pr2.py tu-kiem [--dot-bien] [--root KHO]        tự kiểm bộ so và phép đo vùng (không cần cây git)
+  do_pr2.py tu-kiem [--dot-bien] [--root KHO]        tự kiểm bộ so, phép đo vùng và bộ chạy (không cần cây git)
 Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ
 đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r15 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
 lần đọc không phát sự kiện audit `open`, Python con không hook bị che bởi dòng khởi động thừa, và Python con KHÔNG NHẬN RA ĐƯỢC theo
@@ -293,15 +293,16 @@ def don_nhom(p, tran):
                 het = time.monotonic() + tran / 2
                 while th == signal.SIGTERM and time.monotonic() < het and os.waitid(os.P_PID, p.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
                     time.sleep(0.02)
-            except OSError:
+            except (OSError, AttributeError):   # nền POSIX không có `os.waitid`: bỏ khoảng chờ, KILL ngay
                 pass
     elif p.returncode is None:
         p.kill()
     try:
         out, _ = p.communicate(timeout=tran / 2)
         return f"da ket thuc va thu hoi nhom tien trinh {p.pid} (rc={p.returncode})", out or b""
-    except subprocess.TimeoutExpired as e:
-        return f"DON KHONG HET nhom tien trinh {p.pid} trong {tran} s", e.output or b""
+    except subprocess.TimeoutExpired as e:   # còn tiến trình NGOÀI nhóm giữ ống: vẫn thu hồi `p`, và nói thẳng là dọn không hết
+        p.poll()
+        return f"DON KHONG HET trong {tran} s (nhom tien trinh {p.pid}, rc={p.returncode})", e.output or b""
 
 def chay_quan_sat(cmd, cwd, log, tam, timeout=7200, tran_don=20.0):
     """Chạy MỘT phép dưới hook, trong phiên/nhóm tiến trình RIÊNG mà hàm này sở hữu. Quá hạn (hoặc bị ngắt) ⇒ `don_nhom` rồi mới trả không
@@ -805,7 +806,7 @@ def tu_kiem_chay(bo, root):
             return "KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX"
         d, t0 = tempfile.mkdtemp(dir=tam), time.monotonic()
         _pid, rc, txt = chay_quan_sat([sys.executable, "-B", os.path.join(tam, "qs.py"), d, str(tre), "con"], tam, os.path.join(d, "log"), d, timeout=han, tran_don=2.0)
-        time.sleep(max(0.0, t0 + tre + 1.0 - time.monotonic()))   # nhìn dấu SAU thời điểm hẹn ghi, không nhìn sớm
+        time.sleep(max(0.0, t0 + min(han, 2.0) + tre + 0.5 - time.monotonic()))   # nhìn dấu SAU mọi thời điểm hẹn ghi (tiến trình sinh trước hạn ghi muộn nhất ở hạn + tre)
         return rc, txt.startswith("LOI_CHAY: TimeoutExpired"), [x for x in ("DA_CHAY chau", "DA_CHAY con") if x in txt], sorted(x for x in os.listdir(d) if x.startswith("dau_"))
     with tempfile.TemporaryDirectory(prefix="wp1463-chay-") as tam:
         kq.append(("ab_rc0_doi_chung", (0, "KET_LUAN_AB: DAT", "9/9"), ab(None, tam)))
@@ -818,7 +819,7 @@ def tu_kiem_chay(bo, root):
             f.write(MA_QS)
         day_du = ["DA_CHAY chau", "DA_CHAY con"]
         kq.append(("quan_sat_khoe_doi_chung", (0, False, day_du, ["dau_chau", "dau_con"]), qs(tam, 0.0, 60)))
-        kq.append(("quan_sat_qua_han_con_va_chau_khong_de_dau", (None, True, day_du, []), qs(tam, 2.0, 1.0)))
+        kq.append(("quan_sat_qua_han_con_va_chau_khong_de_dau", (None, True, day_du, []), qs(tam, 2.0, 2.0)))
     return kq
 
 DOT_BIEN_CHAY = [(f"ab_bo_chot_rc_luot_{ten}_{che}", "hong = [k for k, v in rc_luot ¦if v != 0]", f'hong = [k for k, v in rc_luot if v != 0 and k != "{ten}/{che}"]',

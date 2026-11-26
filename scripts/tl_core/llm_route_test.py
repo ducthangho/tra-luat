@@ -2305,9 +2305,9 @@ DOT_BIEN = [
       if os.name != "nt" else []),   # chốt nhóm POSIX: ca đích chỉ đo được trên POSIX — trên Windows không có mutant không đo được
     # r41 (lượt 40): mỗi chốt một đột biến.
     ('wp1525_zip64_cua_so_cu', ('        co_loc = fh.read(4) == b"PK\\x06\\x07"', '        co_loc = i >= 20 and b[i - 20:i - 16] == b"PK\\x06\\x07"'), 'ca_r35_lop_loi'),
-    ('wp1525_zip_loi_mo_khong_chuan_hoa', ('        except (NotImplementedError, RuntimeError, EOFError, zipfile.BadZipFile, zlib.error) as e:', '        except (EOFError, zipfile.BadZipFile, zlib.error) as e:'), 'ca_r35_lop_loi'),
+    ('wp1525_zip_loi_mo_khong_chuan_hoa', ('        except (NotImplementedError, RuntimeError, EOFError, OSError, zipfile.BadZipFile, zlib.error, *_LOI_CODEC) as e:', '        except (EOFError, OSError, zipfile.BadZipFile, zlib.error, *_LOI_CODEC) as e:'), 'ca_r35_lop_loi'),
     ('wp1525_extract_join_khong_kep', ('            t.join(min(0.05, con_lai()))', '            t.join(0.05)'), 'ca_r35_lop_loi'),
-    ('wp1525_extract_wait_vo_han', ('        p.wait(timeout=con_lai())', '        p.wait()'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_wait_vo_han', ('    p.wait(timeout=con_lai())', '    p.wait()'), 'ca_r35_lop_loi'),
     ('wp1525_extract_nuot_loi_doc', ('            loi.append(e)', '            pass'), 'ca_r35_lop_loi'),
     ('wp1525_extract_doc_khoi_lon', ('                k = ong.read1(min(65536, con))', '                k = ong.read1(65536)'), 'ca_r35_lop_loi'),
     ('wp1525_extract_thu_hoi_vo_han', ('        with contextlib.suppress(Exception):\n            p.wait(timeout=5)', '        with contextlib.suppress(Exception):\n            p.wait()'), 'ca_r35_lop_loi'),
@@ -2547,9 +2547,9 @@ DOT_BIEN = [
     ("cho_trich_dan_qua_dong", ("    return sau != 0 or trich is not None", "    return sau != 0"), "ca_nguon_mo_ho_luot8"),
     ("dong_ong_tren_windows", ("        if not _LA_WINDOWS:\n", "        if True:\n"), "ca_sau_khoi_chay_khong_chuyen"),
     # Lượt 7 T1/T2.
-    ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi",
-                            "        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi"), "ca_ranh_gioi_luot4"),
-    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"\n\n\ndef _tu_noi', "        pass\n\n\ndef _tu_noi"),
+    ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _quet(txt)",
+                            "        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _quet(txt)"), "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"\n\n\ndef _quet(txt)', "        pass\n\n\ndef _quet(txt)"),
      "ca_ranh_gioi_luot4"),
     ("dau_dong_khac_khep_trich_dan", ("            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c == trich:\n",
                                       "            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c in ('\"', \"\\u201d\"):\n"),

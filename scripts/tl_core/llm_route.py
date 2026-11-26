@@ -585,68 +585,55 @@ _MO_CHO_PHEP = frozenset("“\"‘(")
 
 
 def _mo_dau_nhieu_ve(t):
-    """r39 → r41 (lượt 38–40 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả
-    Điều. Dùng DOCX có cấp danh sách để xác minh."). r41 (lượt 40): MỘT lượt quét trái → phải trên PHẦN ĐẦU của thân — tới từ nối cấp
-    khoản (`là` NGOÀI ngoặc/nháy, theo sau là đệm rồi chữ/số hoặc dấu mở; cùng điều kiện `_RE_LA` + `_tu_noi`) hoặc hết dòng — giữ độ
-    sâu ngoặc và trạng thái nháy. True (⇒ từ chối) khi, còn chữ phía sau:
-    · dấu kết nhãn `.` `-` `–` `—` NGOÀI mọi nhóm (gạch chỉ tính khi đứng trước đệm/dấu mở — `e-mail` dính chữ không tính);
-    · nhóm NGOẶC mở ngay đầu thân đóng lại (`(Ban a) …`, `(Hồ sơ) …` — quyết định r39); trong NHÁY mở ngay đầu thân có dấu kết nhãn
-      hay `)` lẻ (`“ab c) …”`). Thuật ngữ bọc nháy rồi tới từ nối (`“Hồ sơ” là …`) được nhận.
-    Ngoặc/nháy mở SAU từ đầu là chú thích của thuật ngữ (`Hồ sơ (bản chính) là …`). Không phụ thuộc số vế hay độ dài vế. Tuyến tính."""
-    n = len(t)
-    cuoi = max((k for k in range(n - 1, -1, -1) if t[k].isalnum()), default=-1) if n else -1
-
-    def con_chu(k):
-        return cuoi >= k
-    i, sau, trich, nhom_dau, sau_trich, co_tu = 0, 0, None, False, 0, False
-    while i < n:
-        c = t[i]
-        if trich is not None:
-            if c == trich:
-                trich = None
-                nhom_dau = False   # nháy đầu thân đóng: thuật ngữ bọc nháy hợp lệ; dấu kết SAU nháy do luật ngoài nhóm bắt
-            elif nhom_dau and sau == 0:
-                if c == "(":
-                    sau_trich += 1
-                elif c == ")":
-                    if not sau_trich and con_chu(i + 1):
-                        return True
-                    sau_trich = max(0, sau_trich - 1)
-                elif c in ".-–—" and con_chu(i + 1):
-                    return True
-            i += 1
-            continue
-        if c == "(":
-            if sau == 0:
-                nhom_dau = not co_tu
-            sau += 1
-        elif c == ")" and sau:
-            sau -= 1
-            if sau == 0:
-                if nhom_dau and con_chu(i + 1):
-                    return True
-                nhom_dau = False
-        elif c in _MO_TRICH and sau == 0:
-            trich = _MO_TRICH[c]
-            nhom_dau, sau_trich = not co_tu, 0
-        elif c.isalnum():
-            j = i
-            while j < n and t[j].isalnum():
-                j += 1
-            if sau == 0 and t[i:j] == "là":
-                k = j
-                while k < n and t[k] in _DEM_NGANG:
-                    k += 1
-                if k > j and k < n and (t[k].isalnum() or t[k] in _MO_NHIEU_VE):
-                    return False   # từ nối cấp khoản ⇒ phần trước là thuật ngữ
-            co_tu, i = True, j
-            continue
-        elif c in _DAU_KET_NHIEU_VE and (sau == 0 or nhom_dau):
-            gach = c in "-–—"
-            ke = t[i + 1:i + 2]
-            if (not gach or ke == "" or ke in _DEM_NGANG or ke.isspace() or ke in _MO_NHIEU_VE) and con_chu(i + 1):
+    """r39 → r42 (lượt 38–41 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả
+    Điều. Dùng DOCX có cấp danh sách để xác minh."). r42 (lượt 41): MỘT nguồn sự thật — PHẦN ĐẦU kết thúc ở ĐÚNG từ nối mà phép so dùng
+    (`_tu_noi`, quy tắc `_RE_LA`), và trạng thái ngoặc/nháy lấy từ CHÍNH máy trạng thái `_quet_trang_thai` của `_tu_noi`/`_quet`. True
+    (⇒ từ chối) khi, trong phần đầu và còn chữ phía sau:
+    · dấu kết nhãn ngoài mọi nhóm (`_la_dau_ket`: `.`; gạch `-` `–` `—` chỉ khi đứng trước đệm/dấu mở/hết dòng);
+    · nhóm NGOẶC mở ngay đầu thân đóng lại (`(Ban a) …`, `(Hồ sơ) …` — quyết định r39);
+    · trong NHÁY mở ngay đầu thân: dấu kết nhãn (cùng `_la_dau_ket`) hay `)` lẻ.
+    Thuật ngữ bọc nháy rồi tới từ nối (`“Hồ sơ” là …`), ngoặc chú thích sau từ đầu, gạch dính chữ được nhận. Tuyến tính."""
+    m = _tu_noi(t)
+    het = m.start() if m else len(t)
+    cuoi = next((k for k in range(len(t) - 1, -1, -1) if t[k].isalnum()), -1)
+    nhom_dau, co_tu, sau_tt = False, False, 0
+    for i, c, sau, trich in _quet_trang_thai(t):
+        if i >= het:
+            break
+        if trich is None and sau == 0:
+            if c in "(\"\u201c":
+                nhom_dau, sau_tt = not co_tu, 0   # nhóm mở NGAY đầu thân (chưa có từ nào trước)
+            elif _la_dau_ket(t, i) and cuoi > i:
                 return True
-        i += 1
+        elif trich is not None and sau == 0 and nhom_dau:
+            if c == trich:
+                nhom_dau = False   # nháy đầu thân đóng — dấu kết SAU nó do nhánh ngoài nhóm bắt
+            elif c == "(":
+                sau_tt += 1
+            elif c == ")":
+                if not sau_tt and cuoi > i:
+                    return True
+                sau_tt = max(0, sau_tt - 1)
+            elif _la_dau_ket(t, i) and cuoi > i:
+                return True
+        elif trich is None and sau == 1 and c == ")" and nhom_dau:
+            if cuoi > i:
+                return True
+            nhom_dau = False
+        if c.isalnum():
+            co_tu = True
+    return False
+
+
+def _la_dau_ket(t, i):
+    """r42: MỘT quyết định dấu kết nhãn: `.`; gạch `-` `–` `—` chỉ khi ký tự kế là đệm/khoảng trắng, dấu mở hay hết dòng (gạch dính
+    chữ như `e-mail` không phải dấu kết — ở mọi vị trí, kể cả trong nháy đầu thân)."""
+    c = t[i]
+    if c == ".":
+        return True
+    if c in "-–—":
+        ke = t[i + 1:i + 2]
+        return ke == "" or ke.isspace() or ke in _DEM_NGANG or ke in _MO_NHIEU_VE
     return False
 
 
@@ -696,6 +683,12 @@ _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_mem
 # đệ quy theo wrapper; cây sâu hơn ⇒ `RecursionError` (không thuộc lỗi nguồn CLI bắt). Word/Google Docs xuất sâu dưới 20 tầng.
 _TRAN_SAU_XML = 128
 _TRAN_NUT_XML = 2_000_000   # r36 (lượt 35): trần SỐ NÚT mỗi part
+# r42 (lượt 41): lỗi ĐỌC stream theo codec mà `zipfile` nhận diện (LZMA; BZ2 ném OSError) — cùng biên lỗi nguồn với mở gói/member.
+try:
+    import lzma as _lzma
+    _LOI_CODEC = (_lzma.LZMAError,)
+except ImportError:   # bản Python không có lzma: zipfile cũng không đọc được ZIP_LZMA ⇒ NotImplementedError đã bắt
+    _LOI_CODEC = ()
 _TRAN_GOI = 64 * 1024 * 1024   # r36 (lượt 36): trần byte cả gói .docx, đo TRƯỚC khi mở ZIP
 _TRAN_MEMBER = 2000   # r36: trần số member trong gói
 # r35: trần độ dài NHÃN mở rộng từ `lvlText` và tổng chữ Điều dựng từ .docx.
@@ -1431,7 +1424,7 @@ def doc_dieu_docx(nguon, dieu):
         try:
             z_cm = zipfile.ZipFile(fh)
             return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
-        except (NotImplementedError, RuntimeError, EOFError, zipfile.BadZipFile, zlib.error) as e:
+        except (NotImplementedError, RuntimeError, EOFError, OSError, zipfile.BadZipFile, zlib.error, *_LOI_CODEC) as e:
             # r41 (lượt 40): lỗi MỞ GÓI / MỞ MEMBER của `zipfile` (kiểu nén hay phiên bản ZIP không hỗ trợ ⇒ NotImplementedError; member
             # mã hoá ⇒ RuntimeError; dữ liệu nén hỏng) quy về MỘT lỗi nguồn có chẩn đoán ⇒ CLI rc 2, không traceback.
             if isinstance(e, RecursionError):
@@ -1811,12 +1804,12 @@ def _dong_mo_ho(ln) -> bool:
     return sau != 0 or trich is not None
 
 
-def _quet(txt):
-    """Duyệt `txt` từng ký tự kèm trạng thái "đang trong ngoặc tròn / cụm trích dẫn" TRƯỚC ký tự ấy. Một bộ quét
-    có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
+def _quet_trang_thai(txt):
+    """r42 (lượt 41): MỘT máy trạng thái ngoặc tròn / cụm trích dẫn cho mọi phép đọc thân thô (`_quet` → `_tu_noi`, và
+    `_mo_dau_nhieu_ve`). Trả `(i, c, sâu_ngoặc, ký_tự_đóng_trích_dẫn | None)` — trạng thái TRƯỚC ký tự `c`."""
     sau, trich = 0, None   # `trich`: None, hoặc ký tự ĐÓNG của cụm trích dẫn đang mở (`"` hoặc `”`)
     for i, c in enumerate(txt):
-        yield i, c, sau > 0 or trich is not None
+        yield i, c, sau, trich
         if trich is not None:
             # Trong trích dẫn MỌI ký tự là nội dung (lượt 6 S2: `“(”`; lượt 7 T1: `“"”` từng lật trạng thái ngoặc kép
             # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.
@@ -1830,6 +1823,13 @@ def _quet(txt):
             trich = '"'
         elif c == "\u201c":
             trich = "\u201d"
+
+
+def _quet(txt):
+    """Duyệt `txt` từng ký tự kèm trạng thái "đang trong ngoặc tròn / cụm trích dẫn" TRƯỚC ký tự ấy. Một bộ quét
+    có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
+    for i, c, sau, trich in _quet_trang_thai(txt):
+        yield i, c, sau > 0 or trich is not None
 
 
 def _tu_noi(txt):
@@ -1999,30 +1999,37 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
         het = time.monotonic() + 2.0   # ngân sách RIÊNG cho việc chờ luồng đọc kết thúc sau thu hồi
         for t in luong:
             t.join(max(0.0, het - time.monotonic()))
-    luong = [threading.Thread(target=doc, args=(p.stdout, "out"), daemon=True),
-             threading.Thread(target=doc, args=(p.stderr, "err"), daemon=True)]
-    for t in luong:
+    luong = []
+    try:
+        return _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types)
+    except BaseException:
+        # r42 (lượt 41): MỌI lối thoát bất thường sau `Popen` — lỗi khởi động luồng, lỗi `wait` khác quá hạn, ngắt (Ctrl-C) — đi qua
+        # CÙNG một điểm thu hồi (giết + chờ có hạn + chờ luồng đọc có hạn). `thu_hoi` không ném.
+        thu_hoi()
+        raise
+
+
+def _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types):
+    """r42: phần đọc–chờ của `_chay_gioi_han`, tách ra để MỌI lối thoát bất thường của nó đi qua một `except` thu hồi ở người gọi."""
+    for ten, ong in (("out", p.stdout), ("err", p.stderr)):
+        t = threading.Thread(target=doc, args=(ong, ten), daemon=True)
+        luong.append(t)   # ghi sổ TRƯỚC khi start — luồng đã start luôn nằm trong danh sách thu hồi
         t.start()
+
     def con_lai():
         return max(0.0, han - time.monotonic())   # r40 (lượt 39): MỘT nguồn thời gian còn lại cho mọi lần chờ
     while any(t.is_alive() for t in luong) and not vuot and not loi and con_lai() > 0:
         for t in luong:
             t.join(min(0.05, con_lai()))
     if vuot or loi:
-        thu_hoi()
         ten = "stdout" if (vuot or ["out"])[0] == "out" else "stderr"
         raise ValueError(f"tl extract in qua {tran} byte ra {ten} — vuot ngan sach doc" if vuot
                          else f"loi doc ong cua tl extract: {type(loi[0]).__name__}")
     if any(t.is_alive() for t in luong):
-        thu_hoi()
-        raise subprocess.TimeoutExpired(args, timeout)
-    try:
-        p.wait(timeout=con_lai())
-    except subprocess.TimeoutExpired:
-        thu_hoi()
-        raise
+        raise subprocess.TimeoutExpired(args, timeout)   # thu hồi ở `except` của người gọi (r42)
+    p.wait(timeout=con_lai())
     if time.monotonic() > han:
-        thu_hoi()   # r40 (lượt 39): MỘT nơi quyết nhận thành công — qua hạn thì không nhận, kể cả khi tiến trình vừa kết thúc
+        # r40 (lượt 39): MỘT nơi quyết nhận thành công — qua hạn thì không nhận, kể cả khi tiến trình vừa kết thúc
         raise subprocess.TimeoutExpired(args, timeout)
     return types.SimpleNamespace(returncode=p.returncode, stdout=bytes(buf["out"]).decode("utf-8", "replace"),
                                  stderr=bytes(buf["err"]).decode("utf-8", "replace"))

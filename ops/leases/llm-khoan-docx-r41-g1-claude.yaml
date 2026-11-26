@@ -257,3 +257,5 @@ review_calls_limit: 45
 review_calls_used_truoc: 41
 inference_calls_limit: 0
 review_calls_ghi_chu: 'r34 dung 2 (chay lai theo lop); r35 dung 1 (bi ngat); r36-r40 moi ban 1; tong da dung 41. Tran 45 theo quyet dinh chu kho 26-11-2026: toi tran ma con P2 chan merge thi DUNG va hoi chu kho.'
+da_bi_thay_the: llm-khoan-docx-r42-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 41; revision r42 (ops/specs/llm-khoan-docx-r42.md), tran 45 (quyet dinh chu kho).'

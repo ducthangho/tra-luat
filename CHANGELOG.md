@@ -102,6 +102,9 @@
   không nhận; hướng dẫn tách quy tắc `pStyle`/`rStyle`/`basedOn`.
 - r41 (sau review offline lượt 40, đặc tả `ops/specs/llm-khoan-docx-r41.md`): đường thô quét TOÀN phần đầu khoản (tới từ nối "là")
   để chặn nhãn nhiều vế kể cả khi bọc nháy/ngoặc; lỗi mở ZIP quy về rc 2; `tl extract` quá hạn thu hồi cả nhóm tiến trình (POSIX).
+- r42 (sau review offline lượt 41, đặc tả `ops/specs/llm-khoan-docx-r42.md`): đường thô dùng MỘT máy trạng thái ngoặc/nháy và MỘT
+  từ nối cho cả chốt đầu dòng lẫn phép so; lỗi đọc member ZIP (LZMA hỏng) quy về rc 2; mọi lối thoát bất thường của `tl extract`
+  đều thu hồi tiến trình.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

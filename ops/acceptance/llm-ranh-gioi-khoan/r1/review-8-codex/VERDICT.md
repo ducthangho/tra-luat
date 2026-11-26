@@ -1,8 +1,8 @@
 # Verdict packet #1514 r7 lượt 8 — Codex
 
-reviewed_sha: 4d357d1ad679d1a0aeea9795fe9777be8a32c1e5  
-reviewed_tree: 72c86bbe1f1b67d9e6955e680a5fd561bec4b268  
-base_sha: 64b7f2c14776d5d0e1d34a6be4725490956f5bec  
+reviewed_sha: 4d357d1ad679d1a0aeea9795fe9777be8a32c1e5
+reviewed_tree: 72c86bbe1f1b67d9e6955e680a5fd561bec4b268
+base_sha: 64b7f2c14776d5d0e1d34a6be4725490956f5bec
 base_tree: 0cc14e79cecd2ce44bc4dc6cff92cadb31fd7ee4
 
 **APPROVE theo ngưỡng nội dung của prompt.** G1 đã được vá. Lớp `ranh-gioi-khoan` còn một biểu hiện P2 nên chưa đạt điều kiện severity để merge.

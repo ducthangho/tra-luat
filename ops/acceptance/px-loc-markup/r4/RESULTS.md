@@ -34,7 +34,7 @@ Issue #1529.
 | N6 ma trận Windows | **đạt** (mục 6) |
 | N7 gate kho | mục 5 |
 | N8 phạm vi và trần | mục 5 |
-| N9 review mã | review offline lượt 7 approve `d9cd640` (`issuecomment-7181369591`); connector Codex trên PR #1542: `d9cd640` hoàn tất, `has_any_findings=false` (comment tóm tắt `7181398228`, 03:07:04Z), `6021106` "Didn't find any major issues" (`7186973192`) |
+| N9 review mã | review offline lượt 7 approve `d9cd640` (`issuecomment-7181369591`); connector Codex trên PR #1542: receipt `7186973192` (`Reviewed commit: 60211062d5`, "Didn't find any major issues"); comment tóm tắt `7181398228` bị sửa tại chỗ, nay ghi `6021106` completed, `has_any_findings=false`; kết quả connector trên `d9cd640` không còn readback nên không khai |
 
 ## 4. Phép đo phụ trong phiên Linux (PowerShell 7.4.6; không thay N6)
 Parse 0 lỗi; `.psm1`/`.Tests.ps1` chỉ ASCII; `Remove-PxcElicitation` 14/14 và luật `reportedModel` 7/7 (kể cả qua CLIXML) qua `Import-Module`.
@@ -57,7 +57,7 @@ lệnh chủ kho, 08:03:23Z → 08:29:14Z; `run-n6.ps1` sha256 `22106228930088e2
 **Lượt 2**: H = `6021106`, cùng máy, cây nguồn và B; script chỉ đổi SHA của H (sha256 `ba25d2b7e4ba92a427afbb13ee9d7fd25336ef9be02b3827c9f2074d4d8e8b29`),
 09:10Z → 09:36:08Z; `summary.json` `7078bb1c7e04f29118fb58efb0d46beef3a04b02f8ff45f1e32f7c3ebd134ac0`. Kết quả theo ID của cả 14 `report.json`
 (id/outcome, CX verdict/credited) ở tệp gọn sha256 `10cf0ac046fcde284ea6b795b7b5d5c54537fb6c61553755420bb89f978c1dc8` (đăng ở #1529).
-Mọi lượt rc 0, mọi ca `passed`, `failed_ids` và `setup_error_ids` rỗng; B control 27/27 ×4, `-Counterexamples` 41/41 (`CX00`
+Mọi lượt rc 0 (trích exit code từng lượt từ `summary.json`: `issuecomment-7188743380`), mọi ca `passed`, `failed_ids` và `setup_error_ids` rỗng; B control 27/27 ×4, `-Counterexamples` 41/41 (`CX00`
 CONTROL_PASSED, `CX01`–`CX13` KILLED credited), manifest 7/7 ×2; H control 28/28 ×4, `-Counterexamples` 45/45 (`CX00` CONTROL_PASSED,
 `CX01`–`CX16` KILLED credited), manifest 7/7 ×2. Băm `report.json` (B rồi H; ps51-enUS, ps51-trTR, pwsh-enUS, pwsh-enUS-cx, pwsh-trTR,
 manifest-ps51, manifest-pwsh):

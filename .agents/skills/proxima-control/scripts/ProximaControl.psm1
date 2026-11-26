@@ -362,10 +362,12 @@ function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$
         }
         $mk = @{ Text = $null; State = 'none'; Removed = 0 }
         if ($parsed) { $mk = Remove-PxcElicitation $answer }
+        $rm = $null
+        if ($mk.State -cne 'removed' -and (Test-PxcAdvertisedId $adv $reported)) { $rm = $reported }
         $rec['state'] = $state; $final = $true
         try { Write-PxcRecord $rs.Stream $rec } catch { $final = $false }
         $outcome = $(if (-not $final) { 'finalize_failed' } elseif ($state -cne 'completed') { 'unknown' } elseif ($parsed) { 'ok' } else { 'response_unparsed' })
-        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $(if (Test-PxcAdvertisedId $adv $reported) { $reported })
+        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $rm
                     answer = $(if ($parsed) { $mk.Text }); answerMarkup = $mk.State; answerMarkupRemoved = [int]$mk.Removed; answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
                     recordState = $(if ($final) { $state } else { 'pending_finalize_failed' }) }))
     } finally { Close-PxcCtx $ctx }

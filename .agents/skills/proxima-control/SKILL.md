@@ -45,8 +45,9 @@ px connect -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<T
 - Kết quả `ask` (từ 2.2.0): `answer` đã bỏ mọi khối `<ElicitationsGroup …>…</ElicitationsGroup>` hoàn chỉnh (tên thẻ so Ordinal);
   khoảng trắng cuối chỉ bị cắt khi sau khối cuối cùng không còn gì ngoài khoảng trắng. `answerMarkup` là `none` (không có khối),
   `removed` (đã bỏ) hoặc `unterminated` (thẻ mở cụt, thiếu thẻ đóng hay lồng sai: `answer` giữ nguyên, người gọi tự xử).
-  `answerMarkupRemoved` là số khối đã bỏ. Nội dung đã bỏ không được trả lại. `reportedModel` chỉ được trả khi bằng đúng (Ordinal) một id
-  mà chính lời gọi `ask` ấy nhận từ `GET /v1/models`; giá trị khác thành rỗng. Căn cứ: #1457 r2 kể đúng một câu trả lời Gemini qua gateway
+  `answerMarkupRemoved` là số khối đã bỏ. Nội dung đã bỏ không được trả lại. `reportedModel` là `$null` khi `answerMarkup` là
+  `removed`; ngoài ca ấy chỉ được trả khi bằng đúng (Ordinal) một id mà chính lời gọi `ask` ấy nhận từ `GET /v1/models`, giá trị
+  khác thành `$null`. Căn cứ: #1457 r2 kể đúng một câu trả lời Gemini qua gateway
   có khối này, chứa gợi ý câu hỏi mà chủ đề có vẻ lấy từ lịch sử trò chuyện; hồ sơ ấy là lời khai chưa xác minh trong kho.
 - Chạy tự động với Gemini thì nên dùng `gemini:auto`. Căn cứ, cũng là lời khai chưa xác minh của #1457 r2: một lời gọi model chỉ định
   (`gemini:3-5-flash-lite`) trả HTTP 500 vì luồng treo, còn một lời gọi `gemini:auto` trả được câu trả lời sau một lần treo. Đây là

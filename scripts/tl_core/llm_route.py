@@ -489,7 +489,9 @@ def chuan_hoa_khai_niem(khai_niem):
 
 # Số khoản: `1.` `1)` `1.Hồ sơ` (dính thân) hoặc `(1)`; `(?!\d)` để "1.5 triệu" không bị đọc thành khoản 1.
 _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
-_RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
+# r20 (lượt 19 V4): một quy tắc nhãn điểm cho mọi nguồn thô — `a)`, `(a)`, `a.` (dạng `%N.` của cấp con lowerLetter trong .docx)
+# và dấu đầu dòng. Chữ viết tắt nhiều chữ cái (`Tp.`, `e-mail`) không khớp; một chữ cái + dấu chấm ở đầu dòng luôn coi là nhãn.
+_RE_DIEM = re.compile(r"^(\(?[a-zđ]\)|[a-zđ]\.|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 # Câu dẫn của Điều "Giải thích từ ngữ" — r6 (lượt 6 F2, Review Rescue sau sáu lượt cùng lớp): DANH SÁCH CHO PHÉP NGUYÊN DÒNG.
@@ -831,6 +833,9 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
             mac_dinh_doan = st.get(_W + "styleId")
     dd = goc.find(f"{_W}docDefaults/{_W}rPrDefault/{_W}rPr")
     kq[""] = (gach(dd, "strike"), gach(dd, "dstrike"), mac_dinh_doan)
+    # r20 (lượt 19 V2): đánh số khai ở MẶC ĐỊNH ĐOẠN (`docDefaults/pPrDefault/pPr/numPr`) — bộ đọc chỉ giải style → trực tiếp, nên số
+    # kế thừa từ mặc định không vào bộ đếm ⇒ đánh dấu để `doc_dieu_docx` dừng (không đoán thứ tự hiệu lực của Word).
+    kq["#numPr_mac_dinh"] = goc.find(f"{_W}docDefaults/{_W}pPrDefault/{_W}pPr/{_W}numPr") is not None
     return kq
 
 
@@ -1054,6 +1059,8 @@ def doc_dieu_docx(nguon, dieu):
         goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han)   # r12 (lượt 11 L5): BYTES — parser tự đọc khai báo mã hoá
         danh_so = _doc_danh_so(z, doc_gioi_han, chinh)
         kieu = _doc_kieu(z, doc_gioi_han, chinh)
+    if kieu.get("#numPr_mac_dinh"):
+        raise ValueError("styles co danh so o mac dinh doan (docDefaults/pPrDefault/numPr) — khong ho tro")   # r20 (lượt 19 V2)
     goc_cay = ET.fromstring(goc_xml)
     _chan_mc(goc_cay, "document")
     if goc_cay.tag != _W + "document":
@@ -1481,7 +1488,9 @@ def trang_thai_duong(env=None, tim=shutil.which) -> dict:
 def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
     """Lấy nguyên văn Điều bằng CHÍNH `tl extract` (đường đọc đã verify, có cảnh báo markup/dự thảo
     riêng) — không dựng đường đọc thứ hai. Trả (văn bản, stderr của extract)."""
-    p = chay([sys.executable, str(tl_py), "extract", str(so_hieu), "--dieu", str(dieu), *them],
+    # r20 (lượt 19 V1): `--markup-strict` — nguồn dự thảo KHÔNG chứng minh được đã lọc chữ gạch bỏ ⇒ `tl extract` rc 3, không in chữ
+    # ⇒ dừng trước model (thay vì chỉ chuyển tiếp cảnh báo). Cái giá đã khai: nguồn chỉ đọc được qua text/plain bị chặn.
+    p = chay([sys.executable, str(tl_py), "extract", str(so_hieu), "--dieu", str(dieu), "--markup-strict", *them],
              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
     dau = f"===== Điều {dieu} ====="
     out = p.stdout or ""

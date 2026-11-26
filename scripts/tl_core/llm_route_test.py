@@ -669,8 +669,26 @@ def ca_khoan_mat_so_co_diem_dat(m):
         returncode = 0
         stdout = "===== Điều 3 =====\n" + sach + "\u3000\n"
         stderr = ""
-    vb_ex, _ = m.lay_dieu_qua_extract("1/2025/QH15", 3, "tl.py", chay=lambda *a, **k: _P())
+    _argv = []
+    vb_ex, _ = m.lay_dieu_qua_extract("1/2025/QH15", 3, "tl.py", chay=lambda a, **k: (_argv.append(list(a)), _P())[1])
     bang(vb_ex.endswith("\u3000"), f"extract nuot ky tu la o bien: {vb_ex[-5:]!r}")
+    # r20 (lượt 19 V1): `tl extract` chạy `--markup-strict`; rc 3 (markup chưa chứng minh được đã lọc) ⇒ ValueError trước model.
+    bang("--markup-strict" in _argv[0], f"lay_dieu_qua_extract khong truyen --markup-strict: {_argv[0]}")
+    class _P3:
+        returncode = 3
+        stdout = ""
+        stderr = '{"ok": false, "error": "MARKUP_UNVERIFIED"}'
+    try:
+        m.lay_dieu_qua_extract("1/2025/QH15", 3, "tl.py", chay=lambda *a, **k: _P3())
+        raise TinHieuChotCa("extract rc 3 (MARKUP_UNVERIFIED) phai dung")
+    except ValueError:
+        pass
+    # r20 (lượt 19 V4): nhãn điểm `a.` / `(a)` trên nguồn mất số ⇒ chặn; chữ viết tắt dính chữ không phải nhãn.
+    for x in (sach.replace("Dữ liệu", "a. Dữ liệu"), sach.replace("Dữ liệu", "(a) Dữ liệu")):
+        bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
+    vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
+    bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
+         f"chu viet tat dau dong bi chan oan: {m.tach_khoan(vt)}")
     nel = sach.replace("tài liệu.\nDữ", "tài liệu.\x85Dữ").replace("\nHồ", "\n\x85Hồ")
     bang(m.tach_khoan(nel) is None, f"NEL thanh ranh gioi dong: {m.tach_khoan(nel)}")
     bang(m.tach_khoan(sach.replace("Dữ liệu", "\u3164- Dữ liệu")) is None, "ky tu trong nhom chu che dau diem")
@@ -1409,6 +1427,11 @@ def ca_cau_truc_docx_dat(m):
                                                 '<w:permStart w:id="5" w:edGrp="everyone"/><w:r><w:t>chính (45°) § 1.</w:t></w:r>'
                                                 '<w:permEnd w:id="5"/>')))
     bang(cap31 == [(1, "Hồ sơ là tài liệu “gốc” – bản chính (45°) § 1.")], f"dau in an / permStart bi chan oan: {cap31}")
+    # r20 V2 đối chứng: mặc định đoạn KHÔNG có numPr (chỉ giãn dòng) vẫn đạt.
+    kgd = (f'<w:styles {_WNS}><w:docDefaults><w:pPrDefault><w:pPr><w:spacing w:after="120"/></w:pPr></w:pPrDefault>'
+           '</w:docDefaults></w:styles>')
+    _, cap33, _ = _doc_hop_le(m, lam_docx(H, A, styles=kgd))
+    bang(cap33 == [(1, "Hồ sơ là tài liệu.")], f"mac dinh doan khong danh so bi chan oan: {cap33}")
     # r19 U1 đối chứng: số thập phân sát dấu chấm trong thân vẫn đạt.
     _, cap32, _ = _doc_hop_le(m, lam_docx(H, p_docx("Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.", 1)))
     bang(cap32 == [(1, "Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.")], f"so thap phan bi chan oan: {cap32}")
@@ -1575,6 +1598,10 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(H, p_docx("². Hồ sơ là tài liệu.", 1)), "so go tay bang so mu")
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)&#9;"))),
          "lvlText co tab")
+    # r20 V2: đánh số ở mặc định đoạn (`docDefaults/pPrDefault/numPr`) ⇒ chặn.
+    kmd = (f'<w:styles {_WNS}><w:docDefaults><w:pPrDefault><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>'
+           '</w:pPr></w:pPrDefault></w:docDefaults></w:styles>')
+    chan(lam_docx(H, A, styles=kmd), "danh so o mac dinh doan")
     # r16 R2: số gõ tay ngoặc KÍN dính thân bắt đầu bằng chữ số.
     chan(lam_docx(H, p_docx("(1)5 lần là hệ số.", 1)), "so go tay ngoac kin dinh chu so")
     # r14 N3: khối trùng tên cục bộ `p`/`sdt`/`customXml` nhưng NGOÀI namespace Word ⇒ khối lạ (trước và trong Điều).
@@ -1763,6 +1790,12 @@ DOT_BIEN = [
     ('wp1525_cho_phep_moi_chu_cai', ('        if c not in _KY_TU_CHO_PHEP and not', '        if not c.isalpha() and c not in _KY_TU_CHO_PHEP and not'), 'ca_cau_truc_docx_chan'),
     ('wp1525_lvltext_khoang_trang_rong', ('[.)(\\-– ])*%[1-9](?:%[1-9]|[.)(\\-– ])*"', '[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*"'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bom_nhieu_lan', ('    return s[1:] if s.startswith("\\ufeff") else s', '    return s.lstrip("\\ufeff")'), 'ca_khoan_mat_so_co_diem_dat'),
+    # r20 (lượt 19 V1/V2/V4).
+    ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_diem_bo_dang_cham', ('r"^(\\(?[a-zđ]\\)|[a-zđ]\\.|[-–•+])\\s*"', 'r"^(\\(?[a-zđ]\\)|[-–•+])\\s*"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_ngoac_mo', ('r"^(\\(?[a-zđ]\\)|', 'r"^([a-zđ]\\)|'), 'ca_khoan_mat_so_co_diem_dat'),
     # r19 (lượt 18 U1): số mũ ngoài danh sách cho phép.
     ('wp1525_nhan_so_mu', ('    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№")', '    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№¹²³")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_extract_strip_chung', ('    return out.split(dau, 1)[1].strip(" \\t\\r\\n"), p.stderr or ""', '    return out.split(dau, 1)[1].strip(), p.stderr or ""'), 'ca_khoan_mat_so_co_diem_dat'),

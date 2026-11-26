@@ -409,7 +409,12 @@ biến môi trường của environment.
   được nhận khi đứng CUỐI đoạn), part chính/numbering/styles khai sai trong tệp quan hệ,
   ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
   không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
-  Word. Đường `<số hiệu>` (qua `tl extract`) vẫn là văn bản thô.
+  Word. Đánh số khai ở mặc định đoạn (`docDefaults/pPrDefault/numPr`) cũng bị chặn. Đường `<số hiệu>` (qua `tl extract`) vẫn
+  là văn bản thô, chạy `tl extract --markup-strict` (nguồn dự thảo chưa chứng minh được đã lọc chữ gạch bỏ ⇒ rc 2, kể cả nguồn
+  chỉ đọc được qua text/plain), và có GIỚI HẠN ĐÃ KHAI: bộ cắt Điều của `tl extract` dừng ở dòng đầu tiên mở bằng `Điều <số>`
+  — một dòng dẫn chiếu như vậy làm MẤT các khoản phía sau mà phép so không thấy; ký tự điều khiển bộ đọc đã xoá trước khi lưu
+  cache cũng không tới được chốt. Cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Đường thô coi một chữ cái + `)` / `.`
+  hay `(a)` ở đầu dòng là nhãn điểm ⇒ nguồn bị chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

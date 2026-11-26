@@ -50,6 +50,9 @@
   bỏ phần bao của `tl extract`.
 - r19 (sau cross-review lượt 18, đặc tả `ops/specs/llm-khoan-docx-r19.md`): bỏ số mũ `¹²³` khỏi danh sách cho phép (mọi chữ số tới
   chốt là ASCII); khai giới hạn đường `<số hiệu>`: ký tự bộ đọc `tl extract` đã xoá/thay trước khi lưu cache không tới được chốt.
+- r20 (sau cross-review lượt 19, đặc tả `ops/specs/llm-khoan-docx-r20.md`): đường `<số hiệu>` chạy `tl extract --markup-strict`;
+  đánh số ở mặc định đoạn `.docx` ⇒ chặn; nhãn điểm `a.` / `(a)` trên nguồn thô ⇒ chặn; khai giới hạn bộ cắt Điều của `tl extract`
+  (dòng dẫn chiếu đầu dòng làm mất khoản cuối) theo quyết định chủ kho.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

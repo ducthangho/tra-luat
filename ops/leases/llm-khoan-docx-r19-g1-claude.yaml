@@ -145,3 +145,5 @@ revision_ly_do: 'Cross-review luot 18 (U1 P1, U2 P2); theo quyen dung cua chu kh
 review_calls_limit: 19
 review_calls_used_truoc: 18
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r20-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 19 (V1-V4); revision r20 (ops/specs/llm-khoan-docx-r20.md), tran 20.'

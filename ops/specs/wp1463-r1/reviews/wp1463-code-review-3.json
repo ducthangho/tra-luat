@@ -1,0 +1,603 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "generation": 4,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "d6f2e141d7574c9f8bea01c76d93827b",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "xhigh",
+    "identity_source": "launcher run.json confirms openai_codex/codex_cli/machine and run ID; serving model/effort not measured, not inferred from request or submitter"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+  "reviewed_tree": "f15aac5349a23c1c3a0943ab29ce91db7d1bf1ca",
+  "base_sha": "1260fa0cba89353911e2f97188b2c04dab8139d7",
+  "spec_sha256": "c45c0703fbc268e62556e6826b15eef88f9b52b46b306dc0098d647fcc97477a",
+  "spec_source": "2662fba22104106b7ba7ed6e25fe527342cf20d2:ops/specs/wp1463-r1/SPEC.md",
+  "spec_revision": 16,
+  "local_spec": "Absent in candidate tree; authoritative frozen blob read into reviewer scratch, hash verified.",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "code",
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "name": "preflight",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git diff --numstat 1260fa0 HEAD; sha256(authoritative spec blob); git status --porcelain=v1 --untracked-files=all --ignored",
+      "exit_code": 0,
+      "evidence": "Exact H/tree/hash; detached HEAD; clean initial worktree; core.abbrev=7; origin GitHub; 4 files +1905/-78; master drift has no write-set changes."
+    },
+    {
+      "name": "tu-kiem",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem",
+      "exit_code": 0,
+      "evidence": "26/26 + 155/155 + 14/14; KET_LUAN_TU_KIEM: DAT",
+      "artifact": "/tmp/wp1463-review-d6f2e141/tu-kiem.log"
+    },
+    {
+      "name": "targeted T/D mutants",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/target_mutants.py",
+      "exit_code": 0,
+      "evidence": "All 38 existing T entries (numbering has gaps through T48) and 12 D entries GIET/hoan_tat. T8/T18/T19 DO:c66; T47/T48 DO:c82. Six truncated diagnostics are separately captured untruncated.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/target-mutants.json"
+    },
+    {
+      "name": "registry saved-output replay",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry --tu /tmp/wp1463-g4/luu2",
+      "exit_code": 0,
+      "evidence": "DAT; four combinations ĐẠT/ĐẠT/ĐỎ/ĐỎ. Replays executor artifacts, not a new full producer run.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/registry-replay.log"
+    },
+    {
+      "name": "saved A/B comparator",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/compare_saved.py",
+      "exit_code": 0,
+      "evidence": "9/9 comparison predicates true; independently loaded base/H catalogs are 77/86 cases and 485/524 mutations; saved rc files 0/0/0. Does not independently establish historic producer execution.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/compare-saved.log"
+    },
+    {
+      "name": "bare Ruff F",
+      "status": "passed",
+      "command": "python3 -m ruff check --no-cache --select F <scratch copies of changed Python files at base/H>",
+      "exit_code": 0,
+      "evidence": "ruff 0.15.15; base two Python files 0 errors, H three Python files 0 errors, delta 0; distinct from CI pin/probe contract.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/ruff.json"
+    },
+    {
+      "name": "independent launch probes",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/launch_probe.py",
+      "exit_code": 0,
+      "evidence": "30 actual-process trials, five launch variants × hooked/unhooked × three operations. preexec chdir and posix_spawnp with a cwd decoy: each sole -I child confirms the out-of-zone read, rc 0, python_con=0, bat_dau_con=0, all operations SACH. Their hooked controls return NGOAI_VUNG at exactly the targeted operation. Absolute posix_spawn, relative execv after chdir, and subprocess env PATH override controls count one child: -I gives KHONG_DO_DUOC, hooked gives NGOAI_VUNG.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/launch-probe.log"
+    },
+    {
+      "name": "independent cleanup probe",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/cleanup_probe.py",
+      "exit_code": 0,
+      "evidence": "Timeout control returns after 0.275 s, no late marker. ValueError during wait re-raises and no marker. Inject first KeyboardInterrupt during wait, then second at chay_quan_sat line 399 (cleanup deadline setup): second exception escapes after 0.048 s, same-group TERM-ignoring child writes late.marker after return. Trace injects exceptions into actual H; real child/group and marker, no product edits. Reviewer explicitly kills/reaps its surviving root afterward.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/cleanup-probe.log"
+    },
+    {
+      "name": "full provenance suite",
+      "status": "not_run",
+      "command": "python3 ops/ci_provenance_test.py",
+      "evidence": "0 full runs by reviewer; targeted cases, light mode, supplied saved-output replay used instead. No independent full-suite count assertion."
+    },
+    {
+      "name": "full vung and two real phan_chung probes",
+      "status": "not_run",
+      "evidence": "No new full vung run. Executor logs inspected; targeted operation fixtures are independent tests, not reproduction of 610/610 or 79/91 real-run counts."
+    },
+    {
+      "name": "remote CI / Windows / K7 / LIVE",
+      "status": "not_run",
+      "evidence": "Outside read-only offline assignment. No GitHub writes, workflow dispatch, push, merge, deploy or LIVE."
+    },
+    {
+      "name": "tu-kiem --dot-bien",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -u -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem --dot-bien",
+      "exit_code": 0,
+      "evidence": "46/46 (15 comparator +19 zone +12 runner), DAT. Each BAT line identifies its designated case and changed result; no unrelated exception credited.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/mutants.log"
+    },
+    {
+      "name": "light provenance suite",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 CI_PROVENANCE_KHONG_DOT_BIEN=1 python3 -B ops/ci_provenance_test.py",
+      "exit_code": 0,
+      "evidence": "86/86 cases; 524 mutation entries explicitly CHE DO NHE; TU KIEM PHAN HANG DAT (2); TONG DAT. Mutation execution not claimed in this run.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/light.log"
+    },
+    {
+      "name": "registry suite",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B .claude/dev/ci_dang_ky_test.py",
+      "exit_code": 0,
+      "evidence": "PHẢN CHỨNG 1677/1677 đỏ đúng; TỔNG ĐẠT. Includes actual phan_chung once; no additional real phan_chung probes run. RUFF CI 3/3 contract is separate from bare lint.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/registry-test.log"
+    },
+    {
+      "name": "registry saved rc both modes",
+      "status": "passed",
+      "command": "python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry --tu /tmp/wp1463-review-d6f2e141/registry-rc (scratch saved rc42 in each mode separately)",
+      "exit_codes": [
+        1,
+        1
+      ],
+      "expected_exit_codes": [
+        1,
+        1
+      ],
+      "evidence": "Both positive-output cases, H/nhe rc42 and H/day_du rc42, return KET_LUAN_REGISTRY DO. Expected rejection, not command success.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/registry-rc.json"
+    },
+    {
+      "name": "second real SIGINT transition probe",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/cleanup_signal_probe.py",
+      "exit_code": 0,
+      "evidence": "No second signal: original exception preserved, no marker, 0.179s. Second real SIGINT at line399 or400: late marker true, original exception lost, 0.058/0.042s. Line402 protected control: original exception preserved, no marker, 0.171s. Unrelated process alive in all four trials.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/cleanup-signal-probe.log"
+    },
+    {
+      "name": "repository final snapshot",
+      "status": "passed",
+      "command": "tracked-content SHA256 comparison; git rev-parse/status/diff/diff --cached/ls-files",
+      "exit_code": 0,
+      "evidence": "18775 tracked file hashes unchanged; same exact HEAD/tree; unstaged/staged diffs empty; no untracked or ignored files. --ignored=matching lists an empty read-only .codex directory, which initial non-matching status did not enumerate; directory-history delta unmeasured.",
+      "artifact": "/tmp/wp1463-review-d6f2e141/snapshot-end.json"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR2-C07",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "severity": "P2",
+      "axis": "code",
+      "location": "ops/specs/wp1463-r1/do/do_pr2.py:136",
+      "claim": "Launch-time classification still understates recognizable Python children, allowing an out-of-zone read to be reported SACH inside R16-1/R15-4’s retained guarantee. Documentation discloses two further holes but does not amend the owner-approved spec.",
+      "manifestations": [
+        {
+          "location": "ops/specs/wp1463-r1/do/do_pr2.py:136",
+          "trigger": "posix_spawnp launches a non-regex symlink to the current interpreter through PATH while cwd contains an executable of the same name pointing elsewhere.",
+          "observed": "The hook tries cwd first, records the unrelated executable, and never considers the actual PATH-selected interpreter. Three targeted operations all SACH despite confirmed reads."
+        },
+        {
+          "location": "ops/specs/wp1463-r1/do/do_pr2.py:134",
+          "trigger": "subprocess launches ./alias while preexec_fn changes cwd to the directory containing that interpreter symlink.",
+          "observed": "The hook resolves in the parent/cwd= context before preexec_fn. Three targeted operations all SACH despite confirmed reads."
+        },
+        {
+          "location": "ops/specs/wp1463-r1/do/do_pr2.py:126",
+          "trigger": "multiprocessing spawn runs standard sys.executable with the hook environment removed.",
+          "observed": "No supported SINH event is counted; zero surplus hook starts; the recognizable child reads outside zone and returns SACH."
+        }
+      ],
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/launch_probe.py",
+        "exit_code": 0,
+        "observed": "30 actual-process trials, five launch variants × hooked/unhooked × three operations. preexec chdir and posix_spawnp with a cwd decoy: each sole -I child confirms the out-of-zone read, rc 0, python_con=0, bat_dau_con=0, all operations SACH. Their hooked controls return NGOAI_VUNG at exactly the targeted operation. Absolute posix_spawn, relative execv after chdir, and subprocess env PATH override controls count one child: -I gives KHONG_DO_DUOC, hooked gives NGOAI_VUNG.",
+        "artifact": "/tmp/wp1463-review-d6f2e141/launch-probe.log"
+      },
+      "additional_evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/mp_probe.py",
+        "exit_code": 0,
+        "observed": "multiprocessing spawn using standard sys.executable with PYTHONPATH removed: confirmed read of ops/outside.txt, oracle({path})=nhe, rc0, python_con=0, bat_dau_con=0, SACH. Hook-preserving control confirms the same read and returns NGOAI_VUNG (0 counted children, 2 hook starts). forkserver not measured: sandbox denies socket bind before child starts, rc1/read_confirmed=false.",
+        "artifact": "/tmp/wp1463-review-d6f2e141/mp-probe.log"
+      },
+      "spec_consistency": "R16-1 requires actual launch context; Acceptance 4/R15-4 still promise counting recognizable children. These are neither renamed/copied interpreters at different realpaths, shell children, native reads in a hooked process, nor surplus-start masking. KET_QUA.md:67-69 and module lines 10-11 honestly disclose preexec/multiprocessing, but the positive guarantee and handoff completion claim remain too broad.",
+      "suggested_fix": {
+        "where": "HOOK_SRC _that/_sinh and spawn coverage, plus tu_kiem_vung and KET_QUA.md. The producer must capture the actual launch identity before doc_log can enforce coverage.",
+        "how": "Correctly distinguish or conservatively account for ambiguous posix_spawn/posix_spawnp resolution; do not let a cwd candidate suppress a PATH candidate. For preexec and multiprocessing paths, either obtain sufficient launch evidence or fail closed as KHONG_DO_DUOC. If maintaining the existing guarantee is infeasible, route a further reduction through owner-approved spec revision; a disclosure alone is insufficient. Keep the regex unchanged.",
+        "locking_test": "For each operation run the cwd-decoy posix_spawnp and preexec-chdir symlink as the sole unhooked child, with read markers and hooked controls. Add standard-interpreter multiprocessing spawn with hook environment removed. Each must cease returning SACH. Mutants restoring cwd-first suppression, ignoring preexec context, or dropping multiprocessing coverage must fail their own case. Forkserver remains unmeasured here.",
+        "new_risks": "Conservative handling can reject valid native launches; guessing PATH can misidentify children, while wrapping preexec or multiprocessing internals can change spawn semantics. Do not silently expand accepted residuals or infer identities after symlink replacement."
+      }
+    },
+    {
+      "id": "PR2-C08",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "severity": "P2",
+      "axis": "standards_security",
+      "location": "ops/specs/wp1463-r1/do/do_pr2.py:399",
+      "claim": "A second interrupt between the wait exception handler and the protected cleanup loop bypasses all group cleanup and replaces the original exception. The same-group descendant can write after chay_quan_sat returns, contrary to R16-2.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/cleanup_probe.py",
+        "exit_code": 0,
+        "observed": "Timeout control returns after 0.275 s, no late marker. ValueError during wait re-raises and no marker. Inject first KeyboardInterrupt during wait, then second at chay_quan_sat line 399 (cleanup deadline setup): second exception escapes after 0.048 s, same-group TERM-ignoring child writes late.marker after return. Trace injects exceptions into actual H; real child/group and marker, no product edits. Reviewer explicitly kills/reaps its surviving root afterward.",
+        "artifact": "/tmp/wp1463-review-d6f2e141/cleanup-probe.log"
+      },
+      "suggested_fix": {
+        "where": "chay_quan_sat, particularly the transition from except BaseException to cleanup deadline setup and the cleanup retry loop; the process handle remains owned here.",
+        "how": "Protect cleanup initialization and retries as one owned-process cleanup transaction, for example by deferring interrupts through the transition and preserving the first exception. Maintain one absolute deadline and keep the root identity pinned until cleanup finishes. Do not signal an already-reaped numeric PGID.",
+        "locking_test": "Inject the first interrupt after a real child has started, then a second at cleanup entry before don_nhom. Verify no delayed marker from a same-group TERM-ignoring child, bounded completion, the original exception, and an unrelated live control. A mutant moving cleanup initialization outside the protected region must fail this case. Sweep all transition points, not just the first /proc scan.",
+        "new_risks": "Retries can reset or exceed the deadline, swallow the original exception, or signal after the PID pin is lost. SIGTERM/SIGKILL and descendants that escape the owned group remain separate accepted/out-of-scope limits."
+      },
+      "additional_evidence": {
+        "name": "second real SIGINT transition probe",
+        "status": "failed",
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review-d6f2e141/cleanup_signal_probe.py",
+        "exit_code": 0,
+        "evidence": "No second signal: original exception preserved, no marker, 0.179s. Second real SIGINT at line399 or400: late marker true, original exception lost, 0.058/0.042s. Line402 protected control: original exception preserved, no marker, 0.171s. Unrelated process alive in all four trials.",
+        "artifact": "/tmp/wp1463-review-d6f2e141/cleanup-signal-probe.log"
+      }
+    }
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_note": "Independent cross-family review executed, but no approval is granted. review_deferred is the available non-approval enum, not a statement that no review occurred; no human audit or required-check authority claimed.",
+  "evidence_url": null,
+  "prior_findings_check": [
+    {
+      "id": "PR2-C01",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": "tu-kiem rc 0: rc42 injected separately at base/day_du, H/day_du, H/nhe each yields DO with 9/9 semantic checks; saved registry rc42 rejected; rc0 controls DAT. tu-kiem --dot-bien kills all three matching rc-check mutants and saved-rc mutant in their designated cases. Independent scratch saved rc42 tests reject both H/nhe and H/day_du."
+    },
+    {
+      "id": "PR2-C02",
+      "class_slug": "b4-predicate-mutation-proof",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": "c82 and T47/T48 independently executed: both mutants GIET, DO:c82 vector 29 expected infrastructure_error got hoan_tat. Code uses valid JSON whitespace padding to exactly 65536/65537 bytes; within-limit control passes."
+    },
+    {
+      "id": "PR2-C03",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "status": "VÁ HỜ",
+      "evidence": "Normal timeout lock and reviewer real-process timeout control pass without late writes; inherited class remains open at PR2-C08."
+    },
+    {
+      "id": "PR2-C04",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "status": "CHƯA VÁ",
+      "accepted_residual": true,
+      "authority": "SPEC R15-4 / NO-PR2-VUNG-CAP-HDH",
+      "evidence": "155/155 zone checks include renamed-copy rejection and hooked renamed out-of-zone control; regex unchanged. Accepted narrowed scope, not a repaired class."
+    },
+    {
+      "id": "PR2-C05",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "status": "VÁ HỜ",
+      "evidence": "14/14 runner locks pass, including interrupted exited root, TERM-ignoring grandchild, second interruption inside don_nhom, normal return, DON KHONG HET, and lost pin. Reviewer transition probe still leaks at line 399 (PR2-C08). All 12 runner mutants killed in their designated cases; real second-SIGINT probe independently reproduces the transition gap at lines399/400, with line402 protected control.",
+      "accepted_residual": {
+        "part": "setsid/setpgid escape",
+        "authority": "SPEC R16-3 / NO-PR2-QUAN-SAT-CAY-HDH",
+        "status": "CHƯA VÁ — owner accepted, not a finding",
+        "evidence": "Own tu-kiem run prints GIOI_HAN_QUAN_SAT and records dau_chau_tach after cleanup; code/output/KET_QUA agree."
+      }
+    },
+    {
+      "id": "PR2-C06",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "status": "VÁ HỜ",
+      "evidence": "Original absolute/relative symlink, cwd=, parent chdir and PATH cases pass in all three operations (155/155). Actual launch-context cause remains open: reviewer reproduced preexec and posix_spawnp undercounting; PR2-C07. Reader-cwd-resolution mutant dies exactly at that_lk_chdir_I_bo_day_du; ignoring cwd= dies at that_lk_cwd_I_phan_chung_nguyen; dropping PATH dies at that_lk_path_I_phan_chung_go_bon_khoa."
+    }
+  ],
+  "prior_class_status": {
+    "source_sha": "9333dd968340446a88a5ac195a02a4fe5341b3c8",
+    "inherited_classes": 4,
+    "verified_fixed_classes": 2,
+    "remaining_defect_classes": 2,
+    "accepted_residual_classes": 2,
+    "new_classes": 0,
+    "new_finding_ids": [
+      "PR2-C07",
+      "PR2-C08"
+    ],
+    "note": "2/4 inherited classes closed. Accepted residuals are not repairs; zone and cleanup retain distinct in-scope defects.",
+    "open_finding_count": 2,
+    "open_manifestation_count": 4
+  },
+  "class_table": [
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-C01"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "closure_test": "All three rc42 injections, saved registry rc check and controls.",
+      "source_rounds": "code round1 d0e08eba69d93fa69d0ad948177c1466e2094fd8; round2 9333dd968340446a88a5ac195a02a4fe5341b3c8"
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "PR2-C02"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "closure_test": "Valid 65536 accepted; valid 65537 rejected; T47/T48 killed by vector29.",
+      "source_rounds": "code round1 d0e08eba69d93fa69d0ad948177c1466e2094fd8; round2 9333dd968340446a88a5ac195a02a4fe5341b3c8"
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-C04",
+        "PR2-C06",
+        "PR2-C07"
+      ],
+      "status": "open with separately accepted residual",
+      "highest_open_severity": "P2",
+      "source_rounds": "spec S13; code rounds 1/2/3",
+      "common_fix": "Actual launch identity/coverage or fail closed, keeping accepted copied-interpreter residual distinct.",
+      "closure_test": "Three-operation preexec/spawnp matrix and multiprocessing unhooked standard-interpreter probe."
+    },
+    {
+      "class_slug": "observation-timeout-leaves-process-running",
+      "finding_ids": [
+        "PR2-C03",
+        "PR2-C05",
+        "PR2-C08"
+      ],
+      "status": "open with separately accepted residual",
+      "highest_open_severity": "P2",
+      "source_rounds": "code rounds 1/2/3",
+      "common_fix": "Protect the whole owned-process cleanup transaction and retain original exception and stable identity.",
+      "closure_test": "Repeated-interrupt transition sweep, no late writes, unrelated control alive, bounded cleanup."
+    }
+  ],
+  "hunt_table": [
+    {
+      "hypothesis": "rc after positive output",
+      "command": "do_pr2.py tu-kiem",
+      "real_output": "rc42 at each of three boundaries -> DO, 9/9 semantics retained; saved registry rc42 -> 1",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "valid JSON byte boundary",
+      "command": "target_mutants.py",
+      "real_output": "T47/T48 GIET at DO:c82 vector 29",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "relative/absolute symlink and env PATH control",
+      "command": "launch_probe.py; do_pr2.py tu-kiem",
+      "real_output": "standard controls KHONG_DO_DUOC; hooked controls NGOAI_VUNG; existing 155/155",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "posix_spawnp cwd decoy and preexec chdir",
+      "command": "launch_probe.py",
+      "real_output": "6 unhooked targeted trials SACH with read_confirmed true; 6 hooked controls NGOAI_VUNG",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "multiprocessing audit coverage",
+      "command": "mp_probe.py",
+      "real_output": "spawn SACH, confirmed read, zero child/start counts; forkserver PermissionError before child starts",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "forkserver behavior in actual environment",
+      "command": "mp_probe.py",
+      "real_output": "socket bind PermissionError; rc1; no confirmed read",
+      "result": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "second interrupt at cleanup transition",
+      "command": "cleanup_probe.py",
+      "real_output": "second interrupt escapes, same-group delayed marker true",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "normal timeout / interrupted group / lost pin",
+      "command": "do_pr2.py tu-kiem; cleanup_probe.py",
+      "real_output": "14/14 locks; normal timeout and ordinary-error controls no late writes",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "mutation target and false-credit check",
+      "command": "target_mutants.py; target_full_output.py",
+      "real_output": "50/50 GIET; requested T8/T18/T19 and T47/T48 correct causal diagnostic",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "registry modes and frozen data",
+      "command": "registry --tu; git diff 9333dd9 HEAD -- two test files",
+      "real_output": "DAT four expected combinations; two test files byte-identical to previous H",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "accepted residual wording",
+      "command": "read SPEC R15-4/R16-3, source, KET_QUA; tu-kiem",
+      "real_output": "renamed-copy and escaped-group limitations consistently declared, no repaired-class claim for those parts",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "scope, size, secret markers, commit bypass markers",
+      "command": "git diff/log and restricted pattern scan of added lines",
+      "real_output": "4 files +1905/-78 within 6/2100; zero credential-pattern hits; zero literal skip markers",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Light-mode flag must not omit mutation checks for a touching diff",
+      "command": "target_mutants.py D1–D12; light mode; ci_dang_ky_test.py",
+      "real_output": "D1–D12 GIET at c85/c80;30-row oracle includes every frozen zone member, omitted/unknown diff full; env_theo_che_do full removes inherited light flag; registry suite1677/1677",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Cleanup mutant false credit hides wrong failure cause",
+      "command": "do_pr2.py tu-kiem --dot-bien",
+      "real_output": "No-cleanup leaves both marks; root-only leaves grandchild mark; no-interrupt-cleanup leaves two marks; no-KILL and no-second-interrupt-retry leave TERM-ignoring child mark; normal-return mutant leaves closed-pipe child mark; DON KHONG HET and lost-pin mutants alter their designated result. All targeted cases, no unrelated exception.",
+      "result": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "4 files +1905/-78; cap6/2100",
+      "measurement": "git diff --numstat baseline H",
+      "result": "confirmed"
+    },
+    {
+      "claim": "H differs from tested e437436 only in KET_QUA.md",
+      "measurement": "git diff --name-only e437436 HEAD; hashes of all three Python files",
+      "result": "confirmed bytes; exact-H historic execution not claimed"
+    },
+    {
+      "claim": "ab DAT9/9; rc0/0/0; base77/77+485/485; H86/86+524/524",
+      "measurement": "compare_saved.py recomputes nine predicates on actual saved artifacts, loads exact base/H catalogs, reads saved rc files",
+      "result": "artifact replay confirmed; full producer runs not independently repeated"
+    },
+    {
+      "claim": "registry --tu DAT",
+      "measurement": "actual command on saved artifacts",
+      "result": "confirmed rc0; expected 4/4 combinations"
+    },
+    {
+      "claim": "tu-kiem 26/26 +155/155 +14/14",
+      "measurement": "actual command on H",
+      "result": "confirmed rc0"
+    },
+    {
+      "claim": "Ruff 0.15.15 F delta0",
+      "measurement": "version probe and lint exact base/H changed Python bytes without cache",
+      "result": "confirmed all0"
+    },
+    {
+      "claim": "vung SACH, 610/610, both probes79/91, rows30/30",
+      "measurement": "KET_QUA and supplied artifacts inspected; independent targeted probes",
+      "result": "full-run counts not independently reproduced; SACH guarantee contradicted by PR2-C07"
+    },
+    {
+      "claim": "tu-kiem --dot-bien 46/46 (15+19+12)",
+      "measurement": "actual H command, rc0; inspected designated-case diagnostics",
+      "result": "confirmed; supplied tests still miss new PR2-C07/C08 inputs"
+    },
+    {
+      "claim": "H light86/86,524 entries omitted,2 self-checks",
+      "measurement": "actual H light command rc0",
+      "result": "confirmed with positive final four lines"
+    },
+    {
+      "claim": "ci_dang_ky_test1677/1677",
+      "measurement": "actual H command rc0",
+      "result": "confirmed; RUFF CI3/3 pin/probe contract also observed"
+    },
+    {
+      "claim": "T1–T48 and D1–D12 remain killed",
+      "measurement": "actual catalogs contain38 T entries (intentional numbering gaps) and12 D entries; all50 executed; six truncated messages re-captured untruncated",
+      "result": "50/50 GIET with intended DO:case; T8/T18/T19 DO:c66, T47/T48 DO:c82 vector29"
+    },
+    {
+      "claim": "584.5s base full,616.1s H full,147.3s H light;4 CPU/4 workers",
+      "measurement": "executor ab.log/KET_QUA inspected; independent CPU4 and light TIEN TRINH4 observed",
+      "result": "timings are saved executor measurements, not independently reproduced. Reviewer ran some independent checks concurrently, so no timing comparison claimed"
+    },
+    {
+      "claim": "renamed-copy and escaped-group owner-accepted residuals remain explicit",
+      "measurement": "SPEC R15-4/R16-3 vs source/output/KET_QUA and real supplied locks",
+      "result": "consistent for those residuals; not recorded as repairs. Extra preexec/multiprocessing exclusions are outside approved residual wording."
+    }
+  ],
+  "interpretations": [
+    {
+      "number": 1,
+      "assessment": "accepted",
+      "reason": "Both absolute/relative launch forms and relative symlink target are covered by existing locks."
+    },
+    {
+      "number": 2,
+      "assessment": "accepted",
+      "reason": "subprocess env PATH override resolves correctly in independent probes."
+    },
+    {
+      "number": 3,
+      "assessment": "rejected",
+      "reason": "Trying cwd before PATH is not equivalent to posix_spawnp: unrelated cwd executable hides actual Python target (PR2-C07)."
+    },
+    {
+      "number": 4,
+      "assessment": "accepted within measured scope",
+      "reason": "exe and argv[0] share resolution; regex unchanged. No full proof for arbitrary concurrent path changes."
+    },
+    {
+      "number": 5,
+      "assessment": "partially verified",
+      "reason": "WNOWAIT keeps root unreaped through normal cleanup; lost-pin lock returns not measured and sends no signal. Concurrent external reaping not exhaustively measured."
+    },
+    {
+      "number": 6,
+      "assessment": "accepted",
+      "reason": "Normal return may clean same-group stragglers; successful cleanup need not itself make result unmeasurable. Existing normal-return lock passes."
+    },
+    {
+      "number": 7,
+      "assessment": "rejected as universal claim",
+      "reason": "Second interrupt inside don_nhom is handled, but cleanup entry is unprotected (PR2-C08)."
+    },
+    {
+      "number": 8,
+      "assessment": "accepted scope interpretation",
+      "reason": "R16-2 explicitly names chay_quan_sat and tu-kiem runner, not chay_bo used by ab/registry. The disclosed ab orphan behavior is out of this repair obligation and is not a new finding."
+    },
+    {
+      "number": 9,
+      "assessment": "accepted",
+      "reason": "SIGINT handler raising KeyboardInterrupt is faithful; actual subprocesses and late markers exercise the intended lock. It does not cover all interrupt sites."
+    }
+  ],
+  "environment": {
+    "os": "Linux x86_64, glibc2.39",
+    "python": "3.13.18",
+    "git": "2.43.0",
+    "ruff": "0.15.15",
+    "sandbox": "workspace-write tool sandbox; reviewer obeys read-only repo assignment, scratch under /tmp",
+    "tmp_git": "/tmp/.git exists, empty leftover directory, preserved; known unrelated launcher_test contamination; launcher_test not run",
+    "limitations": [
+      "forkserver socket bind denied; not counted as a successful behavioral probe",
+      "No Windows/remote CI/LIVE",
+      "No independent full provenance or full vung rerun",
+      "Concurrent tests used for behavior, so no wall-time comparison with executor"
+    ],
+    "cpu_count": 4,
+    "observation_limit": "Only supplied clone and named scratch evidence observed; no hidden executor source tree was inspected. No claim about unobserved transient writes."
+  },
+  "notes": [
+    "Round3/3, last source-review budget. Two recurring cause classes remain open: route to owner rescue checkpoint/split decision per lease; no automatic further executor/review attempt.",
+    "No repository edits, commit, push, GitHub writes, workflow dispatch, or cleanup of pre-existing /tmp/.git.",
+    "Executor honestly discloses extra gaps, but disclosures cannot narrow the frozen spec. No allegation of hidden evidence.",
+    "Snapshot equality can establish no observed delta, not absence of transient writes throughout execution.",
+    "First complete verdict saved before15-minute deadline; this final revision incorporates completed supplemental checks.",
+    "No serving-model attestation beyond provider-family identity is available in current run metadata. Requested gpt-6-astra/xhigh is not represented as measured model identity.",
+    "Whole H reviewed against immutable baseline; both previously modified test files are byte-identical to9333dd9. H differs from tested e437436 only in KET_QUA.md, so historic evidence is explicitly artifact replay rather than exact-H execution.",
+    "Known /tmp/.git contamination retained. No launcher_test run was used to claim a regression.",
+    "Empty read-only .codex directory observed at end; no files in it, no removal attempted. Initial status did not use ignored=matching, so no assertion of identical empty-directory inventories."
+  ],
+  "updated_at_utc": "2026-11-26T11:11:24.818082+00:00",
+  "first_complete_verdict_at_utc": "2026-11-26T11:07:19.667635+00:00",
+  "review_complete": true,
+  "r16_mutant_evidence": [
+    "DB_VUNG hop_tap_luot_du_vao_quan_sat_rong_cua_probe: BAT · thuan_tap_rong_phan_chung_nguyen: mong ('KHONG_DO_DUOC', ('SACH', 'KHONG_DO_DUOC', 'SACH')) duoc ('SACH', ('SACH', 'SACH', 'SACH'))",
+    "DB_VUNG la_python_giai_lai_theo_cwd_bo_doc: BAT · that_lk_chdir_I_bo_day_du: mong ('KHONG_DO_DUOC', ('KHONG_DO_DUOC', 'SACH', 'SACH')) duoc ('SACH', ('SACH', 'SACH', 'SACH'))",
+    "DB_VUNG hook_bo_qua_cwd_rieng_cua_loi_goi: BAT · that_lk_cwd_I_phan_chung_nguyen: mong ('KHONG_DO_DUOC', ('SACH', 'KHONG_DO_DUOC', 'SACH')) duoc ('SACH', ('SACH', 'SACH', 'SACH'))",
+    "DB_VUNG hook_khong_do_PATH_cua_loi_goi: BAT · that_lk_path_I_phan_chung_go_bon_khoa: mong ('KHONG_DO_DUOC', ('SACH', 'SACH', 'KHONG_DO_DUOC')) duoc ('SACH', ('SACH', 'SACH', 'SACH'))",
+    "DB_CHAY quan_sat_bo_buoc_don: BAT · quan_sat_qua_han_con_va_chau_khong_de_dau: mong (None, ('TimeoutExpired',), ['DA_CHAY chau', 'DA_CHAY con'], [], True) duoc (None, ('TimeoutExpired',), ['DA_CHAY chau', 'DA_CHAY con'], ['dau_chau', 'dau_con'], True)",
+    "DB_CHAY quan_sat_chi_ket_thuc_con_khong_ket_thuc_nhom: BAT · quan_sat_qua_han_con_va_chau_khong_de_dau: mong (None, ('TimeoutExpired',), ['DA_CHAY chau', 'DA_CHAY con'], [], True) duoc (None, ('TimeoutExpired',), ['DA_CHAY chau', 'DA_CHAY con'], ['dau_chau'], True)",
+    "DB_CHAY quan_sat_bo_don_o_duong_ngat: BAT · quan_sat_ngat_goc_da_thoat_chau_bo_qua_TERM_khong_de_dau: mong ('KeyboardInterrupt', ('trong tran',), [], [], True) duoc ('KeyboardInterrupt', ('trong tran',), [], ['dau_chau_li', 'dau_chau_ngat'], True)",
+    "DB_CHAY quan_sat_bo_buoc_KILL: BAT · quan_sat_ngat_goc_da_thoat_chau_bo_qua_TERM_khong_de_dau: mong ('KeyboardInterrupt', ('trong tran',), [], [], True) duoc ('KeyboardInterrupt', ('trong tran',), [], ['dau_chau_li'], True)",
+    "DB_CHAY quan_sat_bo_don_tiep_khi_bi_ngat_lan_nua: BAT · quan_sat_ngat_lan_nua_giua_luc_don_van_don_het: mong ('KeyboardInterrupt', ('trong tran',), [], [], True) duoc ('KeyboardInterrupt', ('trong tran',), [], ['dau_chau_li'], True)",
+    "DB_CHAY quan_sat_bo_don_o_duong_tra_binh_thuong: BAT · quan_sat_tra_binh_thuong_chau_cung_nhom_da_dong_ong_khong_de_dau: mong (0, (), ['DA_CHAY goc_thoat'], [], True) duoc (None, (), ['DA_CHAY goc_thoat'], ['dau_chau_dong'], True)",
+    "DB_CHAY quan_sat_bo_nhanh_DON_KHONG_HET: BAT · quan_sat_khong_xac_nhan_duoc_nhom_da_het_la_khong_do_duoc: mong (None, ('DON KHONG HET',), ['DA_CHAY chau', 'DA_CHAY con'], ['dau_chau', 'dau_con'], True) duoc (0, (), ['DA_CHAY chau', 'DA_CHAY con'], ['dau_chau', 'dau_con'], True)",
+    "DB_CHAY quan_sat_ban_tin_hieu_khi_mat_ghim: BAT · quan_sat_mat_ghim_khong_ban_tin_hieu_va_khong_do_duoc: mong (None, ('DON KHONG HET',), ['DA_CHAY goc_thoat'], ['dau_chau_dong'], True) duoc (0, (), ['DA_CHAY goc_thoat'], [], True)"
+  ],
+  "artifacts_manifest": "/tmp/wp1463-review-d6f2e141/artifacts.json",
+  "artifacts_manifest_sha256": "e8cacc911ee5cd8ef80fb4c7a8e461c88e6fa905b41458da76f3d375a05dab4d"
+}

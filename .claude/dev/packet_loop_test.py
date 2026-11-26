@@ -9607,7 +9607,7 @@ def _d2b_cay(w, m):
     (w / "ops/land/an-provenance").mkdir(), (w / "ops/land/an-provenance/an.yaml").write_bytes(prov)  # trên cây thật: hai provenance khớp ⇒ `provenance_nhieu`
     for ten, co_yaml, rb, sym, dich in (("trong", 0, {"m": "1" * 40}, None, None), ("a!~z", 1, {"m": m}, None, None), ("lk2", 0, {"m": m, "author_association": "MEMBER"}, "p.yaml", "prov.txt"),
                                         ("an", 1, None, None, None), ("crlf", 1, {"m": m}, None, None), ("hoa", 1, None, None, None), ("tm", 1, None, None, None), ("nen", 1, None, None, None),
-                                        ("lk3", 1, {"m": m}, "p.yaml", "ci.yaml"), ("lk4", 1, None, "d", "sub"), ("lk5", 1, None, "danh-gia-gate-output-1.txt", _D2B_F), ("lk6", 1, None, "len", "../../.."), ("lk7", 1, None, "e", "sub/danh-gia-gate-output-3.txt")):
+                                        ("lk3", 1, {"m": m}, "p.yaml", "ci.yaml"), ("lk4", 1, None, "d", "sub"), ("lk5", 1, None, "danh-gia-gate-output-1.txt", _D2B_F), ("lk6", 1, None, "len", "../../.."), ("lk7", 1, None, "e", "sub/danh-gia-gate-output-3.txt"), *((k, 1, None, *v) for k, v in _D2B_TC.items())):
         thu = f"ops/land/{ten}-provenance"
         (w / thu / "sub/danh-gia-gate-output-3.txt").mkdir(parents=True, exist_ok=True), (w / thu / "sub/danh-gia-gate-output-3.txt/x").write_bytes(b"x")
         (w / thu / _D2B_F).write_bytes(tep), (w / thu / ("ci.yaml" if co_yaml else "prov.txt")).write_bytes(prov)
@@ -9615,7 +9615,7 @@ def _d2b_cay(w, m):
         lien.update({f"{thu}/{sym}": dich} if sym else {})
     (w / _D2B_L("nen", "x1")).mkdir(), (w / _D2B_L("nen", "x1/note.txt")).write_bytes(b"x"), (w / _D2B_L("nen", "x2")).mkdir(), _d2b_readback(w, m, _D2B_L("nen", "x2"))
     return {**lien, "ops/land/lk3-provenance/readback-lk-issuecomment-7.json": _D2B_RB, "ops/land/hoa-provenance/GHI.txt": b"x", "ops/land/hoa-provenance/ghi.txt": b"y",
-            _D2B_L("tm", "A/note.txt"): b"x", _D2B_L("tm", "a", _D2B_RB): (w / _D2B_L("nen", "x2", _D2B_RB)).read_bytes(), _D2B_L("tf", "B/x"): b"x", _D2B_L("tf", "b"): b"y", _D2B_L("lk7", "c"): "e"}
+            _D2B_L("tm", "A/note.txt"): b"x", _D2B_L("tm", "a", _D2B_RB): (w / _D2B_L("nen", "x2", _D2B_RB)).read_bytes(), _D2B_L("tf", "B/x"): b"x", _D2B_L("tf", "b"): b"y", _D2B_L("lk7", "c"): "e", _D2B_L("lkd", "t"): "ci.yaml", _D2B_L("lke", "\u00e9.txt"): b"x"}
 
 
 _NG = lambda **v: lambda bb, ls: bb["gate_output_nguon"].update(v)  # noqa: E731
@@ -9625,6 +9625,10 @@ _D2B_F, _D2B_PF, _D2B_L = _D2B_TEP.split("/")[-1], "ops/land/pr1453-wp433-proven
 _D2B_KHONG_SYM, _D2B_ND, _D2B_TRUNG = (_D2B_KDD + f"OSError('{x}')" for x in (  # ba luật, ba thông điệp: danh mục · nội dung · tên trùng khoá
     "bản bung git archive không khớp danh mục cây của oid", "bản bung git archive không khớp nội dung của oid", "cây của oid có hai tên trùng nhau sau NFC + casefold"))
 _D2B_N, _D2B_RB = lambda c, *d: c.joinpath("ops/land/nen-provenance", *d), "readback-wp-issuecomment-7.json"  # noqa: E731
+_D2B_TC = {  # symlink NGOÀI danh sách cho phép, mỗi thư mục một lớp tên: bí danh THƯ MỤC khác hoa/thường · bí danh TỆP khác hoa/thường · dấu `\` · đích hỏng ·
+    # đích ngoài thư mục provenance (có trong cây của O, không có trong bản bung) · trỏ symlink khác (`t` → `ci.yaml`) · bí danh NFD của tệp NFC
+    "lk8": ("hoa", "SUB"), "lk9": ("hoa", "CI.YAML"), "lka": ("cheo", "sub\\danh-gia-gate-output-3.txt\\x"), "lkb": ("hong", "khong-co"),
+    "lkc": ("ngoai", "../lk5-provenance/ci.yaml"), "lkd": ("c", "t"), "lke": ("nfc", "e\u0301.txt")}
 _D2B_NEN = {  # nền làm bản bung lệch cây theo cách khoá NFC + casefold KHÔNG đoán trước được (dấu chấm cuối, tên dành riêng, luồng phụ, bộ lọc viết lại đích)
     "gop": lambda c: (os.replace(_D2B_N(c, "x2", _D2B_RB), _D2B_N(c, "x1", _D2B_RB)), _D2B_N(c, "x2").rmdir(), os.symlink("x1", _D2B_N(c, "x2"), target_is_directory=True)),
     "thua": lambda c: _D2B_N(c, "thua").write_bytes(b"x"), "thieu": lambda c: _D2B_N(c, "x1/note.txt").unlink(),
@@ -9682,10 +9686,10 @@ _D2B_CA = {
         ("nen_gop_hai_thu_muc", _d2b_mien(readback_thu_muc=_D2B_L("nen", "x1")), 8, [_D2B_KHONG_SYM], None, {"git_loi": "gop"}),
         *[(f"nen_{k}_mot_muc", _NG(tep=_D2B_L("nen", _D2B_F)), 8, [_D2B_KHONG_SYM], None, {"git_loi": k}) for k in ("thua", "thieu")],
         ("nen_viet_lai_dich_symlink", _NG(tep=_D2B_L("lk5", _D2B_F)), 8, [_D2B_ND], None, {"git_loi": "dich", "sym": True}),
-        # Windows gắn loại cho symlink lúc tạo (`git_loi="tep"`: `os.walk` xếp symlink trỏ thư mục vào TỆP, module đợt A bỏ sót) ⇒ K2 tính trên CÂY. `lk6/len` trỏ gốc bản bung
+        # Windows gắn loại cho symlink lúc tạo (`git_loi="tep"`: `os.walk` xếp symlink trỏ thư mục vào TỆP, module đợt A bỏ sót) ⇒ chỉ đích là TỆP THƯỜNG của cây mới qua
         *[(f"nen_bung_symlink_thu_muc_thanh_tep[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), rc, ["kiem_tep:not_measured:symlink"] * (rc > 0), None, {"git_loi": "tep", "sym": True})
           for k, rc in (("lk4", 12), ("lk6", 12), ("lk7", 12), ("lk3", 12), ("lk5", 0))],  # `lk5`: symlink trỏ TỆP, K2 không xét (lượt trong tiến trình không bắt stdout)
-        *[(f"symlink_tro_thu_muc[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), 12, ["kiem_tep:not_measured:symlink"], None, {"sym": True}) for k in ("lk6", "lk7")], o=_d2b_cay),  # `lk7`: đích có `/` + chuỗi `c` → `e`
+        *[(f"symlink_tro_thu_muc[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), 12, ["kiem_tep:not_measured:symlink"], None, {"sym": True}) for k in ("lk6", "lk7", *_D2B_TC)], o=_d2b_cay),  # `lk6`: gốc bản bung · `lk7`: đích có `/` + chuỗi `c` → `e` · `_D2B_TC`: Linux không coi là thư mục, vẫn bị chặn
     "cong_d2b_c5_duong_dan": _d2b_ca(
         *_D2B_SAI(f"{_D2B_PROV}/../pr1440-wp1319-provenance/{_D2B_F}", f"{_D2B_PROV}/./{_D2B_F}", f"ops/khac/pr1440-wp1319-provenance/{_D2B_F}",
                   f"{_D2B_PROV}/danh-gia-gate-output-.txt", f"{_D2B_PROV}/danh-gia-gate-output-x.txt", f"{_D2B_PROV}/danh-gia-gate-output-١.txt",
@@ -9778,8 +9782,12 @@ MUTANTS.update({
     **{f"d2b_trung_khoa_{k}": _d2b_mut(".casefold() for t in muc}) != len(muc):", v, "c4_symlink") for k, v in (  # luật tên trùng khoá: chỉ lá · chỉ thư mục · chỉ cùng loại
         ("chi_xet_la", '.casefold() for t in muc if muc[t][0] != "d"}) != sum(k != "d" for k, _ in muc.values()):'),
         ("chi_xet_thu_muc", '.casefold() for t in muc if muc[t][0] == "d"}) != sum(k == "d" for k, _ in muc.values()):'), ("chi_cung_loai", ".casefold() + muc[t][0] for t in muc}) != len(muc):"))},
-    **{f"d2b_k2_{k}": _d2b_mut(tim, thay, "c4_symlink") for k, tim, thay in (  # K2 theo cây: tin đĩa · quên gốc bản bung · quên thư mục chứa symlink · coi mọi symlink là thư mục
-        ("tin_dia", "if thu_cay & tro else", "if False else"), ("bo_goc", '{"."} | {t for', "{t for"), ("dich_tho", "posixpath.dirname(t)", '""'), ("moi_symlink", "if thu_cay & tro else", "if tro else"))},
+    **{f"d2b_k2_{k}": _d2b_mut(tim, thay, "c4_symlink") for k, tim, thay in (  # danh sách cho phép của symlink: bỏ chốt · chặn hết · quên thư mục chứa link · rồi NỚI theo từng luật
+        ("tin_dia", "if tro - tep_cay else", "if False else"), ("moi_symlink", "if tro - tep_cay else", "if tro else"), ("dich_tho", "posixpath.dirname(t)", '""'),
+        ("cho_thu_muc", 'if k == "f"}', 'if k != "l"}'), ("cho_symlink", 'if k == "f"}', 'if k != "d"}'), ("cho_goc", 'if k == "f"}', 'if k == "f"} | {"."}'),
+        ("cho_ngoai_danh_muc", "if tro - tep_cay else", "if tro & set(muc) - tep_cay else"), ("cho_cheo_nguoc", "os.readlink(cay / t))) for t", 'os.readlink(cay / t).replace("\\\\", "/"))) for t'),
+        *[(f"cho_{k}", "if tro - tep_cay else", f"if {{{f}(x) for x in tro}} - {{{f}(x) for x in tep_cay}} else") for k, f in (("hoa_thuong", "str.casefold"), ("nfc", '(lambda x: unicodedata.normalize("NFC", x))'))])},
+    **{f"d2b_k2_cho_ten_{k}": _d2b_mut('if k == "f"}', f'if k == "f"}} | {{{__import__("posixpath").normpath(_D2B_L(k, v[1]))!r}}}', "c4_symlink") for k, v in _D2B_TC.items()},  # nới danh sách cho đúng MỘT tên tấn công
     "d2b_thong_diep_nhieu_dong": _d2b_mut('f"KHÔNG ĐO ĐƯỢC: D2b {ex!r}")', 'f"KHÔNG ĐO ĐƯỢC: D2b {type(ex).__name__}: {ex}")', "c7_module_nem"),
     "d2b_mC12_nhan_hai_cham": _d2b_mut(' or ".." in dd.split("/"):', ":", "c5_duong_dan"),
     "d2b_nhan_mot_cham": _d2b_mut(' or "." in dd.split("/") or', " or", "c5_duong_dan"),

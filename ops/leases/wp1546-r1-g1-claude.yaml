@@ -1,0 +1,75 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1546
+packet_id: wp1546
+revision: 1
+generation: 1
+lease_id: wp1546-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local-windows
+risk: sensitive
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1546.md
+spec_sha256_required: 375d55457ed8683a9805ae2c9f0c9bbfc2e938d88c727f999a57ab68715efffb
+spec_hash: 375d55457ed8683a9805ae2c9f0c9bbfc2e938d88c727f999a57ab68715efffb
+prompt_path: ops/specs/wp1546.md
+prompt_sha256_required: 375d55457ed8683a9805ae2c9f0c9bbfc2e938d88c727f999a57ab68715efffb
+write_set:
+- CHANGELOG.md
+- ops/cloud_agent_creds_test.py
+- ops/specs/wp1546.md
+write_set_hash: e349de327cad4b930619e3d6a87ff49c623de894bb05f97bcd3093a0146daeab
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+effective_write_set:
+- CHANGELOG.md
+- ops/cloud_agent_creds_test.py
+- ops/specs/wp1546.md
+effective_write_set_nguon: khai_bao_trong_spec
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2'}
+- {id: M-2, dieu_kien: 'gate-registry (windows-latest) va lane ubuntu XANH tren head cuoi, bang chung duong N/N'}
+- {id: M-3, dieu_kien: 'dot bien moi giet dung ca dich; ruff F delta 0'}
+uy_quyen_merge: false
+branch: agent/wp1546-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1a7c5244e96734e5aa0102ab878ba1f2c7070a53
+start_from_sha: 1a7c5244e96734e5aa0102ab878ba1f2c7070a53
+reviewed_sha_required: 1a7c5244e96734e5aa0102ab878ba1f2c7070a53
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1546#issuecomment-7186130206
+granted_on_instruction_readback: 'chu kho tra loi "Duyệt lease" trong chat phien Claude Code tren may chu kho (26-11-2026); ghi ho tren Issue #1546.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc.'
+leased_at_utc: '2026-11-26T08:05:00Z'
+heartbeat_at: '2026-11-26T08:05:00Z'
+lease_until: '2026-11-27T08:05:00Z'
+lease_expires_at_utc: '2026-11-27T08:05:00Z'
+run_minutes: 180
+heartbeat_minutes: 60
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp1546_g1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

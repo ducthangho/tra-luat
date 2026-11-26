@@ -67,8 +67,8 @@
   "recorded_by": "Claude Code packet-coordinator session session_015GtxrbKkGkGkWhVcDYsrsA for wp1463; not executor, not reviewer",
   "recorder_is_executor": false,
   "leased_at_utc": "2026-11-26T12:05:00Z",
-  "lease_until": "2026-11-27T17:00:00Z",
-  "lease_expires_at_utc": "2026-11-27T17:00:00Z",
+  "lease_until": "2026-11-26T15:50:00Z",
+  "lease_expires_at_utc": "2026-11-26T15:50:00Z",
   "heartbeat_required_minutes": 360,
   "heartbeat_at": null,
   "limits": {
@@ -108,5 +108,11 @@
   "start_from_note": "H lượt 4 (lease g4), cục bộ, chưa đẩy; base không đổi 1260fa0.",
   "start_from_tree": "f15aac5349a23c1c3a0943ab29ce91db7d1bf1ca",
   "limits_note": "executor 4/5 used (lượt 1 dừng §12, lượt 2 d0e08eb, lượt 3 9333dd9, lượt 4 02ebcea); Codex review mã 3/4 (blocked, changes_requested, changes_requested); connector 0/2; PR Ubuntu CI 0/3; K7 0/1; full_M9 0/1",
-  "executor_cli_note": "Chỉ thị chủ kho 26-11 qua điều phối Mission: executor chạy `claude -p` (không subagent), env -u các biến CLAUDE*/CLAUDECODE/CCR_*/ANTHROPIC_* + ANTHROPIC_API_KEY=$TL_ANTHROPIC_API_KEY; ghi đường đã dùng (api/subscription) vào handoff."
+  "executor_cli_note": "Chỉ thị chủ kho 26-11 qua điều phối Mission: executor chạy `claude -p` (không subagent), env -u các biến CLAUDE*/CLAUDECODE/CCR_*/ANTHROPIC_* + ANTHROPIC_API_KEY=$TL_ANTHROPIC_API_KEY; ghi đường đã dùng (api/subscription) vào handoff.",
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-27T17:00:00Z",
+    "han_moi_utc": "2026-11-26T15:50:00Z",
+    "chi_thi": "Chỉ thị điều phối Mission (phiên 015Gtxrb3cuZ7Nm935R8yA5W): sau merge rút hạn lease kèm thu_hoi_bang_rut_han, rồi ai-dang-giu sau hạn, M8, đóng Issue.",
+    "ly_do": "Packet #1463 PR2 đã MERGE: PR #1551, merge commit b1db69429d272cfde43681b4a9de1184c452c0f1 lúc 2026-11-26T15:30:37Z (merged_by ducthangho), H d84f45c1b4a346d6c9c17da0ba9579a7d0fcc7c5 (tree 22b64e981758e5c7fb2e5cbd4ecfcb8be31d53b0); kiem-merge rc 0 trên H. Không còn việc ghi nào trên write set."
+  }
 }

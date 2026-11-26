@@ -1,0 +1,34 @@
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+t = open(src, encoding="utf-8").read()
+def rep(old, new, n=1):
+    global t
+    c = t.count(old); assert c == n, (old[:100], c); t = t.replace(old, new)
+NO = "INV-KHOA-BAN-SAO-DINH-CHU"
+rep("# wp1466 r10 —", "# wp1466 r11 —")
+rep("\nrevision: 10\n", "\nrevision: 11\n")
+rep("r10 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 10*. Lịch sử lớp finding ở mục 19.",
+    "r10 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 10*. Revision 11 soạn ngày 26-11-2026, cùng người soạn, trên `origin/master` `695916ea3bfffdd7b2e8fcb94b0740b3c421fe70`, sau review đặc tả Codex lượt 10 trên r10 (`feb0b77`, verdict `changes_requested`: 1 P2, 1 P3); r11 chỉ sửa hai finding ấy (mục 0, đoạn *Revision 11*). Lịch sử lớp finding ở mục 19.")
+rep(f"nên cổng xanh với nó; đó là nợ `{NO}`, giao cho Issue #1469 theo quyết định chủ kho. Không ca nào của wp1466 được đòi đỏ ở các dạng ấy.",
+    f"nên phép (3) không phát hiện chúng; đó là nợ `{NO}`, giao cho Issue #1469 theo quyết định chủ kho. wp1466 không đòi cổng đỏ CHỈ vì có một bản sao như thế. Mọi điều kiện khác vẫn áp dụng đầy đủ trên cả tệp: phép (1) và (2) tại địa chỉ, chốt ID bất biến, chốt HTML, và trạng thái không đo được. Nên một tệp chứa bản sao như thế vẫn có thể đỏ vì lý do khác; ví dụ bản sao dính chữ của `K01` đặt dưới mục khác đỏ bởi chốt ID. Ca nào đòi đỏ vì một trong các điều kiện ấy vẫn hợp lệ.")
+rep("\nKích thước, đối chiếu `ADR-0053`",
+    "\nKhối `nang_tran` theo `ADR-0053` (đặc tả mang khối này; lease cấp cho mã giao nộp chép lại nguyên khối). Khối chỉ có hiệu lực khi ứng viên VƯỢT 450 dòng thêm; ứng viên trong 450 thì không dùng tới nó. Trước MỖI lần xin review và trước lần đẩy, executor và phiên điều phối đo `git diff --numstat 695916e <H>`, ghi số đo cùng SHA vào handoff và vào bản ghi review; vượt 500 dòng thêm hay quá 6 tệp ⇒ dừng.\n\n"
+    "```yaml\nnang_tran:\n"
+    "  ai_nang: ducthangho   # chủ kho, protocol §2; quyết định E2 \"Nâng trần lên 500 dòng (Recommended)\", ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201538748\n"
+    "  can_cu: >-\n"
+    "    Đóng lớp P3 `ca-id-chi-do-mot-gia-tri` của review mã exact-H lượt 1 bằng ca G8 cho ID thật và các biên cùng một đột\n"
+    "    biến thu hẹp miền số (mục 8.3, dòng G8). Đo 26-11-2026, nền `695916e`: H `da4e876` là 4 tệp, +443 −4, chỉ còn 7 dòng\n"
+    "    tới 450. Không tách được: ca và đột biến ấy kiểm chính chốt ID của cổng mà wp1466 thêm, và §1 của đặc tả đòi mọi P3\n"
+    "    của packet phải đóng trong packet, không được miễn.\n"
+    "  tran_cu: \"ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tệp / <= 450 dòng thêm\"\n"
+    "  tran_moi: \"<= 6 tệp / <= 500 dòng thêm (write set của wp1466 vẫn đúng 4 tệp)\"\n"
+    "```\n\nKích thước, đối chiếu `ADR-0053`")
+rep("\n## 1. `packet_id`",
+    "\n**Revision 11, sau review đặc tả lượt 10.** Review Codex lượt 10 trên r10 (`feb0b77`) cho `changes_requested`, gồm hai lớp:\n\n"
+    f"1. `phep-dem-ban-sao-khong-phu-ca-tep` · P2. Câu giới hạn của r10 ở mục 8.3 suy từ \"phép (3) không đếm\" ra \"cổng xanh\", rồi cấm mọi ca đòi đỏ ở các dạng ấy. Câu này sai, vì chốt ID vẫn bắt bản sao dính chữ của `K01` (reviewer đo được rc 9). r11 viết lại câu: phép (3) không phát hiện các bản sao ấy; wp1466 không đòi đỏ chỉ vì chúng; mọi điều kiện khác vẫn áp dụng. Quyết định chuyển phần bản sao sang #1469 (nợ `{NO}`) và mã phép (3) giữ nguyên. Phần chuyển đi không được ghi là đã vá.\n"
+    "2. `thieu-khoi-nang-tran-kich-thuoc` · P3. Lớp này mới. r10 nâng trần lên 500 mà không có khối `nang_tran` bốn trường theo ADR-0053. r11 thêm khối ấy ở mục 10, kèm nghĩa vụ chép khối vào lease và đo numstat trước mỗi lần xin review.\n\n"
+    "r11 không đổi: khối `adr`, sáu khối protocol, bảy băm khoá, khối `do-pham-vi`, khối `so-dang-ky`, write set.\n\n## 1. `packet_id`")
+rep("Theo §12 lớp đầu đã lặp trong họ của nó, nên cách làm đổi theo quyết định chủ kho thay vì vá tiếp.",
+    "Theo §12 lớp đầu đã lặp trong họ của nó, nên cách làm đổi theo quyết định chủ kho thay vì vá tiếp.\n\n"
+    "**Lượt 10 (r10 `feb0b77`) và r11.** Verdict `changes_requested`: U=0, F=0, 1 lớp mới, 0 lớp tái mở. `phep-dem-ban-sao-khong-phu-ca-tep` · P2: câu giới hạn của r10 hứa quá (nói \"cổng xanh\" và cấm ca đỏ); r11 sửa câu, quyết định chuyển #1469 giữ nguyên. `thieu-khoi-nang-tran-kich-thuoc` · P3, mới: thêm khối `nang_tran` ở mục 10. Lớp đầu xuất hiện lần thứ hai sau quyết định Q3 (lượt mã 1, rồi lượt đặc tả 10), lần này chỉ ở câu chữ của chính phần chuyển nợ.")
+open(dst, "w", encoding="utf-8").write(t)

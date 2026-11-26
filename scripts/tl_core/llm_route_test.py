@@ -674,8 +674,11 @@ def ca_khoan_mat_so_co_diem_dat(m):
     nel = sach.replace("tài liệu.\nDữ", "tài liệu.\x85Dữ").replace("\nHồ", "\n\x85Hồ")
     bang(m.tach_khoan(nel) is None, f"NEL thanh ranh gioi dong: {m.tach_khoan(nel)}")
     bang(m.tach_khoan(sach.replace("Dữ liệu", "\u3164- Dữ liệu")) is None, "ky tu trong nhom chu che dau diem")
-    dep = "Điều 3.\nHồ sơ là tài\u00a0liệu “gốc” – bản chính (m²) § 1."
-    bang(m.tach_khoan(dep) == [(None, "Hồ sơ là tài\u00a0liệu “gốc” – bản chính (m²) § 1.")], f"dau in an bi chan oan: {m.tach_khoan(dep)}")
+    dep = "Điều 3.\nHồ sơ là tài\u00a0liệu “gốc” – bản chính (45°) § 1."
+    bang(m.tach_khoan(dep) == [(None, "Hồ sơ là tài\u00a0liệu “gốc” – bản chính (45°) § 1.")], f"dau in an bi chan oan: {m.tach_khoan(dep)}")
+    # r19 (lượt 18 U1): nhãn số mũ đầu dòng / nội dòng ở đường thô ⇒ chặn.
+    for x in (sach.replace("Dữ liệu", "². Dữ liệu"), sach.replace("thông tin.", "thông tin ² nữa.")):
+        bang(m.tach_khoan(x) is None, f"so mu tren duong tho phai bi chan: {x!r}")
     for c in ("\u200b", "\u00ad", "\u2060"):
         x = sach.replace("Dữ liệu", c + "- Dữ liệu")
         bang(m.tach_khoan(x) is None, f"R3: ky tu vo hinh {c!r} che dau diem tren nguon tho: {m.tach_khoan(x)}")
@@ -1403,12 +1406,12 @@ def ca_cau_truc_docx_dat(m):
     bang(cap24 == [(1, "Mục tiêu là đích cần đạt.")], f"khoan 'Muc tieu' bi chan oan: {cap24}")
     # r17 đối chứng: dấu in ấn trong danh sách cho phép, NBSP và mốc quyền sửa (`permStart`/`permEnd`, S3) giữa hai run vẫn đạt.
     _, cap31, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là tài\u00a0liệu “gốc” – bản </w:t></w:r>'
-                                                '<w:permStart w:id="5" w:edGrp="everyone"/><w:r><w:t>chính (m²) § 1.</w:t></w:r>'
+                                                '<w:permStart w:id="5" w:edGrp="everyone"/><w:r><w:t>chính (45°) § 1.</w:t></w:r>'
                                                 '<w:permEnd w:id="5"/>')))
-    bang(cap31 == [(1, "Hồ sơ là tài liệu “gốc” – bản chính (m²) § 1.")], f"dau in an / permStart bi chan oan: {cap31}")
-    # r18 T1 đối chứng: số mũ làm đơn vị trong thân và dẫn chiếu Điều giữa đoạn vẫn đạt.
-    _, cap32, _ = _doc_hop_le(m, lam_docx(H, p_docx("Diện tích là phần đất ² theo Điều ² của Luật này.", 1)))
-    bang(cap32 == [(1, "Diện tích là phần đất ² theo Điều ² của Luật này.")], f"so mu trong than bi chan oan: {cap32}")
+    bang(cap31 == [(1, "Hồ sơ là tài liệu “gốc” – bản chính (45°) § 1.")], f"dau in an / permStart bi chan oan: {cap31}")
+    # r19 U1 đối chứng: số thập phân sát dấu chấm trong thân vẫn đạt.
+    _, cap32, _ = _doc_hop_le(m, lam_docx(H, p_docx("Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.", 1)))
+    bang(cap32 == [(1, "Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.")], f"so thap phan bi chan oan: {cap32}")
     # r14 N2 đối chứng (A5): ID số QUÁ DÀI ở định nghĩa KHÔNG dùng không làm hỏng lần đọc (`int()` có trần độ dài chuỗi).
     dai = "9" * 5000
     ngoai3 = _NUMBERING_CHUAN.replace("</w:numbering>", f'<w:abstractNum w:abstractNumId="{dai}">{_lvl(0, "decimal", "%1.")}'
@@ -1566,9 +1569,9 @@ def ca_cau_truc_docx_chan(m):
     for t in ("\u3164Điều 4 Phạm vi", "Hồ sơ là\x85tài liệu.", "Hồ sơ là tài liệu\u3000.", "Hồ sơ là 資料."):
         chan(lam_docx(H, p_docx(t, 1)), f"ky tu ngoai danh sach cho phep: {t!r}")
     chan(lam_docx(p_docx("Điều 3.\x85"), A), "NEL o tieu de Dieu (bi gop truoc khi kiem)")
-    # r18 T1: số mũ ở vị trí cú pháp (số Điều, số thứ tự Chương, số gõ tay).
-    for t in ("Điều ² Phạm vi", "Chương ² Quy định chung"):
-        chan(lam_docx(H, p_docx("Hồ sơ là tài liệu theo:", 1), p_docx(t, 1, 1)), f"so mu o vi tri cu phap: {t!r}")
+    # r18 T1 → r19 U1: số mũ ở MỌI vị trí (cú pháp lẫn thân) ⇒ ngoài danh sách cho phép.
+    for t in ("Điều ² Phạm vi", "Chương ² Quy định chung", "1.² Hồ sơ", "Diện tích là phần đất m²."):
+        chan(lam_docx(H, p_docx("Hồ sơ là tài liệu theo:", 1), p_docx(t, 1, 1)), f"so mu: {t!r}")
     chan(lam_docx(H, p_docx("². Hồ sơ là tài liệu.", 1)), "so go tay bang so mu")
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)&#9;"))),
          "lvlText co tab")
@@ -1751,7 +1754,7 @@ DOT_BIEN = [
     ('wp1525_nhan_style_trong_dieu', ('    if any(d["so_tu_style"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_style_danh_so', ('    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)', '    nid, il = None, None'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_khong_danh_so', ('        raise ValueError(f"Dieu {dieu} khong co doan danh so tu dong', '        raise IndexError(f"Dieu {dieu} khong co doan danh so tu dong'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(_chieu_so(chu)):', '        if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_so_go_tay_nuot_thap_phan', ('|\\(?\\d+[^\\S\\n]*[.)](?!\\d))")', '|\\(?\\d+[^\\S\\n]*[.)])")'), 'ca_cau_truc_docx_dat'),
     # r16 (lượt 15 R1–R3): mỗi chốt một đột biến.
     ('wp1525_ngoac_kin_theo_thap_phan', ('r"^(?:\\(\\s*\\d+\\s*\\)|', 'r"^(?:'), 'ca_cau_truc_docx_chan'),
@@ -1760,9 +1763,8 @@ DOT_BIEN = [
     ('wp1525_cho_phep_moi_chu_cai', ('        if c not in _KY_TU_CHO_PHEP and not', '        if not c.isalpha() and c not in _KY_TU_CHO_PHEP and not'), 'ca_cau_truc_docx_chan'),
     ('wp1525_lvltext_khoang_trang_rong', ('[.)(\\-– ])*%[1-9](?:%[1-9]|[.)(\\-– ])*"', '[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*"'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bom_nhieu_lan', ('    return s[1:] if s.startswith("\\ufeff") else s', '    return s.lstrip("\\ufeff")'), 'ca_khoan_mat_so_co_diem_dat'),
-    # r18 (lượt 17 T1): miền chữ số của chốt cú pháp gồm số mũ.
-    ('wp1525_bo_chieu_so_mu', ('    return str(chu).translate(_SO_MU)', '    return str(chu)'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_go_tay_khong_chieu_so', ('        if _RE_SO_GO_TAY_DOCX.match(_chieu_so(chu)):', '        if _RE_SO_GO_TAY_DOCX.match(chu):'), 'ca_cau_truc_docx_chan'),
+    # r19 (lượt 18 U1): số mũ ngoài danh sách cho phép.
+    ('wp1525_nhan_so_mu', ('    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№")', '    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№¹²³")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_extract_strip_chung', ('    return out.split(dau, 1)[1].strip(" \\t\\r\\n"), p.stderr or ""', '    return out.split(dau, 1)[1].strip(), p.stderr or ""'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_kiem_ky_tu_khong_bo_bom', ('    return _ky_tu_la(_bo_mot_bom(van_ban), xuong_dong=True)', '    return _ky_tu_la(str(van_ban), xuong_dong=True)'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_tho_kiem_sau_tach_dong', ('    if _ky_tu_la(s, xuong_dong=True):', '    if any(_ky_tu_la(ln) for ln in s.splitlines()):'), 'ca_khoan_mat_so_co_diem_dat'),
@@ -1818,7 +1820,7 @@ DOT_BIEN = [
     ('wp1525_dieu_phan_biet_hoa', ('_RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\\s*\\d", re.IGNORECASE)', '_RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\\s*\\d")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dieu_doi_khoang_trang', ('r"^[ĐÐ]iều\\s*\\d"', 'r"^[ĐÐ]iều\\s+\\d"'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dieu_bo_eth', ('r"^[ĐÐ]iều\\s*\\d"', 'r"^Điều\\s*\\d"'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_dau_doan_giu_ky_hieu', ('"".join(c if c.isalnum() else " " for c in _chieu_so(chu))', '_chieu_so(chu)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_dau_doan_giu_ky_hieu', ('"".join(c if c.isalnum() else " " for c in chu)', 'chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ranh_gioi_lon_tho', ('_RE_RANH_GIOI_LON.match(_dau_doan(d["chu"]))', '_RE_RANH_GIOI_LON.match(d["chu"])'), 'ca_cau_truc_docx_chan'),
     ('wp1525_khoi_ten_cuc_bo', ('        ten = el.tag[len(_W):] if isinstance(el.tag, str) and el.tag.startswith(_W) else None', '        ten = el.tag.split("}")[-1]'), 'ca_cau_truc_docx_chan'),
     ('wp1525_phan_chinh_mac_dinh', ('        chinh = _phan_chinh(z, doc_gioi_han)', '        chinh = "word/document.xml"'), 'ca_cau_truc_docx_dat'),

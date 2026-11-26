@@ -401,7 +401,7 @@ biến môi trường của environment.
   chiếu `Điều 5 của Luật này;` — KHÔNG sửa câu chữ văn bản nguồn để lách chốt (nguyên văn phải đúng bản đã ban hành): Điều có
   điểm/khoản như vậy phải tách khái niệm thủ công), khối/wrapper ngoài namespace Word, chữ có ký tự NGOÀI danh
   sách cho phép — ASCII in được, chữ tiếng Việt dựng sẵn, chữ Latin-1, NBSP, tab và các dấu `“ ” ‘ ’ – — … « » § ° ± × ÷ ≤ ≥ € ₫ ‰
-  • · № ¹ ² ³` (ký tự vô hình, dấu tổ hợp tách rời, chữ Hán/Nga, ký hiệu toán khác… đều bị chặn; áp cả cho văn bản thô `--tep` /
+  • · №` (ký tự vô hình, dấu tổ hợp tách rời, số mũ như `m²`, chữ Hán/Nga, ký hiệu toán khác… đều bị chặn; áp cả cho văn bản thô `--tep` /
   `<số hiệu>`, kiểm trước khi tách dòng), số gõ tay dạng `(1)` dính thân, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
   `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
   không phải số nguyên, số thứ tự trên 999, định dạng số ngoài

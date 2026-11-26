@@ -140,3 +140,5 @@ revision_ly_do: 'Cross-review luot 17 (T1 P1, T2 P2). Chu kho cho tu nang tran v
 review_calls_limit: 18
 review_calls_used_truoc: 17
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r19-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 18 (U1-U2); revision r19 (ops/specs/llm-khoan-docx-r19.md), tran 19.'

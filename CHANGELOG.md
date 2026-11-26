@@ -48,6 +48,8 @@
 - r18 (sau cross-review lượt 17, đặc tả `ops/specs/llm-khoan-docx-r18.md`): số mũ `¹²³` tính là chữ số ở mọi chốt cú pháp; CLI
   `--tep` giải mã `utf-8` thường (một tầng gỡ BOM) và chặn ký tự ngoài danh sách TRƯỚC khi gọi model (rc 2); đường `<số hiệu>` chỉ
   bỏ phần bao của `tl extract`.
+- r19 (sau cross-review lượt 18, đặc tả `ops/specs/llm-khoan-docx-r19.md`): bỏ số mũ `¹²³` khỏi danh sách cho phép (mọi chữ số tới
+  chốt là ASCII); khai giới hạn đường `<số hiệu>`: ký tự bộ đọc `tl extract` đã xoá/thay trước khi lưu cache không tới được chốt.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

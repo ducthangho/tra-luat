@@ -553,7 +553,9 @@ def _dung_bang_cho_phep():
         for thanh in ("", "\u0300", "\u0301", "\u0303", "\u0309", "\u0323"):
             for c in (nguyen_am, nguyen_am.upper()):
                 ds.add(unicodedata.normalize("NFC", c + thanh))
-    ds |= set("đĐ\u00a0\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№¹²³")
+    # r19 (lượt 18 U1): KHÔNG nhận số mũ `¹²³` — mọi chữ số tới được chốt cú pháp đều là ASCII (r18 đổi số mũ về chữ số thường
+    # và làm lệch nhánh số gõ tay / số thập phân; đường thô thì chưa đổi). Cái giá đã khai: `m²`… bị chặn.
+    ds |= set("đĐ\u00a0\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№")
     return frozenset(c for c in ds if len(c) == 1)
 
 
@@ -579,20 +581,10 @@ def _ky_tu_la(chu, xuong_dong=False):
     return None
 
 
-# r18 (lượt 17 T1): MIỀN CHỮ SỐ của mọi chốt cú pháp = chữ số ASCII + chữ số mũ `¹²³` (ký tự chữ số DUY NHẤT khác trong
-# `_KY_TU_CHO_PHEP`); `\d` của regex không khớp số mũ ⇒ đổi số mũ về chữ số thường TRƯỚC khi dò (chỉ để dò; nguyên văn giữ số mũ).
-_SO_MU = str.maketrans("¹²³", "123")
-
-
-def _chieu_so(chu):
-    """r18 (lượt 17 T1): chữ để DÒ cú pháp số — số mũ thành chữ số thường."""
-    return str(chu).translate(_SO_MU)
-
-
 def _dau_doan(chu):
-    """r14 (lượt 13 N1) → r15 (lượt 14 Q1) → r18 (T1): bản chiếu để dò tiền tố cấu trúc — số mũ thành chữ số thường, chỉ chữ/số,
-    mọi ký tự khác thành một dấu cách."""
-    return " ".join("".join(c if c.isalnum() else " " for c in _chieu_so(chu)).split())
+    """r14 (lượt 13 N1) → r15 (lượt 14 Q1): bản chiếu để dò tiền tố cấu trúc — chỉ chữ/số, mọi ký tự khác thành một dấu cách.
+    r19 (lượt 18 U1): chữ số duy nhất trong danh sách cho phép là ASCII ⇒ không cần chiếu số."""
+    return " ".join("".join(c if c.isalnum() else " " for c in chu).split())
 
 
 def _mo_bang_dieu(chu):
@@ -1182,7 +1174,7 @@ def doc_dieu_docx(nguon, dieu):
                 raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")
             continue
         nid, il = d["so"]
-        if _RE_SO_GO_TAY_DOCX.match(_chieu_so(chu)):   # r18 (lượt 17 T1): số gõ tay viết bằng số mũ
+        if _RE_SO_GO_TAY_DOCX.match(chu):
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
             khoan.append([d["dem"][cap0], chu, chu])

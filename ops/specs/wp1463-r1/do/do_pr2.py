@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r11: `ab` · `registry` · `vung` · `tu-kiem [--dot-bien]`.
-
-  python3 -B ops/specs/wp1463-r1/do/do_pr2.py vung [--root KHO]           Nghiệm thu 4 (rc 0 SACH · 4 NGOAI_VUNG · 3 KHONG_DO_DUOC)
-  python3 -B ops/specs/wp1463-r1/do/do_pr2.py ab <SHA_BASE> [--root KHO]  Nghiệm thu 2 + 5 (hai clone dựng trong MỘT lệnh)
-  python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry [--root KHO]       Nghiệm thu 3
-  python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem [--dot-bien]        tự kiểm bộ so và phép đo vùng (không cần cây git)
-
-KHÔNG phải `*_test.py`, không đăng ký vào registry. Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp
-qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ đưa nó vào tập quan sát của probe).
-Giới hạn của `vung`, khai thẳng (SPEC r14 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell, lần đọc
-không phát sự kiện audit `open`, và Python con không hook bị che bởi dòng khởi động thừa đều KHÔNG bị quan sát.
+"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r14. KHÔNG phải `*_test.py`, không đăng ký vào registry. Chạy bằng `python3 -B`:
+  do_pr2.py vung [--root KHO] [--luu DIR]            Nghiệm thu 4 (rc 0 SACH · 4 NGOAI_VUNG · 3 KHONG_DO_DUOC)
+  do_pr2.py ab <SHA_BASE> [--root KHO] [--luu DIR]   Nghiệm thu 1, 2, 5 (hai clone dựng trong MỘT lệnh; chín phép của bộ so)
+  do_pr2.py registry [--root KHO] [--tu DIR]         Nghiệm thu 3 (`--tu` = thư mục `--luu` của `ab`, khỏi chạy lại bộ)
+  do_pr2.py tu-kiem [--dot-bien] [--root KHO]        tự kiểm bộ so và phép đo vùng (không cần cây git)
+Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ
+đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r14 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
+lần đọc không phát sự kiện audit `open`, và Python con không hook bị che bởi dòng khởi động thừa đều KHÔNG bị quan sát.
 """
 import ast
+import contextlib
 import hashlib
 import importlib.util
+import inspect
+import io
 import json
 import os
 import re
@@ -149,10 +149,7 @@ spec = importlib.util.spec_from_file_location("reg_do", os.path.join(root, ".cla
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 BON = ("NHE", "MAU_DAY_DU", "MAU_NHE", "VUNG_THEM")
-def dau_vet():
-    d = {t: K in getattr(m, t) for t in BON}
-    d["so_vung_them"] = len(m.VUNG_THEM.get(K, ()))
-    return d
+dau_vet = lambda: {**{t: K in getattr(m, t) for t in BON}, "so_vung_them": len(m.VUNG_THEM.get(K, ()))}
 kq = {"che_do": che_do, "truoc": dau_vet()}
 if che_do == "go_bon_khoa":
     for t in BON:
@@ -219,9 +216,7 @@ def doc_log(log, root, tracked, pid_goc):
 
 def kiem_vung(ten, tap):
     """Hàm THUẦN: ba điều kiện của MỘT phép trên tập quan sát CỦA CHÍNH phép ấy. Trả (dk1, dk2, tệp ngoài vùng)."""
-    dk1 = bool(tap)
-    dk2 = NHAN_CHUNG[ten] in tap
-    return dk1, dk2, sorted(x for x in tap if oracle({x}) != "day_du")
+    return bool(tap), NHAN_CHUNG[ten] in tap, sorted(x for x in tap if oracle({x}) != "day_du")
 
 def kiem_phep(o):
     """Một phép: (kết luận, lý do không đo được, tệp ngoài vùng). (1)–(3) chỉ xét khi tiến trình gốc rc 0, hook chạy ở
@@ -283,8 +278,7 @@ def lenh_phep(ten, root, tam):
     return [sys.executable, "-B", os.path.join(tam, "probe_vung.py"), root, CHE_DO_PROBE[ten], json.dumps([[n, d] for n, d, _e in BANG])]
 
 def chay_quan_sat(cmd, cwd, log, tam, timeout=7200):
-    env = dict(os.environ)
-    env.pop("CI_PROVENANCE_KHONG_DOT_BIEN", None)
+    env = {k: v for k, v in os.environ.items() if k != "CI_PROVENANCE_KHONG_DOT_BIEN"}
     env["PYTHONPATH"] = tam + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
     env.update(WP1463_VUNG_LOG=log, PYTHONDONTWRITEBYTECODE="1")
     open(log, "w").close()
@@ -371,7 +365,6 @@ def _n(x):   # neo của đột biến viết có dấu `¦` để KHÔNG tự x
 
 def xem(m):
     """Module test đã nạp → cái bộ so đọc: ba bảng, tên ca, kế hoạch đột biến của lượt đủ, `phan_hang` và mã nguồn của nó."""
-    import inspect
     return {"bang": {b: tuple(getattr(m, b)) for b in BA_BANG}, "ca": list(m.CA), "ph": m.phan_hang, "ph_src": inspect.getsource(m.phan_hang),
             "ke_hoach": [d[0] for b in ("DOT_BIEN", "DOT_BIEN_TEST", "DOT_BIEN_DK") for d in getattr(m, b, ())]}
 
@@ -466,7 +459,7 @@ def lenh_ab(root, sha_base, luu=None):
     with tempfile.TemporaryDirectory(prefix="wp1463-ab-") as tam:
         for ten, sha in (("base", sha_base), ("H", sha_h)):
             d = os.path.join(tam, ten)
-            for c in (["git", "clone", "-q", "--no-hardlinks", root, d], ["git", "-C", d, "checkout", "-q", sha], ["git", "-C", d, "config", "core.abbrev", "7"]):
+            for c in (["git", "clone", "-q", "--no-hardlinks", root, d], ["git", "-C", d, "-c", "advice.detachedHead=false", "checkout", "-q", sha], ["git", "-C", d, "config", "core.abbrev", "7"]):
                 if subprocess.run(c).returncode:
                     print(f"KET_LUAN_AB: KHONG_DO_DUOC (lenh hong: {' '.join(c)})")
                     return 3
@@ -494,8 +487,6 @@ def lenh_ab(root, sha_base, luu=None):
 
 def lenh_registry(root, tu=None):
     """Nghiệm thu 3: đầu ra THẬT của lượt nhẹ và lượt đủ trên H đi qua `chay_moi` THẬT của registry H với bộ chạy giả trả lại nó."""
-    import contextlib
-    import io
     ra = {}
     for che in ("nhe", "day_du"):
         if tu:
@@ -540,7 +531,6 @@ def _sua_kc(ra, f):   # đổi ĐÚNG khối KET_CUC_A3 của một đầu ra, m
 
 def dau_vao_so(bo):
     """[(tên đầu vào, đối số của `so_sanh`, TẬP phép phải sai)] — mỗi đầu vào là nền khoẻ đổi ĐÚNG trường nó nêu (SPEC Nghiệm thu 2)."""
-    import inspect
     src = inspect.getsource(bo.phan_hang)
     def view(db=None, dbt=None, tk=None, src=src):
         ns = {}
@@ -706,10 +696,8 @@ def tu_kiem_vung():
     return kq
 
 DOT_BIEN_VUNG = [
-    ("probe_dung_rieng_dung_nhan_chung_cua_bo", '"phan_chung_nguyen": ".github/workflows/ci.yml", ¦"phan_chung_go_bon_khoa": ".github/workflows/ci.yml"}',
-     '"phan_chung_nguyen": "ops/ci_provenance.py", "phan_chung_go_bon_khoa": "ops/ci_provenance.py"}', "thuan_khoe_tap_probe_da_do"),
-    ("hop_tap_luot_du_vao_quan_sat_rong_cua_probe", "kl, ly_do, ngoai = ¦kiem_phep(o)", 'kl, ly_do, ngoai = kiem_phep({**o, "tap": set().union(*[x.get("tap") or set() for x in obs])})',
-     "thuan_tap_rong_phan_chung_nguyen"),
+    ("probe_dung_rieng_dung_nhan_chung_cua_bo", '"phan_chung_nguyen": ".github/workflows/ci.yml", ¦"phan_chung_go_bon_khoa": ".github/workflows/ci.yml"}', '"phan_chung_nguyen": "ops/ci_provenance.py", "phan_chung_go_bon_khoa": "ops/ci_provenance.py"}', "thuan_khoe_tap_probe_da_do"),
+    ("hop_tap_luot_du_vao_quan_sat_rong_cua_probe", "kl, ly_do, ngoai = ¦kiem_phep(o)", 'kl, ly_do, ngoai = kiem_phep({**o, "tap": set().union(*[x.get("tap") or set() for x in obs])})', "thuan_tap_rong_phan_chung_nguyen"),
     ("bo_chot_song", 'dk1, dk2, ngoai = ¦kiem_vung(ten, o.get("tap") or set())', 'dk1, dk2, ngoai = True, True, kiem_vung(ten, o.get("tap") or set())[2]', "thuan_tap_rong_bo_day_du"),
     ("khong_lan_truyen_hook_sang_tien_trinh_con", '    sys.addaudithook(_hook)¦\n    _ghi("BAT_DAU"', '    sys.addaudithook(_hook)\n    os.environ.pop("PYTHONPATH", None)\n    _ghi("BAT_DAU"', "that_doc_con_bo_day_du"),
     ("giai_dir_fd_theo_cwd", 'os.path.join(¦os.readlink(f"/proc/self/fd/{dir_fd}"), os.fsdecode(path))', "os.path.join(os.getcwd(), os.fsdecode(path))", "that_doc_dirfd_bo_day_du"),
@@ -764,13 +752,9 @@ def lenh_tu_kiem(root, dot_bien):
     print(f"KET_LUAN_TU_KIEM: {'DAT' if ok else 'DO'}")
     return 0 if ok else 1
 
-def _goc_kho(argv):
-    if "--root" in argv:
-        return os.path.abspath(argv[argv.index("--root") + 1])
-    return os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), *[os.pardir] * 4))
-
 def main(argv):
-    lenh, root = (argv[1] if len(argv) > 1 else ""), _goc_kho(argv)
+    lenh = argv[1] if len(argv) > 1 else ""
+    root = os.path.abspath(argv[argv.index("--root") + 1] if "--root" in argv else os.path.join(os.path.dirname(os.path.abspath(__file__)), *[os.pardir] * 4))
     luu = argv[argv.index("--luu") + 1] if "--luu" in argv else None
     if lenh == "vung":
         return lenh_vung(root, luu)

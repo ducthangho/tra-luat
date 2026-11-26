@@ -1,0 +1,500 @@
+{
+  "reviewed_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+  "reviewed_tree": "9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb",
+  "base_sha": "a89c83acf998008caecba9084a7d295845bf1976",
+  "spec_sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "revision": 1,
+  "generation": 1,
+  "vong": 5,
+  "review_class": "sensitive",
+  "findings": [],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "status": "VA_MOT_PHAN",
+      "finding_ids": [
+        "B02",
+        "R1-01",
+        "R1-02",
+        "R2-01",
+        "R3-01",
+        "R3-02",
+        "R4-01",
+        "R4-02"
+      ],
+      "highest_open_severity": null,
+      "source_round": 4,
+      "source_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "common_fix": "Inventory theo nghĩa vụ SPEC, đặc biệt danh tính từng giá trị; chốt độc lập với cardinality và nguồn đang bị sửa.",
+      "closing_check": "Giết co-drift từng bộ và ASCII replacement bằng rc3 đúng ca; giữ toàn bộ lịch sử và bảng predicate, controls xanh.",
+      "disposition": "owner_waived",
+      "waived_finding_ids": [
+        "R4-01",
+        "R4-02"
+      ],
+      "note": "Trạng thái kỹ thuật giữ VA_MOT_PHAN; cả hai biểu hiện còn lại được miễn cho SHA này, không khai là đã vá."
+    },
+    {
+      "slug": "nghiem-thu-thoi-gian-chua-dat",
+      "status": "DA_VA_THAT",
+      "finding_ids": [
+        "R3-03"
+      ],
+      "highest_open_severity": null,
+      "source_round": 4,
+      "source_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "common_fix": "Đo tuần tự base/head xen thứ tự, không việc nặng khác của reviewer trong các mẫu; giảm chi phí mã mới bằng cache theo function.",
+      "closing_check": "A3/3 delta<=5s; B2/2 delta<=30s trên exactSHA; toàn bộ mẫu rc0 và công bố độ dao động.",
+      "disposition": "closed_by_prior_evidence_same_sha"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "status": "VA_MOT_PHAN",
+      "disposition": "owner_waived",
+      "source_round": 4,
+      "source_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "finding_status": [
+        {
+          "id": "R4-01",
+          "status": "CHUA_VA",
+          "disposition": "owner_waived"
+        },
+        {
+          "id": "R4-02",
+          "status": "CHUA_VA",
+          "disposition": "owner_waived"
+        }
+      ],
+      "evidence": {
+        "status": "owner_waived",
+        "reviewed_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+        "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+        "finding_ids": [
+          "R4-01",
+          "R4-02"
+        ],
+        "literal": "mien_p3: 97ec9686184fdf55dc1736007e6fdcb186122465 nghiem-thu-khong-co-lap-chot-dich",
+        "source": "https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7197313309",
+        "provenance": "Trích dẫn trong prompt.snapshot do điều phối cung cấp, ghi hộ lựa chọn chủ kho “Miễn 2 P3, đi tiếp (Recommended)”. Reviewer không gọi GitHub, không tự kiểm tác giả hoặc nội dung comment online. K5 kiem-merge phải đọc lại dòng miễn trên GitHub.",
+        "debt_ids": [
+          "BO-SINH-BAT-BIEN-R4-01-danh-tinh-mien-doi-so",
+          "BO-SINH-BAT-BIEN-R4-02-danh-tinh-128-ascii"
+        ]
+      },
+      "note": "Giữ nhãn kỹ thuật theo bốn giá trị validator §8.3; miễn là disposition riêng. Không còn P3 mở chặn review trên SHA này."
+    },
+    {
+      "slug": "nghiem-thu-thoi-gian-chua-dat",
+      "status": "DA_VA_THAT",
+      "source_round": 4,
+      "source_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "evidence": {
+        "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/VERDICT.json",
+        "samples": [
+          {
+            "kind": "A",
+            "sample": 1,
+            "base": 338.295256205,
+            "head": 337.75238767300004,
+            "delta": -0.5428685319999431,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "A",
+            "sample": 2,
+            "base": 349.0790733059998,
+            "head": 344.223832334,
+            "delta": -4.8552409719998195,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "A",
+            "sample": 3,
+            "base": 343.684070499,
+            "head": 339.95724753900004,
+            "delta": -3.726822959999936,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "B",
+            "sample": 1,
+            "base": 303.84519261399964,
+            "head": 311.4175911550001,
+            "delta": 7.572398541000439,
+            "limit": 30,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "B",
+            "sample": 2,
+            "base": 318.3058271740001,
+            "head": 319.01443564300007,
+            "delta": 0.7086084689999552,
+            "limit": 30,
+            "base_rc": 0,
+            "head_rc": 0
+          }
+        ],
+        "comparison": "prior-comparison.json: HEAD/tree trùng lượt 4; kế thừa năm cặp đã đạt (A 3/3, B 2/2). Không chạy lại benchmark ở lượt 5; suite lượt 5 chạy song song, không dùng thời gian để xét SPEC §4."
+      }
+    }
+  ],
+  "verdict": "approve",
+  "reviewer": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "model_family": "openai",
+    "run_id": "26c6424897ea45c89122d8d6514c2a93",
+    "session_id": "01a218a2-de9f-7042-a63d-5bca1ceb748c",
+    "cli": "0.172.0",
+    "declared_model": "gpt-6-astra",
+    "declared_effort": "high",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write",
+    "identity_sources": [
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/run/26c64248/run.json",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/run/26c64248/stderr.log"
+    ],
+    "note": "Executable codex.js và header đo được; header không chứng minh model/effort thực phục vụ từng request. Run chưa terminal khi viết verdict; điều phối phải ghi rc/hash stdout sau kết thúc."
+  },
+  "authority": {
+    "mode": "offline assignment + supplied excerpts",
+    "review_extension": "https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7197354187",
+    "calls": "5/5, thêm đúng một lượt xác nhận cùng SHA; không mở vòng sửa/quét sâu",
+    "waiver": {
+      "status": "owner_waived",
+      "reviewed_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "R4-01",
+        "R4-02"
+      ],
+      "literal": "mien_p3: 97ec9686184fdf55dc1736007e6fdcb186122465 nghiem-thu-khong-co-lap-chot-dich",
+      "source": "https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7197313309",
+      "provenance": "Trích dẫn trong prompt.snapshot do điều phối cung cấp, ghi hộ lựa chọn chủ kho “Miễn 2 P3, đi tiếp (Recommended)”. Reviewer không gọi GitHub, không tự kiểm tác giả hoặc nội dung comment online. K5 kiem-merge phải đọc lại dòng miễn trên GitHub.",
+      "debt_ids": [
+        "BO-SINH-BAT-BIEN-R4-01-danh-tinh-mien-doi-so",
+        "BO-SINH-BAT-BIEN-R4-02-danh-tinh-128-ascii"
+      ]
+    },
+    "lease_until": "2026-11-27T20:55:00Z",
+    "limits": "Không kiểm trạng thái lease/authority online; không tự nhận quyền merge/land."
+  },
+  "preflight": {
+    "head_tree_matches_round4": true,
+    "spec_git_blob": "a47f5bfb9648181f489a20d59c326caf300ab1ef",
+    "spec_source_oid": "d22fe11f9bf35517c70333c567481be460173eee",
+    "spec_path": "ops/specs/bo-sinh-bat-bien-r1.md",
+    "write_set": [
+      "ops/gate_output_doi_chieu_test.py",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "numstat": "+274 -9; 2 files; limit 320 additions",
+    "core_abbrev": 7,
+    "checkout": "detached HEAD",
+    "status": "tracked/untracked/index sạch; ignored .codex/ có sẵn và không đổi",
+    "evidence": [
+      "snapshot-before.json",
+      "snapshot-after.json",
+      "static-checks.json",
+      "prior-comparison.json"
+    ]
+  },
+  "checks": [
+    {
+      "name": "suite-B",
+      "command": [
+        "python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 305.216658675,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/suite-B.log",
+      "sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc",
+      "status": "passed",
+      "positive_evidence": [
+        "CA: 40/40 dat",
+        "DOT BIEN: 145/145 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "name": "suite-A",
+      "command": [
+        "python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 341.91473554399994,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/suite-A.log",
+      "sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179",
+      "status": "passed",
+      "positive_evidence": [
+        "CA: 53/53 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "name": "land",
+      "command": [
+        "python3",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 8.619592838000017,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/land.log",
+      "sha256": "33476900e203e5d9b36e21690ad12301a0c9e7b30909997160016073c77cdb6f",
+      "status": "passed"
+    },
+    {
+      "name": "ruff-head",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 0.09462101100001519,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-head.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "status": "passed"
+    },
+    {
+      "name": "ruff-base",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/base-lint/ops/land_evidence_nguon_test.py",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/base-lint/ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 0.043689567999990686,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-base.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "status": "passed"
+    },
+    {
+      "name": "ruff-version",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "rc": 0,
+      "seconds": 0.03227629900004558,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-version.log",
+      "sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+      "status": "passed"
+    }
+  ],
+  "compatibility_checks": [
+    {
+      "command": [
+        "python3.12",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat_probe.py",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work"
+      ],
+      "rc": 0,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat312.json",
+      "sha256": "98aafbbfa0b59cd267c1a046bb596266c3f9c197d5006dc57505e802d4918e11"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat_probe.py",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work"
+      ],
+      "rc": 0,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat313.json",
+      "sha256": "2340d242b574ddd6ae574c78023b9e57395aa8e3329b89bccf654a39f66a639e"
+    }
+  ],
+  "quick_class_scan": [
+    {
+      "risk": "Cache che chốt sản phẩm",
+      "result": "Không thấy P0–P2. _bo_sinh_nho giữ chính function+args; đổi hàm giả tách key. YAML cache chỉ bao safe_load/safe_dump của test, không bao nap_yaml/SafeLoader hay main→L8 của sản phẩm. Mỗi đầu vào c36 vẫn main→L8; compile cache key chứa byte nguồn. Scanner _mot tạo subprocess mới từng mutant.",
+      "evidence": [
+        "compat312.json",
+        "compat313.json",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/cache-review4.json",
+        "ops/land_evidence_nguon_test.py:838-901",
+        "ops/land_evidence_nguon.py:278-319",
+        "ops/reviews/wp1236-r10-soan/quet_dot_bien.py:263"
+      ]
+    },
+    {
+      "risk": "Phản chứng tự xanh trên mọi đầu vào",
+      "result": "Không thấy P0–P2. c39/c40/a136 đòi rc3 và đúng DO của ca đích cho âm, rc0 cho controls; c39 còn đòi 0 hoặc 648 ô. c38 giữ 24 biến thể. Trace lượt 4 cùng SHA: 68 âm đúng rc3/DO, 10 control đích xanh, 13 lượt A xanh, 0 rc4; không chạy lại quét đột biến sâu.",
+      "evidence": [
+        "suite-A.log",
+        "suite-B.log",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/trace-v2.json"
+      ]
+    },
+    {
+      "risk": "AST đọc nguồn trên CI/Windows",
+      "result": "Các lời gọi hiện tại là literal được ast.literal_eval hỗ trợ; đọc UTF-8 tường minh, LF/CRLF trả cùng năm bộ trên cả hai Python. Nguồn không đọc/parse được dẫn rc4/HONG, không false pass. Phép CRLF chạy Linux, không thay M3 Windows.",
+      "evidence": [
+        "compat312.json",
+        "compat313.json",
+        "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/ast-failure.json"
+      ]
+    },
+    {
+      "risk": "Python 3.12/3.13 và Unicode",
+      "result": "Đã đo cùng code bộ sinh/check/AST/cache: Python 3.12.3 Unicode15.0 và Python3.13.18 Unicode15.1 cho cùng codepoint/category tại cả năm bộ; miền 5, controls đạt, bộ sinh giả bị bắt sau warm cache. Không chạy full suite 3.12.",
+      "evidence": [
+        "compat-receipts.json",
+        "compat312.json",
+        "compat313.json"
+      ]
+    }
+  ],
+  "m3_windows": {
+    "classification": "required",
+    "basis": "ADR-0060 M3.2: added read_text(encoding=...)",
+    "status": "not_run",
+    "reported_by_dispatcher": {
+      "status": "reported_passed_not_independently_verified",
+      "sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+      "host": "DESKTOP-T9R33P2",
+      "source": "https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7196524386",
+      "B": "40/40 ca; 145/145 đột biến",
+      "A": "53/53 ca; 149/149 đột biến",
+      "land_evidence_nguon": "ĐẠT",
+      "ci_dang_ky_test": "1654/1654",
+      "selftest": "1788/1789 cả hai vế; cùng ca đỏ r380_llm_khai_niem_bien_dau_vao; delta 0"
+    },
+    "limits": "Giữ nguyên lời khai. Số A149 của trích dẫn khác số Linux trong log lượt này; reviewer không có raw Windows receipt để đối chiếu nên không chứng nhận M3/Windows green."
+  },
+  "pham_vi_e": {
+    "E1": "khong",
+    "E2": "khong",
+    "E3": "khong",
+    "E4": "khong",
+    "E5": "khong",
+    "basis": "Diff chỉ hai tệp test; không đổi điều kiện hồ sơ land của sản phẩm, lease/merge authority, secrets, LIVE.",
+    "coordination": "Gia hạn review lên 5/5 do chủ kho theo trích dẫn, không phải thay phạm vi E của diff."
+  },
+  "luat9": {
+    "status": "not_run",
+    "product_byte_identical": {
+      "ops/land_evidence_nguon.py": {
+        "equal": true,
+        "base_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+        "head_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c"
+      },
+      "ops/gate_output_doi_chieu.py": {
+        "equal": true,
+        "base_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38",
+        "head_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38"
+      }
+    },
+    "executor_report": "đang chạy, chưa có kết quả theo điều phối",
+    "acceptance": "Theo điều phối executor đang chạy, chưa có kết quả. Đòi đủ base/head cả A/B, scanner ghim, không GIET-base sang hạng khác ở head; giữ nợ SONG/VO_CAN riêng."
+  },
+  "not_run": [
+    {
+      "name": "Luật 9 SPEC §5.8 trên exact SHA",
+      "status": "not_run",
+      "reason": "Theo điều phối executor đang chạy, chưa có kết quả. Đòi đủ base/head cả A/B, scanner ghim, không GIET-base sang hạng khác ở head; giữ nợ SONG/VO_CAN riêng."
+    },
+    {
+      "name": "CI GitHub, gồm Windows CI",
+      "status": "not_run",
+      "reason": "Review offline không gọi mạng."
+    },
+    {
+      "name": "M9 ci-dot-bien-du.yml",
+      "status": "not_run",
+      "reason": "Diff ops/**/*.py; do điều phối cung cấp sau."
+    },
+    {
+      "name": "Connector review",
+      "status": "not_run",
+      "reason": "Không gọi GitHub/connector trong lượt này."
+    },
+    {
+      "name": "Audit uỷ quyền và readback authority/K5",
+      "status": "not_run",
+      "reason": "Không xác minh comment miễn, tác giả, receipt hoặc quyền merge trên GitHub."
+    },
+    {
+      "name": "M3 Windows local độc lập bởi reviewer",
+      "status": "not_run",
+      "reason": "Chỉ ghi nhận lời khai điều phối về Windows; không có phép đo Windows của reviewer."
+    },
+    {
+      "name": "ci_dang_ky_test, selftest, Ruff pin/probe contract và benchmark base/head lượt 5",
+      "status": "not_run",
+      "reason": "Lượt xác nhận chỉ chạy các lệnh được yêu cầu; bằng chứng lượt 4 giữ nguyên nhãn. Selftest lượt 4 failed cả base/head 1773/1789, delta ID đỏ 0; không suy N/N pass."
+    }
+  ],
+  "historical_checks": {
+    "source": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/VERDICT.json",
+    "same_sha": true,
+    "performance": "DA_VA_THAT: 5/5 cặp đúng trần; không tái đo",
+    "selftest": "failed: base/head 1773/1789, cùng ID đỏ, delta 0; không đổi thành passed",
+    "ci_dang_ky_test": "passed trong lượt 4, không tự chạy lại lượt 5",
+    "R3-01_R3-02": "DA_VA_THAT theo evidence lượt 4 cùng SHA; phần thiếu R4-01/R4-02 được miễn, không khai là vá."
+  },
+  "environment": {
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "platform": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "unicode": "15.1.0",
+    "ruff": "0.15.15",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "TMPDIR": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/tmp"
+  },
+  "limits": [
+    "Lời miễn P3, gia hạn 5/5 và Windows receipt là đầu vào điều phối, không tự xác minh tác giả comment; K5 phải đo lại miễn trên GitHub.",
+    "Review approve chỉ cho mã exact SHA, không chứng nhận đủ điều kiện merge, land hoặc Mission complete.",
+    "Không phát hiện P0–P2 mới trong một lượt quét nhanh toàn diff; không bảo đảm tuyệt đối không có lỗi. Không mở finding P3 mới hoặc lặp quét sâu lượt 4.",
+    "Sandbox workspace-write; tuân thủ chỉ đọc checkout. Snapshot 18703 tệp đầu/cuối chỉ chứng minh không delta tại hai mốc, không chứng minh toàn lịch sử I/O. Repo nguồn ngoài checkout không quan sát.",
+    "Thời gian hai suite lượt 5 chạy song song và có probe nhẹ khác nên không dùng kết luận hiệu năng. R3-03 kế thừa evidence cùng SHA lượt 4.",
+    "CRLF/Unicode probe trích đúng định nghĩa cần kiểm, chạy Linux; không phải full suite Python3.12 hay Windows.",
+    "Model/effort thực phục vụ KHONG_DO_DUOC; không suy từ actor đăng verdict. Terminal rc và stdout hash của launcher cần điều phối hoàn tất sau lượt chạy."
+  ],
+  "merge_readiness": "CHƯA ĐỦ ĐIỀU KIỆN MERGE: Luật 9, CI, M9, connector, audit uỷ quyền/readback K5 và xác minh evidence Windows thuộc các bước còn lại."
+}

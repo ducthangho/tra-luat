@@ -1,0 +1,69 @@
+[
+  {
+    "name": "land",
+    "command": [
+      "python3",
+      "-B",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+    "rc": 0,
+    "seconds": 8.619592838000017,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/land.log",
+    "sha256": "33476900e203e5d9b36e21690ad12301a0c9e7b30909997160016073c77cdb6f"
+  },
+  {
+    "name": "ruff-head",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon_test.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+    "rc": 0,
+    "seconds": 0.09462101100001519,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-head.log",
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "name": "ruff-base",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/base-lint/ops/land_evidence_nguon_test.py",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/base-lint/ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+    "rc": 0,
+    "seconds": 0.043689567999990686,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-base.log",
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "name": "ruff-version",
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "--version"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+    "rc": 0,
+    "seconds": 0.03227629900004558,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/ruff-version.log",
+    "sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4"
+  }
+]

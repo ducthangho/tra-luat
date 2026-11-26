@@ -1,0 +1,13 @@
+{
+  "name": "suite-A",
+  "command": [
+    "python3",
+    "-B",
+    "ops/gate_output_doi_chieu_test.py"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+  "rc": 0,
+  "seconds": 341.91473554399994,
+  "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/suite-A.log",
+  "sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179"
+}

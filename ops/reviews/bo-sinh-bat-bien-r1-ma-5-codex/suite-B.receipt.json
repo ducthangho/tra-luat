@@ -1,0 +1,13 @@
+{
+  "name": "suite-B",
+  "command": [
+    "python3",
+    "-B",
+    "ops/land_evidence_nguon_test.py"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+  "rc": 0,
+  "seconds": 305.216658675,
+  "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/suite-B.log",
+  "sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc"
+}

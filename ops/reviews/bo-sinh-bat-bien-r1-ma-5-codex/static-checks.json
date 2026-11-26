@@ -1,0 +1,51 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "d22fe11f9bf35517c70333c567481be460173eee:ops/specs/bo-sinh-bat-bien-r1.md"
+      ],
+      "rc": 0,
+      "stdout": "a47f5bfb9648181f489a20d59c326caf300ab1ef\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "a89c83acf998008caecba9084a7d295845bf1976...HEAD"
+      ],
+      "rc": 0,
+      "stdout": "98\t0\tops/gate_output_doi_chieu_test.py\n176\t9\tops/land_evidence_nguon_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "a89c83acf998008caecba9084a7d295845bf1976",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "products": {
+    "ops/land_evidence_nguon.py": {
+      "equal": true,
+      "base_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+      "head_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c"
+    },
+    "ops/gate_output_doi_chieu.py": {
+      "equal": true,
+      "base_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38",
+      "head_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38"
+    }
+  },
+  "spec_local_sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "spec_git_byte_identical": true
+}

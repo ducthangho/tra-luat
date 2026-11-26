@@ -1,0 +1,27 @@
+{
+  "validator": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/kiem_verdict_lop.py",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/VERDICT.json",
+      "--vong",
+      "5"
+    ],
+    "rc": 0,
+    "stdout": "HOP_LE (§8.3): 0 finding, 2 lop\n"
+  },
+  "artifacts": {
+    "VERDICT.json": {
+      "bytes": 22712,
+      "sha256": "96317eb415cbad3971c2734a2ff210f912ecf7995b9c7fcdd65dbd9d82b53190"
+    },
+    "VERDICT.md": {
+      "bytes": 7375,
+      "sha256": "5c5b8865cf3520ffdfef738bbc262696078611412e94836ab85313667beb2cf5"
+    },
+    "kiem_verdict.txt": {
+      "bytes": 33,
+      "sha256": "d86e06317eef727ef51213b2bab0bef5e25dc2d4db4811b45e1fd8460fabc3f1"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat_probe.py",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work"
+    ],
+    "rc": 0,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat312.json",
+    "sha256": "98aafbbfa0b59cd267c1a046bb596266c3f9c197d5006dc57505e802d4918e11"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat_probe.py",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/repo",
+      "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work"
+    ],
+    "rc": 0,
+    "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/work/compat313.json",
+    "sha256": "2340d242b574ddd6ae574c78023b9e57395aa8e3329b89bccf654a39f66a639e"
+  }
+]

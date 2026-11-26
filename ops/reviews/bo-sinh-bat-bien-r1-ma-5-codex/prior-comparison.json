@@ -1,0 +1,47 @@
+{
+  "prior_round": 4,
+  "prior_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+  "prior_tree": "9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb",
+  "current_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+  "current_tree": "9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb",
+  "old_verdict_sha256": "0e30a239089a908458e7a1a1fd95d402e3c6bad0c73b6c3d9346692c51668735",
+  "same_candidate": true,
+  "old_open_findings": [
+    [
+      "R4-01",
+      "P3"
+    ],
+    [
+      "R4-02",
+      "P3"
+    ]
+  ],
+  "static-review.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/static-review.json",
+    "sha256": "098b415b121982d23788478b920ffec6d19391a32f1365e64a40229b55ea0ed1"
+  },
+  "trace-v2.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/trace-v2.json",
+    "sha256": "11100c9981ed89bb335377ebdda179597365adc2bf9366063fdaf3afecb2e357"
+  },
+  "cache-review4.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/cache-review4.json",
+    "sha256": "bef7c3d70164d4af5285a46b730d3bd2e98fde51d593d8ba18aca275f7644e04"
+  },
+  "repro-R3.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/repro-R3.json",
+    "sha256": "84d14a8cd009a32af53c97d2c8a79516761e9e61250714da491d5ea36e8ed6f1"
+  },
+  "measure.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/measure.json",
+    "sha256": "511d0d04ffc814fe291f560bbdd21c5515e35b343abb6d65073e1af320444d83"
+  },
+  "timing-complete.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/timing-complete.json",
+    "sha256": "30d04ddfdc3c3f057c8dc76db9bc00c5c66975264e9f292d6c0ae0f821e638e5"
+  },
+  "results-summary.json": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l5/lich_su/luot4/results-summary.json",
+    "sha256": "f5d78c4b1408459a8724ab3831928ba625011831ce09249c0f82f8801e49d591"
+  }
+}

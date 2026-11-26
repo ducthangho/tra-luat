@@ -1,0 +1,16 @@
+## f602325574c62184caf16309631f5f680ca5cee2 · ruff 0.15.15
+8	F401	[*] unused-import
+3	F811	[ ] redefined-while-unused
+3	F841	[ ] unused-variable
+2	F541	[*] f-string-missing-placeholders
+Found 16 errors.
+[*] 10 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1
+## 8aab9dabb6f3f150e4ab1872e37757c2620912c3 · ruff 0.15.15
+8	F401	[*] unused-import
+3	F811	[ ] redefined-while-unused
+3	F841	[ ] unused-variable
+2	F541	[*] f-string-missing-placeholders
+Found 16 errors.
+[*] 10 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+rc=1

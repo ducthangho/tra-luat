@@ -1,0 +1,39 @@
+probe sha256 38b06b30aa86d31f2264c69462da7bb2e3ab8e8c38e2f65697a19975e7930065 · previous sha256 2745d8acc286e086ac9d9307271793a42c74dd09676bad919231426a8a53a88c · head 8aab9dabb6f3f150e4ab1872e37757c2620912c3 sach=0 · packet_loop.py sha256 696ba313ad12f482d594fd7614ccf43638d4e5f267f1fb57e115034ffcf9ff22
+case previous plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+case previous tep 0 
+case head plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+case head tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+nfc previous plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+nfc previous tep 0 
+nfc head plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+nfc head tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+backslash previous plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+backslash previous tep 0 
+backslash head plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+backslash head tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+missing previous plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+missing previous tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+missing head plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+missing head tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+file_parent previous plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+file_parent previous tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+file_parent head plain 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+file_parent head tep 12 THIẾU  D2b kiem_tep:not_measured:symlink
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2b
+probe rc=0

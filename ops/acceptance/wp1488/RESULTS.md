@@ -1,7 +1,8 @@
 # WP1488 — kết quả đo (executor: phiên `session_015GtxrazyAyLwN5BiEB52Sq`, Linux, 21-11-2026)
 
-Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r5.md` (sha256 `c27e7b6d…7580`),
-lease `wp1488-r5-g5-claude` (r4 hết hạn, không bia mộ; r4 thay r3, bia mộ hai chiều). §10 cho r5. Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
+Base gốc `8656dc0176ed108e12c209ba55c91a1f6f9d612f` (g1–g5); g6/g7 dựng trên master `b1db69429d272cfde43681b4a9de1184c452c0f1`.
+Đặc tả hiện hành: `ops/specs/wp1488-r6.md` (sha256 `e33176d2…aecf`), lease `wp1488-r6-g7-claude` (thay g6, bia mộ hai chiều;
+g6 thay g5). §10 cho r5, §11 cho g6/g7 (r6). Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
 `f8747c4`, `7a8823b` (sau Codex lượt 4). Mã r4 (trả nợ `WP1488-WIN-THEO-LENH`):
 `ab83dd363` (40 hex ở §9); sau Codex lượt 5 (P3, chỉ đổi ca test): `22a7ad1`; các commit sau nó chỉ đổi tệp hồ sơ.
 
@@ -260,3 +261,54 @@ Hồi quy (N3), hai vế dựng trong CÙNG một lệnh (clone + checkout + `co
 Merge `210ceff` vào master `d0868db` TRƯỚC r5 (đo 18:38Z–19:02Z): 456/456, 824/824. Delta của `4cd2ba2` so master = +1 ca
 (r1488), +29 đột biến (23 `wp1488_sh_*` r1–r4 + 6 r5), 0 hồi quy. Ruff `--select F` 5 F841 và shellcheck 1 SC1090 giống
 hệt master (delta 0). `doctrine-scan` rc 0. Windows thật: chưa đo (cygpath giả trên Linux).
+
+## 11. Generation g6/g7 — áp ADR-0060, review và vá THEO LỚP (đặc tả r6)
+
+Chủ kho chỉ thị 2026-11-26 áp ADR-0060 và vá/review theo lớp. Đối chiếu (Issue #1488, issuecomment-7198141773): PR #1489 đã
+push 26 head (vượt M5) ⇒ đóng, mở g6; 7 verdict g1–g5 không review theo lớp; Issue chưa có hồ sơ; Windows, `full_mutant_audit`,
+connector chưa chạy. Chủ kho nâng trần Codex 8→12 (E2).
+
+- g6 (`d5688ac`, master `b1db694` + mã g5 trong một commit): Codex lượt 8 qua `launcher.py run` (`run_id` `cf204383…`,
+  `gpt-6-astra`/`xhigh` đo được), TOÀN diff theo lớp ⇒ `changes_requested`, 0 P0–P2, P3 mở ở hai lớp:
+  `thay-the-lenh-lam-mat-du-lieu` (F1488-L8-01 A/B/C: `cygpath -w`, `cygpath -u`, stdout rơi về) và
+  `phep-do-khong-do-dieu-khai` (F1488-L8-02 A/B: JSON stdout Windows, PATH nguyên văn khi đích rỗng/vắng). Verdict nguyên văn:
+  issuecomment-7199395981; mục sổ xét lại cách làm: issuecomment-7199403050.
+- r6 (chủ kho duyệt băm `e33176d2`, issuecomment-7199661828), g7 (`agent/wp1488-g7-claude`):
+  - `ops/cai_cong_cu.sh`: MỘT hàm `_tl1488_doc` (B7) đọc nguồn qua `tr '\000' '\001'` dưới `pipefail` kèm sentinel, dùng
+    chung cho kênh, `cygpath -u` (bộ chọn), `cygpath -w` (bước ghi), stdout rơi về; mỗi nơi gọi từ chối 0x01 trước side
+    effect rồi mới bỏ delimiter của giao thức mình (`cygpath`: đúng một LF; stdout: các LF cuối như cũ). `export -nf`.
+  - `.claude/dev/launcher_test.py`: ca r1488 thêm S (`cygpath -w` NUL đầu/giữa/cuối), U (`cygpath -u` NUL/LF thừa/rỗng),
+    U-cap (cặp `<x>`/`<x>LF`), V (stdout có NUL ⇒ 7), Y (PATH nguyên văn, DICH/DICH_WIN × rỗng/vắng); X: `_r1488_json` — mọi
+    lượt gọi trực tiếp thành công của r1488 và bộ chọn r858 phải có TOÀN stdout là một JSON. Bộ dò (M) siết sang đúng
+    `KQ=` và `BASH_FUNC__tl1488*` (thân `chon_thu_muc_chay_duoc`, export sẵn từ base dưới allexport, nay nhắc tên
+    `_tl1488_doc`). 8 đột biến r6; neo cũ dời theo dòng mới, không xoá đột biến nào.
+  - Lượt `--dot-bien` đầu trên `b407791` ra 836/838: `wp858_sh_cygpath_u_hong_khong_tra_loi` và `wp868_sh_doc_kenh_nuot_loi`
+    mất răng vì B7 (hàm không gán đầu ra khi lệnh lỗi; ca hình dạng chưa chốt thân hàm). Sửa ở `bcd23b3`: ca bộ chọn đòi DỪNG
+    ngay ở lời gọi `cygpath -u` hỏng; ca hình dạng r868 chốt thân `_tl1488_doc` trên cả tệp. Cả hai chết đủ 4 ca đích.
+
+Phản chứng: ca r1488 với script g6 `d5688ac` ĐỎ ở (S-nul_dau) (rc 0, ghi `W:<dir>`).
+
+Đột biến r6 (chạy riêng, chết bằng `TinHieuChotCa`):
+
+| Đột biến | Chết ở |
+|---|---|
+| `wp1488_sh_u_bo_chot_byte` | (U-nul) |
+| `wp1488_sh_u_bo_chot_rong` | (U-rong) |
+| `wp1488_sh_u_cat_moi_lf` | (U-du_lf) |
+| `wp1488_sh_w_bo_chot_byte` | (S-nul_dau) |
+| `wp1488_sh_stdout_bo_chot_byte` | (V) rc 3 |
+| `wp1488_sh_doc_lo_export` | (M) `BASH_FUNC__tl1488_doc` |
+| `wp1488_sh_win_in_rac_stdout` (reviewer lượt 8) | (N-nhay) qua `_r1488_json`; `r858_cai_windows…` |
+| `wp1488_sh_path_cat_lf_cuoi` (reviewer lượt 8) | (Y-DICH-rong) |
+
+Cổng trên `bcd23b312082708ff1de89d6472313cfda7a5bb4` (mã cuối g7; commit sau chỉ đổi tệp này):
+
+| Phép đo | master `b1db694` | `bcd23b3` |
+|---|---|---|
+| `launcher_test.py` | 455/455 (tổng 457, bỏ qua 2) | 456/456 (tổng 458, bỏ qua 2) |
+| `launcher_test.py --dot-bien` | 801/801 (7 không đo được) | 838/838 (cùng 7) |
+| `tl.py --selftest` | — | 1789/1789, rc 0 |
+
+Hai vế dựng trong CÙNG một lệnh (clone + checkout + `core.abbrev 7`, `core.autocrlf false`, `core.eol lf`), 18:34Z–19:03Z,
+`/tmp/.git` không tồn tại. `git diff --check b1db694..HEAD` rc 0; ruff `--select F` 5 F841 và shellcheck 1 SC1090 giống master;
+`doctrine-scan` rc 0. Windows thật (M3 `required`): chưa đo tại thời điểm ghi mục này.

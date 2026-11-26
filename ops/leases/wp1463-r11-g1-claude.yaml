@@ -115,5 +115,6 @@
     "edit_spec"
   ],
   "attempts_used": 0,
-  "review_prompt_note": "Mission r117: đặc tả r11 không qua review độc lập ⇒ prompt review mã Codex phải đòi đối chiếu đặc tả ↔ mã và báo mọi mâu thuẫn trong r11 như một phát hiện."
+  "review_prompt_note": "Mission r117: đặc tả r11 không qua review độc lập ⇒ prompt review mã Codex phải đòi đối chiếu đặc tả ↔ mã và báo mọi mâu thuẫn trong r11 như một phát hiện.",
+  "da_bi_thay_the": "wp1463-r14-g2-claude"
 }

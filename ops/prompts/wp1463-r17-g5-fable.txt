@@ -1,0 +1,43 @@
+Bạn là EXECUTOR của packet wp1463 (PR2 #1463, Mission #1172), kho ducthangho/tra-luat. Trả lời và ghi chú bằng tiếng Việt. Đây là LƯỢT 5/5, lượt CUỐI (Mission r125/r126: TÁCH PR2).
+
+ĐỌC TRƯỚC: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §5, §7, §12, §13), .claude/skills/work-packet/SKILL.md.
+
+ĐẶC TẢ ĐÓNG BĂNG (nguồn sự thật duy nhất; đọc TOÀN BỘ, nhất là khối "Phạm vi revision 17" ở đầu, Nghiệm thu 4 mới "Gỡ sạch", Nghiệm thu 9, mục "Kích thước" và mục "Thay đổi so với revision 16"):
+- `git show 63aac4b07977e39874aa46375f3196399f0f10e5:ops/specs/wp1463-r1/SPEC.md`
+- sha256 PHẢI bằng `2848e163bed43cdc825eaa1fa8add2f2820ddc011cb4e95f258b5e0649ec81d8`, lệch ⇒ DỪNG.
+- Chủ kho đã duyệt băm: https://github.com/ducthangho/tra-luat/issues/1463#issuecomment-7191416438
+
+LEASE: `wp1463-r17-g5-claude`; base `1260fa0cba89353911e2f97188b2c04dab8139d7`; nhánh `agent/wp1463-r17-g5-fable`, tạo từ H của lượt 4 `02ebcea54883744a5c79f983f3a310de30e6b8e1` (commit cục bộ trong kho này, nhánh `agent/wp1463-r16-g4-fable`). Hãy tự xác minh: `git show origin/ops/wp1463-r1:ops/leases/wp1463-r17-g5-claude.yaml`.
+
+WRITE SET (đúng bốn tệp, không có tệp thứ năm):
+1. `ops/ci_provenance_test.py` — KHÔNG sửa; phải giữ byte-identical với 02ebcea.
+2. `.claude/dev/ci_dang_ky_test.py` — KHÔNG sửa; phải giữ byte-identical với 02ebcea.
+3. `ops/specs/wp1463-r1/do/do_pr2.py`
+4. `ops/specs/wp1463-r1/do/KET_QUA.md`
+Cần tệp thứ năm, hoặc thấy đặc tả mâu thuẫn ⇒ DỪNG (§12) và báo, không tự sửa đặc tả.
+
+VIỆC (chủ yếu là GỠ, không thêm logic mới ngoài dòng GIOI_HAN_PR2):
+- Gỡ khỏi do_pr2.py đúng những gì Nghiệm thu 4 mới liệt kê: lệnh con `vung`, sitecustomize/hook audit, probe phan_chung, bảng fixture vùng, `chay_quan_sat` và các hàm dọn nhóm, `tu_kiem_vung`, `DOT_BIEN_VUNG`, các ca và đột biến `quan_sat_*`, các dòng GIOI_HAN_VUNG / GIOI_HAN_QUAN_SAT / TU_KIEM_VUNG / KET_LUAN_VUNG. Phép grep của Nghiệm thu 4 (a) phải ra 0 dòng; `python3 -B do_pr2.py vung` ⇒ rc 2.
+- `ab` và `registry` chạy bộ bằng `chay_bo`; giữ nguyên mọi chốt rc của R15-1 (kể cả registry --tu đọc .rc đã lưu) cùng các ca và đột biến của chúng, và giữ răng.
+- Thêm đúng một dòng chẩn đoán `GIOI_HAN_PR2: …` theo Nghiệm thu 4 (c). Dòng này không làm cổng.
+- `tu-kiem` và `tu-kiem --dot-bien` giữ phần bộ so và các chốt rc. Mỗi đột biến còn lại phải chết đúng ca, đúng lý do (không tín dụng giả). Không để mã chết hay tham chiếu treo.
+- KET_QUA.md viết lại theo Nghiệm thu 9: chỉ đầu ra thật của ab, registry, tu-kiem, tu-kiem --dot-bien chạy trên mã mới; không còn kết quả đo vùng nào; có đúng một mục "Giới hạn".
+- Chạy lại các Nghiệm thu mà đặc tả r17 còn giữ (1, 2, 3, 5, 6, 7, 8, 9), cùng `tu-kiem` và `tu-kiem --dot-bien`.
+
+QUY TRÌNH:
+- Sửa tối thiểu; giữ idiom chú thích của kho.
+- `python3 -m ruff check --select F` (ruff 0.15.15) trên các tệp .py đã đổi: DELTA so với base phải = 0.
+- Cần `actionlint` VÀ `shellcheck`.
+- `core.abbrev 7`. Không in hay đọc bí mật. Không viết nguyên văn dấu bỏ-qua-CI vào commit message.
+- Trần kích thước (r17): ≤ 6 tệp, ≤ 2100 dòng thêm theo `git diff --numstat 1260fa0 HEAD`, VÀ tổng dòng thêm phải NHỎ HƠN +1905 (của 02ebcea). Đo trước khi báo xong; vi phạm ⇒ DỪNG (ADR-0044).
+- COMMIT CỤC BỘ, KHÔNG PUSH. Chủ kho phải audit exact-H trước lần đẩy đầu.
+
+BÁO CÁO CUỐI (handoff §7), in ra ở cuối đầu ra:
+- SHA H, cây H, SHA base, numstat từng tệp;
+- bằng chứng hai tệp test byte-identical với 02ebcea;
+- đầu ra của phép grep Nghiệm thu 4 (a) và rc của `do_pr2.py vung`;
+- dòng kết luận của các Nghiệm thu còn giữ, cùng `tu-kiem` và `tu-kiem --dot-bien` (số N/N và M/M);
+- danh sách ca và đột biến đã gỡ, ca và đột biến còn giữ;
+- ruff delta;
+- danh sách chỗ chưa đo được;
+- mọi chỗ đặc tả chưa rõ mà bạn đã chọn cách hiểu.

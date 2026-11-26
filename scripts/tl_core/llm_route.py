@@ -597,7 +597,7 @@ def _mo_dau_nhieu_ve(t):
     het = m.start() if m else len(t)
     cuoi = next((k for k in range(len(t) - 1, -1, -1) if t[k].isalnum()), -1)
     nhom_dau, co_tu, sau_tt = False, False, 0
-    for i, c, sau, trich in _quet_trang_thai(t):
+    for i, c, sau, trich, _ in _quet_trang_thai(t):
         if i >= het:
             break
         if trich is None and sau == 0:
@@ -638,8 +638,6 @@ def _la_dau_ket(t, i):
 
 
 _MO_NHIEU_VE = frozenset("(“\"‘")
-_MO_TRICH = {"“": "”", '"': '"', "‘": "’"}
-_DAU_KET_NHIEU_VE = frozenset(".-–—")
 
 
 def dau_dong_cho_phep(ln):
@@ -853,8 +851,9 @@ def _nap_doc_gioi_han():
 
 def _doc_thanh_phan(z, ten, doc_gioi_han):
     if doc_gioi_han is not None:
-        return doc_gioi_han(z, ten)
-    with z.open(ten) as f:
+        with _bien_zip(f"doc {ten}"):
+            return doc_gioi_han(z, ten)
+    with _bien_zip(f"doc {ten}"), z.open(ten) as f:
         b = f.read(_TRAN_XML + 1)
     if len(b) > _TRAN_XML:
         raise ValueError(f"{ten} vuot tran {_TRAN_XML} byte")
@@ -1420,16 +1419,22 @@ def doc_dieu_docx(nguon, dieu):
         if n_entry > _TRAN_MEMBER:
             raise ValueError(f"goi .docx co {n_entry} member vuot tran {_TRAN_MEMBER} — khong ho tro")
         fh.seek(0)
-        import zlib
-        try:
+        with _bien_zip("mo goi"):
             z_cm = zipfile.ZipFile(fh)
-            return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
-        except (NotImplementedError, RuntimeError, EOFError, OSError, zipfile.BadZipFile, zlib.error, *_LOI_CODEC) as e:
-            # r41 (lượt 40): lỗi MỞ GÓI / MỞ MEMBER của `zipfile` (kiểu nén hay phiên bản ZIP không hỗ trợ ⇒ NotImplementedError; member
-            # mã hoá ⇒ RuntimeError; dữ liệu nén hỏng) quy về MỘT lỗi nguồn có chẩn đoán ⇒ CLI rc 2, không traceback.
-            if isinstance(e, RecursionError):
-                raise   # độ sâu do `_xml_cay` chốt TRƯỚC — không được che bằng lỗi nguồn (giữ đo được chốt ấy)
-            raise ValueError(f"goi .docx khong doc duoc: {type(e).__name__}: {e}") from e
+        return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
+
+
+@contextlib.contextmanager
+def _bien_zip(viec):
+    """r41 → r43 (lượt 42): biên lỗi HẸP quanh đúng các thao tác ZIP (mở gói, mở + đọc member) — parser và logic khác nằm NGOÀI, lỗi của
+    chúng không bị gắn nhãn lỗi nguồn. Lỗi zipfile/codec ⇒ MỘT `ValueError` có chẩn đoán ⇒ CLI rc 2."""
+    import zlib
+    try:
+        yield
+    except (NotImplementedError, RuntimeError, EOFError, OSError, zipfile.BadZipFile, zlib.error, *_LOI_CODEC) as e:
+        if isinstance(e, RecursionError):
+            raise
+        raise ValueError(f"goi .docx khong doc duoc ({viec}): {type(e).__name__}: {e}") from e
 
 
 def _dem_entry_zip(fh, co):
@@ -1465,6 +1470,10 @@ def _dem_entry_zip(fh, co):
         n += 1
         if n > _TRAN_MEMBER:
             return n
+        # r43 (lượt 42): chính sách codec TRƯỚC `ZipFile` — chỉ stored (0) và deflate (8), là hai kiểu Word/Google Docs xuất; cờ mã hoá
+        # (bit 0) ⇒ chặn. Không mở bộ giải nén nào ngoài miền đã xác lập (LZMA/BZ2… có bộ nhớ codec không giới hạn được ở đây).
+        if int.from_bytes(h[10:12], "little") not in (0, 8) or int.from_bytes(h[8:10], "little") & 1:
+            raise ValueError("goi .docx dung kieu nen ngoai stored/deflate hoac member ma hoa — khong ho tro")
         them = int.from_bytes(h[28:30], "little") + int.from_bytes(h[30:32], "little") + int.from_bytes(h[32:34], "little")
         vt += 46 + them
         fh.seek(vt)
@@ -1777,42 +1786,39 @@ def _dong_mo_ho(ln) -> bool:
     """Một dòng có dấu phân cách MƠ HỒ: ngoặc tròn hay trích dẫn KHÔNG khép ngay trong dòng (trải sang dòng khác —
     lượt 8 U3: số thứ tự trong trích dẫn nhiều dòng bị nhận là số khoản), dấu `)` không có `(`, hoặc trích dẫn cong
     LỒNG cùng kiểu dấu (lượt 8 U1: dấu đóng của cụm trong khép nhầm cụm ngoài). Ký tự bên trong một cụm trích dẫn là
-    nội dung, trừ dấu mở cong `“` (lồng ⇒ mơ hồ). Chốt BẢO THỦ: chặn oan được, nhận nhầm thì không."""
+    nội dung, trừ dấu mở cong `“` (lồng ⇒ mơ hồ). Chốt BẢO THỦ: chặn oan được, nhận nhầm thì không.
+    r43 (lượt 42): chuyển trạng thái và sự kiện lấy từ `_quet_trang_thai` — KHÔNG còn bộ chuyển trạng thái thứ hai ở đây."""
     if ln.count('"') >= 3:
         return True   # wp1514 X2: hai tầng trích dẫn bị làm phẳng thành `"` không phân biệt được với hai cụm độc lập
-    sau, trich = 0, None
-    for c in ln:
+    for _, c, sau, trich, su_kien in _quet_trang_thai(ln):
+        if c is None:
+            return sau != 0 or trich is not None   # trạng thái CUỐI: còn nhóm mở ⇒ trải sang dòng khác
         if c not in _DAU_HIEU_DUOC and (unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf") or c in _DAU_KEP_PO):
             return True   # lượt 9 V1: dấu ngoặc/trích dẫn bộ quét KHÔNG hiểu (`«»`, `‘’`, `„`, `[]`…) ⇒ mơ hồ
-        if trich is not None:
-            if c == trich:
-                trich = None
-            elif c == "\u201c" and trich == "\u201d":
-                return True
-        elif c == "(":
-            sau += 1
-        elif c == ")":
-            if not sau:
-                return True
-            sau -= 1
-        elif c == '"':
-            trich = '"'
-        elif c == "\u201c":
-            trich = "\u201d"
-        elif c == "\u201d":
+        if su_kien is not None:
             return True
-    return sau != 0 or trich is not None
+    return False
 
 
 def _quet_trang_thai(txt):
-    """r42 (lượt 41): MỘT máy trạng thái ngoặc tròn / cụm trích dẫn cho mọi phép đọc thân thô (`_quet` → `_tu_noi`, và
-    `_mo_dau_nhieu_ve`). Trả `(i, c, sâu_ngoặc, ký_tự_đóng_trích_dẫn | None)` — trạng thái TRƯỚC ký tự `c`."""
+    """r42 → r43 (lượt 41–42): MỘT máy trạng thái ngoặc tròn / cụm trích dẫn cho MỌI phép đọc thân thô — `_quet` (→ `_tu_noi`),
+    `_mo_dau_nhieu_ve` và `_dong_mo_ho`. Trả `(i, c, sâu_ngoặc, ký_tự_đóng_trích_dẫn | None, sự_kiện | None)` với trạng thái TRƯỚC
+    ký tự `c`; sự kiện của CHÍNH ký tự ấy: `"dong_le"` (`)` không có `(`, ngoài trích dẫn), `"long"` (`“` trong cụm `“…”` — lượt 8 U1),
+    `"dong_cong_le"` (`”` ngoài trích dẫn). Kết thúc bằng một phần tử CANH `(len, None, sâu, trích, None)` mang trạng thái CUỐI."""
     sau, trich = 0, None   # `trich`: None, hoặc ký tự ĐÓNG của cụm trích dẫn đang mở (`"` hoặc `”`)
     for i, c in enumerate(txt):
-        yield i, c, sau, trich
+        su_kien = None
         if trich is not None:
             # Trong trích dẫn MỌI ký tự là nội dung (lượt 6 S2: `“(”`; lượt 7 T1: `“"”` từng lật trạng thái ngoặc kép
             # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.
+            if c == "\u201c" and trich == "\u201d":
+                su_kien = "long"
+        elif c == ")" and not sau:
+            su_kien = "dong_le"
+        elif c == "\u201d":
+            su_kien = "dong_cong_le"
+        yield i, c, sau, trich, su_kien
+        if trich is not None:
             if c == trich:
                 trich = None
         elif c == "(":
@@ -1823,12 +1829,15 @@ def _quet_trang_thai(txt):
             trich = '"'
         elif c == "\u201c":
             trich = "\u201d"
+    yield len(txt), None, sau, trich, None
 
 
 def _quet(txt):
     """Duyệt `txt` từng ký tự kèm trạng thái "đang trong ngoặc tròn / cụm trích dẫn" TRƯỚC ký tự ấy. Một bộ quét
     có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
-    for i, c, sau, trich in _quet_trang_thai(txt):
+    for i, c, sau, trich, _ in _quet_trang_thai(txt):
+        if c is None:
+            return
         yield i, c, sau > 0 or trich is not None
 
 
@@ -1969,9 +1978,46 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
     han = time.monotonic() + timeout
     # r41 (lượt 40): trên POSIX con chạy ở SESSION riêng để thu hồi được CẢ CÂY (cháu còn giữ bản sao đầu ghi của ống thì luồng đọc không
     # bao giờ nhận EOF). Windows: chỉ giết tiến trình trực tiếp (giới hạn đã khai — `taskkill /T` không đáng tin, xem CLAUDE.md).
+    # r43 (lượt 42): sổ và bộ đệm dựng TRƯỚC khi spawn — không còn khe giữa `Popen` và khối thu hồi.
+    buf, vuot, loi, luong = {"out": bytearray(), "err": bytearray()}, [], [], []
     p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          start_new_session=not _LA_WINDOWS)
-    buf, vuot, loi = {"out": bytearray(), "err": bytearray()}, [], []
+    try:
+        return _so_huu_tien_trinh(p, args, timeout, tran, han, buf, vuot, loi, luong, threading, types)
+    except BaseException as e:
+        # r42 → r43: MỌI lối thoát bất thường sau `Popen` đi qua CÙNG một điểm thu hồi. `_thu_hoi` không ném; luồng đọc còn kẹt sau
+        # ngân sách được GHI vào ngoại lệ gốc (không che nó).
+        con = _thu_hoi(p, luong)
+        if con and hasattr(e, "add_note"):
+            e.add_note(f"luong doc con ket sau thu hoi: {', '.join(con)}")
+        raise
+
+
+def _thu_hoi(p, luong):
+    """r43 (lượt 42): giết (nhóm trên POSIX) + chờ có hạn + chờ luồng ĐÃ START trong ngân sách riêng + đóng ống khi không luồng nào
+    còn giữ. Không ném. Trả tên các luồng đọc còn kẹt."""
+    if os.name != "nt":   # POSIX: nhóm tiến trình
+        import signal
+        with contextlib.suppress(Exception):
+            os.killpg(p.pid, signal.SIGKILL)   # cả nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF
+    with contextlib.suppress(Exception):
+        p.kill()
+    with contextlib.suppress(Exception):
+        p.wait(timeout=5)
+    het = time.monotonic() + 2.0   # ngân sách RIÊNG cho việc chờ luồng đọc kết thúc sau thu hồi
+    da_start = [t for t in luong if t.ident is not None]   # `join` trên luồng CHƯA start ném RuntimeError
+    for t in da_start:
+        t.join(max(0.0, het - time.monotonic()))   # chỉ luồng đã start ⇒ không ném
+    con = [t.name for t in da_start if t.is_alive()]
+    if not con:
+        for ong in (p.stdout, p.stderr):
+            with contextlib.suppress(Exception):
+                ong.close()
+    return con
+
+
+def _so_huu_tien_trinh(p, args, timeout, tran, han, buf, vuot, loi, luong, threading, types):
+    """Phần đọc–chờ của `_chay_gioi_han` (r43: tách để khối thu hồi bọc NGAY sau `Popen`)."""
 
     def doc(ong, ten):
         try:
@@ -1986,27 +2032,7 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
                 buf[ten] += k
         except Exception as e:  # noqa: BLE001 — lỗi đọc phải về người gọi, không được trả dữ liệu đọc dở như đã đủ
             loi.append(e)
-
-    def thu_hoi():
-        if os.name != "nt":   # POSIX: nhóm tiến trình
-            import signal
-            with contextlib.suppress(Exception):
-                os.killpg(p.pid, signal.SIGKILL)   # cả nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF
-        with contextlib.suppress(Exception):
-            p.kill()
-        with contextlib.suppress(Exception):
-            p.wait(timeout=5)
-        het = time.monotonic() + 2.0   # ngân sách RIÊNG cho việc chờ luồng đọc kết thúc sau thu hồi
-        for t in luong:
-            t.join(max(0.0, het - time.monotonic()))
-    luong = []
-    try:
-        return _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types)
-    except BaseException:
-        # r42 (lượt 41): MỌI lối thoát bất thường sau `Popen` — lỗi khởi động luồng, lỗi `wait` khác quá hạn, ngắt (Ctrl-C) — đi qua
-        # CÙNG một điểm thu hồi (giết + chờ có hạn + chờ luồng đọc có hạn). `thu_hoi` không ném.
-        thu_hoi()
-        raise
+    return _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types)
 
 
 def _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types):

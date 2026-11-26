@@ -125,3 +125,5 @@ revision_ly_do: 'Cross-review luot 14 (Q1 P1, Q2 P2); ban chieu ky tu chung cho 
 review_calls_limit: 15
 review_calls_used_truoc: 14
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r16-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 15 (R1-R3); revision r16 (ops/specs/llm-khoan-docx-r16.md), tran 16.'

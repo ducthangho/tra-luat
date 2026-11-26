@@ -534,21 +534,34 @@ _RE_RANH_GIOI_LON = re.compile(
 # thì lộ hình dạng khác (dấu cuối, dấu giữa tên, gạch dưới…). Đổi từ "nhận diện tiêu đề" sang "cấm tiền tố": trong thân Điều,
 # MỌI đoạn mà (sau khi bỏ ký tự không phải chữ/số ở đầu, chuẩn hoá NFC) mở bằng `Điều` + số ⇒ chặn, bất kể ký tự sau số hay dấu câu
 # cuối đoạn. Cái giá đã khai: điểm/khoản MỞ BẰNG dẫn chiếu `Điều 5 …` cũng bị chặn (rc 2, không ghép sai).
-# r15 (lượt 14 Q1): MỘT bản chiếu ký tự cho mọi tiền tố cấu trúc — biên ký tự là thứ đã lọt qua mỗi lượt (gạch dưới là `\w`,
-# ký tự định dạng vô hình nằm giữa chữ và số). Bản chiếu: NFC → bỏ ký tự định dạng (Unicode `Cf`: zero-width, soft hyphen…) → mọi
-# ký tự không phải chữ/số thành khoảng trắng → gộp khoảng trắng. Sau đó các mẫu chỉ còn thấy chữ, số và một dấu cách.
-# CHỈ dùng để DÒ; nguyên văn đưa model và phép so vẫn là chữ gốc.
+# r15 (lượt 14 Q1) → r16 (lượt 15 R1): bản chiếu dò tiền tố — mọi ký tự không phải chữ/số (gạch dưới, dấu câu) thành khoảng
+# trắng, gộp khoảng trắng. Ký tự vô hình / dấu tổ hợp lạ / chữ không NFC đã bị TỪ CHỐI trước đó (`_ky_tu_la`), nên bản chiếu không
+# phải chuẩn hoá Unicode nữa. CHỈ dùng để DÒ; nguyên văn đưa model và phép so vẫn là chữ gốc.
 _RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\s*\d", re.IGNORECASE)
 
 
-def _bo_vo_hinh(chu):
-    """r15 (lượt 14 Q1): NFC + bỏ ký tự định dạng vô hình (Unicode `Cf`)."""
-    return "".join(c for c in unicodedata.normalize("NFC", chu) if unicodedata.category(c) != "Cf")
+# r16 (lượt 15 R1/R3, Review Rescue Checkpoint §12): lớp "biên ký tự" lặp N1 → Q1 → R1/R3 — mỗi lượt một cách sắp ký tự vô
+# hình/dấu tổ hợp mới che tiền tố. Đổi từ CHUẨN HOÁ sang TỪ CHỐI: chữ của Điều (mọi đoạn .docx từ tiêu đề trở đi; mọi dòng văn bản
+# thô sau BOM đầu tệp) phải ở dạng NFC và KHÔNG chứa ký tự thuộc nhóm Unicode dưới đây — có ⇒ dừng (rc 2), không đoán.
+# Cf: định dạng (zero-width, soft hyphen, BOM giữa chừng, điều khiển hướng chữ) · Mn/Mc/Me: dấu tổ hợp còn dư sau NFC, bộ chọn biến
+# thể · Cc: điều khiển · Co/Cs/Cn: riêng tư / nửa cặp / chưa gán.
+_NHOM_KY_TU_LA = frozenset({"Cf", "Mn", "Mc", "Me", "Cc", "Co", "Cs", "Cn"})
+
+
+def _ky_tu_la(chu):
+    """r16 (lượt 15 R1/R3): ký tự đầu tiên khiến chữ không đọc được an toàn (không NFC, hoặc thuộc `_NHOM_KY_TU_LA`); None nếu sạch."""
+    s = str(chu)
+    if unicodedata.normalize("NFC", s) != s:
+        return "khong o dang NFC (dau to hop tach roi)"
+    for c in s:
+        if c not in "\t\n" and unicodedata.category(c) in _NHOM_KY_TU_LA:
+            return f"ky tu U+{ord(c):04X} ({unicodedata.category(c)})"
+    return None
 
 
 def _dau_doan(chu):
     """r14 (lượt 13 N1) → r15 (lượt 14 Q1): bản chiếu để dò tiền tố cấu trúc — chỉ chữ/số, mọi ký tự khác thành một dấu cách."""
-    return " ".join("".join(c if c.isalnum() else " " for c in _bo_vo_hinh(chu)).split())
+    return " ".join("".join(c if c.isalnum() else " " for c in chu).split())
 
 
 def _mo_bang_dieu(chu):
@@ -556,7 +569,9 @@ def _mo_bang_dieu(chu):
     return bool(_RE_DIEU_TRONG_THAN.match(_dau_doan(chu)))
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
-_RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)](?!\d)")
+# r16 (lượt 15 R2): dạng ngoặc KÍN `(1)` là số gõ tay kể cả khi thân dính chữ số (`(1)5 lần`) — `(?!\d)` chỉ bảo vệ số thập phân
+# của dạng `1.` / `1)`.
+_RE_SO_GO_TAY_DOCX = re.compile(r"^(?:\(\s*\d+\s*\)|\(?\d+[^\S\n]*[.)](?!\d))")
 # Phần tử khối được phép làm con của body / sdtContent mà không mang nội dung (bỏ qua). Phần tử khối KHÁC ⇒ mốc lạ.
 _KHOI_BO_QUA = {"sectPr", "bookmarkStart", "bookmarkEnd", "proofErr", "permStart", "permEnd", "commentRangeStart",
                 "commentRangeEnd", "customXmlPr", "sdtPr", "sdtEndPr",   # r3 (lượt 2 B6): thuộc tính wrapper
@@ -1087,6 +1102,10 @@ def doc_dieu_docx(nguon, dieu):
     if doan[i0]["la"]:
         raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     vung = doan[i0 + 1:]
+    for d in vung:   # tiêu đề đã qua danh sách cho phép nguyên đoạn (`_RE_TIEU_DE_TRON`)
+        la = _ky_tu_la(d["chu"])
+        if la:   # r16 (lượt 15 R1): từ chối thay cho chuẩn hoá
+            raise ValueError(f"Dieu co {la} — chu khong doc an toan duoc: {d['chu'][:60]!r}")
     if any(_mo_bang_dieu(d["chu"]) or _RE_RANH_GIOI_LON.match(_dau_doan(d["chu"])) for d in vung):
         raise ValueError("tep chua them tieu de Dieu/Chuong/Muc/Phan — chi de dung Dieu can doc trong tep")
     if any(d["la"] for d in vung):
@@ -1130,7 +1149,7 @@ def doc_dieu_docx(nguon, dieu):
                 raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")
             continue
         nid, il = d["so"]
-        if _RE_SO_GO_TAY_DOCX.match(_bo_vo_hinh(chu).lstrip()):   # r15 (lượt 14 Q1): ký tự vô hình không che số gõ tay
+        if _RE_SO_GO_TAY_DOCX.match(chu):
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
             khoan.append([d["dem"][cap0], chu, chu])
@@ -1185,6 +1204,8 @@ def tach_khoan(van_ban):
     - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
       dòng (lượt 6 S2) — dòng gãy giữa câu thành khoản không xác minh được ⇒ chặn."""
     dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
+    if any(_ky_tu_la(ln) for ln in dong):
+        return None   # r16 (lượt 15 R3): ký tự vô hình/dấu tổ hợp lạ có thể che dấu điểm hay số khoản ⇒ từ chối CẢ nguồn
     if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
         return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):

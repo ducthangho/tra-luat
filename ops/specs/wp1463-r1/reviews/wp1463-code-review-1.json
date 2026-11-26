@@ -1,0 +1,488 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "generation": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "9cb47b6ba18248bbbf09ae7d944bf9ce",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "source": "run.json has no observed model/effort fields at review time; family follows provider under ADR-0065"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "d0e08eba69d93fa69d0ad948177c1466e2094fd8",
+  "reviewed_tree": "d53fce1bb3a5015da96cdc37f07d14d7a7d2bfc1",
+  "spec_sha256": "d35051f0e1f125d735c8fd4f80291d8343f006b1af7caad9186a283538273442",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "code",
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "blocked",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "findings": [
+    {
+      "id": "PR2-C01",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "severity": "P2",
+      "axis": "code",
+      "location": "ops/specs/wp1463-r1/do/do_pr2.py:484",
+      "claim": "The A/B command reports DAT and exits 0 when either full run exits nonzero after printing healthy output. Only the light-run exit status participates in dat.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/probes.py",
+        "observed": "control, base_rc42, head_rc42 each return ab_rc 0 and KET_LUAN_AB: DAT (9/9 phep dung). Fault injection replaces chay_bo return values; actual clone/import/comparator paths execute, with base=H to isolate return-code handling. No second full suite executed.",
+        "artifact": "/tmp/wp1463-rc1-audit/probes.log"
+      },
+      "suggested_fix": {
+        "where": "lenh_ab, after all three process results; status belongs to the command runner, not to the nine independent semantic comparisons.",
+        "how": "Require rc 0 for base/day_du, H/day_du and H/nhe before reporting DAT; preserve nonzero rc and diagnostics.",
+        "locking_test": "Inject rc 42 after positive output separately at each of the three run boundaries; each must make the command fail, with an rc-0 control. A mutant dropping each rc check must fail its matching test.",
+        "new_risks": "Do not fold process status into unrelated comparison predicates or misclassify valid stricter A+3 outcomes."
+      }
+    },
+    {
+      "id": "PR2-C02",
+      "class_slug": "b4-predicate-mutation-proof",
+      "severity": "P2",
+      "axis": "code",
+      "location": "ops/ci_provenance_test.py:2621",
+      "claim": "The oversized-file vector is invalid JSON, so it does not test the 65,536-byte guard. Removing that guard leaves c82 green while a valid 65,537-byte result is accepted.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/probes.py",
+        "observed": "CASE audit_bo c82 rc 0; CASE no_size_limit c82 rc 0. LARGE_VALID_JSON 65537: H infrastructure_error, mutant hoan_tat. Mutation replaces the conditional decode/size rejection with unconditional UTF-8 decoding. A second mutant f.read(65537)->f.read(65536) also survives c82. Replacing only the oversized vector with valid padded JSON preserves H rc0 and kills both mutants with rc3 / DO:c82 vector 28 (extra_probes.log). Direct boundary control: 65536 bytes => hoan_tat; 65537 => infrastructure_error on H (boundary-control.json).",
+        "artifact": "/tmp/wp1463-rc1-audit/probes.log"
+      },
+      "suggested_fix": {
+        "where": "c82 VEC and the K5a test-mutant catalog; the production size check itself currently works.",
+        "how": "Add syntactically valid result JSON padded with whitespace to 65,536 and 65,537 bytes, with all identity/type/triple checks otherwise valid, plus a distinct size-check mutant.",
+        "locking_test": "Both parent runners accept the within-limit control and reject the oversized input; removing the byte limit must produce rc 3 / DO:c82, not an unrelated parse exception.",
+        "new_risks": "Keep bytes rather than Unicode-character length as the unit; avoid a truncated JSON vector that another guard also rejects."
+      }
+    },
+    {
+      "id": "PR2-C03",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "severity": "P2",
+      "axis": "standards_security",
+      "location": "ops/specs/wp1463-r1/do/do_pr2.py:290",
+      "claim": "chay_quan_sat catches TimeoutExpired and discards the Popen handle without terminating or reaping the child. A timed-out measurement can keep running and writing after the function reports failure and its temporary hook directory is removed.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/extra_probes.py",
+        "observed": "timeout=.15: function returned (None,None,LOI_CHAY: TimeoutExpired) after 0.158 s; the real child then wrote timeout-after-return after sleeping .4 s. TIMEOUT_CHILD_CONTINUED True. Harmless probe naturally exited; no lingering reviewer child.",
+        "artifact": "/tmp/wp1463-rc1-audit/extra_probes.log"
+      },
+      "suggested_fix": {
+        "where": "chay_quan_sat, which owns the process and timeout; do_cay cannot clean up the discarded handle.",
+        "how": "On timeout, terminate the owned process tree using a bounded cleanup strategy and reap it before returning KHONG_DO_DUOC. Preserve captured output and the actual timeout reason.",
+        "locking_test": "A real child (and a descendant) schedules a marker after the deadline; the helper must return failure and no marker may appear after cleanup. Keep a healthy process control and a mutant that omits cleanup.",
+        "new_risks": "Do not kill unrelated process groups; make ownership explicit and keep cleanup bounded if termination fails."
+      }
+    },
+    {
+      "id": "PR2-C04",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "severity": "P2",
+      "axis": "spec",
+      "location": "ops/specs/wp1463-r1/do/do_pr2.py:164",
+      "claim": "A direct Python child whose executable is a renamed copy is omitted from python_con. It can run -I and read a tracked out-of-zone file while the measurement reports SACH with 0 children / 0 hook starts. This also falsifies r14 Acceptance 4's remaining positive claim about the total number of Python children; the accepted surplus-hook/shell/native limits do not cover this zero-surplus direct-child counterexample.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/alias_python_probe.py",
+        "observed": "Standard interpreter -I: rc0, python_con=1, bat_dau_con=0 => KHONG_DO_DUOC. Renamed byte-for-byte interpreter -I: rc0, python_con=0, bat_dau_con=0 => SACH, though child reads CONTEXT.md. Same renamed interpreter without -I: rc0, hook records CONTEXT.md => NGOAI_VUNG. Parent reads the required ops/ci_provenance.py witness in all three cases. Reusing tu_kiem_vung with only the child executable changed to this copied interpreter gives 107/116: all nine -I/-S/-E × three-operation inputs incorrectly return SACH. See alias_matrix.py and alias_matrix.log.",
+        "artifact": "/tmp/wp1463-rc1-audit/alias_python_probe.log"
+      },
+      "suggested_fix": {
+        "where": "la_python/doc_log and the positive assurance sentence in frozen spec r14 Acceptance 4; all three vung operations share this classifier.",
+        "how": "Do not claim all Python launches from filename matching. Conservatively classify unknown executables as not measured unless positively known outside the measured class, or obtain a new explicit owner-approved limitation narrowing the guarantee to recognized interpreter launches. An expanded regex alone does not close the class; the already-planned OS-level successor is the stronger remedy.",
+        "locking_test": "Run a renamed/copied interpreter with -I, -S and -E as the sole child for each operation. It must not yield SACH; keep normal-interpreter and hooked-renamed controls. Preserve the separately accepted aggregate-surplus limitation.",
+        "new_risks": "Conservative classification may reject valid native tools; widening the regex can create false confidence. Any further assurance reduction needs explicit authority and must not be recorded as a code fix of the inherited class."
+      }
+    }
+  ],
+  "tests": [
+    {
+      "name": "preflight",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree} origin/master; git status --porcelain; sha256sum SPEC.md; git diff --numstat base H",
+      "exit_code": 0,
+      "evidence": "Exact head/tree/base/spec match; 4 files, 1499 additions, 78 deletions; clean tracked worktree."
+    },
+    {
+      "name": "tu-kiem --dot-bien",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem --dot-bien",
+      "exit_code": 0,
+      "evidence": "26/26 comparator, 116/116 zone, 28/28 mutants; KET_LUAN_TU_KIEM: DAT"
+    },
+    {
+      "name": "bare Ruff F delta",
+      "status": "passed",
+      "command": "ruff check --no-cache --select F --output-format json <3 H files / 2 base files>",
+      "exit_code": 0,
+      "evidence": "ruff 0.16.9; H 0, base 0; delta 0"
+    },
+    {
+      "name": "H light",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 CI_PROVENANCE_KHONG_DOT_BIEN=1 python3 -B ops/ci_provenance_test.py",
+      "exit_code": 0,
+      "evidence": "86/86; DOT BIEN: 522 muc CHE DO NHE; TU KIEM DAT (2); TONG DAT; A3 xanh, 0 mutant results. light.log"
+    },
+    {
+      "name": "H full (one execution only, inside vung)",
+      "status": "passed",
+      "command": "python3 -B ops/specs/wp1463-r1/do/do_pr2.py vung --luu /tmp/wp1463-rc1-audit",
+      "exit_code": 0,
+      "evidence": "Outer vung rc0; bo_day_du rc0: 86/86 cases, 522/522 GIET, 2 self-checks, TONG DAT, A3 xanh. Exactly one full invocation. 5 observed tracked files, 608/608 child/hook starts. vung.log and bo_day_du.out"
+    },
+    {
+      "name": "base cases",
+      "status": "passed",
+      "command": "cd /tmp/wp1463-rc1-audit/base-clone && PYTHONDONTWRITEBYTECODE=1 python3 -B ops/ci_provenance_test.py --tat-ca-ca",
+      "exit_code": 0,
+      "evidence": "77/77 rows rc0; full base mutation loop deliberately not repeated. base-cases.log"
+    },
+    {
+      "name": "registry real-output matrix",
+      "status": "passed",
+      "command": "python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry --tu /tmp/wp1463-rc1-audit",
+      "exit_code": 0,
+      "evidence": "Actual H light/full output files: light/light DAT, full/full DAT, full/light DO, light/full DO; KET_LUAN_REGISTRY DAT. registry.log"
+    },
+    {
+      "name": "independent targeted mutants",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-rc1-audit/independent_mutants.py",
+      "exit_code": 0,
+      "evidence": "8/8 independently authored semantic mutations produce rc3, GIET, DO:c78/c79/c81/c82/c83/c84/c85 at the matching guard. independent_mutants.log"
+    },
+    {
+      "name": "required legacy and K8 mutants",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-rc1-audit/probes.py",
+      "exit_code": 0,
+      "evidence": "T8/T18/T19 GIET DO:c66; T39/T40 GIET DO:c82 session vector 5; T45/T46 GIET DO:c86. probes.log"
+    },
+    {
+      "name": "reviewer counterexamples",
+      "status": "failed",
+      "command": "probes.py; extra_probes.py; alias_python_probe.py; alias_matrix.py (all under /tmp/wp1463-rc1-audit)",
+      "exit_code": 0,
+      "evidence": "Probe scripts execute successfully but required properties fail: AB ignores full-run rc; two size-guard mutants survive c82; timeout child continues; renamed isolated Python makes 9/116 zone expectations fail."
+    },
+    {
+      "name": "Ruff CI pin/probe contract",
+      "status": "passed",
+      "command": "python3 -B: load registry and call loi_ruff_ci()",
+      "exit_code": 0,
+      "evidence": "RUFF_CONTRACT 3 []; this is separate from bare lint. CI pins Ruff 0.15.15; locally available bare lint was Ruff 0.16.9."
+    },
+    {
+      "name": "diff whitespace",
+      "status": "passed",
+      "command": "git diff --check 1260fa0 d0e08eb",
+      "exit_code": 0,
+      "evidence": "No output."
+    },
+    {
+      "name": "PR CI / K7 / Windows / post-merge measures",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "evidence": "H unpushed; writes/dispatch prohibited by assignment; no claim of CI approval or land readiness."
+    },
+    {
+      "name": "real registry zone probes",
+      "status": "passed",
+      "command": "do_pr2.py vung --luu /tmp/wp1463-rc1-audit (same single invocation)",
+      "exit_code": 0,
+      "evidence": "Both phan_chung probes rc0, True, 30/30 rows, 7 tracked files, 79/91 child/hook starts; correct before/after four-key fingerprints. KET_LUAN_VUNG SACH."
+    },
+    {
+      "name": "executor report spot-check",
+      "status": "passed",
+      "command": "Compare KET_QUA.md blocks against independent tu-kiem.log, registry.log, vung.log",
+      "exit_code": 0,
+      "evidence": "All three blocks match exactly after the documented rc line/header/path presentation exclusions."
+    },
+    {
+      "name": "read-only final snapshot",
+      "status": "passed",
+      "command": "Compare start/end file SHA256 snapshots; git rev-parse HEAD HEAD^{tree}; git diff; git diff --cached",
+      "exit_code": 0,
+      "evidence": "18775 files at both endpoints, 0 content/path deltas including ignored files; exact H/tree unchanged, empty worktree/index diffs. Pre-existing ignored .codex/ unchanged."
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-C01"
+      ],
+      "highest_open_severity": "P2",
+      "source": "Spec review history PR2-S11; new A/B process-status manifestation on H",
+      "general_fix": "Keep liveness tied to each measured process.",
+      "closure_test": "Each full/light process rc failure independently rejects the A/B command."
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "PR2-C02"
+      ],
+      "highest_open_severity": "P2",
+      "source": "Inherited class named in spec; first code-review manifestation on H",
+      "general_fix": "Isolate each guard with otherwise valid counterexamples.",
+      "closure_test": "Valid oversized JSON kills the removed-size-check mutant as DO:c82."
+    },
+    {
+      "class_slug": "observation-timeout-leaves-process-running",
+      "finding_ids": [
+        "PR2-C03"
+      ],
+      "highest_open_severity": "P2",
+      "source": "New helper on H, code review 1",
+      "general_fix": "Keep ownership through timeout cleanup and reap all owned children.",
+      "closure_test": "Real delayed markers from child/descendant do not appear after timeout cleanup."
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-C04"
+      ],
+      "highest_open_severity": "P2",
+      "source": "Inherited PR2-S13; owner accepted aggregate/native/shell limits, not this uncounted sole direct Python child. Reproduced across all three operations and all three isolation flags (nine manifestations of one cause).",
+      "general_fix": "Scope the positive claim to observable interpreter identity or make unknown executable classification fail closed.",
+      "closure_test": "Renamed sole isolated Python child cannot report SACH."
+    }
+  ],
+  "hunt_table": [
+    {
+      "hypothesis": "Write set or registry logic expanded",
+      "command": "git diff --numstat base H; compare top-level registry AST",
+      "real_output": "4 files, 1499 added; only NHE, MAU_DAY_DU, MAU_NHE, VUNG_THEM AST nodes differ",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "A/B ignores a failed process",
+      "command": "python3 -B /tmp/wp1463-rc1-audit/probes.py",
+      "real_output": "base_rc42 and head_rc42 both DAT rc0",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "Size-boundary test loses its guard",
+      "command": "python3 -B /tmp/wp1463-rc1-audit/probes.py",
+      "real_output": "c82 rc0 on mutant; oversized valid JSON accepted",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "T8/T18/T19 no longer die at c66",
+      "command": "probes.py: chay_dot_bien_test(T8/T18/T19)",
+      "real_output": "all GIET / DO:c66 / hoan_tat",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "T39/T40 are false credit",
+      "command": "probes.py: chay_dot_bien_test(T39/T40)",
+      "real_output": "both GIET / DO:c82 vector 5 session mismatch",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "K8 required mutants lack teeth",
+      "command": "probes.py: chay_dot_bien_test(T45/T46)",
+      "real_output": "both GIET / DO:c86",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "New code introduces Ruff F errors",
+      "command": "ruff check --no-cache --select F",
+      "real_output": "base=0 H=0",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Observation timeout leaves work running",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/extra_probes.py",
+      "real_output": "TIMEOUT_CHILD_CONTINUED True after timeout return",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "Accepted aggregate limitation is the only unhooked direct-child gap",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-rc1-audit/alias_python_probe.py",
+      "real_output": "Renamed sole Python -I: SACH with 0/0; standard -I: KHONG_DO_DUOC with 1/0; hooked renamed: NGOAI_VUNG",
+      "result": "LỖI"
+    },
+    {
+      "hypothesis": "Hostile diff input can select light for a zone change",
+      "command": "Python doc_diff/ke_hoach probes; see diff_probes_pass.json",
+      "real_output": "Actual base..H => day_du; reverse push, invalid/missing SHA and unknown event => day_du. Injected rename/deletion/mixed paths => day_du; docs/near-name controls => nhe. --no-renames and -z verified.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The old formula changes on valid execution states",
+      "command": "python3 -B /tmp/wp1463-rc1-audit/extra_probes.py",
+      "real_output": "All 474 DOT_BIEN, 11 DOT_BIEN_TEST, 2 TU_KIEM tuples preserved; 77 old CA names retained. 1440 synthetic state combinations: unmutated step-3 floor hits 0. This finite grid is not an exhaustive proof about every real execution.",
+      "result": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "4 files / 1499 added lines",
+      "observed": "4 / 1499",
+      "result": "matched"
+    },
+    {
+      "claim": "tu-kiem 26/26 + 116/116; mutants 28/28",
+      "observed": "26/26 + 116/116; 28/28",
+      "result": "matched"
+    },
+    {
+      "claim": "Ruff F delta 0",
+      "observed": "0 - 0 = 0",
+      "result": "matched"
+    },
+    {
+      "claim": "H light 86/86, 522 planned mutations, 2 self-checks",
+      "observed": "86/86; 522 CHE DO NHE; 2; rc0",
+      "result": "matched"
+    },
+    {
+      "claim": "base full 77/77, 485/485",
+      "observed": "77 base cases rc0; immutable catalog 474+11=485; full base mutation execution not repeated",
+      "result": "partially_measured"
+    },
+    {
+      "claim": "registry 2x2 matrix",
+      "observed": "DAT/DAT/DO/DO; rc0 on actual H outputs",
+      "result": "matched"
+    },
+    {
+      "claim": "pre-existing T8/T18/T19 remain GIET at c66",
+      "observed": "3/3 GIET DO:c66; 11 original test-mutant tuples unchanged",
+      "result": "matched"
+    },
+    {
+      "claim": "no literal skip-CI commit markers",
+      "observed": "0 matching conventional skip markers in base..H commit bodies",
+      "result": "matched"
+    },
+    {
+      "claim": "no introduced secrets",
+      "observed": "Changed lines inspected; 0 common private-key/token signatures. No claim of exhaustive secret-detection proof.",
+      "result": "bounded_scan_clean"
+    },
+    {
+      "claim": "executor timing 646.5/634.6/153.5 seconds",
+      "observed": "Historical sequential timing not independently reproduced; reviewer ran H full once with hook and concurrent probes.",
+      "result": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "claim": "registry gate 1677/1677",
+      "observed": "Separate full registry CLI not run; vung executes phan_chung but suppresses its count.",
+      "result": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "claim": "H full 86/86; 522/522; 2 self-checks",
+      "observed": "86/86; 522/522; 2; child rc0; A3 xanh",
+      "result": "matched"
+    },
+    {
+      "claim": "vung full: 5 files, 608/608",
+      "observed": "5 files, 608/608, SACH, rc0",
+      "result": "matched"
+    },
+    {
+      "claim": "vung two registry probes: 7 files and 79/91 each",
+      "observed": "Both 7 files, 79/91, 30/30, phan_chung=True, SACH, rc0",
+      "result": "matched"
+    }
+  ],
+  "notes": [
+    "Read-only repository; all reviewer artifacts and mutations outside checkout under /tmp. No GitHub writes or workflow dispatch.",
+    "Blocked for design/spec checkpoint; content disposition is changes_requested. No approval or cross_approved assurance is claimed.",
+    "Owner-accepted aggregate-hook/native/shell observation limits remain risks, not new defects.",
+    "Runtime sandbox workspace-write, repository read-only by task discipline; no claim of OS-enforced repository read-only.",
+    "Initial complete verdict written within first 15 minutes; updated as independent evidence arrived.",
+    "The inherited zone class is not marked fixed. C04 concerns an additional direct-interpreter gap with zero surplus hooks; accepted native/shell/aggregate-surplus limitations are not treated as defects.",
+    "1,499/1,500 added lines already used. Remediation must respect the size cap or obtain revised authority.",
+    "Preflight clone contains a pre-existing ignored .codex directory; snapshot includes ignored file hashes.",
+    "An initial disposable Git fixture failed because its inherited signing helper required denied network access; no bypass used. Hostile-diff probes instead used existing real commits and clearly labeled injected Git output.",
+    "One mutation-probe setup initially found a nonunique anchor; the anchor was made unique in reviewer scratch and the final targeted run passed.",
+    "Main calls inside c66/c79 are fully mocked and do not recurse into the real suite; treated according to the recursion-prevention purpose of section 2. Early drafting order before SACH cannot be independently reconstructed from commit timestamps."
+  ],
+  "updated_at_utc": "2026-11-26T07:27:48.342287+00:00",
+  "class_counts": {
+    "open_classes": 4,
+    "open_manifestations": 14,
+    "manifestation_definition": "C01: base/H full rc (2); C02: removed size guard/short read (2); C03: timeout continuation (1); C04: 3 flags x 3 operations (9)."
+  },
+  "content_disposition": "changes_requested",
+  "checkpoint_required": {
+    "reason": "PR2-S13 zone-audit-open-coverage-incomplete recurs outside the owner-accepted residual, and r14 still claims all Python children are counted. Protocol §12 requires a design checkpoint for a class recurring in three reviews; frozen-spec correction or further assurance reduction needs coordinator/owner authority. No remediation or extra review call initiated.",
+    "source": "docs/PROTOCOL_DA_PHIEN.md §8.3/§12; SPEC r14 Acceptance 4 and review history r8/r9/r11/r12/r13."
+  },
+  "acceptance": {
+    "sections_1_2": "Light/full mode and output checks pass; targeted own flag/dispatch mutants die.",
+    "section_3": "Exactly the four specified registry data assignments change; other top-level AST nodes identical.",
+    "section_4": "Structured status, raw cu, legacy formula and equivalence controls exercised; size-limit test has C02 coverage gap.",
+    "section_5": "Built-in mutation plan and independent mutants exercised; C02 and C04 expose incomplete guard coverage.",
+    "section_6": "Existing tuples, phan_hang AST/behavior and product blob preserved.",
+    "acceptance_1": "H full and light passed with actual rc0; 86/86 in each, full 522/522 GIET.",
+    "acceptance_2": "Tuple/AST preservation inspected; AB command fails rc fault-injection (C01); full A/B not rerun to honor one full invocation.",
+    "acceptance_3": "Reproduced real-output 2x2 registry matrix.",
+    "acceptance_4": "Actual H vung SACH/rc0 and all recorded counts reproduced; independent C04 still falsifies the positive assurance claim outside the accepted residual.",
+    "acceptance_5": "No independent sequential timing reproduction; no performance threshold asserted.",
+    "acceptance_6_7": "New cases, catalog and fixture hash exercised; size-boundary gap C02.",
+    "acceptance_8": "Ruff delta and size pass; separate registry-count gate and CI/K7/Windows not independently measured.",
+    "acceptance_9": "Code hashes, tu-kiem, registry and all three vung outputs match recorded evidence. Declared cosmetic exclusions are not outcome changes."
+  },
+  "executor_interpretations": {
+    "1_early_drafting": "KHÔNG ĐO ĐƯỢC: commit timestamps do not show whether the measured working tree remained frozen until early vung finished. Commit-only-after-SACH is not evidence of no earlier writes.",
+    "2_real_registry_control": "Actual H vung supplies the real-registry healthy control; tu-kiem uses synthetic trees with real processes. This is not proof that its synthetic coverage is complete (C04).",
+    "3_shared_old_formula": "Confirmed one shared pure cong_thuc_cu; T8/T18/T19 unchanged and killed at c66. Unmutated step-3 floor not hit in 1,440 synthetic states; no universal real-run claim inferred.",
+    "4_diagnostics_before_A3": "Confirmed actual H outputs have exactly one A3 line followed immediately by four contiguous legacy lines.",
+    "5_HONG_hoan_tat": "Defensive fail-closed handling; valid child-result triples plus hop_thanh exclude this combination in normal runner output. No finding.",
+    "6_three_group_a_checks": "Jointly enforce unique/full tuples, same table and no missing names. All legacy tuples retained; independently inspected self-test vectors match the intended split.",
+    "7_last_TONG": "Valid for the independent comparison predicates; full-output MOI separately rejects a line appended after TONG. That appended-line fixture fails only kho_va_ben_doc_cu as required.",
+    "8_root_for_tu_kiem": "Needs H source files for synthetic output generation, not Git metadata. No Git subprocess required by tu-kiem itself; read-only source import is documented.",
+    "9_registry_mutant_statements": "Valid: mutate only temporary registry copies, then evaluate through the real loader. New D1-D12 are in the 522-item full plan.",
+    "10_print_subcommand": "All four subcommands print their own results and --luu stores raw output. No separate printing verb; treated as the requested output capability rather than an additional CLI spelling.",
+    "11_KET_QUA_edits": "The dropped clone stderr hint and substituted scratch path are declared in KET_QUA.md; not silent changes to measured test outcomes. Timings remain executor historical measurements."
+  },
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "cpu_count": 4,
+    "codex_cli": "0.172.0",
+    "sandbox_mode": "workspace-write with repository read-only by task discipline",
+    "network": "restricted",
+    "git_core_abbrev": 7,
+    "ruff_lint": "0.16.9",
+    "ruff_ci_pin": "0.15.15",
+    "actionlint": "available at /root/.local/bin/actionlint",
+    "shellcheck": "available at /usr/bin/shellcheck",
+    "runtime_model_effort": "KHONG_DO_DUOC; launcher run metadata had no served-model/effort attestation while this review was running."
+  },
+  "snapshot": {
+    "head_start": "d0e08eba69d93fa69d0ad948177c1466e2094fd8",
+    "head_end": "d0e08eba69d93fa69d0ad948177c1466e2094fd8",
+    "tree_start": "d53fce1bb3a5015da96cdc37f07d14d7a7d2bfc1",
+    "tree_end": "d53fce1bb3a5015da96cdc37f07d14d7a7d2bfc1",
+    "files_start": 18775,
+    "files_end": 18775,
+    "content_or_path_deltas": 0,
+    "limitation": "Endpoint equality does not prove that no transient write/revert ever occurred. No source repository outside the supplied clone was observed."
+  },
+  "artifact_directory": "/tmp/wp1463-rc1-audit",
+  "output_file": "/tmp/wp1463-code-review-1.json",
+  "review_complete": true,
+  "evidence_manifest": {
+    "path": "/tmp/wp1463-rc1-audit/evidence-manifest.json",
+    "sha256": "88e0eca43a51860dc2395531cfde869949f64d62e82d48d9d935036c5606c621"
+  }
+}

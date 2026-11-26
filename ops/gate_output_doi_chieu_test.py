@@ -1137,10 +1137,34 @@ BO_SINH_MONG = (("—", (), 31, ()), ("", ("Cs",), 30, ("Cs",)),
                 ("", (), 31, ()), ("\r\n", ("Cs",), 30, ("Cs",)))
 
 
+def _mien_doi_so():
+    """Tập (cam, bo_loai) mà các ca `aNNN_` của tệp này THỰC gọi bộ sinh với — đọc bằng AST từ mã nguồn, ĐỘC LẬP với BO_SINH_MONG (review mã
+    lượt 3 R3-01: bỏ, lặp hay thay một bộ trong BO_SINH_MONG, hoặc cắt vòng lặp của kiem_bo_sinh, phải ĐỎ)."""
+    import ast
+    ra = set()
+    for f in ast.parse(Path(__file__).read_text(encoding="utf-8")).body:
+        if isinstance(f, ast.FunctionDef) and f.name[0] == "a" and f.name.split("_")[0] not in ("a135", "a136"):
+            for n in ast.walk(f):
+                if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "_mau_loai_unicode":
+                    d = [ast.literal_eval(x) for x in (*n.args, *(k.value for k in n.keywords))]
+                    ra.add((d[0], tuple(sorted(d[1])) if len(d) > 1 else ()))
+    return ra
+
+
+_NHO_BO_SINH = {}
+
+
+def _bo_sinh_nho(f, cam, bo=()):   # nhớ đệm theo CHÍNH hàm và đối số (a136 vá hàm giả thì khoá khác, không bị che) — chỉ để nhanh
+    k = (f, cam, tuple(bo))
+    return _NHO_BO_SINH[k] if k in _NHO_BO_SINH else _NHO_BO_SINH.setdefault(k, tuple(f(cam, bo)))
+
+
 def kiem_bo_sinh(bo_sinh):
     """Kiểm MỘT bộ sinh (tham số, để a136 đưa bộ sinh giả vào) với năm bộ đối số trên; ĐỎ ở bộ đầu tiên lệch, nêu TÊN từng mệnh đề lệch."""
     from unicodedata import category
+    goi = []
     for cam, bo_loai, so, vang in BO_SINH_MONG:
+        goi.append((cam, tuple(bo_loai)))
         ra = tuple(bo_sinh(cam, bo_loai))
         bmp = [category(c) for c in ra if ord(c) <= 0xFFFF]
         lech = [ten for ten, dat in (("so_phan_tu", len(ra) == so), ("category_vang", sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)),
@@ -1148,24 +1172,29 @@ def kiem_bo_sinh(bo_sinh):
                                      ("tu_0080", all(ord(c) >= 0x80 for c in ra)),
                                      ("cuoi_ngoai_bmp", bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1)) if not dat]
         bang(not lech, f"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}")
+    mien = sorted(_mien_doi_so())
+    bang(sorted(goi) == mien and len(mien) == 5, f"miền đối số lệch đặc tả: đã kiểm {sorted(goi)!r}, các ca dùng {mien!r}")
 
 
 @ca
 def a135_bo_sinh_dung_mien_dac_ta():
-    kiem_bo_sinh(_mau_loai_unicode)
+    kiem_bo_sinh(lambda cam, bo=(): _bo_sinh_nho(_mau_loai_unicode, cam, bo))
 
 
 @ca
 def a136_a135_do_khi_bo_sinh_lech_mien():
     """#1539 P7: chạy CHÍNH a135 với bộ sinh giả — bỏ một category, bỏ ký tự ngoài BMP, bỏ lọc `cam`, bỏ lọc `bo_loai`, và các biến thể cho từng
-    chiều sai của các mệnh đề còn lại (lặp category, đại diện ASCII, rỗng, thừa, sai vị trí, hai phía biên) — mỗi biến thể phải ĐỎ ở đúng bộ đối số và đúng các mệnh đề; bộ sinh thật thì XANH."""
+    chiều sai của các mệnh đề còn lại (lặp category, đại diện ASCII, rỗng, thừa, sai vị trí, hai phía biên), mỗi bộ đối số một bộ sinh giả chỉ
+    sai tại đúng bộ ấy, và miền đối số bị bỏ / lặp / thay một bộ — mỗi biến thể phải ĐỎ ở đúng bộ đối số và đúng các mệnh đề; bộ sinh thật thì XANH."""
     from unicodedata import category
     from unittest.mock import patch
-    that, a135, cam_3, nho = _mau_loai_unicode, "a135_bo_sinh_dung_mien_dac_ta", BO_SINH_MONG[2][0], {}
-
-    def goc(cam, bo=()):   # nhớ đệm theo ĐỐI SỐ, chỉ để nhanh; biến thể "that" gọi thẳng bộ sinh, không qua đây
-        return nho.get((cam, tuple(bo))) or nho.setdefault((cam, tuple(bo)), that(cam, bo))
-    for ten, gia, dau in (
+    that, a135, cam_3 = _mau_loai_unicode, "a135_bo_sinh_dung_mien_dac_ta", BO_SINH_MONG[2][0]
+    goc = lambda cam, bo=(): _bo_sinh_nho(that, cam, bo)   # noqa: E731 — bộ sinh THẬT, nhớ đệm chung với a135
+    mien = sorted(_mien_doi_so())
+    bang(len(mien) == 5, f"các ca phải dùng đúng năm bộ đối số: {mien!r}")
+    rieng = [(f"chi sai o bo {k}", lambda cam, bo=(), ck=ck, bk=bk: goc(cam, bo)[:-1] if (cam, tuple(sorted(bo))) == (ck, bk) else goc(cam, bo),
+              f"({ck!r}, {bk!r}) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']") for k, (ck, bk) in enumerate(mien)]   # R3-01: mỗi bộ một phản chứng
+    for ten, gia, dau in (*rieng,
         ("that", that, None),
         ("bo Mn", lambda cam, bo=(): tuple(c for c in goc(cam, bo) if category(c) != "Mn"), "('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']"),
         ("bo ngoai BMP", lambda cam, bo=(): goc(cam, bo)[:-1], "('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"),
@@ -1187,6 +1216,15 @@ def a136_a135_do_khi_bo_sinh_lech_mien():
         with patch.dict(globals(), {"_mau_loai_unicode": gia}):
             rc, dong = chay_ca(a135)
         bang((rc, dong) == ((0, "") if dau is None else (3, f"DO:{a135}:bộ sinh{dau}")), f"bộ sinh {ten}: rc={rc} {dong[:300]}")
+    m = BO_SINH_MONG   # R3-01: miền đối số của kiem_bo_sinh bị bỏ / lặp / thay một bộ (bộ sinh thật) phải ĐỎ; bản sao nguyên vẹn XANH
+    them = (("x", (), 31, ()),)   # bộ thứ sáu hợp lệ với bộ sinh thật: các ca và BO_SINH_MONG cùng có sáu bộ ⇒ chỉ chốt "đúng năm bộ" bắt
+    for ten, hang, mien_gia in (("ban sao nguyen ven", tuple(list(m)), None), ("bo bo 4", m[:3] + m[4:], None), ("bo bo 5", m[:-1], None),
+                                ("bo 5 thanh ban sao bo 2", m[:4] + m[1:2], None), ("thua ban sao bo 1", m + m[:1], None),
+                                ("ca dung sau bo", m + them, lambda: set(mien) | {them[0][:2]})):
+        with patch.dict(globals(), {"BO_SINH_MONG": hang, **({"_mien_doi_so": mien_gia} if mien_gia else {})}):
+            rc, dong = chay_ca(a135)
+        bang((rc, dong) == (0, "") if ten == "ban sao nguyen ven" else rc == 3 and dong.startswith(f"DO:{a135}:miền đối số lệch đặc tả: đã kiểm "),
+             f"BO_SINH_MONG {ten}: rc={rc} {dong[:300]}")
 
 
 @ca

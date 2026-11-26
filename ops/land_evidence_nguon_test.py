@@ -1009,7 +1009,7 @@ def c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o():
     TRONG BỘ NHỚ. Mỗi chốt của c36 có phản chứng cho TỪNG chiều sai. Số phần tử: THIẾU trên a129 (bộ sinh bỏ Mn · mất một `kiem(...)`), THỪA
     trên a126 (thêm một bản sao ô đầu). Số phần tử KHÁC NHAU: THIẾU (một ô thành BẢN SAO ô khác — a129 đúng cặp của reviewer, a126 một ô rời ·
     Mn thành bản sao Mc), THỪA (kỳ vọng "gặp lại" tăng 1 trên a126 nguyên vẹn). Tập category: Mn thành ký tự Mc khác. Ngoài BMP ở hai phía
-    biên: U+FFFF phải ĐỎ, U+10000 phải XANH. Bản nguyên vẹn của CẢ HAI ca đi cùng đường (và cùng sổ nhớ đệm YAML của c36) phải XANH."""
+    biên: U+FFFF phải ĐỎ, U+10000 phải XANH. Bản nguyên vẹn của a126, a129 và a131 (ca không gọi bộ sinh) đi cùng đường (và cùng sổ nhớ đệm YAML của c36) phải XANH."""
     ten_a, c36, goc_nap, loai_cua = "gate_output_doi_chieu_test.py", "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a", nap_a, unicodedata.category
 
     def voi_bo_sinh(sua):
@@ -1029,6 +1029,7 @@ def c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o():
              a126 + "51 phần tử KHÁC NHAU (đặc tả: đúng 52)", None),
             ("a126", "thêm một bản sao ô đầu", nap_sua(ten_a, o_dau, o_dau * 2), a126 + "53 phần tử (đặc tả: đúng 52), rc=0 ", None),
             ("a126", "nguyên vẹn, kỳ vọng gặp lại +1", goc_nap(ten_a), a126 + "52 phần tử KHÁC NHAU (đặc tả: đúng 51)", lap_them),
+            ("a131", "nguyên vẹn", goc_nap(ten_a), None, None),   # R3-02: ca không gọi bộ sinh (`tru is None`) phải đi đúng nhánh, không vỡ rc 4
             ("a129", "nguyên vẹn", goc_nap(ten_a), None, None),
             ("a129", "bỏ Mn", voi_bo_sinh(lambda d: tuple(c for c in d if loai_cua(c) != "Mn")), a129 + "35 phần tử (đặc tả: đúng 36), rc=0 ", None),
             ("a129", "mất một ô cấu trúc", nap_sua(ten_a, "    kiem(dong + duoi, ten_goc)\n", ""), a129 + "35 phần tử (đặc tả: đúng 36), rc=0 ", None),

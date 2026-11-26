@@ -217,6 +217,7 @@ lease_until: '2026-11-26T22:29:00Z'
 lease_expires_at_utc: '2026-11-26T22:29:00Z'
 max_lease_hours: 8
 revision_ly_do: 'Cross-review luot 33 (APPROVE, 0 P1, J1-J2 P2); chu kho doi het P2. Da dung 33/34.'
-review_calls_limit: 34
+review_calls_limit: 35
 review_calls_used_truoc: 33
 inference_calls_limit: 0
+review_calls_ghi_chu: 'Luot 34 lan 1 (run e535bd34) bi dung giua chung theo chi thi chu kho "Va va review theo lop loi, khong phai tung loi rieng le, co hint patch"; chay lai voi prompt theo lop (tinh 2 loi goi, tran 35).'

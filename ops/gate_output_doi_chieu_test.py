@@ -1157,13 +1157,16 @@ def a135_bo_sinh_dung_mien_dac_ta():
 
 @ca
 def a136_a135_do_khi_bo_sinh_lech_mien():
-    """#1539 P7: chạy CHÍNH a135 với bộ sinh giả — bỏ một category, bỏ ký tự ngoài BMP, bỏ lọc `cam`, bỏ lọc `bo_loai`, và hai biến thể cho hai
-    mệnh đề còn lại (lặp category, đại diện ASCII) — mỗi biến thể phải ĐỎ ở đúng bộ đối số và đúng các mệnh đề; bộ sinh thật thì XANH."""
+    """#1539 P7: chạy CHÍNH a135 với bộ sinh giả — bỏ một category, bỏ ký tự ngoài BMP, bỏ lọc `cam`, bỏ lọc `bo_loai`, và các biến thể cho từng
+    chiều sai của các mệnh đề còn lại (lặp category, đại diện ASCII, rỗng, thừa, sai vị trí, hai phía biên) — mỗi biến thể phải ĐỎ ở đúng bộ đối số và đúng các mệnh đề; bộ sinh thật thì XANH."""
     from unicodedata import category
     from unittest.mock import patch
-    goc, a135, cam_3 = _mau_loai_unicode, "a135_bo_sinh_dung_mien_dac_ta", BO_SINH_MONG[2][0]
+    that, a135, cam_3, nho = _mau_loai_unicode, "a135_bo_sinh_dung_mien_dac_ta", BO_SINH_MONG[2][0], {}
+
+    def goc(cam, bo=()):   # nhớ đệm theo ĐỐI SỐ, chỉ để nhanh; biến thể "that" gọi thẳng bộ sinh, không qua đây
+        return nho.get((cam, tuple(bo))) or nho.setdefault((cam, tuple(bo)), that(cam, bo))
     for ten, gia, dau in (
-        ("that", goc, None),
+        ("that", that, None),
         ("bo Mn", lambda cam, bo=(): tuple(c for c in goc(cam, bo) if category(c) != "Mn"), "('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']"),
         ("bo ngoai BMP", lambda cam, bo=(): goc(cam, bo)[:-1], "('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"),
         ("bo loc cam", lambda cam, bo=(): goc("", bo), f"({cam_3!r}, ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']"),
@@ -1172,6 +1175,14 @@ def a136_a135_do_khi_bo_sinh_lech_mien():
                                                          for c in goc(cam, bo)), "('—', ()) lệch đặc tả: ['category_vang', 'lap_category']"),
         ("Lu thanh ASCII", lambda cam, bo=(): tuple("A" if category(c) == "Lu" and ord(c) <= 0xFFFF else c for c in goc(cam, bo)),
          "('—', ()) lệch đặc tả: ['tu_0080']"),
+        # review mã lượt 2 (R2-01, đóng bằng bảng toán tử): mỗi chiều sai của từng mệnh đề một bộ sinh giả; hai phía biên U+007F/U+0080, U+FFFF/U+10000.
+        ("rong", lambda cam, bo=(): (), "('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'cuoi_ngoai_bmp']"),
+        ("thua mot ngoai BMP", lambda cam, bo=(): (*goc(cam, bo), "𐐁"), "('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"),
+        ("ngoai BMP len dau, cuoi la U+FFFF thay dai dien Cn", lambda cam, bo=(): (goc(cam, bo)[-1], *(c for c in goc(cam, bo)[:-1] if category(c) != "Cn"), chr(0xFFFF)),
+         "('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']"),
+        ("Lu thanh U+007F", lambda cam, bo=(): tuple(chr(0x7F) if category(c) == "Lu" and ord(c) <= 0xFFFF else c for c in goc(cam, bo)),
+         "('—', ()) lệch đặc tả: ['category_vang', 'lap_category', 'tu_0080']"),
+        ("cuoi la U+10000", lambda cam, bo=(): (*goc(cam, bo)[:-1], chr(0x10000)), None),
     ):
         with patch.dict(globals(), {"_mau_loai_unicode": gia}):
             rc, dong = chay_ca(a135)

@@ -9,11 +9,13 @@ giết (bài học CLAUDE.md "bị giết không phải bị giết ĐÚNG LÝ D
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TONG: DAT`. Thoát 0 chỉ khi cả ba.
 """
 import contextlib
+import copy
 import hashlib
 import importlib.util
 import io
 import json
 import os
+import pickle
 import shutil
 import subprocess
 import sys
@@ -830,6 +832,18 @@ def ky_tu_ngoai_ascii(x):
     return set().union(*map(ky_tu_ngoai_ascii, [*x, *x.values()] if isinstance(x, dict) else x if isinstance(x, (list, tuple)) else ()))
 
 
+NHO_YAML = {}
+
+
+def nho_dem(ten, ham):
+    """Nhớ đệm một hàm của PyYAML theo ĐỐI SỐ (chuỗi/byte nguyên văn, hoặc pickle của đối tượng, kèm tham số tên), trả BẢN SAO — chỉ để nhanh:
+    a129 nạp và ghi lại cùng tệp provenance 94 KB cho từng phần tử. Dùng CHUNG cho c36 và mọi lượt c40 chạy lại c36 (cùng đường, cùng sổ)."""
+    def goi(x, **k):
+        khoa = (ten, x if isinstance(x, (str, bytes)) else pickle.dumps(x), tuple(sorted(k.items())))
+        return copy.deepcopy(NHO_YAML[khoa] if khoa in NHO_YAML else NHO_YAML.setdefault(khoa, ham(x, **k)))
+    return goi
+
+
 def nap_a(ten):   # nạp theo ĐƯỜNG DẪN trong kho, không theo biến môi trường (bộ quét luật 9 trỏ biến ấy vào bản đột biến)
     spec = importlib.util.spec_from_file_location(ten.replace(".", "_") + "_cho_l8", HERE / ten)
     mod = importlib.util.module_from_spec(spec)
@@ -868,20 +882,21 @@ def c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a():
             m.main(["--root", str(ROOT_THAT), "--tep", str(Path(tam) / TEN)])
         return dong_l8(ra.getvalue())
     that.kiem_ho_so, a._M[:] = qua_l8, [that]   # hàm lá vẫn là module A THẬT; chỉ consumer đổi sang L8
-    for tt, ten in chon.items():
-        (o_cau_truc, so_lan, tru, lap), truoc = A_CA[tt], dem[0]
-        mong = o_cau_truc + so_lan * (len(LOAI) - len(tru or ()) + 1)
-        thay.clear()
-        van_tay.clear()
-        rc, dong = a.chay_ca(ten)
-        if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này
-            raise RuntimeError(dong)
-        bang(rc == 0 and dem[0] - truoc == mong, f"{ten} qua main → L8: {dem[0] - truoc} phần tử (đặc tả: đúng {mong}), rc={rc} {dong[:600]}")
-        bang(len(van_tay) == mong - lap, f"{ten} qua main → L8: {len(van_tay)} phần tử KHÁC NHAU (đặc tả: đúng {mong - lap})")
-        if tru is not None:   # bốn chốt RIÊNG: số phần tử · số phần tử khác nhau (trên) · tập category · ngoài BMP — c40 đo từng chốt
-            thieu = sorted(set(LOAI) - set(tru) - {unicodedata.category(c) for c in thay})
-            bang(not thieu, f"{ten} qua main → L8: thiếu general category {thieu}")
-            bang(any(ord(c) > 0xFFFF for c in thay), f"{ten} qua main → L8: không có ký tự ngoài BMP")
+    with mock.patch.multiple(yml, safe_load=nho_dem("safe_load", yml.safe_load), safe_dump=nho_dem("safe_dump", yml.safe_dump)):
+        for tt, ten in chon.items():
+            (o_cau_truc, so_lan, tru, lap), truoc = A_CA[tt], dem[0]
+            mong = o_cau_truc + so_lan * (len(LOAI) - len(tru or ()) + 1)
+            thay.clear()
+            van_tay.clear()
+            rc, dong = a.chay_ca(ten)
+            if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này
+                raise RuntimeError(dong)
+            bang(rc == 0 and dem[0] - truoc == mong, f"{ten} qua main → L8: {dem[0] - truoc} phần tử (đặc tả: đúng {mong}), rc={rc} {dong[:600]}")
+            bang(len(van_tay) == mong - lap, f"{ten} qua main → L8: {len(van_tay)} phần tử KHÁC NHAU (đặc tả: đúng {mong - lap})")
+            if tru is not None:   # bốn chốt RIÊNG: số phần tử · số phần tử khác nhau (trên) · tập category · ngoài BMP — c40 đo từng chốt
+                thieu = sorted(set(LOAI) - set(tru) - {unicodedata.category(c) for c in thay})
+                bang(not thieu, f"{ten} qua main → L8: thiếu general category {thieu}")
+                bang(any(ord(c) > 0xFFFF for c in thay), f"{ten} qua main → L8: không có ký tự ngoài BMP")
 
 
 @ca
@@ -947,7 +962,7 @@ def nap_sua(ten, cu, moi):
 def c39_c37_do_khi_bo_sinh_lech_mien():
     """#1539 P1–P3, P6: chạy CHÍNH c37 với bộ sinh của đợt A đã bị sửa TRONG BỘ NHỚ — bỏ TỪNG category trong 29, bỏ ký tự ngoài BMP, thừa
     một phần tử, lặp một category, đổi đại diện thành bản sao / ký tự khác loại / ký tự ASCII — đều phải ĐỎ ở chốt vũ trụ của c37 (nêu tên
-    category). Review mã lượt 1 R1-01: chốt số ô 648 có phản chứng riêng (c37 mất MỘT ô rời, vũ trụ vẫn đúng 158). `ky8` ở đây chỉ ĐẾM ô: ca này
+    category). Review mã lượt 1 R1-01: chốt số ô 648 có phản chứng riêng ở CẢ HAI chiều (c37 mất / thừa MỘT ô rời, vũ trụ vẫn đúng 158). `ky8` ở đây chỉ ĐẾM ô: ca này
     đo hai chốt TRƯỚC vòng ô (phản chứng nào cũng phải 0 ô, bản nguyên vẹn đúng 648 ô), KHÔNG đo consumer — consumer là việc của chính c37."""
     a, c37, loai_cua, nho, o = nap_a("gate_output_doi_chieu_test.py"), "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong", unicodedata.category, {}, []
     goc = lambda *x, that=a._mau_loai_unicode: nho.get(x) or nho.setdefault(x, that(*x))   # noqa: E731 — nhớ đệm theo ĐỐI SỐ, chỉ để nhanh
@@ -963,12 +978,23 @@ def c39_c37_do_khi_bo_sinh_lech_mien():
              ("lặp category Ll", lambda *x: (*goc(*x), "é"), vt + "159 ký tự (159 khác nhau), category lệch ['Ll'], 1 ngoài BMP"),
              ("Mn thành bản sao Mc", doi("Mn", "Mc"), vt + "158 ký tự (157 khác nhau), category lệch ['Mn', 'Mc'], 1 ngoài BMP"),
              ("Mn thành ký tự Mc KHÁC", doi("Mn", chr(0x93B)), vt + "158 ký tự (158 khác nhau), category lệch ['Mn', 'Mc'], 1 ngoài BMP"),   # chỉ `lech` bắt
-             ("Lu thành ASCII 'A'", doi("Lu", "A"), vt + "158 ký tự (157 khác nhau), category lệch [], 1 ngoài BMP")]   # chỉ mệnh đề KHÁC NHAU bắt
-    bang(len(bien) == 29 + 7, f"phải đủ 29 category và bảy biến thể: {len(bien)}")
+             ("Lu thành ASCII 'A'", doi("Lu", "A"), vt + "158 ký tự (157 khác nhau), category lệch [], 1 ngoài BMP"),   # chỉ mệnh đề KHÁC NHAU bắt
+             ("ngoài BMP thành U+FFFF", lambda *x: (*goc(*x)[:-1], chr(0xFFFF)), vt + "158 ký tự (158 khác nhau), category lệch ['Cn'], 0 ngoài BMP"),   # biên BMP: phải ĐỎ
+             ("ngoài BMP thành U+10000", lambda *x: (*goc(*x)[:-1], chr(0x10000)), None)]   # biên BMP phía kia: phải XANH, đủ 648 ô
+    bang(len(bien) == 29 + 9, f"phải đủ 29 category và chín biến thể: {len(bien)}")
+    for neo_sai in ("\x00", "import "):   # neo xuất hiện 0 lần / nhiều lần: `nap_sua` phải ĐỎ bằng tín hiệu chốt, không sửa bừa
+        try:
+            nap_sua("land_evidence_nguon_test.py", neo_sai, "")
+        except TinHieuChotCa:
+            continue
+        except Exception:   # noqa: S110 — sửa bừa rồi vỡ lúc nạp cũng là KHÔNG đỏ đúng chốt
+            pass
+        bang(False, f"nap_sua nhận neo không xuất hiện đúng một lần: {neo_sai!r}")
     ten_b, o_roi = "land_evidence_nguon_test.py", '("nhan", "", ' + 'dung),'   # neo ghép hai mảnh: chính dòng này không được trùng neo
-    for ten, mod, gia, dau, so_o in [("nguyên vẹn", None, goc, None, 648), *((t, None, g, d, 0) for t, g, d in bien),
+    for ten, mod, gia, dau, so_o in [("nguyên vẹn", None, goc, None, 648), *((t, None, g, d, 0 if d else 648) for t, g, d in bien),
                                      ("bản sao nguyên vẹn", nap_sua(ten_b, o_roi, o_roi), goc, None, 648),
-                                     ("c37 mất một ô rời", nap_sua(ten_b, o_roi, ""), goc, "số ô lệch đặc tả: 647 (đúng 648)", 0)]:   # chỉ chốt 648 bắt
+                                     ("c37 mất một ô rời", nap_sua(ten_b, o_roi, ""), goc, "số ô lệch đặc tả: 647 (đúng 648)", 0),   # hai chiều của chốt 648
+                                     ("c37 thừa một ô rời", nap_sua(ten_b, o_roi, o_roi + " " + o_roi), goc, "số ô lệch đặc tả: 649 (đúng 648)", 0)]:
         a._mau_loai_unicode, chay = gia, (mod.chay_ca if mod else chay_ca)
         del o[:]
         with mock.patch.dict((mod.CA if mod else CA)[c37].__globals__, {"nap_a": lambda _: a, "ky8": lambda *x, **k: o.append(1)}):
@@ -979,41 +1005,35 @@ def c39_c37_do_khi_bo_sinh_lech_mien():
 
 @ca
 def c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o():
-    """#1539 P4–P6 + review mã lượt 1 R1-02: chạy CHÍNH c36, thu về MỘT ca, THẬT qua `main` → L8, với bộ test đợt A đã bị sửa TRONG BỘ NHỚ. Mỗi
-    chốt của c36 một phản chứng riêng. Số phần tử, trên a129 (36): bộ sinh bỏ Mn · a129 mất một lời gọi `kiem(...)`. Số phần tử KHÁC NHAU:
-    một ô cấu trúc thành BẢN SAO ô khác (a129: đúng cặp của reviewer; a126: một ô rời), đại diện Mn thành bản sao đại diện Mc. Tập category
-    và ngoài BMP, trên a126 (52; số phần tử và số khác nhau KHÔNG đổi): Mn thành ký tự Mc khác · ký tự ngoài BMP thành ký tự BMP khác. Bản nguyên vẹn của CẢ HAI ca đi cùng đường ấy phải XANH."""
-    import copy
-    import pickle
-    ten_a, c36, goc_nap, loai_cua, yml, nho = "gate_output_doi_chieu_test.py", "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a", nap_a, unicodedata.category, __import__("yaml"), {}
+    """#1539 P4–P6 + review mã lượt 1 R1-02, lượt 2 R2-01: chạy CHÍNH c36, thu về MỘT ca, THẬT qua `main` → L8, với bộ test đợt A đã bị sửa
+    TRONG BỘ NHỚ. Mỗi chốt của c36 có phản chứng cho TỪNG chiều sai. Số phần tử: THIẾU trên a129 (bộ sinh bỏ Mn · mất một `kiem(...)`), THỪA
+    trên a126 (thêm một bản sao ô đầu). Số phần tử KHÁC NHAU: THIẾU (một ô thành BẢN SAO ô khác — a129 đúng cặp của reviewer, a126 một ô rời ·
+    Mn thành bản sao Mc), THỪA (kỳ vọng "gặp lại" tăng 1 trên a126 nguyên vẹn). Tập category: Mn thành ký tự Mc khác. Ngoài BMP ở hai phía
+    biên: U+FFFF phải ĐỎ, U+10000 phải XANH. Bản nguyên vẹn của CẢ HAI ca đi cùng đường (và cùng sổ nhớ đệm YAML của c36) phải XANH."""
+    ten_a, c36, goc_nap, loai_cua = "gate_output_doi_chieu_test.py", "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a", nap_a, unicodedata.category
 
     def voi_bo_sinh(sua):
         a = goc_nap(ten_a)
         a._mau_loai_unicode = lambda *x, goc=a._mau_loai_unicode: sua(goc(*x))
         return a
-
-    def nho_dem(ham):   # a129 nạp và ghi lại CÙNG tệp provenance 94 KB cho từng phần tử, ở mọi biến thể: nhớ đệm theo ĐỐI SỐ, trả bản sao — chỉ để nhanh
-        def goi(x, **k):
-            khoa = (ham.__name__, x if isinstance(x, (str, bytes)) else pickle.dumps(x), tuple(sorted(k.items())))
-            return copy.deepcopy(nho[khoa] if khoa in nho else nho.setdefault(khoa, ham(x, **k)))
-        return goi
-    khong_khop = '    kiem(dau + " [khong khop]" + duoi, ten_goc + " [khong khop]")\n'
-    for tt, ten, a, dau in (
-            ("a126", "nguyên vẹn", goc_nap(ten_a), None),
-            ("a126", "Mn thành ký tự Mc KHÁC", voi_bo_sinh(lambda d: tuple(chr(0x93B) if loai_cua(c) == "Mn" else c for c in d)),   # chỉ chốt category bắt
-             "a126_mien_ascii_qua_ho_so qua main → L8: thiếu general category ['Mn']"),
-            ("a126", "ngoài BMP thành ký tự BMP KHÁC", voi_bo_sinh(lambda d: (*d[:-1], "é")), "a126_mien_ascii_qua_ho_so qua main → L8: không có ký tự ngoài BMP"),
+    khong_khop, o_dau, a126 = '    kiem(dau + " [khong khop]" + duoi, ten_goc + " [khong khop]")\n', "        do(URL, DONG, [])\n", "a126_mien_ascii_qua_ho_so qua main → L8: "
+    a129, lap_them = "a129_ten_job_lazy_qua_ho_so qua main → L8: ", (*A_CA["a126"][:3], A_CA["a126"][3] + 1)
+    for tt, ten, a, dau, ky_vong in (
+            ("a126", "nguyên vẹn", goc_nap(ten_a), None, None),
+            ("a126", "Mn thành ký tự Mc KHÁC", voi_bo_sinh(lambda d: tuple(chr(0x93B) if loai_cua(c) == "Mn" else c for c in d)), a126 + "thiếu general category ['Mn']", None),
+            ("a126", "ngoài BMP thành U+FFFF", voi_bo_sinh(lambda d: (*d[:-1], chr(0xFFFF))), a126 + "không có ký tự ngoài BMP", None),
+            ("a126", "ngoài BMP thành U+10000", voi_bo_sinh(lambda d: (*d[:-1], chr(0x10000))), None, None),
             ("a126", "Mn thành bản sao Mc", voi_bo_sinh(lambda d: tuple(next(x for x in d if loai_cua(x) == "Mc") if loai_cua(c) == "Mn" else c for c in d)),
-             "a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử KHÁC NHAU (đặc tả: đúng 52)"),
-            ("a126", "một ô rời thành bản sao ô đầu", nap_sua(ten_a, '        do(URL, DONG.replace("ubuntu-latest", "ubuntu-latest,win7"), [])\n', "        do(URL, DONG, [])\n"),
-             "a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử KHÁC NHAU (đặc tả: đúng 52)"),
-            ("a129", "nguyên vẹn", goc_nap(ten_a), None),
-            ("a129", "bỏ Mn", voi_bo_sinh(lambda d: tuple(c for c in d if loai_cua(c) != "Mn")), "a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 "),
-            ("a129", "mất một ô cấu trúc", nap_sua(ten_a, "    kiem(dong + duoi, ten_goc)\n", ""), "a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 "),
-            ("a129", "ô `khong khop` thành bản sao ô đầu", nap_sua(ten_a, khong_khop, "    kiem(dong, ten_goc)\n"),
-             "a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử KHÁC NHAU (đặc tả: đúng 36)")):
-        with mock.patch.dict(CA[c36].__globals__, {"nap_a": lambda t: a if t == ten_a else goc_nap(t), "A_CA": {tt: A_CA[tt]}}), \
-                mock.patch.multiple(yml, safe_load=nho_dem(yml.safe_load), safe_dump=nho_dem(yml.safe_dump)):
+             a126 + "51 phần tử KHÁC NHAU (đặc tả: đúng 52)", None),
+            ("a126", "một ô rời thành bản sao ô đầu", nap_sua(ten_a, '        do(URL, DONG.replace("ubuntu-latest", "ubuntu-latest,win7"), [])\n', o_dau),
+             a126 + "51 phần tử KHÁC NHAU (đặc tả: đúng 52)", None),
+            ("a126", "thêm một bản sao ô đầu", nap_sua(ten_a, o_dau, o_dau * 2), a126 + "53 phần tử (đặc tả: đúng 52), rc=0 ", None),
+            ("a126", "nguyên vẹn, kỳ vọng gặp lại +1", goc_nap(ten_a), a126 + "52 phần tử KHÁC NHAU (đặc tả: đúng 51)", lap_them),
+            ("a129", "nguyên vẹn", goc_nap(ten_a), None, None),
+            ("a129", "bỏ Mn", voi_bo_sinh(lambda d: tuple(c for c in d if loai_cua(c) != "Mn")), a129 + "35 phần tử (đặc tả: đúng 36), rc=0 ", None),
+            ("a129", "mất một ô cấu trúc", nap_sua(ten_a, "    kiem(dong + duoi, ten_goc)\n", ""), a129 + "35 phần tử (đặc tả: đúng 36), rc=0 ", None),
+            ("a129", "ô `khong khop` thành bản sao ô đầu", nap_sua(ten_a, khong_khop, "    kiem(dong, ten_goc)\n"), a129 + "35 phần tử KHÁC NHAU (đặc tả: đúng 36)", None)):
+        with mock.patch.dict(CA[c36].__globals__, {"nap_a": lambda t: a if t == ten_a else goc_nap(t), "A_CA": {tt: ky_vong or A_CA[tt]}}):
             rc, dong = chay_ca(c36)
         bang((rc, dong) == ((0, "") if dau is None else (3, f"DO:{c36}:{dau}")),
              f"bộ test đợt A {ten} ({tt}) mà c36 không {'XANH' if dau is None else 'ĐỎ đúng chốt'}: rc={rc} {dong[:300]}")

@@ -28,15 +28,15 @@ Issue #1529.
 ## 3. Nghiệm thu
 | tiêu chí | trạng thái |
 |---|---|
-| N1 `X5-11` | **chưa đo** trên harness — chỉ chạy được trên Windows (N6). Phép thử phụ ở mục 4 không thay N1. |
-| N2 `CX14`, `CX15`, `CX16` | **chưa đo** trên harness (N6). |
-| N3 không hồi quy | diff harness ngoài `X5-11`/CX mới đúng danh sách N3 (đọc diff); chạy ca cũ **chưa đo** (N6). |
-| N4 manifest 2.2.0 | **chưa đo** (N6). |
+| N1 `X5-11` | **đạt** trên Windows (mục 6: 5 lượt control H đều 28/28). |
+| N2 `CX14`, `CX15`, `CX16` | **đạt** — KILLED, `credited` (mục 6). |
+| N3 không hồi quy | **đạt** — 27 ca cũ đạt trên H ở cả 5 lượt control; `CX01`–`CX13` credited; diff harness đúng danh sách N3. |
+| N4 manifest 2.2.0 | **đạt** — manifest H 7/7 ở PS 7 và PS 5.1. Đột biến tay `.psd1` về 2.1.0: **chưa đo**. |
 | N5 tài liệu | mục 5 |
-| N6 ma trận Windows | **chưa đo** — chờ chủ kho chạy trên máy Windows tại SHA ứng viên sau push |
+| N6 ma trận Windows | **đạt** (mục 6) |
 | N7 gate kho | mục 5 |
 | N8 phạm vi và trần | mục 5 |
-| N9 review mã | thuộc review (offline và connector) |
+| N9 review mã | review offline lượt 7 approve (`issuecomment-7181369591`); connector Codex trên `d9cd640` không finding |
 
 ## 4. Phép đo phụ trong phiên Linux (PowerShell 7.4.6; không thay N6)
 - `[Parser]::ParseFile`: `ProximaControl.psm1`, `ProximaControl.Tests.ps1`, `ProximaManifest.Tests.ps1` — 0 lỗi.
@@ -56,4 +56,19 @@ lúc chạy; **mỗi vế chạy harness của chính cây ấy** (chép ra ngo�
 mỗi bản `en-US` và `tr-TR`, `-Counterexamples` ở PS 7 `en-US`; `ProximaManifest.Tests.ps1` với PS 7 và PS 5.1. Báo cáo JSON lưu ngoài
 cây, băm ghi vào đây. Đạt khi (N6) mọi lượt H rc 0, `passed == total`, `CX00` của H báo `CONTROL_PASSED`, mọi `CX01`–`CX16` của H
 `credited`; (M3a) đủ lượt hai vế, không lỗi setup, không ca bắt buộc `skipped`/`not_run`/`NOT_EXECUTED`; (M3b) tập đỏ H ⊆ tập đỏ B;
-(M3c) H đỏ thuộc write set thì chủ kho quyết. Trạng thái: **chưa đo**.
+(M3c) H đỏ thuộc write set thì chủ kho quyết.
+
+**Kết quả** (biên nhận `issuecomment-7186739049`): máy `DESKTOP-T9R33P2` (Windows 10.0.26300, pwsh 7.6.10, PS 5.1.26100), chạy theo
+lệnh chủ kho qua Desktop Commander, 2026-11-26 08:03:23Z → 08:29:14Z. Script `run-n6.ps1` sha256
+`22106228930088e2fb680eb9553ee9a418824295c179169497e5dd3ad2581583` (khớp bản đăng `issuecomment-7181393257`), nguồn là clone kho public
+từ GitHub. `summary.json` sha256 `1c04aceacb187142f5c29e490670d953053f156544fa9de180419d4f03adf427`.
+
+Mọi lượt rc 0, `failed_ids` rỗng. B: control 27/27 ×4 lượt, control `-Counterexamples` 41/41, manifest 7/7 ×2. H: control 28/28 ×4,
+control `-Counterexamples` 45/45, manifest 7/7 ×2. Băm từng `report.json` (14 tệp) ở biên nhận `issuecomment-7186739049`.
+Counterexample: B `CX00` CONTROL_PASSED, `CX01`–`CX13` KILLED; H `CX00` CONTROL_PASSED, `CX01`–`CX16` KILLED (credited).
+N6 **đạt**; M3a **đạt** (đủ 7 lượt mỗi vế, `failed_ids` rỗng ở cả 14); M3b **đạt** (đỏ H = ∅ ⊆ đỏ B = ∅); M3c không áp dụng.
+Ứng viên đo là `d9cd640`; commit ghi biên nhận này chỉ đổi tệp RESULTS.
+
+## 7. Lease
+Lease g1 hết hạn 06:32:09Z. Lease kế nhiệm `px-loc-markup-r4-g2-claude` (chỉ thị chủ kho `issuecomment-7186765839`) nằm ở nhánh
+`ops/px-loc-markup-r4-g2-lease` để diff PR giữ đúng write set của đặc tả; cùng write set, baseline `4a96ccd`.

@@ -1149,7 +1149,10 @@ def pd8_symlink_roi_hai_cham_vao_kho():   # review PR #1367: `..` đứng SAU sy
             _lien_ket(ngoai.parent / "lk", kho / "con", True), _lien_ket(ngoai.parent / "lk2", ngoai.parent / "lk", True)
             kq = chay_bs(ch := str(ngoai.parent) + os.sep + duoi.replace("/", os.sep))   # thư mục từ vựng CÓ tồn tại ⇒ bản cũ ghi trọn vào kho
             bang(not list(kho.rglob("auth.json")) and not (kho / "chua").exists(), f"{duoi}: auth.json/thư mục lọt vào kho: {kq[0]}")
-            bang(kq[0] == "KHÔNG ĐO ĐƯỢC" and "nằm trong kho git" in kq[1] and os.listdir(ngoai) == [], f"{duoi}: kết luận {kq}")
+            if LA_WINDOWS:   # wp1546 (đo 26-11-2026): Win32 gộp `..` THEO TỪ VỰNG trước symlink ⇒ đích thật là normpath, NGOÀI kho ⇒ ghi là đúng
+                bang(kq[0] == "ĐÃ NẠP" and os.path.isfile(os.path.join(os.path.normpath(ch), "auth.json")), f"{duoi}: Win32 — đích ngoài kho mà {kq}")
+            else:
+                bang(kq[0] == "KHÔNG ĐO ĐƯỢC" and "nằm trong kho git" in kq[1] and os.listdir(ngoai) == [], f"{duoi}: kết luận {kq}")
             with mock.patch.dict(os.environ, {"CODEX_HOME": ch}):
                 nap_mod()._ghi_dau(LR_PD, None)
             bang(not list(kho.rglob(TEN_DAU)) and not (kho / "chua").exists(), f"{duoi}: tệp dấu lọt vào kho")
@@ -1157,7 +1160,18 @@ def pd8_symlink_roi_hai_cham_vao_kho():   # review PR #1367: `..` đứng SAU sy
     with tempfile.TemporaryDirectory(prefix="cac_pd_") as t:   # vế dương: symlink + `..` mà đích thật vẫn NGOÀI kho ⇒ không chặn nhầm
         (that := _tam_pd(t) / "that" / "con").mkdir(parents=True), (_tam_pd(t) / "codexhome").mkdir(), _lien_ket(lk := _tam_pd(t) / "lk", that, True)
         kq = chay_bs(f"{lk}{os.sep}..{os.sep}codexhome")
-        bang(kq[0] == "ĐÃ NẠP" and (that.parent / "codexhome" / "auth.json").exists(), f"ngoài kho (symlink + ..) mà bị chặn: {kq}")
+        dich = Path(os.path.normpath(f"{lk}{os.sep}..{os.sep}codexhome")) if LA_WINDOWS else that.parent / "codexhome"   # wp1546: Win32 gộp `..` theo từ vựng
+        bang(kq[0] == "ĐÃ NẠP" and (dich / "auth.json").exists(), f"ngoài kho (symlink + ..) mà bị chặn: {kq}")
+def pd9_ngu_nghia_hai_cham_cua_nen_khop_chot():   # wp1546: ĐO nền thật (tệp qua `lk/..` rơi vào đâu) rồi đòi `_trong_kho_git` cùng chiều
+    with tempfile.TemporaryDirectory(prefix="cac_pd_") as t:
+        (kho := _kho_pd(t)).joinpath("con").mkdir(), (kho / "x").mkdir(), (ngoai := _tam_pd(t) / "ngoai" / "x").mkdir(parents=True)
+        _lien_ket(ngoai.parent / "lk", kho / "con", True)
+        ch = str(ngoai.parent) + os.sep + "lk" + os.sep + ".." + os.sep + "x"
+        Path(ch, "do.txt").write_text("d", encoding="utf-8")
+        vao_kho, ra_ngoai = (kho / "x" / "do.txt").exists(), (ngoai / "do.txt").exists()
+        bang(vao_kho != ra_ngoai, f"phép đo nền mơ hồ: kho={vao_kho} ngoài={ra_ngoai}")
+        bang(vao_kho == (not LA_WINDOWS), f"ngữ nghĩa `..` sau symlink đổi trên nền này: kho={vao_kho} (Windows={LA_WINDOWS}) — xét lại pd8 và chốt")
+        bang((tl_gws._trong_kho_git(ch) is not None) == vao_kho, f"chốt lệch nền: tệp vào kho={vao_kho}, _trong_kho_git={tl_gws._trong_kho_git(ch)!r}")
 CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r"(?:[a-h]|p3[abcs]|pd)\d+_\w+", k) and callable(v)}
 # ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------
 def _doi_khoi_len_tieu_de(s):   # đặt khối ngay sau dòng tiêu đề pip, TRƯỚC lệnh pip thật
@@ -1319,6 +1333,8 @@ DOT_BIEN = (
     ("PD7_bo_chuoi_realpath", "tlgws", "    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):", "    for d in (os.path.abspath(path),):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
     ("PD7_bo_chuoi_tu_vung", "tlgws", "    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):", "    for d in (os.path.realpath(path),):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
     ("PD8_realpath_sau_abspath", "tlgws", "os.path.abspath(path), os.path.realpath(path))):", "os.path.abspath(path), os.path.realpath(os.path.abspath(path)))):", "pd8_symlink_roi_hai_cham_vao_kho"),
+    ("PD9_bo_chuoi_realpath", "tlgws", "os.path.abspath(path), os.path.realpath(path))):", "os.path.abspath(path),)):", "pd9_ngu_nghia_hai_cham_cua_nen_khop_chot"),
+    ("PD9_chan_moi_hai_cham", "tlgws", "    return None   # không tổ tiên nào có `.git`", "    return path if \"..\" in path.split(os.sep) else None", "pd9_ngu_nghia_hai_cham_cua_nen_khop_chot"),
     ("P3S2_bo_or_true", "settings", "ghi-nguoc --neu-doi || true'", "ghi-nguoc --neu-doi'", "p3s2_stop_chay_that"),
 )
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
@@ -1335,7 +1351,10 @@ def phan_hang(rc, ra, ten_ca):
     if rc == 3:
         return "GIET" if re.search(rf"^DO:{re.escape(ten_ca)}:", ra, re.M) else "TIN_DUNG_GIA"
     return {0: "SONG_SOT", 5: "BO_QUA", 4: "TIN_DUNG_GIA"}.get(rc, "HONG")
+CHI_NEN = {"PD8_realpath_sau_abspath": "posix", "PD9_bo_chuoi_realpath": "posix", "PD9_chan_moi_hai_cham": "nt"}   # wp1546: Win32 gộp `..` theo từ vựng ⇒ realpath ≡ abspath ở đó
 def chay_dot_bien(ten, tep, cu, moi, ten_ca):
+    if CHI_NEN.get(ten, os.name) != os.name:
+        return "BO_QUA", f"chỉ đo trên {CHI_NEN[ten]}"
     nguon, bien = {"ma": (MA, "CAC_MA"), "hook": (HOOK, "CAC_HOOK"), "gs": (GS, "CAC_GS"), "settings": (SETTINGS, "CAC_SETTINGS"), "tlgws": (TLGWS, "CAC_TLGWS")}[tep]
     goc = nguon.read_text(encoding="utf-8")
     if cu is not None and (goc.count(cu) != 1 or cu == moi):

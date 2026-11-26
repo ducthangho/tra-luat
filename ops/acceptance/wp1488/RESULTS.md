@@ -1,7 +1,7 @@
 # WP1488 — kết quả đo (executor: phiên `session_015GtxrazyAyLwN5BiEB52Sq`, Linux, 21-11-2026)
 
-Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r4.md` (sha256 `a4888c7e…d1ad`),
-lease `wp1488-r4-g4-claude` (thay r3-g3, bia mộ hai chiều). Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
+Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r5.md` (sha256 `c27e7b6d…7580`),
+lease `wp1488-r5-g5-claude` (r4 hết hạn, không bia mộ; r4 thay r3, bia mộ hai chiều). §10 cho r5. Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
 `f8747c4`, `7a8823b` (sau Codex lượt 4). Mã r4 (trả nợ `WP1488-WIN-THEO-LENH`):
 `ab83dd363` (40 hex ở §9); sau Codex lượt 5 (P3, chỉ đổi ca test): `22a7ad1`; các commit sau nó chỉ đổi tệp hồ sơ.
 
@@ -120,7 +120,7 @@ dạng: 33/34, ca đỏ duy nhất là `r858_hinh_dang_cong_thuc_cai`.
 
 ## 7. Nợ có tên
 
-- CÒN MỞ: `WP1488-NUL-KENH` (Codex lượt 5 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~14:10Z). Lần đọc
+- ĐÃ TRẢ ở r5 (§10). `WP1488-NUL-KENH` (Codex lượt 5 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~14:10Z). Lần đọc
   kênh `KQ="$(cat -- "$KENH_KQ" && printf x)"` để Bash bỏ byte NUL (chỉ in cảnh báo `ignored null byte`), nên kênh
   `<nhãn>\0\n<dir>` được nhận như `<nhãn>\n<dir>`. Đo (VERDICT lượt 5): `DICH\0` được nhận ở base `8656dc0`, r3 và r4
   (lớp có từ wp868); `DICH_WIN\0` trả 7 ở base/r3 chỉ vì nhãn chưa tồn tại, r4 nhận và ghi `W:<dir>`. Chỉ chạm tới khi
@@ -214,3 +214,50 @@ Delta = +7 đột biến (5 r4 + 2 sau lượt 5), 0 hồi quy. Ruff `--select F
 
 Ruff `--select F` trên `launcher_test.py`: 5 F841 ở cả hai vế (delta 0). `shellcheck ops/cai_cong_cu.sh`: một SC1090 ở cả
 hai vế (delta 0). `doctrine-scan`: rc 0.
+
+## 10. Revision 5 — trả nợ `WP1488-NUL-KENH` (đặc tả `ops/specs/wp1488-r5.md`)
+
+Lịch sử: `210ceff` → `9390529` (merge master `d0868db`, không xung đột; tác giả giữ chỗ `x` vì dựng trong clone đo — giữ
+nguyên để không đổi SHA đã review) → `e9ac35b` (r5) → `4cd2ba2` (P3 lượt 6). Lease g5 cấp sau; nhánh fast-forward lên
+`4cd2ba2`, các commit sau chỉ đổi hồ sơ.
+
+- `ops/cai_cong_cu.sh`: lần đọc kênh duy nhất `KQ="$(cat -- "$KENH_KQ" | tr '\000' '\001' && printf x)"` (dưới
+  `pipefail`, lỗi `cat` hay `tr` vẫn là lỗi đọc ⇒ 7); ngay sau `export -n KQ`, kết quả có `0x01` ⇒
+  `cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi`, thoát 7 TRƯỚC mọi phân nhánh.
+- `.claude/dev/launcher_test.py`: ca r1488 thêm (R) 7 biến thể — NUL ở nhãn `DICH`/`DICH_WIN`/`GIU_PATH`; NUL, `0x01` giữa
+  đường dẫn với nhãn `DICH` và với nhãn `DICH_WIN` hợp lệ ⇒ rc 7, đúng NGUYÊN dòng báo, tệp rỗng, không gọi `cygpath`;
+  (R-gp-vang) vắng `$GITHUB_PATH` ⇒ vẫn 7, không tới hậu kiểm. Neo của các ca/đột biến đọc kênh dời theo dòng mới
+  (`r858_hinh_dang…`, `r868_hinh_dang…`, `wp868_sh_doc_kenh_nuot_loi`, `wp1488_sh_doc_kenh_*`, `wp1488_sh_chep_khong_xet_rc`),
+  không xoá đột biến nào.
+
+Phản chứng (cùng fixture, công thức tự ghi kênh, đo 25-11-2026): script `210ceff` ⇒ `DICH\0` rc 0 ghi `<dir>`;
+`DICH_WIN\0` rc 0 ghi `W:<dir>`; NUL giữa đường dẫn ghi `<dir>x` rồi rc 3; `0x01` giữa đường dẫn ghi `<dir>\x01x` rồi rc 3.
+Ca r1488 với script `210ceff` ĐỎ ở (R-dich-nul). Ứng viên r5: cả năm dạng rc 7, tệp rỗng; kênh đúng vẫn rc 0.
+
+Đột biến r5 (chạy riêng trên ca đích, chết bằng `TinHieuChotCa`):
+
+| Đột biến | Thay đổi | Chết ở |
+|---|---|---|
+| `wp1488_sh_bo_tr_nul` | bỏ `\| tr` (Bash lại bỏ NUL) | (R-dich-nul) rc 0, có dòng ghi |
+| `wp1488_sh_bo_chot_nul` | chốt `0x01` không bao giờ khớp | (R-dich-nul) rc 7 nhưng thiếu dòng báo riêng |
+| `wp1488_sh_pipeline_nuot_loi_cat` | `{ cat … \|\| :; } \| tr` | (K1) rc 0 sau lỗi đọc |
+| `wp1488_sh_chot_nul_sau_ghi` | chốt đặt SAU bước ghi | (R-nul-giua) tệp đích đã bị ghi |
+| `wp1488_sh_chot_nul_chi_khi_co_dich` (Codex lượt 6) | chốt chỉ khi có `$GITHUB_PATH` | (R-gp-vang) rc 3 |
+| `wp1488_sh_cygpath_truoc_chot_nul` (Codex lượt 6) | gọi `cygpath -w` trước chốt khi nhãn `DICH_WIN` | (R-win-nul-giua) có log `cygpath` |
+
+Các đột biến đổi neo đo lại: `wp1488_sh_doc_kenh_cu_ghi_muon` (C) · `wp1488_sh_doc_kenh_rieng_truoc` (L-LF) ·
+`wp1488_sh_doc_kenh_hai_lan` (K3) · `wp1488_sh_chep_khong_xet_rc` (B) · `wp1488_sh_kq_lo_export` (M) ·
+`wp868_sh_doc_kenh_nuot_loi` (`r868_doc_kenh_hong_thi_dung` và `r868_hinh_dang_kenh_ket_qua`). Reviewer lượt 7 đo lại
+độc lập 12 đột biến + 1 đột biến riêng: cùng ca chết.
+
+Hồi quy (N3), hai vế dựng trong CÙNG một lệnh (clone + checkout + `core.abbrev 7`), `/tmp/.git` không tồn tại:
+
+| Phép đo | master `d0868db` | `e9ac35b` (19:02Z–19:26Z) | `4cd2ba2` (20:58Z–21:21Z) |
+|---|---|---|---|
+| `launcher_test.py` | 455/455 (tổng 457, bỏ qua 2) | 456/456 | 456/456 (tổng 458, bỏ qua 2) |
+| `launcher_test.py --dot-bien` | 801/801 (7 không đo được) | 828/828 | 830/830 (cùng 7) |
+
+Merge `210ceff` vào master `d0868db` TRƯỚC r5 (đo 18:38Z–19:02Z): 456/456, 824/824. Delta của `4cd2ba2` so master = +1 ca
+(r1488), +29 đột biến (23 `wp1488_sh_*` r1–r4 + 6 r5), 0 hồi quy. Ruff `--select F` 5 F841 và shellcheck 1 SC1090 giống
+hệt master (delta 0). `doctrine-scan` rc 0. Windows thật: chưa đo (cygpath giả trên Linux).
+

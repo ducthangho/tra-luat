@@ -436,3 +436,154 @@ sửa hai P3, ghi P2 thành nợ có tên, KHÔNG gọi thêm Codex; chủ kho d
 | P3 bảng đột biến §9 ghi sai ca chết đầu tiên | Đo lại trên `22a7ad1`: `wp1488_sh_bo_chon_luon_dich` và `wp1488_sh_dich_win_khong_doi` chết ở (I-win). Bảng §9 sửa, kèm câu nêu vì sao bản đầu sai (đo trước khi thêm I-win). |
 | **P2 Bash bỏ byte NUL khi đọc kênh** | **Nợ có tên `WP1488-NUL-KENH`** (chủ kho chọn; chi tiết RESULTS §7). Lớp lỗi có từ wp868 với nhãn `DICH`; r4 mở nó sang `DICH_WIN`. |
 
+## Lượt 6 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 6/8 · đặc tả r5, chỉ xét delta sau lượt 5
+
+- Chủ kho chỉ thị "vá #1489 cho tôi tới khi review approve" (25-11-2026), duyệt đặc tả r5 (`c27e7b6d…`, trần 8). Lease r5
+  chưa cấp được vì `wp1511-r2-g2-claude` giữ `.claude/dev/launcher_test.py`; chủ kho chọn đợi. Review chạy OFFLINE trên
+  ứng viên cục bộ (ADR-0060 M12) trong lúc đợi; không ghi gì vào nhánh trước khi có lease g5.
+- Exact head được review: `e9ac35b358379ebebea558c2ec26086d26b26a4e` (= `210ceff` + merge master `d0868db` + r5). Chạy
+  2026-11-25T20:51:58Z → 20:56:00Z, rc 0. sha256 `scratch/VERDICT.md`: `7399c368a62f9a7dabd6fa2b26ddb7dec3b336dbdaceabfa972936f1a62e9a6f`.
+- Kết luận: **`approve`** (0 P0/P1/P2, 2 P3 khoảng trống kiểm thử).
+
+### Nguyên văn
+
+> reviewed_sha: e9ac35b358379ebebea558c2ec26086d26b26a4e
+> verdict: approve
+> reviewer: codex (OpenAI), codex_cli, read-only
+>
+> # Packet #1488 r5 · lượt 6
+>
+> Delta sau lượt 5 không có P0–P2. Hai P3 dưới đây là khoảng trống kiểm thử. HEAD khớp `HEAD_SHA.txt`, cây nguồn sạch trước và sau review. SHA-256 của `wp1488-r5.md` khớp băm đã duyệt `c27e7b6d14422d892e28840897340b1181c1315d5a79fb393e7958ad61967580`.
+>
+> ## Findings
+>
+> - **P3 — Ca (R) chưa đo việc từ chối kênh khi vắng `GITHUB_PATH`.** `.claude/dev/launcher_test.py:12323` luôn nhận tệp đích do fixture đặt. Đột biến riêng chỉ chạy chốt NUL khi `GITHUB_PATH` khác rỗng vẫn qua ca r1488. Probe dùng kênh `DICH` với NUL ở cuối đường dẫn và bỏ biến đích cho thấy H trả 7, còn bản đột biến lọt tới hậu kiểm và trả 3. Thêm biến thể (R) bỏ biến đích, đòi rc 7, dòng báo riêng và dừng trước hậu kiểm. Biến thể này bắt được đột biến trên.
+> - **P3 — Ca (R) thiếu payload Windows sai byte nhưng có nhãn hợp lệ.** `.claude/dev/launcher_test.py:12316` đặt NUL trong nhãn Windows. Hai payload sai byte hiện có dùng nhãn POSIX. Đột biến riêng gọi `cygpath -w` trước chốt chỉ khi nhãn Windows hợp lệ và payload chứa sentinel vẫn qua ca r1488. Với `DICH_WIN` + LF + đường dẫn chứa NUL, H trả 7 và không gọi stub. Bản đột biến cũng trả 7, in đúng dòng báo, giữ tệp đích rỗng nhưng có log gọi stub. Thêm payload Windows có NUL hoặc 0x01 vào (R), giữ assertion log. Probe đã bắt được đột biến này.
+>
+> ## Đối chiếu B2/B5
+>
+> - `ops/cai_cong_cu.sh:245–249` đọc kênh sau retry và chỉ khi `RC_CAI=0`. `cat` mở kênh một lần, `tr` chỉ đọc stdin. Với `pipefail`, lỗi của bất kỳ vế nào bỏ qua `printf x`, làm phép gán thất bại và trả 7. K1 và K2 đo `cat` in đủ rồi lỗi và lỗi không in gì. Probe cho `tr` trả 19 trong cả hai tình huống đều nhận rc 7, dòng báo lỗi đọc và tệp đích rỗng. K3 đếm đúng một lần đọc kênh trên đường thành công.
+> - Byte NUL trở thành 0x01 trước command substitution. 0x01 vốn có được giữ nguyên. Sentinel `x` giữ LF cuối, rồi chỉ `x` được bỏ. Chốt tại dòng 249 đứng trước dispatch ghi, đổi qua `cygpath -w`, dispatch PATH và hậu kiểm. 0x01 là một ký tự điều khiển ASCII độc lập, không thể là byte đầu hoặc byte tiếp nối của một ký tự UTF-8 nhiều byte hợp lệ. Đường dẫn thử có chữ `đường` qua nguyên văn dưới `C` và `C.UTF-8`.
+> - Probe `--bat-buoc` qua lượt `source` của công cụ tùy chọn có `chuan_bi: true`: cả nhãn sai dạng theo cách cũ và payload chứa NUL đều trả 7, tệp đích rỗng, không chạy công cụ kế tiếp. B2/B5 quy định rc 7 cho kênh hỏng. Nhánh đi tiếp của công cụ tùy chọn nằm sau đó và áp dụng cho lỗi cài đặt đi qua `RC_CAI`.
+> - (Q) chỉ bổ sung test, với bốn đầu vào sai dạng và stub ghi dấu nếu bị gọi. Hai đột biến (Q) chết ở đầu vào đầu tiên, khớp §9. §9 cũng đã sửa hai mục r4 sang (I-win). Merge `9390529` có đúng hai cha đã nêu, diff shell so với cha thứ nhất rỗng. Merge ba chiều `launcher_test.py` từ hai cha và merge-base khớp từng byte với blob của merge. Diff theo cha master chỉ có các hunk #1488.
+> - (R) đo rc, thông báo riêng, byte trong tệp đích và log stub. Trong fixture hiện tại, công thức chỉ ghi kênh, stub chỉ ghi log hoặc in đường dẫn, và nhánh báo kênh hỏng thông thường không có cụm `byte NUL hoac 0x01`. Bỏ chốt cho thấy `R-dich-nul` vẫn trả 7 nhưng đỏ vì thiếu chẩn đoán riêng. Assertion tìm chuỗi con trên stderr tổng hợp nên một đường khác in đúng cụm vẫn có thể thỏa riêng điều kiện này. Không có đường như vậy trong fixture hiện tại. So sánh với dòng chẩn đoán đầy đủ sẽ siết phép đo.
+> - Bốn đột biến N2 mới phủ chuyển NUL, chốt sentinel, lỗi vế `cat` và thứ tự trước ghi. Chưa có đột biến chuyên biệt cho lỗi vế `tr`, chốt trước PATH khi vắng đích, thứ tự với `cygpath` khi nhãn Windows hợp lệ, hoặc truyền rc 7 qua `source`. Đột biến `wp868_sh_doc_kenh_nuot_loi` có thể nuốt lỗi cả hai vế, nhưng ca đích đỏ hiện tại tiêm lỗi vào `cat`. Các probe riêng đo các đường này trên H.
+>
+> ## Lệnh và mã thoát
+>
+> - `cat HEAD_SHA.txt`, `git -C repo rev-parse HEAD`, `git --no-optional-locks -C repo status --porcelain`, `sha256sum wp1488-r5.md`, `git clone --no-local -- repo scratch/repo` và `git rev-parse HEAD` trong clone đều rc 0.
+> - Các `git diff` đọc delta đã nêu, `git show` đọc bốn blob, `git merge-base 210ceff d0868db`, `git merge-file -p` trên bản sao và `cmp` với blob merge đều rc 0. `git diff --exit-code` cho shell qua merge rc 0. `git diff --check 9390529 e9ac35b` và kiểm tra cùng loại cho shell, test và RESULTS ở bước Q đều rc 0. Kiểm tra whitespace rộng hơn từ lượt 5 tới H trả 2 do dòng trống cuối bản lưu VERDICT và whitespace trong tài liệu nhập từ master. Lần đối chiếu merge đầu dùng process substitution cho `merge-file` tạo đầu ra rỗng nên `cmp` trả 1. Phép đối chiếu đã được chạy lại với tệp thường.
+> - `bash -n scratch/repo/ops/cai_cong_cu.sh` rc 0. Môi trường Linux, Bash 5.2.21, Python 3.13.18.
+>
+> | Lệnh trong `scratch/repo` | rc | Kết quả |
+> |---|---:|---|
+> | `python .claude/dev/launcher_test.py --lap-ca r1488_github_path_chi_ghi_khi_thanh_cong --lan 2` | 0 | 2/2 |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_hinh_dang_cong_thuc_cai --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_hinh_dang_kenh_ket_qua --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_doc_kenh_hong_thi_dung --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_ghi_kenh_hong_thi_dung --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_cai_windows_chon_ban_chay_duoc --lan 1` | 0 | 1/1 |
+> | `TMPDIR="$PWD/.." python -B ../mutants.py` | 0 | Runner ghi kết quả từng bản sao. Mã 0 là của runner, kết quả đỏ là ngoại lệ `TinHieuChotCa`. |
+> | `TMPDIR="$PWD/.." python -B ../probes.py` | 0 | Sáu probe trên H đạt. |
+> | `TMPDIR="$PWD/.." python -B ../source_probe.py` | 0 | Hai ca qua lượt source đạt. |
+> | `TMPDIR="$PWD/.." python -B ../probes.py review_bo_chot_khi_thieu_github_path nul_gp_vang` | 1 | Đỏ vì rc 3 thay vì 7. |
+> | `TMPDIR="$PWD/.." python -B ../probes.py review_goi_cygpath_truoc_chot_neu_nul_trong_duong_dan_win nul_win_dans_chemin` | 1 | Đỏ vì có log `cygpath`. |
+>
+> Mỗi đột biến dưới đây được áp riêng, với đúng một vị trí khớp neo trong script nguồn. Các tên trong cột phải là assertion đầu tiên của ca r1488, trừ hàng cuối.
+>
+> | Đột biến | Điểm đỏ đầu tiên |
+> |---|---|
+> | `wp1488_sh_bo_tr_nul` | R-dich-nul, rc 0 và có dòng ghi |
+> | `wp1488_sh_bo_chot_nul` | R-dich-nul, rc 7 nhưng thiếu dòng báo riêng |
+> | `wp1488_sh_pipeline_nuot_loi_cat` | K1, rc 0 sau lỗi đọc |
+> | `wp1488_sh_chot_nul_sau_ghi` | R-nul-giua, tệp đích đã bị ghi |
+> | `wp1488_sh_path_nhan_hau_to` | Q-win-hau-to, rc 3 |
+> | `wp1488_sh_ghi_nhan_long` | Q-win-hau-to, rc 1 và có gọi `cygpath` |
+> | `wp1488_sh_doc_kenh_cu_ghi_muon` | C, ghi đường dẫn từ lượt cũ |
+> | `wp1488_sh_doc_kenh_rieng_truoc` | L-LF, ghi đường dẫn dù payload có LF |
+> | `wp1488_sh_doc_kenh_hai_lan` | K3, đếm hai lần đọc |
+> | `wp868_sh_doc_kenh_nuot_loi` | `r868_doc_kenh_hong_thi_dung`, rc 0 và probe sau đọc đã chạy. Ca hình dạng cũng đỏ. |
+>
+> ## Chưa đo
+>
+> Chưa chạy toàn bộ suite và toàn bộ mutation trên hai vế N3, CI PR của H cục bộ, hay doctrine-scan N4. Ca Windows dùng stub trên Linux, chưa đo Git Bash/Windows thật hoặc các locale khác ngoài hai locale trên. Các kết quả và bản sao làm việc nằm trong `scratch/`. Lượt chạy baseline đầu tiên dùng thư mục tạm mặc định của harness, được harness tự dọn. Lượt xác nhận lại đặt `TMPDIR` dưới `scratch/`.
+
+### Executor xử lý (sửa ở `4cd2ba2`, chỉ `launcher_test.py`)
+
+| Finding | Xử lý |
+|---|---|
+| P3 (R) chưa đo vắng `$GITHUB_PATH` | Thêm (R-gp-vang): bỏ `GITHUB_PATH` khỏi môi trường của chính lần chạy script (khuôn bọc `subprocess.run` của ca E); đòi rc 7, NGUYÊN dòng báo NUL, không tới hậu kiểm. Đột biến của reviewer thành `wp1488_sh_chot_nul_chi_khi_co_dich`, chết ở (R-gp-vang) rc 3. |
+| P3 (R) thiếu payload Windows hỏng byte với nhãn hợp lệ | Thêm (R-win-nul-giua), (R-win-x01-giua); giữ chốt log `cygpath`. Đột biến của reviewer thành `wp1488_sh_cygpath_truoc_chot_nul`, chết ở (R-win-nul-giua) vì có log `cygpath`. Assertion (R) siết từ chuỗi con sang NGUYÊN dòng báo (`_R1488_DONG_NUL`). |
+
+## Lượt 7 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 7/8 · đặc tả r5, chỉ xét delta sau lượt 6
+
+- Exact head được review: `4cd2ba29acdb1fba5eac2267a17d049fa0880a41`. Chạy 2026-11-25T20:57:58Z → 21:00:43Z, rc 0. sha256
+  `scratch/VERDICT.md`: `7b1921361d62b5c53375b753f1e8e867003bc179aaca35c093c5bd1602a7bbb8`.
+- Kết luận: **`approve`**, không finding P0–P3. Hai P3 lượt 6 xác nhận đã đóng.
+- Lease g5 cấp 2026-11-26 sau khi `wp1511-r2-g2-claude` hết hạn; nhánh fast-forward `210ceff` → `4cd2ba2` (không đổi SHA
+  đã review). Mọi commit sau `4cd2ba2` trên nhánh chỉ đổi tệp hồ sơ (`ops/specs`, `ops/leases`, `ops/acceptance`), nên
+  verdict lượt 7 vẫn neo đúng mã. Master `b1db694` lúc cấp lease không đổi tệp nào trong write set so với `d0868db`.
+
+### Nguyên văn
+
+> reviewed_sha: 4cd2ba29acdb1fba5eac2267a17d049fa0880a41
+> verdict: approve
+> reviewer: codex (OpenAI), codex_cli, read-only
+>
+> # Packet #1488 r5 · lượt 7
+>
+> ## Findings
+>
+> Không có finding P0–P3 mới trong delta. Hai P3 của lượt 6 đã đóng.
+>
+> - `.claude/dev/launcher_test.py:12332` bỏ `GITHUB_PATH` khỏi môi trường của lần gọi shell thực tế. `R-gp-vang` đòi rc 7, đúng cả dòng chẩn đoán và dừng trước hậu kiểm. Đột biến chỉ chốt khi có đích trả rc 3 ở chính ca này.
+> - `.claude/dev/launcher_test.py:12321` thêm nhãn `DICH_WIN` hợp lệ với NUL hoặc 0x01 trong đường dẫn. Ca đòi rc 7, đúng cả dòng chẩn đoán, tệp đích rỗng và không có log `cygpath`. Đột biến gọi `cygpath -w` sớm vẫn trả rc 7 và in dòng báo riêng, nhưng log làm ca đỏ. Trong fixture này, công thức chỉ ghi kênh và stub chỉ ghi log hoặc in đường dẫn. Bỏ chốt làm ca đỏ ngay cả khi nhánh báo sai dạng vẫn trả rc 7.
+>
+> ## Đối chiếu delta và B2/B5
+>
+> HEAD khớp `HEAD_SHA.txt`, cây nguồn sạch, SHA-256 của spec khớp băm đã duyệt `c27e7b6d14422d892e28840897340b1181c1315d5a79fb393e7958ad61967580`. Cha trực tiếp là `e9ac35b358379ebebea558c2ec26086d26b26a4e`. Commit chỉ sửa `.claude/dev/launcher_test.py`. Shell giống từng byte với lượt 6. Ca (Q) và nội dung đã nhập từ master nằm ngoài delta lượt 7. Hai đột biến của (Q) vẫn đỏ đúng ca.
+>
+> Ở `ops/cai_cong_cu.sh:245–249`, `cat` mở kênh một lần, `tr` đọc stdin. `pipefail` giữ lỗi của cả hai vế, kể cả khi đã in đủ dữ liệu. Hai ca K1/K2 đo lỗi `cat`, K3 đo số lần đọc trên đường thành công. Probe lượt này tiêm lỗi `tr` cả khi không in và khi chuyển tiếp đủ dữ liệu, đều nhận rc 7, báo lỗi đọc và tệp đích rỗng. Chốt bắt NUL đã chuyển thành 0x01 và byte 0x01 có sẵn trước dispatch ghi, gọi `cygpath` hoặc đổi PATH. Byte 0x01 là ký tự ASCII độc lập, không thể nằm trong chuỗi byte của một ký tự UTF-8 nhiều byte hợp lệ. `exit 7` trong lượt `source` giữ cùng cơ chế thoát như nhánh kênh sai dạng cũ. Đường này đã được đo ở lượt 6.
+>
+> ## Lệnh và mã thoát
+>
+> - `cat HEAD_SHA.txt`, `git -C repo rev-parse HEAD`, `git -C repo rev-parse HEAD^`, `git --no-optional-locks -C repo status --porcelain`, phép so HEAD với tệp và `sha256sum -c` đều rc 0.
+> - `git -C repo diff e9ac35b HEAD`, `git -C repo diff --name-only e9ac35b HEAD`, `git -C repo diff --check e9ac35b HEAD`, `git -C repo diff --exit-code e9ac35b HEAD -- ops/cai_cong_cu.sh` đều rc 0.
+> - `git -C repo diff --exit-code 210ceff 9390529 -- ops/cai_cong_cu.sh` và hai lệnh `git diff --stat` cho test qua merge và bước (Q) đều rc 0.
+> - `git clone --no-local -- repo scratch/review7`, `git rev-parse HEAD` trong clone và `bash -n scratch/review7/ops/cai_cong_cu.sh` đều rc 0. Môi trường Linux, Bash 5.2.21, Python 3.13.18.
+>
+> Các lệnh sau chạy trong `scratch/review7` với `TMPDIR="$PWD/.."`.
+>
+> | Lệnh | rc | Kết quả |
+> |---|---:|---|
+> | `python .claude/dev/launcher_test.py --lap-ca r1488_github_path_chi_ghi_khi_thanh_cong --lan 2` | 0 | 2/2 |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_hinh_dang_cong_thuc_cai --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_hinh_dang_kenh_ket_qua --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_doc_kenh_hong_thi_dung --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_ghi_kenh_hong_thi_dung --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_cai_windows_chon_ban_chay_duoc --lan 1` | 0 | 1/1 |
+> | `python -B ../review7-tr.py` | 0 | Hai probe, shell rc 7 ở cả hai |
+> | `python -B ../review7-mutants.py` | 0 | 12 đột biến trong bảng và một đột biến riêng đều bị bắt |
+>
+> Runner áp từng đột biến trên một tệp shell riêng trong `scratch/`, kiểm neo khớp đúng một lần và chạy các ca đích. Mã 0 là của runner. Điểm đỏ ghi dưới đây là assertion đầu tiên (`TinHieuChotCa`), không phải lỗi chạy harness. Tất cả các hàng trừ `wp868_sh_doc_kenh_nuot_loi` dùng ca r1488.
+>
+> | Đột biến | Điểm đỏ đầu tiên |
+> |---|---|
+> | `wp1488_sh_doc_kenh_cu_ghi_muon` | C, ghi đường dẫn của lượt cũ |
+> | `wp1488_sh_doc_kenh_rieng_truoc` | L-LF, ghi đường dẫn dù payload có LF |
+> | `wp1488_sh_doc_kenh_hai_lan` | K3, đếm hai lần đọc |
+> | `wp1488_sh_path_nhan_hau_to` | Q-win-hau-to, rc 3 |
+> | `wp1488_sh_ghi_nhan_long` | Q-win-hau-to, rc 1 và có log `cygpath` |
+> | `wp1488_sh_bo_tr_nul` | R-dich-nul, rc 0 và có dòng ghi |
+> | `wp1488_sh_bo_chot_nul` | R-dich-nul, rc 7 nhưng thiếu chẩn đoán riêng |
+> | `wp1488_sh_pipeline_nuot_loi_cat` | K1, rc 0 sau lỗi đọc |
+> | `wp1488_sh_chot_nul_chi_khi_co_dich` | **R-gp-vang**, rc 3 ở hậu kiểm |
+> | `wp1488_sh_cygpath_truoc_chot_nul` | **R-win-nul-giua**, rc 7 và tệp đích rỗng nhưng có log `cygpath` |
+> | `wp1488_sh_chot_nul_sau_ghi` | R-nul-giua, tệp đích đã bị ghi |
+> | `wp868_sh_doc_kenh_nuot_loi` | `r868_doc_kenh_hong_thi_dung`, rc 0 và đã chạy probe sau đọc. `r868_hinh_dang_kenh_ket_qua` cũng đỏ. |
+> | `review7_cygpath_chi_khi_duong_dan_win_co_byte_hong` | R-win-nul-giua. Đột biến riêng chỉ gọi sớm khi nhãn Windows hợp lệ và payload chứa sentinel. Log bắt được lời gọi. |
+>
+> ## Chưa đo
+>
+> Trong tập đột biến có sẵn đã chọn, chưa có đột biến chuyên biệt cho lỗi vế `tr`, đổi PATH nội bộ trước chốt mà vẫn trả 7, hoặc truyền rc 7 qua lượt `source`. Probe riêng ở lượt này đo lỗi `tr`. Đối chiếu lượt 6 bao gồm phép thử `source` và UTF-8 dưới `C` và `C.UTF-8`. Lượt 7 không chạy lại toàn bộ suite, CI, doctrine-scan, hoặc Windows/Git Bash thật. Các ca Windows chạy bằng stub trên Linux.
+

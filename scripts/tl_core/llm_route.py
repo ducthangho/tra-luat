@@ -585,40 +585,36 @@ _MO_CHO_PHEP = frozenset("“\"‘(")
 
 
 def _mo_dau_nhieu_ve(t):
-    """r39 (lượt 38 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả Điều.
-    Dùng DOCX có cấp danh sách để xác minh."). True khi thân `t` mở bằng [`(`] ≥ 2 VẾ (dải chữ/số) chỉ ngăn bằng đệm ngang, KHÔNG có
-    chữ "là" trong các vế, rồi DẤU KẾT nhãn và còn chữ phía sau: `.`/`)` mọi độ dài vế; `-`/`–` (đứng trước khoảng trắng, dấu mở
-    trích dẫn/ngoặc) chỉ khi ≤ 3 vế, mỗi vế ≤ 3 ký tự (dạng placeholder) — để `Kinh tế - xã hội là …` không bị chặn. Tuyến tính."""
-    i = 1 if t[:1] == "(" else 0
-    ve, j = [], i
+    """r39 → r40 (lượt 38–39 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả
+    Điều. Dùng DOCX có cấp danh sách để xác minh."). True khi thân `t` mở bằng [một dấu mở `(` `“` `"` `‘`] ≥ 2 VẾ (dải chữ/số) chỉ
+    ngăn bằng đệm ngang, rồi DẤU KẾT nhãn (`.` `)` `-` `–` `—`) và còn chữ phía sau. Mốc thoát DUY NHẤT là từ nối cấp khoản: vế `là`
+    đứng NGOÀI dấu mở và có khoảng trắng theo sau (cùng điều kiện `_RE_LA`) — `là` trong ngoặc/nháy mở hay dính dấu kết không thoát.
+    r40 (lượt 39): bỏ ngoại lệ "gạch ≤ 3 vế ngắn" — mọi số vế, mọi độ dài vế; `kinh tế - xã hội …` ở đầu dòng nay bị chặn (thu hẹp
+    miền theo quyết định chủ kho). Tuyến tính."""
+    mo = t[:1] in _MO_NHIEU_VE
+    i = 1 if mo else 0
+    so_ve, j = 0, i
     while True:
         k = j
         while k < len(t) and t[k].isalnum():
             k += 1
         if k == j:
             return False
-        ve.append(t[j:k])
-        if ve[-1] == "là":
-            return False
+        so_ve += 1
         m = k
         while m < len(t) and t[m] in _DEM_NGANG:
             m += 1
+        if not mo and t[j:k] == "là" and m > k:
+            return False   # từ nối cấp khoản ⇒ phần trước là thuật ngữ, không phải nhãn
         if m > k and m < len(t) and t[m].isalnum():
             j = m
             continue
         break
-    c = t[m] if m < len(t) else ""
-    if len(ve) < 2 or not t[m + 1:].strip(" \t\u00a0"):
-        return False
-    if c in ".)":
-        return True
-    if c in "-–":
-        sau = t[m + 1:m + 2]
-        return len(ve) <= 3 and all(len(x) <= 3 for x in ve) and (sau.isspace() or sau in _MO_THAN_GACH)
-    return False
+    return so_ve >= 2 and m < len(t) and t[m] in _DAU_KET_NHIEU_VE and bool(t[m + 1:].strip(" \t\u00a0"))
 
 
-_MO_THAN_GACH = frozenset("“\"‘'(")
+_MO_NHIEU_VE = frozenset("(“\"‘")
+_DAU_KET_NHIEU_VE = frozenset(".)-–—")
 
 
 def dau_dong_cho_phep(ln):
@@ -1410,7 +1406,13 @@ def _dem_entry_zip(fh, co):
     vt_eocd = co - doc + i
     n_khai = int.from_bytes(b[i + 10:i + 12], "little")
     co_cd = int.from_bytes(b[i + 12:i + 16], "little")
-    if n_khai == 0xFFFF or co_cd == 0xFFFFFFFF or (i >= 20 and b[i - 20:i - 16] == b"PK\x06\x07"):
+    co_loc = False
+    if vt_eocd >= 20:
+        # r40 (lượt 39): locator ZIP64 đọc ở VỊ TRÍ TUYỆT ĐỐI ngay trước EOCD trên cùng handle (như `zipfile._EndRecData64`), không
+        # trong cửa sổ đã đọc — EOCD sát đầu cửa sổ (comment dài) từng làm locator nằm ngoài phần được soi.
+        fh.seek(vt_eocd - 20)
+        co_loc = fh.read(4) == b"PK\x06\x07"
+    if n_khai == 0xFFFF or co_cd == 0xFFFFFFFF or co_loc:
         raise ValueError("goi .docx dang ZIP64 — khong ho tro")
     dau = vt_eocd - co_cd
     if dau < 0:
@@ -1945,9 +1947,11 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
              threading.Thread(target=doc, args=(p.stderr, "err"), daemon=True)]
     for t in luong:
         t.start()
-    while any(t.is_alive() for t in luong) and not vuot and not loi and time.monotonic() < han:
+    def con_lai():
+        return max(0.0, han - time.monotonic())   # r40 (lượt 39): MỘT nguồn thời gian còn lại cho mọi lần chờ
+    while any(t.is_alive() for t in luong) and not vuot and not loi and con_lai() > 0:
         for t in luong:
-            t.join(0.05)
+            t.join(min(0.05, con_lai()))
     if vuot or loi:
         thu_hoi()
         ten = "stdout" if (vuot or ["out"])[0] == "out" else "stderr"
@@ -1957,10 +1961,13 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
         thu_hoi()
         raise subprocess.TimeoutExpired(args, timeout)
     try:
-        p.wait(timeout=max(0.0, han - time.monotonic()))
+        p.wait(timeout=con_lai())
     except subprocess.TimeoutExpired:
         thu_hoi()
         raise
+    if time.monotonic() > han:
+        thu_hoi()   # r40 (lượt 39): MỘT nơi quyết nhận thành công — qua hạn thì không nhận, kể cả khi tiến trình vừa kết thúc
+        raise subprocess.TimeoutExpired(args, timeout)
     return types.SimpleNamespace(returncode=p.returncode, stdout=bytes(buf["out"]).decode("utf-8", "replace"),
                                  stderr=bytes(buf["err"]).decode("utf-8", "replace"))
 

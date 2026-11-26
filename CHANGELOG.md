@@ -97,6 +97,9 @@
 - r39 (sau cross-review lượt 38 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r39.md`): đường thô TỪ CHỐI cả Điều khi phần mở đầu
   khoản có hình dạng nhãn điểm nhiều vế (chủ kho quyết thu hẹp miền), hai phía miền ghi trong `pham_vi_kiem`; gói `.docx` đếm số entry thật trước khi mở ZIP; bộ chạy `tl extract` có
   hạn chót tới khi tiến trình kết thúc và báo lỗi đọc.
+- r40 (sau review offline lượt 39, đặc tả `ops/specs/llm-khoan-docx-r40.md`): đường thô chặn mọi mở đầu dạng nhãn nhiều vế (mọi số
+  vế, gạch dài, `là` trong ngoặc không thoát); locator ZIP64 kiểm ở vị trí tuyệt đối; bộ chạy `tl extract` một hạn chót, qua hạn
+  không nhận; hướng dẫn tách quy tắc `pStyle`/`rStyle`/`basedOn`.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -1941,11 +1941,14 @@ def ca_r35_lop_loi(m):
     # r39 (quyết định chủ kho "THU HẸP MIỀN"): hai phía miền. ÂM — mở đầu có hình dạng nhãn điểm nhiều vế (≥ 2 vế chỉ ngăn bằng đệm,
     # không có "là", rồi dấu kết nhãn và còn chữ sau). DƯƠNG — cụm từ đứng trước "là", gạch nối giữa từ dài, ngoặc sau từ đầu.
     for L in ("ab c. Dữ liệu là b.", "Ban a) Dữ liệu là b.", "(Ban a) Dữ liệu là b.", "(Hồ sơ) là tài liệu.", "ab c - Dữ liệu là b.",
-              "Hồ sơ gốc. Dữ liệu là b.", "đ e) Dữ liệu là b.", "1 a. Dữ liệu là b."):
+              "Hồ sơ gốc. Dữ liệu là b.", "đ e) Dữ liệu là b.", "1 a. Dữ liệu là b.",
+              # r40 (lượt 39): mọi số vế/độ dài vế với gạch; gạch dài; `là` trong ngoặc/nháy mở hay dính dấu kết không thoát.
+              "ab cd ef gh - Dữ liệu là b.", "abcd efgh - Dữ liệu là b.", "ab c — Dữ liệu là b.", "(là a) Dữ liệu là b.",
+              "ab là. Dữ liệu là b.", "“ab c) Dữ” liệu là b.", "Phát triển kinh tế - xã hội là mục tiêu."):
         bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"r39 mo dau nhieu ve lot (co so): {L!r}")
         bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"r39 mo dau nhieu ve lot (mat so): {L!r}")
     for than in ("Quy trình là cách làm.", "“Hồ sơ” là tài liệu.", "Ban hành là công bố.", "HỒ SƠ là tài liệu.",
-                 "Phát triển kinh tế - xã hội là mục tiêu.", "Quy chuẩn kỹ thuật quốc gia (QCVN) là văn bản.",
+                 "Quy chuẩn kỹ thuật quốc gia (QCVN) là văn bản.",
                  "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu.", "Hồ sơ là tài liệu gốc. Bản sao không dùng."):
         bang(tach(f"Điều 3.\n1. {than}\n2. Dữ liệu là thông tin.") == [(1, than), (2, "Dữ liệu là thông tin.")],
              f"so khoan + than hop le bi chan oan: {than!r}")
@@ -1971,6 +1974,57 @@ def ca_r35_lop_loi(m):
     bang(_dung.stdout == "x" * 5000, "dung tran byte bi chan oan")
     bang("nhieu ve" in m.PHAM_VI_KIEM and "TU CHOI" in m.PHAM_VI_KIEM and "van duoc nhan" in m.PHAM_VI_KIEM,
          "pham_vi_kiem chua khoa hai phia mien nhan nhieu ve")
+    # r40 (lượt 39): tiến trình GIẢ — lỗi luồng đọc về người gọi; mỗi lần đọc ≤ phần còn lại + 1; thu hồi có hạn; qua hạn thì không nhận.
+    import time as _tg
+
+    class _Ong:
+        def __init__(self, khoi, loi=None):
+            self.khoi, self.loi, self.co = list(khoi), loi, []
+
+        def read1(self, n):
+            self.co.append(n)
+            if not self.khoi and self.loi:
+                raise self.loi
+            return self.khoi.pop(0)[:max(n, 0)] if self.khoi else b""
+
+    class _P:
+        cu = None
+
+        def __init__(self, *a, **k):
+            self.stdout, self.stderr, self.returncode, self.giet, self.cho = _P.ra(), _Ong([]), 0, False, []
+            _P.cu = self
+
+        def kill(self):
+            self.giet = True
+
+        def wait(self, timeout=None):
+            self.cho.append(timeout)
+            _tg.sleep(_P.ngu)
+            return 0
+    _popen = m.subprocess.Popen
+    try:
+        m.subprocess.Popen = _P
+        _P.ra, _P.ngu = (lambda: _Ong([b"ab"], OSError("hong"))), 0
+        try:
+            m._chay_gioi_han(["x"], tran=100, timeout=5)
+            raise TinHieuChotCa("loi luong doc bi nuot, du lieu doc do duoc tra nhu da du")
+        except ValueError:
+            pass
+        bang(_P.cu.giet and 5 in _P.cu.cho, f"loi doc khong thu hoi co han: giet={_P.cu.giet} cho={_P.cu.cho}")
+        _P.ra = lambda: _Ong([b"x" * 50000] * 3)
+        try:
+            m._chay_gioi_han(["x"], tran=10, timeout=5)
+        except ValueError:
+            pass
+        bang(max(_P.cu.stdout.co) <= 11, f"doc vuot phan con lai + 1: {_P.cu.stdout.co[:3]}")
+        _P.ra, _P.ngu = (lambda: _Ong([])), 0.2
+        try:
+            m._chay_gioi_han(["x"], tran=10, timeout=0.05)
+            raise TinHieuChotCa("ket qua qua han van duoc nhan")
+        except _sp39.TimeoutExpired:
+            pass
+    finally:
+        m.subprocess.Popen = _popen
     # r38 (lượt 37): bộ chạy `tl extract` đọc ống THEO KHỐI có trần — vượt ⇒ giết tiến trình + ValueError; trong hạn ⇒ trả đủ.
     _ok = m._chay_gioi_han([sys.executable, "-c", "import sys; sys.stdout.write('x' * 1000); sys.stderr.write('e')"], tran=5000)
     bang(_ok.returncode == 0 and _ok.stdout == "x" * 1000 and _ok.stderr == "e", f"chay gioi han sai ket qua: {_ok!r}"[:120])
@@ -2033,6 +2087,15 @@ def ca_r35_lop_loi(m):
     _ie = _goi5.rfind(b"PK\x05\x06")
     _lech = _goi5[:_ie + 8] + (1).to_bytes(2, "little") + (1).to_bytes(2, "little") + _goi5[_ie + 12:]
     chan(_lech, "so entry khai lech so that")
+    # r40 (lượt 39): locator ZIP64 ở VỊ TRÍ TUYỆT ĐỐI trước EOCD — kể cả khi bản ghi thư mục cuối "che" nó bằng comment (quét CD vẫn qua).
+    _g = bytearray(lam_docx(H, A, B))
+    _ie = bytes(_g).rfind(b"PK\x05\x06")
+    _ic = bytes(_g).rfind(b"PK\x01\x02")
+    _cm = int.from_bytes(_g[_ic + 32:_ic + 34], "little") + 20
+    _g[_ic + 32:_ic + 34] = _cm.to_bytes(2, "little")
+    _g[_ie + 12:_ie + 16] = (int.from_bytes(_g[_ie + 12:_ie + 16], "little") + 20).to_bytes(4, "little")
+    _g[_ie:_ie] = b"PK\x06\x07" + bytes(16)
+    chan(bytes(_g), "locator ZIP64 che trong comment ban ghi")
     # r36 (lượt 36): chuỗi `basedOn` dài dùng chung bởi nhiều đoạn — phân giải có nhớ, không bậc hai.
     _n = 2500
     _st = "".join(f'<w:style w:type="paragraph" w:styleId="S{i}">' + (f'<w:basedOn w:val="S{i - 1}"/>' if i else "") + "</w:style>"
@@ -2098,14 +2161,20 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 
 DOT_BIEN = [
-    ('wp1525_extract_wait_vo_han', ('        p.wait(timeout=max(0.0, han - time.monotonic()))', '        p.wait()'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_wait_vo_han', ('        p.wait(timeout=con_lai())', '        p.wait()'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_nhan_qua_han', ('    if time.monotonic() > han:\n        thu_hoi()   # r40', '    if False:\n        thu_hoi()   # r40'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_nuot_loi_doc', ('            loi.append(e)', '            pass'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_doc_khoi_lon', ('                k = ong.read1(min(65536, con))', '                k = ong.read1(65536)'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_thu_hoi_vo_han', ('        with contextlib.suppress(Exception):\n            p.wait(timeout=5)', '        with contextlib.suppress(Exception):\n            p.wait()'), 'ca_r35_lop_loi'),
+    ('wp1525_zip64_loc_trong_cua_so', ('        co_loc = fh.read(4) == b"PK\\x06\\x07"', '        co_loc = False'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_la_trong_ngoac', ('        if not mo and t[j:k] == "là" and m > k:', '        if t[j:k] == "là" and m > k:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_la_dinh_dau', ('        if not mo and t[j:k] == "là" and m > k:', '        if not mo and t[j:k] == "là":'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_mo_chi_ngoac', ('_MO_NHIEU_VE = frozenset("(“\\"‘")', '_MO_NHIEU_VE = frozenset("(")'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_bo_gach_dai', ('_DAU_KET_NHIEU_VE = frozenset(".)-–—")', '_DAU_KET_NHIEU_VE = frozenset(".)-–")'), 'ca_r35_lop_loi'),
     ('wp1525_zip_tin_so_khai', ('    if vt != vt_eocd or n != n_khai:', '    if vt != vt_eocd:'), 'ca_r35_lop_loi'),
     ('wp1525_zip_dem_sau_zipfile', ('        n_entry = _dem_entry_zip(fh, co)\n        if n_entry > _TRAN_MEMBER:', '        n_entry = 0\n        if n_entry > _TRAN_MEMBER:'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_nhieu_ve', ("""                "dong co phan mo dau dang nhan diem nhieu ve (vd 'ab c.', 'Ban a)', '(Ho so)') bi TU CHOI ca Dieu — "\n""", ""), 'ca_r35_lop_loi'),
     ('wp1525_nhieu_ve_bo_chot', ('    if _mo_dau_nhieu_ve(ln[m.end() if m else 0:]):', '    if False:'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_bo_dung_la', ('        if ve[-1] == "là":\n            return False', '        if False:\n            return False'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_gach_khong_gioi_han', ('        return len(ve) <= 3 and all(len(x) <= 3 for x in ve) and', '        return'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_bo_ngoac_mo', ('    i = 1 if t[:1] == "(" else 0\n    ve, j = [], i', '    i = 0\n    ve, j = [], i'), 'ca_r35_lop_loi'),
     ('wp1525_extract_khong_tran', ('                if con <= 0:\n                    vuot.append(ten)', '                if False:\n                    vuot.append(ten)'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_gioi_han', ("""                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "\n""", ""), 'ca_r35_lop_loi'),
     # r36 (§2.38): danh sách cho phép đầu dòng — mỗi điều kiện một đột biến riêng.

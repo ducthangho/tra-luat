@@ -1,0 +1,19 @@
+TONG (moi mau):
+  nen-1: wall 408.4s · cpu 118.4s · cpu_con 233.6s · cpu+con 352.0s · rc 0
+  nen-2: wall 427.0s · cpu 127.3s · cpu_con 242.2s · cpu+con 369.5s · rc 0
+  sau-1: wall 391.8s · cpu 109.7s · cpu_con 228.9s · cpu+con 338.6s · rc 0
+  sau-2: wall 425.7s · cpu 121.5s · cpu_con 244.6s · cpu+con 366.1s · rc 0
+
+CPU+con theo PHA (trung vi qua mau):
+  CA        nen   126.8s · sau   120.1s · delta   -6.6s
+  DOT_BIEN  nen   233.8s · sau   233.2s · delta   -0.6s
+  TU_KIEM   nen     0.2s · sau     0.3s · delta   +0.1s
+  TONG      nen   360.7s · sau   353.6s · delta   -7.1s
+
+CA: chi co o sau: a135_bo_sinh_dung_mien_dac_ta 1.89s, a136_a135_do_khi_bo_sinh_lech_mien 1.27s
+CA: 8 muc lech nhieu nhat (cpu+con, trung vi): a213_la_landed_khop_kiem_ho_so_land 11.36->8.18 · a102_ca_kho_tai_base 16.79->14.71 · a127_bang_o_dong_bang 32.74->31.41 · a210_cli 1.78->1.37 · a108_neo 3.69->3.29 · a103_bo_phan_tich 3.32->2.97 · a118_k1_k2_quet_he_thong 1.47->1.17 · a125_ascii_dong_danh_gia 9.29->9.03
+CA: tong lech cac muc chung: -9.78s tren 51 muc
+
+DOT_BIEN: chi co o sau: 
+DOT_BIEN: 8 muc lech nhieu nhat (cpu+con, trung vi): m128_moc_so_rong 6.44->7.60 · m37_khong_prov_lay_dong_tong 30.91->31.68 · m127_skip_v3_khop_dau 6.46->6.97 · r12i_skip_old_ascii_name 8.66->8.20 · m10_bo_attempt 4.42->4.03 · r12i_head_uppercase 9.38->9.04 · m95_job_khong_mapping 2.97->3.30 · m125_dau_head_khong_hex 8.87->8.54
+DOT_BIEN: tong lech cac muc chung: -0.58s tren 158 muc

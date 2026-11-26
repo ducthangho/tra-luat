@@ -1,0 +1,182 @@
+[
+ {
+  "cap": 1,
+  "bo": "B",
+  "ve": "nen",
+  "bat_dau": "12:43:45Z",
+  "wall": 329.99,
+  "cpu": 304.8,
+  "rc": 0,
+  "duoi": [
+   "CA: 38/38 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 1,
+  "bo": "B",
+  "ve": "sau",
+  "bat_dau": "12:49:15Z",
+  "wall": 346.51,
+  "cpu": 320.61,
+  "rc": 0,
+  "duoi": [
+   "CA: 40/40 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 1,
+  "bo": "A",
+  "ve": "nen",
+  "bat_dau": "12:55:01Z",
+  "wall": 357.64,
+  "cpu": 349.75,
+  "rc": 0,
+  "duoi": [
+   "CA: 51/51 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 1,
+  "bo": "A",
+  "ve": "sau",
+  "bat_dau": "13:00:59Z",
+  "wall": 385.87,
+  "cpu": 377.79,
+  "rc": 0,
+  "duoi": [
+   "CA: 53/53 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 2,
+  "bo": "B",
+  "ve": "sau",
+  "bat_dau": "13:07:25Z",
+  "wall": 329.34,
+  "cpu": 306.7,
+  "rc": 0,
+  "duoi": [
+   "CA: 40/40 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 2,
+  "bo": "B",
+  "ve": "nen",
+  "bat_dau": "13:12:54Z",
+  "wall": 327.88,
+  "cpu": 305.36,
+  "rc": 0,
+  "duoi": [
+   "CA: 38/38 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 2,
+  "bo": "A",
+  "ve": "sau",
+  "bat_dau": "13:18:22Z",
+  "wall": 346.06,
+  "cpu": 339.11,
+  "rc": 0,
+  "duoi": [
+   "CA: 53/53 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 2,
+  "bo": "A",
+  "ve": "nen",
+  "bat_dau": "13:24:08Z",
+  "wall": 348.94,
+  "cpu": 340.91,
+  "rc": 0,
+  "duoi": [
+   "CA: 51/51 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 3,
+  "bo": "B",
+  "ve": "nen",
+  "bat_dau": "13:29:57Z",
+  "wall": 340.2,
+  "cpu": 316.51,
+  "rc": 0,
+  "duoi": [
+   "CA: 38/38 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 3,
+  "bo": "B",
+  "ve": "sau",
+  "bat_dau": "13:35:37Z",
+  "wall": 325.43,
+  "cpu": 302.84,
+  "rc": 0,
+  "duoi": [
+   "CA: 40/40 dat",
+   "DOT BIEN: 145/145 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 3,
+  "bo": "A",
+  "ve": "nen",
+  "bat_dau": "13:41:02Z",
+  "wall": 361.22,
+  "cpu": 353.7,
+  "rc": 0,
+  "duoi": [
+   "CA: 51/51 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ },
+ {
+  "cap": 3,
+  "bo": "A",
+  "ve": "sau",
+  "bat_dau": "13:47:04Z",
+  "wall": 347.07,
+  "cpu": 339.79,
+  "rc": 0,
+  "duoi": [
+   "CA: 53/53 dat",
+   "DOT BIEN: 158/158 bi giet dung ly do",
+   "TU KIEM PHAN HANG: DAT (2 dot bien)",
+   "TONG: DAT"
+  ]
+ }
+]

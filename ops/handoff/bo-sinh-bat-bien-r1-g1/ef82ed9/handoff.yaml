@@ -1,0 +1,151 @@
+schema_version: 1
+# Handoff cua EXECUTOR, luot 2. Nhanh code CHUA push, CHUA co PR (ADR-0060 M5/M12). Executor khong tu review, khong tu approve.
+packet_id: bo-sinh-bat-bien
+packet_issue: 1539
+packet_slug: BO-SINH-BAT-BIEN
+revision: 1
+generation: 1
+luot_handoff: 2
+lease_id: bo-sinh-bat-bien-r1-g1-claude
+lease_ref: 'refs/heads/ops/bo-sinh-bat-bien-lease (ops/leases/bo-sinh-bat-bien-r1-g1-claude.yaml); lease_expires_at_utc 2026-11-27T20:55:00Z'
+spec_path: ops/specs/bo-sinh-bat-bien-r1.md
+spec_source_oid: d22fe11f9bf35517c70333c567481be460173eee
+spec_hash: bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577
+provider: claude
+model_family: claude
+model_ghi_chu: 'model va effort: theo lease; tep nay khong chep dinh danh model'
+execution_surface: claude_code
+transport: machine/local
+environment: remote
+operating_system: Linux
+python: 3.13.18
+unicode_data: 15.1.0
+role: executor
+session_id: session_015GtxrabSZAwhhMamwUmUFW
+dieu_phoi: session_015Gtxraj8uybNKhrrYZSKtB
+base_sha: a89c83acf998008caecba9084a7d295845bf1976
+base_tree: 1f5c8276008d5708f09ac77d6b4272c04c4f2298
+head_sha: ef82ed9a7c26f085fa567021fea1d0baaf15c75b
+head_tree: 30d8b599d30f7552e5b1c00b51008d4efec09c66
+tested_sha: ef82ed9a7c26f085fa567021fea1d0baaf15c75b
+head_sha_bang_tested_sha: true
+commits:
+  - {sha: ded412862fba5181fc59e8482ff40cb31162f577, cha: a89c83acf998008caecba9084a7d295845bf1976, noi_dung: 'ung vien luot 1 (da review, khong sua)'}
+  - {sha: ef82ed9a7c26f085fa567021fea1d0baaf15c75b, cha: ded412862fba5181fc59e8482ff40cb31162f577, noi_dung: 'va lop theo verdict luot 1; so voi ded4128: chi ops/land_evidence_nguon_test.py (numstat ded4128..ef82ed9: +90 -52), tep test dot A KHONG doi (blob giong ded4128)'}
+pushed: false
+bundle:
+  path: ops/handoff/bo-sinh-bat-bien-r1-g1/ef82ed9/bo-sinh-bat-bien-ef82ed9.bundle
+  sha256: 0a50138d32884ef0f4064664abc8403beec4193b5a9939bf8fbfd83f4599c59e
+  bytes: 10830
+  range: a89c83acf998008caecba9084a7d295845bf1976..refs/heads/claude/bo-sinh-bat-bien-r1-g1
+  verify: 'git bundle verify rc 0 (gate/bundle_verify.log)'
+  dung: 'git fetch <bundle> claude/bo-sinh-bat-bien-r1-g1:claude/bo-sinh-bat-bien-r1-g1  (can base a89c83a trong kho)'
+status: needs_review
+tra_loi_verdict:
+  verdict: 'review ma luot 1 (Codex, run efd533b8bf264ca5a8bee54ee6f44cb8, tren ded4128, changes_requested: 2 P3, mot lop) — ops/reviews/bo-sinh-bat-bien-r1-ma-1-codex/VERDICT.md tren ops/bo-sinh-bat-bien-lease @ 3901ae6, sha256 76695546f683e88539efbf6005866583edf51ed79eb2a0f0f25038e585f74e7e (executor tu bam, khop)'
+  R1-01:
+    nhan_dinh: 'dung. Bang go chot luot 1 bo sot chot 648 va phep go "tong 158" sua hai ve cung luc.'
+    da_lam:
+      - 'c39 them bien the "lap CHINH ky tu ngoai BMP cuoi" (159 ky tu, 158 khac nhau, lech rong): chi menh de TONG 158 bat.'
+      - 'c39 them phan chung cho chot 648: nap_sua() dung ban sao TRONG BO NHO cua chinh tep test dot B voi dung MOT o roi `("nhan", "", dung),` bi bo (neo phai xuat hien dung mot lan), bo sinh nguyen ven (vu tru van 158); c37 cua ban sao phai rc 3 "so o lech dac ta: 647 (dung 648)" va 0 o chay. Doi chung: ban sao KHONG sua gi di cung duong ay phai rc 0 va dung 648 o.'
+      - '`ky8` trong c39 khong con cam: no DEM o. Moi phan chung bi doi dung 0 o (do truoc vong o), ban nguyen ven dung 648 o. Docstring noi ro c39 KHONG do consumer.'
+      - 'Bang go chot (phan-chung/go_chot.log) nay la 14 phep, moi phep bo NGUYEN mot menh de va khong sua ve nao khac: 14/14 lam ca phan chung do.'
+  R1-02:
+    nhan_dinh: 'dung. Chot dem va chot category khong thay mot o bi thay bang ban sao.'
+    da_lam:
+      - 'c36 them chot thu tu: so phan tu KHAC NHAU (ho so YAML + moi tep provenance, so tung byte) phai BANG so phan tu tru so "gap lai co chu y" cua ca. So gap lai la HANG trong A_CA, co dan giai tung so hang ngay tai cho: a124 84 · a125 71 · a126 0 · a129 0 · a131 0 · a132 15 · a133 28 · a134 0.'
+      - 'Pham vi: ca tam ca, cung mot co che. Khong ap tinh duy nhat len tung phan tu: cac vong Unicode co y gap lai dai dien, phan do nam trong hang `lap`.'
+      - 'c40 chay dung cap nguon/dich cua reviewer (outside-mutant.json) tren a129, that qua main -> L8: rc 3 "35 phan tu KHAC NHAU (dac ta: dung 36)". Them mot cap cung dang tren a126 (o `win7` thanh ban sao o dau): "51 phan tu KHAC NHAU (dac ta: dung 52)".'
+      - 'Ky vong khong ghim bam test dot A va khong phu thuoc gia tri ky tu dai dien: chi dem so vet khac nhau. No van phu thuoc cac so da co san trong A_CA (19 khoang trang ngoai ASCII, 9 dai dien L/N gap lai) — giong luot 1, khong them phu thuoc phien ban Unicode nao moi.'
+  de_nghi_cua_reviewer_ve_c40: 'da lam: c40 co doi chung a129 nguyen ven di CUNG duong nho dem (hang "a129 nguyen ven"), chay truoc ba phan chung a129.'
+  selftest_1773_vs_1789: 'xem muc dieu_kien_do. Executor khong sua gi vi chuyen nay.'
+summary: >-
+  Va theo LOP `nghiem-thu-khong-co-lap-chot-dich` sau verdict luot 1. Them chot "so phan tu khac nhau" vao c36 (dong bieu hien: o cau truc
+  bi thay bang BAN SAO), phan chung rieng cho menh de tong 158 va cho chot 648 cua c37, doi chung a129 qua duong nho dem trong c40. Tep test
+  dot A khong doi so voi luot 1. Module san pham khong doi.
+changed_paths:
+  - ops/gate_output_doi_chieu_test.py
+  - ops/land_evidence_nguon_test.py
+write_set_khop_lease: true
+numstat: {lenh: 'git diff --numstat a89c83acf998008caecba9084a7d295845bf1976...HEAD', tep: 2, them: 201, xoa: 6, chi_tiet: 'gate_output_doi_chieu_test.py +49 -0 · land_evidence_nguon_test.py +152 -6', tran: '<= 2 tep / <= 320 dong them', con_lai_toi_tran: 119}
+khong_doi: 'git diff --stat a89c83a HEAD -- ops/land_evidence_nguon.py ops/gate_output_doi_chieu.py .github: rong'
+master_da_tien: 'origin/master luc lap handoff = 1260fa0cba89353911e2f97188b2c04dab8139d7 (lease ghi base a89c83a). git diff --stat a89c83a origin/master tren hai tep write set va hai module: rong. git merge-tree --write-tree origin/master HEAD: rc 0'
+sha256_tep_tai_head:
+  ops/land_evidence_nguon_test.py: 8f1a26a66aa21d865ff7b72dcbd5a14cd5cc918d1d62d61f4b3130dfbd2fd6e6
+  ops/gate_output_doi_chieu_test.py: 53f1c66318d7ca50acd0a8d40b37e91f2ac2003194ff3595696ad3e27813888e
+rig: >-
+  Hai clone day du dung trong CUNG mot lenh: nen = a89c83a (tree 1f5c827), sau = ef82ed9 (tree 30d8b59); shallow=false, .git la thu muc,
+  core.abbrev 7, autocrlf false, eol lf; cay sach truoc va sau (ban=0). Hai bo test co tran thoi gian chay XEN KE nen/sau, khong co tien
+  trinh nang nao khac cung luc (gate/ab_thoi_gian.log). Cac cong con lai (gate/ab_con_lai.log) chay trong luc bo quet luat 9 da bat dau.
+dieu_kien_do:
+  tmp_git: 'KHONG co /tmp/.git luc do (ls -d /tmp/.git: khong ton tai) — executor khong goi Codex nen khong co thu muc rong sandbox de lai'
+  tmpdir: 'TMPDIR khong dat (mac dinh /tmp); to tien cua /tmp khong co .git'
+  origin_master_trong_clone: 'hai clone la clone CUC BO cua checkout chinh, nen origin cua chung la checkout ay va refs/remotes/origin/master = 5259239d763c9ffc1677f033bd9a9cf23ede9299 (nhanh master cuc bo cua container, CU hon base). Ref CO ton tai, nhung khong phai a89c83a. Checkout chinh co origin/master that (da fetch --unshallow)'
+  selftest: 'python scripts/tl.py --selftest: 1789/1789 o ca nen va sau, rc 0. Reviewer do 1773/1789 o ca hai ve trong sandbox co /tmp/.git va clone thieu origin/master; executor KHONG tai lap duoc 16 ca do ay va khong ket luan nguyen nhan'
+tests:
+  - name: 'buoc 1 — python3 -B ops/land_evidence_nguon_test.py'
+    status: passed
+    evidence: 'sau: rc 0, "CA: 40/40 dat · DOT BIEN: 145/145 bi giet dung ly do · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT" (gate/sau-test-b.log) · nen: rc 0, CA 38/38 · DOT BIEN 145/145 · TONG DAT'
+  - name: 'buoc 2 — python3 -B ops/gate_output_doi_chieu_test.py'
+    status: passed
+    evidence: 'sau: rc 0, "CA: 53/53 dat · DOT BIEN: 158/158 bi giet dung ly do · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT" (gate/sau-test-a.log) · nen: rc 0, CA 51/51 · DOT BIEN 158/158 · TONG DAT'
+  - name: 'thoi gian (muc 4 dac ta): B khong cham hon base qua 30s, A khong qua 5s'
+    status: passed
+    evidence: 'gate/ab_thoi_gian.log, xen ke, cung may, mot lan moi ve: B nen 310,5s -> sau 328,2s (delta +17,7s) · A nen 337,0s -> sau 336,9s (delta -0,1s). Luot 1 (ded4128, phien do khac): B 349,0 -> 342,4 · A 342,8 -> 343,4; nhieu giua cac phien ~ +-20s nen delta B chi nen doc la "trong tran o lan do nay". Do le bang --mot-ca: c39 ~0,3s · c40 ~12s (luot 1: 18s; nho dem yaml dung chung nen 4 luot a129 re hon 2 luot cu) · c36 ~48s (luot 1 ~45-47s)'
+  - name: 'buoc 3 — python3 -B ops/land_evidence_nguon.py --root .'
+    status: passed
+    evidence: 'sau: rc 0, "land_evidence_nguon: 153 DAT · 25/28 mien tru (bam khop) · 0 vi pham · 0 KHONG DO DUOC · tong 178" + "TONG: DAT" (gate/sau-land-evidence.log); nen: cung dong'
+  - name: 'buoc 4 — python3 -B .claude/dev/ci_dang_ky_test.py'
+    status: passed
+    evidence: 'sau: rc 0, "PHAN CHUNG: 1677/1677 do dung · TONG: DAT" (gate/sau-ci-dang-ky.log.tail); nen: cung dong'
+  - name: 'buoc 5 — python scripts/tl.py --selftest'
+    status: passed
+    evidence: 'sau: rc 0, "== tl selftest 1789/1789 ==" (gate/sau-selftest.log.tail); nen: rc 0, 1789/1789. Dieu kien do: muc dieu_kien_do'
+  - name: 'buoc 6 — python3 -m ruff check --select F tren hai tep (ruff 0.15.15, ban ghim CI)'
+    status: passed
+    evidence: 'nen: "All checks passed!" · sau: "All checks passed!" => delta 0 (gate/*-ruff.log)'
+  - name: 'buoc 7 — git diff --check va numstat'
+    status: passed
+    evidence: 'git diff --check a89c83a...HEAD rc 0; numstat: chi hai tep write set, +201 -6 (tran 320)'
+  - name: 'buoc 8 — luat 9 (bo quet ghim, hai cap module/test x hai ve)'
+    status: not_measured
+    evidence: 'DANG CHAY NEN, khong ghi so du doan. Lenh: cong-cu/luat9.sh <thu muc hai clone> <thu muc ra> 3 — tuc `python3 ops/reviews/wp1236-r10-soan/quet_dot_bien.py do <module> <test> <kho> --thu-muc-ra D --song-song 3` lan luot B-sau, B-nen, A-sau, A-nen; kho B rong, kho A 201 ID (sha256 191225ca…). Bat dau 2026-11-26T04:55Z. Hai luot NEN: tep test va module o base khong doi so voi luot 1 nen thu muc ra duoc dat san kq.jsonl cua luot 1; `do` chi dung lai ket qua khi neo (cong_cu, test, goc, manifest, kho, python) khop, va van chay baseline day du truoc. Xong se gui handoff bo sung cung SHA, thu muc con luat9/. Ket qua luot 1 (tren ded4128, KHONG phai SHA nay): 0 dot bien GIET -> hang khac o ca hai cap'
+  - name: 'buoc 9 — phan chung muc 3 la ca trong bo test'
+    status: passed
+    evidence: 'phan-chung/bang.md: 50 dong phan chung (P1-P7, R1-01, R1-02, them), ca dich deu rc 3, khong rc 4; 5 doi chung nguyen ven rc 0. Nguon: phan-chung/dong_DO_quan_sat.log, do tren clone sau'
+  - name: 'rang cua TUNG chot moi: bo NGUYEN mot menh de moi phep, chay ca phan chung'
+    status: passed
+    evidence: 'phan-chung/go_chot.log: "GO CHOT: 14/14 bi giet dung ca; cay sau khi do: sach". c36: so phan tu · so phan tu khac nhau · tap category · ngoai BMP (c40). c37: tong 158 · doi mot khac nhau · category · so o 648 (c39). a135: 6 menh de (a136). Cong cu: cong-cu/go_chot.py (bang M ghi nguyen van tung cap cu/moi)'
+bang_chot:   # MOI chot moi cua packet -> phep go nguyen menh de -> bien the lam ca phan chung do (dong tuong ung trong phan-chung/go_chot.log)
+  - {chot: 'c36: dem[0] - truoc == mong', ca_phan_chung: c40, bien_the_do_dau_tien: 'bo Mn (a129)', chi_chot_nay_bat: 'khong co bien the rieng: bo chot nay thi chot "khac nhau" bat thay (35 != 36) voi thong diep khac, c40 doi dung thong diep nen van do'}
+  - {chot: 'c36: len(van_tay) == mong - lap', ca_phan_chung: c40, bien_the_do_dau_tien: 'Mn thanh ban sao Mc (a126)', chi_chot_nay_bat: 'a129 o `khong khop` thanh ban sao · a126 o roi thanh ban sao'}
+  - {chot: 'c36: not thieu (tap category)', ca_phan_chung: c40, bien_the_do_dau_tien: 'Mn thanh ky tu Mc KHAC (a126)', chi_chot_nay_bat: 'chinh bien the ay'}
+  - {chot: 'c36: co ky tu ngoai BMP', ca_phan_chung: c40, bien_the_do_dau_tien: 'ngoai BMP thanh ky tu BMP KHAC (a126)', chi_chot_nay_bat: 'chinh bien the ay'}
+  - {chot: 'c37: len(vu_tru) == 158', ca_phan_chung: c39, bien_the_do_dau_tien: 'lap CHINH ky tu ngoai BMP cuoi', chi_chot_nay_bat: 'chinh bien the ay (bo chot thi roi sang chot 648 voi 652 o; c39 doi dung thong diep)'}
+  - {chot: 'c37: len(set(vu_tru)) == 158', ca_phan_chung: c39, bien_the_do_dau_tien: 'Lu thanh ASCII A', chi_chot_nay_bat: 'chinh bien the ay'}
+  - {chot: 'c37: not lech', ca_phan_chung: c39, bien_the_do_dau_tien: 'Mn thanh ky tu Mc KHAC', chi_chot_nay_bat: 'chinh bien the ay'}
+  - {chot: 'c37: len(o) == 648', ca_phan_chung: c39, bien_the_do_dau_tien: 'c37 mat mot o roi (ban sao trong bo nho)', chi_chot_nay_bat: 'chinh bien the ay'}
+  - {chot: 'a135: so_phan_tu · category_vang · lap_category · thuoc_cam · tu_0080 · cuoi_ngoai_bmp', ca_phan_chung: a136, bien_the_do_dau_tien: 'xem 6 dong cuoi go_chot.log', chi_chot_nay_bat: 'a136 doi DUNG danh sach menh de lech cua tung bo sinh gia, nen bo menh de nao cung lam danh sach lech'}
+bang_lop:
+  - slug: nghiem-thu-khong-co-lap-chot-dich
+    lich_su: ['wp1236 dot B luot 4: B02 P3 (no goc)', 'packet nay luot 1 (ded4128): hai phan chung B02 goc DA_VA_THAT; lop VA_MOT_PHAN — R1-01, R1-02 (P3)', 'luot 2 (ef82ed9): xu ly R1-01, R1-02 theo co che chung duoi day']
+    bieu_hien:
+      - {ma: B02-a, mo_ta: 'san dem cho phep roi phan tu (bo sinh bo category; ca mat mot o)', trang_thai: 'reviewer luot 1 xac nhan da va; khong dung lai'}
+      - {ma: B02-b, mo_ta: 'vu tru c37 co theo bo sinh', trang_thai: 'reviewer luot 1 xac nhan da va; khong dung lai'}
+      - {ma: R1-01, mo_ta: 'chot co mat ma khong co phan chung rieng (tong 158, 648)', trang_thai: 'luot 2: moi chot mot phan chung, bang 14/14'}
+      - {ma: R1-02, mo_ta: 'o cau truc bi thay bang BAN SAO o khac: so luong va tap category khong doi', trang_thai: 'luot 2: chot so phan tu khac nhau, ca tam ca'}
+    cach_va_chung: 'moi bat bien cua bang (so phan tu, so phan tu khac nhau, tap category, ngoai BMP, vu tru 158, so o 648, mien bo sinh) la mot chot rieng so voi HANG; moi chot co phan chung la CA chay chinh ca dich tren ban sua trong bo nho, doi DUNG thong diep cua chot ay; doi chung nguyen ven di cung duong'
+    phep_dong: 'go nguyen tung menh de 14/14 do; 50 phan chung rc 3 dung ca dich; 5 doi chung xanh'
+    chua_do_duoc:
+      - 'Mot o cau truc bi thay bang mot o KHAC, khong trung o nao san co, cung so luong va cung tap category (vi du doi chuoi " [khong khop]" thanh " [khac]"): so phan tu, so khac nhau, tap category deu giu nguyen nen KHONG chot nao thay. Dung o day vi muon thay duoc thi phai ghim NOI DUNG tung o (bam hoac ban chep ky vong cua test dot A sang test dot B) — dung thu verdict B02 goc va dieu phoi can ("khong ghim bam toan bo test dot A"), va no bien test dot B thanh ban sao thu hai cua test dot A. Phan con lai nay la ban chat cua viec TAI DUNG bang: test dot B chot HINH DANG cua bang, con Y NGHIA tung o do chinh ca cua test dot A chot. Neu dieu phoi/reviewer coi phan nay la phai dong trong packet nay thi do la cau hoi E1/E3 (dac ta muc 8 da khai dung gioi han nay), executor se dung cho quyet dinh thay vi va tiep.'
+      - 'Chot tap category cua c36 la quan he CHUA (dac ta 2.2.2); du lieu ngoai bo sinh co the gop san category (reviewer luot 1 da xet, khong doi).'
+      - 'c39 khong do consumer (ky8 chi dem o); consumer do chinh c37 do trong bo.'
+      - 'Hang `lap` cua a124/a125/a132/a133 la suy tu ma test dot A (dan giai tai cho) va khop phep do; neu test dot A doi mot vong lap co chu y thi c36 do — do la tin hieu dung (bang doi), khong phai do vo can.'
+      - 'Windows: thoi gian va hanh vi cac ca moi chua do (M3 required theo reviewer; dieu phoi chay).'
+ghi_chu_cho_reviewer:
+  - 'nap_sua(ten, cu, moi): ban sao trong bo nho cua MOT tep test voi dung mot cho sua; neo khong xuat hien dung mot lan thi ca DO (bang), khong phai loi vo can. c39 dung no cho chinh tep test dot B (neo ghep tu hai manh chuoi de dong khai bao neo khong tu trung neo); c40 dung no cho tep test dot A.'
+  - 'c40 nho dem yaml.safe_load/safe_dump theo DOI SO (chuoi/bytes nguyen van, hoac pickle cua doi tuong + kwargs), tra deepcopy, bang mock.patch.multiple tren module yaml trong luc chay tung bien the; ham that van la SafeLoader/SafeDumper thuan. Doi chung a126 va a129 nguyen ven di cung duong nay.'
+  - 'van_tay trong c36 la bo (byte ho so YAML, (duong dan tuong doi, byte) cua tung tep provenance): so sanh noi dung, khong bam.'
+chua_do: ['buoc 8 luat 9 tren ef82ed9 (dang chay nen)', 'Windows', 'ci-dot-bien-du.yml tren head (M9)']
+pham_vi_e: 'E1-E5: khong (chi sua hai tep test)'
+next_action: 'dieu phoi goi review luot 2 tren ef82ed9a7c26f085fa567021fea1d0baaf15c75b; executor gui handoff bo sung luat 9 khi xong; KHONG push nhanh code'

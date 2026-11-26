@@ -1,0 +1,68 @@
+COMMAND ["python", "-B", "out/probes.py"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+base RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-first RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K02-adjacent-heading RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K02-later-block RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K02-leading-blanks RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K02-two-copies RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : có 3 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K02-fence RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-comment RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-attached-before RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-attached-after RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-space-line RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K04-first RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-adjacent-heading RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-later-block RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-leading-blanks RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-two-copies RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : có 3 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-fence RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K04-comment RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K04-attached-before RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K04-attached-after RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K04-space-line RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K05-first RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-adjacent-heading RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-later-block RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-leading-blanks RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-two-copies RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : có 3 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-fence RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K05-comment RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K05-attached-before RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K05-attached-after RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K05-space-line RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K06-first RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-adjacent-heading RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-later-block RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-leading-blanks RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-two-copies RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : có 3 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-fence RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K06-comment RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K06-attached-before RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K06-attached-after RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K06-space-line RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K07-first RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-adjacent-heading RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-later-block RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-leading-blanks RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-two-copies RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : có 3 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-fence RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K07-comment RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K07-attached-before RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K07-attached-after RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K07-space-line RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K01-whole-section-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K01 : có 2 bản hiển thị trong protocol, phải đúng 1 / doctrine-scan: ID bất biến trên dòng bảng nằm ngoài tiểu mục §1.1: dòng [7, 8, 9, 10, 11] / 2 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K03-whole-section-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K03 : có 2 bản hiển thị trong protocol, phải đúng 1 / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+neutral-plain RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+neutral-blanks RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+neutral-comment-heading RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+neutral-fence-heading RC 0 PASS True REASON doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine
+K02-move-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K02 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K04-move-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K04 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K05-move-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K05 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K06-move-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K06 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+K07-move-before RC 9 PASS True REASON doctrine-scan: đơn vị khoá K07 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó / 1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)
+no-headings RC 9 PASS True REASON doctrine-scan: đơn vị khoá K01 : mục chứa nó phải có đúng 1 lần, thấy 0 / doctrine-scan: đơn vị khoá K02 : mục chứa nó phải có đúng 1 lần, thấy 0 / doctrine-scan: đơn vị khoá K03 : mục chứa nó phải có đúng 1 lần, thấy 0 / doctrine-scan: đơn vị khoá K
+PROBES 63 PASS 63
+
+RC 0 ELAPSED 19.15

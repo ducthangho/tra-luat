@@ -1,0 +1,34 @@
+import pathlib,re,ast,hashlib,json,subprocess
+O=pathlib.Path(__file__).resolve().parent;C=O/'candidate';S=O.parent/'cay-kho'
+proto=(C/'docs/PROTOCOL_DA_PHIEN.md').read_bytes()
+for i in range(1,7):
+ k=f'p{i}-moi';raw=(O/(k+'.txt')).read_bytes();print('PROTOCOL_BLOCK',k,proto.count(raw));assert proto.count(raw)==1
+for k in ['p4-cu','p5-cu']:
+ raw=(O/(k+'.txt')).read_bytes();print('OLD_BLOCK',k,proto.count(raw));assert proto.count(raw)==0
+code=(C/'.claude/dev/packet_loop.py').read_text();tree=ast.parse(code)
+values=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(x,ast.Name) and x.id=='INV_KHOA_PROTOCOL' for x in n.targets))
+keys=json.loads((O/'keys.json').read_text());expected=tuple((k,v['address'],v['order'],v['hash']) for k,v in keys.items());assert values==expected;print('CODE_CONSTANT_EQUALS_INDEPENDENT 7/7')
+adr=(C/'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md').read_bytes();template=(O/'adr.txt').read_bytes()
+status=next(l for l in adr.splitlines() if l.startswith(b'- **Tr'))
+print('ADR_STATUS',status.decode())
+# Giá trị giữ chỗ là phần sau "- **Trạng thái:** ", không cả dòng.
+head='- **Trạng thái:** '.encode();assert status.startswith(head);filled=template.replace(b'{{TRANG_THAI}}',status)
+paths=['ops/lease_publish.py','.claude/dev/packet_loop.py','.claude/dev/launcher.py','.claude/dev/gate_lifecycle.py','.github/workflows/ci.yml','.github/workflows/ops-publish-lease.yml']
+counts=[]
+for i,path in enumerate(paths,1):
+ n=sum(bool(re.search(rb'ADR-0068|INV_|_inv_',l)) for l in (C/path).read_bytes().split(b'\n'));counts.append(n);filled=filled.replace(('{{N'+str(i)+'}}').encode(),str(n).encode())
+print('ADR_COUNTS',counts,'MATCH',filled==adr);assert filled==adr
+# Tập nghĩa §1: nối chỉ các dòng tiếp diễn của cùng một mục đánh số.
+base=subprocess.check_output(['git','-C',str(S),'show','1fac6ce:docs/PROTOCOL_DA_PHIEN.md']).decode();sec=base.split('## 1. Mục tiêu và bất biến\n',1)[1].split('\n## ',1)[0]
+items={};current=None
+for line in sec.splitlines():
+ m=re.match(r'^(\d+)\. (.*)',line)
+ if m:current=int(m[1]);items[current]=m[2]
+ elif current and line.startswith(' '):items[current]+=' '+line.strip()
+p2=(O/'p2-moi.txt').read_text(); rows=[l for l in p2.splitlines() if l.startswith('| `INV-')];matches=[]
+for row in rows:
+ cells=[c.strip() for c in row.split('|')[1:-1]];m=re.fullmatch(r'§1 \((\d+)\)',cells[2])
+ if m:matches.append((cells[0],int(m[1]),cells[1]==items[int(m[1])]))
+print('SOURCE_SECTION1',matches);assert len(matches)==10 and all(x[2] for x in matches)
+debts=set(re.findall(r'(?:còn nợ:|nợ:) `([^`]+)`','\n'.join(rows)));registered=set(re.findall(r'^- `([^`]+)`:',adr.decode().split('## Nợ\n',1)[1].split('## Giới hạn',1)[0],re.M))
+print('DEBT_REFERENCED',len(debts),'REGISTERED',len(registered),'MISSING',sorted(debts-registered));assert debts<=registered

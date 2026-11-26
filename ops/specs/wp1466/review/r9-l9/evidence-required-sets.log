@@ -1,0 +1,11 @@
+COMMAND ["python", "-I", "-B", "exec-out/sc/do_tap_bat_buoc.py", "cay-kho", "out/candidate", "out/required-check"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+nguyên mẫu dựng lại: numstat 76	1	.claude/dev/packet_loop.py · 163	1	.claude/dev/packet_loop_test.py · 46	2	docs/PROTOCOL_DA_PHIEN.md + tệp mới docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+tập bắt buộc: 57 ca · 26 đột biến (nền cũ 48d372e: 1582 ca, 1864 đột biến)
+thiếu ở H: ca [] · đột biến []
+đột biến bắt buộc mà cặp (tìm, thay) đổi so với nguyên mẫu: []
+  inv_doctrine_scan_bo_goi: danh sách ca đích 52 → 54; thêm ['doctrine_inv_nhan_doi_K02_sat_tieu_de_dau', 'doctrine_inv_nhan_doi_K04_truoc_tieu_de_dau']; bớt []
+  inv_duy_nhat_lech_so: danh sách ca đích 5 → 6; thêm ['doctrine_inv_chu_la_truoc_tieu_de_dau_van_xanh']; bớt []
+N6(a)/N7 có mặt: ĐẠT — 57 ca và 26 đột biến bắt buộc đều có ở H; không cặp (tìm, thay) nào đổi; không ca đích nào bị bớt
+
+RC 0 ELAPSED 6.31

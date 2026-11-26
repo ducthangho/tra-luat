@@ -1,0 +1,46 @@
+"""Parser riêng của reviewer, không import mã executor. Byte gốc và biên LF."""
+from pathlib import Path
+import re,hashlib,json
+O=Path(__file__).resolve().parent
+raw=(O/'candidate/docs/PROTOCOL_DA_PHIEN.md').read_bytes()
+lines=raw.split(b'\n'); masked=[]; fence=None
+for ln in lines:
+ m=re.match(rb' {0,3}(`{3,}|~{3,})(.*)$',ln)
+ if fence:
+  masked.append(b' '*len(ln))
+  if m and m[1][:1]==fence[:1] and len(m[1])>=len(fence) and not m[2].strip():fence=None
+ elif m and not (m[1].startswith(b'`') and b'`' in m[2]):
+  fence=m[1];masked.append(b' '*len(ln))
+ else:masked.append(ln)
+joined=b'\n'.join(masked)
+joined=re.sub(rb'<!--.*?-->',lambda m:re.sub(rb'[^\n]',b' ',m[0]),joined,flags=re.S)
+masked=joined.split(b'\n'); assert len(masked)==len(lines)
+sha=lambda b:hashlib.sha256(b).hexdigest()
+sections=[];stack=[];starts=[i for i,l in enumerate(masked) if l.startswith(b'#')]
+for j,start in enumerate(starts):
+ stop=starts[j+1] if j+1<len(starts) else len(lines)
+ level=len(masked[start])-len(masked[start].lstrip(b'#'))
+ while stack and stack[-1][0]>=level:stack.pop()
+ stack.append((level,lines[start])); path=sha(b'\n'.join(x[1] for x in stack))
+ end=stop
+ while end>start and lines[end-1]==b'':end-=1
+ spans=[(start,end)]; pos=start+1
+ while pos<stop:
+  if lines[pos]==b'':pos+=1;continue
+  e=pos+1
+  while e<stop and lines[e]!=b'':e+=1
+  spans.append((pos,e));pos=e
+ sections.append((path,spans))
+keys={}
+for row in (O/'khoa.txt').read_text().splitlines():
+ k,address,order,want,_=row.split(' | '); order=int(order)
+ matches=[s for a,s in sections if a==address];assert len(matches)==1
+ start,end=matches[0][order];data=b'\n'.join(lines[start:end]); actual=sha(data)
+ assert actual==want,(k,want,actual)
+ visible=all(lines[i]==masked[i] for i in range(start,end));assert visible
+ occurrence=sum(sha(b'\n'.join(lines[s:e]))==want and all(lines[i]==masked[i] for i in range(s,e)) for _,sp in sections for s,e in (sp[:1] if order==0 else sp[1:]))
+ assert occurrence==1
+ keys[k]={'address':address,'order':order,'hash':actual,'start':start+1,'end':end,'copies':occurrence}
+ (O/(k+'.raw')).write_bytes(data)
+ print(k,address,order,actual,'LINES',start+1,end,'COPIES',occurrence)
+(O/'keys.json').write_text(json.dumps(keys,indent=2));print('INDEPENDENT_HASH 7/7 PASS')

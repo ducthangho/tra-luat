@@ -1,0 +1,142 @@
+[
+  {
+    "key": "K02",
+    "kind": "comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K02",
+    "kind": "fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K04",
+    "kind": "comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K04",
+    "kind": "fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K05",
+    "kind": "comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K05",
+    "kind": "fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K06",
+    "kind": "comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K06",
+    "kind": "fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K07",
+    "kind": "comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  },
+  {
+    "key": "K07",
+    "kind": "fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/prefix-mask-root"
+    ],
+    "rc": 9,
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n"
+  }
+]

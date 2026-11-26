@@ -1,0 +1,1010 @@
+[
+  {
+    "name": "base",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-first",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K02-adjacent-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K02-later-block",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K02-leading-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K02-two-copies",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : có 3 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K02-fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-attached-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-attached-after",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-space-line",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K04-first",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-adjacent-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-later-block",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-leading-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-two-copies",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : có 3 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K04-comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K04-attached-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K04-attached-after",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K04-space-line",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K05-first",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-adjacent-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-later-block",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-leading-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-two-copies",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : có 3 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K05-comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K05-attached-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K05-attached-after",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K05-space-line",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K06-first",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-adjacent-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-later-block",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-leading-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-two-copies",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : có 3 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K06-comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K06-attached-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K06-attached-after",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K06-space-line",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K07-first",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-adjacent-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-later-block",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-leading-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-two-copies",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : có 3 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-fence",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K07-comment",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K07-attached-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K07-attached-after",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K07-space-line",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K01-whole-section-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K01 : có 2 bản hiển thị trong protocol, phải đúng 1\ndoctrine-scan: ID bất biến trên dòng bảng nằm ngoài tiểu mục §1.1: dòng [7, 8, 9, 10, 11]\n2 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K03-whole-section-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K03 : có 2 bản hiển thị trong protocol, phải đúng 1\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "neutral-plain",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "neutral-blanks",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "neutral-comment-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "neutral-fence-heading",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 0 tệp, 0 chỗ chép doctrine\n",
+    "stderr": "",
+    "expected": 0,
+    "ok": true
+  },
+  {
+    "name": "K02-move-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K02 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K04-move-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K04 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K05-move-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K05 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K06-move-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K06 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "K07-move-before",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K07 : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó\n1 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  },
+  {
+    "name": "no-headings",
+    "cmd": [
+      "/usr/local/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/probe-root"
+    ],
+    "rc": 9,
+    "stdout": "",
+    "stderr": "doctrine-scan: đơn vị khoá K01 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K02 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K03 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K04 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K05 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K06 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: đơn vị khoá K07 : mục chứa nó phải có đúng 1 lần, thấy 0\ndoctrine-scan: ID bất biến trên dòng bảng nằm ngoài tiểu mục §1.1: dòng [55, 56, 57, 58, 59]\n8 chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)\n",
+    "expected": 9,
+    "ok": true
+  }
+]

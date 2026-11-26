@@ -1,0 +1,95 @@
+# Verdict packet #1525 r26 lượt 26 — Codex
+
+reviewed_sha: 475fee9afc6f55bdfdc4b463db740fe54fbd0934
+reviewed_tree: 6d2ea315470d4064307349c1a38bb6ca59d08a1a
+
+## Đối chiếu lượt 25 và đặc tả r26
+
+- Baseline nghiệm thu `64b7f2c14776d5d0e1d34a6be4725490956f5bec`, tree `0cc14e79cecd2ce44bc4dc6cff92cadb31fd7ee4`. Mốc tiếp nối #1514 `fcb12b3873c3bec2c339029136243ed2c804ce05`. Mốc trước bản vá r26 `0ae38e9c4dfb1964199f578672eb7611e19b305a`. Cả ba là tổ tiên của ứng viên. Checkout detached, origin `ducthangho/tra-luat`, ref origin cục bộ của nhánh packet khớp head. [Lease r26](../ops/leases/llm-khoan-docx-r26-g1-claude.yaml)
+- Lease #1525 r26/g1 còn hạn đến 19:59 UTC ngày 26-11-2026, lớp `sensitive`, đây là lượt 26/26. Đặc tả tại blob của `reviewed_sha` và bản trên đĩa có cùng SHA-256 `68231e08177f371ca8c699ec9e010a7850e2494ad36fcaa205e9796c59bc1cfd`, khớp lease. Đối chiếu **26/26** cặp bia mộ hai chiều và **27/27** hash spec từ #1514 r9 qua #1525 r1 đến r26. Quyền đứng tăng trần và ngoại lệ M5 được ghi ở đầu đặc tả. [Đặc tả r26](../ops/specs/llm-khoan-docx-r26.md)
+- Lease có **141** đường dẫn duy nhất, hash LF `e8e5cfd407e3ff5865bcc06491915f2374f668441926029b5952a5edec81d704`. Bản vá r26 **8/8** và diff #1525 **137/137** đường dẫn trong write set sau khi loại bốn tệp hồ sơ #1514 theo prompt. Toàn PR có 185 đường dẫn gồm phần kế thừa. Ba diff và numstat lưu trong thư mục log.
+- Reviewer `openai_codex / codex_cli / machine`, Codex CLI 0.172.0, launcher run `e117702f6b4a4dcab5a4a36fdd1b9488`. SHA-256 prompt `8c8778d11afe38ad01d384f8edeaad9539f1c1404f3272349a618e026a28d7ff` khớp biên nhận. Sandbox `workspace-write`, metadata Git checkout gốc chỉ đọc. Executor theo lease `claude / claude_code / machine/local`, họ `claude`, phiên `session_015GtxrZQYT3Vt8PJdXrjEKg`. Model và effort phục vụ của reviewer `KHONG_DO_DUOC` trong biên nhận đang chạy. [Protocol §8.1](../docs/PROTOCOL_DA_PHIEN.md#L770)
+
+| Mục | Trạng thái | Bằng chứng |
+| --- | --- | --- |
+| B1 lượt 25 · §2.28 | **VÁ MỘT PHẦN** | Ca sẵn có kiểm gạch nối giữa các cấp, nhãn sát dấu mở trích dẫn, dạng gạch sau nhãn chữ, đối chứng từ ghép và viết tắt. Năm mutant nhãn bị giết. Nhãn đa cấp có đệm có thể rơi vào nhánh số khoản trước khi đến chốt nhãn. Xem C1. [Chốt](../scripts/tl_core/llm_route.py#L1405) · [Ca](../scripts/tl_core/llm_route_test.py#L690) |
+| B2 lượt 25 · §2.28 · A1 lượt 24 §2.27 | **ĐÃ VÁ THẬT** cho việc đọc tuần tự và ba khoảng trống test đã báo | `_chu_t` dùng `xml:space` hiệu lực, có đối chứng thường, kế thừa và đặt lại. `cap42`–`cap44` giết riêng mutant đặt lại `default`, đọc ruột bỏ bằng `e.text` và đọc `delText` lạc chưa cắt khoảng trắng. Hai mutant lịch sử cho cắt biên và kế thừa cũng bị giết. [Mã](../scripts/tl_core/llm_route.py#L1002) · [Ca](../scripts/tl_core/llm_route_test.py#L1464) |
+| B3 lượt 25 · §2.28 | **ĐÃ VÁ THẬT** cho ngắt mềm và ngắt trang/cột đã báo. **VÁ MỘT PHẦN** cho lớp tác dụng phụ của run đã bỏ | `ngat_mem` và `sau_trang` của run chỉ ghi vào đoạn khi run còn hiệu lực. Hai mutant ghi sớm chết ở `cap45`/`cap46`. Ca chữ thật theo sau ngắt trang vẫn chặn. Cờ phần tử lạ còn cập nhật sớm, xem C2. [Mã](../scripts/tl_core/llm_route.py#L1095) · [Ca](../scripts/tl_core/llm_route_test.py#L1473) |
+| A2 lượt 24 · §2.27 | **ĐÃ VÁ THẬT** cho hai nhãn đa cấp kết gạch đã báo. **VÁ MỘT PHẦN** cho lớp ranh giới | Hai ca có gạch cuối còn trong suite. §2.28 mở rộng nhãn nhiều cấp và thân dính. C1 thuộc cùng lớp. [Ca](../scripts/tl_core/llm_route_test.py#L694) |
+| §1–§2.3 · A8 lượt 1 · K1 #1514 | **ĐÃ VÁ THẬT** cho hai biểu hiện K1 gốc | Ca nguồn có số và mất số với dòng điểm, cùng ca tiếp dòng “là” ở nguồn có số, đều chặn. Đường mất số chỉ chấp nhận phép so có hai vế có chữ. Fixture Điều 3 và ba đầu ra lưu vẫn đạt 8/8. Diff giữ giao diện, định tuyến model, `can_nguoi_duyet: true` và chọn `pham_vi_kiem` theo nguồn ranh giới. [Tách khoản](../scripts/tl_core/llm_route.py#L1377) · [CLI](../scripts/tl_core/ops_misc.py#L3120) |
+| §2.4–§2.9 · A1/B1/C1/D1/E1/F1 và phần bảng của B2/C2/E3/E4 | **HẾT ĐỐI TƯỢNG do hợp đồng r7** với dò điểm cắt và duyệt ô. **ĐÃ VÁ THẬT** với bỏ fallback | Đoạn có nội dung đầu tiên là tiêu đề đúng số và khớp nguyên đoạn. Vùng kết thúc ở cuối body. Tiền tố cấm trong thân, bảng hoặc khối lạ bị chặn. DOCX thiếu số tự động ném `ValueError`, CLI trả 2. Không còn nhánh `KhongCauTruc` trong bộ đọc hoặc handler. [Vùng Điều](../scripts/tl_core/llm_route.py#L1267) · [CLI](../scripts/tl_core/ops_misc.py#L3037) |
+| §2.4–§2.13 · A2/A5, B2/C2, D2/E6, F3–F5, G1–G3, H2/H4, J1/K3 | **ĐÃ VÁ THẬT** cho các biểu hiện đánh số đã báo trong miền đo | ID dạng số ASCII được chuẩn hóa; đếm theo từng `numId`, áp `start` mặc định 0 và `startOverride` theo cấp, xóa bộ đếm cấp con khi cấp cha tăng. Ca dương kiểm override khác start và reset điểm. Nhảy cấp, nhiều danh sách thực dùng, lỗi của định nghĩa đang dùng, đánh số qua style và dãy khoản lệch 1…N đều chặn. [Định nghĩa](../scripts/tl_core/llm_route.py#L757) · [Bộ đếm](../scripts/tl_core/llm_route.py#L1239) · [Ca](../scripts/tl_core/llm_route_test.py#L1314) |
+| §2.4–§2.13 · A3/A4, B3/B4/B6, C3–C5, D3–D6, E2/E5, F6, G4, H5, J2/J5, K1 lượt 10 | **ĐÃ VÁ THẬT** cho các biểu hiện lịch sử đã khóa. D5 là giới hạn đã khai | Đọc XML gốc, xử lý riêng gạch đơn/kép, chặn toggle chưa giải và sửa dấu đoạn, kiểm cân mốc move. Tab, wrapper và metadata được hỗ trợ có đối chứng. `mc:` bị chặn toàn part. Dò “là” chỉ trong đoạn mở khoản, chốt dấu phân cách chạy trên chữ còn lại. C2 là trường hợp cờ lạ của riêng run đã bỏ. [Đọc đoạn](../scripts/tl_core/llm_route.py#L1057) · [Đối chiếu](../scripts/tl_core/llm_route.py#L1536) |
+| §2.5, §2.9, §2.18 · A6/B5/F2/R2 và câu dẫn | **HẾT ĐỐI TƯỢNG do hợp đồng r7** với việc nhận điểm gõ tay đứng riêng. **ĐÃ VÁ THẬT** cho số gõ tay và câu dẫn đã báo | Đoạn không số sau khoản đầu bị từ chối. Chốt số gõ tay trong đoạn có số tự động nhận dạng ngoặc kín dính thân, có đối chứng số thập phân. Trước khoản đầu chỉ nhận một câu dẫn nguyên đoạn đúng mẫu hoặc vắng. [Số gõ tay](../scripts/tl_core/llm_route.py#L618) · [Câu dẫn](../scripts/tl_core/llm_route.py#L1357) |
+| §2.10–§2.21 · G6/H1/J3/K2, L1–L5, M1/M2, N1–N3, Q1/Q2, R1/R3, S1–S3, T1/T2, U1/U2 | **ĐÃ VÁ THẬT** với các biểu hiện đã báo trong phạm vi bộ đọc. U2 là giới hạn đã duyệt | Chốt ký tự chạy trước khi dò tiền tố, chỉ nhận một BOM đầu nguồn thô, loại số mũ. QName khối và URI quan hệ được so đầy đủ. Part chính đọc byte, tiêu đề đích không phân biệt hoa thường. Quy tắc nhận dạng tiêu đề thiếu dấu L2/M1 đã được thay bằng chặn tiền tố từ r14. Hướng dẫn dùng bản nguồn nguyên văn và tách bằng tay ở trường hợp dẫn chiếu đầu đoạn. [Tiền tố](../scripts/tl_core/llm_route.py#L548) · [Quan hệ](../scripts/tl_core/llm_route.py#L716) · [Hướng dẫn](../docs/GOI_AGENT_DA_NEN.md#L390) |
+| §2.22–§2.26 · V1–V4, W1–W5, X1–X3, Y1–Y3, Z1–Z4 | **ĐÃ VÁ THẬT** cho các mẫu lịch sử đã đo. **VÁ MỘT PHẦN** cho lớp nhãn thô và lớp lọc run | Chuyển `--markup-strict` và dừng trước model khi extract lỗi. Mặc định đoạn, cấp trùng, trường đơn trị, khóa style, wrapper và tên member trùng đều còn chốt. Chính sách giữ phân cách chỉ với mẩu thuần trắng dùng chung một hàm. V3, W1, W3 và phần số hiệu của W2 là giới hạn đã duyệt. C1/C2 ghi các biểu hiện còn mở. [Đơn trị](../scripts/tl_core/llm_route.py#L638) · [Ruột đã bỏ](../scripts/tl_core/llm_route.py#L1027) · [Extract](../scripts/tl_core/llm_route.py#L1641) |
+| §3 · A7/B7/C6/D4/E5/F5/G5/H3/J4/Z4 và A8/B8/C7/K4/L6 | **ĐÃ VÁ THẬT** cho các khoảng trống test và hướng dẫn lịch sử đã báo trong miền đo | Harness đòi neo duy nhất và `TinHieuChotCa` đúng ca đích, ghi riêng lỗi nạp và lỗi vô can. Có đột biến riêng cho metadata content control, part chính đổi tên, bộ đếm, hai nhánh K1 và ba nhánh B2. Selftest CLI dùng model giả kiểm rc 0/5/2. [Harness](../scripts/tl_core/llm_route_test.py#L2209) · [Selftest](../scripts/tl_selftest.py#L32285) |
+
+Phép so buộc số thứ tự theo vị trí, đủ số lượng, đủ hai vế theo từ nối và giữ ranh giới dòng của điểm. Với danh sách khoản dựng đúng, model bỏ, cắt, gộp hoặc tráo khoản sẽ trả lệch. Tệp cấu trúc và tệp thô đều có thể bị ảnh hưởng khi danh sách chuẩn đã được dựng sai từ nguồn. Hai hình dạng mất phân cấp có chữ giống hệt nhau là giới hạn đã nêu của đường thô. C1 chỉ ra lỗi ở miền nhãn được đặc tả. [Phép so](../scripts/tl_core/llm_route.py#L1536) · [Verdict #1514 lượt 10](../ops/acceptance/llm-ranh-gioi-khoan/r1/review-10-codex/VERDICT.md)
+
+## Findings
+
+### C1 [P2] Nhánh số khoản có thể nhận trước nhãn điểm đa cấp — `scripts/tl_core/llm_route.py:1405`
+
+**Kịch bản và căn cứ.** Trong tệp `--tep` văn bản thô mất số cấp khoản, một điểm có nhãn thập phân nhiều cấp dạng có dấu chấm, đệm ngang giữa các cấp và kết ngay sau chữ số thuộc §2.28 B1. Khi thành phần đầu của nhãn là 1 và thân theo sau đủ hình dạng định nghĩa, `_RE_SO_KHOAN` thấy dấu chấm sau 1 rồi thấy khoảng đệm thay cho chữ số. Sự có mặt của match này đặt `co_so` và nhánh số khoản chạy trước `_RE_DIEM`. Thành phần cấp kế nằm lại trong chữ khoản. Chốt số nội dòng cần dấu chấm hoặc ngoặc sau số ấy nên không bù được trường hợp này. Nếu đây là dòng nội dung duy nhất sau tiêu đề và câu dẫn, hoặc các dòng cùng giữ dạng ấy với thành phần đầu liên tục, phép so có thể nhận chúng là khoản khi model chép đúng phân đoạn sai. Tương tự, nhãn dạng hai placeholder có ngoặc kẹp thành phần sau có thể được `_nhan` dựng hợp lệ theo §2.13 K3 nhưng nằm ngoài mẫu nối bằng chấm/gạch của §2.28. Câu “miền nhãn = miền _nhan” vì vậy rộng hơn cả nhận diện lẫn miền được diễn giải chi tiết. [Số khoản và nhãn](../scripts/tl_core/llm_route.py#L490) · [Bộ dựng](../scripts/tl_core/llm_route.py#L937) · [§2.28](../ops/specs/llm-khoan-docx-r26.md#L334)
+
+**Hạng và đề xuất.** P2 vì cần nguồn thô có bố cục cụ thể và đầu ra vẫn mang cảnh báo duyệt ranh giới. Đây là lớp `ranh-gioi-khoan` của K1/V4/W4/X3/Y3/Z3/A2/B1. Xét nhãn đa cấp trước nhãn số khoản đơn ở nơi nhận vai trò dòng, với cùng phép nhận diện khi bỏ nhãn để kiểm dấu phân cách. Kiểm riêng ca đa cấp có đệm đi vào nhánh đánh số và đối chứng số khoản đơn hợp lệ. Nếu giữ tuyên bố khớp miền `_nhan`, cho bộ dựng và bộ nhận dùng chung ngữ pháp có kiểm biên. Ca âm cần phân biệt dữ liệu bắt đầu bằng số thập phân, từ ghép và viết tắt để tránh mở rộng chặn oan. [Ca hiện có của B1](../scripts/tl_core/llm_route_test.py#L690)
+
+### C2 [P2] Phần tử lạ trong run đã gạch bỏ vẫn kích hoạt chốt đoạn — `scripts/tl_core/llm_route.py:1119`
+
+**Kịch bản và căn cứ.** Một khoản DOCX còn nguyên sau lọc có một ký hiệu cục bộ `w:sym` chỉ xuất hiện trong run đã gạch bỏ. Khi duyệt run, nhánh phần tử chưa hiểu đặt `kq["la"]`. Sau đó nhánh gạch tính đúng ruột là có nội dung theo §2.26 Z1 và bỏ run, nhưng cờ còn trên đoạn. `doc_dieu_docx` trả lỗi phần tử lạ; CLI trả 2. Trường hợp cùng ký hiệu trong `w:del` đi thẳng qua phép đọc ruột và không đặt cờ. Ca và mutant Z1 đang kiểm đường `w:del`; ca B3 kiểm hai cờ ngắt. Giới hạn đã khai về ký hiệu còn hiệu lực vẫn áp dụng. [Cờ run](../scripts/tl_core/llm_route.py#L1117) · [Nhánh wrapper](../scripts/tl_core/llm_route.py#L1151) · [Chốt vùng](../scripts/tl_core/llm_route.py#L1296)
+
+**Hạng và đề xuất.** P2 vì hậu quả là từ chối oan nguồn đọc được sau lọc, ở lớp `docx-khoang-trang-sau-loc` của Z1/B3. Quyết định trạng thái giữ/bỏ run trước khi phát sinh cờ nội dung hiển thị. Giữ kiểm riêng ở cấp tài liệu đối với thành phần ảnh hưởng cấu trúc hoặc hiệu lực bên ngoài run. Khi Executor đo lại, đối chiếu ký hiệu cục bộ trong mẩu gạch, trong wrapper xóa và trong run còn hiệu lực. Mutant khôi phục ghi cờ lạ trước lọc phải làm đỏ ca đích, còn ca ký hiệu sống vẫn bị chặn. [Quy tắc Z1](../ops/specs/llm-khoan-docx-r26.md#L320)
+
+| Lớp | Biểu hiện còn mở | Phép đóng |
+| --- | --- | --- |
+| `ranh-gioi-khoan` | C1 · P2 · ưu tiên số khoản và lệch miền nhãn giữa hai bộ đọc | Khóa ca nhãn đa cấp trên cả nguồn có số và mất số, giữ đối chứng số khoản đơn và kiểm sự thống nhất của phạm vi nhãn đã công bố. |
+| `docx-khoang-trang-sau-loc` | C2 · P2 · cờ phần tử lạ của run đã bỏ | Kiểm ba trạng thái ký hiệu cục bộ ở trên. Giữ kiểm ngắt và phân cách trắng. |
+| `docx-test-doc-lap` | B2 lượt 25 đóng trong phạm vi đã đo | Ba mutant r26 chết độc lập đúng ca. |
+| `docx-so-hien-thi` | Các biểu hiện lịch sử đã báo đóng trong miền đo | Ca và mutant hiện có giữ đối chứng start, override, reset và từ chối định nghĩa mơ hồ. |
+
+Có **0 P0, 0 P1, 2 P2, 0 P3**, hai finding thuộc hai lớp còn mở. Verdict nội dung theo ngưỡng prompt là APPROVE. Hai P2 còn mở chặn merge theo M1. [Protocol §8](../docs/PROTOCOL_DA_PHIEN.md#L646) · [ADR-0060 M1–M2](../docs/adr/0060-dieu-kien-merge-va-moc-ready.md#L32) · [ADR-0062](../docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md#L13)
+
+## Kết quả test và đột biến
+
+Linux x86_64, Python 3.13.18, Git 2.43.0, `core.abbrev=7`, checkout shallow. Log, mã thoát, diff và checkout tạm nằm trong `/tmp/wp1525-r26-review.rSCF3JAq/`. Bản sao head và base clone cục bộ rồi checkout detached đúng SHA. Bytecode được tắt và cache dùng thư mục tạm.
+
+| Lệnh | Trạng thái | Mã thoát và bằng chứng |
+| --- | --- | --- |
+| `python scripts/tl_core/llm_route_test.py` | `passed` | rc 0, **63/63** ca và **243/243** mutant bị giết, có **146/146** `wp1525_*`. `route.log`. |
+| `python scripts/tl.py --deterministic workflow-audit --strict --json` | `passed` | rc 0, `ok=true`, 194 lệnh, 26 card, 11 nhóm, 60 task, 0 lỗi, 0 cảnh báo. `workflow.log`. |
+| `python scripts/tl.py --deterministic golden-test --json` · checkout có verdict | `passed` theo mã thoát | rc 0, **20/20** ca đạt fixture, **20/20** bản chiếu ổn định, **19/20** byte thô ổn định. Ca `hygiene_sweep_fixture` có `raw_stable=false`. `golden.log`. |
+| Cùng lệnh golden-test · head sạch, chạy lại | `passed` | rc 0, **20/20** ca đạt fixture, **20/20** bản chiếu ổn định, **20/20** byte thô ổn định. `clean-golden.log`. |
+| `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` · head sạch | `passed` | rc 0, `ok=true`, **187/187** tệp, sai/thiếu/thừa đều 0, hash gói `a41cdeafedf5b4d139a1d76dc38d2a43055cbf1ad6ed31a0cbf73b08c14e0078`. `clean-release.log`. |
+| Cùng lệnh release-verify · checkout có verdict | `failed` | rc 2, đúng 187 tệp theo manifest, một tệp thừa `.review/VERDICT.md`. `release.log`. |
+| `python ops/lease_publish.py check --root . ops/leases/llm-khoan-docx-r26-g1-claude.yaml` | `passed` cục bộ | rc 0, “ĐĂNG ĐƯỢC”, issue #1525, neo `64b7f2c14776`, hết hạn 19:59 UTC. `lease.log`. |
+| `python scripts/tl.py --selftest` · checkout có verdict | `failed` | rc 1, **1773/1790**, transport **12/12**. Ca CLI #1525 đạt. Có thêm `wp44_release_bundle_topology_under_200` so với head sạch. `selftest.log`. |
+| Cùng lệnh selftest · head sạch | `failed` | rc 1, **1774/1790**, transport **12/12**. Ca CLI #1525 và topology gói đều đạt. `clean-selftest.log`. |
+| Cùng lệnh selftest · base sạch | `failed` | rc 1, **1773/1789**, transport **12/12**. Trùng 16 ID đỏ của head sạch. `base-selftest.log`. |
+| `python scripts/tl.py --deterministic determinism-audit --strict --json` · head | `passed` | rc 0, `ok=true`, **15/15** kiểm tra. `determinism.log`. |
+| `python scripts/tl.py --deterministic doc-claims-check --strict --json` · head và base | `failed` | Cả hai rc 2, cùng một cờ `SHA_NOT_A_COMMIT` cho `9941d8af52aeede1c78ea4e232fbe9a8d5272033` ở protocol dòng 1680, cùng 410 advisory. `doc-claims.log`, `base-doc-claims.log`. |
+| `python -m ruff check --no-cache --select F --output-format json scripts/tl.py` · head và base | `failed` cho bare lint, delta 0 | Ruff 0.15.15. Cả hai rc 1, cùng 12 F821, khớp cả vị trí và nội dung. `ruff-head.log`, `ruff-base.log`. |
+| `loi_ruff_ci()` qua `runpy.run_path(".claude/dev/ci_dang_ky_test.py")` · head | `passed` cho hợp đồng pin/probe | rc 0, `RUFF_CONTRACT 3 []`. `ruff-contract.log`. |
+| `git diff --check 0ae38e9 HEAD` và `git diff --check fcb12b3 HEAD` | `passed` | Cả hai rc 0. `patch-diff-check.log`, `packet-diff-check.log`. |
+| `git diff --check 64b7f2c HEAD` | `failed` | rc 2, ba dấu cách cuối dòng trong verdict #1514 lượt 8, phần kế thừa. `pr-diff-check.log`. |
+
+`cmp base-selftest.fail-ids clean-selftest.fail-ids` cho rc 0. Có tám ca `r973_bootstrap_*`, năm ca `wp433_*` và `wp727_tl_gws_refresh` trong sandbox có `/tmp/.git` rỗng, cùng hai ca `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` và `r268_l2_trichotomy_theo_trang_thai_object`. Delta ID đỏ bằng 0. Ca mới `r1525_llm_khai_niem_tep_docx_cau_truc` đạt. Điều kiện selftest N/N và doc-claims rc 0 của §5 vẫn thiếu. SHA-256 log selftest head sạch `14920f256283c08326bcfe72628e132ff42e63e06e7841df8f1804d6f2b85982`, base sạch `3a2929c1ac830775654d107ee031e3c3cb1278aa5b16b66c3b5f89336fbb523f`.
+
+Chạy lại suite trong bản sao head với `python -B -m pdb scripts/tl_core/llm_route_test.py`, breakpoint có điều kiện tại dòng 2229 trong nhánh `TinHieuChotCa`. Cả suite và trình gỡ lỗi rc 0. Log `target-mutants.log` có 146 tín hiệu của `wp1525_*`. Harness sẵn có sinh đột biến trong thư mục tạm.
+
+| Nhóm | Ca đích báo đúng lý do |
+| --- | --- |
+| B1 | `diem_bo_thap_phan` lọt nhãn số nối gạch. `diem_bo_cham_ngoac` lọt nhãn chữ kết chấm. `diem_bo_dang_gach` lọt nhãn chữ kết gạch. `diem_noi_chi_cham` lọt nhãn chữ nối gạch. `mo_than_chi_khoang_trang` lọt nhãn sát dấu mở trích dẫn. |
+| B2 | `xml_space_dinh` giữ sai khoảng trắng do bỏ đặt lại `default`. `ruot_doc_text_tho` và `deltext_lac_text_tho` giữ lại khoảng trắng XML không có hiệu lực trong hai nhánh độc lập. |
+| B3 | `ngat_ghi_truoc_gach` và `trang_ghi_truoc_gach` làm ca dương bị từ chối vì ngắt dòng mềm. `chu_sau_ngat_trang` làm ca âm mất chốt chữ còn hiệu lực sau ngắt. |
+| Z1 và K1 | `ruot_ky_hieu_la_trang` giữ sai khoảng trắng trong mẩu có ký hiệu qua `w:del`. `wp1525_tho_nhan_diem` làm ca K1 của #1514 nhận các dòng điểm ở nguồn mất số. |
+
+## Không đo được
+
+- C1/C2 có căn cứ luồng mã. Ca đầu-cuối mới, tần suất gặp trong tài liệu thật và hành vi Word khi lưu các dạng đó chưa được đo trong phạm vi prompt. Danh sách phần tử đã được rà cùng hướng dẫn và ca hiện có. Chưa xác nhận một phần tử phổ biến khác của Word/Google Docs gây chặn oan ngoài các giới hạn đã khai. Workspace không có DOCX export thật được theo dõi để xác định độ phổ biến. [Giới hạn DOCX](../docs/GOI_AGENT_DA_NEN.md#L390)
+- `_GIU_TRANG` đang dùng tập ID cấp module. CLI hiện có một đường đọc tuần tự. Gọi đồng thời từ một tiến trình là trường hợp chưa đo. [Trạng thái khoảng trắng](../scripts/tl_core/llm_route.py#L1017) · [Đường gọi](../scripts/tl_core/ops_misc.py#L3044)
+- `skipped` ở cấp lệnh trong sáu lệnh prompt là 0. Các nhánh Windows/native không quan sát được trên Linux. `not_run` gồm hai kiểm GitHub mà `lease_publish.py check` báo bỏ ngoài phạm vi, provider thật, LIVE và xác minh CI/receipt từ xa. Mã thoát cuối của launcher và hash stdout thuộc biên nhận sau khi phiên con kết thúc.
+- Đầu và cuối lượt cùng head/tree. `git diff --exit-code` và `git diff --cached --exit-code` đều rc 0 ở hai mốc. Checkout cuối có tệp verdict mới và `.codex/` đã có trước lượt. Fixture và state do cổng tạo đã chuyển ra scratch. Snapshot chỉ cho biết delta quan sát ở hai mốc.
+
+P2_mo: 2
+VERDICT: APPROVE

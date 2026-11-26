@@ -242,3 +242,5 @@ review_calls_limit: 39
 review_calls_used_truoc: 38
 inference_calls_limit: 0
 review_calls_ghi_chu: 'r34 dung 2 (chay lai theo lop); r35 dung 1 (bi ngat); r36, r37 moi ban 1; tong da dung 38, tran 39 (chu kho trao quyen tu nang tran).'
+da_bi_thay_the: llm-khoan-docx-r39-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 38; revision r39 (ops/specs/llm-khoan-docx-r39.md), tran 45 (quyet dinh chu kho).'

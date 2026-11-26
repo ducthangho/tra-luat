@@ -584,6 +584,43 @@ _RE_SO_DAU = re.compile("(?:([0-9]{1,%d})[.)]|\\(([0-9]{1,%d})\\))[ \t\u00a0]*" 
 _MO_CHO_PHEP = frozenset("“\"‘(")
 
 
+def _mo_dau_nhieu_ve(t):
+    """r39 (lượt 38 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả Điều.
+    Dùng DOCX có cấp danh sách để xác minh."). True khi thân `t` mở bằng [`(`] ≥ 2 VẾ (dải chữ/số) chỉ ngăn bằng đệm ngang, KHÔNG có
+    chữ "là" trong các vế, rồi DẤU KẾT nhãn và còn chữ phía sau: `.`/`)` mọi độ dài vế; `-`/`–` (đứng trước khoảng trắng, dấu mở
+    trích dẫn/ngoặc) chỉ khi ≤ 3 vế, mỗi vế ≤ 3 ký tự (dạng placeholder) — để `Kinh tế - xã hội là …` không bị chặn. Tuyến tính."""
+    i = 1 if t[:1] == "(" else 0
+    ve, j = [], i
+    while True:
+        k = j
+        while k < len(t) and t[k].isalnum():
+            k += 1
+        if k == j:
+            return False
+        ve.append(t[j:k])
+        if ve[-1] == "là":
+            return False
+        m = k
+        while m < len(t) and t[m] in _DEM_NGANG:
+            m += 1
+        if m > k and m < len(t) and t[m].isalnum():
+            j = m
+            continue
+        break
+    c = t[m] if m < len(t) else ""
+    if len(ve) < 2 or not t[m + 1:].strip(" \t\u00a0"):
+        return False
+    if c in ".)":
+        return True
+    if c in "-–":
+        sau = t[m + 1:m + 2]
+        return len(ve) <= 3 and all(len(x) <= 3 for x in ve) and (sau.isspace() or sau in _MO_THAN_GACH)
+    return False
+
+
+_MO_THAN_GACH = frozenset("“\"‘'(")
+
+
 def dau_dong_cho_phep(ln):
     """r36: phân loại đầu dòng (đã strip) theo DANH SÁCH CHO PHÉP → `("so", số, vị trí thân)` · `("than",)` · None (ngoài danh sách)."""
     m = _RE_SO_DAU.match(ln)
@@ -603,6 +640,8 @@ def dau_dong_cho_phep(ln):
         # r38 (lượt 37): CẢ HAI nhánh — từ đầu phải là một TỪ TRỌN đứng trước đệm rồi một chữ cái/chữ số (`Điều 3 của …`). Nhãn điểm GÕ TAY bằng chữ tiếng
         # Việt (`đ)`, `(đ)`, `đ.`, `ơ-`) có chữ ngoài bảng placeholder Word nhưng theo sau là DẤU nhãn ⇒ không phải thân.
         return None
+    if _mo_dau_nhieu_ve(ln[m.end() if m else 0:]):
+        return None   # r39 (lượt 38, quyết định chủ kho "thu hẹp miền")
     co_dau = any(c not in _CHU_PH for c in tu)
     if not co_dau and (len(tu) < 2 or tu == tu[0] * len(tu)):
         return None   # (b): chữ ASCII dài ≥ 2 và không phải một chữ lặp (`aa`, `BB` là nhãn Word sau `z`)
@@ -1359,17 +1398,37 @@ def doc_dieu_docx(nguon, dieu):
 
 
 def _dem_entry_zip(fh, co):
-    """r38 (lượt 37): số entry khai trong bản ghi End-Of-Central-Directory (cùng cách tìm như `zipfile`: chữ ký CUỐI trong 64 KiB +
-    22 byte đuôi). Không thấy ⇒ ValueError; ZIP64 (0xFFFF) ⇒ không hỗ trợ."""
+    """r38 → r39 (lượt 38): số entry THẬT của thư mục trung tâm, đếm TUẦN TỰ từng bản ghi (`PK\\x01\\x02`, 46 byte cố định + tên + extra
+    + comment) trên đúng vùng mà `zipfile` sẽ đọc (`EOCD - kích thước CD`), dừng ngay khi vượt `_TRAN_MEMBER` — TRƯỚC khi `ZipFile`
+    cấp phát metadata. Không thấy EOCD, có locator ZIP64, vùng CD ngoài tệp, bản ghi hỏng, hay số đếm lệch số khai ⇒ ValueError."""
     doc = min(co, 22 + 65535)
     fh.seek(co - doc)
     b = fh.read(doc)
     i = b.rfind(b"PK\x05\x06")
     if i < 0 or len(b) < i + 22:
         raise ValueError("goi .docx khong co ban ghi EOCD — khong phai ZIP hop le")
-    n = int.from_bytes(b[i + 10:i + 12], "little")
-    if n == 0xFFFF:
+    vt_eocd = co - doc + i
+    n_khai = int.from_bytes(b[i + 10:i + 12], "little")
+    co_cd = int.from_bytes(b[i + 12:i + 16], "little")
+    if n_khai == 0xFFFF or co_cd == 0xFFFFFFFF or (i >= 20 and b[i - 20:i - 16] == b"PK\x06\x07"):
         raise ValueError("goi .docx dang ZIP64 — khong ho tro")
+    dau = vt_eocd - co_cd
+    if dau < 0:
+        raise ValueError("thu muc trung tam ZIP nam ngoai tep")
+    fh.seek(dau)
+    n, vt = 0, dau
+    while vt < vt_eocd:
+        h = fh.read(46)
+        if len(h) < 46 or h[:4] != b"PK\x01\x02":
+            raise ValueError("ban ghi thu muc trung tam ZIP hong")
+        n += 1
+        if n > _TRAN_MEMBER:
+            return n
+        them = int.from_bytes(h[28:30], "little") + int.from_bytes(h[30:32], "little") + int.from_bytes(h[32:34], "little")
+        vt += 46 + them
+        fh.seek(vt)
+    if vt != vt_eocd or n != n_khai:
+        raise ValueError(f"thu muc trung tam ZIP khong nhat quan (dem {n}, khai {n_khai})")
     return n
 
 
@@ -1571,6 +1630,9 @@ PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan do
                 "KHONG chung minh ranh gioi khoan (tach tu van ban tho) — can nguoi duyet; "
                 # r37 (lượt 36, quyết định chủ kho): giới hạn đã khai được KHOÁ vào tín hiệu đầu ra của đường thô.
                 "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "
+                # r39 (lượt 38, quyết định chủ kho "THU HẸP MIỀN"): hai phía miền được khoá ở đây.
+                "dong co phan mo dau dang nhan diem nhieu ve (vd 'ab c.', 'Ban a)', '(Ho so)') bi TU CHOI ca Dieu — "
+                "khong phai gioi han; cum tu dung truoc 'la' khong mang dau ket ('Ho so la …') van duoc nhan; "
                 "can ranh gioi chac chan thi dung --tep <tep .docx>")
 
 
@@ -1849,39 +1911,55 @@ def trang_thai_duong(env=None, tim=shutil.which) -> dict:
 # ----------------------------------------------------------------- lấy nguyên văn Điều
 
 def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
-    """r38 (lượt 37, `can-tai-nguyen-doc-nguon`): chạy tiến trình con, đọc stdout + stderr THEO KHỐI với trần byte mỗi ống — vượt trần
-    thì GIẾT tiến trình và ném ValueError TRƯỚC khi nhận hết; quá hạn ⇒ `subprocess.TimeoutExpired` (CLI đã bắt `SubprocessError`).
+    """r38 → r39 (lượt 38, `can-tai-nguyen-doc-nguon`): chạy tiến trình con, đọc stdout + stderr THEO KHỐI với trần byte mỗi ống. MỘT
+    hạn chót phủ từ lúc đọc tới khi tiến trình KẾT THÚC (cả `wait`); vượt trần, quá hạn hay lỗi đọc ⇒ giết + thu hồi CÓ GIỚI HẠN, rồi
+    ném (ValueError / `subprocess.TimeoutExpired`) TRƯỚC model. Mỗi lần đọc tối đa phần còn lại + 1 byte (biết vượt mà không nạp thêm).
     Trả đối tượng có `returncode`/`stdout`/`stderr` (chuỗi UTF-8, `errors=replace`) như `subprocess.run(text=True)`."""
     import threading
     import types
     tran = TRAN_BYTE_TEP if tran is None else tran
+    han = time.monotonic() + timeout
     p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    buf, vuot = {"out": bytearray(), "err": bytearray()}, []
+    buf, vuot, loi = {"out": bytearray(), "err": bytearray()}, [], []
 
     def doc(ong, ten):
-        while True:
-            k = ong.read1(65536)
-            if not k:
-                return
-            buf[ten] += k
-            if len(buf[ten]) > tran:
-                vuot.append(ten)
-                p.kill()
-                return
+        try:
+            while True:
+                k = ong.read1(min(65536, tran + 1 - len(buf[ten])))
+                if not k:
+                    return
+                buf[ten] += k
+                if len(buf[ten]) > tran:
+                    vuot.append(ten)
+                    return
+        except Exception as e:  # noqa: BLE001 — lỗi đọc phải về người gọi, không được trả dữ liệu đọc dở như đã đủ
+            loi.append(e)
+
+    def thu_hoi():
+        with contextlib.suppress(Exception):
+            p.kill()
+        with contextlib.suppress(Exception):
+            p.wait(timeout=5)
     luong = [threading.Thread(target=doc, args=(p.stdout, "out"), daemon=True),
              threading.Thread(target=doc, args=(p.stderr, "err"), daemon=True)]
     for t in luong:
         t.start()
-    han = time.monotonic() + timeout
-    for t in luong:
-        t.join(max(0.0, han - time.monotonic()))
+    while any(t.is_alive() for t in luong) and not vuot and not loi and time.monotonic() < han:
+        for t in luong:
+            t.join(0.05)
+    if vuot or loi:
+        thu_hoi()
+        ten = "stdout" if (vuot or ["out"])[0] == "out" else "stderr"
+        raise ValueError(f"tl extract in qua {tran} byte ra {ten} — vuot ngan sach doc" if vuot
+                         else f"loi doc ong cua tl extract: {type(loi[0]).__name__}")
     if any(t.is_alive() for t in luong):
-        p.kill()
-        p.wait()
+        thu_hoi()
         raise subprocess.TimeoutExpired(args, timeout)
-    p.wait()
-    if vuot:
-        raise ValueError(f"tl extract in qua {tran} byte ra {'stdout' if vuot[0] == 'out' else 'stderr'} — vuot ngan sach doc")
+    try:
+        p.wait(timeout=max(0.0, han - time.monotonic()))
+    except subprocess.TimeoutExpired:
+        thu_hoi()
+        raise
     return types.SimpleNamespace(returncode=p.returncode, stdout=bytes(buf["out"]).decode("utf-8", "replace"),
                                  stderr=bytes(buf["err"]).decode("utf-8", "replace"))
 

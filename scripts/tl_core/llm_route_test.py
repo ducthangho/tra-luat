@@ -734,11 +734,11 @@ def ca_khoan_mat_so_co_diem_dat(m):
     _d34 = _t34.monotonic()
     m.tach_khoan("Điều 3.\n1." + "a" * 4000 + "b là x.\n2. B là y.")
     bang(_t34.monotonic() - _d34 < 2.0, "regex nhan chu dai chay qua cham (backtracking)")
-    # r31 (lượt 30 G2) đối chứng: khoản có thân mở bằng cụm ngoặc `(…)` không phải nhãn nhiều dấu.
-    bang(m.tach_khoan("Điều 3.\n1. (Hồ sơ) là tài liệu.\n2. Dữ liệu là thông tin.") == [(1, "(Hồ sơ) là tài liệu."), (2, "Dữ liệu là thông tin.")],
-         "khoan than mo bang ngoac bi chan oan")
-    # r29 đối chứng: dòng mở bằng dấu rồi CHỮ (không phải placeholder đứng riêng) không phải nhãn.
-    bang(m.tach_khoan("Điều 3.\n(Hồ sơ) là tài liệu.\nDữ liệu là thông tin.") is not None, "dong mo bang ngoac + chu bi nhan lam nhan")
+    # r31 (lượt 30 G2) → r39 (quyết định chủ kho "thu hẹp miền"): thân mở bằng cụm ngoặc nhiều vế `(Hồ sơ) …` có hai cách đọc ⇒ CHẶN;
+    # cụm ngoặc đứng SAU từ đầu (`Hồ sơ (bản chính) là …`) vẫn nhận.
+    bang(m.tach_khoan("Điều 3.\n1. (Hồ sơ) là tài liệu.\n2. Dữ liệu là thông tin.") is None, "r39: than mo bang cum ngoac nhieu ve phai bi chan")
+    bang(m.tach_khoan("Điều 3.\n(Hồ sơ) là tài liệu.\nDữ liệu là thông tin.") is None, "r39: dong mo bang cum ngoac nhieu ve phai bi chan")
+    bang(m.tach_khoan("Điều 3.\n1. Hồ sơ (bản chính) là tài liệu.\n2. Dữ liệu là thông tin.") is not None, "cum ngoac sau tu dau bi chan oan")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) is None, f"r36: chu viet tat dau dong phai bi chan (ngoai danh sach): {m.tach_khoan(vt)}")
     nel = sach.replace("tài liệu.\nDữ", "tài liệu.\x85Dữ").replace("\nHồ", "\n\x85Hồ")
@@ -1938,8 +1938,15 @@ def ca_r35_lop_loi(m):
               "aa là nhãn.", "a tổ chức là x.", "2020 là năm.", "§ 1 là mục.", "Ab. Dữ liệu là b."):
         bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"dau than ngoai danh sach lot (co so): {L!r}")
         bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"dau than ngoai danh sach lot (mat so): {L!r}")
-    for than in ("(Hồ sơ) là tài liệu.", "Quy trình là cách làm.", "“Hồ sơ” là tài liệu.", "Ban hành là công bố.",
-                 "HỒ SƠ là tài liệu."):
+    # r39 (quyết định chủ kho "THU HẸP MIỀN"): hai phía miền. ÂM — mở đầu có hình dạng nhãn điểm nhiều vế (≥ 2 vế chỉ ngăn bằng đệm,
+    # không có "là", rồi dấu kết nhãn và còn chữ sau). DƯƠNG — cụm từ đứng trước "là", gạch nối giữa từ dài, ngoặc sau từ đầu.
+    for L in ("ab c. Dữ liệu là b.", "Ban a) Dữ liệu là b.", "(Ban a) Dữ liệu là b.", "(Hồ sơ) là tài liệu.", "ab c - Dữ liệu là b.",
+              "Hồ sơ gốc. Dữ liệu là b.", "đ e) Dữ liệu là b.", "1 a. Dữ liệu là b."):
+        bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"r39 mo dau nhieu ve lot (co so): {L!r}")
+        bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"r39 mo dau nhieu ve lot (mat so): {L!r}")
+    for than in ("Quy trình là cách làm.", "“Hồ sơ” là tài liệu.", "Ban hành là công bố.", "HỒ SƠ là tài liệu.",
+                 "Phát triển kinh tế - xã hội là mục tiêu.", "Quy chuẩn kỹ thuật quốc gia (QCVN) là văn bản.",
+                 "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu."):
         bang(tach(f"Điều 3.\n1. {than}\n2. Dữ liệu là thông tin.") == [(1, than), (2, "Dữ liệu là thông tin.")],
              f"so khoan + than hop le bi chan oan: {than!r}")
         bang(tach(f"Điều 3.\n{than}\nDữ liệu là thông tin.") == [(None, than), (None, "Dữ liệu là thông tin.")],
@@ -1951,6 +1958,19 @@ def ca_r35_lop_loi(m):
         bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"nhan chu Viet dau dong lot: {L!r}")
     bang(tach("Điều 3.\nĐiều 3 của quy chế là điều khoản.\nDữ liệu là thông tin.") is not None, "tu truoc chu so bi chan oan")
     # --- can-tai-nguyen-doc-nguon
+    # r39 (lượt 38): hạn chót phủ cả `wait` — tiến trình đóng ống rồi vẫn chạy ⇒ quá hạn có kiểm soát, không treo; biên đúng trần.
+    import subprocess as _sp39
+    _d39 = _t35.monotonic()
+    try:
+        m._chay_gioi_han([sys.executable, "-c", "import os, time; os.close(1); os.close(2); time.sleep(8)"], timeout=1)
+        raise TinHieuChotCa("tien trinh dong ong roi treo khong bi cat")
+    except _sp39.TimeoutExpired:
+        pass
+    bang(_t35.monotonic() - _d39 < 5.0, "han chot khong phu wait")
+    _dung = m._chay_gioi_han([sys.executable, "-c", "import sys; sys.stdout.write('x' * 5000)"], tran=5000)
+    bang(_dung.stdout == "x" * 5000, "dung tran byte bi chan oan")
+    bang("nhieu ve" in m.PHAM_VI_KIEM and "TU CHOI" in m.PHAM_VI_KIEM and "van duoc nhan" in m.PHAM_VI_KIEM,
+         "pham_vi_kiem chua khoa hai phia mien nhan nhieu ve")
     # r38 (lượt 37): bộ chạy `tl extract` đọc ống THEO KHỐI có trần — vượt ⇒ giết tiến trình + ValueError; trong hạn ⇒ trả đủ.
     _ok = m._chay_gioi_han([sys.executable, "-c", "import sys; sys.stdout.write('x' * 1000); sys.stderr.write('e')"], tran=5000)
     bang(_ok.returncode == 0 and _ok.stdout == "x" * 1000 and _ok.stderr == "e", f"chay gioi han sai ket qua: {_ok!r}"[:120])
@@ -1996,6 +2016,23 @@ def ca_r35_lop_loi(m):
     # r38 (lượt 37): miền bộ đếm chốt khi CẬP NHẬT — cả cấp bullet (không qua callback `%N`).
     am_b = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "bullet", "-", start=-5))
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=am_b), "so thu tu am cap bullet")
+    # r39 (lượt 38): số entry THẬT của thư mục ZIP đếm TRƯỚC `ZipFile` (stub ném lỗi khác nếu bị gọi); số khai lệch ⇒ chặn.
+    _goi5 = lam_docx(H, A, B, them={f"x{i}.xml": "<a/>" for i in range(3)})
+    _cu_z, _cu_n = m.zipfile.ZipFile, m._TRAN_MEMBER
+
+    class _ChuaDuocGoi(RuntimeError):
+        pass
+
+    def _stub(*a, **k):
+        raise _ChuaDuocGoi("ZipFile bi goi truoc khi chot so entry")
+    m.zipfile.ZipFile, m._TRAN_MEMBER = _stub, 3
+    try:
+        chan(_goi5, "so entry that vuot tran truoc ZipFile")
+    finally:
+        m.zipfile.ZipFile, m._TRAN_MEMBER = _cu_z, _cu_n
+    _ie = _goi5.rfind(b"PK\x05\x06")
+    _lech = _goi5[:_ie + 8] + (1).to_bytes(2, "little") + (1).to_bytes(2, "little") + _goi5[_ie + 12:]
+    chan(_lech, "so entry khai lech so that")
     # r36 (lượt 36): chuỗi `basedOn` dài dùng chung bởi nhiều đoạn — phân giải có nhớ, không bậc hai.
     _n = 2500
     _st = "".join(f'<w:style w:type="paragraph" w:styleId="S{i}">' + (f'<w:basedOn w:val="S{i - 1}"/>' if i else "") + "</w:style>"
@@ -2061,6 +2098,14 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 
 DOT_BIEN = [
+    ('wp1525_extract_wait_vo_han', ('        p.wait(timeout=max(0.0, han - time.monotonic()))', '        p.wait()'), 'ca_r35_lop_loi'),
+    ('wp1525_zip_tin_so_khai', ('    if vt != vt_eocd or n != n_khai:', '    if vt != vt_eocd:'), 'ca_r35_lop_loi'),
+    ('wp1525_zip_dem_sau_zipfile', ('        n_entry = _dem_entry_zip(fh, co)\n        if n_entry > _TRAN_MEMBER:', '        n_entry = 0\n        if n_entry > _TRAN_MEMBER:'), 'ca_r35_lop_loi'),
+    ('wp1525_pham_vi_bo_nhieu_ve', ("""                "dong co phan mo dau dang nhan diem nhieu ve (vd 'ab c.', 'Ban a)', '(Ho so)') bi TU CHOI ca Dieu — "\n""", ""), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_bo_chot', ('    if _mo_dau_nhieu_ve(ln[m.end() if m else 0:]):', '    if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_bo_dung_la', ('        if ve[-1] == "là":\n            return False', '        if False:\n            return False'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_gach_khong_gioi_han', ('        return len(ve) <= 3 and all(len(x) <= 3 for x in ve) and', '        return'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_bo_ngoac_mo', ('    i = 1 if t[:1] == "(" else 0\n    ve, j = [], i', '    i = 0\n    ve, j = [], i'), 'ca_r35_lop_loi'),
     ('wp1525_extract_khong_tran', ('            if len(buf[ten]) > tran:', '            if False:'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_gioi_han', ("""                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "\n""", ""), 'ca_r35_lop_loi'),
     # r36 (§2.38): danh sách cho phép đầu dòng — mỗi điều kiện một đột biến riêng.

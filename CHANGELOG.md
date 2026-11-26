@@ -94,6 +94,9 @@
 - r38 (sau cross-review lượt 37 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r38.md`): danh sách cho phép đòi từ đầu là TỪ TRỌN —
   nhãn điểm gõ tay `đ)`, `(đ)` bị chặn; `tl extract` đọc có trần và bị dừng khi vượt; gói `.docx` đếm entry trước khi mở ZIP; số
   thứ tự âm bị chặn ở mọi kiểu cấp.
+- r39 (sau cross-review lượt 38 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r39.md`): đường thô TỪ CHỐI cả Điều khi phần mở đầu
+  khoản có hình dạng nhãn điểm nhiều vế (chủ kho quyết thu hẹp miền), hai phía miền ghi trong `pham_vi_kiem`; gói `.docx` đếm số entry thật trước khi mở ZIP; bộ chạy `tl extract` có
+  hạn chót tới khi tiến trình kết thúc và báo lỗi đọc.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

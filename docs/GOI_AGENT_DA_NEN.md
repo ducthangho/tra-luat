@@ -421,7 +421,9 @@ biến môi trường của environment.
   hiệu, dấu đầu dòng, mọi nhãn điểm — chặn CẢ nguồn: dùng `--tep <tệp .docx>`. Nhãn dính thân không có dấu phân biệt (`aHồ…`) và nhãn
   chỉ ngăn bằng khoảng trắng (`ab Hồ …`) không phân biệt được với thân — thuộc bước duyệt ranh giới. Điểm đánh số dạng `N.` / `N)` / `(N)` trùng hình
   dạng số khoản: nếu dãy số sau khi mất cấp vẫn liên tục từ 1, một điểm có thể bị nhận thành khoản riêng — `pham_vi_kiem` của
-  đường thô nêu rõ điều này; cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Ngân sách đọc: văn bản thô quá
+  đường thô nêu rõ điều này; cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Dòng mà phần mở đầu có hình dạng nhãn điểm nhiều vế
+  (`ab c. …`, `Ban a) …`, `(Hồ sơ) là …`) làm đường thô TỪ CHỐI cả Điều — dùng `.docx` có cấp danh sách; cụm từ đứng trước "là"
+  (`Hồ sơ là …`) và gạch nối giữa từ dài (`kinh tế - xã hội`) vẫn được nhận. Ngân sách đọc: văn bản thô quá
   400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số, hay `tl extract` in quá 1 600 000 byte ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, nhãn mở rộng dài quá 64
   ký tự, hay Điều dựng ra quá 400 000 ký tự ⇒ chặn — Điều dài hơn thì đọc thủ công. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên, hay đoạn tham chiếu style không có / sai loại (paragraph ↔ character) ⇒ chặn.

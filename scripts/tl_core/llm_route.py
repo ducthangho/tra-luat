@@ -503,7 +503,8 @@ _RE_DIEM = re.compile("^(?:" + "|".join([
     rf"\({_KC}{_chu_nhan(1)}{_KC}\)",
     rf"\(?{_chu_nhan(2)}{_KC}[.)]",
     rf"{_chu_nhan(3)}{_KC}[-–](?=\s)",
-    r"\d+(?:\.\d+)+\.?(?=\s)",
+    # r24 (lượt 23 Z3): thập phân nhiều cấp, có thể trong ngoặc, có thể dính thân sau dấu cuối (`(1.1)`, `1.1.Dữ`, `1.2)`).
+    rf"\(?{_KC}\d+(?:\.\d+)+{_KC}[.)]?{_KC}\)?(?=\s|[^\W\d_])",
     r"[-–•+]",
 ]) + r")\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
@@ -990,15 +991,30 @@ def _sdt_hop_le(el):
 def _ruot_bi_bo(el):
     """r22 (lượt 21 X1, chính sách r222 `chunk_payload`): chữ HIỂN THỊ của nội dung bị bỏ (`w:del`/`w:moveFrom`) — `t`/`delText` theo chữ,
     `tab`/`ptab`/`br`/`cr` là khoảng trắng, `noBreakHyphen` là `-`; phần tử khác bỏ qua."""
+    # r24 (lượt 23 Z1): DANH SÁCH CHO PHÉP — chỉ phần tử ĐÃ BIẾT là khoảng trắng mới được tính là khoảng trắng; mọi con khác của run
+    # (ký hiệu `w:sym`, trường, hình…) và mọi con không phải run của wrapper được tính là NỘI DUNG (`\x00`) ⇒ mẩu bị bỏ TRỌN.
     phan = []
-    for e in el.iter():
-        ten = e.tag[len(_W):] if isinstance(e.tag, str) and e.tag.startswith(_W) else None
-        if ten in ("t", "delText"):
-            phan.append(e.text or "")
-        elif ten in ("tab", "ptab", "br", "cr"):
-            phan.append(" ")
-        elif ten == "noBreakHyphen":
-            phan.append("-")
+    runs = [el] if el.tag == _W + "r" else None
+    if runs is None:
+        runs = []
+        for c in el:
+            if c.tag == _W + "r":
+                runs.append(c)
+            else:
+                phan.append("\x00")
+    for r in runs:
+        for e in r:
+            ten = e.tag[len(_W):] if isinstance(e.tag, str) and e.tag.startswith(_W) else None
+            if ten in ("t", "delText"):
+                phan.append(e.text or "")
+            elif ten in ("tab", "ptab", "br", "cr"):
+                phan.append(" ")
+            elif ten == "noBreakHyphen":
+                phan.append("-")
+            elif ten == "softHyphen" or ten in _CON_RUN_BO_QUA:
+                continue
+            else:
+                phan.append("\x00")
     return "".join(phan)
 
 
@@ -1145,6 +1161,10 @@ def doc_dieu_docx(nguon, dieu):
     doc_gioi_han = _nap_doc_gioi_han()
     import io
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
+        # r24 (lượt 23 Z2): tên member TRÙNG trong thư mục ZIP ⇒ đọc theo tên chỉ lấy MỘT bản ngầm ⇒ dừng (cả gói).
+        _ten = z.namelist()
+        if len(_ten) != len(set(_ten)):
+            raise ValueError("goi .docx co member trung ten — khong ho tro")
         chinh = _phan_chinh(z, doc_gioi_han)
         goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han)   # r12 (lượt 11 L5): BYTES — parser tự đọc khai báo mã hoá
         danh_so = _doc_danh_so(z, doc_gioi_han, chinh)

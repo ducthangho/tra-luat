@@ -221,3 +221,5 @@ review_calls_limit: 35
 review_calls_used_truoc: 33
 inference_calls_limit: 0
 review_calls_ghi_chu: 'Luot 34 lan 1 (run e535bd34) bi dung giua chung theo chi thi chu kho "Va va review theo lop loi, khong phai tung loi rieng le, co hint patch"; chay lai voi prompt theo lop (tinh 2 loi goi, tran 35).'
+da_bi_thay_the: llm-khoan-docx-r35-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 34; revision r35 (ops/specs/llm-khoan-docx-r35.md), tran 35.'

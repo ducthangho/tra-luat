@@ -1916,12 +1916,72 @@ def ca_cau_truc_docx_chan(m):
                 styles=kc), "gach toggle: style con tat khong tat gach cua cha")
 
 
+
+def ca_r35_lop_loi(m):
+    """#1525 r35 (lượt 34): ba LỚP lỗi — mỗi lớp một chốt chung, ca phủ MIỀN hình dạng, không từng biểu hiện.
+    `ranh-gioi-khoan`: một bộ quét đầu dòng cho nguồn có số lẫn mất số. `can-tai-nguyen-doc-nguon`: ngân sách đọc (số dài, quét
+    lùi tuyến tính, độ sâu XML, độ dài nhãn, tổng chữ). `ranh-gioi-ky-tu`: kiểm chữ gốc trên MỌI đoạn trước khi chọn tiêu đề."""
+    import time as _t35
+
+    def tach(vb):
+        try:
+            return m.tach_khoan(vb)
+        except Exception as e:  # noqa: BLE001 — nguồn ngoài miền phải ra None có kiểm soát
+            raise TinHieuChotCa(f"tach_khoan no {type(e).__name__}: {str(e)[:80]}") from None
+    # --- ranh-gioi-khoan: bảng hình dạng nhãn × (đầu thân của số khoản · dòng nguồn mất số)
+    nhan = ["ab-“Dữ liệu” là b.", "ab -(Dữ liệu) là b.", "ab( Dữ liệu là b.", "ab. Dữ liệu là b.", "(a) Dữ liệu là b.",
+            "ab-cd. Dữ liệu là b.", "ab1) Dữ liệu là b.", "AB) Dữ liệu là b.", "a-1 Dữ liệu là b."]
+    for L in nhan:
+        bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"so khoan + than mo bang nhan lot: {L!r}")
+        bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2.{L}") is None, f"so khoan dinh nhan lot: {L!r}")
+        bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"dong mat so mo bang nhan lot: {L!r}")
+    for L in ("2 ab. Dữ liệu là b.", "2 a) Dữ liệu là b."):
+        bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"nhan noi bang dem lot: {L!r}")
+    # đối chứng đã duyệt: chữ đầu thân, từ ghép, mã hạng, cụm ngoặc, chữ viết tắt hoa đầu.
+    for than in ("(Hồ sơ) là tài liệu.", "Quy trình là cách làm.", "e-mail là thư điện tử.", "A1 là hạng.",
+                 "Tp. Hồ Chí Minh là thành phố.", "ASEAN (Hiệp hội) là tổ chức.", "Ban (sau đây gọi là B) là nhóm."):
+        bang(tach(f"Điều 3.\n1. {than}\n2. Dữ liệu là thông tin.") == [(1, than), (2, "Dữ liệu là thông tin.")],
+             f"so khoan + than hop le bi chan oan: {than!r}")
+        bang(tach(f"Điều 3.\n{than}\nDữ liệu là thông tin.") == [(None, than), (None, "Dữ liệu là thông tin.")],
+             f"dong mat so hop le bi chan oan: {than!r}")
+    # --- can-tai-nguyen-doc-nguon
+    bang(tach("Điều 3.\n" + "1" * 5000 + ". Hồ sơ là a.") is None, "so khoan qua dai khong bi chan")
+    lon = "Điều 3.\nHồ sơ là " + "a" * 400_001 + "."
+    bang(m.vuot_ngan_sach(lon) is not None and tach(lon) is None, "nguon vuot ngan sach khong bi chan")
+    bang(tach("Điều 3.\nHồ sơ là " + "a" * 1000 + ".") is not None, "nguon trong han bi chan oan")
+    _d = _t35.monotonic()
+    tach("Điều 3.\nHồ sơ là a" + " " * 40_000 + "b.")
+    bang(_t35.monotonic() - _d < 1.0, "dau ket cau quet bac hai")
+
+    def chan(docx, ly_do):
+        try:
+            m.doc_dieu_cau_truc(docx, 3)
+        except ValueError:
+            return
+        except Exception as e:  # noqa: BLE001
+            raise TinHieuChotCa(f"{ly_do}: no {type(e).__name__} thay vi ValueError") from None
+        raise TinHieuChotCa(f"{ly_do}: phai bi chan")
+    H, A, B = p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1), p_docx("Dữ liệu là thông tin.", 1)
+    sau = "<w:customXml>" * 1500 + p_docx("Điều 3.") + "</w:customXml>" * 1500
+    chan(lam_docx(sau, A, B), "cay XML qua sau")
+    dai = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%1." + "-" * 70 + "%2)"))
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=dai), "nhan mo rong qua dai")
+    chan(lam_docx(H, p_docx("Hồ sơ là " + "a" * 400_001 + ".", 1)), "Dieu docx vuot tran tong chu")
+    _doc_hop_le(m, lam_docx(H, A, p_docx("tổ chức.", 1, 1), B))   # đối chứng: điểm tự động trong hạn
+    # --- ranh-gioi-ky-tu: đoạn chỉ có khoảng trắng NGOÀI danh sách ở trước tiêu đề / trong vùng / cuối tệp
+    W = p_docx("　")
+    chan(lam_docx(W, H, A, B), "khoang trang ngoai danh sach truoc tieu de")
+    chan(lam_docx(H, W, A, B), "khoang trang ngoai danh sach trong vung")
+    chan(lam_docx(H, A, B, W), "khoang trang ngoai danh sach cuoi tep")
+    _doc_hop_le(m, lam_docx("<w:p/>", H, A, B))   # đối chứng: đoạn rỗng chỉ có phân cách được phép
+    _doc_hop_le(m, lam_docx(H, p_docx("Hồ sơ là tài liệu.", 1, xoa="x　y"), B))   # ký tự ngoài miền trọn trong mẩu đã bỏ
+
 def ca_usage_thieu_truong(m):
     bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
     bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
 
 
-CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen_sub, ca_het_credit_402_chuyen_sub,
+CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen_sub, ca_het_credit_402_chuyen_sub,
       ca_400_khac_thi_dung, ca_ket_noi_chuyen_duong, ca_sub_loi_sau_khoi_chay_thi_dung, ca_sub_go_key_va_cat_ngu_canh,
       ca_sub_sai_model_thi_dung, ca_het_duong, ca_tu_choi_thi_dung, ca_schema_sai_thi_dung,
       ca_lech_nguyen_van, ca_chuan_hoa_chu_la, ca_tach_sai_cho, ca_khong_in_key,
@@ -1936,7 +1996,25 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_cau_truc_docx_abstract_id, ca_cau_truc_docx_numbering_ten_khac, ca_cau_truc_docx_rels_part_chinh]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
+_TAT_QUET = [("    if _RE_DIEM.match(ln) or _nhan_dau(ln):", "    if _RE_DIEM.match(ln):"),
+             ("        if len(so) > _TRAN_CHU_SO or _nhan_dau(ln, m.end()):", "        if len(so) > _TRAN_CHU_SO:")]
+
+
 DOT_BIEN = [
+    # r35 (lượt 34): mỗi chốt của ba lớp một đột biến riêng.
+    ('wp1525_quet_than_so', ('        if len(so) > _TRAN_CHU_SO or _nhan_dau(ln, m.end()):', '        if len(so) > _TRAN_CHU_SO:'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_dong_than', ('    if _RE_DIEM.match(ln) or _nhan_dau(ln):', '    if _RE_DIEM.match(ln):'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_ranh_gioi', ('    ranh = k > j or k >= len(s) or s[k] in _MO_THAN_KT', '    ranh = k > j or k >= len(s)'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_cho', ('            cho += 1   # dấu nối không ranh giới: chờ thành phần sau', '            break'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_dem_noi', ('        elif k > j and _doc_tp(s, k) is not None:', '        elif False:'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_ngoai_le_hoa_dau', ('    if j - i >= 2 and s[i].isupper() and s[i + 1:j].islower() and s[i + 1:j].isalpha():', '    if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_quet_tp_dinh_chu', ('    if j == i or (j < len(s) and s[j].isalpha()):', '    if j == i:'), 'ca_r35_lop_loi'),
+    ('wp1525_chu_so_khong_tran', ('        if len(so) > _TRAN_CHU_SO or _nhan_dau', '        if _nhan_dau'), 'ca_r35_lop_loi'),
+    ('wp1525_ngan_sach_bo', ('    if vuot_ngan_sach(s):\n        return None   # r35', '    if False:\n        return None   # r35'), 'ca_r35_lop_loi'),
+    ('wp1525_ket_cau_regex', ("""    s = str(txt)\n    i = len(s)\n    while i and""", """    s = re.sub(r'[\\s)"\\u201d]+$', "", str(txt))\n    i = len(s)\n    while False and"""), 'ca_r35_lop_loi'),
+    ('wp1525_xml_sau_bo', ('        if d > _TRAN_SAU_XML:', '        if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhan_dai_bo', ('    if len(nhan.strip()) > _TRAN_NHAN:', '    if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_tong_docx_bo', ('    if sum(len(x) + 1 for x in dong) > _TRAN_VAN_BAN:', '    if False:'), 'ca_r35_lop_loi'),
     # wp1514 lượt 2 (A1/A2/A3/A4).
     ('wp1514_l2_cau_dan_bo_tu_noi', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif i_dong == 0 and " ".join(ln.split()).endswith("được hiểu như sau:"):'), 'ca_wp1514_luot2'),
     ("wp1514_l2_cham_phay_ket_cau", ('_DAU_CAU_KET = frozenset(".!?")', '_DAU_CAU_KET = frozenset(".;!?")'), "ca_wp1514_luot2"),
@@ -1985,9 +2063,6 @@ DOT_BIEN = [
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
     # r34 (lượt 33 J1/J2): dải chữ phẳng + dấu kết.
-    ('wp1525_dai_chu_bo', ('    rf"\\d+(?:{_KC}[.)(\\-–])*{_KC}[a-zđA-ZĐ]+{_KC}(?:[.)]|[-–](?=\\s))",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_dai_chu_khong_dem', ('    rf"\\d+(?:{_KC}[.)(\\-–])*{_KC}[a-zđA-ZĐ]+{_KC}(?:[.)]', '    rf"\\d+(?:[.)(\\-–])*[a-zđA-ZĐ]+(?:[.)]'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_dai_chu_gach_khong_doi_trang', ('{_KC}(?:[.)]|[-–](?=\\s))",', '{_KC}(?:[.)]|[-–])",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_so_so_bo', ('    rf"\\d+{_NOI_NHIEU}\\d+",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     # r33 (lượt 32 I1/I2).
     ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": False,'), 'ca_cau_truc_docx_chan'),
@@ -2004,20 +2079,20 @@ DOT_BIEN = [
     ('wp1525_rstyle_sai_loai', ('                kq["la"] = True   # r31', '                pass   # r31'), 'ca_cau_truc_docx_chan'),
     ('wp1525_basedon_doi_loai', ('        if goc_sid in loai and loai[goc_sid] != ten_loai:', '        if False:'), 'ca_cau_truc_docx_chan'),
     # r29 (lượt 28 E1): tiền tố dấu của nhãn.
-    ('wp1525_tien_to_chi_ngoac', ('_TIEN_TO = rf"(?:{_KC}[.)(\\-–])*{_KC}"', '_TIEN_TO = rf"\\(?{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_tien_to_chi_ngoac', [('_TIEN_TO = rf"(?:{_KC}[.)(\\-–])*{_KC}"', '_TIEN_TO = rf"\\(?{_KC}"'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_nhan_dau_dau', ('    rf"{_TIEN_TO_DAU}(?:\\d+|{_chu_rieng(7)})', '    r"(?!)(?:\\d+|{_chu_rieng(7)})'), 'ca_khoan_mat_so_co_diem_dat'),
     # r28 (lượt 27 D1): ngữ pháp nhãn nhiều thành phần — mỗi nhánh một đột biến.
     ('wp1525_nhieu_cap_noi_chi_cham', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.])+{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_chu_truoc', ('    rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\\d+|{_chu_rieng(5)})",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_nhieu_cap_bo_chu_dinh_so', ('    rf"{_chu_rieng(4)}\\d+{_KC}[.)(\\-–]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_nhieu_cap_bo_chu_dinh_so', [('    rf"{_chu_rieng(4)}\\d+{_KC}[.)(\\-–]",', '    r"(?!)",'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_chu_rieng_dinh_chu', ('(?P=R{i})*)(?![^\\\\W\\\\d_])"', '(?P=R{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
     # r27 (lượt 26 C1/C2).
-    ('wp1525_bo_chan_nhieu_cap', ('    if any(_RE_NHIEU_CAP.match(ln) for ln in dong):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_bo_chan_nhieu_cap', [('    if _RE_NHIEU_CAP.match(ln):\n        return ("nhan",)', '    if False:\n        return ("nhan",)'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_la_ghi_truoc_gach', ('                la_run = True   # B4', '                kq["la"] = True   # B4'), 'ca_cau_truc_docx_dat'),
     # r26 (lượt 25 B1–B3): mỗi nhánh ngữ pháp nhãn một đột biến; trạng thái ngắt; `xml:space` đặt lại / ruột / delText.
-    ('wp1525_diem_bo_cham_ngoac', ('    rf"{_TIEN_TO}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_dang_gach', ('    rf"{_TIEN_TO}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_mo_than_chi_khoang_trang', ('_MO_THAN = "(?=\\\\s|[“\\"‘\'(])"', '_MO_THAN = "(?=\\\\s)"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_cham_ngoac', [('    rf"{_TIEN_TO}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",', '    r"(?!)",'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_dang_gach', [('    rf"{_TIEN_TO}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",', '    r"(?!)",'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_mo_than_chi_khoang_trang', [('_MO_THAN = "(?=\\\\s|[“\\"‘\'(])"', '_MO_THAN = "(?=\\\\s)"'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_chu_sau_ngat_trang', ('                if sau_trang and chu.strip():', '                if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ngat_ghi_truoc_gach', ('                    ngat_mem = True', '                    kq["ngat"] = True'), 'ca_cau_truc_docx_dat'),
     ('wp1525_trang_ghi_truoc_gach', ('                    sau_trang = True   # r8', '                    kq["sau_ngat_trang"] = sau_trang = True   # r8'), 'ca_cau_truc_docx_dat'),
@@ -2034,8 +2109,8 @@ DOT_BIEN = [
     ('wp1525_sdtendpr_khong_don_tri', ('"sdt": ("sdtPr", "sdtEndPr", "sdtContent")', '"sdt": ("sdtPr", "sdtContent")'), 'ca_cau_truc_docx_chan'),
     # r23 (lượt 22 Y1/Y2/Y3): mỗi nhánh ngữ pháp nhãn một đột biến.
     ('wp1525_diem_bo_khoang_dem', ('_KC = r"[ \\t\\u00a0]*"', '_KC = r""'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_chu_hoa', ('|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"', '|(?P<h{i}>[a-zđ])(?P=h{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_chu_lap', ('(?:(?P<t{i}>[a-zđ])(?P=t{i})*|', '(?:(?P<t{i}>[a-zđ])|'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_chu_hoa', [('|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"', '|(?P<h{i}>[a-zđ])(?P=h{i})*)"'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_chu_lap', [('(?:(?P<t{i}>[a-zđ])(?P=t{i})*|', '(?:(?P<t{i}>[a-zđ])|'), *_TAT_QUET], 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_gach_doc_ruot_rieng', ('            ruot = _ruot_bi_bo(r)   # r23', '            ruot = "".join(chu_run)   # r23'), 'ca_cau_truc_docx_dat'),
     ('wp1525_sdt_nhan_con_la', ('    return all(c.tag in (_W + "sdtPr", _W + "sdtEndPr", _W + "sdtContent") for c in el)', '    return True'), 'ca_cau_truc_docx_chan'),
     ('wp1525_style_trung_ghi_de', ('        if st.get(_W + "styleId") in kq:   # r23', '        if False:   # r23'), 'ca_cau_truc_docx_chan'),
@@ -2059,7 +2134,7 @@ DOT_BIEN = [
     ('wp1525_kiem_ky_tu_khong_bo_bom', ('    return _ky_tu_la(_bo_mot_bom(van_ban), xuong_dong=True)', '    return _ky_tu_la(str(van_ban), xuong_dong=True)'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_tho_kiem_sau_tach_dong', ('    if _ky_tu_la(s, xuong_dong=True):', '    if any(_ky_tu_la(ln) for ln in s.splitlines()):'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_docx_kiem_sau_gop', ('"ky_tu_la": _ky_tu_la(tho)', '"ky_tu_la": _ky_tu_la(_gon_doan(tho))'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_ky_tu_la_chi_vung', ('    for d in doan[i0:]:   # r17', '    for d in vung:   # r17'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_ky_tu_sau_i0', ('    for d in doan:\n        # r17 (lượt 16 S2) → r35', '    for d in [x for x in doan if x["chu"] or x["so"] is not None or x["la"]]:\n        # r17 (lượt 16 S2) → r35'), 'ca_r35_lop_loi'),
     ('wp1525_tho_bo_tu_choi_ky_tu_la', ('    if _ky_tu_la(s, xuong_dong=True):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_lien_tuc', ('    if [so for so, _, _ in khoan] != list(range(1, len(khoan) + 1)):', '    if False:'), 'ca_cau_truc_docx_chan'),
@@ -2132,7 +2207,7 @@ DOT_BIEN = [
     ('wp1525_override_loi_nem_ngay', ('                loi = loi or f"lvlOverride: {e}"', '                raise'), 'ca_cau_truc_docx_dat'),
     ('wp1525_moc_move_bo_kiem_id', ('        if None in dau or None in cuoi:', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_start_override', ('            muc[il] = (fmt, txt, _so_nguyen(ov.find(_W + "startOverride").get(_W + "val")))', '            pass'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_loc_bang_regex', ('    goc_cay = ET.fromstring(goc_xml)', '    _nap_doc_gioi_han()\n    import docx_markup as _dmx\n    goc_cay = ET.fromstring(_dmx.strip_markup(goc_xml.decode("utf-8"), "strip")[0])'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_loc_bang_regex', ('    goc_cay = _xml_cay(goc_xml)', '    _nap_doc_gioi_han()\n    import docx_markup as _dmx\n    goc_cay = _xml_cay(_dmx.strip_markup(goc_xml.decode("utf-8"), "strip")[0])'), 'ca_cau_truc_docx_dat'),
     ('wp1525_ranh_gioi_lon_chi_so', ('(?:[IVXLCDM]+|\\d+|(?i:thứ\\s+(?:nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười)(?!\\w))|[A-ZĐ])', '(?:[IVXLCDM]+|\\d+)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_la_ma_khong_phan_biet_hoa', ('(?:[IVXLCDM]+|\\d+|(?i:thứ', '(?:(?i:[IVXLCDM]+)|\\d+|(?i:thứ'), 'ca_cau_truc_docx_dat'),
     ('wp1525_quan_he_hau_to', ('    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).strip() == uri]', '    dich = [r_ for r_ in rels.findall(ns + "Relationship") if str(r_.get("Type", "")).endswith("/" + loai)]'), 'ca_cau_truc_docx_dat'),
@@ -2140,10 +2215,10 @@ DOT_BIEN = [
     ('wp1525_lvltext_none', ('                       (txt.get(_W + "val") or "") if txt is not None else "",', '                       txt.get(_W + "val") if txt is not None else "",'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ep_utf8', ('        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han)   # r12', '        goc_xml = _doc_thanh_phan(z, chinh, doc_gioi_han).decode("utf-8")   # r12'), 'ca_cau_truc_docx_dat'),
     # #1525: đường thô không nhận dòng điểm.
-    ('wp1525_tho_nhan_diem', ('        elif _RE_DIEM.match(ln):\n            # #1525', '        elif False:\n            # #1525'), 'ca_wp1514_luot9'),
+    ('wp1525_tho_nhan_diem', ('    if _RE_DIEM.match(ln) or _nhan_dau(ln):\n        return ("nhan",)', '    if False:\n        return ("nhan",)'), 'ca_wp1514_luot9'),
     # r9 (lượt 7 G1 · lượt 8 H1 · lượt 9 J1): nguồn mất số không được có dòng điểm.
     ('wp1514_l4_cau_dan_moi_vi_tri', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):'), 'ca_wp1514_luot4'),
-    ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
+    ("wp1514_l2_duoi_mot_luot", ("""    while i and (s[i - 1].isspace() or s[i - 1] in ')"\\u201d'):""", """    if i and (s[i - 1].isspace() or s[i - 1] in ')"\\u201d'):"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
     ("wp1514_bo_x2", ("    if ln.count('\"') >= 3:\n        return True", "    if False:\n        return True"), "ca_wp1514"),
     ("wp1514_bo_ket_cau", ("    if not all(_ket_thuc_cau(txt) for _, txt in khoan):\n        return None", "    if False:\n        return None"), "ca_wp1514"),
@@ -2316,13 +2391,19 @@ def chay_dot_bien():
     goc = NGUON.read_text(encoding="utf-8")
     giet, ket = 0, []
     theo_ten = {f.__name__: f for f in CA}
-    for ten, (cu, moi), dich in DOT_BIEN:
-        if goc.count(cu) != 1:
-            ket.append(f"  {ten}: KHONG AP DUOC (neo xuat hien {goc.count(cu)} lan)")
+    for ten, cap, dich in DOT_BIEN:
+        # r35: một đột biến có thể là NHIỀU cặp (cu, moi) — đo một LỚP chốt khi lớp kia bị tắt (chốt chồng nhau).
+        cac_cap = [cap] if isinstance(cap[0], str) else list(cap)
+        sai = [cu for cu, _ in cac_cap if goc.count(cu) != 1]
+        if sai:
+            ket.append(f"  {ten}: KHONG AP DUOC (neo xuat hien {goc.count(sai[0])} lan)")
             continue
+        ban = goc
+        for cu, moi in cac_cap:
+            ban = ban.replace(cu, moi)
         with tempfile.TemporaryDirectory() as d:
             tep = Path(d) / f"llm_route_db_{ten}.py"
-            tep.write_text(goc.replace(cu, moi), encoding="utf-8")
+            tep.write_text(ban, encoding="utf-8")
             try:
                 m = nap(tep, f"llm_route_db_{ten}")
             except Exception as e:  # noqa: BLE001

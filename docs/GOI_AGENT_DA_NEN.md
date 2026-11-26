@@ -420,8 +420,13 @@ biến môi trường của environment.
   chặn (kể cả có khoảng đệm `a . …`, `( a ) …`, nhãn nhiều cấp nối bằng `.`/`-` như `1.1. …`, `1-1 …`, `a-b. …`). Nhãn chỉ ngăn bằng
   khoảng trắng (`a tổ chức`) không phân biệt được với chữ — thuộc bước duyệt ranh giới. Dòng mở bằng nhãn nhiều thành phần (`1.1`,
   `1. 1`, `1(1)`, `1).1`, `1.a.`, `1a.`, `a-b`, kể cả có dấu đứng đầu như `.1.1.`, `.a`) chặn cả nguồn, kể cả khoản có thân mở bằng một số (`2. 1 năm là …`); `1. A là …` và
-  `A1 là …`, `1. e-mail là …` vẫn đọc được; `1. Tp. Hồ Chí Minh là …` (viết tắt ASCII có dấu chấm ngay sau số) bị chặn. Hai chữ cái kề nhau sau số mà không có dấu kết (`1.ab …`) không phân biệt được với thân dính chữ (`2.Quy
-  trình …`) — thuộc bước duyệt ranh giới. `.docx` khai một trường đơn trị nhiều lần
+  `A1 là …`, `1. e-mail là …`, `1. Tp. Hồ Chí Minh là …` (viết tắt HOA đầu + thường) vẫn đọc được. Nguồn có số và mất số dùng
+  CHUNG một bộ quét đầu dòng: thân của số khoản mở bằng nhãn (`1. ab. …`, `1.ab-“…”`, `1. (a) …`, `2 ab. …`) cũng chặn cả nguồn. Hai
+  chữ cái kề nhau sau số mà không có dấu kết (`1.ab …`) không phân biệt được với thân dính chữ (`2.Quy trình …`); dấu mở của thân và
+  dấu mở kết thúc nhãn chỉ phân biệt được khi còn ranh giới nhìn thấy (`1.ab(Hồ sơ)` đọc là thân `ab(Hồ sơ)`); nhãn ghép hai
+  placeholder khác kiểu chữ (`Ab.`) đọc là chữ viết tắt — các dạng ấy thuộc bước duyệt ranh giới. Ngân sách đọc: văn bản thô quá
+  400 000 ký tự hay số khoản quá 4 chữ số ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng, nhãn mở rộng dài quá 64
+  ký tự, hay Điều dựng ra quá 400 000 ký tự ⇒ chặn — Điều dài hơn thì đọc thủ công. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên, hay đoạn tham chiếu style không có / sai loại (paragraph ↔ character) ⇒ chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả

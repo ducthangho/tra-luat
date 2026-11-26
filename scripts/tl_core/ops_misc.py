@@ -3095,7 +3095,7 @@ def cmd_llm_khai_niem(a) -> int:
         print("[tl] van ban rong", file=sys.stderr)
         return 2
     if khoan_ct is None:
-        _la = lr.ky_tu_ngoai_danh_sach(van_ban)
+        _la = lr.vuot_ngan_sach(van_ban) or lr.ky_tu_ngoai_danh_sach(van_ban)   # r35 (lượt 34): ngân sách đọc cũng chặn trước model
         if _la:   # #1525 r18 (lượt 17 T2): ký tự ngoài danh sách cho phép ⇒ dừng TRƯỚC khi gọi model
             print(f"[tl] van ban co {_la} — khong doc an toan duoc, khong goi model", file=sys.stderr)
             return 2

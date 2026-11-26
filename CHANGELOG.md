@@ -81,6 +81,10 @@
   traceback với tham chiếu tới khoá nội bộ); nhãn `1.ab.` ⇒ chặn.
 - r34 (sau cross-review lượt 33 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r34.md`): một nhánh "số + dải chữ + dấu kết" thời gian tuyến
   tính (bỏ lặp lồng nhau gây backtracking); `1. e-mail là …` không còn bị chặn oan.
+- r35 (sau cross-review lượt 34 theo LỚP, đặc tả `ops/specs/llm-khoan-docx-r35.md`): một bộ quét nhãn đầu dòng chung cho nguồn có số
+  và mất số (thân số khoản mở bằng nhãn ⇒ chặn; `1. Tp. Hồ Chí Minh là …` nay đọc được); ngân sách đọc nguồn (văn bản thô, số khoản,
+  độ sâu XML, độ dài nhãn, tổng chữ) — vượt ⇒ dừng có kiểm soát, CLI dừng trước model; kiểm ký tự gốc trên mọi đoạn `.docx` kể cả
+  đoạn trắng trước tiêu đề.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

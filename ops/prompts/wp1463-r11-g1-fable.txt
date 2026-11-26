@@ -1,0 +1,35 @@
+Bạn là EXECUTOR của packet wp1463 (PR2 #1463, Mission #1172), kho ducthangho/tra-luat. Trả lời và ghi chú bằng tiếng Việt.
+
+ĐỌC TRƯỚC: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §5, §7, §12, §13), .claude/skills/work-packet/SKILL.md.
+
+ĐẶC TẢ ĐÓNG BĂNG (nguồn sự thật duy nhất; đọc TOÀN BỘ):
+- `git show 01a192a513de202a92f3ec41270ce2b3953c90c2:ops/specs/wp1463-r1/SPEC.md`
+- sha256 PHẢI bằng `8b207fd307ed3cdf5beba71e056005f3cd21a7e47bb66038f52352fde3a7a046`, lệch ⇒ DỪNG.
+- Chủ kho đã duyệt băm: https://github.com/ducthangho/tra-luat/issues/1463#issuecomment-7172827985
+
+LEASE: `wp1463-r11-g1-claude`; base `4a96ccd2774b67406b8cd4110f7e574cfa82bc6d`; nhánh `agent/wp1463-r11-g1-fable`. Hãy tự xác minh: `git show origin/ops/wp1463-r1:ops/leases/wp1463-r11-g1-claude.yaml`.
+
+WRITE SET (đúng bốn tệp, không có tệp thứ năm):
+1. `ops/ci_provenance_test.py`
+2. `.claude/dev/ci_dang_ky_test.py` (CHỈ bốn thay đổi dữ liệu của mục 3)
+3. `ops/specs/wp1463-r1/do/do_pr2.py`
+4. `ops/specs/wp1463-r1/do/KET_QUA.md`
+Cần tệp thứ năm, hoặc thấy đặc tả mâu thuẫn ⇒ DỪNG (§12) và báo, không tự sửa đặc tả.
+
+VIỆC ĐẦU TIÊN — so blob trước lease ra `khac` (`.claude/dev/ci_dang_ky_test.py` `be072cde` → `266bf95c`, d0868db → 4a96ccd; 10 tệp còn lại của Z giống):
+Hiện thực lệnh con `vung` của `do_pr2.py` theo Nghiệm thu 4, gồm cả "Độ phủ quan sát" và "Danh tính từng phép". Áp bốn thay đổi dữ liệu mục 3 lên base rồi chạy nó, TRƯỚC mọi mã khác. Kết quả ngoài vùng hoặc không đo được ⇒ DỪNG, báo, không tự thêm vùng. Có thể tham khảo `ops/specs/wp1463-r1/do-chuan-bi/do_vung_pr2.py` (nhánh `ops/wp1463-r1`, chỉ là tham khảo, có lỗi đã biết, ghi ở mục "Thay đổi so với revision 9").
+
+QUY TRÌNH:
+- Sửa tối thiểu; giữ idiom chú thích của kho.
+- `python3 -m ruff check --select F` trên các tệp .py đã đổi: DELTA so với base phải = 0.
+- Chạy đủ Nghiệm thu 1–9 cục bộ. Cần `actionlint` VÀ `shellcheck`.
+- `core.abbrev 7`. Không in hay đọc bí mật. Không viết nguyên văn dấu bỏ-qua-CI vào commit message.
+- Trần kích thước: ≤ 6 tệp và ≤ 450 dòng thêm theo `git diff --numstat <base> HEAD`. Đo trước khi báo xong; vượt ⇒ DỪNG (ADR-0044), không cắt ca hay đột biến cho vừa trần.
+- COMMIT CỤC BỘ, KHÔNG PUSH. Chủ kho phải audit exact-H trước lần đẩy đầu.
+
+BÁO CÁO CUỐI (handoff §7):
+- SHA H, cây H, SHA base, numstat từng tệp;
+- dòng kết luận của các lệnh trong Nghiệm thu 1–5 cùng `tu-kiem` và `tu-kiem --dot-bien` (số N/N và M/M);
+- ruff delta;
+- danh sách chỗ chưa đo được;
+- mọi chỗ đặc tả chưa rõ mà bạn đã chọn cách hiểu.

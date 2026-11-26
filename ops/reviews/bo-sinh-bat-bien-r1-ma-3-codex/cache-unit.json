@@ -1,0 +1,34 @@
+{
+  "one_byte_different": true,
+  "first": {
+    "a": [
+      1,
+      9
+    ]
+  },
+  "reread": {
+    "a": [
+      1
+    ]
+  },
+  "other": {
+    "a": [
+      2
+    ]
+  },
+  "underlying_calls": 2,
+  "name_separated": true,
+  "kwargs_values": [
+    {
+      "z": 1
+    },
+    {
+      "z": 2
+    }
+  ],
+  "out_of_actual_domain_type_collision": {
+    "cached": "a: 1\n",
+    "actual": "!!binary |\n  gASVCgAAAAAAAAB9lIwBYZRLAXMu\n",
+    "different": true
+  }
+}

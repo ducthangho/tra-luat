@@ -1,0 +1,4 @@
+{"probe": "omit-fourth", "case": "a136_a135_do_khi_bo_sinh_lech_mien", "rc": 0, "stdout": "\n", "stderr": ""}
+{"probe": "omit-fifth", "case": "a136_a135_do_khi_bo_sinh_lech_mien", "rc": 0, "stdout": "\n", "stderr": ""}
+{"probe": "final-bang-invert", "case": "a136_a135_do_khi_bo_sinh_lech_mien", "rc": 3, "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh that: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: []\n", "stderr": ""}
+{"probe": "domain-branch-invert", "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o", "rc": 3, "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành ký tự Mc KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n", "stderr": ""}

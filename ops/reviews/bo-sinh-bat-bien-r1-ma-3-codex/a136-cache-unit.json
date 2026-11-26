@@ -1,0 +1,18 @@
+{
+  "first_rc": 0,
+  "second_rc": 0,
+  "one_byte_arguments_have_distinct_keys": true,
+  "cache_size_before": 5,
+  "tuple_result": true,
+  "cannot_mutate_result": true,
+  "fresh_dictionary_per_call": true,
+  "keys_argument_inventory": [
+    "('—', ())",
+    "('', ())",
+    "('', ('Cs',))",
+    "('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ())",
+    "('\\r\\n', ('Cs',))",
+    "('X', ())",
+    "('Y', ())"
+  ]
+}

@@ -1,0 +1,5 @@
+Đã hoàn tất review: **3 finding P3 thuộc 2 lớp**, validator trả `HOP_LE`. Các finding cũ đã vá; còn thiếu bảo vệ miền đối số, thiếu predicate trong bảng và hai mẫu thời gian A vượt ngưỡng.
+
+Bàn giao: [VERDICT.md](../work/VERDICT.md), [VERDICT.json](../work/VERDICT.json), [kết quả validator](../work/kiem_verdict.txt). Kho được review không đổi.
+
+KET_LUAN: changes_requested

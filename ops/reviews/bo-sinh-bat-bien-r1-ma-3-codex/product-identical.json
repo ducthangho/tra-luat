@@ -1,0 +1,12 @@
+{
+  "ops/land_evidence_nguon.py": {
+    "identical": true,
+    "base_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+    "head_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c"
+  },
+  "ops/gate_output_doi_chieu.py": {
+    "identical": true,
+    "base_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38",
+    "head_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38"
+  }
+}

@@ -1,0 +1,116 @@
+[
+  {
+    "guard": "original",
+    "generator": "healthy",
+    "rc": 0,
+    "output": "",
+    "arguments": [
+      [
+        "—",
+        []
+      ],
+      [
+        "",
+        [
+          "Cs"
+        ]
+      ],
+      [
+        "\n\r\u000b\f\u001c\u001d\u001e   \t",
+        []
+      ],
+      [
+        "",
+        []
+      ],
+      [
+        "\r\n",
+        [
+          "Cs"
+        ]
+      ]
+    ]
+  },
+  {
+    "guard": "original",
+    "generator": "bad-only-fourth",
+    "rc": 3,
+    "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']",
+    "arguments": [
+      [
+        "—",
+        []
+      ],
+      [
+        "",
+        [
+          "Cs"
+        ]
+      ],
+      [
+        "\n\r\u000b\f\u001c\u001d\u001e   \t",
+        []
+      ],
+      [
+        "",
+        []
+      ]
+    ]
+  },
+  {
+    "guard": "omit-fourth",
+    "generator": "healthy",
+    "rc": 0,
+    "output": "",
+    "arguments": [
+      [
+        "—",
+        []
+      ],
+      [
+        "",
+        [
+          "Cs"
+        ]
+      ],
+      [
+        "\n\r\u000b\f\u001c\u001d\u001e   \t",
+        []
+      ],
+      [
+        "\r\n",
+        [
+          "Cs"
+        ]
+      ]
+    ]
+  },
+  {
+    "guard": "omit-fourth",
+    "generator": "bad-only-fourth",
+    "rc": 0,
+    "output": "",
+    "arguments": [
+      [
+        "—",
+        []
+      ],
+      [
+        "",
+        [
+          "Cs"
+        ]
+      ],
+      [
+        "\n\r\u000b\f\u001c\u001d\u001e   \t",
+        []
+      ],
+      [
+        "\r\n",
+        [
+          "Cs"
+        ]
+      ]
+    ]
+  }
+]

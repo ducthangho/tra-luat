@@ -1,0 +1,202 @@
+[
+  {
+    "mode": "cached",
+    "out": [
+      0,
+      ""
+    ],
+    "calls": [
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          0,
+          ""
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang', 'lap_category']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['tu_0080']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang', 'lap_category', 'tu_0080']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          0,
+          ""
+        ]
+      },
+      {
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "result": [
+          0,
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "mode": "uncached",
+    "out": [
+      0,
+      ""
+    ],
+    "calls": [
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          0,
+          ""
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang', 'lap_category']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['tu_0080']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          3,
+          "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang', 'lap_category', 'tu_0080']"
+        ]
+      },
+      {
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "result": [
+          0,
+          ""
+        ]
+      },
+      {
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "result": [
+          0,
+          ""
+        ]
+      }
+    ]
+  }
+]

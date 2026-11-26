@@ -1,0 +1,1024 @@
+[
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "ky_tu_ngoai_ascii",
+    "line": 824,
+    "type": "If",
+    "expr": "if isinstance(x, bytes):\n        van = x.decode(\"utf-8\", \"ignore\")\n        try:\n            x = [van, json.loads(van)]\n        except ValueError:\n            x = van"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "ky_tu_ngoai_ascii",
+    "line": 830,
+    "type": "If",
+    "expr": "if isinstance(x, str):\n        return {c for c in x if ord(c) > 127}"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "ky_tu_ngoai_ascii",
+    "line": 831,
+    "type": "Compare",
+    "expr": "ord(c) > 127"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "ky_tu_ngoai_ascii",
+    "line": 832,
+    "type": "IfExp",
+    "expr": "[*x, *x.values()] if isinstance(x, dict) else x if isinstance(x, (list, tuple)) else ()"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "ky_tu_ngoai_ascii",
+    "line": 832,
+    "type": "IfExp",
+    "expr": "x if isinstance(x, (list, tuple)) else ()"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "nho_dem",
+    "line": 842,
+    "type": "IfExp",
+    "expr": "x if isinstance(x, (str, bytes)) else pickle.dumps(x)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "nho_dem",
+    "line": 843,
+    "type": "IfExp",
+    "expr": "NHO_YAML[khoa] if khoa in NHO_YAML else NHO_YAML.setdefault(khoa, ham(x, **k))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "nho_dem",
+    "line": 843,
+    "type": "Compare",
+    "expr": "khoa in NHO_YAML"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 886,
+    "type": "For",
+    "expr": "for tt, ten in chon.items():\n            (o_cau_truc, so_lan, tru, lap), truoc = A_CA[tt], dem[0]\n            mong = o_cau_truc + so_lan * (len(LOAI) - len(tru or ()) + 1)\n            thay.clear()\n            van_tay.clear()\n            rc, dong = a.chay_ca(ten)\n            if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này\n                raise RuntimeError(dong)\n            bang(rc == 0 and dem[0] - truoc == mong, f\"{ten} qua main → L8: {dem[0] - truoc} phần tử (đặc tả: đúng {mong}), rc={rc} {dong[:600]}\")\n            bang(len(van_tay) == mong - lap, f\"{ten} qua main → L8: {len(van_tay)} phần tử KHÁC NHAU (đặc tả: đúng {mong - lap})\")\n            if tru is not None:   # bốn chốt RIÊNG: số phần tử · số phần tử khác nhau (trên) · tập category · ngoài BMP — c40 đo từng chốt\n                thieu = sorted(set(LOAI) - set(tru) - {unicodedata.category(c) for c in thay})\n                bang(not thieu, f\"{ten} qua main → L8: thiếu general category {thieu}\")\n                bang(any(ord(c) > 0xFFFF for c in thay), f\"{ten} qua main → L8: không có ký tự ngoài BMP\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 868,
+    "type": "BoolOp",
+    "expr": "ma.get(x) or ma.setdefault(x, compile(*x))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 872,
+    "type": "Call",
+    "expr": "bang(m.nap_yaml(yml, byte) == du_lieu, f\"hồ sơ YAML phải nạp lại ĐÚNG phần tử bộ sinh đưa ra: {du_lieu!r}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 876,
+    "type": "If",
+    "expr": "if Path(thu) != a.ROOT:   # ca không cần tệp đưa gốc kho làm thư mục provenance: để vắng\n                shutil.copytree(thu, Path(tam) / PROV)\n                tep = sorted((t.relative_to(tam).as_posix(), t.read_bytes()) for t in (Path(tam) / PROV).rglob(\"*\") if t.is_file())\n                thay.update(*(ky_tu_ngoai_ascii(b) for _, b in tep))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 892,
+    "type": "If",
+    "expr": "if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này\n                raise RuntimeError(dong)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 896,
+    "type": "If",
+    "expr": "if tru is not None:   # bốn chốt RIÊNG: số phần tử · số phần tử khác nhau (trên) · tập category · ngoài BMP — c40 đo từng chốt\n                thieu = sorted(set(LOAI) - set(tru) - {unicodedata.category(c) for c in thay})\n                bang(not thieu, f\"{ten} qua main → L8: thiếu general category {thieu}\")\n                bang(any(ord(c) > 0xFFFF for c in thay), f\"{ten} qua main → L8: không có ký tự ngoài BMP\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 872,
+    "type": "Compare",
+    "expr": "m.nap_yaml(yml, byte) == du_lieu"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 876,
+    "type": "Compare",
+    "expr": "Path(thu) != a.ROOT"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 892,
+    "type": "Compare",
+    "expr": "rc == 4"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 894,
+    "type": "Call",
+    "expr": "bang(rc == 0 and dem[0] - truoc == mong, f\"{ten} qua main → L8: {dem[0] - truoc} phần tử (đặc tả: đúng {mong}), rc={rc} {dong[:600]}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 895,
+    "type": "Call",
+    "expr": "bang(len(van_tay) == mong - lap, f\"{ten} qua main → L8: {len(van_tay)} phần tử KHÁC NHAU (đặc tả: đúng {mong - lap})\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 896,
+    "type": "Compare",
+    "expr": "tru is not None"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 894,
+    "type": "BoolOp",
+    "expr": "rc == 0 and dem[0] - truoc == mong"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 895,
+    "type": "Compare",
+    "expr": "len(van_tay) == mong - lap"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 898,
+    "type": "Call",
+    "expr": "bang(not thieu, f\"{ten} qua main → L8: thiếu general category {thieu}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 899,
+    "type": "Call",
+    "expr": "bang(any(ord(c) > 0xFFFF for c in thay), f\"{ten} qua main → L8: không có ký tự ngoài BMP\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 894,
+    "type": "Compare",
+    "expr": "rc == 0"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 894,
+    "type": "Compare",
+    "expr": "dem[0] - truoc == mong"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 898,
+    "type": "UnaryOp",
+    "expr": "not thieu"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 899,
+    "type": "Call",
+    "expr": "any(ord(c) > 0xFFFF for c in thay)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 899,
+    "type": "Compare",
+    "expr": "ord(c) > 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "line": 888,
+    "type": "BoolOp",
+    "expr": "tru or ()"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 930,
+    "type": "For",
+    "expr": "for vt, gt, mong in o:\n        ky8(json.dumps({\"gate_output\": f\"measured — {ten}\"}), {ten: \"\\n\".join(d.format(gt if k == vt else goc[k]) for k, d in mau.items())}, 1,\n            f\"{vt} {gt!r}\", [f\"$.gate_output: danh_gia_khong_passed:{ten}:not_measured:{mong}\"])"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 927,
+    "type": "Call",
+    "expr": "bang(len(vu_tru) == 158 and len(set(vu_tru)) == 158 and not lech,\n         f\"vũ trụ ký tự lệch đặc tả: {len(vu_tru)} ký tự ({len(set(vu_tru))} khác nhau), category lệch {lech}, {len(ngoai) - len(bmp)} ngoài BMP\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 929,
+    "type": "Call",
+    "expr": "bang(len(o) == 648, f\"số ô lệch đặc tả: {len(o)} (đúng 648)\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 927,
+    "type": "BoolOp",
+    "expr": "len(vu_tru) == 158 and len(set(vu_tru)) == 158 and not lech"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 929,
+    "type": "Compare",
+    "expr": "len(o) == 648"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "IfExp",
+    "expr": "\"dau_tep_sai\" if c == \"\\n\" and vt == \"dau\" else \"dong_la\" if c == \"\\n\" or c == \"]\" and vt == \"nhan\" else \"cr_le\" if c == \"\\r\" else dung"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 925,
+    "type": "Compare",
+    "expr": "ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 926,
+    "type": "Compare",
+    "expr": "bmp.count(loai) != (loai != \"Cs\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 927,
+    "type": "Compare",
+    "expr": "len(vu_tru) == 158"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 927,
+    "type": "Compare",
+    "expr": "len(set(vu_tru)) == 158"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 927,
+    "type": "UnaryOp",
+    "expr": "not lech"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "BoolOp",
+    "expr": "c == \"\\n\" and vt == \"dau\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "IfExp",
+    "expr": "\"dong_la\" if c == \"\\n\" or c == \"]\" and vt == \"nhan\" else \"cr_le\" if c == \"\\r\" else dung"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 926,
+    "type": "Compare",
+    "expr": "loai != \"Cs\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "c == \"\\n\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "vt == \"dau\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "BoolOp",
+    "expr": "c == \"\\n\" or c == \"]\" and vt == \"nhan\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "IfExp",
+    "expr": "\"cr_le\" if c == \"\\r\" else dung"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "c == \"\\n\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "BoolOp",
+    "expr": "c == \"]\" and vt == \"nhan\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "c == \"\\r\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "c == \"]\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 915,
+    "type": "Compare",
+    "expr": "vt == \"nhan\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 931,
+    "type": "IfExp",
+    "expr": "gt if k == vt else goc[k]"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "line": 931,
+    "type": "Compare",
+    "expr": "k == vt"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "nap_sua",
+    "line": 955,
+    "type": "Call",
+    "expr": "bang(nguon.count(cu) == 1, f\"neo sửa phải xuất hiện ĐÚNG MỘT lần trong {ten}: {nguon.count(cu)} lần {cu!r}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "nap_sua",
+    "line": 955,
+    "type": "Compare",
+    "expr": "nguon.count(cu) == 1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 985,
+    "type": "For",
+    "expr": "for neo_sai in (\"\\x00\", \"import \"):   # neo xuất hiện 0 lần / nhiều lần: `nap_sua` phải ĐỎ bằng tín hiệu chốt, không sửa bừa\n        try:\n            nap_sua(\"land_evidence_nguon_test.py\", neo_sai, \"\")\n        except TinHieuChotCa:\n            continue\n        except Exception:   # noqa: S110 — sửa bừa rồi vỡ lúc nạp cũng là KHÔNG đỏ đúng chốt\n            pass\n        bang(False, f\"nap_sua nhận neo không xuất hiện đúng một lần: {neo_sai!r}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 994,
+    "type": "For",
+    "expr": "for ten, mod, gia, dau, so_o in [(\"nguyên vẹn\", None, goc, None, 648), *((t, None, g, d, 0 if d else 648) for t, g, d in bien),\n                                     (\"bản sao nguyên vẹn\", nap_sua(ten_b, o_roi, o_roi), goc, None, 648),\n                                     (\"c37 mất một ô rời\", nap_sua(ten_b, o_roi, \"\"), goc, \"số ô lệch đặc tả: 647 (đúng 648)\", 0),   # hai chiều của chốt 648\n                                     (\"c37 thừa một ô rời\", nap_sua(ten_b, o_roi, o_roi + \" \" + o_roi), goc, \"số ô lệch đặc tả: 649 (đúng 648)\", 0)]:\n        a._mau_loai_unicode, chay = gia, (mod.chay_ca if mod else chay_ca)\n        del o[:]\n        with mock.patch.dict((mod.CA if mod else CA)[c37].__globals__, {\"nap_a\": lambda _: a, \"ky8\": lambda *x, **k: o.append(1)}):\n            rc, dong = chay(c37)\n        bang((rc, dong, len(o)) == ((0, \"\", so_o) if dau is None else (3, f\"DO:{c37}:{dau}\", so_o)),\n             f\"{ten} mà c37 không {'XANH' if dau is None else 'ĐỎ đúng chốt'} với đúng {so_o} ô: rc={rc}, {len(o)} ô, {dong[:300]}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 984,
+    "type": "Call",
+    "expr": "bang(len(bien) == 29 + 9, f\"phải đủ 29 category và chín biến thể: {len(bien)}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 968,
+    "type": "BoolOp",
+    "expr": "nho.get(x) or nho.setdefault(x, that(*x))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 984,
+    "type": "Compare",
+    "expr": "len(bien) == 29 + 9"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 992,
+    "type": "Call",
+    "expr": "bang(False, f\"nap_sua nhận neo không xuất hiện đúng một lần: {neo_sai!r}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1002,
+    "type": "Call",
+    "expr": "bang((rc, dong, len(o)) == ((0, \"\", so_o) if dau is None else (3, f\"DO:{c37}:{dau}\", so_o)),\n             f\"{ten} mà c37 không {'XANH' if dau is None else 'ĐỎ đúng chốt'} với đúng {so_o} ô: rc={rc}, {len(o)} ô, {dong[:300]}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 974,
+    "type": "Compare",
+    "expr": "loai != \"Cs\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 998,
+    "type": "IfExp",
+    "expr": "mod.chay_ca if mod else chay_ca"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1002,
+    "type": "Compare",
+    "expr": "(rc, dong, len(o)) == ((0, \"\", so_o) if dau is None else (3, f\"DO:{c37}:{dau}\", so_o))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1002,
+    "type": "IfExp",
+    "expr": "(0, \"\", so_o) if dau is None else (3, f\"DO:{c37}:{dau}\", so_o)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "IfExp",
+    "expr": "(moi if len(moi) == 1 else next(d for d in goc(*x) if loai_cua(d) == moi)) if loai_cua(c) == cu and ord(c) <= 0xFFFF else c"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 994,
+    "type": "IfExp",
+    "expr": "0 if d else 648"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1002,
+    "type": "Compare",
+    "expr": "dau is None"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1003,
+    "type": "IfExp",
+    "expr": "'XANH' if dau is None else 'ĐỎ đúng chốt'"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "BoolOp",
+    "expr": "loai_cua(c) == cu and ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "IfExp",
+    "expr": "moi if len(moi) == 1 else next(d for d in goc(*x) if loai_cua(d) == moi)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 975,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 977,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1000,
+    "type": "IfExp",
+    "expr": "mod.CA if mod else CA"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 1003,
+    "type": "Compare",
+    "expr": "dau is None"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "Compare",
+    "expr": "loai_cua(c) == cu"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "Compare",
+    "expr": "ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "Compare",
+    "expr": "len(moi) == 1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 973,
+    "type": "BoolOp",
+    "expr": "loai_cua(c) != loai or ord(c) > 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 973,
+    "type": "Compare",
+    "expr": "loai_cua(c) != loai"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 973,
+    "type": "Compare",
+    "expr": "ord(c) > 0xFFFF"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 982,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 983,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c39_c37_do_khi_bo_sinh_lech_mien",
+    "line": 970,
+    "type": "Compare",
+    "expr": "loai_cua(d) == moi"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1021,
+    "type": "For",
+    "expr": "for tt, ten, a, dau, ky_vong in (\n            (\"a126\", \"nguyên vẹn\", goc_nap(ten_a), None, None),\n            (\"a126\", \"Mn thành ký tự Mc KHÁC\", voi_bo_sinh(lambda d: tuple(chr(0x93B) if loai_cua(c) == \"Mn\" else c for c in d)), a126 + \"thiếu general category ['Mn']\", None),\n            (\"a126\", \"ngoài BMP thành U+FFFF\", voi_bo_sinh(lambda d: (*d[:-1], chr(0xFFFF))), a126 + \"không có ký tự ngoài BMP\", None),\n            (\"a126\", \"ngoài BMP thành U+10000\", voi_bo_sinh(lambda d: (*d[:-1], chr(0x10000))), None, None),\n            (\"a126\", \"Mn thành bản sao Mc\", voi_bo_sinh(lambda d: tuple(next(x for x in d if loai_cua(x) == \"Mc\") if loai_cua(c) == \"Mn\" else c for c in d)),\n             a126 + \"51 phần tử KHÁC NHAU (đặc tả: đúng 52)\", None),\n            (\"a126\", \"một ô rời thành bản sao ô đầu\", nap_sua(ten_a, '        do(URL, DONG.replace(\"ubuntu-latest\", \"ubuntu-latest,win7\"), [])\\n', o_dau),\n             a126 + \"51 phần tử KHÁC NHAU (đặc tả: đúng 52)\", None),\n            (\"a126\", \"thêm một bản sao ô đầu\", nap_sua(ten_a, o_dau, o_dau * 2), a126 + \"53 phần tử (đặc tả: đúng 52), rc=0 \", None),\n            (\"a126\", \"nguyên vẹn, kỳ vọng gặp lại +1\", goc_nap(ten_a), a126 + \"52 phần tử KHÁC NHAU (đặc tả: đúng 51)\", lap_them),\n            (\"a129\", \"nguyên vẹn\", goc_nap(ten_a), None, None),\n            (\"a129\", \"bỏ Mn\", voi_bo_sinh(lambda d: tuple(c for c in d if loai_cua(c) != \"Mn\")), a129 + \"35 phần tử (đặc tả: đúng 36), rc=0 \", None),\n            (\"a129\", \"mất một ô cấu trúc\", nap_sua(ten_a, \"    kiem(dong + duoi, ten_goc)\\n\", \"\"), a129 + \"35 phần tử (đặc tả: đúng 36), rc=0 \", None),\n            (\"a129\", \"ô `khong khop` thành bản sao ô đầu\", nap_sua(ten_a, khong_khop, \"    kiem(dong, ten_goc)\\n\"), a129 + \"35 phần tử KHÁC NHAU (đặc tả: đúng 36)\", None)):\n        with mock.patch.dict(CA[c36].__globals__, {\"nap_a\": lambda t: a if t == ten_a else goc_nap(t), \"A_CA\": {tt: ky_vong or A_CA[tt]}}):\n            rc, dong = chay_ca(c36)\n        bang((rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{c36}:{dau}\")),\n             f\"bộ test đợt A {ten} ({tt}) mà c36 không {'XANH' if dau is None else 'ĐỎ đúng chốt'}: rc={rc} {dong[:300]}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1038,
+    "type": "Call",
+    "expr": "bang((rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{c36}:{dau}\")),\n             f\"bộ test đợt A {ten} ({tt}) mà c36 không {'XANH' if dau is None else 'ĐỎ đúng chốt'}: rc={rc} {dong[:300]}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1038,
+    "type": "Compare",
+    "expr": "(rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{c36}:{dau}\"))"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1038,
+    "type": "IfExp",
+    "expr": "(0, \"\") if dau is None else (3, f\"DO:{c36}:{dau}\")"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1038,
+    "type": "Compare",
+    "expr": "dau is None"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1039,
+    "type": "IfExp",
+    "expr": "'XANH' if dau is None else 'ĐỎ đúng chốt'"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1036,
+    "type": "IfExp",
+    "expr": "a if t == ten_a else goc_nap(t)"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1036,
+    "type": "BoolOp",
+    "expr": "ky_vong or A_CA[tt]"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1039,
+    "type": "Compare",
+    "expr": "dau is None"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1023,
+    "type": "IfExp",
+    "expr": "chr(0x93B) if loai_cua(c) == \"Mn\" else c"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1026,
+    "type": "IfExp",
+    "expr": "next(x for x in d if loai_cua(x) == \"Mc\") if loai_cua(c) == \"Mn\" else c"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1036,
+    "type": "Compare",
+    "expr": "t == ten_a"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1023,
+    "type": "Compare",
+    "expr": "loai_cua(c) == \"Mn\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1026,
+    "type": "Compare",
+    "expr": "loai_cua(c) == \"Mn\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1033,
+    "type": "Compare",
+    "expr": "loai_cua(c) != \"Mn\""
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1024,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1025,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/land_evidence_nguon_test.py",
+    "function": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "line": 1026,
+    "type": "Compare",
+    "expr": "loai_cua(x) == \"Mc\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1143,
+    "type": "For",
+    "expr": "for cam, bo_loai, so, vang in BO_SINH_MONG:\n        ra = tuple(bo_sinh(cam, bo_loai))\n        bmp = [category(c) for c in ra if ord(c) <= 0xFFFF]\n        lech = [ten for ten, dat in ((\"so_phan_tu\", len(ra) == so), (\"category_vang\", sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)),\n                                     (\"lap_category\", len(bmp) == len(set(bmp))), (\"thuoc_cam\", not any(c in cam for c in ra)),\n                                     (\"tu_0080\", all(ord(c) >= 0x80 for c in ra)),\n                                     (\"cuoi_ngoai_bmp\", bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1)) if not dat]\n        bang(not lech, f\"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}\")"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1150,
+    "type": "Call",
+    "expr": "bang(not lech, f\"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}\")"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1150,
+    "type": "UnaryOp",
+    "expr": "not lech"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1145,
+    "type": "Compare",
+    "expr": "ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "UnaryOp",
+    "expr": "not dat"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1146,
+    "type": "Compare",
+    "expr": "len(ra) == so"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1146,
+    "type": "Compare",
+    "expr": "sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1147,
+    "type": "Compare",
+    "expr": "len(bmp) == len(set(bmp))"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1147,
+    "type": "UnaryOp",
+    "expr": "not any(c in cam for c in ra)"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1148,
+    "type": "Call",
+    "expr": "all(ord(c) >= 0x80 for c in ra)"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "BoolOp",
+    "expr": "bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1147,
+    "type": "Call",
+    "expr": "any(c in cam for c in ra)"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "Call",
+    "expr": "bool(ra)"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "Compare",
+    "expr": "ord(ra[-1]) > 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "Compare",
+    "expr": "len(ra) - len(bmp) == 1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1148,
+    "type": "Compare",
+    "expr": "ord(c) >= 0x80"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1147,
+    "type": "Compare",
+    "expr": "c in cam"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "kiem_bo_sinh",
+    "line": 1149,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1168,
+    "type": "For",
+    "expr": "for ten, gia, dau in (\n        (\"that\", that, None),\n        (\"bo Mn\", lambda cam, bo=(): tuple(c for c in goc(cam, bo) if category(c) != \"Mn\"), \"('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']\"),\n        (\"bo ngoai BMP\", lambda cam, bo=(): goc(cam, bo)[:-1], \"('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']\"),\n        (\"bo loc cam\", lambda cam, bo=(): goc(\"\", bo), f\"({cam_3!r}, ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']\"),\n        (\"bo loc bo_loai\", lambda cam, bo=(): goc(cam), \"('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']\"),\n        (\"Mn thanh ban sao Mc\", lambda cam, bo=(): tuple(next(d for d in goc(cam, bo) if category(d) == \"Mc\") if category(c) == \"Mn\" else c\n                                                         for c in goc(cam, bo)), \"('—', ()) lệch đặc tả: ['category_vang', 'lap_category']\"),\n        (\"Lu thanh ASCII\", lambda cam, bo=(): tuple(\"A\" if category(c) == \"Lu\" and ord(c) <= 0xFFFF else c for c in goc(cam, bo)),\n         \"('—', ()) lệch đặc tả: ['tu_0080']\"),\n        # review mã lượt 2 (R2-01, đóng bằng bảng toán tử): mỗi chiều sai của từng mệnh đề một bộ sinh giả; hai phía biên U+007F/U+0080, U+FFFF/U+10000.\n        (\"rong\", lambda cam, bo=(): (), \"('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'cuoi_ngoai_bmp']\"),\n        (\"thua mot ngoai BMP\", lambda cam, bo=(): (*goc(cam, bo), \"𐐁\"), \"('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']\"),\n        (\"ngoai BMP len dau, cuoi la U+FFFF thay dai dien Cn\", lambda cam, bo=(): (goc(cam, bo)[-1], *(c for c in goc(cam, bo)[:-1] if category(c) != \"Cn\"), chr(0xFFFF)),\n         \"('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\"),\n        (\"Lu thanh U+007F\", lambda cam, bo=(): tuple(chr(0x7F) if category(c) == \"Lu\" and ord(c) <= 0xFFFF else c for c in goc(cam, bo)),\n         \"('—', ()) lệch đặc tả: ['category_vang', 'lap_category', 'tu_0080']\"),\n        (\"cuoi la U+10000\", lambda cam, bo=(): (*goc(cam, bo)[:-1], chr(0x10000)), None),\n    ):\n        with patch.dict(globals(), {\"_mau_loai_unicode\": gia}):\n            rc, dong = chay_ca(a135)\n        bang((rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{a135}:bộ sinh{dau}\")), f\"bộ sinh {ten}: rc={rc} {dong[:300]}\")"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1167,
+    "type": "BoolOp",
+    "expr": "nho.get((cam, tuple(bo))) or nho.setdefault((cam, tuple(bo)), that(cam, bo))"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1189,
+    "type": "Call",
+    "expr": "bang((rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{a135}:bộ sinh{dau}\")), f\"bộ sinh {ten}: rc={rc} {dong[:300]}\")"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1189,
+    "type": "Compare",
+    "expr": "(rc, dong) == ((0, \"\") if dau is None else (3, f\"DO:{a135}:bộ sinh{dau}\"))"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1189,
+    "type": "IfExp",
+    "expr": "(0, \"\") if dau is None else (3, f\"DO:{a135}:bộ sinh{dau}\")"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1189,
+    "type": "Compare",
+    "expr": "dau is None"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1171,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1174,
+    "type": "IfExp",
+    "expr": "next(d for d in goc(cam, bo) if category(d) == \"Mc\") if category(c) == \"Mn\" else c"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1176,
+    "type": "IfExp",
+    "expr": "\"A\" if category(c) == \"Lu\" and ord(c) <= 0xFFFF else c"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1181,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1183,
+    "type": "IfExp",
+    "expr": "chr(0x7F) if category(c) == \"Lu\" and ord(c) <= 0xFFFF else c"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1170,
+    "type": "Compare",
+    "expr": "category(c) != \"Mn\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1174,
+    "type": "Compare",
+    "expr": "category(c) == \"Mn\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1176,
+    "type": "BoolOp",
+    "expr": "category(c) == \"Lu\" and ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1183,
+    "type": "BoolOp",
+    "expr": "category(c) == \"Lu\" and ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1176,
+    "type": "Compare",
+    "expr": "category(c) == \"Lu\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1176,
+    "type": "Compare",
+    "expr": "ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1181,
+    "type": "Compare",
+    "expr": "category(c) != \"Cn\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1183,
+    "type": "Compare",
+    "expr": "category(c) == \"Lu\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1183,
+    "type": "Compare",
+    "expr": "ord(c) <= 0xFFFF"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1185,
+    "type": "UnaryOp",
+    "expr": "-1"
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1174,
+    "type": "Compare",
+    "expr": "category(d) == \"Mc\""
+  },
+  {
+    "file": "ops/gate_output_doi_chieu_test.py",
+    "function": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "line": 1181,
+    "type": "UnaryOp",
+    "expr": "-1"
+  }
+]

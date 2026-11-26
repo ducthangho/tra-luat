@@ -1,0 +1,3 @@
+{'probe': 'branch-always-true-a131', 'rc': 4, 'output': "HONG:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:TypeError: 'NoneType' object is not iterable"}
+{'probe': 'branch-always-true-c40', 'rc': 0, 'output': ''}
+{'probe': 'dev-table-with-c40-own-assert-removed', 'hang': 'SONG', 'ca': '', 'rc': 0, 'dong': ''}

@@ -1,0 +1,6 @@
+{'mutation': 'remove-constant-entry', 'index': 1, 'argument': ['—', ()], 'rc': 3, 'output': "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']"}
+{'mutation': 'remove-constant-entry', 'index': 2, 'argument': ['', ('Cs',)], 'rc': 3, 'output': "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc cam: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']"}
+{'mutation': 'remove-constant-entry', 'index': 3, 'argument': ['\n\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029 \t', ()], 'rc': 3, 'output': 'DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc cam: rc=0 '}
+{'mutation': 'remove-constant-entry', 'index': 4, 'argument': ['', ()], 'rc': 0, 'output': ''}
+{'mutation': 'remove-constant-entry', 'index': 5, 'argument': ['\r\n', ('Cs',)], 'rc': 0, 'output': ''}
+{'mutation': 'replace-fifth-with-second-keep-five', 'rc': 0, 'output': ''}

@@ -1,0 +1,29 @@
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'ky_tu_ngoai_ascii', 'line': 824, 'type': 'If', 'expr': 'if isinstance(x, bytes):\n        van = x.decode("utf-8", "ignore")\n        try:\n            x = [van, json.loads(van)]\n        except ValueError:\n            x = van'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'ky_tu_ngoai_ascii', 'line': 830, 'type': 'If', 'expr': 'if isinstance(x, str):\n        return {c for c in x if ord(c) > 127}'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'ky_tu_ngoai_ascii', 'line': 831, 'type': 'Compare', 'expr': 'ord(c) > 127'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'ky_tu_ngoai_ascii', 'line': 832, 'type': 'IfExp', 'expr': '[*x, *x.values()] if isinstance(x, dict) else x if isinstance(x, (list, tuple)) else ()'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'ky_tu_ngoai_ascii', 'line': 832, 'type': 'IfExp', 'expr': 'x if isinstance(x, (list, tuple)) else ()'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'nho_dem', 'line': 842, 'type': 'IfExp', 'expr': 'x if isinstance(x, (str, bytes)) else pickle.dumps(x)'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'nho_dem', 'line': 843, 'type': 'IfExp', 'expr': 'NHO_YAML[khoa] if khoa in NHO_YAML else NHO_YAML.setdefault(khoa, ham(x, **k))'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'nho_dem', 'line': 843, 'type': 'Compare', 'expr': 'khoa in NHO_YAML'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'nap_sua', 'line': 955, 'type': 'Call', 'expr': 'bang(nguon.count(cu) == 1, f"neo sửa phải xuất hiện ĐÚNG MỘT lần trong {ten}: {nguon.count(cu)} lần {cu!r}")'}
+{'file': 'ops/land_evidence_nguon_test.py', 'function': 'nap_sua', 'line': 955, 'type': 'Compare', 'expr': 'nguon.count(cu) == 1'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1143, 'type': 'For', 'expr': 'for cam, bo_loai, so, vang in BO_SINH_MONG:\n        ra = tuple(bo_sinh(cam, bo_loai))\n        bmp = [category(c) for c in ra if ord(c) <= 0xFFFF]\n        lech = [ten for ten, dat in (("so_phan_tu", len(ra) == so), ("category_vang", sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)),\n                                     ("lap_category", len(bmp) == len(set(bmp))), ("thuoc_cam", not any(c in cam for c in ra)),\n                                     ("tu_0080", all(ord(c) >= 0x80 for c in ra)),\n                                     ("cuoi_ngoai_bmp", bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1)) if not dat]\n        bang(not lech, f"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}")'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1150, 'type': 'Call', 'expr': 'bang(not lech, f"bộ sinh({cam!r}, {bo_loai!r}) lệch đặc tả: {lech}")'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1150, 'type': 'UnaryOp', 'expr': 'not lech'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1145, 'type': 'Compare', 'expr': 'ord(c) <= 0xFFFF'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'UnaryOp', 'expr': 'not dat'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1146, 'type': 'Compare', 'expr': 'len(ra) == so'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1146, 'type': 'Compare', 'expr': 'sorted(set(LOAI_UNICODE) - set(bmp)) == sorted(vang)'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1147, 'type': 'Compare', 'expr': 'len(bmp) == len(set(bmp))'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1147, 'type': 'UnaryOp', 'expr': 'not any(c in cam for c in ra)'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1148, 'type': 'Call', 'expr': 'all(ord(c) >= 0x80 for c in ra)'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'BoolOp', 'expr': 'bool(ra) and ord(ra[-1]) > 0xFFFF and len(ra) - len(bmp) == 1'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1147, 'type': 'Call', 'expr': 'any(c in cam for c in ra)'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'Call', 'expr': 'bool(ra)'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'Compare', 'expr': 'ord(ra[-1]) > 0xFFFF'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'Compare', 'expr': 'len(ra) - len(bmp) == 1'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1148, 'type': 'Compare', 'expr': 'ord(c) >= 0x80'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1147, 'type': 'Compare', 'expr': 'c in cam'}
+{'file': 'ops/gate_output_doi_chieu_test.py', 'function': 'kiem_bo_sinh', 'line': 1149, 'type': 'UnaryOp', 'expr': '-1'}
+{'c37.tong/le': True, 'c37.khac_nhau/ge': True, 'a135.lap_category/le': True, 'a135.cuoi.duy_nhat/le': True}

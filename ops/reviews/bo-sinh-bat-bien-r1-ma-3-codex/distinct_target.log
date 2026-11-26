@@ -1,0 +1,4 @@
+{'case': 'a126', 'guard': 'guard-present', 'rc': 3, 'output': 'DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử KHÁC NHAU (đặc tả: đúng 52)'}
+{'case': 'a126', 'guard': 'guard-removed', 'rc': 0, 'output': ''}
+{'case': 'a129', 'guard': 'guard-present', 'rc': 3, 'output': 'DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử KHÁC NHAU (đặc tả: đúng 36)'}
+{'case': 'a129', 'guard': 'guard-removed', 'rc': 0, 'output': ''}

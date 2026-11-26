@@ -1,0 +1,7 @@
+cached (0, '') (0, '') L8 inputs 8955 cache 3619
+uncached (0, '') (0, '') L8 inputs 8955 cache 0
+exact input and result equality True True
+{'one_byte_different': True, 'first': {'a': [1, 9]}, 'reread': {'a': [1]}, 'other': {'a': [2]}, 'underlying_calls': 2, 'name_separated': True, 'kwargs_values': [{'z': 1}, {'z': 2}], 'out_of_actual_domain_type_collision': {'cached': 'a: 1\n', 'actual': '!!binary |\n  gASVCgAAAAAAAAB9lIwBYZRLAXMu\n', 'different': True}}
+a136 cached (0, '')
+a136 uncached (0, '')
+{'first_rc': 0, 'second_rc': 0, 'one_byte_arguments_have_distinct_keys': True, 'cache_size_before': 5, 'tuple_result': True, 'cannot_mutate_result': True, 'fresh_dictionary_per_call': True, 'keys_argument_inventory': ["('—', ())", "('', ())", "('', ('Cs',))", "('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ())", "('\\r\\n', ('Cs',))", "('X', ())", "('Y', ())"]}

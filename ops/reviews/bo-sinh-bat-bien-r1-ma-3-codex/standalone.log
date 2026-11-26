@@ -1,0 +1,1 @@
+{'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py', '--mot-ca', 'c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a'], 'rc': 0, 'stdout': '\n', 'stderr': '', 'seconds': 45.45995831900018}

@@ -1,0 +1,11 @@
+{'name': 'probes', 'command': ['/usr/local/bin/python3', '-B', 'probes.py'], 'rc': 0, 'seconds': 33.59175012800006}
+{'name': 'tool_audit', 'command': ['/usr/local/bin/python3', '-B', 'tool_audit.py'], 'rc': 0, 'seconds': 53.0660424040002}
+{'name': 'excess_probe', 'command': ['/usr/local/bin/python3', '-B', 'excess_probe.py'], 'rc': 0, 'seconds': 45.95407851300001}
+{'name': 'distinct_target', 'command': ['/usr/local/bin/python3', '-B', 'distinct_target.py'], 'rc': 0, 'seconds': 19.067692613999952}
+{'name': 'table', 'command': ['/usr/local/bin/python3', '-B', 'bang_toan_tu.py', '--goc', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l3/work/head', '--ra', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l3/work/table', '--song-song', '3'], 'rc': 0, 'seconds': 111.77485226500016}
+{'name': 'guard_witnesses', 'command': ['/usr/local/bin/python3', '-B', 'guard_witnesses.py'], 'rc': 0, 'seconds': 19.069755536999992}
+{'name': 'b02_targeted', 'command': ['/usr/local/bin/python3', '-B', 'b02_targeted.py'], 'rc': 0, 'seconds': 37.03496374300016}
+{'name': 'independent', 'command': ['/usr/local/bin/python3', '-B', 'independent.py'], 'rc': 0, 'seconds': 134.2189946640001}
+{'name': 'trace_v2', 'command': ['/usr/local/bin/python3', '-B', 'trace_v2.py'], 'rc': 0, 'seconds': 51.67492046999996}
+{'name': 'count_audit', 'command': ['/usr/local/bin/python3', '-B', 'count_audit.py'], 'rc': 0, 'seconds': 28.730656286000112}
+{'name': 'cache_review', 'command': ['/usr/local/bin/python3', '-B', 'cache_review.py'], 'rc': 0, 'seconds': 395.32766782199997}

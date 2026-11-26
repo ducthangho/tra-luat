@@ -1,0 +1,54 @@
+{
+  "base": {
+    "failed_ids": [
+      "r973_bootstrap_khong_kiem_khoa",
+      "r973_bootstrap_ba_trang_thai",
+      "r973_bootstrap_require_agent_creds",
+      "r973_bootstrap_giu_auth_json_moi_hon",
+      "r973_bootstrap_last_refresh_hong_khong_pha",
+      "r973_bootstrap_auth_json_nguyen_tu",
+      "r973_bootstrap_sai_dinh_dang_khong_nap",
+      "r973_bootstrap_khong_export_khong_ghi_gemini",
+      "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "r268_l2_trichotomy_theo_trang_thai_object",
+      "wp433_gws_cred_dich_ngoai_kho",
+      "wp433_gws_cred_dich_ngoai_kho_b",
+      "wp433_gws_cred_no",
+      "wp433_gws_cred_win_reparse",
+      "wp433_nlm_gws_dich_ngoai_kho",
+      "wp727_tl_gws_refresh"
+    ],
+    "passed": 1773,
+    "total": 1789,
+    "status": "failed",
+    "log": "base-selftest.log"
+  },
+  "head": {
+    "failed_ids": [
+      "r973_bootstrap_khong_kiem_khoa",
+      "r973_bootstrap_ba_trang_thai",
+      "r973_bootstrap_require_agent_creds",
+      "r973_bootstrap_giu_auth_json_moi_hon",
+      "r973_bootstrap_last_refresh_hong_khong_pha",
+      "r973_bootstrap_auth_json_nguyen_tu",
+      "r973_bootstrap_sai_dinh_dang_khong_nap",
+      "r973_bootstrap_khong_export_khong_ghi_gemini",
+      "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "r268_l2_trichotomy_theo_trang_thai_object",
+      "wp433_gws_cred_dich_ngoai_kho",
+      "wp433_gws_cred_dich_ngoai_kho_b",
+      "wp433_gws_cred_no",
+      "wp433_gws_cred_win_reparse",
+      "wp433_nlm_gws_dich_ngoai_kho",
+      "wp727_tl_gws_refresh"
+    ],
+    "passed": 1773,
+    "total": 1789,
+    "status": "failed",
+    "log": "head-selftest.log"
+  },
+  "new_failures": [],
+  "resolved": [],
+  "delta": 0,
+  "same_failure_set": true
+}

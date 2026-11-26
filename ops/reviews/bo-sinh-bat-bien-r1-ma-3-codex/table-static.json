@@ -1,0 +1,758 @@
+[
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+    "op": "or",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.category  `not thieu`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.category  `not thieu`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.category  `not thieu`",
+    "op": "yeu",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+    "op": "yeu",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.cong_thuc  `... - len(tru or ()) + 1`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c36.cong_thuc  `... - len(tru or ()) + 1`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.tong  `len(vu_tru) == 158`",
+    "op": "or",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+    "op": "or",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.category  `not lech`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.category  `not lech`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+    "op": "gt",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+    "op": "lt",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.phan_bo_sinh  `vu_tru[128:]`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.phan_bo_sinh  `vu_tru[128:]`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "c37.so_o  `len(o) == 648`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.so_phan_tu  `len(ra) == so`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+    "op": "yeu",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+    "op": "yeu",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "yeu",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.khong_rong  `bool(ra)`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.khong_rong  `bool(ra)`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.khong_rong  `bool(ra)`",
+    "op": "or",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+    "op": "or",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "ge",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "le",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "ne",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "cong1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "tru1",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.gom  `if not dat` / `bang(not lech`",
+    "op": "dao",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  },
+  {
+    "id": "a135.gom  `if not dat` / `bang(not lech`",
+    "op": "bo",
+    "anchor_count": 1,
+    "different": true,
+    "syntax_valid": true
+  }
+]

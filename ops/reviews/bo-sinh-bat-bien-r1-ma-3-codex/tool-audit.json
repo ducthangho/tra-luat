@@ -1,0 +1,55 @@
+[
+  {
+    "label": "comment-survives",
+    "cu": "# #1539: MIỀN",
+    "moi": "# reviewer comment #1539: MIỀN",
+    "hang": "SONG",
+    "ca": "",
+    "rc": 0,
+    "dong": ""
+  },
+  {
+    "label": "syntax-error",
+    "cu": "def kiem_bo_sinh(bo_sinh):",
+    "moi": "def kiem_bo_sinh(bo_sinh) BROKEN:",
+    "hang": "HONG",
+    "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 1,
+    "dong": ""
+  },
+  {
+    "label": "outer-TypeError",
+    "cu": "    that, a135, cam_3, nho =",
+    "moi": "    raise TypeError(\"REVIEW_INJECTED_OUTER\")\n    that, a135, cam_3, nho =",
+    "hang": "HONG",
+    "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 4,
+    "dong": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: REVIEW_INJECTED_OUTER"
+  },
+  {
+    "label": "inner-TypeError",
+    "cu": "    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+    "moi": "    raise TypeError(\"REVIEW_INJECTED_INNER\")\n    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+    "hang": "GIET",
+    "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 3,
+    "dong": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh that: rc=4 HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: REVIEW_INJECTED_INNER"
+  },
+  {
+    "label": "wrong-case-DO",
+    "cu": "def chay_ca(ten):\n",
+    "moi": "def chay_ca(ten):\n    return 3, \"DO:UNRELATED:injected\"\n",
+    "hang": "HONG",
+    "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 3,
+    "dong": "DO:UNRELATED:injected"
+  },
+  {
+    "label": "main-live",
+    "rc": 1
+  },
+  {
+    "label": "main-error",
+    "rc": 1
+  }
+]

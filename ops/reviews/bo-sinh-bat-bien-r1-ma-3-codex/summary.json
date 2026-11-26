@@ -1,0 +1,260 @@
+{
+  "table": {
+    "counts": {
+      "GIET": 104,
+      "TUONG_DUONG": 4,
+      "SONG": 0,
+      "HONG": 0
+    },
+    "cells": 108,
+    "matches": 108,
+    "differences": [],
+    "baseline": {
+      "c39_c37_do_khi_bo_sinh_lech_mien": [
+        0,
+        ""
+      ],
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o": [
+        0,
+        ""
+      ],
+      "c38_c36_do_khi_bang_cua_dot_a_mat_ca": [
+        0,
+        ""
+      ],
+      "a136_a135_do_khi_bo_sinh_lech_mien": [
+        0,
+        ""
+      ]
+    },
+    "nested_error_kills": [
+      {
+        "id": "a135.cuoi.khong_rong  `bool(ra)`",
+        "op": "bo",
+        "dong": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh rong: rc=4 HONG:a135_bo_sinh_dung_mien_dac_ta:IndexError: tuple index out of range"
+      }
+    ]
+  },
+  "trace": {
+    "c39_c37_do_khi_bo_sinh_lech_mien": {
+      "calls": 42,
+      "rc": {
+        "0": 3,
+        "3": 39
+      },
+      "valid_DO": true
+    },
+    "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o": {
+      "calls": 24,
+      "rc": {
+        "0": 15,
+        "3": 9
+      },
+      "valid_DO": true
+    },
+    "a136_a135_do_khi_bo_sinh_lech_mien": {
+      "calls": 12,
+      "rc": {
+        "0": 2,
+        "3": 10
+      },
+      "valid_DO": true
+    },
+    "c38_c36_do_khi_bang_cua_dot_a_mat_ca": {
+      "calls": 24,
+      "rc": {
+        "3": 24
+      },
+      "valid_DO": true
+    }
+  },
+  "c39_line_events": {
+    "1296": 3,
+    "0": 39
+  },
+  "loops": {
+    "648": 3,
+    "0": 39
+  },
+  "cache": {
+    "modes": [
+      {
+        "mode": "cached",
+        "c36": [
+          0,
+          ""
+        ],
+        "c40": [
+          0,
+          ""
+        ],
+        "cache_size": 3619
+      },
+      {
+        "mode": "uncached",
+        "c36": [
+          0,
+          ""
+        ],
+        "c40": [
+          0,
+          ""
+        ],
+        "cache_size": 0
+      }
+    ],
+    "identical_calls": true,
+    "identical_A_results": true,
+    "inputs": 8955
+  },
+  "a136_cache_equal": true,
+  "base_selftest": {
+    "totals": [
+      "== tl selftest 1773/1789 =="
+    ],
+    "failed_lines": [
+      "  [OK] r180_thang_hc_noi_nhan_ds_co_FAIL",
+      "  [OK] r180_thang_hc_noi_nhan_tu_co_FAIL",
+      "  [OK] r180_thang_hc_ten_loai_co_FAIL",
+      "  [OK] r180_thang_hc_dia_danh_kieu_FAIL",
+      "  [OK] r180_thang_dang_the_loai_co_FAIL",
+      "  [OK] r180_thang_dang_dia_danh_co_FAIL",
+      "  [OK] r180_thang_dang_so_ky_hieu_co_FAIL",
+      "  [OK] r180_thang_dang_dia_danh_kieu_FAIL",
+      "  [FAIL] r973_bootstrap_khong_kiem_khoa",
+      "  [FAIL] r973_bootstrap_ba_trang_thai",
+      "  [FAIL] r973_bootstrap_require_agent_creds",
+      "  [FAIL] r973_bootstrap_giu_auth_json_moi_hon",
+      "  [FAIL] r973_bootstrap_last_refresh_hong_khong_pha",
+      "  [FAIL] r973_bootstrap_auth_json_nguyen_tu",
+      "  [FAIL] r973_bootstrap_sai_dinh_dang_khong_nap",
+      "  [FAIL] r973_bootstrap_khong_export_khong_ghi_gemini",
+      "  [FAIL] r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "  [FAIL] r268_l2_trichotomy_theo_trang_thai_object",
+      "  [FAIL] wp433_gws_cred_dich_ngoai_kho",
+      "  [FAIL] wp433_gws_cred_dich_ngoai_kho_b",
+      "  [FAIL] wp433_gws_cred_no",
+      "  [FAIL] wp433_gws_cred_win_reparse",
+      "  [FAIL] wp433_nlm_gws_dich_ngoai_kho",
+      "  [FAIL] wp727_tl_gws_refresh"
+    ]
+  },
+  "head_selftest": {
+    "totals": [
+      "== tl selftest 1773/1789 =="
+    ],
+    "failed_lines": [
+      "  [OK] r180_thang_hc_noi_nhan_ds_co_FAIL",
+      "  [OK] r180_thang_hc_noi_nhan_tu_co_FAIL",
+      "  [OK] r180_thang_hc_ten_loai_co_FAIL",
+      "  [OK] r180_thang_hc_dia_danh_kieu_FAIL",
+      "  [OK] r180_thang_dang_the_loai_co_FAIL",
+      "  [OK] r180_thang_dang_dia_danh_co_FAIL",
+      "  [OK] r180_thang_dang_so_ky_hieu_co_FAIL",
+      "  [OK] r180_thang_dang_dia_danh_kieu_FAIL",
+      "  [FAIL] r973_bootstrap_khong_kiem_khoa",
+      "  [FAIL] r973_bootstrap_ba_trang_thai",
+      "  [FAIL] r973_bootstrap_require_agent_creds",
+      "  [FAIL] r973_bootstrap_giu_auth_json_moi_hon",
+      "  [FAIL] r973_bootstrap_last_refresh_hong_khong_pha",
+      "  [FAIL] r973_bootstrap_auth_json_nguyen_tu",
+      "  [FAIL] r973_bootstrap_sai_dinh_dang_khong_nap",
+      "  [FAIL] r973_bootstrap_khong_export_khong_ghi_gemini",
+      "  [FAIL] r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "  [FAIL] r268_l2_trichotomy_theo_trang_thai_object",
+      "  [FAIL] wp433_gws_cred_dich_ngoai_kho",
+      "  [FAIL] wp433_gws_cred_dich_ngoai_kho_b",
+      "  [FAIL] wp433_gws_cred_no",
+      "  [FAIL] wp433_gws_cred_win_reparse",
+      "  [FAIL] wp433_nlm_gws_dich_ngoai_kho",
+      "  [FAIL] wp727_tl_gws_refresh"
+    ]
+  },
+  "independent": [
+    {
+      "id": "a135-final-remove",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "a135-final-invert",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "c36-domain-invert",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "c36-skip-domain",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "c36-ascii-boundary",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "a135-lower-plus2",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "a135-last-index",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "c37-subset-reverse",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "c36-unique-minus2",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "a135-omit-fourth",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "a135-omit-fifth",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "a135-first-call-only",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "c40-remove-own-assert",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "yaml-hit-test-negated",
+      "rc": 3,
+      "classification": "GIET"
+    },
+    {
+      "id": "yaml-deepcopy-remove",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "a129-replace-unique-cell",
+      "rc": 0,
+      "classification": "SONG"
+    },
+    {
+      "id": "a129-replace-unique-cell-L8",
+      "rc": 0,
+      "classification": null
+    }
+  ]
+}

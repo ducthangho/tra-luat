@@ -1,0 +1,8 @@
+START head-B-sample2
+{'label': 'head-B-sample2', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'rc': 0, 'seconds': 327.3798349589997}
+START base-B-sample2
+{'label': 'base-B-sample2', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'rc': 0, 'seconds': 339.09280211899977}
+START head-A-sample2
+{'label': 'head-A-sample2', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'rc': 0, 'seconds': 355.486688857}
+START base-A-sample2
+{'label': 'base-A-sample2', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'rc': 0, 'seconds': 341.79962057600005}

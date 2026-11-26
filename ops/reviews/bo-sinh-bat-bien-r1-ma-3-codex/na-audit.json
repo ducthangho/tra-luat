@@ -1,0 +1,872 @@
+[
+  {
+    "id": "c36.so_phan_tu",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.so_phan_tu",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.so_phan_tu",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.so_phan_tu",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.khac_nhau",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.khac_nhau",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.khac_nhau",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.khac_nhau",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.khac_nhau",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.category",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.ngoai_bmp",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.ngoai_bmp",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.ngoai_bmp",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.ngoai_bmp",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.ngoai_bmp",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "bo",
+    "reason": "Hàng là công thức số hoặc lát cắt; xóa toàn biểu thức cần chọn giá trị thay, không phải bỏ một mệnh đề Boolean.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c36.cong_thuc",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.tong",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.tong",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.tong",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.tong",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.khac_nhau",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.khac_nhau",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.khac_nhau",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.khac_nhau",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.category",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.lech",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.bien_bmp",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "bo",
+    "reason": "Hàng là công thức số hoặc lát cắt; xóa toàn biểu thức cần chọn giá trị thay, không phải bỏ một mệnh đề Boolean.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.phan_bo_sinh",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.so_o",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.so_o",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.so_o",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.so_o",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "c37.so_o",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "nap_sua.neo",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "nap_sua.neo",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "nap_sua.neo",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "nap_sua.neo",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "nap_sua.neo",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.so_phan_tu",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.so_phan_tu",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.so_phan_tu",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.so_phan_tu",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.so_phan_tu",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.category_vang",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.lap_category",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.thuoc_cam",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.tu_0080",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.tu_0080",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.tu_0080",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.tu_0080",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.tu_0080",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.khong_rong",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.vi_tri",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.vi_tri",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.vi_tri",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.vi_tri",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.vi_tri",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.duy_nhat",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.duy_nhat",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.duy_nhat",
+    "op": "dao",
+    "reason": "Phép đảo == đã có ne; hoặc hàng là công thức/lát cắt không có Boolean để đảo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.duy_nhat",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.cuoi.duy_nhat",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.bien_bmp",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "ge",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "le",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "ne",
+    "reason": "Không có == mục tiêu cho họ này; phép đảo/biên của predicate khác đã nằm ở dao hoặc biến thể biên.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "gt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "lt",
+    "reason": "Họ gt/lt trong tập cố định chỉ tách hai chiều của !=; hàng này không có != mục tiêu.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "cong1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "tru1",
+    "reason": "Không có hằng số số học mục tiêu; tên category/tập dữ liệu không phải hằng số để +1/-1.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "or",
+    "reason": "Không có and tại hàng này; nếu là vế cuối, cùng and được đo ở hàng vế trước.",
+    "review": "accepted_with_scope_above"
+  },
+  {
+    "id": "a135.gom",
+    "op": "yeu",
+    "reason": "Không có lượng từ any/all hoặc quan hệ chứa mục tiêu; not-lech của c37 biểu diễn đếm multiplicity, phép xóa nó ở bo.",
+    "review": "accepted_with_scope_above"
+  }
+]

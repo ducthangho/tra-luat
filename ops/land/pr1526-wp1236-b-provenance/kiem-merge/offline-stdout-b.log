@@ -1,0 +1,7 @@
+Đã ghi [VERDICT.json](../work/VERDICT.json) và [VERDICT.md](../work/VERDICT.md), kiểm schema **HOP_LE**.
+
+HEAD `bca55c1cd09c57180d60b05d5ca1813828ae1d10` không đổi; checkout giữ nguyên. Đạt 38/38 ca, 145/145 đột biến, cổng cây thật, Ruff và diff-check. Không phát hiện finding mới.
+
+B01 đã đóng; B02 được miễn theo trích dẫn điều phối neo đúng SHA. Tôi không tự xác minh tác giả comment trên GitHub.
+
+KET_LUAN: approve

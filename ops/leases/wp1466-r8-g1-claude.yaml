@@ -10,6 +10,7 @@ revision: 8
 generation: 1
 lease_id: wp1466-r8-g1-claude
 thay_the_cho: []
+da_bi_thay_the: wp1466-r9-g2-claude
 thay_the_cho_ghi_chu: 'Lease dau tien cua wp1466; khong co lease truoc cho write set nay (ai-dang-giu NGUOI_GIU 0 tren ca 4 duong dan luc 2026-11-26T09:39Z)'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7188435673

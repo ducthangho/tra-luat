@@ -100,6 +100,8 @@
 - r40 (sau review offline lượt 39, đặc tả `ops/specs/llm-khoan-docx-r40.md`): đường thô chặn mọi mở đầu dạng nhãn nhiều vế (mọi số
   vế, gạch dài, `là` trong ngoặc không thoát); locator ZIP64 kiểm ở vị trí tuyệt đối; bộ chạy `tl extract` một hạn chót, qua hạn
   không nhận; hướng dẫn tách quy tắc `pStyle`/`rStyle`/`basedOn`.
+- r41 (sau review offline lượt 40, đặc tả `ops/specs/llm-khoan-docx-r41.md`): đường thô quét TOÀN phần đầu khoản (tới từ nối "là")
+  để chặn nhãn nhiều vế kể cả khi bọc nháy/ngoặc; lỗi mở ZIP quy về rc 2; `tl extract` quá hạn thu hồi cả nhóm tiến trình (POSIX).
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -12,6 +12,7 @@ Dòng tổng (sổ đăng ký CI): `llm_route tests: N/N ca QUA · M/M dot bien 
 from __future__ import annotations
 
 import contextlib
+import os
 import importlib.util
 import json
 import re
@@ -1944,12 +1945,16 @@ def ca_r35_lop_loi(m):
               "Hồ sơ gốc. Dữ liệu là b.", "đ e) Dữ liệu là b.", "1 a. Dữ liệu là b.",
               # r40 (lượt 39): mọi số vế/độ dài vế với gạch; gạch dài; `là` trong ngoặc/nháy mở hay dính dấu kết không thoát.
               "ab cd ef gh - Dữ liệu là b.", "abcd efgh - Dữ liệu là b.", "ab c — Dữ liệu là b.", "(là a) Dữ liệu là b.",
-              "ab là. Dữ liệu là b.", "“ab c) Dữ” liệu là b.", "Phát triển kinh tế - xã hội là mục tiêu."):
+              "ab là. Dữ liệu là b.", "“ab c) Dữ” liệu là b.", "Phát triển kinh tế - xã hội là mục tiêu.",
+              # r41 (lượt 40): dấu kết SAU cụm đóng cân (nháy thẳng/cong, ngoặc), `là` + đệm + dấu kết, dấu kết TRONG nháy đầu thân.
+              "ab (c). Dữ liệu là b.", "“ab c”. Dữ liệu là b.", '"ab c". Dữ liệu là b.', "ab là . Dữ liệu là b.",
+              "“ab c. Dữ” liệu là b.", "ab c - “Dữ liệu” là b."):
         bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"r39 mo dau nhieu ve lot (co so): {L!r}")
         bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"r39 mo dau nhieu ve lot (mat so): {L!r}")
     for than in ("Quy trình là cách làm.", "“Hồ sơ” là tài liệu.", "Ban hành là công bố.", "HỒ SƠ là tài liệu.",
                  "Quy chuẩn kỹ thuật quốc gia (QCVN) là văn bản.",
-                 "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu.", "Hồ sơ là tài liệu gốc. Bản sao không dùng."):
+                 "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu.", "Hồ sơ là tài liệu gốc. Bản sao không dùng.",
+                 "Thư e-mail là thư.", "Hồ sơ, tài liệu là x.", "“Hồ sơ (bản chính)” là x."):
         bang(tach(f"Điều 3.\n1. {than}\n2. Dữ liệu là thông tin.") == [(1, than), (2, "Dữ liệu là thông tin.")],
              f"so khoan + than hop le bi chan oan: {than!r}")
         bang(tach(f"Điều 3.\n{than}\nDữ liệu là thông tin.") == [(None, than), (None, "Dữ liệu là thông tin.")],
@@ -2025,6 +2030,68 @@ def ca_r35_lop_loi(m):
             pass
     finally:
         m.subprocess.Popen = _popen
+    # r41 (lượt 40): lỗi luồng đọc ở STDERR (đối xứng stdout); thời gian chờ `join` kẹp theo phần còn lại (luồng giả ghi nhận).
+    import threading as _th41
+    _popen41, _thread41 = m.subprocess.Popen, _th41.Thread
+    try:
+        m.subprocess.Popen = _P
+
+        class _PE(_P):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                self.stdout, self.stderr = _Ong([]), _Ong([b"e"], OSError("hong"))
+        m.subprocess.Popen, _P.ngu = _PE, 0
+        try:
+            m._chay_gioi_han(["x"], tran=100, timeout=5)
+            raise TinHieuChotCa("loi doc stderr bi nuot")
+        except ValueError:
+            pass
+        _cho41 = []
+
+        class _T:
+            def __init__(self, *a, **k):
+                pass
+
+            def start(self):
+                pass
+
+            def is_alive(self):
+                return True
+
+            def join(self, t=None):
+                _cho41.append(t)
+                _tg.sleep(t or 0)
+        m.subprocess.Popen, _P.ra, _th41.Thread = _P, (lambda: _Ong([])), _T
+        try:
+            m._chay_gioi_han(["x"], tran=10, timeout=0.01)
+        except _sp39.TimeoutExpired:
+            pass
+        bang(_cho41 and max(x for x in _cho41[:-2] or [0]) <= 0.011, f"join khong kep theo phan con lai: {_cho41[:4]}")
+    finally:
+        m.subprocess.Popen, _th41.Thread = _popen41, _thread41
+    # r41 (lượt 40): CHÁU giữ bản sao ống ⇒ quá hạn phải thu hồi CẢ NHÓM tiến trình (POSIX) — cháu không được sống sót.
+    if os.name != "nt":
+        import tempfile as _tf41
+        with _tf41.TemporaryDirectory() as _d41:
+            _pf = os.path.join(_d41, "pid")
+            _ma = ("import subprocess, sys; g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)']); "
+                   f"open({_pf!r}, 'w').write(str(g.pid))")
+            _t0 = _tg.monotonic()
+            try:
+                m._chay_gioi_han([sys.executable, "-c", _ma], tran=1000, timeout=2)
+            except _sp39.TimeoutExpired:
+                pass
+            bang(_tg.monotonic() - _t0 < 15, "thu hoi chau giu ong khong co han")
+            _pid = int(open(_pf).read())
+            _tg.sleep(0.3)
+            try:
+                _st = open(f"/proc/{_pid}/stat").read().split(")")[-1].split()[0]
+            except OSError:
+                _st = "X"
+            if _st not in ("Z", "X"):
+                with contextlib.suppress(Exception):
+                    os.kill(_pid, 9)
+                raise TinHieuChotCa(f"chau giu ong con song sau thu hoi (trang thai {_st})")
     # r38 (lượt 37): bộ chạy `tl extract` đọc ống THEO KHỐI có trần — vượt ⇒ giết tiến trình + ValueError; trong hạn ⇒ trả đủ.
     _ok = m._chay_gioi_han([sys.executable, "-c", "import sys; sys.stdout.write('x' * 1000); sys.stderr.write('e')"], tran=5000)
     bang(_ok.returncode == 0 and _ok.stdout == "x" * 1000 and _ok.stderr == "e", f"chay gioi han sai ket qua: {_ok!r}"[:120])
@@ -2074,7 +2141,7 @@ def ca_r35_lop_loi(m):
     _goi5 = lam_docx(H, A, B, them={f"x{i}.xml": "<a/>" for i in range(3)})
     _cu_z, _cu_n = m.zipfile.ZipFile, m._TRAN_MEMBER
 
-    class _ChuaDuocGoi(RuntimeError):
+    class _ChuaDuocGoi(Exception):   # r41: KHÔNG thuộc nhóm lỗi zipfile được chuẩn hoá — gọi sớm phải lộ ra
         pass
 
     def _stub(*a, **k):
@@ -2096,6 +2163,29 @@ def ca_r35_lop_loi(m):
     _g[_ie + 12:_ie + 16] = (int.from_bytes(_g[_ie + 12:_ie + 16], "little") + 20).to_bytes(4, "little")
     _g[_ie:_ie] = b"PK\x06\x07" + bytes(16)
     chan(bytes(_g), "locator ZIP64 che trong comment ban ghi")
+    # r41 (lượt 40): locator ZIP64 NGOÀI cửa sổ đuôi (comment EOCD dài) — chốt vị trí tuyệt đối phải chặn TRƯỚC `ZipFile`.
+    _g2 = bytearray(_g)
+    _ie2 = bytes(_g2).rfind(b"PK\x05\x06")
+    _g2[_ie2 + 20:_ie2 + 22] = (65535).to_bytes(2, "little")
+    _g2 += b"c" * 65535
+    m.zipfile.ZipFile = _stub
+    try:
+        chan(bytes(_g2), "locator ZIP64 ngoai cua so duoi")
+    finally:
+        m.zipfile.ZipFile = _cu_z
+    # r41 (lượt 40): lỗi MỞ MEMBER của zipfile (kiểu nén lạ ⇒ NotImplementedError; member mã hoá ⇒ RuntimeError) ⇒ ValueError.
+    _goc = lam_docx(H, A, B)
+    for _ten, _vt, _gt in (("kieu nen la", 8, (99).to_bytes(2, "little")), ("member ma hoa", 6, (1).to_bytes(2, "little"))):
+        _h = bytearray(_goc)
+        for _sig, _lech in ((b"PK\x03\x04", 0), (b"PK\x01\x02", 2)):
+            _k = 0
+            while True:
+                _k = bytes(_h).find(_sig, _k)
+                if _k < 0:
+                    break
+                _h[_k + _vt + _lech:_k + _vt + _lech + 2] = _gt
+                _k += 4
+        chan(bytes(_h), f"loi mo member ZIP ({_ten})")
     # r36 (lượt 36): chuỗi `basedOn` dài dùng chung bởi nhiều đoạn — phân giải có nhớ, không bậc hai.
     _n = 2500
     _st = "".join(f'<w:style w:type="paragraph" w:styleId="S{i}">' + (f'<w:basedOn w:val="S{i - 1}"/>' if i else "") + "</w:style>"
@@ -2161,16 +2251,24 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 
 DOT_BIEN = [
+    # r41 (lượt 40): mỗi chốt một đột biến.
+    ('wp1525_nhieu_ve_ngoac_dau_khong_tinh', ('            if sau == 0:\n                nhom_dau = not co_tu\n            sau += 1', '            sau += 1'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_trich_khong_soi', ('                elif c in ".-–—" and con_chu(i + 1):\n                    return True', '                elif False:\n                    return True'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_la_moi_dem', ('                if k > j and k < n and (t[k].isalnum() or t[k] in _MO_NHIEU_VE):', '                if k > j:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_la_trong_nhom', ('            if sau == 0 and t[i:j] == "là":', '            if t[i:j] == "là":'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_bo_dau_ngoai_nhom', ('        elif c in _DAU_KET_NHIEU_VE and (sau == 0 or nhom_dau):', '        elif False:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_gach_dinh_chu', ('            if (not gach or ke == "" or ke in _DEM_NGANG', '            if (True or ke == "" or ke in _DEM_NGANG'), 'ca_r35_lop_loi'),
+    ('wp1525_nhieu_ve_trich_dau_khong_tinh', ('            nhom_dau, sau_trich = not co_tu, 0', '            nhom_dau, sau_trich = False, 0'), 'ca_r35_lop_loi'),
+    ('wp1525_zip64_cua_so_cu', ('        co_loc = fh.read(4) == b"PK\\x06\\x07"', '        co_loc = i >= 20 and b[i - 20:i - 16] == b"PK\\x06\\x07"'), 'ca_r35_lop_loi'),
+    ('wp1525_zip_loi_mo_khong_chuan_hoa', ('        except (NotImplementedError, RuntimeError, EOFError, zipfile.BadZipFile, zlib.error) as e:', '        except (EOFError, zipfile.BadZipFile, zlib.error) as e:'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_join_khong_kep', ('            t.join(min(0.05, con_lai()))', '            t.join(0.05)'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_khong_giet_nhom', ('                os.killpg(p.pid, signal.SIGKILL)', '                pass'), 'ca_r35_lop_loi'),
     ('wp1525_extract_wait_vo_han', ('        p.wait(timeout=con_lai())', '        p.wait()'), 'ca_r35_lop_loi'),
     ('wp1525_extract_nhan_qua_han', ('    if time.monotonic() > han:\n        thu_hoi()   # r40', '    if False:\n        thu_hoi()   # r40'), 'ca_r35_lop_loi'),
     ('wp1525_extract_nuot_loi_doc', ('            loi.append(e)', '            pass'), 'ca_r35_lop_loi'),
     ('wp1525_extract_doc_khoi_lon', ('                k = ong.read1(min(65536, con))', '                k = ong.read1(65536)'), 'ca_r35_lop_loi'),
     ('wp1525_extract_thu_hoi_vo_han', ('        with contextlib.suppress(Exception):\n            p.wait(timeout=5)', '        with contextlib.suppress(Exception):\n            p.wait()'), 'ca_r35_lop_loi'),
     ('wp1525_zip64_loc_trong_cua_so', ('        co_loc = fh.read(4) == b"PK\\x06\\x07"', '        co_loc = False'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_la_trong_ngoac', ('        if not mo and t[j:k] == "là" and m > k:', '        if t[j:k] == "là" and m > k:'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_la_dinh_dau', ('        if not mo and t[j:k] == "là" and m > k:', '        if not mo and t[j:k] == "là":'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_mo_chi_ngoac', ('_MO_NHIEU_VE = frozenset("(“\\"‘")', '_MO_NHIEU_VE = frozenset("(")'), 'ca_r35_lop_loi'),
-    ('wp1525_nhieu_ve_bo_gach_dai', ('_DAU_KET_NHIEU_VE = frozenset(".)-–—")', '_DAU_KET_NHIEU_VE = frozenset(".)-–")'), 'ca_r35_lop_loi'),
     ('wp1525_zip_tin_so_khai', ('    if vt != vt_eocd or n != n_khai:', '    if vt != vt_eocd:'), 'ca_r35_lop_loi'),
     ('wp1525_zip_dem_sau_zipfile', ('        n_entry = _dem_entry_zip(fh, co)\n        if n_entry > _TRAN_MEMBER:', '        n_entry = 0\n        if n_entry > _TRAN_MEMBER:'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_nhieu_ve', ("""                "dong co phan mo dau dang nhan diem nhieu ve (vd 'ab c.', 'Ban a)', '(Ho so)') bi TU CHOI ca Dieu — "\n""", ""), 'ca_r35_lop_loi'),

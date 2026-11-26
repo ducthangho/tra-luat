@@ -585,36 +585,74 @@ _MO_CHO_PHEP = frozenset("“\"‘(")
 
 
 def _mo_dau_nhieu_ve(t):
-    """r39 → r40 (lượt 38–39 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả
-    Điều. Dùng DOCX có cấp danh sách để xác minh."). True khi thân `t` mở bằng [một dấu mở `(` `“` `"` `‘`] ≥ 2 VẾ (dải chữ/số) chỉ
-    ngăn bằng đệm ngang, rồi DẤU KẾT nhãn (`.` `)` `-` `–` `—`) và còn chữ phía sau. Mốc thoát DUY NHẤT là từ nối cấp khoản: vế `là`
-    đứng NGOÀI dấu mở và có khoảng trắng theo sau (cùng điều kiện `_RE_LA`) — `là` trong ngoặc/nháy mở hay dính dấu kết không thoát.
-    r40 (lượt 39): bỏ ngoại lệ "gạch ≤ 3 vế ngắn" — mọi số vế, mọi độ dài vế; `kinh tế - xã hội …` ở đầu dòng nay bị chặn (thu hẹp
-    miền theo quyết định chủ kho). Tuyến tính."""
-    mo = t[:1] in _MO_NHIEU_VE
-    i = 1 if mo else 0
-    so_ve, j = 0, i
-    while True:
-        k = j
-        while k < len(t) and t[k].isalnum():
-            k += 1
-        if k == j:
-            return False
-        so_ve += 1
-        m = k
-        while m < len(t) and t[m] in _DEM_NGANG:
-            m += 1
-        if not mo and t[j:k] == "là" and m > k:
-            return False   # từ nối cấp khoản ⇒ phần trước là thuật ngữ, không phải nhãn
-        if m > k and m < len(t) and t[m].isalnum():
-            j = m
+    """r39 → r41 (lượt 38–40 — quyết định chủ kho: "Khi phần mở đầu khoản cũng có hình dạng nhãn điểm nhiều vế, đường thô từ chối cả
+    Điều. Dùng DOCX có cấp danh sách để xác minh."). r41 (lượt 40): MỘT lượt quét trái → phải trên PHẦN ĐẦU của thân — tới từ nối cấp
+    khoản (`là` NGOÀI ngoặc/nháy, theo sau là đệm rồi chữ/số hoặc dấu mở; cùng điều kiện `_RE_LA` + `_tu_noi`) hoặc hết dòng — giữ độ
+    sâu ngoặc và trạng thái nháy. True (⇒ từ chối) khi, còn chữ phía sau:
+    · dấu kết nhãn `.` `-` `–` `—` NGOÀI mọi nhóm (gạch chỉ tính khi đứng trước đệm/dấu mở — `e-mail` dính chữ không tính);
+    · nhóm NGOẶC mở ngay đầu thân đóng lại (`(Ban a) …`, `(Hồ sơ) …` — quyết định r39); trong NHÁY mở ngay đầu thân có dấu kết nhãn
+      hay `)` lẻ (`“ab c) …”`). Thuật ngữ bọc nháy rồi tới từ nối (`“Hồ sơ” là …`) được nhận.
+    Ngoặc/nháy mở SAU từ đầu là chú thích của thuật ngữ (`Hồ sơ (bản chính) là …`). Không phụ thuộc số vế hay độ dài vế. Tuyến tính."""
+    n = len(t)
+    cuoi = max((k for k in range(n - 1, -1, -1) if t[k].isalnum()), default=-1) if n else -1
+
+    def con_chu(k):
+        return cuoi >= k
+    i, sau, trich, nhom_dau, sau_trich, co_tu = 0, 0, None, False, 0, False
+    while i < n:
+        c = t[i]
+        if trich is not None:
+            if c == trich:
+                trich = None
+                nhom_dau = False   # nháy đầu thân đóng: thuật ngữ bọc nháy hợp lệ; dấu kết SAU nháy do luật ngoài nhóm bắt
+            elif nhom_dau and sau == 0:
+                if c == "(":
+                    sau_trich += 1
+                elif c == ")":
+                    if not sau_trich and con_chu(i + 1):
+                        return True
+                    sau_trich = max(0, sau_trich - 1)
+                elif c in ".-–—" and con_chu(i + 1):
+                    return True
+            i += 1
             continue
-        break
-    return so_ve >= 2 and m < len(t) and t[m] in _DAU_KET_NHIEU_VE and bool(t[m + 1:].strip(" \t\u00a0"))
+        if c == "(":
+            if sau == 0:
+                nhom_dau = not co_tu
+            sau += 1
+        elif c == ")" and sau:
+            sau -= 1
+            if sau == 0:
+                if nhom_dau and con_chu(i + 1):
+                    return True
+                nhom_dau = False
+        elif c in _MO_TRICH and sau == 0:
+            trich = _MO_TRICH[c]
+            nhom_dau, sau_trich = not co_tu, 0
+        elif c.isalnum():
+            j = i
+            while j < n and t[j].isalnum():
+                j += 1
+            if sau == 0 and t[i:j] == "là":
+                k = j
+                while k < n and t[k] in _DEM_NGANG:
+                    k += 1
+                if k > j and k < n and (t[k].isalnum() or t[k] in _MO_NHIEU_VE):
+                    return False   # từ nối cấp khoản ⇒ phần trước là thuật ngữ
+            co_tu, i = True, j
+            continue
+        elif c in _DAU_KET_NHIEU_VE and (sau == 0 or nhom_dau):
+            gach = c in "-–—"
+            ke = t[i + 1:i + 2]
+            if (not gach or ke == "" or ke in _DEM_NGANG or ke.isspace() or ke in _MO_NHIEU_VE) and con_chu(i + 1):
+                return True
+        i += 1
+    return False
 
 
 _MO_NHIEU_VE = frozenset("(“\"‘")
-_DAU_KET_NHIEU_VE = frozenset(".)-–—")
+_MO_TRICH = {"“": "”", '"': '"', "‘": "’"}
+_DAU_KET_NHIEU_VE = frozenset(".-–—")
 
 
 def dau_dong_cho_phep(ln):
@@ -1389,8 +1427,14 @@ def doc_dieu_docx(nguon, dieu):
         if n_entry > _TRAN_MEMBER:
             raise ValueError(f"goi .docx co {n_entry} member vuot tran {_TRAN_MEMBER} — khong ho tro")
         fh.seek(0)
-        z_cm = zipfile.ZipFile(fh)
-        return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
+        import zlib
+        try:
+            z_cm = zipfile.ZipFile(fh)
+            return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
+        except (NotImplementedError, RuntimeError, EOFError, zipfile.BadZipFile, zlib.error) as e:
+            # r41 (lượt 40): lỗi MỞ GÓI / MỞ MEMBER của `zipfile` (kiểu nén hay phiên bản ZIP không hỗ trợ ⇒ NotImplementedError; member
+            # mã hoá ⇒ RuntimeError; dữ liệu nén hỏng) quy về MỘT lỗi nguồn có chẩn đoán ⇒ CLI rc 2, không traceback.
+            raise ValueError(f"goi .docx khong doc duoc: {type(e).__name__}: {e}") from e
 
 
 def _dem_entry_zip(fh, co):
@@ -1921,7 +1965,10 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
     import types
     tran = TRAN_BYTE_TEP if tran is None else tran
     han = time.monotonic() + timeout
-    p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # r41 (lượt 40): trên POSIX con chạy ở SESSION riêng để thu hồi được CẢ CÂY (cháu còn giữ bản sao đầu ghi của ống thì luồng đọc không
+    # bao giờ nhận EOF). Windows: chỉ giết tiến trình trực tiếp (giới hạn đã khai — `taskkill /T` không đáng tin, xem CLAUDE.md).
+    p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         start_new_session=not _LA_WINDOWS)
     buf, vuot, loi = {"out": bytearray(), "err": bytearray()}, [], []
 
     def doc(ong, ten):
@@ -1939,10 +1986,17 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
             loi.append(e)
 
     def thu_hoi():
+        if not _LA_WINDOWS:
+            import signal
+            with contextlib.suppress(Exception):
+                os.killpg(p.pid, signal.SIGKILL)   # cả nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF
         with contextlib.suppress(Exception):
             p.kill()
         with contextlib.suppress(Exception):
             p.wait(timeout=5)
+        het = time.monotonic() + 2.0   # ngân sách RIÊNG cho việc chờ luồng đọc kết thúc sau thu hồi
+        for t in luong:
+            t.join(max(0.0, het - time.monotonic()))
     luong = [threading.Thread(target=doc, args=(p.stdout, "out"), daemon=True),
              threading.Thread(target=doc, args=(p.stderr, "err"), daemon=True)]
     for t in luong:

@@ -1,0 +1,96 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1466
+packet_id: wp1466
+packet_slug: BAT-BIEN-PROTOCOL-REVIEW-THEO-LOP
+mission_issue: 1466
+mission_id: gh-1466
+mission_ghi_chu: 'Quyet dinh quan tri cua chu kho (#1466); chuoi #1466 -> #1469 -> #1470 merge thang master (C5, E5)'
+revision: 8
+generation: 1
+lease_id: wp1466-r8-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua wp1466; khong co lease truoc cho write set nay (ai-dang-giu NGUOI_GIU 0 tren ca 4 duong dan luc 2026-11-26T09:39Z)'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7188435673
+authority_url: https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7188435673
+authority_ghi_chu: 'Chu kho duyet spec_hash r8 (C1, E5, issuecomment-7058374374); mien Windows (C3, E2); chap nhan 3d va cap lease (E2, issuecomment-7188435673); Codex chi dieu phoi, Claude viet ma (E2, issuecomment-7130067171); Fable 5.2 high viet ma, Codex high review theo lop (E2, issuecomment-7130364325)'
+authority_caveat: 'Ghi ho quyet dinh chu kho (ADR-0067) qua app claude; loi chu kho trong phien session_015GtxrcdabvDuhzgezMEE89'
+recorded_by: claude_code_session_015GtxrcdabvDuhzgezMEE89
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi cap lease, goi executor bang claude -p (API truoc), goi review Codex offline; KHONG viet ma cua packet'
+executor_session: 'phien claude -p (CLI) do dieu phoi goi trong clone rieng; session_id CLI ghi vao handoff'
+executor_ghi_chu: 'Ap nguyen mau ops/specs/wp1466/nguyen-mau-r5/nguyen-mau.patch len base, giai 1 khoi xung dot o packet_loop_test.py, do lai N1-N16 cua spec'
+leased_at_utc: '2026-11-26T09:50:00Z'
+heartbeat_at: '2026-11-26T09:50:00Z'
+lease_until: '2026-11-29T09:50:00Z'
+lease_expires_at_utc: '2026-11-29T09:50:00Z'
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_effort: high
+model_ghi_chu: 'Chu kho chi dinh Claude Fable 5.2 muc high viet ma (issuecomment-7130364325); goi bang claude -p, duong api truoc, subscription sau (chi thi chu kho 26-11)'
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: 'claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux'
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec r8 review_class sensitive; cham E5 (cong doctrine-scan, protocol §20, ADR moi)'
+assurance_target: human_audited
+assurance_ghi_chu: 'Codex review offline doc lap theo lop (§8.3, ADR-0060); chu kho audit exact head truoc merge (E5)'
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_effort: high
+reviewer_transport: machine/local
+reviewer_independence: 'Codex CLI do phien dieu phoi goi qua launcher.py run, read-only tren exact head; executor KHONG tu review'
+spec_path: ops/specs/wp1466.md
+spec_ref: refs/heads/master@1fac6ced8e5a8c76fdb2699edac779a4251f6149
+spec_source_oid: 434846a154ef42711e79d0c9b376b1cb15b21180
+spec_blob: a9de826382bb7df489b689c602b44e8a5418367e
+spec_hash: 98790505d927224bc5e1e42e8f9460376a911a913e2e1d1b12bdf36c5eb20834
+spec_sha256: 98790505d927224bc5e1e42e8f9460376a911a913e2e1d1b12bdf36c5eb20834
+spec_ref_ghi_chu: 'dac ta r8 da tren master (PR #1495, merge 434846a); blob khong doi o 1fac6ce'
+branch: claude/wp1466-r8-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1fac6ced8e5a8c76fdb2699edac779a4251f6149
+start_from_sha: 1fac6ced8e5a8c76fdb2699edac779a4251f6149
+reviewed_sha_required: 1fac6ced8e5a8c76fdb2699edac779a4251f6149
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+write_set_hash: 203f5a49874a8cedbfd7f82c976720602f4c29fb24a7e0cfa5c5b8d12ffd217f
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: 'Dung bon tep cua muc 5 spec r8; base chua merge B4 (2cbb552) va #1236-C (1fac6ce)'
+closure_status: 'Dieu kien 3a-3c dat luc 2026-11-26T09:39Z (366/366 nhanh, policy 0, ai-dang-giu NGUOI_GIU 0 ca 4 duong dan); 3d mien theo quyet dinh chu kho issuecomment-7188435673'
+mien_dieu_kien_3d: 'Nhanh nhap claude/wp1507-don-rac-a (26bc9b9) co tep docs/adr/0068-don-rac-...; chu kho da quyet wp1466 giu 0068, wp1507 doi sang 0069 (issuecomment-7130100252); chu kho chap nhan 3d (issuecomment-7188435673)'
+tran_kich_thuoc: '<= 6 tep / <= 450 dong them (ADR-0053), do git diff --numstat origin/master...<head>; vuot => DUNG truoc review (E2)'
+tran_loi_goi_codex: 'ADR-0055 tran 10, da dung 9 cho review dac ta; con 1 loi goi; can them => xin nang_tran (E2) TRUOC khi goi'
+windows: '<H> mien — chu kho mien Windows (C3, E2, issuecomment-7058374374); rui ro con lai: ca G1 symlink chua do tren Windows; KHONG workflow_dispatch'
+coordination_paths:
+- ops/leases/wp1466-r8-g1-claude.yaml
+run_minutes: 4320
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- push_truoc_review_approve
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'chu kho audit va duyet SHA cu the truoc merge (E5), roi tu merge'

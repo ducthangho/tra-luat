@@ -43,7 +43,12 @@ provenance_10_2_2:
     trang_thai: measured
     nguon: [graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj2gw.json, graphql-workflowrun-file-WFR_kwLOTNeRjc8AAAAKkyj24A.json, readback-contents-launcher-windows.yml-a03a28e.json, readback-contents-ci.yml-a03a28e.json, git-rev-parse-blob-a03a28e.txt, workflow-bytes-sha256-a03a28e.txt]
     ghi_chu: 'WorkflowRun.file.path + repositoryFileUrl ghim a03a28e cho ca hai run; blob REST = git rev-parse: launcher-windows.yml 0a0f77ff…, ci.yml a1db88d9…; SHA-256 bytes (git cat-file blob a03a28e:<path>): ci.yml d1201a76… (80203 byte), launcher-windows.yml 0895a8b2… (13180 byte). Cross-review #1518 luot 1 P2 workflow-definition-thieu-sha256-bytes.'
-  gate_output: {trang_thai: measured, nguon: [do_lai.py, do_lai.out.txt, logs/, readback-jobs-45418608259.json, readback-jobs-45418608352.json, readback-artifacts-45418608259.json, readback-artifacts-45418608352.json], ghi_chu: 'dem lai tu log GOC (khong tu ban trich): 41/41 job conclusion success, 0 dong `Process completed with exit code` khac 0, 158 dong marker duong (DOT BIEN n/n, "ok": true, TONG: DAT, "returncode": 0); launcher DOT BIEN 596/596 (windows) va 786/786 (ubuntu). Artifact: run ci.yml co 33 artifact, ID + digest sha256 trong readback-artifacts-45418608352.json; run launcher-windows.yml 0 artifact. Cross-review #1518 luot 1 P2 gate-output-khong-do-lai-duoc-so-loi.'}
+  gate_output: >-
+    passed — danh-gia-gate-output-45418608352.txt (danh_gia_gate.py v3 sha256 0ea9a5e9, chep nguyen tu
+    ops/land/pr1516-wp1460-provenance/): MOC_GATE_OUTPUT passed 39/39 job co dau hieu duong theo TUNG BUOC (run ci.yml 45418608352,
+    attempt 1, head a03a28e). Kem do lai tu log GOC: do_lai.py / do_lai.out.txt 41/41 job conclusion success, 0 dong exit code khac 0;
+    launcher DOT BIEN 596/596 (windows) va 786/786 (ubuntu) o run launcher-windows.yml 45418608259 (khong phai gate ci.yml, khong tinh
+    vao moc). Artifact ID + digest: readback-artifacts-45418608352.json. Cross-review #1518 luot 1 P2 gate-output-khong-do-lai-duoc-so-loi.
 trang_thai_packet:
   merged: true
   landed: true

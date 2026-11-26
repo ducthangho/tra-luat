@@ -1,0 +1,22 @@
+{
+  "rev-parse HEAD HEAD^{tree}": {
+    "rc": 0,
+    "stdout": "ded412862fba5181fc59e8482ff40cb31162f577\nbcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd\n",
+    "sha256": "28f0696dab90122eb48c59bd008b51472ea7067ac7a6764c1b2fc6cd175c97e6"
+  },
+  "status --porcelain=v1 --untracked-files=all --ignored=matching": {
+    "rc": 0,
+    "stdout": "!! .codex/\n",
+    "sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+  },
+  "diff --binary": {
+    "rc": 0,
+    "stdout": "",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "diff --cached --binary": {
+    "rc": 0,
+    "stdout": "",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

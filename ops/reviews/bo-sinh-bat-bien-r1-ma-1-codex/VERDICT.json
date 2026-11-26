@@ -1,0 +1,559 @@
+{
+  "reviewed_sha": "ded412862fba5181fc59e8482ff40cb31162f577",
+  "reviewed_tree": "bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd",
+  "base_sha": "a89c83acf998008caecba9084a7d295845bf1976",
+  "spec_sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "vong": 1,
+  "packet_id": "bo-sinh-bat-bien",
+  "revision": 1,
+  "generation": 1,
+  "review_class": "sensitive",
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "run_id": "efd533b8bf264ca5a8bee54ee6f44cb8",
+  "session_id": "01a215ff-bbbf-7320-8e87-39f866b97838",
+  "model_phuc_vu": "KHONG_DO_DUOC",
+  "effort_phuc_vu": "KHONG_DO_DUOC",
+  "cli_header": {
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "version": "0.172.0",
+    "source": "../run/efd533b8/stderr.log:2-11"
+  },
+  "sandbox_mode": "workspace-write",
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "unicode_data": "15.1.0",
+    "ruff": "0.15.15",
+    "core.abbrev": 7
+  },
+  "findings": [
+    {
+      "id": "R1-01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P3",
+      "phan_loai": "ngoai_bang_dong",
+      "vi_tri": "ops/land_evidence_nguon_test.py:900-902; c39:925-950",
+      "van_de": "Hai chốt chưa có phản chứng riêng: bỏ riêng len(vu_tru)==158 vẫn c39 rc0; bỏ chốt len(o)==648 vẫn c39 rc0. Bảng12 executor không có648; phép gỡ tổng158 của họ đổi thêm len(set(vu_tru))==158 thành ==len(vu_tru), nên không phải chỉ gỡ một vế mã. Không khẳng định HEAD thiếu ô: HEAD thực chạy648.",
+      "bang_chung": {
+        "script": "probes.py",
+        "results": "probes.json",
+        "labels": [
+          "c37-total-literal",
+          "c37-648",
+          "c37-total-executor"
+        ],
+        "witness_script": "guard_witnesses.py",
+        "witness_results": "guard-witnesses.json",
+        "measured": "Gỡ literal-total rc0; gỡ648 rc0. Chứng nhân: bỏ1 ô với guard còn => rc3 DO:c37:số ô647, 0 ô chạy; bỏ ô+guard => rc0,647 ô thật chạy. Thêm bản sao supplementary: guard tổng còn => DO:c37:vũ trụ159/158; bỏ tổng => DO:c37:số ô652 (rơi sang chốt khác)."
+      },
+      "de_xuat": {
+        "o_dau": "c39 và cơ chế dựng/kiểm miền của c37",
+        "cach_va": "Thêm biến thể lặp chính supplementary cuối để cô lập vế tổng158, và biến thể thiếu/thừa ô cấu trúc trong khi miền158 giữ nguyên để cô lập648; sửa trong bộ nhớ, neo duy nhất.",
+        "test_khoa": "Healthy control cùng đường xanh; gỡ RIÊNG mỗi chốt khiến ca phản chứng rc3 DO:c39 đúng lý do; đo không gọi ky8 khi guard đỏ.",
+        "rui_ro": "Không đổi hai vế trong một mutant; không dùng ky8 câm để khẳng định đã đo consumer; tránh tăng thời gian quá30s."
+      }
+    },
+    {
+      "id": "R1-02",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P3",
+      "phan_loai": "ngoai_bang_dong",
+      "vi_tri": "ops/land_evidence_nguon_test.py:868-872 (chốt mới); ops/gate_output_doi_chieu_test.py:1212 (nguồn tái dùng)",
+      "van_de": "Thay ô a129 kiểm delimiter sớm không khớp bằng bản sao kiem(dong,ten_goc) giữ36 phần tử và tập category; cả hai suite vẫn xanh. Đây là biểu hiện cùng lớp: chốt số lượng/category không phân biệt tập ô cấu trúc. Giới hạn này đã khai ở spec8, không nâng thành vi phạm miền bắt buộc mới và không khẳng định mọi chứng nhân backtracking đã mất.",
+      "bang_chung": {
+        "script": "probes.py",
+        "pair": "outside-mutant.json",
+        "results": "probes.json",
+        "A": {
+          "rc": 0,
+          "positive": "CA53/53; DOT BIEN158/158; TONG DAT"
+        },
+        "B": {
+          "rc": 0,
+          "positive": "CA40/40; DOT BIEN145/145; TONG DAT"
+        }
+      },
+      "de_xuat": {
+        "o_dau": "c36/c40 và định danh ô cấu trúc của a129",
+        "cach_va": "Nếu đóng trong packet: bảo toàn đặc trưng/ID cấu trúc độc lập của các ô cần giữ và thêm phản chứng thay-ô-bằng-ô-trùng; không ghim hash toàn tệp hay sao lại oracle sản phẩm. Nếu giữ ngoài scope, điều phối xử lý theo M1 bằng authority đúng SHA, không tự tuyên bố đã đóng.",
+        "test_khoa": "Cặp outside-mutant.json phải đỏ đúng ca đích; nguyên vẹn xanh; quét các caA cùng cơ chế.",
+        "rui_ro": "Tránh coi hai phần tử trùng hợp lệ do vòng Unicode là lỗi; kiểm cấu trúc theo nghĩa, không đòi tất cả8396 đầu vào khác nhau."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "R1-01",
+        "R1-02"
+      ],
+      "manifestations": [
+        "c37 chốt648 và vế tổng158 chưa có phản chứng gỡ riêng",
+        "a129 thay ô cấu trúc bằng bản sao giữ tổng/category, hai suite xanh"
+      ],
+      "highest_open_severity": "P3",
+      "source": "B02 wp1236 đợtB lượt4 reviewed_sha bca55c1cd09c57180d60b05d5ca1813828ae1d10; cùng lớp, không reset lịch sử",
+      "status": "VA_MOT_PHAN",
+      "common_fix": "Kỳ vọng miền/ID độc lập và mỗi đường vào có một phản chứng riêng; healthy control cùng đường; phân biệt DO đúng đích với lỗi vô can.",
+      "closing_check": "Hai phản chứng B02 cũ giữ đỏ; 13 chốt gỡ riêng đỏ; mutant thay ô bằng bản sao đỏ hoặc disposition chủ kho đúng SHA; suite và trần thời gian đạt."
+    }
+  ],
+  "verdict": "changes_requested",
+  "status": "complete",
+  "m3_windows": {
+    "classification": "required",
+    "step": 2,
+    "reason": "Không là làn lưu trữ M8. Dòng mới land_evidence_nguon_test.py:974 chứa read_text(encoding=\"utf-8\"), đủ M3 bước2; dừng phân loại tại bước này.",
+    "local_status": "not_run",
+    "risks": [
+      "Path Unicode/longpaths và tempfile/copytree/rglob khi c36 đọc provenance",
+      "UTF-8/CRLF: c40 read_text chuẩn hoá dòng trước neo, cần đối chứng Windows",
+      "c40 thêm chạy a129 qua main/L8; cache YAML phải giữ deepcopy; thời gian và timeout300s cần đo Windows"
+    ]
+  },
+  "pham_vi_e": {
+    "E1": "khong",
+    "E2": "khong",
+    "E3": "khong",
+    "E4": "khong",
+    "E5": "khong",
+    "reason": "Diff đúng2 tệp test, +163/-6, không đổi module sản phẩm, không đổi điều kiện hồ sơ được tính land, không sửa cổng lease/merge/thẩm quyền hay tác động ngoài kho. Thiếu Windows ở lượt offline là nghĩa vụ tiếp theo của điều phối, không phải tự miễn."
+  },
+  "luat9": {
+    "B": {
+      "count": 624,
+      "hashchecks": [
+        [
+          "nen",
+          "manifest.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "hoi_quy.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "tat_ca.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "kq.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "do.log",
+          true
+        ],
+        [
+          "sau",
+          "manifest.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "hoi_quy.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "tat_ca.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "kq.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "do.log",
+          true
+        ]
+      ],
+      "base_counts": {
+        "GIET": 438,
+        "SONG": 173,
+        "VO_CAN": 13
+      },
+      "head_counts": {
+        "GIET": 438,
+        "SONG": 173,
+        "VO_CAN": 13
+      },
+      "regressions": [],
+      "baseline_cases": [
+        38,
+        40
+      ],
+      "sample_ids": [
+        "c2:token_nguon:197:4",
+        "i6:RE_MOC:lookaround@80 bo"
+      ],
+      "base_sample_rc": 0,
+      "head_sample_rc": 0
+    },
+    "A": {
+      "count": 946,
+      "hashchecks": [
+        [
+          "nen",
+          "manifest.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "hoi_quy.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "tat_ca.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "kq.jsonl",
+          true
+        ],
+        [
+          "nen",
+          "do.log",
+          true
+        ],
+        [
+          "sau",
+          "manifest.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "hoi_quy.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "tat_ca.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "kq.jsonl",
+          true
+        ],
+        [
+          "sau",
+          "do.log",
+          true
+        ]
+      ],
+      "base_counts": {
+        "GIET": 923,
+        "SONG": 23
+      },
+      "head_counts": {
+        "GIET": 923,
+        "SONG": 23
+      },
+      "regressions": [],
+      "baseline_cases": [
+        51,
+        53
+      ],
+      "sample_ids": [
+        "l:module:46:0:body4",
+        "kho:r8_name_nfkc"
+      ],
+      "base_sample_rc": 0,
+      "head_sample_rc": 0
+    },
+    "full_rerun": "not_run",
+    "artifact_audit": "passed",
+    "sample": "2 cặp mỗi module, 4 cặp/8 lượt mutant; baseline từng chay có đủ ca.",
+    "bank_scope": "B kho rỗng cùng hai vế; A201 ID,148 áp dụng53 không áp dụng cùng hai vế; 0 hồi quy trong các inventory ấy, không suy sang kho khác.",
+    "initial_probe_error": "audit_luat9.py lượt đầu chọn killer c36 nhưng inventory không có killer ấy -> StopIteration trước sample. Sửa chọn mẫu hợp lệ; không coi setup error là lỗi sản phẩm."
+  },
+  "tests": [
+    {
+      "label": "head-B",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 0,
+      "seconds": 299.15587309500006,
+      "status": "passed",
+      "log": "head-B.log",
+      "positive": "CA: 40/40 dat\nDOT BIEN: 145/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT",
+      "stdout_sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc"
+    },
+    {
+      "label": "head-A",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 0,
+      "seconds": 329.110319526,
+      "status": "passed",
+      "log": "head-A.log",
+      "positive": "CA: 53/53 dat\nDOT BIEN: 158/158 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT",
+      "stdout_sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179"
+    },
+    {
+      "label": "head-land",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 0,
+      "seconds": 7.909156107999934,
+      "status": "passed",
+      "log": "head-land.log",
+      "positive": "ĐẠT ops/land/pr995-wp960-land-evidence.yaml\n  ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (băm khớp ảnh chụp base đợt B)\nĐẠT ops/land/pr997-wp978-land-evidence.yaml\nland_evidence_nguon: 153 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 178\nTỔNG: ĐẠT",
+      "stdout_sha256": "33476900e203e5d9b36e21690ad12301a0c9e7b30909997160016073c77cdb6f"
+    },
+    {
+      "label": "head-ci",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 0,
+      "seconds": 340.3932080259999,
+      "status": "passed",
+      "log": "head-ci.log",
+      "positive": "ĐỘT BIẾN p643-A4-N-1: ĐỎ đúng\nĐỘT BIẾN p643-A4-bo-env: ĐỎ đúng\nĐỘT BIẾN p643-A4-hai-buoc-registry: ĐỎ đúng\nPHẢN CHỨNG: 1677/1677 đỏ đúng\nTỔNG: ĐẠT",
+      "stdout_sha256": "9ec1093f854b6049a4911a2e9d3a2566f6b5d959a81bad353fde3a0e34990fb4"
+    },
+    {
+      "label": "head-selftest",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 1,
+      "seconds": 279.670677869,
+      "status": "failed",
+      "log": "head-selftest.log",
+      "positive": "  [OK] r380_llm_order_luu_doi_xoa\n  [OK] r380_llm_khai_niem_tu_tep_qua_sub\n  [OK] r380_llm_khai_niem_bien_dau_vao\n  [OK] wp42_complete_runtime_test_ids_unique\n== tl selftest 1773/1789 ==",
+      "stdout_sha256": "bb1b48d31055e256b6fccdf54213bdd4ba52b381d297583031de422fcb020aed"
+    },
+    {
+      "label": "base-ruff",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/base",
+      "rc": 0,
+      "seconds": 0.5323228429999745,
+      "status": "passed",
+      "log": "base-ruff.log",
+      "positive": "All checks passed!",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "label": "head-ruff",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+      "rc": 0,
+      "seconds": 0.03227010499995231,
+      "status": "passed",
+      "log": "head-ruff.log",
+      "positive": "All checks passed!",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    }
+  ],
+  "selftest_delta": {
+    "base": {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/base",
+      "rc": 1,
+      "seconds": 274.77127258099995,
+      "log": "base-selftest.log"
+    },
+    "failed_ids": {
+      "base": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ],
+      "head": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ]
+    },
+    "new_failures": [],
+    "status": "failed_on_both",
+    "note": "Clone thiếu origin/master; /tmp/.git hiện diện trong sandbox. Không đã cô lập nguyên nhân từng ca; không coi delta0 là selftest pass."
+  },
+  "static_checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "a89c83a",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "a89c83a",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "49\t0\tops/gate_output_doi_chieu_test.py\n114\t6\tops/land_evidence_nguon_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "ruff 0.15.15\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "a89c83a",
+        "HEAD",
+        "--",
+        "ops/land_evidence_nguon.py",
+        "ops/gate_output_doi_chieu.py"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "runpy ci_dang_ky_test.py:loi_ruff_ci()",
+      "rc": 0,
+      "count": 3,
+      "errors": []
+    }
+  ],
+  "counterexamples": {
+    "B02": "b02-targeted.json và probes.json",
+    "guard_removals": "probes.json",
+    "positive_negative_trace": "controls.json",
+    "witnesses": "guard-witnesses.json"
+  },
+  "acceptance_derivations": "independent_counts.md",
+  "not_run": [
+    "Bốn lượt full Luật9 do không tái chạy theo assignment; đã kiểm hiện vật và chạy mẫu chay, không nhận mẫu là HOAN_TAT.",
+    "Windows local base/head và Windows CI: not_run trong review offline; M3 required, điều phối tiếp tục.",
+    "GitHub CI/connector/full_mutant_audit M9, audit uỷ quyền và merge/land: not_run; không gọi mạng.",
+    "Không đo lại delta thời gian full suite base/head trong cùng lệnh; số reviewer là head dưới tải song song."
+  ],
+  "limits": [
+    "Selftest reviewer failed 1773/1789 ở cả base/head,16 ID đỏ trùng; không chứng nhận cổng selftest xanh. Clone scratch thiếu origin/master và sandbox có /tmp/.git; cần môi trường gate chuẩn để lấy N/N. Không sửa ngoài work/ để làm xanh.",
+    "Read-only là kỷ luật reviewer; sandbox workspace-write cho phép ghi checkout. Mọi script đo chỉ ghi work/. Snapshot hai mốc không chứng minh mọi sự kiện trung gian.",
+    "Không kiểm authority/refs GitHub live vì assignment cấm mạng; lease/spec/bundle offline là đầu vào authority.",
+    "Model/effort thực phục vụ từng request KHONG_DO_DUOC. Header CLI công bố gpt-6-astra/high chỉ là evidence phụ, không chứng minh toàn phiên.",
+    "Các mutant test do reviewer dựng không thuộc manifest module; hai finding giữ P3 ngoai_bang_dong. Không dùng tổng suite xanh để đóng lớp.",
+    "Số đo thời gian executor chỉ một lần mỗi vế, đủ chứng minh lượt đo đó trong ngưỡng; không ước lượng độ biến động hay bảo đảm Windows."
+  ],
+  "timing": {
+    "executor": {
+      "B_base": 349.0,
+      "B_head": 342.4,
+      "B_delta": -6.6,
+      "A_base": 342.8,
+      "A_head": 343.4,
+      "A_delta": 0.6,
+      "source": "../bang_chung/gate/ab_thoi_gian.log"
+    },
+    "reviewer_head_seconds": {
+      "head-B": 299.15587309500006,
+      "head-A": 329.110319526
+    },
+    "reviewer_delta": "not_measured; concurrent load, no paired full base run"
+  },
+  "checkout_snapshot": "matched start/end; tracked/index clean, ignored .codex/ unchanged in status; source outside provided repo not observed"
+}

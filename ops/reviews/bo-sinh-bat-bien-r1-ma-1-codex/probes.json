@@ -1,0 +1,314 @@
+[
+  {
+    "label": "control-c39_c37_do_khi_bo_sinh_lech_mien",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 0,
+    "seconds": 0.2259332960000222,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "control-c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+    ],
+    "rc": 0,
+    "seconds": 15.636194532000019,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "control-a136_a135_do_khi_bo_sinh_lech_mien",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 0,
+    "seconds": 1.7897198000000003,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "control-c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c38_c36_do_khi_bang_cua_dot_a_mat_ca"
+    ],
+    "rc": 0,
+    "seconds": 0.24202230399998825,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "c36-count",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+    ],
+    "rc": 3,
+    "seconds": 8.747065958000007,
+    "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A bỏ Mn (a129) mà c36 không ĐỎ đúng chốt: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: thiếu general category ['Mn']\n",
+    "stderr": ""
+  },
+  {
+    "label": "c36-category",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+    ],
+    "rc": 3,
+    "seconds": 0.7228394320000007,
+    "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành bản sao Mc (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+    "stderr": ""
+  },
+  {
+    "label": "c36-BMP",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+    ],
+    "rc": 3,
+    "seconds": 1.0573968349999632,
+    "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A ngoài BMP thành bản sao BMP (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+    "stderr": ""
+  },
+  {
+    "label": "c37-total-executor",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 0.2858989430000065,
+    "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:bộ sinh bỏ ký tự ngoài BMP mà c37 không ĐỎ đúng chốt: rc=3 DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 644 (đúng 648)\n",
+    "stderr": ""
+  },
+  {
+    "label": "c37-total-literal",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 0,
+    "seconds": 0.3209064999999782,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "c37-distinct",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 0.2923062479999885,
+    "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:bộ sinh Lu thành ASCII 'A' mà c37 không ĐỎ đúng chốt: rc=0 \n",
+    "stderr": ""
+  },
+  {
+    "label": "c37-category",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 0.3532325520000086,
+    "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:bộ sinh Mn thành ký tự Mc KHÁC mà c37 không ĐỎ đúng chốt: rc=0 \n",
+    "stderr": ""
+  },
+  {
+    "label": "c37-648",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c39_c37_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 0,
+    "seconds": 0.22894931100000804,
+    "stdout": "\n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-so_phan_tu",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 0.7868981409999947,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang']\n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-category_vang",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 0.8573791689999553,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu']\n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-lap_category",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 1.7712101589999634,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Mn thanh ban sao Mc: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang']\n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-thuoc_cam",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 1.4634539710000354,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc cam: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']\n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-tu_0080",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 2.2686629949999997,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Lu thanh ASCII: rc=0 \n",
+    "stderr": ""
+  },
+  {
+    "label": "a135-cuoi_ngoai_bmp",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 3,
+    "seconds": 1.0224001509999994,
+    "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo ngoai BMP: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu']\n",
+    "stderr": ""
+  },
+  {
+    "label": "B02-omit-category-Mn-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 1,
+    "seconds": 192.60475788399998,
+    "stdout": "[DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a124_token_ascii_qua_ho_so qua main → L8: 1723 phần tử (đặc tả: đúng 1733), rc=0 ]\n[DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP]\n[DO:c39_c37_do_khi_bo_sinh_lech_mien:bộ sinh nguyên vẹn mà c37 không XANH: rc=3 DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP]\n[DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A nguyên vẹn (a126) mà c36 không XANH: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử (đặc tả: đúng 52), rc=0 ]\nCA: 36/40 dat\n[DOT BIEN KHONG BI GIET DUNG] L8_chuan_hoa_nfkc_truoc_khi_doi_chieu: HONG ca đích không xanh trên bản gốc (rc=3): DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a124_token_ascii_qua_ho_so qua main → L8: 1723 phần tử (đặc tả: đúng 1733), rc=0 \n\n[DOT BIEN KHONG BI GIET DUNG] L8_nuot_ly_do_bo_sinh_la: HONG ca đích không xanh trên bản gốc (rc=3): DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP\n\nDOT BIEN: 143/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DO\n",
+    "stderr": ""
+  },
+  {
+    "label": "B02-omit-category-Mn-A",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "rc": 1,
+    "seconds": 324.390954999,
+    "stdout": "[DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']]\n[DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh that: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']]\nCA: 51/53 dat\nDOT BIEN: 158/158 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DO\n",
+    "stderr": ""
+  },
+  {
+    "label": "B02-omit-lazy-backtracking-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 1,
+    "seconds": 279.220577755,
+    "stdout": "[DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 ]\n[DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A bỏ Mn (a129) mà c36 không ĐỎ đúng chốt: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 34 phần tử (đặc tả: đúng 36), rc=0 ]\nCA: 38/40 dat\n[DOT BIEN KHONG BI GIET DUNG] L8_chuan_hoa_nfkc_truoc_khi_doi_chieu: HONG ca đích không xanh trên bản gốc (rc=3): DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 \n\nDOT BIEN: 144/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DO\n",
+    "stderr": ""
+  },
+  {
+    "label": "outside-duplicate-structural-A",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "rc": 0,
+    "seconds": 318.80014236600005,
+    "stdout": "CA: 53/53 dat\nDOT BIEN: 158/158 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n",
+    "stderr": ""
+  },
+  {
+    "label": "outside-duplicate-structural-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "rc": 0,
+    "seconds": 288.7670739760001,
+    "stdout": "CA: 40/40 dat\nDOT BIEN: 145/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\n",
+    "stderr": ""
+  }
+]

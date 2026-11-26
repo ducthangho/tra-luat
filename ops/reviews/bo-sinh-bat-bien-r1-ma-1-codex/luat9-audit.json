@@ -1,0 +1,152 @@
+{
+  "B": {
+    "count": 624,
+    "hashchecks": [
+      [
+        "nen",
+        "manifest.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "hoi_quy.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "tat_ca.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "kq.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "do.log",
+        true
+      ],
+      [
+        "sau",
+        "manifest.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "hoi_quy.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "tat_ca.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "kq.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "do.log",
+        true
+      ]
+    ],
+    "base_counts": {
+      "GIET": 438,
+      "SONG": 173,
+      "VO_CAN": 13
+    },
+    "head_counts": {
+      "GIET": 438,
+      "SONG": 173,
+      "VO_CAN": 13
+    },
+    "regressions": [],
+    "baseline_cases": [
+      38,
+      40
+    ],
+    "sample_ids": [
+      "c2:token_nguon:197:4",
+      "i6:RE_MOC:lookaround@80 bo"
+    ],
+    "base_sample_rc": 0,
+    "head_sample_rc": 0
+  },
+  "A": {
+    "count": 946,
+    "hashchecks": [
+      [
+        "nen",
+        "manifest.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "hoi_quy.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "tat_ca.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "kq.jsonl",
+        true
+      ],
+      [
+        "nen",
+        "do.log",
+        true
+      ],
+      [
+        "sau",
+        "manifest.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "hoi_quy.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "tat_ca.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "kq.jsonl",
+        true
+      ],
+      [
+        "sau",
+        "do.log",
+        true
+      ]
+    ],
+    "base_counts": {
+      "GIET": 923,
+      "SONG": 23
+    },
+    "head_counts": {
+      "GIET": 923,
+      "SONG": 23
+    },
+    "regressions": [],
+    "baseline_cases": [
+      51,
+      53
+    ],
+    "sample_ids": [
+      "l:module:46:0:body4",
+      "kho:r8_name_nfkc"
+    ],
+    "base_sample_rc": 0,
+    "head_sample_rc": 0
+  }
+}

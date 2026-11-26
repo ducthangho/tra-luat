@@ -1,0 +1,20 @@
+[
+  {
+    "mutant": "omit-category-Mn",
+    "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "rc": 3,
+    "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a124_token_ascii_qua_ho_so qua main → L8: 1723 phần tử (đặc tả: đúng 1733), rc=0 "
+  },
+  {
+    "mutant": "omit-category-Mn",
+    "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+    "rc": 3,
+    "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP"
+  },
+  {
+    "mutant": "omit-lazy-backtracking",
+    "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+    "rc": 3,
+    "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 "
+  }
+]

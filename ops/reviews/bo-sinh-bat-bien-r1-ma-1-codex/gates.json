@@ -1,0 +1,94 @@
+[
+  {
+    "label": "head-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 0,
+    "seconds": 299.15587309500006
+  },
+  {
+    "label": "head-A",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 0,
+    "seconds": 329.110319526
+  },
+  {
+    "label": "head-land",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 0,
+    "seconds": 7.909156107999934
+  },
+  {
+    "label": "head-ci",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/ci_dang_ky_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 0,
+    "seconds": 340.3932080259999
+  },
+  {
+    "label": "head-selftest",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "scripts/tl.py",
+      "--selftest"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 1,
+    "seconds": 279.670677869
+  },
+  {
+    "label": "base-ruff",
+    "command": [
+      "/usr/local/bin/python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon_test.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/base",
+    "rc": 0,
+    "seconds": 0.5323228429999745
+  },
+  {
+    "label": "head-ruff",
+    "command": [
+      "/usr/local/bin/python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon_test.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/head",
+    "rc": 0,
+    "seconds": 0.03227010499995231
+  }
+]

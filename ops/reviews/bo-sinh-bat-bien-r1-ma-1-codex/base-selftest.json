@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "scripts/tl.py",
+    "--selftest"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/base",
+  "rc": 1,
+  "seconds": 274.77127258099995,
+  "log": "base-selftest.log"
+}

@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](../work/VERDICT.md) và [VERDICT.json](../work/VERDICT.json); kiểm schema đạt `HOP_LE`.
+
+Còn **2 finding P3 thuộc 1 lớp**. Hai suite chính xanh; selftest base/head cùng `1773/1789`, cùng 16 ca đỏ. Repository gốc không bị sửa.
+
+KET_LUAN: changes_requested

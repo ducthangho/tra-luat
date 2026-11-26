@@ -1,0 +1,57 @@
+[
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "a89c83a",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "a89c83a",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "49\t0\tops/gate_output_doi_chieu_test.py\n114\t6\tops/land_evidence_nguon_test.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/local/bin/python3",
+      "-m",
+      "ruff",
+      "--version"
+    ],
+    "rc": 0,
+    "stdout": "ruff 0.15.15\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "a89c83a",
+      "HEAD",
+      "--",
+      "ops/land_evidence_nguon.py",
+      "ops/gate_output_doi_chieu.py"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": "runpy ci_dang_ky_test.py:loi_ruff_ci()",
+    "rc": 0,
+    "count": 3,
+    "errors": []
+  }
+]

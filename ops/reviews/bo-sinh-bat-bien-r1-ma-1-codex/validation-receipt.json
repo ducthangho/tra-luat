@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/local/bin/python3",
+    "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/kiem_verdict_lop.py",
+    "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l1/work/VERDICT.json",
+    "--vong",
+    "1"
+  ],
+  "rc": 0,
+  "stdout": "HOP_LE (§8.3): 2 finding, 1 lop\n",
+  "stderr": "",
+  "verdict_sha256": "502396f0d25a32252c74f09e538d551b02acf84e5411201289579ee97d280bcf"
+}

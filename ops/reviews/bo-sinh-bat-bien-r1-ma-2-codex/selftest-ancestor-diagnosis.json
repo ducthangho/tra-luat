@@ -1,0 +1,5 @@
+{
+  "actual_ancestor": "/tmp",
+  "counterfactual_without_tmp_git": null,
+  "scope": "isolated read-only predicate; no credential read/write; no filesystem changes"
+}

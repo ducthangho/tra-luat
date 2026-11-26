@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](work/VERDICT.md) và [VERDICT.json](work/VERDICT.json); kiểm schema: `HOP_LE`.
+
+R1-01/R1-02 đã đóng. Còn R2-01 (P3): đổi `==` thành `>=` vẫn qua toàn bộ suite B. Lớp giữ nhãn `VA_MOT_PHAN`.
+
+KET_LUAN: changes_requested

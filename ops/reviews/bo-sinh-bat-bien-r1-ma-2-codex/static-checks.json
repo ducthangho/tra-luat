@@ -1,0 +1,59 @@
+[
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "a89c83a",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "a89c83a",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "49\t0\tops/gate_output_doi_chieu_test.py\n152\t6\tops/land_evidence_nguon_test.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--name-only",
+      "ded4128",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "ops/land_evidence_nguon_test.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "--version"
+    ],
+    "rc": 0,
+    "stdout": "ruff 0.15.15\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "config",
+      "core.abbrev"
+    ],
+    "rc": 0,
+    "stdout": "7\n",
+    "stderr": ""
+  }
+]

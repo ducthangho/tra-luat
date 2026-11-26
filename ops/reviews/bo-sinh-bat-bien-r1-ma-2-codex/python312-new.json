@@ -1,0 +1,54 @@
+[
+  {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a"
+    ],
+    "rc": 0,
+    "stdout": "\n",
+    "stderr": "",
+    "seconds": 47.332576205999885
+  },
+  {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+    ],
+    "rc": 0,
+    "stdout": "\n",
+    "stderr": "",
+    "seconds": 12.060430972999939
+  },
+  {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a135_bo_sinh_dung_mien_dac_ta"
+    ],
+    "rc": 0,
+    "stdout": "\n",
+    "stderr": "",
+    "seconds": 0.5289552649999223
+  },
+  {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py",
+      "--mot-ca",
+      "a136_a135_do_khi_bo_sinh_lech_mien"
+    ],
+    "rc": 0,
+    "stdout": "\n",
+    "stderr": "",
+    "seconds": 1.9397690139999213
+  }
+]

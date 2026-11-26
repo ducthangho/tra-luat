@@ -1,0 +1,919 @@
+{
+  "reviewed_sha": "ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+  "reviewed_tree": "30d8b599d30f7552e5b1c00b51008d4efec09c66",
+  "base_sha": "a89c83acf998008caecba9084a7d295845bf1976",
+  "spec_sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "packet_id": "bo-sinh-bat-bien",
+  "revision": 1,
+  "generation": 1,
+  "vong": 2,
+  "review_class": "sensitive",
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "run_id": "866eb42659994d88b5bc3da44d2af062",
+  "session_id": "01a2164e-1065-75a3-a28c-85ec5b095e3f",
+  "model": "KHONG_DO_DUOC",
+  "effort": "KHONG_DO_DUOC",
+  "cli_declared_model": "gpt-6-astra",
+  "cli_declared_effort": "high",
+  "sandbox_mode": "workspace-write",
+  "runtime_evidence": {
+    "provider": "local_process",
+    "execution_surface": "subprocess",
+    "transport": "machine",
+    "trang_thai": "dang_chay",
+    "run_id": "866eb42659994d88b5bc3da44d2af062",
+    "bat_dau_utc": "2026-11-26T05:22:24.073373+00:00",
+    "deadline_utc": null,
+    "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+    "agent_da_khai": null,
+    "agent_suy_ra": "khong",
+    "reviewer_process_evidence": "stderr.log header: OpenAI Codex v0.172.0, provider openai, session01a2164e; executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+    "model_effort_served": "KHONG_DO_DUOC"
+  },
+  "status": "complete",
+  "findings": [
+    {
+      "id": "R2-01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P3",
+      "classification": "ngoai_bang_dong",
+      "title": "c40 chưa khoá chiều thừa của số phần tử chính xác: đổi == thành >= vẫn xanh cả bộ B",
+      "path": "ops/land_evidence_nguon_test.py",
+      "line": 1001,
+      "target_guard_line": 879,
+      "spec_basis": "§2.2.1: số phần tử qua main→L8 phải BẰNG ĐÚNG kỳ vọng; sàn A_CA bị thay. Không thuộc ngoại lệ §8 vì witness tăng36→37, không giữ số lượng.",
+      "impact": "Meta-test không nhận ra việc nới exact count thành sàn. HEAD nguyên vẹn hiện đúng; đây là độ nhạy hồi quy của bộ test, không phải lỗi runtime sản phẩm.",
+      "evidence": [
+        "excess-probe.json: c40 rc0 cả exact/floor; witness a129 thêm bản sao: exact rc3 DO:c36 37/36, floor rc0; intact rc0 cả hai.",
+        "floor-full-B.json/log: chỉ ==→>= trên bản sao, full suite rc0 CA40/40 DOT BIEN145/145 TU KIEM2 TONG DAT."
+      ],
+      "reproduce": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/../work/tmp\" python3 -B ../work/excess_probe.py; full clone measurement: excess_full.py (fresh floor directory).",
+      "recommendation": {
+        "where": "Bảng phản chứng c40, test B trong write set.",
+        "how": "Thêm một phần tử là bản sao ô đã có, để N tăng còn số khác nhau/category/BMP không đổi; chạy chính c36 qua main→L8, đòi rc3 DO:c36 đúng thông báo tổng lớn hơn kỳ vọng; giữ control cùng cache. Có thể dùng a126 rẻ hơn sau khi executor tự dẫn xuất.",
+        "locking_test": "Mutant ==→>= phải làm c40 đỏ; healthy control xanh; 14 phép gỡ, phản chứng cũ và full suites vẫn đúng.",
+        "risk": "Thêm I/O provenance có thể chạm trần thời gian B+30s; đo lại cặp base/head, không nới oracle hoặc sửa fixture để qua."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "R1-01 (closed)",
+        "R1-02 (closed)",
+        "R2-01 (open)"
+      ],
+      "manifestations": "Hai biểu hiện cũ đóng; chốt exact count vẫn có hướng thừa không được meta-test bảo vệ.",
+      "highest_open_severity": "P3",
+      "source": "B02 wp1236 lượt4 -> ded4128 lượt1 -> ef82ed9 lượt2; không reset lịch sử.",
+      "common_fix": "Mỗi bất biến định lượng có expected độc lập và đối chứng âm ở các chiều sai có thể đạt được, cô lập khỏi chốt lân cận; control qua cùng consumer/cache.",
+      "closing_check": "R2-01 ==→>= phải bị c40 bắt bằng tín hiệu đúng; extra-duplicate witness bị c36 chặn;14 phép gỡ và các biểu hiện cũ vẫn được khoá, gate/thời gian đạt."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "status": "VA_MOT_PHAN",
+      "evidence": {
+        "prior_findings": [
+          {
+            "id": "R1-01",
+            "status": "DA_VA_THAT",
+            "evidence": [
+              "probes.json: c37-total-literal và c37-648 đều rc3 DO:c39.",
+              "trace-v2.json:37 âm c37 rc3 và0 ô,2 dương rc0 và648 ô.",
+              "guard-witnesses.json: đối chứng real ky8 648; bỏ ô647 bị chặn trước ô; bỏ chốt thì647 thực chạy.",
+              "nap-code-audit.json: code/constant/metadata của mọi hàm bản sao nguyên vẹn khớp; kiểm đường mod.chay_ca."
+            ]
+          },
+          {
+            "id": "R1-02",
+            "status": "DA_VA_THAT",
+            "evidence": [
+              "scope-scan.json: đúng cặp reviewer cho c36 rc3 DO:c36 35 phần tử KHÁC NHAU/36.",
+              "probes.json: chạy lại cả hai suite của đúng outside-mutant.json, B đỏ.",
+              "count-audit.json: tám số gặp lại và tổng8396/8198 đo lại độc lập.",
+              "cache-audit.json:402 đầu vào main→L8 và rc/DO trùng khi bật/tắt cache."
+            ]
+          }
+        ],
+        "remaining": "R2-01 trong §2.2.1, đã đo cả targeted và full suite mutant; không phải unique replacement ngoài §8."
+      }
+    }
+  ],
+  "prior_finding_status": [
+    {
+      "id": "R1-01",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "probes.json: c37-total-literal và c37-648 đều rc3 DO:c39.",
+        "trace-v2.json:37 âm c37 rc3 và0 ô,2 dương rc0 và648 ô.",
+        "guard-witnesses.json: đối chứng real ky8 648; bỏ ô647 bị chặn trước ô; bỏ chốt thì647 thực chạy.",
+        "nap-code-audit.json: code/constant/metadata của mọi hàm bản sao nguyên vẹn khớp; kiểm đường mod.chay_ca."
+      ]
+    },
+    {
+      "id": "R1-02",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "scope-scan.json: đúng cặp reviewer cho c36 rc3 DO:c36 35 phần tử KHÁC NHAU/36.",
+        "probes.json: chạy lại cả hai suite của đúng outside-mutant.json, B đỏ.",
+        "count-audit.json: tám số gặp lại và tổng8396/8198 đo lại độc lập.",
+        "cache-audit.json:402 đầu vào main→L8 và rc/DO trùng khi bật/tắt cache."
+      ]
+    }
+  ],
+  "class_closure_ratio": {
+    "U": 1,
+    "F": 0,
+    "ratio": 0,
+    "prior_manifestations_closed": "2/2",
+    "new_classes": 0
+  },
+  "verdict": "changes_requested",
+  "ngoai_pham_vi_dac_ta": [
+    {
+      "id": "unique-structural-substitution",
+      "spec_basis": "§8 đã khai cùng số lượng/category; §2.2.1–3 không ghim nội dung/ID từng ô. P5 bắt buộc BỎ một lời gọi, không phải thay một ô bằng một ô duy nhất khác.",
+      "description": "Thay marker bằng [khac], hoặc thay ô delimiter bằng kiem(dong+\" \",ten_goc):36 phần tử khác nhau, category/BMP vẫn đủ; A/a129 và c36 đều rc0. Đã xét mất ví dụ delimiter trong mutant thứ hai; spec này không bắt buộc ghim ví dụ đó khi các miền đã nêu giữ nguyên.",
+      "evidence": [
+        {
+          "label": "rename-marker",
+          "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+          "moi": "    kiem(dau + \" [khac]\" + duoi, ten_goc + \" [khac]\")\n",
+          "A_rc": 0,
+          "A_output": "",
+          "B_rc": 0,
+          "B_output": ""
+        },
+        {
+          "label": "unique-trailing-space",
+          "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+          "moi": "    kiem(dong + \" \", ten_goc)\n",
+          "A_rc": 0,
+          "A_output": "",
+          "B_rc": 0,
+          "B_output": ""
+        }
+      ],
+      "disposition": "limits; không findings, không cắt nghĩa vụ P4/P5, không dùng để miễn thiếu/thừa miền bắt buộc."
+    }
+  ],
+  "m3_windows": {
+    "classification": "required",
+    "step": 2,
+    "reason": "Diff thêm nap_sua read_text(encoding=\"utf-8\") ở dòng940; không là M8. Giữ required lượt1.",
+    "local_status": "not_run"
+  },
+  "pham_vi_e": {
+    "E1": "khong",
+    "E2": "khong",
+    "E3": "khong",
+    "E4": "khong",
+    "E5": "khong",
+    "reason": "Diff chỉ2 tệp test+201/-6, không đổi module quyết định land, lease/merge gate, authority hoặc workflow."
+  },
+  "luat9": {
+    "status": "chua_do_duoc",
+    "reviewer_full_rerun": "not_run",
+    "module_comparison": [
+      {
+        "path": "ops/land_evidence_nguon.py",
+        "byte_identical": true,
+        "base_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+        "head_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c"
+      },
+      {
+        "path": "ops/gate_output_doi_chieu.py",
+        "byte_identical": true,
+        "base_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38",
+        "head_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38"
+      }
+    ],
+    "acceptance_condition": "Handoff bổ sung trên ef82ed9/tree, đủ hai cặp base/head bằng bộ quét ghim, manifest/kho/Python khớp, HOAN_TAT, so từng ID không GIET-base→hạng khác-head; giữ riêng SONG/VO_CAN/không áp dụng.",
+    "prior_sha_not_current": "ded412862fba5181fc59e8482ff40cb31162f577",
+    "prior_counts_only": {
+      "B": {
+        "GIET": 438,
+        "SONG": 173,
+        "VO_CAN": 13
+      },
+      "A": {
+        "GIET": 923,
+        "SONG": 23,
+        "VO_CAN": 0
+      }
+    }
+  },
+  "tests": [
+    {
+      "label": "base-B",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+      "rc": 0,
+      "seconds": 276.260317795,
+      "status": "passed",
+      "log": "base-B.log",
+      "stdout_sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+      "positive": "CA: 38/38 dat\nDOT BIEN: 145/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT"
+    },
+    {
+      "label": "head-B",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 0,
+      "seconds": 305.211322329,
+      "status": "passed",
+      "log": "head-B.log",
+      "stdout_sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc",
+      "positive": "CA: 40/40 dat\nDOT BIEN: 145/145 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT"
+    },
+    {
+      "label": "base-A",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+      "rc": 0,
+      "seconds": 336.0687894580001,
+      "status": "passed",
+      "log": "base-A.log",
+      "stdout_sha256": "27acd3408f36ff07b619ab67be154127c1bd1a89580aba8843a21da4eaa89f9f",
+      "positive": "CA: 51/51 dat\nDOT BIEN: 158/158 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT"
+    },
+    {
+      "label": "head-A",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 0,
+      "seconds": 333.1301123630001,
+      "status": "passed",
+      "log": "head-A.log",
+      "stdout_sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179",
+      "positive": "CA: 53/53 dat\nDOT BIEN: 158/158 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT"
+    },
+    {
+      "label": "head-land",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 0,
+      "seconds": 7.453658795000138,
+      "status": "passed",
+      "log": "head-land.log",
+      "stdout_sha256": "33476900e203e5d9b36e21690ad12301a0c9e7b30909997160016073c77cdb6f",
+      "positive": "ĐẠT ops/land/pr995-wp960-land-evidence.yaml\n  ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (băm khớp ảnh chụp base đợt B)\nĐẠT ops/land/pr997-wp978-land-evidence.yaml\nland_evidence_nguon: 153 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 178\nTỔNG: ĐẠT"
+    },
+    {
+      "label": "head-ci",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 0,
+      "seconds": 369.40801611300003,
+      "status": "passed",
+      "log": "head-ci.log",
+      "stdout_sha256": "9ec1093f854b6049a4911a2e9d3a2566f6b5d959a81bad353fde3a0e34990fb4",
+      "positive": "ĐỘT BIẾN p643-A4-N-1: ĐỎ đúng\nĐỘT BIẾN p643-A4-bo-env: ĐỎ đúng\nĐỘT BIẾN p643-A4-hai-buoc-registry: ĐỎ đúng\nPHẢN CHỨNG: 1677/1677 đỏ đúng\nTỔNG: ĐẠT"
+    },
+    {
+      "label": "base-selftest",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+      "rc": 1,
+      "seconds": 289.98944171799985,
+      "status": "failed",
+      "log": "base-selftest.log",
+      "stdout_sha256": "c7d9fdca605b1350b4c1a67f1c14194600e1e2270fb66a7d766b78a20ea46138",
+      "positive": "  [OK] r380_llm_order_luu_doi_xoa\n  [OK] r380_llm_khai_niem_tu_tep_qua_sub\n  [OK] r380_llm_khai_niem_bien_dau_vao\n  [OK] wp42_complete_runtime_test_ids_unique\n== tl selftest 1773/1789 =="
+    },
+    {
+      "label": "head-selftest",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 1,
+      "seconds": 288.96201120600017,
+      "status": "failed",
+      "log": "head-selftest.log",
+      "stdout_sha256": "1b9f88617195d22d036287629353878d164e7abd7cc3f3b0bd648b354c4718ae",
+      "positive": "  [OK] r380_llm_order_luu_doi_xoa\n  [OK] r380_llm_khai_niem_tu_tep_qua_sub\n  [OK] r380_llm_khai_niem_bien_dau_vao\n  [OK] wp42_complete_runtime_test_ids_unique\n== tl selftest 1773/1789 =="
+    },
+    {
+      "label": "base-ruff",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+      "rc": 0,
+      "seconds": 0.07871413300017593,
+      "status": "passed",
+      "log": "base-ruff.log",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "positive": "All checks passed!"
+    },
+    {
+      "label": "head-ruff",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+      "rc": 0,
+      "seconds": 0.059709678000217536,
+      "status": "passed",
+      "log": "head-ruff.log",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "positive": "All checks passed!"
+    }
+  ],
+  "timing": {
+    "reviewer": {
+      "B_base": 276.260317795,
+      "B_head": 305.211322329,
+      "B_delta": 28.951004533999992,
+      "A_base": 336.0687894580001,
+      "A_head": 333.1301123630001,
+      "A_delta": -2.9386770950000027
+    },
+    "executor": {
+      "B_base": 310.5,
+      "B_head": 328.2,
+      "B_delta": 17.7,
+      "A_base": 337.0,
+      "A_head": 336.9,
+      "A_delta": -0.1
+    },
+    "scope": "One paired sequential run per suite, same command/machine/Linux/runtime, no other heavy reviewer test during timed pairs; later parallel probes excluded from timing comparison. Single measurements do not bound variance or Windows runtime."
+  },
+  "selftest": {
+    "failed_ids": {
+      "base": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ],
+      "head": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ]
+    },
+    "new_failures": [],
+    "resolved": [],
+    "status": "failed_on_both",
+    "diagnosis": [
+      "selftest-git-diagnosis.json: synthetic git commit rc128, inherited signer attempts blocked loopback; no commit object -> r226/r268 cannot build their mini-repo evidence.",
+      "selftest-ancestor-diagnosis.json: read-only _trong_kho_git(work/tmp/synthetic_credential_home) returns /tmp; counterfactual predicate without /tmp/.git returns None. No actual marker/credential changed."
+    ],
+    "limits": "Partial diagnosis, not per-ID causal proof for all failures; origin/master was present in both scratch clones. No unsigned rerun, no removal of /tmp/.git."
+  },
+  "static_checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "a89c83a",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "a89c83a",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "49\t0\tops/gate_output_doi_chieu_test.py\n152\t6\tops/land_evidence_nguon_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-only",
+        "ded4128",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "ops/land_evidence_nguon_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "ruff 0.15.15\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "config",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    }
+  ],
+  "counterexamples": {
+    "guard_removals": [
+      {
+        "label": "c36-count",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 9.956781780000028,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A bỏ Mn (a129) mà c36 không ĐỎ đúng chốt: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử KHÁC NHAU (đặc tả: đúng 36)\n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 0.9682436620000772,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành ký tự Mc KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-BMP",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 1.4414746999998442,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A ngoài BMP thành ký tự BMP KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-total-literal",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.31362627099997553,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:lặp CHÍNH ký tự ngoài BMP cuối mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=3, 0 ô, DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 652 (đúng 648)\n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-distinct",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.3101254270000027,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:Lu thành ASCII 'A' mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 648 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.47126315800005614,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:Mn thành ký tự Mc KHÁC mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 648 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-648",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.3202973009999823,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:c37 mất một ô rời mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 647 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-distinct",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 1.411972298999899,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành bản sao Mc (a126) mà c36 không ĐỎ đúng chốt: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: thiếu general category ['Mn']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-so_phan_tu",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8977810179999324,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-category_vang",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8274403589998656,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-lap_category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 1.8472884519999297,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Mn thanh ban sao Mc: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-thuoc_cam",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 1.6373324829999092,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc cam: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-tu_0080",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 2.975944453000011,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Lu thanh ASCII: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-cuoi_ngoai_bmp",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 1.0609250810000503,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo ngoai BMP: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu']\n",
+        "stderr": ""
+      }
+    ],
+    "legacy_extra_probe": {
+      "label": "c37-total-executor",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py",
+        "--mot-ca",
+        "c39_c37_do_khi_bo_sinh_lech_mien"
+      ],
+      "rc": 3,
+      "seconds": 0.3172753650001141,
+      "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:bỏ ký tự ngoài BMP mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=3, 0 ô, DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 644 (đúng 648)\n",
+      "stderr": ""
+    },
+    "B02": [
+      {
+        "mutant": "omit-category-Mn",
+        "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+        "rc": 3,
+        "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a124_token_ascii_qua_ho_so qua main → L8: 1723 phần tử (đặc tả: đúng 1733), rc=0 "
+      },
+      {
+        "mutant": "omit-category-Mn",
+        "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+        "rc": 3,
+        "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP"
+      },
+      {
+        "mutant": "omit-lazy-backtracking",
+        "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+        "rc": 3,
+        "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 "
+      }
+    ],
+    "guard_witnesses": [
+      {
+        "label": "original",
+        "rc": 0,
+        "output": "",
+        "actual_cells": 648
+      },
+      {
+        "label": "missing-cell",
+        "rc": 3,
+        "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 647 (đúng 648)",
+        "actual_cells": 0
+      },
+      {
+        "label": "missing-cell-no-648",
+        "rc": 0,
+        "output": "",
+        "actual_cells": 647
+      },
+      {
+        "label": "duplicate-extra-nonBMP",
+        "rc": 3,
+        "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 159 ký tự (158 khác nhau), category lệch [], 2 ngoài BMP"
+      },
+      {
+        "label": "duplicate-extra-no-total",
+        "rc": 3,
+        "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 652 (đúng 648)"
+      }
+    ],
+    "trace": "trace-v2.json",
+    "cache": "cache-audit.json",
+    "scope": "scope-scan.json",
+    "fingerprint_components": "fingerprint-scan.json",
+    "distinct_direct": "distinct-target.json",
+    "extra_count": {
+      "guard_mutation": {
+        "path": "ops/land_evidence_nguon_test.py",
+        "cu": "bang(rc == 0 and dem[0] - truoc == mong,",
+        "moi": "bang(rc == 0 and dem[0] - truoc >= mong,"
+      },
+      "witness": {
+        "path": "ops/gate_output_doi_chieu_test.py",
+        "cu": "    kiem(dong, ten_goc)\n",
+        "moi": "    kiem(dong, ten_goc)\n    kiem(dong, ten_goc)\n"
+      },
+      "rows": [
+        {
+          "guard": "exact",
+          "probe": "c40",
+          "rc": 0,
+          "output": ""
+        },
+        {
+          "guard": "exact",
+          "probe": "extra-duplicate-a129",
+          "rc": 3,
+          "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 37 phần tử (đặc tả: đúng 36), rc=0 "
+        },
+        {
+          "guard": "exact",
+          "probe": "intact-a129",
+          "rc": 0,
+          "output": ""
+        },
+        {
+          "guard": "floor-mutant",
+          "probe": "c40",
+          "rc": 0,
+          "output": ""
+        },
+        {
+          "guard": "floor-mutant",
+          "probe": "extra-duplicate-a129",
+          "rc": 0,
+          "output": ""
+        },
+        {
+          "guard": "floor-mutant",
+          "probe": "intact-a129",
+          "rc": 0,
+          "output": ""
+        }
+      ]
+    },
+    "full_floor_mutant": {
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/floor",
+      "rc": 0,
+      "seconds": 302.6776279559999,
+      "mutant": {
+        "cu": "bang(rc == 0 and dem[0] - truoc == mong,",
+        "moi": "bang(rc == 0 and dem[0] - truoc >= mong,"
+      },
+      "stdout_sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc"
+    }
+  },
+  "unicode": {
+    "probe_312": "unicode-312.json",
+    "probe_313": "unicode-313.json",
+    "domains_equal": true,
+    "targeted_python312": [
+      {
+        "command": [
+          "/usr/bin/python3.12",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a"
+        ],
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": "",
+        "seconds": 47.332576205999885
+      },
+      {
+        "command": [
+          "/usr/bin/python3.12",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": "",
+        "seconds": 12.060430972999939
+      },
+      {
+        "command": [
+          "/usr/bin/python3.12",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a135_bo_sinh_dung_mien_dac_ta"
+        ],
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": "",
+        "seconds": 0.5289552649999223
+      },
+      {
+        "command": [
+          "/usr/bin/python3.12",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": "",
+        "seconds": 1.9397690139999213
+      }
+    ],
+    "c39_python312_rc": 0,
+    "derivation": "independent_counts.md",
+    "counts": "count-audit.json"
+  },
+  "not_run": [
+    "Bốn lượt full Luật9/bước8 trên ef82ed9: không chạy lại theo assignment; chờ handoff bổ sung exact SHA.",
+    "Windows local base/head và Windows CI: not_run; M3 required.",
+    "GitHub CI/connector/full_mutant_audit M9, audit uỷ quyền, push/merge/land: not_run, không được review này chứng nhận.",
+    "Cô lập nhân quả đầy đủ từng ID selftest dưới môi trường không có /tmp/.git và signer hoạt động: not_run; không có quyền thay môi trường ngoài work/."
+  ],
+  "skipped": [],
+  "limits": [
+    "Không chốt nội dung từng ô cấu trúc: hai mutant minh hoạ trong scope-scan.json khớp giới hạn §8, không là findings.",
+    "Selftest vẫn failed trong sandbox ở cả hai vế, delta0 không phải N/N; chẩn đoán chỉ một phần, không suy nguyên nhân tất cả16 ID từ /tmp/.git.",
+    "Không gọi GitHub/web/network để lấy authority hoặc CI. Selftest và fixture Git có signer thừa kế thử loopback, bị sandbox từ chối; không truy cập thành công, không đổi cấu hình để vượt chặn.",
+    "Model/effort thực phục vụ KHONG_DO_DUOC; header CLI công bố gpt-6-astra/high không chứng minh mọi request.",
+    "Read-only là kỷ luật: sandbox workspace-write. Snapshot hai mốc không chứng minh mọi sự kiện trung gian. Repo nguồn ngoài checkout được cấp không nằm trong phạm vi quan sát.",
+    "So thời gian chỉ một lượt mỗi vế. Python3.12 local dùng Unicode15.0/PyYAML6.0.1, không phải bằng chứng full CI hay Windows.",
+    "So marshal.dumps ban đầu không trùng; chưa cô lập chi tiết biểu diễn của marshal, không dùng nó kết luận code khác. nap-code-audit.json so Python code equality và mọi thuộc tính/constant lồng nhau: đều trùng."
+  ],
+  "stop_condition": "P3-only rework giữ1 lớp mở (0/1 đóng lớp), ADR0060 M1 yêu cầu dừng vá tự động/checkpoint điều phối. Trần4 lời gọi còn số dư không tự cấp quyền tiếp tục; giữ lịch sử lớp, không tự gọi lượt3.",
+  "checkout_snapshot": "snapshot-start.json / snapshot-end.json; compare before final delivery"
+}

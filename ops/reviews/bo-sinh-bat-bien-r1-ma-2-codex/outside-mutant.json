@@ -1,0 +1,6 @@
+{
+  "target": "ops/gate_output_doi_chieu_test.py",
+  "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+  "moi": "    kiem(dong, ten_goc)\n",
+  "classification": "ngoai_bang_dong"
+}

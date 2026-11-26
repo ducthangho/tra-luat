@@ -1,0 +1,48 @@
+{
+  "failed_ids": {
+    "base": [
+      "r973_bootstrap_khong_kiem_khoa",
+      "r973_bootstrap_ba_trang_thai",
+      "r973_bootstrap_require_agent_creds",
+      "r973_bootstrap_giu_auth_json_moi_hon",
+      "r973_bootstrap_last_refresh_hong_khong_pha",
+      "r973_bootstrap_auth_json_nguyen_tu",
+      "r973_bootstrap_sai_dinh_dang_khong_nap",
+      "r973_bootstrap_khong_export_khong_ghi_gemini",
+      "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "r268_l2_trichotomy_theo_trang_thai_object",
+      "wp433_gws_cred_dich_ngoai_kho",
+      "wp433_gws_cred_dich_ngoai_kho_b",
+      "wp433_gws_cred_no",
+      "wp433_gws_cred_win_reparse",
+      "wp433_nlm_gws_dich_ngoai_kho",
+      "wp727_tl_gws_refresh"
+    ],
+    "head": [
+      "r973_bootstrap_khong_kiem_khoa",
+      "r973_bootstrap_ba_trang_thai",
+      "r973_bootstrap_require_agent_creds",
+      "r973_bootstrap_giu_auth_json_moi_hon",
+      "r973_bootstrap_last_refresh_hong_khong_pha",
+      "r973_bootstrap_auth_json_nguyen_tu",
+      "r973_bootstrap_sai_dinh_dang_khong_nap",
+      "r973_bootstrap_khong_export_khong_ghi_gemini",
+      "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+      "r268_l2_trichotomy_theo_trang_thai_object",
+      "wp433_gws_cred_dich_ngoai_kho",
+      "wp433_gws_cred_dich_ngoai_kho_b",
+      "wp433_gws_cred_no",
+      "wp433_gws_cred_win_reparse",
+      "wp433_nlm_gws_dich_ngoai_kho",
+      "wp727_tl_gws_refresh"
+    ]
+  },
+  "new_failures": [],
+  "resolved": [],
+  "status": "failed_on_both",
+  "diagnosis": [
+    "selftest-git-diagnosis.json: synthetic git commit rc128, inherited signer attempts blocked loopback; no commit object -> r226/r268 cannot build their mini-repo evidence.",
+    "selftest-ancestor-diagnosis.json: read-only _trong_kho_git(work/tmp/synthetic_credential_home) returns /tmp; counterfactual predicate without /tmp/.git returns None. No actual marker/credential changed."
+  ],
+  "limits": "Partial diagnosis, not per-ID causal proof for all failures; origin/master was present in both scratch clones. No unsigned rerun, no removal of /tmp/.git."
+}

@@ -1,0 +1,128 @@
+[
+  {
+    "label": "base-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+    "rc": 0,
+    "seconds": 276.260317795
+  },
+  {
+    "label": "head-B",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 0,
+    "seconds": 305.211322329
+  },
+  {
+    "label": "base-A",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+    "rc": 0,
+    "seconds": 336.0687894580001
+  },
+  {
+    "label": "head-A",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 0,
+    "seconds": 333.1301123630001
+  },
+  {
+    "label": "head-land",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 0,
+    "seconds": 7.453658795000138
+  },
+  {
+    "label": "head-ci",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/ci_dang_ky_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 0,
+    "seconds": 369.40801611300003
+  },
+  {
+    "label": "base-selftest",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "scripts/tl.py",
+      "--selftest"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+    "rc": 1,
+    "seconds": 289.98944171799985
+  },
+  {
+    "label": "head-selftest",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "scripts/tl.py",
+      "--selftest"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 1,
+    "seconds": 288.96201120600017
+  },
+  {
+    "label": "base-ruff",
+    "command": [
+      "/usr/local/bin/python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon_test.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/base",
+    "rc": 0,
+    "seconds": 0.07871413300017593
+  },
+  {
+    "label": "head-ruff",
+    "command": [
+      "/usr/local/bin/python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "ops/land_evidence_nguon_test.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head",
+    "rc": 0,
+    "seconds": 0.059709678000217536
+  }
+]

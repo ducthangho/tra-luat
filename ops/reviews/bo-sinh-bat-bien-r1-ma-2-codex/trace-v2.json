@@ -1,0 +1,806 @@
+{
+  "calls": [
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Lu'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Ll'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Lt'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Lm'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Lo'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mn'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Mc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Me'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Nd'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Nl'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['No'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Pc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Pd'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Ps'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Pe'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Pi'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Pf'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Po'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Sm'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Sc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Sk'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['So'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Zs'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Zl'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Zp'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Cc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Cf'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Co'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch ['Cn'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 157 ký tự (157 khác nhau), category lệch [], 0 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 159 ký tự (159 khác nhau), category lệch [], 2 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 159 ký tự (158 khác nhau), category lệch [], 2 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 159 ký tự (159 khác nhau), category lệch ['Ll'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 158 ký tự (157 khác nhau), category lệch ['Mn', 'Mc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 158 ký tự (158 khác nhau), category lệch ['Mn', 'Mc'], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 158 ký tự (157 khác nhau), category lệch [], 1 ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "rc": 3,
+      "output": "DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 647 (đúng 648)",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a126_mien_ascii_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a126_mien_ascii_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: thiếu general category ['Mn']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a126_mien_ascii_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: không có ký tự ngoài BMP",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a126_mien_ascii_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử KHÁC NHAU (đặc tả: đúng 52)",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a126_mien_ascii_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: 51 phần tử KHÁC NHAU (đặc tả: đúng 52)",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a129_ten_job_lazy_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a129_ten_job_lazy_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 ",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a129_ten_job_lazy_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử (đặc tả: đúng 36), rc=0 ",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "a129_ten_job_lazy_qua_ho_so",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử KHÁC NHAU (đặc tả: đúng 36)",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang', 'thuoc_cam']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang', 'lap_category']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a135_bo_sinh_dung_mien_dac_ta",
+      "rc": 3,
+      "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['tu_0080']",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/gate_output_doi_chieu_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a124': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a124': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a124': ['a124_token_ascii_qua_ho_so', 'a124_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a125': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a125': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a125': ['a125_ascii_dong_danh_gia', 'a125_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a126': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a126': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a126': ['a126_mien_ascii_qua_ho_so', 'a126_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a129': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a129': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a129': ['a129_ten_job_lazy_qua_ho_so', 'a129_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a131': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a131': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a131': ['a131_ten_tep_co_Z', 'a131_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a132': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a132': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a132': ['a132_ascii_khoa_landed_qua_ho_so', 'a132_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a133': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a133': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a133': ['a133_lop_dong_mien_qua_ho_so', 'a133_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a134': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a134': []}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: {'a134': ['a134_lop_dong_ten_tep_qua_ho_so', 'a134_ban_sao']}",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    },
+    {
+      "outer": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "case": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "rc": 0,
+      "output": "",
+      "file": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l2/work/head/ops/land_evidence_nguon_test.py"
+    }
+  ],
+  "c39_loops": [
+    {
+      "iterations": 1296,
+      "actual_counter_calls": 648
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    },
+    {
+      "iterations": 1296,
+      "actual_counter_calls": 648
+    },
+    {
+      "iterations": 0,
+      "actual_counter_calls": 0
+    }
+  ]
+}

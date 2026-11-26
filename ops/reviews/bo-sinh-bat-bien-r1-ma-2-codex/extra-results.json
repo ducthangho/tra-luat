@@ -1,0 +1,27 @@
+[
+  {
+    "name": "trace_v2.py",
+    "rc": 0,
+    "seconds": 48.56492883099986
+  },
+  {
+    "name": "cache_audit.py",
+    "rc": 0,
+    "seconds": 65.71498252800006
+  },
+  {
+    "name": "count_audit.py",
+    "rc": 0,
+    "seconds": 27.859591481000052
+  },
+  {
+    "name": "scope_scan.py",
+    "rc": 0,
+    "seconds": 122.41934694199995
+  },
+  {
+    "name": "python312-cases",
+    "rc": 0,
+    "seconds": 0.33423924399994576
+  }
+]

@@ -1,0 +1,14 @@
+[
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ trong_kho: TinHieuChotCa('trong_kho · W4 · stderr') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ goc_bieu_dien: TinHieuChotCa('goc_bieu_dien · W5.goc_0 · goc_0') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ to_tien: TinHieuChotCa('to_tien · W4.ong · lien_ket') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ duong_xuong_dong: TinHieuChotCa('duong_xuong_dong · W4.bootstrap · mot_dong_w4') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ bien_cfgdir: TinHieuChotCa('bien_cfgdir · W4.cfg_la_tep · hop_dong') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ nguyen_tu: TinHieuChotCa('nguyen_tu · W4.thuong · nguyen_tu') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ du_lieu_sai_dang: TinHieuChotCa('du_lieu_sai_dang · N6.kieu · kieu') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ ghi_loi_theo_pha: TinHieuChotCa('ghi_loi_theo_pha · W4.mkstemp · tiem') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho] ĐỎ chung_hop_dong_loi: TinHieuChotCa('chung_hop_dong_loi · W4.trong_kho · mot_dong_loi') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho_b] ĐỎ w6_du_lieu: TinHieuChotCa('w6_du_lieu · W6.hop_le · duong') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho_b] ĐỎ w6_locale: TinHieuChotCa('w6_locale · W6.web_utf8 · duong_utf8') (None)",
+  "[wp433_gws_cred_dich_ngoai_kho_b] ĐỎ jar_rong_base: TinHieuChotCa('jar_rong_base · W2.rong · base_w2') (None)"
+]

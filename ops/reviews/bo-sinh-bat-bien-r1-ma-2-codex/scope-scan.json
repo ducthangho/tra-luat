@@ -1,0 +1,29 @@
+[
+  {
+    "label": "rename-marker",
+    "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+    "moi": "    kiem(dau + \" [khac]\" + duoi, ten_goc + \" [khac]\")\n",
+    "A_rc": 0,
+    "A_output": "",
+    "B_rc": 0,
+    "B_output": ""
+  },
+  {
+    "label": "unique-trailing-space",
+    "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+    "moi": "    kiem(dong + \" \", ten_goc)\n",
+    "A_rc": 0,
+    "A_output": "",
+    "B_rc": 0,
+    "B_output": ""
+  },
+  {
+    "label": "R1-02-exact-duplicate",
+    "cu": "    kiem(dau + \" [khong khop]\" + duoi, ten_goc + \" [khong khop]\")\n",
+    "moi": "    kiem(dong, ten_goc)\n",
+    "A_rc": 0,
+    "A_output": "",
+    "B_rc": 3,
+    "B_output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 35 phần tử KHÁC NHAU (đặc tả: đúng 36)"
+  }
+]

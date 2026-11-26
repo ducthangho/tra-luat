@@ -1,0 +1,17 @@
+[
+  {
+    "label": "ignore-provenance",
+    "rc": 3,
+    "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a125_ascii_dong_danh_gia qua main → L8: 1 phần tử KHÁC NHAU (đặc tả: đúng 3769)"
+  },
+  {
+    "label": "ignore-profile",
+    "rc": 3,
+    "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a124_token_ascii_qua_ho_so qua main → L8: 1 phần tử KHÁC NHAU (đặc tả: đúng 1649)"
+  },
+  {
+    "label": "no-reset",
+    "rc": 3,
+    "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a125_ascii_dong_danh_gia qua main → L8: 5418 phần tử KHÁC NHAU (đặc tả: đúng 3769)"
+  }
+]

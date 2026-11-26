@@ -1,0 +1,273 @@
+{
+  "declared_functions_equal": {
+    "bang": true,
+    "ca": true,
+    "nap": true,
+    "cay": true,
+    "kiem": true,
+    "chay": true,
+    "ky": true,
+    "c01_l1_luot1_mergeable_clean_khong_nguon": true,
+    "c02_l1_glob_va_thu_muc": true,
+    "c03_l1_token_khong_duoc_thoat_goc": true,
+    "c04_l1_measured_hoa_thuong_va_khong_phai_khai": true,
+    "c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van": true,
+    "c06_l3_luot2_moc_sau_merged_at": true,
+    "c07_l3_chi_doc_readback_cua_chinh_pr": true,
+    "c14_cli_moi_to_hop_duong_dan": true,
+    "c08_l4_khong_do_duoc_khong_bao_gio_dat": true,
+    "c09_l5_mien_tru_theo_bam": true,
+    "c13_bam_va_luat_tren_cung_mot_lan_doc": true,
+    "c10_l5_danh_sach_dong_bang": true,
+    "_cay_that_dat": true,
+    "c11_cay_that_dat_va_mien_tru_du": true,
+    "c15_c11_tu_kiem_qua_dau_ra_gia": true,
+    "c16_l6_landed_true_phai_co_phan_hoan_tat": true,
+    "hs7": true,
+    "c17_l7_khai_dat_phai_do_thuc_thi": true,
+    "c18_l7_mien_tru_theo_bam": true,
+    "c19_l7_danh_sach_dong_bang": true,
+    "ky7": true,
+    "c20_l7r2_long_mapping_khong_khoi_goc": true,
+    "c21_l7r2_long_trong_list": true,
+    "c22_l7r2_khoi_goc_la_nguon_duy_nhat": true,
+    "c23_l7_model_effort_tuy_chon": true,
+    "prov_that": true,
+    "dong_l8": true,
+    "ky8": true,
+    "cay_tai": true,
+    "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base": true,
+    "c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia": true,
+    "c26_b6_l8_duong_khop_tep_danh_gia": true,
+    "c27_b7_l8_landed_khong_loi_khai": true,
+    "c28_b5_l8_danh_sach_dong_bang": true,
+    "c29_b3_l8_mien_tru_theo_ten_va_bam": true,
+    "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc": true,
+    "c31_b8_l8_chay_sau_chot_cutover": true,
+    "c32_l8_ma_tran_token_va_khoa_qua_cong": true,
+    "rb8": true,
+    "c34_l8_ma_tran_mien_qua_cong": true,
+    "c35_l8_ngu_phap_tep_danh_gia_qua_cong": true,
+    "ky_tu_ngoai_ascii": true,
+    "nap_a": true,
+    "chon_ca_a": true,
+    "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a": true,
+    "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong": true,
+    "c38_c36_do_khi_bang_cua_dot_a_mat_ca": true,
+    "nap_sua": true,
+    "c39_c37_do_khi_bo_sinh_lech_mien": true,
+    "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o": true,
+    "c33_tong_ket_qua_cong_ci": true,
+    "c12_dong_cuoi_dung_dinh_dang": true,
+    "chay_con": true,
+    "phan_hang": true,
+    "chay_dot_bien": true,
+    "chay_ca": true,
+    "main": true
+  },
+  "all_declared_functions_equal": true,
+  "cases": [
+    {
+      "case": "c01_l1_luot1_mergeable_clean_khong_nguon",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c02_l1_glob_va_thu_muc",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c03_l1_token_khong_duoc_thoat_goc",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c04_l1_measured_hoa_thuong_va_khong_phai_khai",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c06_l3_luot2_moc_sau_merged_at",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c07_l3_chi_doc_readback_cua_chinh_pr",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c14_cli_moi_to_hop_duong_dan",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c08_l4_khong_do_duoc_khong_bao_gio_dat",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c09_l5_mien_tru_theo_bam",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c13_bam_va_luat_tren_cung_mot_lan_doc",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c10_l5_danh_sach_dong_bang",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c11_cay_that_dat_va_mien_tru_du",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c15_c11_tu_kiem_qua_dau_ra_gia",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c16_l6_landed_true_phai_co_phan_hoan_tat",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c17_l7_khai_dat_phai_do_thuc_thi",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c18_l7_mien_tru_theo_bam",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c19_l7_danh_sach_dong_bang",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c20_l7r2_long_mapping_khong_khoi_goc",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c21_l7r2_long_trong_list",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c22_l7r2_khoi_goc_la_nguon_duy_nhat",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c23_l7_model_effort_tuy_chon",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c26_b6_l8_duong_khop_tep_danh_gia",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c27_b7_l8_landed_khong_loi_khai",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c28_b5_l8_danh_sach_dong_bang",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c29_b3_l8_mien_tru_theo_ten_va_bam",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c31_b8_l8_chay_sau_chot_cutover",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c32_l8_ma_tran_token_va_khoa_qua_cong",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c34_l8_ma_tran_mien_qua_cong",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c33_tong_ket_qua_cong_ci",
+      "code_eq": true,
+      "differences": {}
+    },
+    {
+      "case": "c12_dong_cuoi_dung_dinh_dang",
+      "code_eq": true,
+      "differences": {}
+    }
+  ],
+  "all_normalized_equal": true,
+  "all_python_code_equal": true
+}

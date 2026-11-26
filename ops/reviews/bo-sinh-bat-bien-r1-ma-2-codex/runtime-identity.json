@@ -1,0 +1,14 @@
+{
+  "provider": "local_process",
+  "execution_surface": "subprocess",
+  "transport": "machine",
+  "trang_thai": "dang_chay",
+  "run_id": "866eb42659994d88b5bc3da44d2af062",
+  "bat_dau_utc": "2026-11-26T05:22:24.073373+00:00",
+  "deadline_utc": null,
+  "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "agent_da_khai": null,
+  "agent_suy_ra": "khong",
+  "reviewer_process_evidence": "stderr.log header: OpenAI Codex v0.172.0, provider openai, session01a2164e; executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "model_effort_served": "KHONG_DO_DUOC"
+}

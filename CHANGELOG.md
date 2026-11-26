@@ -43,6 +43,8 @@
   gõ tay; hướng dẫn bỏ lời khuyên sửa câu chữ nguồn để lách chốt.
 - r16 (sau cross-review lượt 15, đặc tả `ops/specs/llm-khoan-docx-r16.md`): đổi từ chuẩn hoá sang TỪ CHỐI — chữ của Điều (.docx và
   văn bản thô) có ký tự vô hình, dấu tổ hợp lạ, bộ chọn biến thể hay không ở dạng NFC ⇒ dừng; số gõ tay `(1)` dính thân chữ số ⇒ chặn.
+- r17 (sau cross-review lượt 16, đặc tả `ops/specs/llm-khoan-docx-r17.md`): đảo danh sách cấm nhóm Unicode thành DANH SÁCH CHO PHÉP
+  ký tự, kiểm trên chữ gốc trước khi tách dòng / gộp khoảng trắng; đúng một BOM; khoảng trắng trong `lvlText` chỉ là dấu cách.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

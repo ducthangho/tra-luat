@@ -130,3 +130,5 @@ revision_ly_do: 'Cross-review luot 15 (R1 P1, R2-R3 P2); doi lop bien ky tu tu c
 review_calls_limit: 16
 review_calls_used_truoc: 15
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r17-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 16 (S1-S3); revision r17 (ops/specs/llm-khoan-docx-r17.md), tran 17.'

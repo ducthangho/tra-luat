@@ -3056,7 +3056,9 @@ def cmd_llm_khai_niem(a) -> int:
             return 2
         try:
             # `utf-8-sig`: gỡ BOM đầu tệp — để nguyên thì U+FEFF che tiêu đề `Điều N` (lượt 2 N3).
-            van_ban = Path(a.tep).read_text(encoding="utf-8-sig").strip()
+            # r17 (#1525 lượt 16 S2): gỡ ĐÚNG MỘT BOM ở lớp giải mã; BOM thứ hai hay ký tự lạ ở biên để `tach_khoan` từ chối —
+            # chỉ strip khoảng trắng ASCII (str.strip() còn nuốt NEL, U+3000… trước khi kịp kiểm).
+            van_ban = Path(a.tep).read_text(encoding="utf-8-sig").strip(" \t\r\n")
         except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
             print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
             return 2

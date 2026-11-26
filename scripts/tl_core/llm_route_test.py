@@ -657,6 +657,14 @@ def ca_khoan_mat_so_co_diem_dat(m):
     # r16 (lượt 15 R3): ký tự vô hình che dấu điểm (hay số khoản) ⇒ từ chối CẢ nguồn thô; đối chứng sạch đạt.
     sach = "Điều 3.\nHồ sơ là tài liệu.\nDữ liệu là thông tin."
     bang(m.tach_khoan(sach) == [(None, "Hồ sơ là tài liệu."), (None, "Dữ liệu là thông tin.")], f"nguon tho sach bi chan: {m.tach_khoan(sach)}")
+    # r17 (lượt 16 S1/S2): danh sách cho phép, kiểm TRƯỚC `splitlines`/`strip`; đúng MỘT BOM; NBSP + dấu in ấn đạt.
+    bang(m.tach_khoan("\ufeff" + sach) is not None, "mot BOM dau van ban phai dat")
+    bang(m.tach_khoan("\ufeff\ufeff" + sach) is None, "BOM thu hai phai bi chan")
+    nel = sach.replace("tài liệu.\nDữ", "tài liệu.\x85Dữ").replace("\nHồ", "\n\x85Hồ")
+    bang(m.tach_khoan(nel) is None, f"NEL thanh ranh gioi dong: {m.tach_khoan(nel)}")
+    bang(m.tach_khoan(sach.replace("Dữ liệu", "\u3164- Dữ liệu")) is None, "ky tu trong nhom chu che dau diem")
+    dep = "Điều 3.\nHồ sơ là tài\u00a0liệu “gốc” – bản chính (m²) § 1."
+    bang(m.tach_khoan(dep) == [(None, "Hồ sơ là tài\u00a0liệu “gốc” – bản chính (m²) § 1.")], f"dau in an bi chan oan: {m.tach_khoan(dep)}")
     for c in ("\u200b", "\u00ad", "\u2060"):
         x = sach.replace("Dữ liệu", c + "- Dữ liệu")
         bang(m.tach_khoan(x) is None, f"R3: ky tu vo hinh {c!r} che dau diem tren nguon tho: {m.tach_khoan(x)}")
@@ -1382,6 +1390,11 @@ def ca_cau_truc_docx_dat(m):
     # r11 K2 đối chứng: khoản mở bằng "Mục tiêu" (không phải tiêu đề) đạt.
     _, cap24, _ = _doc_hop_le(m, lam_docx(H, p_docx("Mục tiêu là đích cần đạt.", 1)))
     bang(cap24 == [(1, "Mục tiêu là đích cần đạt.")], f"khoan 'Muc tieu' bi chan oan: {cap24}")
+    # r17 đối chứng: dấu in ấn trong danh sách cho phép, NBSP và mốc quyền sửa (`permStart`/`permEnd`, S3) giữa hai run vẫn đạt.
+    _, cap31, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là tài\u00a0liệu “gốc” – bản </w:t></w:r>'
+                                                '<w:permStart w:id="5" w:edGrp="everyone"/><w:r><w:t>chính (m²) § 1.</w:t></w:r>'
+                                                '<w:permEnd w:id="5"/>')))
+    bang(cap31 == [(1, "Hồ sơ là tài liệu “gốc” – bản chính (m²) § 1.")], f"dau in an / permStart bi chan oan: {cap31}")
     # r14 N2 đối chứng (A5): ID số QUÁ DÀI ở định nghĩa KHÔNG dùng không làm hỏng lần đọc (`int()` có trần độ dài chuỗi).
     dai = "9" * 5000
     ngoai3 = _NUMBERING_CHUAN.replace("</w:numbering>", f'<w:abstractNum w:abstractNumId="{dai}">{_lvl(0, "decimal", "%1.")}'
@@ -1535,6 +1548,12 @@ def ca_cau_truc_docx_chan(m):
               unicodedata.normalize("NFD", "Hồ sơ là tài liệu."), "\u200b1. Hồ sơ là tài liệu.", "Hồ sơ là đơn vị \u2126."):
         chan(lam_docx(H, p_docx(t, 1)), f"ky tu la trong Dieu: {t!r}")
     chan(lam_docx(p_docx("Điều 3.\u200b"), A), "ky tu la o tieu de Dieu")
+    # r17 S1/S2: danh sách cho phép trên chữ GỐC — ký tự trống thuộc nhóm chữ, NEL bị gộp thành khoảng trắng, kể cả ở tiêu đề.
+    for t in ("\u3164Điều 4 Phạm vi", "Hồ sơ là\x85tài liệu.", "Hồ sơ là tài liệu\u3000.", "Hồ sơ là 資料."):
+        chan(lam_docx(H, p_docx(t, 1)), f"ky tu ngoai danh sach cho phep: {t!r}")
+    chan(lam_docx(p_docx("Điều 3.\x85"), A), "NEL o tieu de Dieu (bi gop truoc khi kiem)")
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)&#9;"))),
+         "lvlText co tab")
     # r16 R2: số gõ tay ngoặc KÍN dính thân bắt đầu bằng chữ số.
     chan(lam_docx(H, p_docx("(1)5 lần là hệ số.", 1)), "so go tay ngoac kin dinh chu so")
     # r14 N3: khối trùng tên cục bộ `p`/`sdt`/`customXml` nhưng NGOÀI namespace Word ⇒ khối lạ (trước và trong Điều).
@@ -1719,10 +1738,14 @@ DOT_BIEN = [
     # r16 (lượt 15 R1–R3): mỗi chốt một đột biến.
     ('wp1525_ngoac_kin_theo_thap_phan', ('r"^(?:\\(\\s*\\d+\\s*\\)|', 'r"^(?:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_tu_choi_ky_tu_la_docx', ('        if la:   # r16', '        if False:   # r16'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_bo_kiem_nfc', ('    if unicodedata.normalize("NFC", s) != s:', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhom_bo_dau_to_hop', ('_NHOM_KY_TU_LA = frozenset({"Cf", "Mn", ', '_NHOM_KY_TU_LA = frozenset({"Cf", '), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhom_bo_dinh_dang', ('_NHOM_KY_TU_LA = frozenset({"Cf", "Mn", ', '_NHOM_KY_TU_LA = frozenset({"Mn", '), 'ca_cau_truc_docx_chan'),
-    ('wp1525_tho_bo_tu_choi_ky_tu_la', ('    if any(_ky_tu_la(ln) for ln in dong):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
+    # r17 (lượt 16 S1/S2): danh sách cho phép, kiểm trên chữ GỐC.
+    ('wp1525_cho_phep_moi_chu_cai', ('        if c not in _KY_TU_CHO_PHEP and not', '        if not c.isalpha() and c not in _KY_TU_CHO_PHEP and not'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_lvltext_khoang_trang_rong', ('[.)(\\-– ])*%[1-9](?:%[1-9]|[.)(\\-– ])*"', '[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*"'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_bom_nhieu_lan', ('    s = s[1:] if s.startswith("\\ufeff") else s', '    s = s.lstrip("\\ufeff")'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_tho_kiem_sau_tach_dong', ('    if _ky_tu_la(s, xuong_dong=True):', '    if any(_ky_tu_la(ln) for ln in s.splitlines()):'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_docx_kiem_sau_gop', ('"ky_tu_la": _ky_tu_la(tho)', '"ky_tu_la": _ky_tu_la(_gon_doan(tho))'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_ky_tu_la_chi_vung', ('    for d in doan[i0:]:   # r17', '    for d in vung:   # r17'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_tho_bo_tu_choi_ky_tu_la', ('    if _ky_tu_la(s, xuong_dong=True):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_lien_tuc', ('    if [so for so, _, _ in khoan] != list(range(1, len(khoan) + 1)):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_chu_cap_khoan', ('    if fmt0 != "decimal" or not re.fullmatch', '    if False and not re.fullmatch'), 'ca_cau_truc_docx_chan'),
@@ -1782,7 +1805,7 @@ DOT_BIEN = [
     ('wp1525_rels_part_chinh_mac_dinh', ('    thu_muc, ten_chinh = posixpath.split(chinh)', '    thu_muc, ten_chinh = posixpath.split("word/document.xml")'), 'ca_cau_truc_docx_rels_part_chinh'),
     ('wp1525_gach_sau_ngat_la_ngat', ('                    chu_sau_ngat = True   # r9', '                    kq["ngat"] = True   # r9'), 'ca_cau_truc_docx_dat'),
     ('wp1525_mc_bo_qua', ('    if any(str(e.tag).startswith(_MC) for e in goc.iter()):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_lvltext_tu_do', ('    if not re.fullmatch(r"(?:%[1-9]|[.)(\\-–\\s])*%[1-9](?:%[1-9]|[.)(\\-–\\s])*", txt):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_lvltext_tu_do', ('    if not re.fullmatch(r"(?:%[1-9]|[.)(\\-– ])*%[1-9](?:%[1-9]|[.)(\\-– ])*", txt):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_them_tieu_de', ('    if any(_mo_bang_dieu(d["chu"]) or _RE_RANH_GIOI_LON.match(_dau_doan(d["chu"])) for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_cam_tien_to_dieu', ('    if any(_mo_bang_dieu(d["chu"]) or ', '    if any('), 'ca_cau_truc_docx_chan'),
     # r13 (lượt 12 M2): mỗi chốt một đột biến.

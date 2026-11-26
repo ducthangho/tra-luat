@@ -540,22 +540,31 @@ _RE_RANH_GIOI_LON = re.compile(
 _RE_DIEU_TRONG_THAN = re.compile(r"^[ĐÐ]iều\s*\d", re.IGNORECASE)
 
 
-# r16 (lượt 15 R1/R3, Review Rescue Checkpoint §12): lớp "biên ký tự" lặp N1 → Q1 → R1/R3 — mỗi lượt một cách sắp ký tự vô
-# hình/dấu tổ hợp mới che tiền tố. Đổi từ CHUẨN HOÁ sang TỪ CHỐI: chữ của Điều (mọi đoạn .docx từ tiêu đề trở đi; mọi dòng văn bản
-# thô sau BOM đầu tệp) phải ở dạng NFC và KHÔNG chứa ký tự thuộc nhóm Unicode dưới đây — có ⇒ dừng (rc 2), không đoán.
-# Cf: định dạng (zero-width, soft hyphen, BOM giữa chừng, điều khiển hướng chữ) · Mn/Mc/Me: dấu tổ hợp còn dư sau NFC, bộ chọn biến
-# thể · Cc: điều khiển · Co/Cs/Cn: riêng tư / nửa cặp / chưa gán.
-_NHOM_KY_TU_LA = frozenset({"Cf", "Mn", "Mc", "Me", "Cc", "Co", "Cs", "Cn"})
+# r16 (lượt 15 R1/R3) → r17 (lượt 16 S1/S2, Review Rescue Checkpoint §12): lớp "biên ký tự" lặp N1 → Q1 → R1 → S1 — r16 TỪ CHỐI
+# theo DANH SÁCH CẤM nhóm Unicode (Cf/Mn/…) và thua ngay ký tự trống thuộc nhóm CHỮ (Hangul Filler U+3164, `Lo`). Doctrine kho:
+# danh sách cấm không bao giờ đủ ⇒ ĐẢO thành DANH SÁCH CHO PHÉP. Chữ của Điều chỉ được gồm: ASCII in được (U+0020–U+007E), chữ
+# tiếng Việt dựng sẵn (nguyên âm × 5 thanh, đ/Đ), chữ Latin-1 (U+00C0–U+00FF trừ × ÷), một bộ dấu in ấn cố định, NBSP, tab; xuống
+# dòng `\n`/`\r` chỉ ở văn bản thô. Ký tự khác (kể cả dấu tổ hợp tách rời ⇒ không cần kiểm NFC riêng) ⇒ dừng (rc 2), không đoán.
+# Kiểm trên chữ GỐC, TRƯỚC mọi bước tách dòng / gộp khoảng trắng / strip (S2).
+def _dung_bang_cho_phep():
+    ds = set(chr(i) for i in range(0x20, 0x7F))
+    ds |= set(chr(i) for i in range(0xC0, 0x100)) - {"×", "÷"}
+    for nguyen_am in "aăâeêioôơuưy":
+        for thanh in ("", "\u0300", "\u0301", "\u0303", "\u0309", "\u0323"):
+            for c in (nguyen_am, nguyen_am.upper()):
+                ds.add(unicodedata.normalize("NFC", c + thanh))
+    ds |= set("đĐ\u00a0\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№¹²³")
+    return frozenset(c for c in ds if len(c) == 1)
 
 
-def _ky_tu_la(chu):
-    """r16 (lượt 15 R1/R3): ký tự đầu tiên khiến chữ không đọc được an toàn (không NFC, hoặc thuộc `_NHOM_KY_TU_LA`); None nếu sạch."""
-    s = str(chu)
-    if unicodedata.normalize("NFC", s) != s:
-        return "khong o dang NFC (dau to hop tach roi)"
-    for c in s:
-        if c not in "\t\n" and unicodedata.category(c) in _NHOM_KY_TU_LA:
-            return f"ky tu U+{ord(c):04X} ({unicodedata.category(c)})"
+_KY_TU_CHO_PHEP = _dung_bang_cho_phep()
+
+
+def _ky_tu_la(chu, xuong_dong=False):
+    """r17 (lượt 16 S1/S2): ký tự đầu tiên NGOÀI danh sách cho phép (`_KY_TU_CHO_PHEP`; `\n`/`\r` chỉ khi `xuong_dong`); None nếu sạch."""
+    for c in str(chu):
+        if c not in _KY_TU_CHO_PHEP and not (xuong_dong and c in "\n\r"):
+            return f"ky tu U+{ord(c):04X} ({unicodedata.category(c)}) ngoai danh sach cho phep"
     return None
 
 
@@ -864,7 +873,8 @@ def _nhan(muc, ilvl, bo_dem):
         raise ValueError(f"numFmt {f!r} khong ho tro")
     if fmt not in ("decimal", "lowerLetter", "upperLetter"):
         raise ValueError(f"numFmt {fmt!r} khong ho tro")
-    if not re.fullmatch(r"(?:%[1-9]|[.)(\-–\s])*%[1-9](?:%[1-9]|[.)(\-–\s])*", txt):
+    # r17 (lượt 16 S2): khoảng trắng trong nhãn chỉ là dấu cách thường (không `\s` — tab, NBSP, NEL…).
+    if not re.fullmatch(r"(?:%[1-9]|[.)(\-– ])*%[1-9](?:%[1-9]|[.)(\-– ])*", txt):
         # r10 (lượt 9 J3) → r11 (lượt 10 K3): DANH SÁCH CHO PHÉP toàn chuỗi — chỉ placeholder `%N` (ít nhất một), các dấu `.` `)`
         # `(` `-` `–` và khoảng trắng; chữ, chữ số trần, `%` lẻ, ký tự vô hình ⇒ không hỗ trợ.
         raise ValueError(f"lvlText {txt!r} ngoai danh sach cho phep — khong ho tro")
@@ -1008,7 +1018,8 @@ def _phan_tich_doan(p, kieu):
     so = None if nid in (None, "0") else (nid, il or 0)
     # r7 (lượt 6 F5): cấp ngoài miền ở ĐOẠN không cần chốt riêng — chỉ đếm khi cấp có trong định nghĩa (đã giới hạn 0–8),
     # và bước xác thực chặn đoạn trỏ cấp không có định nghĩa.
-    return {"chu": _gon_doan("".join(kq["phan"])), "so": so, "so_tu_style": tu_style and so is not None,
+    tho = "".join(kq["phan"])
+    return {"chu": _gon_doan(tho), "ky_tu_la": _ky_tu_la(tho), "so": so, "so_tu_style": tu_style and so is not None,
             "ngat": kq["ngat"], "la": kq["la"]}
 
 
@@ -1057,7 +1068,7 @@ def doc_dieu_docx(nguon, dieu):
     for loai, el, trong_bang in _doan_trong(body):
         if loai != "p":
             doan.append({"chu": "", "so": None, "dem": None, "loai": loai, "trong_bang": trong_bang,
-                         "ngat": False, "la": loai == "la", "so_tu_style": False})
+                         "ngat": False, "la": loai == "la", "so_tu_style": False, "ky_tu_la": None})
             continue
         pt = _phan_tich_doan(el, kieu)
         so = pt["so"]
@@ -1102,8 +1113,8 @@ def doc_dieu_docx(nguon, dieu):
     if doan[i0]["la"]:
         raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     vung = doan[i0 + 1:]
-    for d in vung:   # tiêu đề đã qua danh sách cho phép nguyên đoạn (`_RE_TIEU_DE_TRON`)
-        la = _ky_tu_la(d["chu"])
+    for d in doan[i0:]:   # r17 (lượt 16 S2): kiểm chữ GỐC (trước gộp khoảng trắng), kể cả tiêu đề
+        la = d["ky_tu_la"]
         if la:   # r16 (lượt 15 R1): từ chối thay cho chuẩn hoá
             raise ValueError(f"Dieu co {la} — chu khong doc an toan duoc: {d['chu'][:60]!r}")
     if any(_mo_bang_dieu(d["chu"]) or _RE_RANH_GIOI_LON.match(_dau_doan(d["chu"])) for d in vung):
@@ -1203,9 +1214,13 @@ def tach_khoan(van_ban):
       không số khác ⇒ None (có thể là khoản mất số — không đoán).
     - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
       dòng (lượt 6 S2) — dòng gãy giữa câu thành khoản không xác minh được ⇒ chặn."""
-    dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
-    if any(_ky_tu_la(ln) for ln in dong):
-        return None   # r16 (lượt 15 R3): ký tự vô hình/dấu tổ hợp lạ có thể che dấu điểm hay số khoản ⇒ từ chối CẢ nguồn
+    s = str(van_ban)
+    s = s[1:] if s.startswith("\ufeff") else s   # r17 (lượt 16 S2): bỏ ĐÚNG MỘT BOM đầu văn bản
+    if _ky_tu_la(s, xuong_dong=True):
+        # r16 (lượt 15 R3) → r17 (lượt 16 S1/S2): ký tự ngoài danh sách cho phép, kiểm TRƯỚC `splitlines`/`strip` (NEL, LS/PS…
+        # không được thành ranh giới dòng) ⇒ từ chối CẢ nguồn.
+        return None
+    dong = [ln.strip() for ln in s.splitlines() if ln.strip()]
     if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
         return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):

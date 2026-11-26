@@ -2,45 +2,45 @@ schema_version: 2
 event: operator_lease_granted
 packet_issue: 1529
 packet_id: px-loc-markup
-revision: 3
+revision: 4
 generation: 1
-lease_id: px-loc-markup-r3-g1-claude
+lease_id: px-loc-markup-r4-g1-claude
 role: executor
 reviewer: 'Codex offline qua launcher.py truoc push (ADR-0060 M5/M12) + connector Codex tren PR khi con draft'
 review_class: sensitive
 effective_review_class: sensitive
-reviewed_sha_required: a89c83acf998008caecba9084a7d295845bf1976
+reviewed_sha_required: 4a96ccd2774b67406b8cd4110f7e574cfa82bc6d
 target_hosts: []
 live_change: 'Khong co. Sua module proxima-control trong kho; 0 thao tac VM, 0 loi goi inference. Harness chay tren may Windows cua chu kho (N6).'
-spec_path: ops/specs/px-loc-markup-r3.md
-spec_hash: ebf6f2779f0759a9a3168037f9877e4546a027c752e10ef006e9934e47c1adda
+spec_path: ops/specs/px-loc-markup-r4.md
+spec_hash: a346d4542153cb7dff5ebcf1ce0bf2d1a2bbd88cfea8a1d19267f3cf73f9c51e
 write_set:
 - .agents/skills/proxima-control/SKILL.md
 - .agents/skills/proxima-control/scripts/ProximaControl.psd1
 - .agents/skills/proxima-control/scripts/ProximaControl.psm1
 - .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
 - .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
-- ops/acceptance/px-loc-markup/r3/RESULTS.md
-- ops/leases/px-loc-markup-r3-g1-claude.yaml
-- ops/specs/px-loc-markup-r3.md
-write_set_hash: c0b9f9833c9742160c096fa212bd679f8ceb56d27f3947ee16dbb220343a94b0
+- ops/acceptance/px-loc-markup/r4/RESULTS.md
+- ops/leases/px-loc-markup-r4-g1-claude.yaml
+- ops/specs/px-loc-markup-r4.md
+write_set_hash: f91dae01ca5d367abe99450a82aba5886e391f576fd53d1e8c3683e1bc8eafd7
 write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
 nang_tran:
   ai_nang: ducthangho (chủ kho, thẩm quyền §2 protocol; ghi hộ issuecomment-7172063543)
-  can_cu: 'Chép từ đặc tả r3 (giữ quyết định r2): 5 tệp mã của module + 3 tệp sổ sách; ứng viên r2 cuối 8060930 đo 8 tệp / 395 dòng thêm.'
+  can_cu: 'Chép từ đặc tả r4 (giữ quyết định r2): 5 tệp mã của module + 3 tệp sổ sách; ứng viên r3 cuối d0edb21 đo 8 tệp / 432 dòng thêm.'
   tran_cu: 6 tệp / 450 dòng thêm (ADR-0053)
   tran_moi: 8 tệp / 450 dòng thêm
-branch: ops/px-loc-markup-r3
-base_sha: a89c83acf998008caecba9084a7d295845bf1976
+branch: ops/px-loc-markup-r4
+base_sha: 4a96ccd2774b67406b8cd4110f7e574cfa82bc6d
 granted_by: ducthangho
-granted_on_instruction: 'chu kho 25-11-2026 "Rut han va duyet bam dac ta"; ghi ho https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7174094220'
+granted_on_instruction: 'chu kho 26-11-2026 "Toi dong y duyet bam dac ta."; ghi ho https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7180863540'
 recorded_by: 'phien executor (vai executor cua packet px-loc-markup)'
 thay_the_cho: []
-thay_the_cho_ghi_chu: 'Khong bia mo: lease r2 (nhanh cuc bo, chua push) da rut han ve 2026-11-25T20:45:19Z theo chi thi chu kho (issuecomment-7174094220); ai-dang-giu do 0 cho ca write set truoc khi cap.'
-leased_at_utc: '2026-11-25T20:47:27Z'
-heartbeat_at: '2026-11-25T20:47:27Z'
-lease_until: '2026-11-26T00:47:27Z'
-lease_expires_at_utc: '2026-11-26T00:47:27Z'
+thay_the_cho_ghi_chu: 'Khong bia mo: lease r3 (nhanh cuc bo, chua push) het han 2026-11-26T00:47:27Z; ai-dang-giu do NGUOI_GIU 0 cho ca 8 duong dan write set r4 luc 02:31:48Z.'
+leased_at_utc: '2026-11-26T02:32:09Z'
+heartbeat_at: '2026-11-26T02:32:09Z'
+lease_until: '2026-11-26T06:32:09Z'
+lease_expires_at_utc: '2026-11-26T06:32:09Z'
 max_lease_hours: 4
 native_runs_limit_per_host: 0
 inference_calls_limit_per_host: 0

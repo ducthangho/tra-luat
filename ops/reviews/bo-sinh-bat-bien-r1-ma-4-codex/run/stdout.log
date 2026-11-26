@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](./../work/VERDICT.md) và [VERDICT.json](./../work/VERDICT.json). Validator trả `HOP_LE`.
+
+Còn 2 finding P3: mất miền đối số khi hai nguồn cùng đổi, và thiếu bảo vệ đủ 128 ký tự ASCII.
+
+KET_LUAN: changes_requested

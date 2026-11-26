@@ -1,0 +1,14 @@
+{
+  "VERDICT.json": {
+    "bytes": 91693,
+    "sha256": "0e30a239089a908458e7a1a1fd95d402e3c6bad0c73b6c3d9346692c51668735"
+  },
+  "VERDICT.md": {
+    "bytes": 19435,
+    "sha256": "73be99d32df099b00d595d8961859da3ce547879a4dab35ac34f6e19c4daf391"
+  },
+  "kiem_verdict.txt": {
+    "bytes": 33,
+    "sha256": "9739f5bd7b231ec52705a94e69de72d373883fea5c969d334c4f5ee6af7394f0"
+  }
+}

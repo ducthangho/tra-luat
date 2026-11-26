@@ -1,0 +1,24 @@
+START table
+{'name': 'table', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/bang_toan_tu.py', '--goc', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', '--ra', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/table', '--song-song', '3'], 'rc': 1}
+START repro_R3.py
+{'name': 'repro_R3.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/repro_R3.py'], 'rc': 0}
+START probes.py
+{'name': 'probes.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/probes.py'], 'rc': 0}
+START excess_probe.py
+{'name': 'excess_probe.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/excess_probe.py'], 'rc': 0}
+START trace_v2.py
+{'name': 'trace_v2.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/trace_v2.py'], 'rc': 0}
+START guard_witnesses.py
+{'name': 'guard_witnesses.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/guard_witnesses.py'], 'rc': 0}
+START data_domain_probe.py
+{'name': 'data_domain_probe.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/data_domain_probe.py'], 'rc': 0}
+START b02_targeted.py
+{'name': 'b02_targeted.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/b02_targeted.py'], 'rc': 0}
+START distinct_target.py
+{'name': 'distinct_target.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/distinct_target.py'], 'rc': 0}
+START ast_review.py
+{'name': 'ast_review.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/ast_review.py'], 'rc': 0}
+START cache_review4.py
+{'name': 'cache_review4.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/cache_review4.py'], 'rc': 0}
+START tool_review4.py
+{'name': 'tool_review4.py', 'command': ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/tool_review4.py'], 'rc': 0}

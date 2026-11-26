@@ -1,0 +1,20 @@
+--- ops/gate_output_doi_chieu_test.py
++++ ops/gate_output_doi_chieu_test.py
+@@ -1134,7 +1134,7 @@
+ LOAI_UNICODE = tuple("Lu Ll Lt Lm Lo Mn Mc Me Nd Nl No Pc Pd Ps Pe Pi Pf Po Sm Sc Sk So Zs Zl Zp Cc Cf Cs Co Cn".split())
+ BO_SINH_MONG = (("—", (), 31, ()), ("", ("Cs",), 30, ("Cs",)),
+                 ("\n\r\v\f\x1c\x1d\x1e\x85" + chr(0x2028) + chr(0x2029) + " \t", (), 29, ("Zl", "Zp")),   # U+2028/U+2029: ký tự DUY NHẤT của Zl/Zp
+-                ("", (), 31, ()), ("\r\n", ("Cs",), 30, ("Cs",)))
++                ("", (), 31, ()), ("\r", ("Cs",), 30, ("Cs",)))
+ 
+ 
+ def _mien_doi_so():
+@@ -1263,7 +1263,7 @@
+     kiem(tien_to + duoi.lstrip(), None, "dong_la")
+     kiem(dau + duoi.replace("]", "]]", 1), None, "dong_la")
+     kiem(dong + "\nloi", None, "dong_la")
+-    for ky_tu in _mau_loai_unicode("\r\n", {"Cs"}):
++    for ky_tu in _mau_loai_unicode("\r", {"Cs"}):
+         kiem(tien_to + ky_tu + ten_goc + duoi + ky_tu, ky_tu + ten_goc)
+ 
+ 

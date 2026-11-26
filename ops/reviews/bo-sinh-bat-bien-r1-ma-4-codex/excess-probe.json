@@ -1,0 +1,50 @@
+{
+  "guard_mutation": {
+    "path": "ops/land_evidence_nguon_test.py",
+    "cu": "bang(rc == 0 and dem[0] - truoc == mong,",
+    "moi": "bang(rc == 0 and dem[0] - truoc >= mong,"
+  },
+  "witness": {
+    "path": "ops/gate_output_doi_chieu_test.py",
+    "cu": "    kiem(dong, ten_goc)\n",
+    "moi": "    kiem(dong, ten_goc)\n    kiem(dong, ten_goc)\n"
+  },
+  "rows": [
+    {
+      "guard": "exact",
+      "probe": "c40",
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "guard": "exact",
+      "probe": "extra-duplicate-a129",
+      "rc": 3,
+      "output": "DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a129_ten_job_lazy_qua_ho_so qua main → L8: 37 phần tử (đặc tả: đúng 36), rc=0 "
+    },
+    {
+      "guard": "exact",
+      "probe": "intact-a129",
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "guard": "floor-mutant",
+      "probe": "c40",
+      "rc": 3,
+      "output": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A thêm một bản sao ô đầu (a126) mà c36 không ĐỎ đúng chốt: rc=0 "
+    },
+    {
+      "guard": "floor-mutant",
+      "probe": "extra-duplicate-a129",
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "guard": "floor-mutant",
+      "probe": "intact-a129",
+      "rc": 0,
+      "output": ""
+    }
+  ]
+}

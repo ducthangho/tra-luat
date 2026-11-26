@@ -1,0 +1,50 @@
+START base-A-1
+{'label': 'base-A-1', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 338.295256205, 'kind': 'A', 'sample': 1}
+START head-A-1
+{'label': 'head-A-1', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 337.75238767300004, 'kind': 'A', 'sample': 1}
+START head-A-2
+{'label': 'head-A-2', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 344.223832334, 'kind': 'A', 'sample': 2}
+START base-A-2
+{'label': 'base-A-2', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 349.0790733059998, 'kind': 'A', 'sample': 2}
+START base-A-3
+{'label': 'base-A-3', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 343.684070499, 'kind': 'A', 'sample': 3}
+START head-A-3
+{'label': 'head-A-3', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 339.95724753900004, 'kind': 'A', 'sample': 3}
+START base-B-1
+{'label': 'base-B-1', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 303.84519261399964, 'kind': 'B', 'sample': 1}
+START head-B-1
+{'label': 'head-B-1', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 311.4175911550001, 'kind': 'B', 'sample': 1}
+START head-B-2
+{'label': 'head-B-2', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 319.01443564300007, 'kind': 'B', 'sample': 2}
+START base-B-2
+{'label': 'base-B-2', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 318.3058271740001, 'kind': 'B', 'sample': 2}
+START head-a135-0
+{'label': 'head-a135-0', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a135_bo_sinh_dung_mien_dac_ta'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 0.8685950899998716}
+START head-a135-1
+{'label': 'head-a135-1', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a135_bo_sinh_dung_mien_dac_ta'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 0.9160558769999625}
+START head-a135-2
+{'label': 'head-a135-2', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a135_bo_sinh_dung_mien_dac_ta'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 0.9121359640002993}
+START head-a136-0
+{'label': 'head-a136-0', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a136_a135_do_khi_bo_sinh_lech_mien'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 1.2885740000001533}
+START head-a136-1
+{'label': 'head-a136-1', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a136_a135_do_khi_bo_sinh_lech_mien'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 1.3709273250001388}
+START head-a136-2
+{'label': 'head-a136-2', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/gate_output_doi_chieu_test.py', '--mot-ca', 'a136_a135_do_khi_bo_sinh_lech_mien'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 1.226753264999843}
+START head-c40-0
+{'label': 'head-c40-0', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py', '--mot-ca', 'c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 12.999507257999994}
+START head-c40-1
+{'label': 'head-c40-1', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py', '--mot-ca', 'c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 12.716861518000314}
+START head-c40-2
+{'label': 'head-c40-2', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon_test.py', '--mot-ca', 'c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 14.121384039000077}
+START head-land
+{'label': 'head-land', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'ops/land_evidence_nguon.py', '--root', '.'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 8.867560805000267}
+START head-ci
+{'label': 'head-ci', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', '.claude/dev/ci_dang_ky_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 378.56592900800024}
+START base-selftest
+{'label': 'base-selftest', 'side': 'base', 'command': ['/usr/local/bin/python3', '-B', 'scripts/tl.py', '--selftest'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 1, 'seconds': 319.40901167500033}
+START head-selftest
+{'label': 'head-selftest', 'side': 'head', 'command': ['/usr/local/bin/python3', '-B', 'scripts/tl.py', '--selftest'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 1, 'seconds': 305.1026206439992}
+START base-ruff
+{'label': 'base-ruff', 'side': 'base', 'command': ['/usr/local/bin/python3', '-m', 'ruff', 'check', '--no-cache', '--select', 'F', 'ops/land_evidence_nguon_test.py', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base', 'rc': 0, 'seconds': 0.5186755200002153}
+START head-ruff
+{'label': 'head-ruff', 'side': 'head', 'command': ['/usr/local/bin/python3', '-m', 'ruff', 'check', '--no-cache', '--select', 'F', 'ops/land_evidence_nguon_test.py', 'ops/gate_output_doi_chieu_test.py'], 'cwd': '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', 'rc': 0, 'seconds': 0.03846256899942091}

@@ -1,0 +1,2509 @@
+{
+  "reviewed_sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+  "reviewed_tree": "9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb",
+  "base_sha": "a89c83acf998008caecba9084a7d295845bf1976",
+  "spec_sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "revision": 1,
+  "generation": 1,
+  "vong": 4,
+  "findings": [
+    {
+      "id": "R4-01",
+      "severity": "P3",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "title": "Hai nguồn cùng lệch làm mất bộ đối số bắt buộc",
+      "path": "ops/gate_output_doi_chieu_test.py",
+      "line": 1137,
+      "spec_clause": "2.3.1",
+      "status": "open",
+      "evidence": [
+        "repro-R4.json",
+        "ast-review.json",
+        "co-drift-witness.json",
+        "co-drift.patch"
+      ],
+      "reproduce": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/../work/tmp\" python3 -B ../work/repro_R4.py",
+      "observed": "Cùng đổi caller và BO_SINH_MONG: a135/a136 rc0 ở bộ3/4/5. Giả chỉ sai tại bộ5 nguyên văn: original rc3 DO:a135; co-drift rc0. Controls rc0.",
+      "common_fix": "Ghim danh tính năm bộ bằng hằng độc lập lấy SPEC; so AST và goi với miền đó; tạo phản chứng từ miền cố định.",
+      "closing_check": "Đổi đồng thời caller/kỳ vọng từng bộ phải bị phản chứng bắt rc3 đúngDO; bộ sinh chỉ sai tại mỗi bộ SPEC không lọt; controls xanh.",
+      "estimated_added_lines": "15–25; có thể ít hơn nếu thay AST bằng miền cố định",
+      "waiver_risk": "Bộ đối số nguyên văn có thể mất hoàn toàn mà bộ test vẫn tuyên bố kiểm đủ năm; lỗi chỉ xuất hiện tại bộ đó không bị bắt.",
+      "remediation_risk": "Trùng lặp hằng và thêm chi phí meta-test; giữ checks từng bộ, controls và thời gian."
+    },
+    {
+      "id": "R4-02",
+      "severity": "P3",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "title": "Tổng158 không bảo vệ128 giá trị ASCII",
+      "path": "ops/land_evidence_nguon_test.py",
+      "line": 924,
+      "spec_clause": "2.1.1",
+      "status": "open",
+      "evidence": [
+        "domain-review4.json",
+        "repro-R4.json"
+      ],
+      "reproduce": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/../work/tmp\" python3 -B ../work/repro_R4.py",
+      "observed": "Thay NUL bằngU0081: c37/c39/c40 rc0. Thay DEL bằngU0081: c37/c39 rc0. Giữ158 khác nhau/648ô; controls cùng đường rc0.",
+      "common_fix": "Chốt tậpASCII chính xác U0000..U007F trước vòngô; thêm phản chứng thay phần tử giữ cardinality và uniqueness.",
+      "closing_check": "NUL/DEL bị thay bằngU0081 phải rc3 DO:c37 và0ô, control rc0/648ô; bỏ guard mới phải bị c39 bắt.",
+      "estimated_added_lines": "8–14",
+      "waiver_risk": "Bốn ô tại các vị trí văn bản tự do cho NUL hoặcDEL biến mất mà count158/648 vẫn xanh.",
+      "remediation_risk": "Không ép thứ tự nếu chỉ cần tập; guard mới phải có phản chứng độc lập."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "status": "VA_MOT_PHAN",
+      "finding_ids": [
+        "B02",
+        "R1-01",
+        "R1-02",
+        "R2-01",
+        "R3-01",
+        "R3-02",
+        "R4-01",
+        "R4-02"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 3,
+      "source_sha": "485387fb1e0e6e49837623ba9df7843d5dca782f",
+      "common_fix": "Inventory theo nghĩa vụ SPEC, đặc biệt danh tính từng giá trị; chốt độc lập với cardinality và nguồn đang bị sửa.",
+      "closing_check": "Giết co-drift từng bộ và ASCII replacement bằng rc3 đúng ca; giữ toàn bộ lịch sử và bảng predicate, controls xanh."
+    },
+    {
+      "slug": "nghiem-thu-thoi-gian-chua-dat",
+      "status": "DA_VA_THAT",
+      "finding_ids": [
+        "R3-03"
+      ],
+      "highest_open_severity": null,
+      "source_round": 3,
+      "source_sha": "485387fb1e0e6e49837623ba9df7843d5dca782f",
+      "common_fix": "Đo tuần tự base/head xen thứ tự, không việc nặng khác của reviewer trong các mẫu; giảm chi phí mã mới bằng cache theo function.",
+      "closing_check": "A3/3 delta<=5s; B2/2 delta<=30s trên exactSHA; toàn bộ mẫu rc0 và công bố độ dao động."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "status": "VA_MOT_PHAN",
+      "evidence": "repro-R3:3/3/3/3; bỏ từng BO và thay5=2 đều rc3; R3-01/02 cụ thể đã vá nhưng R4-01/02 còn sống, cùng lớp."
+    },
+    {
+      "slug": "nghiem-thu-thoi-gian-chua-dat",
+      "status": "DA_VA_THAT",
+      "evidence": {
+        "samples": [
+          {
+            "kind": "A",
+            "sample": 1,
+            "base": 338.295256205,
+            "head": 337.75238767300004,
+            "delta": -0.5428685319999431,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "A",
+            "sample": 2,
+            "base": 349.0790733059998,
+            "head": 344.223832334,
+            "delta": -4.8552409719998195,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "A",
+            "sample": 3,
+            "base": 343.684070499,
+            "head": 339.95724753900004,
+            "delta": -3.726822959999936,
+            "limit": 5,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "B",
+            "sample": 1,
+            "base": 303.84519261399964,
+            "head": 311.4175911550001,
+            "delta": 7.572398541000439,
+            "limit": 30,
+            "base_rc": 0,
+            "head_rc": 0
+          },
+          {
+            "kind": "B",
+            "sample": 2,
+            "base": 318.3058271740001,
+            "head": 319.01443564300007,
+            "delta": 0.7086084689999552,
+            "limit": 30,
+            "base_rc": 0,
+            "head_rc": 0
+          }
+        ],
+        "spreads": {
+          "A": {
+            "base": 10.78381710099984,
+            "head": 6.471444660999964
+          },
+          "B": {
+            "base": 14.460634560000472,
+            "head": 7.596844487999988
+          }
+        },
+        "interpretation": "Đạt trong cả5 cặp theo ngưỡng nguyên văn; không suy ra tăng tốc thực hoặc độ tin cậy thống kê. Không dùng trung vị/CPU thay tiêu chí."
+      }
+    }
+  ],
+  "verdict": "changes_requested",
+  "ngoai_pham_vi_dac_ta": [
+    {
+      "probe": "include-meta",
+      "result": "a135/a136 rc0",
+      "reason": "a135/a136 hiện không có direct ast.Call tới tên bộ sinh; tập miền hiện tại không đổi, không mất nghĩa vụ."
+    },
+    {
+      "probe": "AST-return-constant",
+      "result": "a135/a136 rc0",
+      "reason": "Hằng đúng năm bộ SPEC vẫn kiểm đủ các giá trị bắt buộc; mất khả năng tự theo caller tương lai không tự thành mất miền SPEC hiện hành."
+    },
+    {
+      "probe": "rename-generator-consistent",
+      "result": "a135/a136 rc0",
+      "reason": "Đổi tên hàm, lời gọi và detector đồng bộ; ngữ nghĩa/miền không đổi."
+    },
+    {
+      "probe": "alias/partial/constants/kwargs/keyword reorder/AST unreadable",
+      "result": "Alias/partial/missing detector:rc3; Name/kwargs/reorder/read error/syntax error:rc4",
+      "reason": "Fail-close, không xanh sai. Các biểu thức không dùng trên HEAD; SPEC không yêu cầu hỗ trợ mọi refactor. Rc4 không được tính là kill đúng chốt."
+    },
+    {
+      "probe": "different structural cell, same count/category",
+      "result": "not rerun in round4; retained SPEC §8 exclusion",
+      "reason": "Không mở rộng phạm vi sang ô cấu trúc mới không trùng; khác mất ASCII bắt buộc ởR4-02."
+    },
+    {
+      "probe": "meta assertion recursion / arbitrary callable custom equality",
+      "result": "not required / not measured",
+      "reason": "Không đòi đệ quy vô hạn phản chứng; cache chỉ xác minh các Python function thực dùng, không suy mọi callable custom hash/equality."
+    }
+  ],
+  "bang_toan_tu": {
+    "status": "passed",
+    "counts": {
+      "GIET": 136,
+      "TUONG_DUONG": 4,
+      "SONG": 0,
+      "HONG": 0
+    },
+    "matched": 140,
+    "differences": [],
+    "anchors": 140,
+    "audit": [
+      {
+        "id": "comment",
+        "old": " #1539: MIỀN",
+        "new": " REVIEW #1539: MIỀN",
+        "hang": "SONG",
+        "ca": "",
+        "rc": 0,
+        "dong": ""
+      },
+      {
+        "id": "syntax",
+        "old": "def kiem_bo_sinh(bo_sinh):",
+        "new": "def kiem_bo_sinh(bo_sinh) BROKEN:",
+        "hang": "HONG",
+        "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 1,
+        "dong": ""
+      },
+      {
+        "id": "outer-TypeError",
+        "old": "    that, a135, cam_3 =",
+        "new": "    raise TypeError(\"OUTER\")\n    that, a135, cam_3 =",
+        "hang": "HONG",
+        "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 4,
+        "dong": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: OUTER"
+      },
+      {
+        "id": "inner-TypeError",
+        "old": "    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+        "new": "    raise TypeError(\"INNER\")\n    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+        "hang": "GIET",
+        "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "dong": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=4 HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: INNER"
+      },
+      {
+        "id": "wrong-DO",
+        "old": "def chay_ca(ten):\n",
+        "new": "def chay_ca(ten):\n    return 3, \"DO:WRONG:injected\"\n",
+        "hang": "HONG",
+        "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "dong": "DO:WRONG:injected"
+      },
+      {
+        "id": "main-SONG",
+        "rc": 1
+      },
+      {
+        "id": "main-HONG",
+        "rc": 1
+      }
+    ],
+    "receipt": {
+      "command": [
+        "python3",
+        "-B",
+        "bang_toan_tu.py",
+        "--goc",
+        "head",
+        "--ra",
+        "table",
+        "--song-song",
+        "3"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work",
+      "rc": 0,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/table-rerun.log",
+      "sha256": "ca157e2a790107df8030c08b01a365556f4a4b3b0fc60c3345da0266834c73dd",
+      "first_attempt": "table-first-attempt.log: reviewer queue.py shadowed stdlib; renamed probe_tasks.py then reran unmodified tool"
+    }
+  },
+  "thoi_gian": {
+    "status": "passed",
+    "judgement": "đạt trong tất cả5 cặp đã đo",
+    "criterion": "B không chậm hơnbase quá30s, A không chậm hơnbase quá5s; hai vế cùnglệnh/cùngmáy Linux",
+    "all_samples": [
+      {
+        "label": "base-A-1",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 338.295256205,
+        "kind": "A",
+        "sample": 1
+      },
+      {
+        "label": "head-A-1",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 337.75238767300004,
+        "kind": "A",
+        "sample": 1
+      },
+      {
+        "label": "head-A-2",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 344.223832334,
+        "kind": "A",
+        "sample": 2
+      },
+      {
+        "label": "base-A-2",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 349.0790733059998,
+        "kind": "A",
+        "sample": 2
+      },
+      {
+        "label": "base-A-3",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 343.684070499,
+        "kind": "A",
+        "sample": 3
+      },
+      {
+        "label": "head-A-3",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 339.95724753900004,
+        "kind": "A",
+        "sample": 3
+      },
+      {
+        "label": "base-B-1",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 303.84519261399964,
+        "kind": "B",
+        "sample": 1
+      },
+      {
+        "label": "head-B-1",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 311.4175911550001,
+        "kind": "B",
+        "sample": 1
+      },
+      {
+        "label": "head-B-2",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 319.01443564300007,
+        "kind": "B",
+        "sample": 2
+      },
+      {
+        "label": "base-B-2",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 318.3058271740001,
+        "kind": "B",
+        "sample": 2
+      },
+      {
+        "label": "base-a135",
+        "status": "absent_at_base",
+        "seconds": null,
+        "note": "Không có ca trên base; không phải mẫu chạy."
+      },
+      {
+        "label": "base-a136",
+        "status": "absent_at_base",
+        "seconds": null,
+        "note": "Không có ca trên base; không phải mẫu chạy."
+      },
+      {
+        "label": "base-c40",
+        "status": "absent_at_base",
+        "seconds": null,
+        "note": "Không có ca trên base; không phải mẫu chạy."
+      },
+      {
+        "label": "head-a135-0",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a135_bo_sinh_dung_mien_dac_ta"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 0.8685950899998716
+      },
+      {
+        "label": "head-a135-1",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a135_bo_sinh_dung_mien_dac_ta"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 0.9160558769999625
+      },
+      {
+        "label": "head-a135-2",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a135_bo_sinh_dung_mien_dac_ta"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 0.9121359640002993
+      },
+      {
+        "label": "head-a136-0",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 1.2885740000001533
+      },
+      {
+        "label": "head-a136-1",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 1.3709273250001388
+      },
+      {
+        "label": "head-a136-2",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 1.226753264999843
+      },
+      {
+        "label": "head-c40-0",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 12.999507257999994
+      },
+      {
+        "label": "head-c40-1",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 12.716861518000314
+      },
+      {
+        "label": "head-c40-2",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 14.121384039000077
+      },
+      {
+        "label": "head-land",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon.py",
+          "--root",
+          "."
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 8.867560805000267
+      },
+      {
+        "label": "head-ci",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          ".claude/dev/ci_dang_ky_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 378.56592900800024
+      },
+      {
+        "label": "base-selftest",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "scripts/tl.py",
+          "--selftest"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 1,
+        "seconds": 319.40901167500033
+      },
+      {
+        "label": "head-selftest",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "scripts/tl.py",
+          "--selftest"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 1,
+        "seconds": 305.1026206439992
+      },
+      {
+        "label": "base-ruff",
+        "side": "base",
+        "command": [
+          "/usr/local/bin/python3",
+          "-m",
+          "ruff",
+          "check",
+          "--no-cache",
+          "--select",
+          "F",
+          "ops/land_evidence_nguon_test.py",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+        "rc": 0,
+        "seconds": 0.5186755200002153
+      },
+      {
+        "label": "head-ruff",
+        "side": "head",
+        "command": [
+          "/usr/local/bin/python3",
+          "-m",
+          "ruff",
+          "check",
+          "--no-cache",
+          "--select",
+          "F",
+          "ops/land_evidence_nguon_test.py",
+          "ops/gate_output_doi_chieu_test.py"
+        ],
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+        "rc": 0,
+        "seconds": 0.03846256899942091
+      }
+    ],
+    "pairs": [
+      {
+        "kind": "A",
+        "sample": 1,
+        "base": 338.295256205,
+        "head": 337.75238767300004,
+        "delta": -0.5428685319999431,
+        "limit": 5,
+        "base_rc": 0,
+        "head_rc": 0
+      },
+      {
+        "kind": "A",
+        "sample": 2,
+        "base": 349.0790733059998,
+        "head": 344.223832334,
+        "delta": -4.8552409719998195,
+        "limit": 5,
+        "base_rc": 0,
+        "head_rc": 0
+      },
+      {
+        "kind": "A",
+        "sample": 3,
+        "base": 343.684070499,
+        "head": 339.95724753900004,
+        "delta": -3.726822959999936,
+        "limit": 5,
+        "base_rc": 0,
+        "head_rc": 0
+      },
+      {
+        "kind": "B",
+        "sample": 1,
+        "base": 303.84519261399964,
+        "head": 311.4175911550001,
+        "delta": 7.572398541000439,
+        "limit": 30,
+        "base_rc": 0,
+        "head_rc": 0
+      },
+      {
+        "kind": "B",
+        "sample": 2,
+        "base": 318.3058271740001,
+        "head": 319.01443564300007,
+        "delta": 0.7086084689999552,
+        "limit": 30,
+        "base_rc": 0,
+        "head_rc": 0
+      }
+    ],
+    "spreads": {
+      "A": {
+        "base": 10.78381710099984,
+        "head": 6.471444660999964
+      },
+      "B": {
+        "base": 14.460634560000472,
+        "head": 7.596844487999988
+      }
+    },
+    "new_code_cost": [
+      {
+        "cache": true,
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "seconds": 2.9221522379998532,
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "cache": true,
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "seconds": 1.0766225140000643,
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "cache": false,
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "seconds": 2.956301629000336,
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "cache": false,
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "seconds": 39.94713465700033,
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "sample": 0,
+        "combined_seconds": 1.0928620790000423,
+        "a": [
+          0,
+          ""
+        ],
+        "b": [
+          0,
+          ""
+        ]
+      },
+      {
+        "sample": 1,
+        "combined_seconds": 1.0519460719997369,
+        "a": [
+          0,
+          ""
+        ],
+        "b": [
+          0,
+          ""
+        ]
+      },
+      {
+        "sample": 2,
+        "combined_seconds": 1.2342480629999955,
+        "a": [
+          0,
+          ""
+        ],
+        "b": [
+          0,
+          ""
+        ]
+      }
+    ],
+    "caveat": "A spreadbase10.78s/head6.47s vượt5s; không diễn giải delta âm thành tăngtốc thực. Ba cặp riêng đều trongtrần, không lựa mẫu/không lấytrungvị/không đổi tiêu chí. Chi phí riêng là bằng chứng bổ sung, không thaywall-time. Combined cost có thể trùng với functional gates, chỉ standalone trongmeasure.py không trùng probes."
+  },
+  "m3_windows": {
+    "classification": "required",
+    "basis": "ADR-0060 M3.2",
+    "added_lines": [
+      "+    for f in ast.parse(Path(__file__).read_text(encoding=\"utf-8\")).body:",
+      "+    nguon = (HERE / ten).read_text(encoding=\"utf-8\")"
+    ],
+    "status": "not_run"
+  },
+  "pham_vi_e": {
+    "E1": "khong",
+    "E2": "khong",
+    "E3": "khong",
+    "E4": "khong",
+    "E5": "khong",
+    "basis": "Phân loại diff: chỉ hai tệp test; không đổi sản phẩm, lease/merge authority, secrets hayLIVE.",
+    "coordination": "Sau verdict changes_requested,4/4 reviewcalls đã dùng; điều phối trả checkpointE2, không mở thêmvòng tự động."
+  },
+  "luat9": {
+    "status": "not_run",
+    "product_byte_identical": {
+      "ops/land_evidence_nguon.py": {
+        "equal": true,
+        "base_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+        "head_sha256": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c"
+      },
+      "ops/gate_output_doi_chieu.py": {
+        "equal": true,
+        "base_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38",
+        "head_sha256": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38"
+      }
+    },
+    "cache_analysis": "Bộ sinh nằm trong TEST, không đọc module sản phẩm; key giữ chính function+args, giả dùng function khác. _mot ở bộ quét ghim:263 tạo process mới mỗi mutant; cache không xuyên mutant. Mã không cho thấy đường che mutantMODULE qua cache mới, nhưng không thay full audit còn thiếu.",
+    "acceptance": "Handoff bổ sung executor trên đúngSHA/tree, cùng bộ quét ghim, đủbase/head cảA/B, kết thúc trọnvẹn,0 mutant GIET-base sanghạngkhác-head; giữriêng nợ SONG/VO_CAN."
+  },
+  "not_run": [
+    {
+      "name": "Luật9 SPEC5 bước8 exact97ec968",
+      "status": "not_run",
+      "acceptance": "Handoff bổ sung executor trên đúngSHA/tree, cùng bộ quét ghim, đủbase/head cảA/B, kết thúc trọnvẹn,0 mutant GIET-base sanghạngkhác-head; giữriêng nợ SONG/VO_CAN."
+    },
+    {
+      "name": "Windows local base/head và Windows CI",
+      "status": "not_run",
+      "reason": "M3 required; giao điều phối, Linux không thayWindows."
+    },
+    {
+      "name": "M9 ci-dot-bien-du.yml; CI/connector; audit uỷ quyền",
+      "status": "not_run",
+      "reason": "Review offline cấm mạng; chưa chứng nhận điều kiện merge."
+    }
+  ],
+  "limits": [
+    "Không gọi mạng/GitHub; authority dùng snapshot lease và chỉ thị review, không xác minh trạng thái LIVE của lease/CI.",
+    "Provider openai_codex/codex_cli/machine-local được neo executable/header; model/effort từngrequest KHONG_DO_DUOC. Header chỉ công bố gpt-6-astra/high.",
+    "Sandbox workspace-write, không phải mount repository read-only. Snapshot đầu/cuối chỉ chứng minh không delta quan sát; không chứng minh không từng ghi rồi hoàn nguyên.",
+    "Repo nguồn ngoài checkout được cấp không nằm trong phạm vi quan sát.",
+    "Toàn bộ mẫu hiệu năng hoàn tất trước khi chạy probes song song. Cổng CI/selftest và probes sau đó có chạy song song; thời gian các cổng ấy không dùng xét SPEC4. Hostload ngoài namespace không đo được.",
+    "Bảng hữu hạn không chứng minh inventory nghĩa vụ đầy đủ; R4-01/02 là phản chứng ngoài tập fixed làm mất miền SPEC.",
+    "GIET của công cụ là tín hiệu ca phản chứng ngoài. Inner rc4 có thể khiến meta-test rc3; không suy inner error là nghiệp vụ đỏ đúngchốt.",
+    "Lượt bảng đầu bị reviewer queue.py che stdlib queue. Đã đổi tên thành probe_tasks.py và chạy lại công cụ nguyên vẹn rc0; giữ log thất bại, không tính là lỗi candidate."
+  ],
+  "gates": [
+    {
+      "label": "base-A-1",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 338.295256205,
+      "kind": "A",
+      "sample": 1,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-A-1.log",
+      "sha256": "27acd3408f36ff07b619ab67be154127c1bd1a89580aba8843a21da4eaa89f9f",
+      "positive": [
+        "CA: 51/51 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-A-1",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 337.75238767300004,
+      "kind": "A",
+      "sample": 1,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-A-1.log",
+      "sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179",
+      "positive": [
+        "CA: 53/53 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-A-2",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 344.223832334,
+      "kind": "A",
+      "sample": 2,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-A-2.log",
+      "sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179",
+      "positive": [
+        "CA: 53/53 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "base-A-2",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 349.0790733059998,
+      "kind": "A",
+      "sample": 2,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-A-2.log",
+      "sha256": "27acd3408f36ff07b619ab67be154127c1bd1a89580aba8843a21da4eaa89f9f",
+      "positive": [
+        "CA: 51/51 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "base-A-3",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 343.684070499,
+      "kind": "A",
+      "sample": 3,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-A-3.log",
+      "sha256": "27acd3408f36ff07b619ab67be154127c1bd1a89580aba8843a21da4eaa89f9f",
+      "positive": [
+        "CA: 51/51 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-A-3",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 339.95724753900004,
+      "kind": "A",
+      "sample": 3,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-A-3.log",
+      "sha256": "df2b8fc59656da043aabf8816349a6cdc9354932872c8072eba88b402ec44179",
+      "positive": [
+        "CA: 53/53 dat",
+        "DOT BIEN: 158/158 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "base-B-1",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 303.84519261399964,
+      "kind": "B",
+      "sample": 1,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-B-1.log",
+      "sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+      "positive": [
+        "CA: 38/38 dat",
+        "DOT BIEN: 145/145 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-B-1",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 311.4175911550001,
+      "kind": "B",
+      "sample": 1,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-B-1.log",
+      "sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc",
+      "positive": [
+        "CA: 40/40 dat",
+        "DOT BIEN: 145/145 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-B-2",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 319.01443564300007,
+      "kind": "B",
+      "sample": 2,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-B-2.log",
+      "sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc",
+      "positive": [
+        "CA: 40/40 dat",
+        "DOT BIEN: 145/145 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "base-B-2",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 318.3058271740001,
+      "kind": "B",
+      "sample": 2,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-B-2.log",
+      "sha256": "daa585a9d164997465c6cafdf3f6c22a906c6b30f6e0d2cde0e77d672f526ec1",
+      "positive": [
+        "CA: 38/38 dat",
+        "DOT BIEN: 145/145 bi giet dung ly do",
+        "TU KIEM PHAN HANG: DAT (2 dot bien)",
+        "TONG: DAT"
+      ]
+    },
+    {
+      "label": "head-a135-0",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a135_bo_sinh_dung_mien_dac_ta"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 0.8685950899998716,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a135-0.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-a135-1",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a135_bo_sinh_dung_mien_dac_ta"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 0.9160558769999625,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a135-1.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-a135-2",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a135_bo_sinh_dung_mien_dac_ta"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 0.9121359640002993,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a135-2.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-a136-0",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a136_a135_do_khi_bo_sinh_lech_mien"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 1.2885740000001533,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a136-0.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-a136-1",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a136_a135_do_khi_bo_sinh_lech_mien"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 1.3709273250001388,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a136-1.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-a136-2",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py",
+        "--mot-ca",
+        "a136_a135_do_khi_bo_sinh_lech_mien"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 1.226753264999843,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-a136-2.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-c40-0",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py",
+        "--mot-ca",
+        "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 12.999507257999994,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-c40-0.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-c40-1",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py",
+        "--mot-ca",
+        "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 12.716861518000314,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-c40-1.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-c40-2",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon_test.py",
+        "--mot-ca",
+        "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 14.121384039000077,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-c40-2.log",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "positive": []
+    },
+    {
+      "label": "head-land",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "ops/land_evidence_nguon.py",
+        "--root",
+        "."
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 8.867560805000267,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-land.log",
+      "sha256": "33476900e203e5d9b36e21690ad12301a0c9e7b30909997160016073c77cdb6f",
+      "positive": [
+        "TỔNG: ĐẠT"
+      ]
+    },
+    {
+      "label": "head-ci",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 378.56592900800024,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-ci.log",
+      "sha256": "9ec1093f854b6049a4911a2e9d3a2566f6b5d959a81bad353fde3a0e34990fb4",
+      "positive": [
+        "RUFF CI: 3/3 hợp đồng",
+        "PHẢN CHỨNG: 1677/1677 đỏ đúng",
+        "TỔNG: ĐẠT"
+      ]
+    },
+    {
+      "label": "base-selftest",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 1,
+      "seconds": 319.40901167500033,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-selftest.log",
+      "sha256": "e20bdfa8f63d9ee97439eb2081191e8e6db1ba72bec75d4d97593f55b9e86aaa",
+      "positive": [
+        "[wp1099_nlm_nap_lai] CA A: 12/12 · D: 3/3 · DOT BIEN: 30/30 bị giết đúng ca · BỎ QUA 0",
+        "[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=2 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=16 đạt=7 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=11 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 2/3",
+        "[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=0 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=9 đạt=6 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=6 chỉ_posix=0 · HONG: 0 · TU_KIEM: 2/3",
+        "[wp433_gws_cred_no] CA: dự_kiến=3 chạy=3 đạt=2 · LUOT: dự_kiến=27 chạy=17 đạt=16 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=5 chạy=5 giết_đúng=3 bỏ_qua=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0",
+        "[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3",
+        "[wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=0 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=1 đạt=0 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=1 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 2/3 · PC_DO: 1",
+        "[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=3 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=23 bỏ_qua=0 · HONG: 0",
+        "== tl selftest 1773/1789 =="
+      ]
+    },
+    {
+      "label": "head-selftest",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 1,
+      "seconds": 305.1026206439992,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-selftest.log",
+      "sha256": "09273b5096ed9bbda2a417f27ac1ce8fd96f809c9aeeba584685bbbdc195697c",
+      "positive": [
+        "[wp1099_nlm_nap_lai] CA A: 12/12 · D: 3/3 · DOT BIEN: 30/30 bị giết đúng ca · BỎ QUA 0",
+        "[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=2 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=16 đạt=7 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=11 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 2/3",
+        "[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=0 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=9 đạt=6 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=6 chỉ_posix=0 · HONG: 0 · TU_KIEM: 2/3",
+        "[wp433_gws_cred_no] CA: dự_kiến=3 chạy=3 đạt=2 · LUOT: dự_kiến=27 chạy=17 đạt=16 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=5 chạy=5 giết_đúng=3 bỏ_qua=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0",
+        "[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3",
+        "[wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=0 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=1 đạt=0 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=1 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 2/3 · PC_DO: 1",
+        "[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=3 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=23 bỏ_qua=0 · HONG: 0",
+        "== tl selftest 1773/1789 =="
+      ]
+    },
+    {
+      "label": "base-ruff",
+      "side": "base",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base",
+      "rc": 0,
+      "seconds": 0.5186755200002153,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/base-ruff.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "positive": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "label": "head-ruff",
+      "side": "head",
+      "command": [
+        "/usr/local/bin/python3",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/land_evidence_nguon_test.py",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head",
+      "rc": 0,
+      "seconds": 0.03846256899942091,
+      "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head-ruff.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "positive": [
+        "All checks passed!"
+      ]
+    }
+  ],
+  "selftest": {
+    "status": "failed",
+    "delta_same": true,
+    "failed_ids": {
+      "base": [
+        "  [FAIL] r973_bootstrap_khong_kiem_khoa",
+        "  [FAIL] r973_bootstrap_ba_trang_thai",
+        "  [FAIL] r973_bootstrap_require_agent_creds",
+        "  [FAIL] r973_bootstrap_giu_auth_json_moi_hon",
+        "  [FAIL] r973_bootstrap_last_refresh_hong_khong_pha",
+        "  [FAIL] r973_bootstrap_auth_json_nguyen_tu",
+        "  [FAIL] r973_bootstrap_sai_dinh_dang_khong_nap",
+        "  [FAIL] r973_bootstrap_khong_export_khong_ghi_gemini",
+        "  [FAIL] r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "  [FAIL] r268_l2_trichotomy_theo_trang_thai_object",
+        "  [FAIL] wp433_gws_cred_dich_ngoai_kho",
+        "  [FAIL] wp433_gws_cred_dich_ngoai_kho_b",
+        "  [FAIL] wp433_gws_cred_no",
+        "  [FAIL] wp433_gws_cred_win_reparse",
+        "  [FAIL] wp433_nlm_gws_dich_ngoai_kho",
+        "  [FAIL] wp727_tl_gws_refresh"
+      ],
+      "head": [
+        "  [FAIL] r973_bootstrap_khong_kiem_khoa",
+        "  [FAIL] r973_bootstrap_ba_trang_thai",
+        "  [FAIL] r973_bootstrap_require_agent_creds",
+        "  [FAIL] r973_bootstrap_giu_auth_json_moi_hon",
+        "  [FAIL] r973_bootstrap_last_refresh_hong_khong_pha",
+        "  [FAIL] r973_bootstrap_auth_json_nguyen_tu",
+        "  [FAIL] r973_bootstrap_sai_dinh_dang_khong_nap",
+        "  [FAIL] r973_bootstrap_khong_export_khong_ghi_gemini",
+        "  [FAIL] r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "  [FAIL] r268_l2_trichotomy_theo_trang_thai_object",
+        "  [FAIL] wp433_gws_cred_dich_ngoai_kho",
+        "  [FAIL] wp433_gws_cred_dich_ngoai_kho_b",
+        "  [FAIL] wp433_gws_cred_no",
+        "  [FAIL] wp433_gws_cred_win_reparse",
+        "  [FAIL] wp433_nlm_gws_dich_ngoai_kho",
+        "  [FAIL] wp727_tl_gws_refresh"
+      ]
+    },
+    "new_failures": []
+  },
+  "snapshot": {
+    "files_before": 18703,
+    "files_after": 18703,
+    "delta": [],
+    "commands": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "97ec9686184fdf55dc1736007e6fdcb186122465\n9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "limit": "Hai mốc quan sát; không chứng minh lịch sử không từng ghi rồi khôi phục. Repo nguồn ngoài checkout được giao không nằm trong phạm vi quan sát."
+  },
+  "reviewer": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "model_family": "openai",
+    "run_id": "d2200510e4904e5dba88cc0a9fa468b5",
+    "session_id": "01a2183b-5d3d-7040-9185-2d23d0c482ab",
+    "cli": "0.172.0",
+    "declared_model": "gpt-6-astra",
+    "declared_effort": "high",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write",
+    "identity_sources": [
+      "../run/d2200510/run.json",
+      "../run/d2200510/stderr.log"
+    ]
+  },
+  "runtime": {
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "os": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "unicode": "15.1.0"
+  },
+  "prior_findings": [
+    {
+      "id": "R3-01",
+      "status": "DA_VA_THAT",
+      "scope": "Các biểu hiện bỏ/cắt/lặp bộ cũ; co-drift danh tính vẫn mở dướiR4-01",
+      "evidence": [
+        "repro-R3.json",
+        "data-domain.json"
+      ]
+    },
+    {
+      "id": "R3-02",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "domain-review4.json",
+        "table/bang.json"
+      ]
+    },
+    {
+      "id": "R3-03",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "measure.json"
+      ]
+    }
+  ],
+  "closure_rate": {
+    "previous_open_classes": 2,
+    "closed_classes": 1,
+    "ratio": "1/2",
+    "new_classes": 0
+  },
+  "independent_evidence": [
+    "obligations.md",
+    "ast-review.json",
+    "ast-failure.json",
+    "domain-review4.json",
+    "co-drift-witness.json",
+    "trace-v2.json",
+    "cache-review4.json",
+    "repro-R3.json",
+    "repro-R4.json",
+    "probes.json",
+    "excess-probe.json",
+    "distinct-target.json",
+    "guard-witnesses.json",
+    "data-domain.json",
+    "b02-targeted.json"
+  ],
+  "probe_results": {
+    "repro-R3.json": [
+      {
+        "probe": "omit-fourth",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "probe": "omit-fifth",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 3: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "probe": "final-bang-invert",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: []\n",
+        "stderr": ""
+      },
+      {
+        "probe": "domain-branch-invert",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "rc": 3,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành ký tự Mc KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      }
+    ],
+    "probes.json": [
+      {
+        "label": "control-c39_c37_do_khi_bo_sinh_lech_mien",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 0,
+        "seconds": 0.3247331080001459,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "label": "control-c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 0,
+        "seconds": 13.089526794999983,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "label": "control-a136_a135_do_khi_bo_sinh_lech_mien",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 0,
+        "seconds": 1.1868141630002356,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "label": "control-c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c38_c36_do_khi_bang_cua_dot_a_mat_ca"
+        ],
+        "rc": 0,
+        "seconds": 0.3044645949998994,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-count",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 2.7616697720000047,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A thêm một bản sao ô đầu (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 1.1444207869999445,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành ký tự Mc KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-BMP",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 1.355810037000083,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A ngoài BMP thành U+FFFF (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-total-executor",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.35439177500029473,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:bỏ ký tự ngoài BMP mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=3, 0 ô, DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 644 (đúng 648)\n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-total-literal",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.3909386519999316,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:lặp CHÍNH ký tự ngoài BMP cuối mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=3, 0 ô, DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:số ô lệch đặc tả: 652 (đúng 648)\n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-distinct",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.3901350219998676,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:Lu thành ASCII 'A' mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 648 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.34442402300010144,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:Mn thành ký tự Mc KHÁC mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 648 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c37-648",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c39_c37_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.4797880589999295,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:c37 mất một ô rời mà c37 không ĐỎ đúng chốt với đúng 0 ô: rc=0, 647 ô, \n",
+        "stderr": ""
+      },
+      {
+        "label": "c36-distinct",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/land_evidence_nguon_test.py",
+          "--mot-ca",
+          "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o"
+        ],
+        "rc": 3,
+        "seconds": 2.057631734000097,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành bản sao Mc (a126) mà c36 không ĐỎ đúng chốt: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: thiếu general category ['Mn']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-so_phan_tu",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8183525379999992,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-category_vang",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8167086960002052,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['so_phan_tu']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-lap_category",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.9370277500001976,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Mn thanh ban sao Mc: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-thuoc_cam",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8285309249999955,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc cam: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-tu_0080",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8503828119996797,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh Lu thanh ASCII: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "label": "a135-cuoi_ngoai_bmp",
+        "command": [
+          "/usr/local/bin/python3",
+          "-B",
+          "ops/gate_output_doi_chieu_test.py",
+          "--mot-ca",
+          "a136_a135_do_khi_bo_sinh_lech_mien"
+        ],
+        "rc": 3,
+        "seconds": 0.8726503939997201,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('', ()) lệch đặc tả: ['so_phan_tu']\n",
+        "stderr": ""
+      }
+    ],
+    "data-domain.json": [
+      {
+        "mutation": "remove-constant-entry",
+        "index": 1,
+        "argument": [
+          "—",
+          []
+        ],
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 4: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',))], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      },
+      {
+        "mutation": "remove-constant-entry",
+        "index": 2,
+        "argument": [
+          "",
+          [
+            "Cs"
+          ]
+        ],
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 1: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      },
+      {
+        "mutation": "remove-constant-entry",
+        "index": 3,
+        "argument": [
+          "\n\r\u000b\f\u001c\u001d\u001e   \t",
+          []
+        ],
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 2: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      },
+      {
+        "mutation": "remove-constant-entry",
+        "index": 4,
+        "argument": [
+          "",
+          []
+        ],
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      },
+      {
+        "mutation": "remove-constant-entry",
+        "index": 5,
+        "argument": [
+          "\r\n",
+          [
+            "Cs"
+          ]
+        ],
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 3: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      },
+      {
+        "mutation": "replace-fifth-with-second-keep-five",
+        "rc": 3,
+        "output": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 3: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]"
+      }
+    ],
+    "domain-review4.json": [
+      {
+        "id": "missing-ASCII-NUL-replaced-U0081",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "vu_tru = [*map(chr, range(128)),",
+        "new": "vu_tru = [chr(0x81), *map(chr, range(1, 128)),",
+        "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+        "clause": "2.1.1:128 ASCII",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "missing-ASCII-NUL-replaced-U0081",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "vu_tru = [*map(chr, range(128)),",
+        "new": "vu_tru = [chr(0x81), *map(chr, range(1, 128)),",
+        "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+        "clause": "2.1.1:128 ASCII",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "missing-ASCII-NUL-replaced-U0081",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "vu_tru = [*map(chr, range(128)),",
+        "new": "vu_tru = [chr(0x81), *map(chr, range(1, 128)),",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "clause": "2.1.1:128 ASCII",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "missing-ASCII-DEL-replaced-U0081",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "vu_tru = [*map(chr, range(128)),",
+        "new": "vu_tru = [*map(chr, range(127)), chr(0x81),",
+        "case": "c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong",
+        "clause": "2.1.1:128 ASCII",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "missing-ASCII-DEL-replaced-U0081",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "vu_tru = [*map(chr, range(128)),",
+        "new": "vu_tru = [*map(chr, range(127)), chr(0x81),",
+        "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+        "clause": "2.1.1:128 ASCII",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "total-plus2",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "len(vu_tru) == 158 and",
+        "new": "len(vu_tru) == 160 and",
+        "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+        "clause": "2.1.1",
+        "rc": 3,
+        "stdout": "DO:c39_c37_do_khi_bo_sinh_lech_mien:nguyên vẹn mà c37 không XANH với đúng 648 ô: rc=3, 0 ô, DO:c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong:vũ trụ ký tự lệch đặc tả: 158 ký tự (158 khác nhau), category lệch [], 1 ngoài BMP\n",
+        "stderr": ""
+      },
+      {
+        "id": "count-minus2",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "len(van_tay) == mong - lap",
+        "new": "len(van_tay) == mong - lap - 2",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "clause": "2.2.1",
+        "rc": 3,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A nguyên vẹn (a126) mà c36 không XANH: rc=3 DO:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:a126_mien_ascii_qua_ho_so qua main → L8: 52 phần tử KHÁC NHAU (đặc tả: đúng 52)\n",
+        "stderr": ""
+      },
+      {
+        "id": "branch-true",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "if tru is not None:",
+        "new": "if True:",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "clause": "2.2.2",
+        "rc": 3,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A nguyên vẹn (a131) mà c36 không XANH: rc=4 HONG:c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a:TypeError: 'NoneType' object is not iterable\n",
+        "stderr": ""
+      },
+      {
+        "id": "branch-false",
+        "path": "ops/land_evidence_nguon_test.py",
+        "old": "if tru is not None:",
+        "new": "if False:",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "clause": "2.2.2",
+        "rc": 3,
+        "stdout": "DO:c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o:bộ test đợt A Mn thành ký tự Mc KHÁC (a126) mà c36 không ĐỎ đúng chốt: rc=0 \n",
+        "stderr": ""
+      },
+      {
+        "id": "drop-final-bang",
+        "path": "ops/gate_output_doi_chieu_test.py",
+        "old": "bang(not lech, f\"bộ sinh",
+        "new": "bang(True, f\"bộ sinh",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "clause": "2.3.1",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=0 \n",
+        "stderr": ""
+      }
+    ],
+    "ast-review.json": [
+      {
+        "id": "filter-out-a129",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "filter-out-a129",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "prefix-b",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng []\n",
+        "stderr": ""
+      },
+      {
+        "id": "prefix-b",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: []\n",
+        "stderr": ""
+      },
+      {
+        "id": "include-meta",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "include-meta",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "return-empty",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng []\n",
+        "stderr": ""
+      },
+      {
+        "id": "return-empty",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: []\n",
+        "stderr": ""
+      },
+      {
+        "id": "alias-fifth",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "alias-fifth",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "partial-fifth",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "partial-fifth",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "kwargs-fifth",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 4,
+        "stdout": "HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: unhashable type: 'dict'\n",
+        "stderr": ""
+      },
+      {
+        "id": "kwargs-fifth",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 4,
+        "stdout": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: unhashable type: 'dict'\n",
+        "stderr": ""
+      },
+      {
+        "id": "named-fifth",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 4,
+        "stdout": "HONG:a135_bo_sinh_dung_mien_dac_ta:ValueError: malformed node or string on line 1267: <ast.Name object at 0x7f1fcca5d690>\n",
+        "stderr": ""
+      },
+      {
+        "id": "named-fifth",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 4,
+        "stdout": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:ValueError: malformed node or string on line 1267: <ast.Name object at 0x7fcbcf3a9b10>\n",
+        "stderr": ""
+      },
+      {
+        "id": "reorder-keywords",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 4,
+        "stdout": "HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: unhashable type: 'set'\n",
+        "stderr": ""
+      },
+      {
+        "id": "reorder-keywords",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 4,
+        "stdout": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: unhashable type: 'set'\n",
+        "stderr": ""
+      },
+      {
+        "id": "only-call-fifth-drift",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "only-call-fifth-drift",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 3: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "only-expected-fifth-drift",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "only-expected-fifth-drift",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 3: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r', ('Cs',)), ('—', ())], các ca dùng [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())]\n",
+        "stderr": ""
+      },
+      {
+        "id": "last-index",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\n",
+        "stderr": ""
+      },
+      {
+        "id": "last-index",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\n",
+        "stderr": ""
+      },
+      {
+        "id": "lower-bound-plus2",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['tu_0080']\n",
+        "stderr": ""
+      },
+      {
+        "id": "lower-bound-plus2",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['tu_0080']\n",
+        "stderr": ""
+      },
+      {
+        "id": "swap-last-two",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\n",
+        "stderr": ""
+      },
+      {
+        "id": "swap-last-two",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('—', ()) lệch đặc tả: ['cuoi_ngoai_bmp']\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fifth-CR-only",
+        "kind": "outside/fixed mandatory value SPEC 2.3.1",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fifth-CR-only",
+        "kind": "outside/fixed mandatory value SPEC 2.3.1",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fifth-CR-only",
+        "kind": "outside/fixed mandatory value SPEC 2.3.1",
+        "case": "c39_c37_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fifth-CR-only",
+        "kind": "outside/fixed mandatory value SPEC 2.3.1",
+        "case": "c40_c36_do_khi_bang_cua_dot_a_mat_mien_hoac_o",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fifth-CR-only",
+        "kind": "outside/fixed mandatory value SPEC 2.3.1",
+        "case": "c38_c36_do_khi_bang_cua_dot_a_mat_ca",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-first",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-first",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo Mn: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('–', ()) lệch đặc tả: ['so_phan_tu', 'category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-second",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-second",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh bo loc bo_loai: rc=3 DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('x', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'category_vang']\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-third",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-third",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fourth",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "co-drift-fourth",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "AST-return-constant",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "AST-return-constant",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "rename-generator-consistent",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "rename-generator-consistent",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 0,
+        "stdout": "\n",
+        "stderr": ""
+      },
+      {
+        "id": "rename-without-detector-update",
+        "kind": "AST",
+        "case": "a135_bo_sinh_dung_mien_dac_ta",
+        "rc": 3,
+        "stdout": "DO:a135_bo_sinh_dung_mien_dac_ta:miền đối số lệch đặc tả: đã kiểm [('', ()), ('', ('Cs',)), ('\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029 \\t', ()), ('\\r\\n', ('Cs',)), ('—', ())], các ca dùng []\n",
+        "stderr": ""
+      },
+      {
+        "id": "rename-without-detector-update",
+        "kind": "AST",
+        "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+        "rc": 3,
+        "stdout": "DO:a136_a135_do_khi_bo_sinh_lech_mien:các ca phải dùng đúng năm bộ đối số: []\n",
+        "stderr": ""
+      }
+    ],
+    "co-drift-witness.json": [
+      {
+        "guard": "original",
+        "generator": "healthy",
+        "rc": 0,
+        "output": "",
+        "calls": [
+          [
+            "—",
+            []
+          ],
+          [
+            "",
+            [
+              "Cs"
+            ]
+          ],
+          [
+            "\n\r\u000b\f\u001c\u001d\u001e   \t",
+            []
+          ],
+          [
+            "",
+            []
+          ],
+          [
+            "\r\n",
+            [
+              "Cs"
+            ]
+          ]
+        ]
+      },
+      {
+        "guard": "original",
+        "generator": "bad-only-original-fifth",
+        "rc": 3,
+        "output": "DO:a135_bo_sinh_dung_mien_dac_ta:bộ sinh('\\r\\n', ('Cs',)) lệch đặc tả: ['so_phan_tu', 'cuoi_ngoai_bmp']",
+        "calls": [
+          [
+            "—",
+            []
+          ],
+          [
+            "",
+            [
+              "Cs"
+            ]
+          ],
+          [
+            "\n\r\u000b\f\u001c\u001d\u001e   \t",
+            []
+          ],
+          [
+            "",
+            []
+          ],
+          [
+            "\r\n",
+            [
+              "Cs"
+            ]
+          ]
+        ]
+      },
+      {
+        "guard": "co-drift",
+        "generator": "healthy",
+        "rc": 0,
+        "output": "",
+        "calls": [
+          [
+            "—",
+            []
+          ],
+          [
+            "",
+            [
+              "Cs"
+            ]
+          ],
+          [
+            "\n\r\u000b\f\u001c\u001d\u001e   \t",
+            []
+          ],
+          [
+            "",
+            []
+          ],
+          [
+            "\r",
+            [
+              "Cs"
+            ]
+          ]
+        ]
+      },
+      {
+        "guard": "co-drift",
+        "generator": "bad-only-original-fifth",
+        "rc": 0,
+        "output": "",
+        "calls": [
+          [
+            "—",
+            []
+          ],
+          [
+            "",
+            [
+              "Cs"
+            ]
+          ],
+          [
+            "\n\r\u000b\f\u001c\u001d\u001e   \t",
+            []
+          ],
+          [
+            "",
+            []
+          ],
+          [
+            "\r",
+            [
+              "Cs"
+            ]
+          ]
+        ]
+      }
+    ]
+  }
+}

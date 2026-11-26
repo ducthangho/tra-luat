@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "bang_toan_tu.py",
+    "--goc",
+    "head",
+    "--ra",
+    "table",
+    "--song-song",
+    "3"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work",
+  "rc": 0,
+  "log": "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/table-rerun.log",
+  "sha256": "ca157e2a790107df8030c08b01a365556f4a4b3b0fc60c3345da0266834c73dd",
+  "first_attempt": "table-first-attempt.log: reviewer queue.py shadowed stdlib; renamed probe_tasks.py then reran unmodified tool"
+}

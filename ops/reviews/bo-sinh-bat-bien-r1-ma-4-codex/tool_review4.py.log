@@ -1,0 +1,10 @@
+{'id': 'comment', 'old': ' #1539: MIỀN', 'new': ' REVIEW #1539: MIỀN', 'hang': 'SONG', 'ca': '', 'rc': 0, 'dong': ''}
+{'id': 'syntax', 'old': 'def kiem_bo_sinh(bo_sinh):', 'new': 'def kiem_bo_sinh(bo_sinh) BROKEN:', 'hang': 'HONG', 'ca': 'a136_a135_do_khi_bo_sinh_lech_mien', 'rc': 1, 'dong': ''}
+{'id': 'outer-TypeError', 'old': '    that, a135, cam_3 =', 'new': '    raise TypeError("OUTER")\n    that, a135, cam_3 =', 'hang': 'HONG', 'ca': 'a136_a135_do_khi_bo_sinh_lech_mien', 'rc': 4, 'dong': 'HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: OUTER'}
+{'id': 'inner-TypeError', 'old': '    for cam, bo_loai, so, vang in BO_SINH_MONG:', 'new': '    raise TypeError("INNER")\n    for cam, bo_loai, so, vang in BO_SINH_MONG:', 'hang': 'GIET', 'ca': 'a136_a135_do_khi_bo_sinh_lech_mien', 'rc': 3, 'dong': 'DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=4 HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: INNER'}
+{'id': 'wrong-DO', 'old': 'def chay_ca(ten):\n', 'new': 'def chay_ca(ten):\n    return 3, "DO:WRONG:injected"\n', 'hang': 'HONG', 'ca': 'a136_a135_do_khi_bo_sinh_lech_mien', 'rc': 3, 'dong': 'DO:WRONG:injected'}
+SONG | SONG | bo |  rc=0 | 
+BANG TOAN TU: 1 dot bien · GIET 0 · TUONG_DUONG 0 · SONG 1 · HONG 0 · baseline XANH · ban sao sach True
+HONG | HONG | bo | a136_a135_do_khi_bo_sinh_lech_mien rc=1 | 
+BANG TOAN TU: 1 dot bien · GIET 0 · TUONG_DUONG 0 · SONG 0 · HONG 1 · baseline XANH · ban sao sach True
+TABLE {'GIET': 136, 'TUONG_DUONG': 4, 'SONG': 0, 'HONG': 0} differences 0

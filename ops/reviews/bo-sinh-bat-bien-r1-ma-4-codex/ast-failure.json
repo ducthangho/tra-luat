@@ -1,0 +1,26 @@
+[
+  {
+    "id": "unreadable",
+    "case": "a135_bo_sinh_dung_mien_dac_ta",
+    "rc": 4,
+    "output": "HONG:a135_bo_sinh_dung_mien_dac_ta:OSError: injected unreadable"
+  },
+  {
+    "id": "unreadable",
+    "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 4,
+    "output": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:OSError: injected unreadable"
+  },
+  {
+    "id": "syntax_error",
+    "case": "a135_bo_sinh_dung_mien_dac_ta",
+    "rc": 4,
+    "output": "HONG:a135_bo_sinh_dung_mien_dac_ta:SyntaxError: invalid syntax (<unknown>, line 1)"
+  },
+  {
+    "id": "syntax_error",
+    "case": "a136_a135_do_khi_bo_sinh_lech_mien",
+    "rc": 4,
+    "output": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:SyntaxError: invalid syntax (<unknown>, line 1)"
+  }
+]

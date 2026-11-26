@@ -1,0 +1,6 @@
+{
+  "time": "2026-11-26T15:20:22.240567+00:00",
+  "full_suite_samples": 10,
+  "standalone_samples": 9,
+  "note": "All performance samples complete. Release independent clone probes while remaining functional gates run; no concurrent workload in the timed full-suite samples."
+}

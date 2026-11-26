@@ -1,0 +1,6 @@
+{
+  "command": "git cat-file blob d22fe11f9bf35517c70333c567481be460173eee:ops/specs/bo-sinh-bat-bien-r1.md",
+  "rc": 0,
+  "sha256": "bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577",
+  "stderr": ""
+}

@@ -1,0 +1,908 @@
+{
+  "probes": [
+    {
+      "id": "comment",
+      "old": " #1539: MIỀN",
+      "new": " REVIEW #1539: MIỀN",
+      "hang": "SONG",
+      "ca": "",
+      "rc": 0,
+      "dong": ""
+    },
+    {
+      "id": "syntax",
+      "old": "def kiem_bo_sinh(bo_sinh):",
+      "new": "def kiem_bo_sinh(bo_sinh) BROKEN:",
+      "hang": "HONG",
+      "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "rc": 1,
+      "dong": ""
+    },
+    {
+      "id": "outer-TypeError",
+      "old": "    that, a135, cam_3 =",
+      "new": "    raise TypeError(\"OUTER\")\n    that, a135, cam_3 =",
+      "hang": "HONG",
+      "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "rc": 4,
+      "dong": "HONG:a136_a135_do_khi_bo_sinh_lech_mien:TypeError: OUTER"
+    },
+    {
+      "id": "inner-TypeError",
+      "old": "    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+      "new": "    raise TypeError(\"INNER\")\n    for cam, bo_loai, so, vang in BO_SINH_MONG:",
+      "hang": "GIET",
+      "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "rc": 3,
+      "dong": "DO:a136_a135_do_khi_bo_sinh_lech_mien:bộ sinh chi sai o bo 0: rc=4 HONG:a135_bo_sinh_dung_mien_dac_ta:TypeError: INNER"
+    },
+    {
+      "id": "wrong-DO",
+      "old": "def chay_ca(ten):\n",
+      "new": "def chay_ca(ten):\n    return 3, \"DO:WRONG:injected\"\n",
+      "hang": "HONG",
+      "ca": "a136_a135_do_khi_bo_sinh_lech_mien",
+      "rc": 3,
+      "dong": "DO:WRONG:injected"
+    },
+    {
+      "id": "main-SONG",
+      "rc": 1
+    },
+    {
+      "id": "main-HONG",
+      "rc": 1
+    }
+  ],
+  "anchor_checks": [
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.so_phan_tu  `dem[0] - truoc == mong`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.khac_nhau  `len(van_tay) == mong - lap`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.category  `not thieu`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.category  `not thieu`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.category  `not thieu`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.ngoai_bmp  `any(ord(c) > 0xFFFF ...)`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.cong_thuc  `... - len(tru or ()) + 1`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.cong_thuc  `... - len(tru or ()) + 1`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.tong  `len(vu_tru) == 158`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.khac_nhau  `len(set(vu_tru)) == 158`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.category  `not lech`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.category  `not lech`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+      "op": "gt",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+      "op": "lt",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.lech  `bmp.count(loai) != (loai != \"Cs\")`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.phan_bo_sinh  `vu_tru[128:]`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.phan_bo_sinh  `vu_tru[128:]`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c37.so_o  `len(o) == 648`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "nap_sua.neo  `nguon.count(cu) == 1`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.so_phan_tu  `len(ra) == so`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.category_vang  `sorted(...) == sorted(vang)`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.lap_category  `len(bmp) == len(set(bmp))`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.thuoc_cam  `not any(c in cam ...)`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.tu_0080  `all(ord(c) >= 0x80 ...)`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.khong_rong  `bool(ra)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.khong_rong  `bool(ra)`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.khong_rong  `bool(ra)`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.vi_tri  `ord(ra[-1]) > 0xFFFF`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "le",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.cuoi.duy_nhat  `len(ra) - len(bmp) == 1`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.bien_bmp  `ord(c) <= 0xFFFF`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.gom  `if not dat`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.gom  `if not dat`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.chot_cuoi  `bang(not lech, …)` trong vòng",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.chot_cuoi  `bang(not lech, …)` trong vòng",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `sorted(goi) == mien`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `sorted(goi) == mien`",
+      "op": "ne",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `sorted(goi) == mien`",
+      "op": "or",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `sorted(goi) == mien`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `len(mien) == 5`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `len(mien) == 5`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `len(mien) == 5`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.mien_doi_so  `len(mien) == 5`",
+      "op": "ge",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.ghi_loi_goi  `goi.append(...)`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.ghi_loi_goi  `goi.append(...)`",
+      "op": "mien",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.doc_mien  `f.name[0] == \"a\"`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.doc_mien  `f.name[0] == \"a\"`",
+      "op": "mien",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.nho_dem  khoá `(f, cam, tuple(bo))`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.vong  `for … in BO_SINH_MONG`",
+      "op": "cat",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.vong  `for … in BO_SINH_MONG`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "a135.vong  `for … in BO_SINH_MONG`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.BO_SINH_MONG  năm bộ đối số",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.BO_SINH_MONG  năm bộ đối số",
+      "op": "mien",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.BO_SINH_MONG  năm bộ đối số",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.BO_SINH_MONG  năm bộ đối số",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.LOAI_UNICODE  30 category (đợt A)",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.LOAI_UNICODE  30 category (đợt A)",
+      "op": "mien",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.LOAI  30 category (đợt B)",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.LOAI  30 category (đợt B)",
+      "op": "mien",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.ascii_c37  `range(128)`",
+      "op": "cong1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.ascii_c37  `range(128)`",
+      "op": "tru1",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "mien.ascii_c37  `range(128)`",
+      "op": "cat",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.nhanh_mien  `if tru is not None`",
+      "op": "bo",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.nhanh_mien  `if tru is not None`",
+      "op": "dao",
+      "unique": true,
+      "changed": true
+    },
+    {
+      "id": "c36.nhanh_mien  `if tru is not None`",
+      "op": "yeu",
+      "unique": true,
+      "changed": true
+    }
+  ],
+  "table_count": 140,
+  "expected_count": 140,
+  "differences": [],
+  "counts": {
+    "GIET": 136,
+    "TUONG_DUONG": 4,
+    "SONG": 0,
+    "HONG": 0
+  }
+}

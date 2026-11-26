@@ -1,0 +1,19 @@
+fatal: destination path '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/mut' already exists and is not an empty directory.
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/bang_toan_tu.py", line 252, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/bang_toan_tu.py", line 217, in main
+    with cf.ThreadPoolExecutor(len(workers)) as ex:
+         ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/concurrent/futures/__init__.py", line 50, in __getattr__
+    from .thread import ThreadPoolExecutor as te
+  File "/usr/local/lib/python3.13/concurrent/futures/thread.py", line 10, in <module>
+    import queue
+  File "/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/queue.py", line 8, in <module>
+    subprocess.run(['git','clone','-q',str(w/'head'),str(w/'mut')],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['git', 'clone', '-q', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/head', '/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/review1539/l4/work/mut']' returned non-zero exit status 128.

@@ -40,7 +40,9 @@ $script:ReGuid = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\
 $script:ReRecord = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json\z'
 $script:Help = @('px help', 'px config|status|start|stop|restart|connect|disconnect -ConfigPath <file> -RepositoryRoot <dir> -TargetId <id> [-Credential <PSCredential>] [-Force]',
     'px models [<provider>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'px use <provider> <model id: provider | provider:variant | provider/model> -ConfigPath ... -RepositoryRoot ... -TargetId ...',
-    'px ask <provider> <prompt> [-Model <model id>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'Every action supports -WhatIf and -Confirm.')
+    'px ask <provider> <prompt> [-Model <model id>] -ConfigPath ... -RepositoryRoot ... -TargetId ...',
+    'ask data: answer has complete <ElicitationsGroup> blocks removed; answerMarkup none|removed|unterminated; answerMarkupRemoved = blocks removed',
+    'Every action supports -WhatIf and -Confirm.')
 
 function Get-PxcSha256([byte[]]$Bytes) {
     $h = [Security.Cryptography.SHA256]::Create()
@@ -282,9 +284,60 @@ function Get-PxcPending([string]$Base, [string]$Protected) {
 }
 
 # ---- operations (endpoint side; also the in-process Local path after px's gate) ----
+# px-loc-markup r1 #1529 (#1457 r2 reported one gateway answer carrying such a block): drop each COMPLETE
+# <ElicitationsGroup ...>...</ElicitationsGroup> block (tag name compared Ordinal; the name must end at whitespace, '>', '/' or end of
+# text). The open tag must end with '>' outside double quotes, with no '<' before it and not self-closing; it pairs with the first
+# close after that '>' only when no second open comes first. Anything else leaves the whole text untouched as 'unterminated'.
+# Trailing whitespace is trimmed only when nothing but whitespace follows the last removed block. The removed text is never returned.
+function Find-PxcOpenTag([string]$Text, [int]$From) {
+    while ($From -le $Text.Length) {
+        $i = $Text.IndexOf('<ElicitationsGroup', $From, [StringComparison]::Ordinal)
+        if ($i -lt 0) { return -1 }
+        $e = $i + 18
+        if ($e -ge $Text.Length -or [char]::IsWhiteSpace($Text[$e]) -or $Text[$e] -eq [char]'>' -or $Text[$e] -eq [char]'/') { return $i }
+        $From = $i + 1
+    }
+    return -1
+}
+function Find-PxcOpenEnd([string]$Text, [int]$From) {
+    $inQuote = $false
+    for ($p = $From; $p -lt $Text.Length; $p++) {
+        $ch = $Text[$p]
+        if ($ch -eq [char]34) { $inQuote = -not $inQuote; continue }
+        if ($inQuote) { continue }
+        if ($ch -eq [char]'<') { return -1 }
+        if ($ch -eq [char]'>') { if ($Text[$p - 1] -eq [char]'/') { return -1 }; return $p }
+    }
+    return -1
+}
+function Remove-PxcElicitation([string]$Text) {
+    $close = '</ElicitationsGroup>'; $keep = @{ Text = $Text; State = 'unterminated'; Removed = 0 }
+    $sb = [Text.StringBuilder]::new(); $pos = 0; $n = 0
+    while ($true) {
+        $i = Find-PxcOpenTag $Text $pos
+        if ($i -lt 0) { break }
+        $e = Find-PxcOpenEnd $Text ($i + 18)
+        if ($e -lt 0) { return $keep }
+        $j = $Text.IndexOf($close, $e + 1, [StringComparison]::Ordinal); $k = Find-PxcOpenTag $Text ($e + 1)
+        if ($j -lt 0 -or ($k -ge 0 -and $k -lt $j)) { return $keep }
+        $null = $sb.Append($Text, $pos, $i - $pos); $pos = $j + $close.Length; $n++
+    }
+    if ($n -eq 0) { return @{ Text = $Text; State = 'none'; Removed = 0 } }
+    $tail = $Text.Substring($pos)
+    if ($tail.Trim().Length -eq 0) { $out = $sb.ToString().TrimEnd() } else { $out = $sb.ToString() + $tail }
+    return @{ Text = $out; State = 'removed'; Removed = $n }
+}
+# px-loc-markup r3 #1529: the gateway-reported model is echoed only when it equals (Ordinal) an id that the SAME ask call received from
+# GET /v1/models; any other value (markup, free text, a dropped label) becomes $null.
+function Test-PxcAdvertisedId($Ids, $S) {
+    if ($S -isnot [string]) { return $false }
+    foreach ($i in $Ids) { if ([string]::Equals($i, $S, [StringComparison]::Ordinal)) { return $true } }
+    return $false
+}
 function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$Provider, [string]$Model, [string]$Prompt) {
     $url = Get-PxcGateway $Base
-    if (-not (Test-PxcModel (Get-PxcAdvertised $url) $Provider $Model)) { Stop-Pxc 'ModelNotAdvertised' }
+    $adv = Get-PxcAdvertised $url
+    if (-not (Test-PxcModel $adv $Provider $Model)) { Stop-Pxc 'ModelNotAdvertised' }
     $ctx = New-PxcCtx
     try {
         $dir = Invoke-PxcStep 'JournalUnsafe' { Open-PxcJournal $Base $Protected $true $ctx }
@@ -307,11 +360,15 @@ function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$
                 } catch { $parsed = $false }
             }
         }
+        $mk = @{ Text = $null; State = 'none'; Removed = 0 }
+        if ($parsed) { $mk = Remove-PxcElicitation $answer }
+        $rm = $null
+        if ($mk.State -cne 'removed' -and (Test-PxcAdvertisedId $adv $reported)) { $rm = $reported }
         $rec['state'] = $state; $final = $true
         try { Write-PxcRecord $rs.Stream $rec } catch { $final = $false }
         $outcome = $(if (-not $final) { 'finalize_failed' } elseif ($state -cne 'completed') { 'unknown' } elseif ($parsed) { 'ok' } else { 'response_unparsed' })
-        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $(if ($reported -is [string]) { $reported })
-                    answer = $(if ($parsed) { $answer }); answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
+        return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $rm
+                    answer = $(if ($parsed) { $mk.Text }); answerMarkup = $mk.State; answerMarkupRemoved = [int]$mk.Removed; answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
                     recordState = $(if ($final) { $state } else { 'pending_finalize_failed' }) }))
     } finally { Close-PxcCtx $ctx }
 }

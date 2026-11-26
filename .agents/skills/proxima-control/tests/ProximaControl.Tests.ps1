@@ -3,7 +3,7 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
 #     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
-# rc 0: all 27 mandatory IDs (with -Counterexamples also CX00-CX13) passed and cleanup was verified. rc 1: a case failed - an absent
+# rc 0: all 28 mandatory IDs (with -Counterexamples also CX00-CX16) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
 # Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service/TCP listener, service control, id) is
 # replaced in the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real
@@ -15,7 +15,7 @@
 # process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
 # script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
 # AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
-# -Counterexamples: CX00 unmodified control + CX01-CX13 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# -Counterexamples: CX00 unmodified control + CX01-CX16 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -27,7 +27,7 @@ param([Parameter(Mandatory = $true)][string]$ModulePath, [Parameter(Mandatory = 
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 $Ids = 'X1-01', 'X1-02', 'X1-03', 'X2-01', 'X2-02', 'X2-03', 'X2-04', 'X2-05', 'X2-06', 'X2-07', 'X3-01', 'X3-02', 'X4-01', 'X4-02', 'X4-03',
-'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X5-09', 'X5-10', 'X6-01', 'X6-02'
+'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X5-09', 'X5-10', 'X5-11', 'X6-01', 'X6-02'
 $PrimKeys = 'GetProcess', 'GetService', 'GetTcpListener', 'Http', 'InvokeRemote', 'NewId', 'NewSession', 'RemoveSession', 'ServiceControl', 'UiSessions'
 $Results = [Collections.Generic.List[object]]::new()
 $Cleanup = [ordered]@{ status = 'not_run'; errors = [Collections.Generic.List[string]]::new(); tree_removed = $false; keep_sentinel_intact = $null; wire_servers_stopped = $null }
@@ -182,7 +182,7 @@ function New-PxArgs([string]$Action, $Tgt, [hashtable]$More = @{}) {
 $DefaultHttp = { param($Req) $p = ([Uri]$Req['Uri']).AbsolutePath; $m = $Req['Method']
     if ($m -ceq 'GET' -and $p -ceq '/api/status') { return @{ Status = 200; Body = '{"ok":true}' } }
     if ($m -ceq 'GET' -and $p -ceq '/v1/models') { return @{ Status = 200; Body = $global:PxcT.Models } }
-    if ($m -ceq 'POST' -and $p -ceq '/v1/chat/completions') { return @{ Status = 200; Body = '{"model":"prov/served","choices":[{"message":{"content":"answer-text"}}]}' } }
+    if ($m -ceq 'POST' -and $p -ceq '/v1/chat/completions') { if ($global:PxcT.Chat) { return @{ Status = 200; Body = $global:PxcT.Chat } }; return @{ Status = 200; Body = '{"model":"prov/served","choices":[{"message":{"content":"answer-text"}}]}' } }
     return @{ Status = 404; Body = '' } }
 $DefaultProc = { param($ProcId) [pscustomobject]@{ SessionId = [uint32]0; ExecutablePath = $global:PxcT.Pids["$ProcId"] } }
 $DefaultSvc = { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' } }
@@ -225,7 +225,7 @@ function Reset-T {
     foreach ($l in $T.Calls, $T.HttpReqs, $T.Envelopes, $T.Bodies, $T.SessReqs) { $l.Clear() }
     $T.RemoveFail.Clear(); $T.NewSessionFail = $false; $T.SessSeq = 0; $T.HttpHandler = $DefaultHttp; $T.RemoteHandler = $DefaultRemote; $T.ProcHandler = $DefaultProc; $T.ListenHandler = $DefaultListen
     $T.UiHandler = { }; $T.SvcHandler = $DefaultSvc; $T.IdHandler = { [guid]::NewGuid().ToString('D') }; $T.ServiceExe = "$($Tg.Svc.Base)\runtime\Proxima.exe"
-    $T.Models = '{"data":[{"id":"prov/m1"},{"id":"prov/m2"},{"id":"prov/Model-X"},{"id":"prov/TITLE"},{"id":"other/m9"}]}'
+    $T.Models = '{"data":[{"id":"prov/m1"},{"id":"prov/m2"},{"id":"prov/Model-X"},{"id":"prov/TITLE"},{"id":"other/m9"}]}'; $T.Chat = ''
     if ($script:Mod) { & $script:Mod { $script:Sessions.Clear(); $script:Selection.Clear(); $script:Orphans.Clear() } }
 }
 function Get-ModState {
@@ -448,7 +448,7 @@ $Evid = "$(if ($EvidenceRoot) { [IO.Path]::GetFullPath($EvidenceRoot).TrimEnd('\
 $null = [IO.Directory]::CreateDirectory("$Evid\child"); $Report.evidence_dir = $Evid; $Report.evidence.dir = $Evid
 $global:PxcT = @{ Calls = [Collections.Generic.List[string]]::new(); HttpReqs = [Collections.Generic.List[object]]::new(); Envelopes = [Collections.Generic.List[object]]::new()
     Bodies = [Collections.Generic.List[object]]::new(); SessReqs = [Collections.Generic.List[object]]::new(); RemoveFail = [Collections.Generic.HashSet[int]]::new(); Pids = @{}; Ports = @{}; ListenHandler = $null
-    SessSeq = 0; NewSessionFail = $false; Sentinel = ''; SelfSha = (Get-FileSha256 $ModulePath); CfgSha = (Get-FileSha256 $CfgModPath); Models = ''; ServiceExe = '' }
+    SessSeq = 0; NewSessionFail = $false; Sentinel = ''; SelfSha = (Get-FileSha256 $ModulePath); CfgSha = (Get-FileSha256 $CfgModPath); Models = ''; Chat = ''; ServiceExe = '' }
 $Cred = New-Cred 'dummy-not-a-secret'
 $Tg = @{}
 $Tg.L1 = New-Target 'l1' 'tgt-local' "$S\base1" 4101
@@ -828,9 +828,9 @@ Invoke-Case 'X5-01' {
             if ($b.model -cne 'prov/m1' -or -not [string]::Equals([string]@($b.messages)[0].content, $prompt, [StringComparison]::Ordinal)) { Add-Fail 'BODY_NOT_VERBATIM' }
             if (@($pr[0].Headers | Where-Object { $_ -ceq 'Authorization: Bearer dummy-test-key' }).Count -ne 1) { Add-Fail 'KEY_NOT_SENT_ON_ASK' }
         }
-        $w.Routes['POST /v1/chat/completions'] = @(200, '{"model":"prov/served","choices":[{"message":{"content":"wire-answer"}}]}'); $before = $w.Log.Count
+        $w.Routes['POST /v1/chat/completions'] = @(200, '{"model":"prov/m2","choices":[{"message":{"content":"wire-answer"}}]}'); $before = $w.Log.Count
         $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'second'; Model = 'prov/m1' })
-        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m1' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'wire-answer') { Add-Fail "WIRE_POSITIVE[$($x.Id)]" }
+        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m1' -or "$($x.R.data.reportedModel)" -cne 'prov/m2' -or "$($x.R.data.answer)" -cne 'wire-answer') { Add-Fail "WIRE_POSITIVE[$($x.Id)]" }
         if ($w.Log.Count - $before -ne 2) { Add-Fail "WIRE_COUNTS[200] $($w.Log.Count - $before)" }
     } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId $Tg.Pos.ProcId; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
     foreach ($c in @(@('timeout', { param($Req) if ($Req['Method'] -ceq 'POST') { throw [TimeoutException]::new('timeout') }; & $DefaultHttp $Req }),
@@ -1067,6 +1067,53 @@ Invoke-Case 'X5-10' {
     $post = @($global:PxcT.HttpReqs | Where-Object { $_['Method'] -ceq 'POST' })
     if ($post.Count - $n0 -ne 1 -or ([string]$post[-1]['Body'] | ConvertFrom-Json).model -cne 'gw:fast') { Add-Fail 'ASK_VARIANT_NOT_SENT' }
 }
+Invoke-Case 'X5-11' {
+    # px-loc-markup r4 #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
+    # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, trims trailing whitespace only after a
+    # trailing block; reportedModel is $null whenever a block was removed, else only an id this call got from GET /v1/models. Spec r4 N1 is
+    # FUNCTIONAL only: answer, answerMarkup, answerMarkupRemoved, reportedModel and the record's bytes. Absence of dropped content on other
+    # surfaces is not asserted here; it is checked by code review of the diff (spec r4 N9).
+    $drop = 'PXDROP7f3a'; $keepMk = 'PXKEEP7f3a'; $nl = [string][char]10; $crlf = [string][char]13 + $nl; $q = [string][char]34; $nb = [string][char]0xA0
+    $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
+    $open = '<ElicitationsGroup message=' + $q + 'x' + $q + '>'
+    $global:PxcT.Models = '{"data":[{"id":"prov/m1"},{"id":"prov/m2"},{"id":"prov/served"},{"id":"' + $drop + '"}]}'
+    $fp = Get-Fp $Tg.Pos; $u8 = [Text.UTF8Encoding]::new($false)
+    # name, content, expected answer, answerMarkup, answerMarkupRemoved, gateway model, expected reportedModel ($null = null)
+    $cases = @(
+        @('none', ('plain answer' + $nl), ('plain answer' + $nl), 'none', 0, 'prov/served', 'prov/served'),
+        @('one block', ('OK' + $nl + $nl + $g + $nl), 'OK', 'removed', 1, 'prov/served', $null),
+        @('two blocks', ('A ' + $g + ' B' + $nl + $g), 'A  B', 'removed', 2, 'prov/served', $null),
+        @('middle keeps tail', ('A' + $g + 'B  ' + $crlf), ('AB  ' + $crlf), 'removed', 1, 'prov/served', $null),
+        @('middle keeps nbsp', ('A' + $g + 'B' + $nb), ('AB' + $nb), 'removed', 1, 'prov/served', $null),
+        @('unterminated', ('OK' + $nl + $open + 'tail'), ('OK' + $nl + $open + 'tail'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('nested', ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), ('OK ' + $open + $open + '</ElicitationsGroup></ElicitationsGroup>'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('opener without end', 'A <ElicitationsGroup </ElicitationsGroup> B', 'A <ElicitationsGroup </ElicitationsGroup> B', 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('opener open quote', ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), ('A <ElicitationsGroup message=' + $q + 'X></ElicitationsGroup> B'), 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('self closing', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'A <ElicitationsGroup/> useful </ElicitationsGroup> B', 'unterminated', 0, 'prov/served', 'prov/served'),
+        @('other name', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'none', 0, 'prov/served', 'prov/served'),
+        @('case variant', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'none', 0, 'prov/served', 'prov/served'),
+        @('kept outside', ('keep ' + $keepMk + $nl + $g), ('keep ' + $keepMk), 'removed', 1, 'prov/served', $null),
+        @('removed, model is advertised', ('OK ' + $g), 'OK', 'removed', 1, 'prov/m1', $null),
+        @('removed, model is advertised label', ('OK ' + $g), 'OK', 'removed', 1, $drop, $null),
+        @('not advertised', 'plain', 'plain', 'none', 0, 'prov/unlisted', $null),
+        @('advertised other', 'plain', 'plain', 'none', 0, 'prov/m1', 'prov/m1'))
+    foreach ($c in $cases) {
+        Clear-Journal $Tg.Pos.Base
+        $global:PxcT.Chat = (@{ model = $c[5]; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
+        $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' })
+        if (-not $x.R -or $x.R.outcome -isnot [string] -or -not [string]::Equals($x.R.outcome, 'ok', [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]"; continue }
+        $d = $x.R.data; $ans = $d['answer']
+        if ($ans -isnot [string] -or -not [string]::Equals($ans, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
+        if ($d['answerMarkup'] -isnot [string] -or -not [string]::Equals($d['answerMarkup'], [string]$c[3], [StringComparison]::Ordinal) -or $d['answerMarkupRemoved'] -isnot [int] -or $d['answerMarkupRemoved'] -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
+        $rm = $d['reportedModel']
+        if ($(if ($null -eq $c[6]) { $null -ne $rm } else { $rm -isnot [string] -or -not [string]::Equals($rm, [string]$c[6], [StringComparison]::Ordinal) })) { Add-Fail "MARKUP_REPORTED_MODEL[$($c[0])]" }
+        $rp = "$($Tg.Pos.Base)\results\px-active\$($d['recordId']).json"
+        $want = $u8.GetBytes('{"schema":"px.active.v1","action":"ask","targetFingerprint":"' + $fp + '","requestedModel":"prov/m2","state":"completed"}')
+        $got = $(if ([IO.File]::Exists($rp)) { [IO.File]::ReadAllBytes($rp) } else { [byte[]]@() })
+        if ($got.Length -ne $want.Length -or -not [string]::Equals([Convert]::ToBase64String($got), [Convert]::ToBase64String($want), [StringComparison]::Ordinal)) { Add-Fail "MARKUP_JOURNAL[$($c[0])]" }
+    }
+    $global:PxcT.Chat = ''
+}
 Invoke-Case 'X6-01' {
     $h = Invoke-Px @{ Action = 'help' }; if (-not $h.R -or @($h.R.data).Count -lt 3) { Add-Fail 'HELP_EMPTY' }
     $x = Invoke-Px (New-PxArgs 'config' $Tg.L1); if (-not $x.R -or "$($x.R.data.basePath)" -cne $Tg.L1.Base -or $x.Calls.Count) { Add-Fail 'CONFIG_POSITIVE' }
@@ -1076,8 +1123,9 @@ Invoke-Case 'X6-01' {
     if (-not $x.R -or (@($x.R.data.models) -join ',') -cne 'prov/m1,prov/m2,prov/Model-X,prov/TITLE' -or "$($x.R.data.modelState)" -cne 'advertised_not_execution_tested') { Add-Fail 'MODELS_POSITIVE' }
     $x = Invoke-Px (New-PxArgs 'use' $Tg.Pos @{ Provider = 'prov'; Value = 'prov/m2' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models') 'use'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'selected') { Add-Fail 'USE_POSITIVE' }
-    $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'hello' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models', 'NewId', 'Http:POST /v1/chat/completions') 'ask'
-    if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m2' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'answer-text' -or "$($x.R.data.answerTrust)" -cne 'untrusted_data') { Add-Fail 'ASK_POSITIVE' }
+    $global:PxcT.Chat = '{"model":"prov/m1","choices":[{"message":{"content":"answer-text"}}]}'
+    $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'hello' }); $global:PxcT.Chat = ''; Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models', 'NewId', 'Http:POST /v1/chat/completions') 'ask'
+    if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m2' -or "$($x.R.data.reportedModel)" -cne 'prov/m1' -or "$($x.R.data.answer)" -cne 'answer-text' -or "$($x.R.data.answerTrust)" -cne 'untrusted_data') { Add-Fail 'ASK_POSITIVE' }
     elseif ((Get-RecordState $Tg.Pos.Base $x.R.data.recordId) -cne 'completed') { Add-Fail 'ASK_RECORD_NOT_COMPLETED' }
     Clear-Journal $Tg.Svc.Base; $global:PxcT.UiHandler = { 0 }
     Assert-Calls (Invoke-Px (New-PxArgs 'start' $Tg.Svc)) @('UiSessions', 'GetService', 'ServiceControl:Start') 'start'
@@ -1138,7 +1186,10 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX10'; file = 'ProximaControl.psm1'; e = @('if ([string]::IsNullOrEmpty($exePath)) { throw ''unreadable'' }', 'if ([string]::IsNullOrEmpty($exePath)) { $exePath = $expected }'); red = @('X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]') },
     @{ id = 'CX11'; file = 'ProximaControl.psm1'; e = @('if ($own -ne $meta[''pid'']) { throw ''owner'' }', '$null = $own'); red = @('X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]', 'X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]') },
     @{ id = 'CX12'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider, [StringComparison]::Ordinal)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[prefix without separator]') },
-    @{ id = 'CX13'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider + '':'', [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[provider case variant]', 'X5-10:MODELS_FILTER_CASE_LOOSE') })
+    @{ id = 'CX13'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider + '':'', [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[provider case variant]', 'X5-10:MODELS_FILTER_CASE_LOOSE') },
+    @{ id = 'CX14'; file = 'ProximaControl.psm1'; e = @('if ($parsed) { $mk = Remove-PxcElicitation $answer }', 'if ($parsed) { $mk = @{ Text = $answer; State = ''none''; Removed = 0 } }'); red = @('X5-11:MARKUP_ANSWER[one block]', 'X5-11:MARKUP_STATE[one block]') },
+    @{ id = 'CX15'; file = 'ProximaControl.psm1'; e = @('$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::Ordinal)', '$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-11:MARKUP_STATE[case variant]') },
+    @{ id = 'CX16'; file = 'ProximaControl.psm1'; e = @('if ($mk.State -cne ''removed'' -and (Test-PxcAdvertisedId $adv $reported))', 'if ((Test-PxcAdvertisedId $adv $reported))'); red = @('X5-11:MARKUP_REPORTED_MODEL[removed, model is advertised label]') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

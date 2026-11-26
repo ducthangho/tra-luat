@@ -105,6 +105,8 @@
 - r42 (sau review offline lượt 41, đặc tả `ops/specs/llm-khoan-docx-r42.md`): đường thô dùng MỘT máy trạng thái ngoặc/nháy và MỘT
   từ nối cho cả chốt đầu dòng lẫn phép so; lỗi đọc member ZIP (LZMA hỏng) quy về rc 2; mọi lối thoát bất thường của `tl extract`
   đều thu hồi tiến trình.
+- r43 (sau review offline lượt 42, đặc tả `ops/specs/llm-khoan-docx-r43.md`): một bộ chuyển trạng thái ngoặc/nháy dùng chung cho mọi
+  chốt đường thô; gói `.docx` chỉ nhận nén stored/deflate, không mã hoá (kiểm trước khi mở); `tl extract` thu hồi đúng và giữ lỗi gốc.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -425,7 +425,7 @@ biến môi trường của environment.
   (`ab c. …`, `Ban a) …`, `(Hồ sơ) là …`, kể cả nhãn bọc nháy/ngoặc như `“ab c”. …`, `ab (c). …` — xét trên toàn phần
   trước từ nối "là") làm đường thô TỪ CHỐI cả Điều — dùng `.docx` có cấp danh sách; cụm từ đứng trước "là"
   (`Hồ sơ là …`) vẫn được nhận; mở đầu dạng `… - …` (`kinh tế - xã hội …`) cũng bị chặn. Ngân sách đọc: văn bản thô quá
-  400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số, hay `tl extract` in quá 1 600 000 byte ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, gói ZIP dùng kiểu nén lạ hay member mã hoá, nhãn mở rộng dài quá 64
+  400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số, hay `tl extract` in quá 1 600 000 byte ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, gói ZIP dùng kiểu nén ngoài stored/deflate (chuẩn Word/Google Docs) hay member mã hoá, nhãn mở rộng dài quá 64
   ký tự, hay Điều dựng ra quá 400 000 ký tự ⇒ chặn — Điều dài hơn thì đọc thủ công. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên, ⇒ chặn. Tham chiếu style: `pStyle` trỏ style KHÔNG CÓ hoặc khác loại paragraph ⇒ chặn; `rStyle` trỏ style khác loại
   character ⇒ chặn, còn `rStyle` trỏ style không có thì Word bỏ qua và bộ đọc cũng bỏ qua; chuỗi `basedOn` gặp ID không có thì

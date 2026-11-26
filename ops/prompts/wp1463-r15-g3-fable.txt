@@ -1,0 +1,37 @@
+Bạn là EXECUTOR của packet wp1463 (PR2 #1463, Mission #1172), kho ducthangho/tra-luat. Trả lời và ghi chú bằng tiếng Việt. Đây là LƯỢT 3/3, lượt CUỐI.
+
+ĐỌC TRƯỚC: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §5, §7, §12, §13), .claude/skills/work-packet/SKILL.md.
+
+ĐẶC TẢ ĐÓNG BĂNG (nguồn sự thật duy nhất; đọc TOÀN BỘ, nhất là mục "Thay đổi so với revision 14" với R15-1…R15-4):
+- `git show c4c39265b214fa6bba0afcf9fee36e76fbc567aa:ops/specs/wp1463-r1/SPEC.md`
+- sha256 PHẢI bằng `d8d2523abcef33668ef1f9b0e92c1fa4dc26f703e2af44b255da5afe6bcf5e5f`, lệch ⇒ DỪNG.
+- Chủ kho đã duyệt băm: https://github.com/ducthangho/tra-luat/issues/1463#issuecomment-7185612391
+
+REVIEW MÃ LƯỢT 1 (bốn P2 cần xử lý, chi tiết bằng chứng và gợi ý sửa): `git show c4c39265b214fa6bba0afcf9fee36e76fbc567aa:ops/specs/wp1463-r1/reviews/wp1463-code-review-1.json`.
+
+LEASE: `wp1463-r15-g3-claude`; base `1260fa0cba89353911e2f97188b2c04dab8139d7`; nhánh `agent/wp1463-r15-g3-fable`, tạo từ H của lượt 2 `d0e08eba69d93fa69d0ad948177c1466e2094fd8` (commit cục bộ trong kho này, nhánh `wp1463-H-g2`). Hãy tự xác minh: `git show origin/ops/wp1463-r1:ops/leases/wp1463-r15-g3-claude.yaml`.
+
+WRITE SET (đúng bốn tệp, không có tệp thứ năm):
+1. `ops/ci_provenance_test.py`
+2. `.claude/dev/ci_dang_ky_test.py` (CHỈ bốn thay đổi dữ liệu của mục 3, đã có ở H lượt 2; không đổi thêm)
+3. `ops/specs/wp1463-r1/do/do_pr2.py`
+4. `ops/specs/wp1463-r1/do/KET_QUA.md`
+Cần tệp thứ năm, hoặc thấy đặc tả mâu thuẫn ⇒ DỪNG (§12) và báo, không tự sửa đặc tả.
+
+VIỆC: hiện thực R15-1, R15-2, R15-3, R15-4 đúng như đặc tả, mỗi cái có ca khoá và đột biến riêng chết đúng ca, đúng lý do (không tín dụng giả: đột biến chết vì ngoại lệ vô can hay vì assertion của ca khác không tính). R15-4 KHÔNG mở rộng biểu thức tên Python; chỉ thêm ca khoá và ghi giới hạn. Sau đó chạy lại đủ Nghiệm thu 1–9 trên H mới và cập nhật `KET_QUA.md` bằng đầu ra thật.
+
+QUY TRÌNH:
+- Sửa tối thiểu; giữ idiom chú thích của kho.
+- `python3 -m ruff check --select F` trên các tệp .py đã đổi: DELTA so với base phải = 0.
+- Cần `actionlint` VÀ `shellcheck`.
+- `core.abbrev 7`. Không in hay đọc bí mật. Không viết nguyên văn dấu bỏ-qua-CI vào commit message.
+- Trần kích thước (nang_tran r15): ≤ 6 tệp và ≤ 1800 dòng thêm theo `git diff --numstat 1260fa0 HEAD`. Đo trước khi báo xong; vượt ⇒ DỪNG (ADR-0044), không cắt ca hay đột biến cho vừa trần.
+- COMMIT CỤC BỘ, KHÔNG PUSH. Chủ kho phải audit exact-H trước lần đẩy đầu.
+
+BÁO CÁO CUỐI (handoff §7), in ra ở cuối đầu ra:
+- SHA H, cây H, SHA base, numstat từng tệp;
+- dòng kết luận của các lệnh trong Nghiệm thu 1–5 cùng `tu-kiem` và `tu-kiem --dot-bien` (số N/N và M/M);
+- với từng R15-x: tên ca khoá, tên đột biến, kết quả đo;
+- ruff delta;
+- danh sách chỗ chưa đo được;
+- mọi chỗ đặc tả chưa rõ mà bạn đã chọn cách hiểu.

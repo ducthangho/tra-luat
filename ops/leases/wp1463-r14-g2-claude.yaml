@@ -120,5 +120,6 @@
     "giong": 10,
     "base": "1260fa0 (3 tệp registry/bộ/ci_provenance giống 4a96ccd)",
     "he_qua": "executor chạy lại `vung` theo r14 TRƯỚC mọi mã khác"
-  }
+  },
+  "da_bi_thay_the": "wp1463-r15-g3-claude"
 }

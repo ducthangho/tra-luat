@@ -499,12 +499,20 @@ def _chu_nhan(i):
     return f"(?:(?P<t{i}>[a-zđ])(?P=t{i})*|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"
 
 
+def _tok(i):
+    """r26 (lượt 25 B1): một placeholder của `lvlText` đã dựng — số thập phân, hoặc một chữ cái lặp (thường/hoa)."""
+    return f"(?:\\d+|{_chu_nhan(i)})"
+
+
+# r26 (lượt 25 B1): miền nhãn = mọi nhãn `_nhan` dựng được — các placeholder nối bằng `.` / `-` / `–` (có đệm), mở bằng `(` tuỳ chọn,
+# kết bằng `.` `)` (dính thân được), gạch (sau là khoảng trắng hay dấu mở trích dẫn/ngoặc), hoặc — chỉ khi đã có dấu nối giữa các
+# placeholder — kết ngay sau chữ số. Nhãn chỉ có khoảng trắng (`a tổ chức`) không phân biệt được với chữ ⇒ ngoài miền (§2.28 B1).
+_NOI = rf"{_KC}[.\-–]{_KC}"
+_MO_THAN = "(?=\\s|[“\"‘'(])"
 _RE_DIEM = re.compile("^(?:" + "|".join([
-    rf"\({_KC}{_chu_nhan(1)}{_KC}\)",
-    rf"\(?{_chu_nhan(2)}{_KC}[.)]",
-    rf"{_chu_nhan(3)}{_KC}[-–](?=\s)",
-    # r24 (lượt 23 Z3): thập phân nhiều cấp, có thể trong ngoặc, có thể dính thân sau dấu cuối (`(1.1)`, `1.1.Dữ`, `1.2)`).
-    rf"\(?{_KC}\d+(?:\.\d+)+{_KC}[.)\-–]?{_KC}\)?(?=\s|[^\W\d_])",   # r25 (lượt 24 A2): + kết bằng gạch
+    rf"\(?{_KC}\d+(?:{_NOI}\d+)+(?=\s|[^\W\d_]|[“\"‘'(])",
+    rf"\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",
+    rf"\(?{_KC}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",
     r"[-–•+]",
 ]) + r")\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
@@ -1084,20 +1092,22 @@ def _phan_tich_doan(p, kieu):
                 hl[t] = False
             else:
                 hl[t] = dem[t] == 1
-        chu_run, chu_sau_ngat = [], False
+        # r26 (lượt 25 B3): trạng thái NGẮT của run chỉ ghi vào đoạn SAU khi biết run còn hiệu lực (run gạch bị bỏ trọn — kể cả
+        # ngắt của nó, §2.25 Y1).
+        chu_run, chu_sau_ngat, ngat_mem, sau_trang = [], False, False, kq["sau_ngat_trang"]
         for c in r:
             ten = c.tag[len(_W):] if c.tag.startswith(_W) else None
             if ten in _CON_RUN_CHU:
                 chu = _chu_t(c) if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten]   # r25 (lượt 24 A1): `xml:space` hiệu lực
-                if kq["sau_ngat_trang"] and chu.strip():
+                if sau_trang and chu.strip():
                     chu_sau_ngat = True   # r9 (lượt 8 H5); r10 (lượt 9 J5): chỉ tính khi run KHÔNG bị gạch (xét bên dưới)
                 chu_run.append(chu)
             elif ten in ("br", "cr"):
                 chu_run.append(" ")
                 if c.get(_W + "type") not in ("page", "column"):
-                    kq["ngat"] = True
+                    ngat_mem = True
                 else:
-                    kq["sau_ngat_trang"] = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT ở CUỐI đoạn là trình bày
+                    sau_trang = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT ở CUỐI đoạn là trình bày
             elif ten in ("delText",):
                 # chữ đã xoá (track changes) — không vào nguyên văn; r22 (lượt 21 X1, lưới phụ r222): `delText` lạc chỉ có khoảng
                 # trắng ⇒ giữ khoảng trắng.
@@ -1118,6 +1128,9 @@ def _phan_tich_doan(p, kieu):
             if ruot and not ruot.strip():
                 kq["phan"].append(ruot)
             return
+        if ngat_mem:
+            kq["ngat"] = True
+        kq["sau_ngat_trang"] = sau_trang
         if chu_sau_ngat:
             kq["ngat"] = True   # có chữ HIỆU LỰC sau ngắt trang/cột ⇒ có thể che số khoản gõ tay ⇒ như ngắt mềm
         kq["phan"].extend(chu_run)

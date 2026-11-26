@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
   "file_count": 187,
-  "total_bytes": 9542233,
-  "package_hash": "73610e7a3c45745bc44a2df03685953d202069d4528a3a74d5a21532c017dc51",
-  "content_hash": "73610e7a3c45745bc44a2df03685953d202069d4528a3a74d5a21532c017dc51",
+  "total_bytes": 9543404,
+  "package_hash": "a41cdeafedf5b4d139a1d76dc38d2a43055cbf1ad6ed31a0cbf73b08c14e0078",
+  "content_hash": "a41cdeafedf5b4d139a1d76dc38d2a43055cbf1ad6ed31a0cbf73b08c14e0078",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 1136784,
-      "sha256": "d1b6811e16ad5b203910c4d6a87513b432276be0a9c4a65281244c17db8b7083"
+      "size": 1137052,
+      "sha256": "286b0f1ada30f149f7772c233161a0dc6a0023b90d142358aceb185ff495c67a"
     },
     {
       "path": "CONTEXT.md",
@@ -793,8 +793,8 @@
     },
     {
       "path": "scripts/tl_core/llm_route.py",
-      "size": 101682,
-      "sha256": "d3fb38e8ae5c171bdc82726d342471f923219ea0e809dab3434cf289e55e415e"
+      "size": 102585,
+      "sha256": "aa28445f5b44f84535a07852c9026679128440f1ee4dd99169fa917e85c31dc8"
     },
     {
       "path": "scripts/tl_core/lookup_ops.py",

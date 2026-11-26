@@ -417,7 +417,8 @@ biến môi trường của environment.
   trong văn bản dù `--markup-strict` cho qua) và chặn cả bản export sạch không có dấu sửa; bộ chuyển XML→chữ của nó có thể bỏ
   `w:tab`/`w:br`. Cần ranh giới và nguyên văn chắc chắn thì dùng `--tep <tệp .docx>`. Đường thô coi một chữ cái + `)` / `.`
   hay `(a)` ở đầu dòng — chữ thường hoặc chữ HOA, đơn hoặc lặp (`aa.`, `BB)`), kể cả `a- …` / `A – …` — là nhãn điểm ⇒ nguồn bị
-  chặn (kể cả có khoảng đệm `a . …`, `( a ) …`, và nhãn thập phân nhiều cấp `1.1. …`). `.docx` khai một trường đơn trị nhiều lần
+  chặn (kể cả có khoảng đệm `a . …`, `( a ) …`, nhãn nhiều cấp nối bằng `.`/`-` như `1.1. …`, `1-1 …`, `a-b. …`). Nhãn chỉ ngăn bằng
+  khoảng trắng (`a tổ chức`) không phân biệt được với chữ — thuộc bước duyệt ranh giới. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên ⇒ chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả

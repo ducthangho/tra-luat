@@ -64,6 +64,8 @@
   dung); member ZIP trùng tên ⇒ chặn; nhãn thập phân nhiều cấp trong ngoặc / dính thân ⇒ chặn.
 - r25 (sau cross-review lượt 24, đặc tả `ops/specs/llm-khoan-docx-r25.md`): khoảng trắng biên của `w:t`/`w:delText` theo `xml:space`
   hiệu lực (quy tắc Word); nhãn thập phân nhiều cấp kết bằng gạch ⇒ chặn.
+- r26 (sau cross-review lượt 25 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r26.md`): miền nhãn điểm thô = miền nhãn dựng từ `lvlText`;
+  ngắt trong run gạch bị bỏ không còn làm cả Điều bị từ chối; khoá thêm ca `xml:space`.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -1,0 +1,63 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1540
+packet_id: DON-REF-TEST-VAO-CI
+revision: 2
+generation: 1
+lease_id: don-ref-test-vao-ci-r2-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+pham_vi_e: 'cham E5 (ADR-0067): sua ma cong registry .claude/dev/ci_dang_ky_test.py; chu kho duyet bam dac ta r2, audit va merge.'
+reviewed_sha_required: b1db69429d272cfde43681b4a9de1184c452c0f1
+reviewed_sha_required_nghia: 'chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+spec_path: ops/specs/DON-REF-TEST-VAO-CI-r2.md
+spec_hash: f243cc3098a2a62fddb58b41923a34962d5a8d21e262855024707fae3a7952b7
+spec_sha256_required: f243cc3098a2a62fddb58b41923a34962d5a8d21e262855024707fae3a7952b7
+spec_ref: refs/heads/ops/don-ref-test-vao-ci-spec@d189fb2c41ba27a7a51021c98109f2c591d4132b
+spec_approval: https://github.com/ducthangho/tra-luat/issues/1540#issuecomment-7197806239
+write_set:
+- .claude/dev/ci_dang_ky_test.py
+- ops/don_ref_chot_test.py
+- ops/specs/DON-REF-TEST-VAO-CI-r2.md
+write_set_hash: 5889afb68987cdfc402c0981c3df16ae442f14eef6f85a2889956edc152dba76
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'dac ta r2 muc 5; ops/specs/DON-REF-TEST-VAO-CI-r2.md vao nhanh thi cong nguyen byte f243cc30 (ADR-0063). Lease nay dang tren nhanh so sach ops/don-ref-test-vao-ci-spec (ADR-0062 N4), khong thuoc write set ma.'
+branch: agent/don-ref-test-vao-ci-g1-claude
+branch_ownership: exclusive
+base_sha: b1db69429d272cfde43681b4a9de1184c452c0f1
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 26-11-2026 trong phien session_015GtxrcARTz5uxXUUDyqmUZ: "Đồng ý duyệt băm và cấp lease để làm tiếp." (ghi ho tai issuecomment-7197806239)'
+authority_url: https://github.com/ducthangho/tra-luat/issues/1540#issuecomment-7197806239
+recorded_by: 'phien session_015GtxrcARTz5uxXUUDyqmUZ'
+recorder_is_executor: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-26T16:34:10Z'
+  goc_quet: 'origin/master b1db694; fetch +refs/heads/*; ls-remote so TAP ten voi for-each-ref: 375 nhanh, thieu 0; master cuc bo da fast-forward truoc khi quet'
+  ket_qua: 'ca 3 duong dan: NGUOI_GIU 0. wp1463-r17-g5-claude HET_HAN (PR #1551 merge b1db694).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet nay chua co lease truoc (r1 khong duoc cap lease).'
+leased_at_utc: '2026-11-26T16:35:00Z'
+heartbeat_at: '2026-11-26T16:35:00Z'
+lease_until: '2026-11-27T00:35:00Z'
+lease_expires_at_utc: '2026-11-27T00:35:00Z'
+max_lease_hours: 8
+review_calls_limit: 10
+review_calls_basis: 'ADR-0055 (dong khai tran_loi_goi_codex trong dac ta); record-codex-call cho TUNG loi goi.'
+inference_calls_limit: 0
+nang_tran: []
+windows: 'required (ADR-0060 M3: diff cham .claude/dev/**); local tren may Windows cua chu kho bang bundle TRUOC push (M4); workflow_dispatch windows-only cong them sau push (A7).'
+full_mutant_audit: 'bat buoc (ADR-0060 M9, K7): ci-dot-bien-du.yml tren H (A11).'
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho.'
+push_policy: 'ADR-0060 M5/M12: day nhanh thi cong MOT lan sau khi review offline approve, verdict dang len Issue #1540 va Windows local xanh; mo PR draft; push them can checkpoint chu kho (E2) kem bien nhan SHA truoc/sau.'

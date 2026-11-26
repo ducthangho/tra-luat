@@ -6,15 +6,11 @@
   python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry [--root KHO]       Nghiệm thu 3
   python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem [--dot-bien]        tự kiểm bộ so và phép đo vùng (không cần cây git)
 
-TRẠNG THÁI (attempt 1, 2026-11-26): CHỈ `vung` được hiện thực. Lần chạy sớm của nó ra KHONG_DO_DUOC nên executor DỪNG theo
-SPEC "Vùng trước lease (revision 10)" trước mọi mã khác; `ab`, `registry`, `tu-kiem` CHƯA có (xem KET_QUA.md cạnh tệp này).
-
 KHÔNG phải `*_test.py`, không đăng ký vào registry. Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp
 qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ đưa nó vào tập quan sát của probe).
-Giới hạn của `vung`, khai thẳng: tiến trình KHÔNG phải Python (bash, git, actionlint, shellcheck) và Python được gọi qua
-shell không bị quan sát; chỉ Python do một tiến trình Python sinh TRỰC TIẾP mới được đối chiếu với dòng khởi động hook.
+Giới hạn của `vung`, khai thẳng (SPEC r14 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell, lần đọc
+không phát sự kiện audit `open`, và Python con không hook bị che bởi dòng khởi động thừa đều KHÔNG bị quan sát.
 """
-import collections
 import hashlib
 import json
 import os
@@ -188,10 +184,10 @@ def la_python(sinh):
 
 def doc_log(log, root, tracked, pid_goc):
     """Nhật ký của MỘT phép → quan sát. `tap` = tệp được theo dõi khớp đường dẫn theo chữ HOẶC sau realpath.
-    `thieu_hook` = đối chiếu THEO TỪNG tiến trình sinh P: mỗi lần P sinh một Python con phải có MỘT dòng BAT_DAU riêng
-    (pid, starttime khác nhau) có PID cha = P và đúng argv ấy; dòng của tiến trình khác, dòng lặp không bù được."""
-    q = {"tap": set(), "khong_giai": [], "bat_dau_goc": False, "python_con": 0, "bat_dau": 0, "thieu_hook": [], "hong": []}
-    sinh, khoi, da_thay = collections.defaultdict(collections.Counter), collections.defaultdict(collections.Counter), set()
+    Đối chiếu GỘP theo phép (SPEC r12+): `bat_dau_con` = số dòng BAT_DAU của tiến trình KHÁC gốc (dòng lặp cùng pid và
+    starttime tính một lần) phải ≥ `python_con` = số lần một tiến trình có hook sinh Python con; thiếu ⇒ `thieu_hook`."""
+    q = {"tap": set(), "khong_giai": [], "bat_dau_goc": False, "python_con": 0, "bat_dau_con": 0, "thieu_hook": [], "hong": []}
+    da_thay = set()
     try:
         with open(log, encoding="utf-8", errors="surrogateescape") as f:
             dong = f.read().splitlines()
@@ -212,9 +208,10 @@ def doc_log(log, root, tracked, pid_goc):
             if (pid, p[0]) in da_thay:
                 continue                                     # dòng khởi động LẶP: không tính thêm
             da_thay.add((pid, p[0]))
-            q["bat_dau"] += 1
-            q["bat_dau_goc"] = q["bat_dau_goc"] or pid == pid_goc
-            khoi[ppid][json.dumps(p[1])] += 1
+            if pid == pid_goc and not q["bat_dau_goc"]:
+                q["bat_dau_goc"] = True
+            else:
+                q["bat_dau_con"] += 1
         elif kieu == "DIRFD_KHONG_GIAI":
             q["khong_giai"].append(p)
         elif kieu == "SINH":
@@ -222,17 +219,14 @@ def doc_log(log, root, tracked, pid_goc):
                 q["hong"].append(f"lan sinh khong xac dinh duoc tien trinh sinh: {d[:80]}")
             elif la_python(p):
                 q["python_con"] += 1
-                sinh[pid][json.dumps(p.get("argv"))] += 1
         elif kieu in ("MO", "DIRFD", "THAT") and isinstance(p, str):
             for r in (os.path.relpath(p, root), os.path.relpath(p, goc)):
                 if r in tracked:
                     q["tap"].add(r)
         else:
             q["hong"].append(f"dong nhat ky la: {d[:80]}")
-    for P, dem in sorted(sinh.items()):
-        for argv, n in sorted(dem.items()):
-            if khoi[P][argv] < n:
-                q["thieu_hook"].append(f"pid {P}: sinh {n} Python con {argv[:60]}, chi {khoi[P][argv]} dong khoi dong co PID cha ay")
+    if q["bat_dau_con"] < q["python_con"]:
+        q["thieu_hook"].append(f"sinh {q['python_con']} Python con, chi {q['bat_dau_con']} dong khoi dong hook cua tien trinh con")
     return q
 
 
@@ -353,7 +347,7 @@ def in_vung(kl, ct, obs):
     for c, o in zip(ct, obs):
         dk1, dk2, _ = kiem_vung(c["ten"], set(c["tap"]))
         print(f"PHEP {c['ten']}: {c['ket_luan']} · rc={o.get('rc')} · (1) khac rong={dk1} · (2) nhan chung {NHAN_CHUNG[c['ten']]}={dk2}"
-              f" · (3) ngoai vung={c['ngoai_vung']} · Python con/dong khoi dong={o.get('python_con')}/{o.get('bat_dau')}")
+              f" · (3) ngoai vung={c['ngoai_vung']} · Python con/dong khoi dong={o.get('python_con')}/{o.get('bat_dau_con')}")
         print(f"  tap ({len(c['tap'])}): {c['tap']}")
         if c["ten"] == "bo_day_du":
             print(f"  khoi cuoi: {o.get('khoi_cuoi')}")

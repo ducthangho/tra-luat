@@ -74,17 +74,17 @@ khai báo mà gỡ đúng điều kiện ấy thì ca đích đỏ.
   cũ thật. `nen_giu_nguyen_dich[lk5]` là đối chứng dương của chính mô hình (rc 0).
 - Ba fixture thư mục/gốc (`lk4`, `lk6`, `lk7`) vẫn cần mô hình `git_loi="tep"` trên Linux như lượt 4.
 
-## 5. Hai điều về Python và Windows mà executor KHÔNG đo được
+## 5. Hai điều về Python và Windows (executor không đo; phần đã đo là của điều phối)
 
-- **Ranh giới phiên bản của bản vá `tarfile`.** Trên Python 3.13.18 ở đây, `tarfile._get_filtered_attrs` gọi `os.path.normpath(member.linkname)` và
-  ghi lại `linkname` (executor đọc mã). Theo trí nhớ của executor về changelog CPython, đoạn ấy có từ 3.12.11 / 3.13.4; con số này CHƯA được kiểm
-  bằng phép đo. Bằng chứng gián tiếp: M3 trên Python 3.12.10 xanh ở `lk7` với rc 12, mà rc 12 chỉ ra được khi `readlink` trên đĩa còn nguyên
-  `sub/…` (điều phối đo, issuecomment-7172185200 và 7180853548). Vậy trên 3.12.10 bộ bung giữ nguyên văn bản đích, và `khong/../ci.yaml` trên
-  `8aab9da` qua danh sách. Chưa ai chạy đúng ca ấy trên 3.12.10.
-- **Nợ đo: Windows với Python có bản vá ấy.** `os.path.normpath` trên Windows là `ntpath.normpath`, đổi `/` thành `\`. Khi đó đích của `lk6`
-  (`../../..`), `lk7` (`sub/…`) và `lkc` (`../lk5-provenance/ci.yaml`) bị viết lại lúc bung, luật nội dung của lượt 3 ra rc 8, trong khi biến thể đòi
-  rc 12. Vẫn fail-closed, nhưng ca `cong_d2b_c4_symlink` sẽ ĐỎ trên interpreter Windows ấy. Tồn tại từ lượt 4; chủ kho quyết ghi thành nợ đo
-  (issuecomment-7182681531), không vá ở lượt này.
+- **Bản vá `tarfile` viết lại đích.** Trên Python 3.13.18 ở đây, `tarfile._get_filtered_attrs` gọi `os.path.normpath(member.linkname)` và ghi lại
+  `linkname` (executor đọc mã). Điều phối đo riêng hàm `tarfile.data_filter` trên DESKTOP-T9R33P2 (báo 05:02Z 26-11): Python 3.12.10 GIỮ NGUYÊN
+  `khong/../ci.yaml`; CPython 3.13.17 viết lại thành `ci.yaml`. Vậy trên 3.12.10 đích hỏng ấy tới được chốt của `8aab9da` và qua danh sách. Bản Python đầu
+  tiên có bản vá (executor nhớ là 3.12.11 / 3.13.4) chưa được đo, và chưa ai chạy cả cổng D2b với đích ấy trên 3.12.10.
+- **Nợ: Windows với Python có bản vá ấy.** `os.path.normpath` trên Windows là `ntpath.normpath`, đổi `/` thành `\`. Điều phối đo ở mức hàm trên
+  CPython 3.13.17 (cùng máy): `../../..`, `sub/danh-gia-gate-output-3.txt`, `../lk5-provenance/ci.yaml` đều bị đổi mọi `/` thành `\`, không ném ngoại
+  lệ. Hệ quả dự đoán: đích của `lk6`, `lk7`, `lkc` bị viết lại lúc bung, luật nội dung của lượt 3 ra rc 8, trong khi biến thể đòi rc 12, nên ca
+  `cong_d2b_c4_symlink` ĐỎ trên interpreter ấy. Vẫn fail-closed. Tồn tại từ lượt 4; chủ kho quyết ghi nợ (issuecomment-7182681531), không vá ở lượt
+  này. Kết quả ở mức ca, nếu có, nằm trong `handoff.yaml`.
 
 ## 6. Tệp trong thư mục
 

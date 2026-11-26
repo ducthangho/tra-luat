@@ -1,0 +1,12 @@
+$ sha256sum <bundle>
+accb8b7fb2bef8f38fbfe35f33a2aead484f5d7770fa9af2946d80ecc778bd9a  wp1236-c-45944c7.bundle
+$ git bundle verify <bundle>
+/tmp/claude-0/-home-user-tra-luat/5967f379-4bdf-59e4-8c2d-d41c6965cf15/scratchpad/handoff/tree6/ops/handoff/wp1236-c-r12-g1/45944c7/wp1236-c-45944c7.bundle is okay
+The bundle contains this ref:
+45944c7c3f4c75beaa87f36138b2bba9fb9198a3 refs/heads/claude/wp1236-c-r12-g1
+The bundle requires this ref:
+f602325574c62184caf16309631f5f680ca5cee2 
+The bundle uses this hash algorithm: sha1
+rc=0
+$ git bundle list-heads <bundle>
+45944c7c3f4c75beaa87f36138b2bba9fb9198a3 refs/heads/claude/wp1236-c-r12-g1

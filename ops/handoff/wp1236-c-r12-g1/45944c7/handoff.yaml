@@ -1,0 +1,229 @@
+schema_version: 1
+packet_id: wp1236
+packet_issue: 1236
+packet_slug: GATE-OUTPUT-DOI-CHIEU
+dot: C
+revision: 12
+generation: 1
+luot_handoff: 6
+tra_loi_verdict: 'review mã lượt 5/6 (Codex, run 845189ec5e834d1ba278b0b6c0b854c7, trên 8aab9da, changes_requested: C05 P2 danh sách cho phép chưa thực thi điều cấm đích chứa dấu chéo ngược; reviewer xếp vào lớp archive-loc-mat-du-lieu-kiem) — ops/reviews/wp1236-c-r12-ma-5-codex/ trên ops/wp1236-bc-lease @ 75840c6; biên nhận #1236 issuecomment-7182572432'
+lease_id: wp1236-c-r12-g1-claude-20261124
+lease_ref: 'refs/heads/ops/wp1236-bc-lease (ops/leases/wp1236-c-r12-g1-claude-20261124.yaml; trần Codex 6, đã dùng 5 theo issuecomment-7182681531); lease_expires_at_utc 2026-11-27T11:22:26Z'
+spec_path: ops/specs/wp1236-r12.md
+spec_blob: e5583bc042448517b94eadda57231dfc60e0a284
+spec_hash: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+quyet_dinh_chu_kho_ap_dung:
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7182681531', noi_dung: '"Vá (a)+(b), gọi Codex 6/6" (điều phối ghi hộ): (a) cấm dấu chéo ngược trên join(dirname(link), readlink) trước normpath; (b) đòi posixpath.normpath(d) == d, hệ quả có chủ đích là ./x, a//b, sub/../x cũng bị chặn; (c) không thêm mã riêng cho mode 100644/100755, ghi trong bảng mệnh đề. Rủi ro Windows với Python có bản vá tarfile: ghi thành nợ đo. Trần 450 và trần Codex không đổi; lượt 6 là lượt cuối'}
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7180063460', noi_dung: '"Đổi sang danh sách cho phép" (lượt 5): symlink chỉ qua khi đích trùng từng byte một tệp thường trong cây; mọi trường hợp khác (thư mục, gốc bản bung, bí danh hoa/thường hay NFC, chứa dấu chéo ngược, hỏng, ngoài cây, symlink khác) ⇒ kiem_tep:not_measured:symlink'}
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7170968907', noi_dung: '"Vá + nâng trần Codex C lên 6" (lượt 4)'}
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7134458601', noi_dung: 'E3 cho C02: mỗi thành phần đường dẫn chỉ nhận ASCII 0x21–0x7E trừ "/" (không đổi)'}
+  - {url: 'https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7130670276', noi_dung: 'luật 9 = miền DELTA + nghĩa vụ không hồi quy'}
+quy_tac_dung_lop_lap: 'reviewer lượt 5 ghi lop_lap_lan_ba vẫn chứa archive-loc-mat-du-lieu-kiem. Executor đã dừng và báo điều phối lẫn chủ kho (trước 04:32Z 26-11); chỉ chốt ứng viên sau khi có dòng ghi quyết định issuecomment-7182681531'
+provider: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: remote
+operating_system: Linux
+python: 3.13.18
+role: executor
+session_id: session_015GtxrZsYAFm7iLa11eWogL
+base_sha: f602325574c62184caf16309631f5f680ca5cee2
+head_sha: 45944c7c3f4c75beaa87f36138b2bba9fb9198a3
+head_tree: 66a0f315c1cf27eaac67beae06ee20cd1789f23a
+tested_sha: 45944c7c3f4c75beaa87f36138b2bba9fb9198a3
+head_sha_bang_tested_sha: true
+commits:
+  - {sha: ac523aebd876640b369e94511fd44e81bace0908, cha: f602325574c62184caf16309631f5f680ca5cee2, noi_dung: 'ứng viên lượt 1 (đã review, không sửa)'}
+  - {sha: 2439922c67a091c53e277c9e0b13d8fc04089453, cha: ac523aebd876640b369e94511fd44e81bace0908, noi_dung: 'ứng viên lượt 2 (đã review, không sửa)'}
+  - {sha: dbe650d2a3c3fb6da9573ea485adc65934efdc78, cha: 2439922c67a091c53e277c9e0b13d8fc04089453, noi_dung: 'ứng viên lượt 3 (review approve; M3 Windows đỏ; không sửa)'}
+  - {sha: d5a7d8510af03e0d08545f677ad5de687e0264f4, cha: dbe650d2a3c3fb6da9573ea485adc65934efdc78, noi_dung: 'ứng viên lượt 4 (M3 Windows tập trung xanh; review changes_requested; không sửa)'}
+  - {sha: 8aab9dabb6f3f150e4ab1872e37757c2620912c3, cha: d5a7d8510af03e0d08545f677ad5de687e0264f4, noi_dung: 'ứng viên lượt 5 (M3 Windows tập trung xanh; review changes_requested C05; không sửa)'}
+  - {sha: 45944c7c3f4c75beaa87f36138b2bba9fb9198a3, cha: 8aab9dabb6f3f150e4ab1872e37757c2620912c3, noi_dung: 'C05: cấm dấu chéo ngược trên đường dẫn đích trước chuẩn hoá + đòi đích thô chuẩn tắc; so với 8aab9da: packet_loop.py +6 −5 · packet_loop_test.py +18 −10'}
+pushed: false        # nhánh code claude/wp1236-c-r12-g1 CHƯA push, CHƯA có PR (ADR-0060 M5/M12); ứng viên giao bằng bundle
+bundle:
+  path: ops/handoff/wp1236-c-r12-g1/45944c7/wp1236-c-45944c7.bundle
+  sha256: accb8b7fb2bef8f38fbfe35f33a2aead484f5d7770fa9af2946d80ecc778bd9a
+  bytes: 30078
+  range: f602325574c62184caf16309631f5f680ca5cee2..refs/heads/claude/wp1236-c-r12-g1
+  verify: 'git bundle verify rc 0 (gate/bundle_verify.log)'
+  dung: 'git fetch <bundle> claude/wp1236-c-r12-g1:claude/wp1236-c-r12-g1  (cần base f602325 trong kho)'
+  giao_hai_buoc: 'bundle + README lên nhánh handoff ở commit ffc8797 (để M3 chạy song song); handoff.yaml và log ở commit kế tiếp, cùng nhánh'
+status: needs_review
+summary: >-
+  Danh sách cho phép của lượt 5 được thêm hai điều kiện, kiểm trên từng symlink 120000 của danh mục cây con thư mục provenance, với d = readlink và
+  j = posixpath.join(dirname(link), d): (a) j không mang dấu chéo ngược, kiểm TRƯỚC normpath nên gồm cả đích thô lẫn thư mục chứa link; (b)
+  posixpath.normpath(d) == d; (c) như lượt 5, posixpath.normpath(j) trùng từng byte một mục kiểu tệp của danh mục. Sai một điều ⇒
+  kiem_tep:not_measured:symlink (rc 12), không gọi module. (a) đóng C05; (b) thực thi mệnh đề "đích hỏng" cho dạng a/../x mà phép chuẩn hoá văn bản
+  từng cho qua. Không thay dấu chéo ngược bằng "/", không casefold, không NFC.
+changed_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_khop_lease: true
+numstat: {lenh: 'git diff --numstat origin/master...HEAD', tep: 2, them: 438, xoa: 13, chi_tiet: 'packet_loop.py +96 −1 · packet_loop_test.py +342 −12', tran: '<= 6 tệp, <= 450 dòng thêm', con_lai_toi_tran: 12}
+master_da_tien: 'origin/master lúc lập handoff = 1260fa0cba89353911e2f97188b2c04dab8139d7 (lease ghi base f602325). git diff --stat f602325 origin/master trên hai tệp write set và ops/gate_output_doi_chieu.py: rỗng. git merge-tree --write-tree origin/master 45944c7: rc 0. Gate KHÔNG chạy lại trên bản ghép với master mới.'
+sha256_tep_tai_head:
+  .claude/dev/packet_loop.py: e339eb42480d782731dcd7719e40ca1c91cb0e5bdcbeaab0844e9a4942acb4d7
+  .claude/dev/packet_loop_test.py: 732b70ecb82571b71c66c018b7f837171512ac869ec3383870cd2135fcd85905
+gate_checkout_chinh: {bat_dau: '2026-11-26T06:28:26Z', ket_thuc: '2026-11-26T07:13:38Z', head: 45944c7c3f4c75beaa87f36138b2bba9fb9198a3, cay_sach_truoc_sau: true}
+tests:   # Linux, Python 3.13.18, core.abbrev 7, kho không shallow. Mỗi mục ghi rõ chạy ở checkout chính hay ở clone A/B; cây sạch trước và sau
+  - name: 'không hồi quy base ↔ head — packet_loop_test ĐỦ (16 mảnh nền + job gom + 16 mảnh đột biến) trên mỗi vế'
+    status: passed
+    evidence: 'ab/bang_so.md — KẾT LUẬN: KHÔNG HỒI QUY (delta 0). Rig (ab/ab6_dung.log): nen HEAD=f602325574c62184caf16309631f5f680ca5cee2 tree=99e13c5f0e2442d48c3c05675a586f3cf1b0a62a shallow=false .git=thu_muc sach=0 | sau HEAD=45944c7c3f4c75beaa87f36138b2bba9fb9198a3 tree=66a0f315c1cf27eaac67beae06ee20cd1789f23a shallow=false .git=thu_muc sach=0. (i) ca nền: nen 1784 {''bo_qua'': 38, ''dat'': 1746} · sau 1801 {''bo_qua'': 38, ''dat'': 1763}; ca có ở nen mà vắng ở sau: 0 []; ca đạt ở nen mà không đạt ở sau: 0 []; ca chỉ có ở sau: 17 (đều `cong_d2b_*`: True), trạng thái {''dat'': 17}. Job gom: nen "GOM: ĐẠT · 16 mảnh · 1784 ca bắt buộc (sổ 1786 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)" · sau "GOM: ĐẠT · 16 mảnh · 1801 ca bắt buộc (sổ 1803 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)". CA_DAI ở mảnh đột biến 0: nen "MẢNH: ca - · đột biến 0/16 · 2/2 ca · 123 lượt đột biến · carrier=không · 2291s · rc=0" · sau "MẢNH: ca - · đột biến 0/16 · 2/2 ca · 127 lượt đột biến · carrier=không · 2318s · rc=0". (ii) đột biến khai báo: nen 2009 {''bo_qua'': 1, ''do'': 1, ''ok'': 2007} · sau 2077 {''bo_qua'': 1, ''do'': 1, ''ok'': 2075}; đột biến bị giết ở nen mà không bị giết ở sau: 0 []; đột biến chỉ có ở sau: 68 (đều `d2b_*`: True), trạng thái {''ok'': 68}. (iii) số từng mảnh: hai bảng trong ab/bang_so.md'
+  - name: 'đột biến đỏ có sẵn (đỏ ở CẢ HAI vế, delta 0)'
+    status: failed
+    evidence: 'đỏ ở nen: [''r1187_spec_packet_type''] · đỏ ở sau: [''r1187_spec_packet_type'']; rc khác 0: [((''nen'', ''db'', 9), 1), ((''sau'', ''db'', 13), 1)]. Cùng tập tên ở hai vế ⇒ đỏ sẵn, delta 0; không thuộc mục tiêu của đợt C, không vá. Đo ở Python 3.13.18, chưa đo ở 3.12 của CI'
+  - name: 'BỎ QUA (tách riêng, không tính là đạt)'
+    status: skipped
+    evidence: 'nền: nen 38 ca · sau 38 ca · cùng tập tên: True; lý do ở vế sau: 37× "ca native Windows (kernel32) — nền Linux không đ…" · 1× "chỉ đo lệnh pwsh trên Windows…". Đột biến BỎ QUA: nen [''luong_canonical_chay_that_dao_os_name''] · sau [''luong_canonical_chay_that_dao_os_name'']. Ca ĐỎ ở lượt nền (đếm dòng ĐỎ trong 16 log mảnh): nen 0 · sau 0 — môi trường executor không gặp ca socket bị sandbox chặn'
+  - name: 'đột biến khai báo — họ d2b_ + ba họ dùng chung fixture/nhánh phân hạng (checkout chính tại 45944c7)'
+    status: passed
+    evidence: 'gate/dot_bien_khai_bao.log: rc 0, 236 giết đúng ca đích, 0 đỏ (d2b_ 68 · c1106_ 22 · wp1124_ 3 · b4_ 143); dòng cuối: dot bien: 236'
+  - name: 'ma trận đột biến × biến thể của cong_d2b_c4_symlink (mỗi chốt có biến thể RIÊNG bắt nó)'
+    status: passed
+    evidence: 'gate/ma_tran_c4.log: 43 biến thể × 31 đột biến; bản gốc 0 biến thể lệch; số biến thể lệch dưới từng đột biến: d2b_loc_mat_symlink 25 · d2b_tin_ban_bung 7 · d2b_danh_muc_chi_chieu_git 1 · d2b_danh_muc_chi_chieu_dia 2 · d2b_tin_ban_chep_cua_symlink 3 · d2b_danh_muc_bo_thu_muc 35 · d2b_bo_bam_blob 2 · d2b_bo_dich_symlink 1 · d2b_gop_ten_khac_hoa_thuong 4 · d2b_trung_khoa_chi_xet_la 3 · d2b_trung_khoa_chi_xet_thu_muc 2 · d2b_trung_khoa_chi_cung_loai 1 · d2b_k2_tin_dia 16 · d2b_k2_moi_symlink 3 · d2b_k2_dich_tho 3 · d2b_k2_bo_cam_cheo 5 · d2b_k2_cam_cheo_chi_dich_tho 1 · d2b_k2_bo_chuan_tac 1 · d2b_k2_cho_thu_muc 1 · d2b_k2_cho_symlink 1 · d2b_k2_cho_goc 1 · d2b_k2_cho_ngoai_danh_muc 6 · d2b_k2_cho_cheo_nguoc 1 · d2b_k2_cho_hoa_thuong 1 · d2b_k2_cho_nfc 1 · d2b_k2_cho_ten_lk8 1 · d2b_k2_cho_ten_lk9 1 · d2b_k2_cho_ten_lkb 1 · d2b_k2_cho_ten_lkc 1 · d2b_k2_cho_ten_lkd 1 · d2b_k2_cho_ten_lke 1. Các đột biến chỉ bị MỘT biến thể bắt: d2b_danh_muc_chi_chieu_git ⇐ nen_thua_mot_muc · d2b_bo_dich_symlink ⇐ nen_viet_lai_dich_symlink · d2b_trung_khoa_chi_cung_loai ⇐ thu_muc_va_tep_trung_khoa_mien · d2b_k2_cam_cheo_chi_dich_tho ⇐ symlink_tro_thu_muc[lkj] · d2b_k2_bo_chuan_tac ⇐ nen_giu_nguyen_dich[lkl] · d2b_k2_cho_thu_muc ⇐ nen_bung_symlink_thu_muc_thanh_tep[lk4] · d2b_k2_cho_symlink ⇐ symlink_tro_thu_muc[lkd] · d2b_k2_cho_goc ⇐ nen_bung_symlink_thu_muc_thanh_tep[lk6] · d2b_k2_cho_cheo_nguoc ⇐ symlink_tro_thu_muc[lka] · d2b_k2_cho_hoa_thuong ⇐ symlink_tro_thu_muc[lk9] · d2b_k2_cho_nfc ⇐ symlink_tro_thu_muc[lke] · d2b_k2_cho_ten_lk8 ⇐ symlink_tro_thu_muc[lk8] · d2b_k2_cho_ten_lk9 ⇐ symlink_tro_thu_muc[lk9] · d2b_k2_cho_ten_lkb ⇐ symlink_tro_thu_muc[lkb] · d2b_k2_cho_ten_lkc ⇐ symlink_tro_thu_muc[lkc] · d2b_k2_cho_ten_lkd ⇐ symlink_tro_thu_muc[lkd] · d2b_k2_cho_ten_lke ⇐ symlink_tro_thu_muc[lke]'
+  - name: 'bộ test của ứng viên chạy trên MÃ 8aab9da và mã 45944c7 (ca cong_d2b_c4_symlink)'
+    status: passed
+    evidence: 'gate/m3_mo_hinh.log (cùng bộ test của 45944c7, đổi mã sản phẩm): ma_cu sha256 696ba313ad12f482 :: DO GIET ChotB4: (''cong_d2b_c4_symlink'', "symlink_tro_thu_muc[lkf]: đòi (12, [''kiem_tep:not_measured:symlink''], []), được (0, [], [''D2b ĐẠT ops/land/lkf-provenance/danh-gia-gate-output-44669622916.txt@46f7466018bbf59d04f498937710f1f2beaa0d8e'']); stderr=''''") | ma_moi sha256 e339eb42480d7827 :: DAT. Mã cũ lấy từ clone A/B lượt 5 tại 8aab9da; biến thể lệch đầu tiên là lkf (tệp 100644 tên mang dấu chéo ngược), mã 8aab9da trả rc 0'
+  - name: 'probe_paths.py và probe_modes.py của reviewer lượt 5, chạy NGUYÊN VĂN trên 8aab9da và trên 45944c7'
+    status: passed
+    evidence: 'gate/probe_l5.log — probe_paths sha256 9f0580252927dcfd6a0301694cf44c1c8b433b742bc65f10be774162ece1628d · probe_modes sha256 d60e9a1d93f13696c00ffd514b8b3028cb6bfbf778480e0a337bff41af6218cd; 32 dòng (kịch bản, chế độ) mỗi vế. rc 8aab9da → 45944c7: literal_backslash/native=0→12 · modes:backslash_nested/native=0→12 · modes:backslash_directory/native=0→12 · modes:backslash_executable/native=0→12 · dot/retained_safe_link_text=0→12 · double_slash/retained_safe_link_text=0→12 · parent/retained_safe_link_text=0→12 · missing_parent/retained_safe_link_text=0→12 · file_parent/retained_safe_link_text=0→12 · chain_parent/retained_safe_link_text=0→12 · backslash_parent/retained_safe_link_text=0→12 · regular/native=0→0 · executable/native=0→0 · nested/native=0→0 · nonutf_exact/native=0→0. Các dòng còn lại giống nhau ở hai vế: backslash_parent/native=8 · case/native=12 · chain_parent/native=8 · dot/native=8 · double_slash/native=8 · empty/native=8 · export_ignore/native=8 · file_parent/native=8 · gitlink/native=12 · homoglyph/native=12 · missing_parent/native=8 · modes:gitlink/native=8 · modes:symlink_before_k1/native=12 · modes:yaml_link/native=12 · nfd/native=12 · nonutf_missing/native=12 · parent/native=8'
+  - name: 'probe_models.py của reviewer lượt 4, chạy NGUYÊN VĂN (previous = d5a7d85, head = 45944c7)'
+    status: passed
+    evidence: 'gate/probe_l4.log — probe sha256 38b06b30aa86d31f2264c69462da7bb2e3ab8e8c38e2f65697a19975e7930065; rc theo (kịch bản, mã, mô hình os.walk): case/previous/plain=12 · case/previous/tep=0 · case/head/plain=12 · case/head/tep=12 · nfc/previous/plain=12 · nfc/previous/tep=0 · nfc/head/plain=12 · nfc/head/tep=12 · backslash/previous/plain=12 · backslash/previous/tep=0 · backslash/head/plain=12 · backslash/head/tep=12 · missing/previous/plain=12 · missing/previous/tep=12 · missing/head/plain=12 · missing/head/tep=12 · file_parent/previous/plain=12 · file_parent/previous/tep=12 · file_parent/head/plain=12 · file_parent/head/tep=12'
+  - name: 'luật 9 miền DELTA — quet_dot_bien.py do trên khối D2b (checkout chính tại 45944c7)'
+    status: passed
+    evidence: 'luat9/do.log: "TONG 235 · GIET 232 · SONG_SACH 3 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0" + dòng HOAN_TAT, rc 0; luat9/ledger_A.tsv (235 ID, rc 0): GIET 232 · TUONG_DUONG 3. Neo: goc a0dee0dd7ba867656c0977376e24d2c9ba3e44cd1b812ca672e5a4c9021fb1b0 · manifest 4b79257492b195898380a9aa4c9b22c9f4d14577266eb101a20a720e6fd18517 · python 3.13.18. 3 đột biến sống đều có chứng minh tương đương: g:_d2b_kiem:44:49 (dau ra cua `git branch` chi duoc doc qua `r.startswith(b''refs/remotes/origin/'')`; them `~` SAU ten ref khong doi tien to cua dong nao); i7:_d2b_kiem:30:90 (SHA_RE = ^[0-9a-f]{40}\Z da neo ca hai dau, nen match va fullmatch nhan cung tap chuoi); j1:_d2b_kiem:31:23 (`type(ra)` la mot lop dung san (gia tri dung tu YAML); `==` giua hai lop la so danh tinh, bang `is`)'
+  - name: 'luật 9 — kho hồi quy'
+    status: not_applicable
+    evidence: 'kho của đợt C rỗng (luat9/kho_rong.jsonl 0 byte). Nghĩa vụ không hồi quy đo bằng mục A/B ở trên'
+  - name: 'D2b trên DỮ LIỆU THẬT — chính _d2b_kiem trên mọi tệp danh-gia-gate-output-*.txt của ops/land, ứng viên lượt 5 so với lượt 6'
+    status: passed
+    evidence: 'gate/kho_that.log (origin/master lúc đo = 1260fa0cba89353911e2f97188b2c04dab8139d7); 8aab9da: "commit 1260fa0cba89353911e2f97188b2c04dab8139d7 · 76 tep · DAT: 56 · kiem_tep:failed:-: 10 · kiem_tep:not_measured:co_job_skipped: 3 · kiem_tep:not_measured:khong_phai_run_land: 1 · kiem_tep:not_measured:provenance_0: 6"; 45944c7: "commit 1260fa0cba89353911e2f97188b2c04dab8139d7 · 76 tep · DAT: 56 · kiem_tep:failed:-: 10 · kiem_tep:not_measured:co_job_skipped: 3 · kiem_tep:not_measured:khong_phai_run_land: 1 · kiem_tep:not_measured:provenance_0: 6"; cmp hai bảng từng tệp (gate/kho_that_*.tsv): rc 0; master 1260fa0cba89353911e2f97188b2c04dab8139d7 muc ops/land (ca thu muc): 11327 · nhom trung khoa: 0'
+  - name: 'phép đo của reviewer lượt 2 (probe_case_directory.py, dựng lại không assert) trên 8aab9da và 45944c7'
+    status: passed
+    evidence: 'gate/probe_l2.log: ## 8aab9dabb6f3f150e4ab1872e37757c2620912c3 sach=0 | (1) doi chung Linux      : rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError(''cây của oid có hai tên trùng nhau sau NFC + casefold'')"] | (2) mo phong gop hoa/thuong: rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError(''cây của oid có hai tên trùng nhau sau NFC + casefold'')"] | ## 45944c7c3f4c75beaa87f36138b2bba9fb9198a3 sach=0 | (1) doi chung Linux      : rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError(''cây của oid có hai tên trùng nhau sau NFC + casefold'')"] | (2) mo phong gop hoa/thuong: rc=8 ["KHÔNG ĐO ĐƯỢC: D2b OSError(''cây của oid có hai tên trùng nhau sau NFC + casefold'')"]'
+  - name: 'python3 scripts/tl.py --selftest'
+    status: passed
+    evidence: 'gate/selftest.tail.log: rc 0, == tl selftest 1786/1786 =='
+  - name: 'python3 .claude/dev/ci_dang_ky_test.py'
+    status: passed
+    evidence: 'gate/ci_dang_ky.tail.log: rc 0, PHẢN CHỨNG: 1226/1226 đỏ đúng TỔNG: ĐẠT'
+  - name: 'ruff F delta so master (python3 -m ruff 0.15.15)'
+    status: passed
+    evidence: 'gate/ruff_nen.log (hai clone A/B, cùng lệnh --no-cache --select F --statistics trên hai tệp write set): base F541×2 F811×3 F841×3 F401×8 · head F541×2 F811×3 F841×3 F401×8 ⇒ delta 0. Cả hai vế rc 1 (đỏ sẵn), không gọi là lint xanh'
+  - name: 'git diff --check origin/master...HEAD · adr-song · doctrine-scan'
+    status: passed
+    evidence: 'gate/gate2.tong: git diff --check rc 0 · adr-song rc 0 · doctrine-scan rc 0; numstat: 96 1 .claude/dev/packet_loop.py;342 12 .claude/dev/packet_loop_test.py;'
+  - name: 'Windows native (ADR-0060 M3 required) — trên 45944c7'
+    status: passed
+    evidence: '#1236 issuecomment-7184957862 (ĐIỀU PHỐI đo, executor chỉ đọc biên nhận; DESKTOP-T9R33P2, Python 3.12.10; TẬP TRUNG, không phải full suite): base f602325 118/118 (424,1 s), head 45944c7 135/135, 0 skipped (535,2 s), cùng một lệnh (chay_tt4.py). Bundle sha256 accb8b7f…78bd9a khớp, git bundle verify ok. Ca cong_d2b_c4_symlink đạt ở mức CA (biên nhận không có kết quả từng biến thể; ca chỉ đạt khi mọi biến thể đạt). Năm biến thể lkf…lkj VẮNG MẶT trên Windows (bảng _D2B_TB rỗng khi os.sep khác ''/''), nên trên Windows điều cấm dấu chéo ngược chỉ được đo qua lka; hai biến thể nen_giu_nguyen_dich[lkl] (rc 12) và [lk5] (rc 0) có chạy. Lượt M3 trước: dbe650d đỏ (issuecomment-7170894289), d5a7d85 xanh (issuecomment-7172185200), 8aab9da xanh (issuecomment-7180853548). Các phép đo CÒN LẠI của handoff này chạy trên Linux'
+  - name: 'Windows với Python có bản vá tarfile chuẩn hoá linkname — ca cong_d2b_c4_symlink'
+    status: not_run
+    evidence: 'ở mức CA chưa có kết quả (điều phối định chạy cùng tập ca bằng CPython 3.13.17 sau M3; chỉ để ghi, không chấm M3). Đã đo ở mức HÀM: điều phối chạy tarfile.data_filter trên DESKTOP-T9R33P2 bằng CPython 3.13.17 (báo 05:02Z 26-11): "../../.." thành "..\..\..", "sub/danh-gia-gate-output-3.txt" thành "sub\danh-gia-gate-output-3.txt", "../lk5-provenance/ci.yaml" thành "..\lk5-provenance\ci.yaml", "khong/../ci.yaml" thành "ci.yaml"; không ném ngoại lệ. Hệ quả dự đoán: đích của lk6, lk7, lkc bị viết lại lúc bung, luật nội dung ra rc 8, biến thể đòi rc 12, ca đỏ. Fail-closed về an toàn. Có từ lượt 4; chủ kho quyết ghi nợ (issuecomment-7182681531)'
+  - name: 'CI GitHub'
+    status: not_run
+    evidence: 'chưa push (M5)'
+bang_doi_chieu_menh_de:   # điều phối yêu cầu (04:24Z 26-11): mọi mệnh đề của luật issuecomment-7180063460 + 7182681531, đối chiếu với mã. a/b/c là ba điều kiện ở summary
+  - {menh_de: 'đích là thư mục', ma: '(c): mục kiểu thư mục không thuộc tập tệp', bien_the: 'lk4, lk7 (thật và mô hình tep)', dot_bien: 'cho_thu_muc'}
+  - {menh_de: 'gốc bản bung', ma: '(c): "." hay đường đi lên không thuộc tập tệp', bien_the: 'lk6', dot_bien: 'cho_goc'}
+  - {menh_de: 'bí danh khác hoa/thường', ma: '(c): so byte', bien_the: 'lk8 (thư mục), lk9 (tệp)', dot_bien: 'cho_hoa_thuong, cho_ten_lk8, cho_ten_lk9'}
+  - {menh_de: 'bí danh khác NFC', ma: '(c): so byte', bien_the: 'lke', dot_bien: 'cho_nfc, cho_ten_lke'}
+  - {menh_de: 'đích chứa dấu chéo ngược', ma: '(a)', bien_the: 'lka (không có tệp tên ấy) · lkf (tệp 100644) · lkg (tệp 100755) · lkh (thành phần thư mục) · lki (link lồng) · lkj (link nằm trong thư mục mang dấu ấy, đích thô sạch)', dot_bien: 'bo_cam_cheo; cam_cheo_chi_dich_tho (chỉ lkj bắt); cho_cheo_nguoc (chỉ lka bắt)'}
+  - {menh_de: 'đích hỏng hoặc không tồn tại', ma: '(c) cho tên vắng; (b) cho dạng không chuẩn tắc', bien_the: 'lkb; nen_giu_nguyen_dich[lkl] (mô hình nguyen)', dot_bien: 'cho_ten_lkb, cho_ngoai_danh_muc; bo_chuan_tac (chỉ lkl bắt)'}
+  - {menh_de: 'đích ngoài cây', ma: '(c): tập tệp lấy từ danh mục cây con thư mục provenance', bien_the: 'lkc', dot_bien: 'cho_ten_lkc, cho_ngoai_danh_muc'}
+  - {menh_de: 'đích là một symlink khác', ma: '(c): mục kiểu symlink không thuộc tập tệp', bien_the: 'lkd', dot_bien: 'cho_symlink, cho_ten_lkd'}
+  - {menh_de: 'chỉ tệp thường 100644 / 100755', ma: 'KHÔNG có mã riêng: kiểu tệp = mọi mode khác 040000 và 120000. Gitlink (160000) không tới được chốt, luật danh mục ra rc 8 trước (modes.json của reviewer lượt 5, kịch bản gitlink; đo lại ở gate/probe_l5.log). Chủ kho duyệt không thêm mã', bien_the: 'không có', dot_bien: 'không có'}
+  - {menh_de: 'symlink *.yaml vẫn do module bắt', ma: 'không đổi: link *.yaml trỏ tệp thường qua danh sách rồi module trả symlink', bien_the: 'yaml_chi_la_symlink (lk2), yaml_thuong_kem_yaml_symlink (lk3)', dot_bien: 'd2b_loc_mat_symlink'}
+  - {menh_de: 'symlink tệp không phải *.yaml trỏ đúng một tệp thường thì qua', ma: 'cả ba điều kiện đúng', bien_the: 'symlink_ngoai_pham_vi_k2 (lk5, rc 0); lk5 dưới mô hình tep và nguyen', dot_bien: 'moi_symlink, dich_tho'}
+bang_doi_chieu_lop:   # executor KHÔNG tự gán nhãn đóng lớp; cột phep_kiem_dong là phép đo để reviewer đối chiếu
+  - slug: archive-loc-mat-du-lieu-kiem
+    finding: 'C05 (P2) của lượt 5; reviewer giữ symlink-tren-dia-lech-cay là bí danh của lớp này, VA_MOT_PHAN. Lớp đã lặp ở lượt 1, 2, 4, 5; executor dừng và báo, chủ kho quyết vá (issuecomment-7182681531)'
+    co_che: 'luật của chủ kho có nhiều mệnh đề chặn; lượt 5 thực thi chúng bằng MỘT phép so byte với danh mục. Phép so ấy không thực thi mệnh đề nào mà cây có thể tự thoả: trên POSIX cây chứa được tên mang dấu chéo ngược, và phép chuẩn hoá văn bản biến một đích hỏng thành tên một tệp có thật'
+    bieu_hien:
+      - {nguon: 'reviewer lượt 5 (C05)', mo_ta: 'cây có tệp 100644 tên mang dấu chéo ngược, link trỏ đúng tên ấy ⇒ rc 0', ca: 'symlink_tro_thu_muc[lkf]; probe literal_backslash', luot: 6}
+      - {nguon: 'reviewer lượt 5 (C05, quét cùng lớp)', mo_ta: 'cùng thế với tệp 100755', ca: 'symlink_tro_thu_muc[lkg]; probe backslash_executable', luot: 6}
+      - {nguon: 'reviewer lượt 5 (C05, quét cùng lớp)', mo_ta: 'dấu chéo ngược nằm ở một thành phần thư mục của đích', ca: 'symlink_tro_thu_muc[lkh]; probe backslash_directory', luot: 6}
+      - {nguon: 'reviewer lượt 5 (C05, quét cùng lớp)', mo_ta: 'link lồng trong thư mục con trỏ tệp anh em mang dấu chéo ngược', ca: 'symlink_tro_thu_muc[lki]; probe backslash_nested', luot: 6}
+      - {nguon: 'executor (liệt kê)', mo_ta: 'đích thô sạch, nhưng link NẰM TRONG thư mục mang dấu chéo ngược ⇒ đường dẫn đích mang dấu ấy', ca: 'symlink_tro_thu_muc[lkj]; đột biến cam_cheo_chi_dich_tho', luot: 6}
+      - {nguon: 'executor (liệt kê; reviewer lượt 5 đã thấy ở chế độ retained_safe_link_text nhưng không nêu thành finding)', mo_ta: 'đích hỏng dạng a/../x: chuẩn hoá văn bản ra đúng một tệp thường. Bộ bung không viết lại linkname thì đích ấy tới được chốt', ca: 'nen_giu_nguyen_dich[lkl]; probe missing_parent, file_parent, chain_parent (retained)', luot: 6}
+      - {nguon: 'hệ quả của (b), chủ kho duyệt', mo_ta: 'đích không chuẩn tắc mà KHÔNG hỏng (./x, a//b, sub/../x) cũng bị chặn', ca: 'probe dot, double_slash, parent (retained): rc 0 → 12', luot: 6}
+      - {nguon: 'lượt 5', mo_ta: 'bí danh hoa/thường, NFC; đích hỏng tên vắng; ngoài thư mục provenance; trỏ symlink khác', ca: 'lk8, lk9, lke, lkb, lkc, lkd (không đổi)', luot: 5}
+      - {nguon: 'lượt 4 (M3, điều phối)', mo_ta: 'đích là thư mục của danh mục hoặc gốc bản bung', ca: 'lk4 · lk7 · lk6 (không đổi)', luot: 4}
+      - {nguon: 'đối chứng dương', mo_ta: 'symlink tệp không phải *.yaml trỏ đúng một tệp thường của danh mục, đích chuẩn tắc', ca: 'symlink_ngoai_pham_vi_k2 [lk5] ⇒ rc 0 D2b ĐẠT; lk5 dưới mô hình tep và nguyen ⇒ rc 0; probe regular, executable, nested, nonutf_exact ⇒ rc 0', luot: 6}
+    cach_va_chung: >-
+      Mỗi mệnh đề của luật có một điều kiện mã thực thi nó, không dựa vào việc cây "chắc không có tên ấy": xem bang_doi_chieu_menh_de. Hai điều
+      kiện mới (a) và (b) đọc CHUỖI THÔ của readlink (đã được luật nội dung của lượt 3 ghim bằng băm blob ngay trước đó), trước mọi phép chuẩn hoá.
+      Với (b), một đích qua danh sách chỉ còn dạng (../)*tên/tên/…: các ".." chỉ đứng đầu và đi lên qua thư mục thật của danh mục (luật danh mục
+      của lượt 3 bảo đảm kiểu trên đĩa bằng kiểu trong cây), phần còn lại là đường dẫn một tệp thường có trong danh mục. Trên POSIX nó phân giải
+      đúng tới tệp ấy; lập luận chuỗi lồng của lượt 5 không còn cần.
+    phep_kiem_dong: >-
+      ca cong_d2b_c4_symlink 43 biến thể trên POSIX (38 trên Windows: bảng _D2B_TB rỗng ở đó). 19 đột biến d2b_k2_*: ba đột biến mới bo_cam_cheo
+      (gỡ a) · cam_cheo_chi_dich_tho (thu a về đích thô) · bo_chuan_tac (gỡ b); cho_ten_lka của lượt 5 bị bỏ vì (a) đã chặn lka. Ma trận
+      (gate/ma_tran_c4.log) cho biết biến thể nào bắt đột biến nào. probe_paths.py và probe_modes.py của reviewer lượt 5 chạy nguyên văn trên
+      8aab9da và 45944c7 (gate/probe_l5.log). Bộ test này trên mã 8aab9da đỏ (gate/m3_mo_hinh.log).
+    chua_do_duoc:
+      - 'năm fixture tên mang dấu chéo ngược (lkf…lkj) chỉ dựng trên POSIX: Git for Windows từ chối đường dẫn index ấy. Executor suy từ mã verify_path của git, CHƯA đo trên Windows. Trên Windows điều cấm (a) chỉ được đo qua lka'
+      - 'biến thể nen_giu_nguyen_dich dùng MÔ HÌNH (bộ lọc trả lại linkname gốc). Điều phối đo riêng hàm tarfile.data_filter trên DESKTOP-T9R33P2 (báo 05:02Z 26-11): Python 3.12.10 GIỮ NGUYÊN "khong/../ci.yaml"; CPython 3.13.17 viết lại thành "ci.yaml". Bản Python đầu tiên có bản vá ấy (executor nhớ là 3.12.11 / 3.13.4) chưa được đo. Chưa ai chạy cả cổng D2b với đích ấy trên 3.12.10'
+      - 'đích tuyệt đối hoặc thoát gốc bản bung: không soạn ca; filter data ném ⇒ rc 8 theo tài liệu tarfile. Nếu tới được chốt thì (c) chặn (đường dẫn tuyệt đối không thuộc tập tệp)'
+      - 'gitlink (160000): không có mã riêng và không có ca riêng ở lượt 6; xem bang_doi_chieu_menh_de'
+      - 'nền khác Linux và Windows (vd macOS, hệ tệp chuẩn hoá Unicode): không đo'
+  - slug: hop-dong-dau-ra-duong-dan-tu-do
+    finding: 'C02 — DA_VA_THAT từ lượt 2; reviewer lượt 5 giữ DA_VA_THAT'
+    thay_doi_luot_6: 'không đổi'
+siet_k2_so_voi_r12:   # chủ kho đã duyệt (issuecomment-7180063460 và 7182681531)
+  truoc: 'r12 / lượt 1–4: symlink tệp không phải *.yaml do module bỏ qua ⇒ rc 0 nếu phần còn lại đạt'
+  nay: 'symlink ấy chỉ còn rc 0 khi đích thô chuẩn tắc, đường dẫn đích không mang dấu chéo ngược và trùng từng byte một tệp thường của danh mục (lk5). Mọi dạng khác ⇒ rc 12 kiem_tep:not_measured:symlink. Symlink *.yaml vẫn do module bắt'
+  anh_huong_du_lieu_that: 'xem mục test "D2b trên DỮ LIỆU THẬT"; git ls-tree -r origin/master -- ops/land tại 1260fa0: 10452 mục 100644, 2 mục 100755, 0 mục 120000'
+lech_so_voi_chu_dac_ta:
+  - {muc: 'K2 — phạm vi symlink bị chặn', da_lam: 'danh sách cho phép + (a) + (b) (xem siet_k2_so_voi_r12)', vi_sao: 'quyết định chủ kho issuecomment-7180063460 và 7182681531'}
+  - {muc: 'chữ "chuẩn hoá trên văn bản" của luật lượt 5', da_lam: 'đích thô phải chuẩn tắc sẵn; ./x, a//b, sub/../x bị chặn (rc 12). Trên Python có bản vá tarfile các dạng này vốn ra rc 8 từ luật nội dung, nên chỉ đổi kết quả ở bộ bung giữ nguyên văn bản', vi_sao: 'điểm (b) của quyết định issuecomment-7182681531'}
+  - {muc: 'lý do đầu của kiem_tep khi cây có symlink ngoài danh sách VÀ tệp đánh giá hỏng K1', da_lam: 'D2b in kiem_tep:not_measured:symlink mà không gọi module (như lượt 4, 5). Vẫn rc 12', vi_sao: 'chốt chạy trước module; reviewer lượt 4, 5 đo: không phải lỗi độc lập'}
+  - {muc: 'regex đường dẫn của mục D2b chi tiết ([^/]+)', da_lam: '[!-.0-~]+ ở bốn vị trí', vi_sao: 'quyết định E3 của chủ kho; reviewer lượt 2–5: DA_VA_THAT'}
+  - {muc: 'thứ tự chốt khi biên bản VỪA sai đường dẫn VỪA có OID không trên remote', da_lam: 'in duong_dan_sai', vi_sao: 'reviewer lượt 2–5 chấp nhận'}
+  - {muc: 'luật 9 trên khối D2b · fixture rút gọn và đổi head · hợp đồng đầu ra riêng của packet_loop_test', da_lam: 'như các lượt trước', vi_sao: 'reviewer lượt 1–5 chấp nhận'}
+quyet_dinh_thiet_ke_can_reviewer_soi:
+  - '(a) kiểm trên j = join(dirname(link), readlink), RỘNG hơn "đích thô" mà reviewer đề xuất: link nằm trong thư mục mang dấu chéo ngược bị chặn dù đích thô sạch (lkj). Hệ quả: nếu chính thư mục provenance mang dấu ấy trong tên (miền ký tự E3 cho phép 0x5C) thì mọi symlink trong nó bị chặn. Chủ kho duyệt (a) đúng dạng này.'
+  - '(b) chặn cả đích không chuẩn tắc mà không hỏng. Chủ kho duyệt, biết hệ quả.'
+  - 'Thứ tự trong any(): (a) rồi (b) rồi (c), trên từng symlink; any() dừng ở symlink đầu tiên sai. Lý do in ra luôn là một chuỗi cố định (symlink), nên thứ tự không lộ ra ngoài.'
+  - '"Cây" vẫn là DANH MỤC CÂY CON của thư mục provenance (lkc bị chặn), như lượt 5; reviewer lượt 5 không thấy chặn oan trên dữ liệu hiện có.'
+  - '"Mục kiểu tệp" vẫn là mọi mode khác 040000 và 120000; không thêm mã (điểm c của quyết định).'
+  - 'Không dùng casefold, NFC hay đổi dấu phân cách: ba đột biến cho_hoa_thuong, cho_nfc, cho_cheo_nguoc thêm đúng các phép ấy và đều làm ca đích đỏ.'
+  - 'Chốt chỉ nằm ở nhánh passed. Nhánh miễn không gọi K2; kiem_mien lọc readback bằng is_file() and not is_symlink(), không dùng os.walk.'
+  - 'Bảng mục index của fixture: giá trị bytearray ⇒ mode 100755 (để tệp 100755 của lkg không phụ thuộc chmod và core.fileMode).'
+mo_hinh_khong_phai_windows: >-
+  Hai móc trong tiến trình. git_loi="tep" (lượt 4) thay os.walk để xếp symlink trỏ thư mục vào danh sách tệp; cần cho lk4, lk6, lk7 trên Linux.
+  git_loi="nguyen" (lượt 6) thay bộ lọc của extractall: gọi tarfile.data_filter rồi trả lại linkname gốc; cần cho lkl trên Python có bản vá tarfile.
+  Bảy fixture _D2B_TC và năm fixture _D2B_TB không dùng mô hình nào. Không mô hình nào tạo symlink loại tệp hay mô phỏng phép phân giải tên của NTFS.
+he_qua_windows:   # viết từ mã và từ các phép đo của điều phối; kết quả M3 trên 45944c7 ở mục test Windows
+  - 'Bảng _D2B_TB rỗng trên Windows (os.sep khác "/"): năm biến thể lkf…lkj VẮNG MẶT. Một lượt Windows xanh không đo chúng.'
+  - 'lka (→ sub\…\x): đường dẫn Windows hợp lệ tới một tệp thường; bị (a) chặn trên mọi nền.'
+  - 'nen_giu_nguyen_dich[lkl] và [lk5] chạy trên Windows, trong tiến trình. Trên 3.12.10 bộ lọc data không viết lại linkname (điều phối đo), nên với lkl mô hình ở đó trùng hành vi của chính bộ lọc.'
+  - 'lk8 (→ SUB): trên NTFS SUB phân giải tới thư mục sub; (c) chặn vì "…/SUB" không trùng từng byte mục nào kiểu tệp.'
+  - 'Máy không tạo được symlink: mọi biến thể đánh dấu sym tự chuyển kỳ vọng sang rc 8 danh mục; một lượt xanh trên máy ấy KHÔNG đo chốt.'
+  - 'Ca dừng ở biến thể lệch ĐẦU TIÊN, nên một ca đỏ che các biến thể sau nó.'
+chua_do_duoc:
+  - 'Windows: chỉ có lượt TẬP TRUNG của điều phối (mục test Windows); full suite, bộ đột biến và luật 9 chưa chạy trên Windows.'
+  - 'Windows với Python có bản vá tarfile: xem mục test cùng tên; chủ kho quyết ghi nợ, không vá ở lượt này.'
+  - 'Python 3.12 trên Linux: mọi phép đo của executor ở 3.13.18.'
+  - 'Hai lệnh git branch -r --contains và cat-file chạy trên object store cục bộ: không chứng minh remote THẬT còn giữ oid lúc chạy.'
+  - 'Đột biến NGOÀI bộ toán tử của quet_dot_bien.py và ngoài các đột biến khai báo.'
+  - 'Bản ghép 45944c7 với master mới: chỉ đo merge-tree, không chạy gate.'
+  - 'Tài liệu ngoài write set vẫn ghi "D1–D4" cho kiem-dong-wp (ADR-0060 mục Cưỡng chế, bảng §20 protocol); đặc tả r12 chưa ghi luật danh sách cho phép.'
+no_ngoai_write_set:   # executor KHÔNG sửa
+  - vi_tri: 'ops/gate_output_doi_chieu.py, hàm chon_provenance (đợt A): K2 dựa vào cách os.walk xếp symlink và vào phép phân giải tên của nền'
+    co_che: 'D2b nay chặn trước khi gọi module, nhưng người gọi KHÁC của module (kiem_ho_so, CLI của module) vẫn mang lỗ ấy trên Windows'
+    trang_thai_do: 'điều phối đo (issuecomment-7170894289); ghi nợ cho packet sau'
+  - vi_tri: 'ops/gate_output_doi_chieu.py, hàm kiem_mien: thu_muc.glob(f"readback-*issuecomment-{urls[0]}.json")'
+    co_che: 'Path.glob khớp mẫu theo luật hoa/thường của nền (điều phối đo, issuecomment-7153384629)'
+    trang_thai_do: 'đã đo bởi điều phối; không thuộc đợt C'
+  - vi_tri: 'ops/specs/wp1236-r12.md (đặc tả đóng băng)'
+    co_che: 'luật danh sách cho phép và hai điều kiện (a), (b) là quyết định sau khi đặc tả đóng băng; chữ đặc tả về K2 chưa phản ánh'
+    trang_thai_do: 'không sửa đặc tả đóng băng; căn cứ là issuecomment-7180063460 và 7182681531'
+  - vi_tri: '.claude/dev/packet_loop_test.py, ca cong_d2b_c4_symlink trên Windows với Python có bản vá tarfile (TRONG write set, nhưng chủ kho quyết không vá ở lượt này)'
+    co_che: 'ntpath.normpath đổi "/" trong đích symlink ⇒ lk6, lk7, lkc ra rc 8 thay vì rc 12 ⇒ ca đỏ'
+    trang_thai_do: 'xem mục test "Windows với Python có bản vá tarfile"; nợ theo issuecomment-7182681531'
+remaining_work:
+  - 'điều phối: Codex review lượt 6/6, lượt CUỐI trong trần (M3 Windows tập trung trên 45944c7: xem mục test Windows)'
+  - 'executor: nếu lượt 6 còn finding thì DỪNG và báo; hết ngân sách review, mọi bước tiếp theo cần quyết định của chủ kho'
+  - 'sau M3 xanh và APPROVE trên SHA X: push đúng X lên claude/wp1236-c-r12-g1, mở PR draft vào master'

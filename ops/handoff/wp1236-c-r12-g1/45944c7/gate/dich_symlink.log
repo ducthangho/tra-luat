@@ -1,0 +1,8 @@
+3.13.18
+trong tar : {'t/l1': 'x.txt', 't/l2': './x.txt', 't/l3': 'sub/../x.txt', 't/l4': 'sub//y.txt', 't/l5': 'sub/', 't/l6': 'vang'}
+t/l1: git 'x.txt'          -> dia 'x.txt'          giong · is_dir=False is_file=True
+t/l2: git './x.txt'        -> dia 'x.txt'          KHAC · is_dir=False is_file=True
+t/l3: git 'sub/../x.txt'   -> dia 'x.txt'          KHAC · is_dir=False is_file=True
+t/l4: git 'sub//y.txt'     -> dia 'sub/y.txt'      KHAC · is_dir=False is_file=True
+t/l5: git 'sub/'           -> dia 'sub'            KHAC · is_dir=True is_file=False
+t/l6: git 'vang'           -> dia 'vang'           giong · is_dir=False is_file=False

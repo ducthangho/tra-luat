@@ -1,0 +1,71 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1547
+packet_id: wp1547
+spec_packet_id: CAI-SHELLCHECK-WIN-TAT-DINH
+revision: 1
+generation: 1
+lease_id: wp1547-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: windows
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: [1488]
+depends_on_ghi_chu: 'xây trên nhánh PR #1489 (#1488 r4); chỉ land sau #1489.'
+spec_path: ops/specs/wp1547.md
+spec_hash: b4ecc60b1123f041accfc31307a8ada12362ffbcf30489b4232e5ae427d658b4
+spec_sha256_required: b4ecc60b1123f041accfc31307a8ada12362ffbcf30489b4232e5ae427d658b4
+spec_duyet: 'chủ kho trả lời "Cấp lease" trong chat phiên nervous-wiles-dd9e19, 26-11-2026 ~08:33Z, sau khi xem đề xuất https://github.com/ducthangho/tra-luat/issues/1547#issuecomment-7186707974 (băm b4ecc60b).'
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/wp1547/RESULTS.md
+- ops/acceptance/wp1547/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/wp1547-r1-g1-claude.yaml
+- ops/specs/wp1547.md
+write_set_hash: 701bc08d835478b485e50811c4723c479c503b1eba7354ab82d15eb33b49a318
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-26T08:33:05Z'
+  goc_quet: 'git log --all trên ops/leases/ sau git fetch origin; ai-dang-giu chưa chạy (quét toàn kho trên Windows ~20 phút)'
+  ket_qua: 'lease wp1488 r1–r4 giữ ops/cai_cong_cu.sh và .claude/dev/launcher_test.py: cả bốn HẾT_HẠN (r4 2026-11-21T19:25:05Z). PR #1489 còn mở; chủ kho chọn xây trên nó.'
+branch: claude/wp1547-shellcheck-win
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 210ceff7457e9df95b2e3780f8ea72ec7492c34d
+start_from_sha: a0ac083542436f63aadd514b3381463288433947
+reviewed_sha_required: a0ac083542436f63aadd514b3381463288433947
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1547
+granted_on_instruction_readback: 'chủ kho 26-11: "Xây trên #1489" rồi "Cấp lease".'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa cong_cu.yaml/launcher.py/hook/workflow.'
+recorded_by: 'phiên nervous-wiles-dd9e19'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này ghi lease và thi công theo chỉ thị trực tiếp của chủ kho trong chat; lease KHÔNG tự cấp.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease wp1488 đã hết hạn, không khai bia mộ.'
+leased_at_utc: '2026-11-26T08:33:05Z'
+heartbeat_at: '2026-11-26T08:38:28Z'
+lease_until: '2026-11-26T16:33:05Z'
+lease_expires_at_utc: '2026-11-26T16:33:05Z'
+lease_until_ghi_chu: '8h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 0, reserved: 1, limit: 2}
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

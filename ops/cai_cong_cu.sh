@@ -184,6 +184,34 @@ _tl1479_so() {   # <gia tri> <mac dinh> <toi da> — so nguyen thap phan <= 3 ch
   _tl1479_v=$(( 10#$1 ))
   if [ "$_tl1479_v" -le "$3" ]; then echo "$_tl1479_v"; else echo "$2"; fi
 }
+# wp1547 (B1/B3, ops/specs/wp1547.md): stdout cua trinh cai chi nam o "$TAM_CAI/stdout" nen luot loi KHONG DO DUOC tu log
+# (run 45685386364: choco thoat 0 ma khong co shim, khong biet vi sao). Luot loi in toi da 200 dong cuoi cua CHINH luot ay ra
+# stderr, giua hai dong moc; doc tep loi => mot dong bao, khong doi ma thoat. Stdout cua script (JSON kiem-tra) khong doi.
+_tl1547_in_stdout() {
+  echo "cai_cong_cu: --- stdout trinh cai ($TEN) ---" >&2
+  tail -n 200 -- "$TAM_CAI/stdout" >&2 2>/dev/null || echo "cai_cong_cu: khong doc duoc stdout trinh cai" >&2
+  echo "cai_cong_cu: --- het stdout ---" >&2
+}
+# wp1547 (B2): choco tren windows-latest doi khi thoat 0 ma khong de lai shim (§1 dac ta) => thu lai theo dung khung #1479
+# (tran N, cho CHO*2^(k-1), KENH MOI, xoa stdout cu), KHONG apt-get update. Ham rieng: khong cham dong neo cua vong apt.
+_tl1547_thu_lai_choco() {
+  local _tl1547_n _tl1547_cho _tl1547_k=0 _tl1547_s
+  _tl1547_n="$(_tl1479_so "${CAI_CONG_CU_THU_LAI:-}" 3 9)"
+  _tl1547_cho="$(_tl1479_so "${CAI_CONG_CU_CHO_GIAY:-}" 15 600)"
+  while [ "$RC_CAI" -ne 0 ] && [ "$_tl1547_k" -lt "$_tl1547_n" ]; do
+    _tl1547_k=$(( _tl1547_k + 1 ))
+    _tl1547_s=$(( _tl1547_cho << (_tl1547_k - 1) ))
+    _tl1547_in_stdout
+    echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); cho ${_tl1547_s}s roi thu lai choco lan $_tl1547_k/$_tl1547_n" >&2
+    sleep "$_tl1547_s" || echo "cai_cong_cu: sleep ${_tl1547_s}s loi (rc=$?) — thu lai ngay" >&2
+    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"
+    export -n KENH_KQ
+    : > "$KENH_KQ"
+    rm -f -- "$TAM_CAI/stdout"
+    _wp1404_chay_cong_thuc "$@"
+  done
+}
+export -nf _tl1547_in_stdout _tl1547_thu_lai_choco
 _tl1479_thu_lai_apt() {
   local _tl1479_n _tl1479_cho _tl1479_k=0 _tl1479_s
   _tl1479_n="$(_tl1479_so "${CAI_CONG_CU_THU_LAI:-}" 3 9)"
@@ -202,6 +230,7 @@ _tl1479_thu_lai_apt() {
     KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"
     export -n KENH_KQ
     : > "$KENH_KQ"
+    _tl1547_in_stdout
     rm -f -- "$TAM_CAI/stdout"
     _wp1404_chay_cong_thuc "$@"
   done
@@ -211,6 +240,8 @@ if [ "$RC_CAI" -ne 0 ]; then
   case "$LENH" in
     *"apt-get install"*)
       _tl1479_thu_lai_apt "$@" ;;
+    *"choco install"*)
+      _tl1547_thu_lai_choco "$@" ;;
   esac
 fi
 # wp1488 (r3, ops/specs/wp1488-r3.md B2/B3/B5): chi luot CUOI thanh cong moi duoc them dong vao $GITHUB_PATH. Truoc day bo
@@ -249,6 +280,7 @@ case "$KQ" in
 esac
 fi
 if [ "$RC_CAI" -ne 0 ]; then
+  _tl1547_in_stdout
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
     echo "cai_cong_cu: '$TEN' (bat_buoc: false) khong cai duoc (rc=$RC_CAI); --bat-buoc di tiep" >&2
     rm -rf -- "$TAM_CAI"

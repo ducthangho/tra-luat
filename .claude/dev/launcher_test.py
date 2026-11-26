@@ -11796,6 +11796,97 @@ def r1479_khong_phai_apt_khong_thu_lai():
              f"cong thuc khong phai apt van thu lai: rc={p.returncode} apt={log} sleep={ngu}")
 
 
+
+# wp1547 (CAI-SHELLCHECK-WIN-TAT-DINH r1, ops/specs/wp1547.md §3): choco giả trong `dau/` (đầu PATH) đếm lượt, in
+# `CHOCO-LUOT-<k>` ra stdout, và chỉ từ lượt `shim_tu` mới đặt `rg` tốt vào `shim/`. `rg` trần ở `dau/` HỎNG ⇒ bộ chọn
+# chỉ DAT khi `shim/rg` có. `sleep` giả chỉ ghi đối số. Trả (process, GITHUB_PATH, thư mục shim, nhật ký sleep).
+def _r1547_chay(s, shim_tu, lenh=None):
+    q = shlex.quote
+    dem, shim, ngu = s / "choco.dem", s / "shim", s / "sleep.log"
+    (s / "rg-tot").write_text("#!/bin/sh\necho 'ripgrep 14.1.0'\n")
+    choco = (f'n=$(( $(cat {q(str(dem))} 2>/dev/null || echo 0) + 1 )); echo $n > {q(str(dem))}; echo "CHOCO-LUOT-$n"; '
+             f'if [ $n -ge {shim_tu} ]; then mkdir -p {q(str(shim))}; '
+             f'cp {q(str(s / "rg-tot"))} {q(str(shim / "rg"))}; chmod +x {q(str(shim / "rg"))}; fi; exit 0')
+    lenh = lenh or f'choco install ripgrep --yes --no-progress && chon_thu_muc_chay_duoc rg {q(str(shim))}'
+    p, gp, _uv, _x, _t = _wp868_chay(s, apt=f'echo "$*" >> {q(str(s / "apt.log"))}; exit 0', lenh=lenh,
+                                      env_them={"CAI_CONG_CU_CHO_GIAY": "2"},
+                                      ung_vien={str(s / "dau" / "choco"): choco,
+                                                str(s / "dau" / "sleep"): f'echo "$1" >> {q(str(ngu))}'})
+    return p, gp, shim, (ngu.read_text().split() if ngu.exists() else [])
+
+
+def _r1547_khoi(stderr):
+    """Các khối B1 trong stderr, mỗi khối là danh sách dòng giữa hai mốc."""
+    khoi, dang = [], None
+    for d in stderr.splitlines():
+        if d.startswith("cai_cong_cu: --- stdout trinh cai ("):
+            dang = []
+        elif d == "cai_cong_cu: --- het stdout ---" and dang is not None:
+            khoi.append(dang); dang = None
+        elif dang is not None:
+            dang.append(d)
+    return khoi
+
+
+@ca
+def r1547_choco_khong_shim_roi_thu_lai_duoc():
+    """N1: choco thoát 0 mà lượt 1 không có shim, lượt 2 có ⇒ rc 0, DAT, đúng MỘT khối stdout (của lượt 1), $GITHUB_PATH
+    đúng một dòng = shim, sleep đúng một lần (2s)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        p, gp, shim, ngu = _r1547_chay(s, shim_tu=2)
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(shim) and ngu == ["2"],
+             f"choco thu lai khong cuu duoc: rc={p.returncode} GITHUB_PATH={gp!r} sleep={ngu} {p.stderr[-500:]}")
+        bang(_r1547_khoi(p.stderr) == [["CHOCO-LUOT-1"]], f"khoi stdout sai: {_r1547_khoi(p.stderr)} {p.stderr[-500:]}")
+        bang("CHOCO-LUOT" not in p.stdout, f"stdout trinh cai lot vao stdout script: {p.stdout[-300:]}")
+
+
+@ca
+def r1547_choco_luon_khong_shim_het_tran():
+    """N2: choco luôn thoát 0 không shim ⇒ hết 3 lần thử lại (sleep 2/4/8), rc khác 0, $GITHUB_PATH rỗng; mỗi lượt lỗi có
+    đúng một khối chứa stdout CỦA CHÍNH lượt ấy (3 khối trước thử lại + 1 khối lượt cuối = 4)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        p, gp, _shim, ngu = _r1547_chay(s, shim_tu=99)
+        bang(p.returncode != 0 and gp == "" and ngu == ["2", "4", "8"],
+             f"het tran sai: rc={p.returncode} GITHUB_PATH={gp!r} sleep={ngu} {p.stderr[-500:]}")
+        bang(_r1547_khoi(p.stderr) == [[f"CHOCO-LUOT-{k}"] for k in (1, 2, 3, 4)],
+             f"khoi stdout phai la cua tung luot: {_r1547_khoi(p.stderr)}")
+        bang([d.split("lan ")[-1] for d in p.stderr.splitlines() if "thu lai choco lan " in d] == ["1/3", "2/3", "3/3"],
+             f"dong bao thu lai choco sai: {p.stderr[-500:]}")
+        bang("apt-get update" not in p.stderr and not (s / "apt.log").exists(),
+             f"choco ma goi apt-get: {p.stderr[-500:]}")
+
+
+@ca
+def r1547_choco_duoc_ngay_khong_khoi_khong_cho():
+    """N3: shim có ngay lượt 1 ⇒ rc 0, không khối stdout, không sleep."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        p, gp, shim, ngu = _r1547_chay(s, shim_tu=1)
+        bang(p.returncode == 0 and gp == str(shim) and ngu == [] and _r1547_khoi(p.stderr) == [],
+             f"duoc ngay ma van cho/in: rc={p.returncode} sleep={ngu} khoi={_r1547_khoi(p.stderr)} {p.stderr[-300:]}")
+
+
+@ca
+def r1547_khong_choco_khong_apt_khong_thu_lai():
+    """N4: công thức không có `choco install`/`apt-get install` lỗi ⇒ không thử lại, không sleep, mã cũ; vẫn đúng MỘT khối
+    stdout của lượt ấy."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        p, gp, _shim, ngu = _r1547_chay(s, shim_tu=1, lenh="echo LUOT-DUY-NHAT; exit 7")
+        bang(p.returncode == 7 and ngu == [] and "thu lai" not in p.stderr
+             and _r1547_khoi(p.stderr) == [["LUOT-DUY-NHAT"]],
+             f"cong thuc thuong: rc={p.returncode} sleep={ngu} khoi={_r1547_khoi(p.stderr)} {p.stderr[-300:]}")
+
 @ca
 def r1479_kenh_rieng_tung_lan_thu_lai():
     """Lần cài thứ 2 để tiến trình nền gọi bộ chọn và ghi KÊNH của nó SAU khi lần thứ 3 đã in thư mục tốt ⇒ vẫn chọn thư mục
@@ -18512,6 +18603,17 @@ DOT_BIEN_HOOK = [
     # wp1479: lớp gọi mới cũng phải chuyển "$@" xuống (cùng chốt Codex wp1404 lượt 3).
     ("wp1479_mat_tham_so_vong", ('      _tl1479_thu_lai_apt "$@" ;;\n', '      _tl1479_thu_lai_apt ;;\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    # wp1547 (ops/specs/wp1547.md §3): bốn đột biến bắt buộc.
+    ('wp1547_bo_thu_lai_choco', ('    *"choco install"*)\n', '    *"KHONG_BAO_GIO_KHOP_CHOCO"*)\n'),
+     ['r1547_choco_khong_shim_roi_thu_lai_duoc', 'r1547_choco_luon_khong_shim_het_tran'], "cai_sh"),
+    ('wp1547_bo_in_stdout', ('  tail -n 200 -- "$TAM_CAI/stdout" >&2 2>/dev/null ||', '  : ||'),
+     ['r1547_choco_khong_shim_roi_thu_lai_duoc', 'r1547_choco_luon_khong_shim_het_tran', 'r1547_khong_choco_khong_apt_khong_thu_lai'], "cai_sh"),
+    ('wp1547_in_stdout_sai_luot', ('    _tl1547_in_stdout\n    echo "cai_cong_cu: \'$TEN\' cai loi (rc=$RC_CAI); cho ${_tl1547_s}s roi thu lai choco lan $_tl1547_k/$_tl1547_n" >&2\n    sleep "$_tl1547_s" || echo "cai_cong_cu: sleep ${_tl1547_s}s loi (rc=$?) — thu lai ngay" >&2\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n    export -n KENH_KQ\n    : > "$KENH_KQ"\n    rm -f -- "$TAM_CAI/stdout"\n    _wp1404_chay_cong_thuc "$@"\n', '    echo "cai_cong_cu: \'$TEN\' cai loi (rc=$RC_CAI); cho ${_tl1547_s}s roi thu lai choco lan $_tl1547_k/$_tl1547_n" >&2\n    sleep "$_tl1547_s" || echo "cai_cong_cu: sleep ${_tl1547_s}s loi (rc=$?) — thu lai ngay" >&2\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n    export -n KENH_KQ\n    : > "$KENH_KQ"\n    rm -f -- "$TAM_CAI/stdout"\n    _wp1404_chay_cong_thuc "$@"\n    _tl1547_in_stdout\n'),
+     ['r1547_choco_khong_shim_roi_thu_lai_duoc', 'r1547_choco_luon_khong_shim_het_tran'], "cai_sh"),
+    ("wp1547_choco_goi_apt_giu_thong_bao", ('    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n', '    apt-get update -qq >&2 || true\n    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1547_k"\n'),
+     ["r1547_choco_luon_khong_shim_het_tran"], "cai_sh"),
+    ('wp1547_choco_chay_apt_update', ('      _tl1547_thu_lai_choco "$@" ;;\n', '      _tl1479_thu_lai_apt "$@" ;;\n'),
+     ['r1547_choco_luon_khong_shim_het_tran'], "cai_sh"),
     ("wp1404_sh_tran_update_loi_dung", ('*) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;',
                                         '*) apt-get update -qq >&2 ;;'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),

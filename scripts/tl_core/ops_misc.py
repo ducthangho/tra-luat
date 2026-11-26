@@ -3055,10 +3055,10 @@ def cmd_llm_khai_niem(a) -> int:
                   file=sys.stderr)
             return 2
         try:
-            # `utf-8-sig`: gỡ BOM đầu tệp — để nguyên thì U+FEFF che tiêu đề `Điều N` (lượt 2 N3).
-            # r17 (#1525 lượt 16 S2): gỡ ĐÚNG MỘT BOM ở lớp giải mã; BOM thứ hai hay ký tự lạ ở biên để `tach_khoan` từ chối —
-            # chỉ strip khoảng trắng ASCII (str.strip() còn nuốt NEL, U+3000… trước khi kịp kiểm).
-            van_ban = Path(a.tep).read_text(encoding="utf-8-sig").strip(" \t\r\n")
+            # r18 (#1525 lượt 17 T2): giải mã `utf-8` THƯỜNG — việc gỡ ĐÚNG MỘT BOM đầu văn bản giao cho MỘT tầng duy nhất
+            # (`tach_khoan`, `so_dieu_tu_tieu_de`); `utf-8-sig` + `tach_khoan` từng gỡ hai BOM. Chỉ strip khoảng trắng ASCII
+            # (str.strip() còn nuốt NEL, U+3000… trước khi kịp kiểm — r17 S2).
+            van_ban = Path(a.tep).read_text(encoding="utf-8").strip(" \t\r\n")
         except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
             print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
             return 2
@@ -3094,6 +3094,11 @@ def cmd_llm_khai_niem(a) -> int:
     if not van_ban:
         print("[tl] van ban rong", file=sys.stderr)
         return 2
+    if khoan_ct is None:
+        _la = lr.ky_tu_ngoai_danh_sach(van_ban)
+        if _la:   # #1525 r18 (lượt 17 T2): ký tự ngoài danh sách cho phép ⇒ dừng TRƯỚC khi gọi model
+            print(f"[tl] van ban co {_la} — khong doc an toan duoc, khong goi model", file=sys.stderr)
+            return 2
     if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
         print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
         return 2

@@ -135,3 +135,5 @@ revision_ly_do: 'Cross-review luot 16 (S1 P1, S2-S3 P2); dao sang danh sach cho 
 review_calls_limit: 17
 review_calls_used_truoc: 16
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r18-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 17 (T1-T2); revision r18 (ops/specs/llm-khoan-docx-r18.md), tran 18.'

@@ -32343,6 +32343,14 @@ def run() -> int:
                 _rc_bom_lech, _ = _chay(tep=str(_bom), dieu="7")
                 _rc_bom, _o_bom = _chay(tep=str(_bom))
                 _dieu_bom = json.loads(_o_bom)["dieu"] if _rc_bom == 0 else None
+                # #1525 r18 (lượt 17 T2): BOM thứ hai / NEL ở biên ⇒ rc 2 TRƯỚC khi gọi model (một tầng gỡ BOM; strip chỉ ASCII).
+                _n_bom2 = len(_goi_model)
+                _rc_bom2s = []
+                for _ten2, _nd2 in (("bom2.txt", "\ufeff\ufeffĐiều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập."),
+                                    ("nel.txt", "Điều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.\x85")):
+                    (_d / _ten2).write_bytes(_nd2.encode("utf-8"))
+                    _rc_bom2s.append(_chay(tep=str(_d / _ten2))[0])
+                _bom2_ok = _rc_bom2s == [2, 2] and len(_goi_model) == _n_bom2
                 # Lượt 2 N5: `--out` là thư mục ⇒ rc 2 TRƯỚC khi gọi model; ghi đè giữ quyền 0644.
                 _n_truoc = len(_goi_model)
                 _rc_outdir, _ = _chay(tep=str(_t15), out=str(_d))
@@ -32402,7 +32410,7 @@ def run() -> int:
         return (_rc_a == 0 and _dieu_tep == "15" and _rc_lech == 2 and _rc_ghep == 2 and _rc_ma == 2
                 and _rc_cfg == 0 and _them_bat and _them_bat[-1][:2] == ["--config", "yeu_cau.json"]
                 and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
-                and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
+                and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15" and _bom2_ok
                 and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok
                 and _nkdir_ok and _nkmuon_ok and _moi_ok and _chan_ok and _chacon_ok)
     _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)

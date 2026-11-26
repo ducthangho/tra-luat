@@ -560,6 +560,17 @@ def _dung_bang_cho_phep():
 _KY_TU_CHO_PHEP = _dung_bang_cho_phep()
 
 
+def _bo_mot_bom(van_ban):
+    """r17 (lượt 16 S2) → r18 (lượt 17 T2): bỏ ĐÚNG MỘT BOM đầu văn bản — tầng DUY NHẤT gỡ BOM của đường thô."""
+    s = str(van_ban)
+    return s[1:] if s.startswith("\ufeff") else s
+
+
+def ky_tu_ngoai_danh_sach(van_ban):
+    """r18 (lượt 17 T2): chốt dùng chung cho CLI — lý do (chuỗi) nếu văn bản thô có ký tự ngoài danh sách cho phép; None nếu sạch."""
+    return _ky_tu_la(_bo_mot_bom(van_ban), xuong_dong=True)
+
+
 def _ky_tu_la(chu, xuong_dong=False):
     """r17 (lượt 16 S1/S2): ký tự đầu tiên NGOÀI danh sách cho phép (`_KY_TU_CHO_PHEP`; `\n`/`\r` chỉ khi `xuong_dong`); None nếu sạch."""
     for c in str(chu):
@@ -568,9 +579,20 @@ def _ky_tu_la(chu, xuong_dong=False):
     return None
 
 
+# r18 (lượt 17 T1): MIỀN CHỮ SỐ của mọi chốt cú pháp = chữ số ASCII + chữ số mũ `¹²³` (ký tự chữ số DUY NHẤT khác trong
+# `_KY_TU_CHO_PHEP`); `\d` của regex không khớp số mũ ⇒ đổi số mũ về chữ số thường TRƯỚC khi dò (chỉ để dò; nguyên văn giữ số mũ).
+_SO_MU = str.maketrans("¹²³", "123")
+
+
+def _chieu_so(chu):
+    """r18 (lượt 17 T1): chữ để DÒ cú pháp số — số mũ thành chữ số thường."""
+    return str(chu).translate(_SO_MU)
+
+
 def _dau_doan(chu):
-    """r14 (lượt 13 N1) → r15 (lượt 14 Q1): bản chiếu để dò tiền tố cấu trúc — chỉ chữ/số, mọi ký tự khác thành một dấu cách."""
-    return " ".join("".join(c if c.isalnum() else " " for c in chu).split())
+    """r14 (lượt 13 N1) → r15 (lượt 14 Q1) → r18 (T1): bản chiếu để dò tiền tố cấu trúc — số mũ thành chữ số thường, chỉ chữ/số,
+    mọi ký tự khác thành một dấu cách."""
+    return " ".join("".join(c if c.isalnum() else " " for c in _chieu_so(chu)).split())
 
 
 def _mo_bang_dieu(chu):
@@ -1160,7 +1182,7 @@ def doc_dieu_docx(nguon, dieu):
                 raise ValueError(f"doan khong danh so sau khoan dau (diem phai danh so tu dong): {chu[:60]!r}")
             continue
         nid, il = d["so"]
-        if _RE_SO_GO_TAY_DOCX.match(chu):
+        if _RE_SO_GO_TAY_DOCX.match(_chieu_so(chu)):   # r18 (lượt 17 T1): số gõ tay viết bằng số mũ
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
             khoan.append([d["dem"][cap0], chu, chu])
@@ -1214,8 +1236,7 @@ def tach_khoan(van_ban):
       không số khác ⇒ None (có thể là khoản mất số — không đoán).
     - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
       dòng (lượt 6 S2) — dòng gãy giữa câu thành khoản không xác minh được ⇒ chặn."""
-    s = str(van_ban)
-    s = s[1:] if s.startswith("\ufeff") else s   # r17 (lượt 16 S2): bỏ ĐÚNG MỘT BOM đầu văn bản
+    s = _bo_mot_bom(van_ban)
     if _ky_tu_la(s, xuong_dong=True):
         # r16 (lượt 15 R3) → r17 (lượt 16 S1/S2): ký tự ngoài danh sách cho phép, kiểm TRƯỚC `splitlines`/`strip` (NEL, LS/PS…
         # không được thành ranh giới dòng) ⇒ từ chối CẢ nguồn.
@@ -1486,7 +1507,9 @@ def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
     if MAU_CAP_EXTRACT in (p.stderr or ""):
         raise ValueError(f"nguon cua {so_hieu} cham tran export (~200k ky tu) — Dieu {dieu} co the bi CAT; "
                          f"chay `tl cache-build {so_hieu}` (no-cap) roi chay lai")
-    return out.split(dau, 1)[1].strip(), p.stderr or ""
+    # r18 (lượt 17 T2): chỉ bỏ phần bao do `tl extract` in ra (dòng mốc + khoảng trắng ASCII) — `str.strip()` tổng quát còn nuốt
+    # NEL, U+3000… ở biên trước khi `tach_khoan` kịp kiểm.
+    return out.split(dau, 1)[1].strip(" \t\r\n"), p.stderr or ""
 
 
 def tach_khai_niem(van_ban, so_hieu="", model=MODEL_MAC_DINH, thu_tu=THU_TU_MAC_DINH, env=None,

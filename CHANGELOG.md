@@ -45,6 +45,9 @@
   văn bản thô) có ký tự vô hình, dấu tổ hợp lạ, bộ chọn biến thể hay không ở dạng NFC ⇒ dừng; số gõ tay `(1)` dính thân chữ số ⇒ chặn.
 - r17 (sau cross-review lượt 16, đặc tả `ops/specs/llm-khoan-docx-r17.md`): đảo danh sách cấm nhóm Unicode thành DANH SÁCH CHO PHÉP
   ký tự, kiểm trên chữ gốc trước khi tách dòng / gộp khoảng trắng; đúng một BOM; khoảng trắng trong `lvlText` chỉ là dấu cách.
+- r18 (sau cross-review lượt 17, đặc tả `ops/specs/llm-khoan-docx-r18.md`): số mũ `¹²³` tính là chữ số ở mọi chốt cú pháp; CLI
+  `--tep` giải mã `utf-8` thường (một tầng gỡ BOM) và chặn ký tự ngoài danh sách TRƯỚC khi gọi model (rc 2); đường `<số hiệu>` chỉ
+  bỏ phần bao của `tl extract`.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

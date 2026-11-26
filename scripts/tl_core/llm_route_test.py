@@ -689,7 +689,10 @@ def ca_khoan_mat_so_co_diem_dat(m):
               sach.replace("Dữ liệu", "A. Dữ liệu"), sach.replace("Dữ liệu", "B) Dữ liệu"), sach.replace("Dữ liệu", "aa. Dữ liệu"),
               sach.replace("Dữ liệu", "BB) Dữ liệu"), sach.replace("Dữ liệu", "(B) Dữ liệu"),
               # r22 (lượt 21 X3): chữ + gạch (lvlText `%N-` / `%N –`).
-              sach.replace("Dữ liệu", "a- Dữ liệu"), sach.replace("Dữ liệu", "A – Dữ liệu")):
+              sach.replace("Dữ liệu", "a- Dữ liệu"), sach.replace("Dữ liệu", "A – Dữ liệu"),
+              # r23 (lượt 22 Y3): khoảng đệm (dấu cách, tab, NBSP), ngoặc có đệm, nhãn thập phân nhiều cấp.
+              sach.replace("Dữ liệu", "( a ) Dữ liệu"), sach.replace("Dữ liệu", "a . Dữ liệu"), sach.replace("Dữ liệu", "a\t- Dữ liệu"),
+              sach.replace("Dữ liệu", "a\u00a0) Dữ liệu"), sach.replace("Dữ liệu", "1.1. Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
@@ -1446,6 +1449,10 @@ def ca_cau_truc_docx_dat(m):
     _, cap37, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t><w:delText xml:space="preserve"> </w:delText>'
                                                 '<w:t>tài liệu.</w:t></w:r>')))
     bang(cap37 == [(1, "Hồ sơ là tài liệu.")], f"delText lac chi co khoang trang lam dinh chu: {cap37}")
+    # r23 Y1: run gạch mà ruột có CHỮ (kể cả `delText`) cùng tab ⇒ bỏ TRỌN (không giữ phân cách của mẩu đã bỏ).
+    _, cap38, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t></w:r><w:r><w:rPr><w:strike/></w:rPr><w:delText>cũ</w:delText><w:tab/>'
+                                                '</w:r><w:r><w:t>tài liệu.</w:t></w:r>')))
+    bang(cap38 == [(1, "Hồ sơ làtài liệu.")], f"run gach co chu van giu phan cach: {cap38}")
     # r22 X2 đối chứng (A5): trường đơn trị khai nhiều lần ở danh sách KHÔNG dùng không chặn.
     _doc_hop_le(m, lam_docx(H, A, numbering=numbering(_lvl(0, "decimal", "%1."), _lvl(0, "decimal", "%1.", them='<w:start w:val="2"/>'),
                                                       nums=[(1, 0, ""), (6, 1, "")])))
@@ -1635,6 +1642,22 @@ def ca_cau_truc_docx_chan(m):
                      '<w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r></w:p>'), "numPr khai hai lan")
     kbo = f'<w:styles {_WNS}><w:style w:styleId="Z"><w:basedOn w:val="A1"/><w:basedOn w:val="B1"/></w:style></w:styles>'
     chan(lam_docx(H, A, styles=kbo), "basedOn khai hai lan")
+    # r23 Y2: nút chọn vùng / khoá style đơn trị — hai `sdtContent`, `sdt` thiếu nội dung hay có con lạ, hai `styleId`.
+    B2 = p_docx("Dữ liệu là thông tin.", 1)
+    chan(lam_docx(H, f'<w:sdt><w:sdtContent>{A}</w:sdtContent><w:sdtContent>{B2}</w:sdtContent></w:sdt>'), "sdt hai sdtContent")
+    chan(lam_docx(H, A, '<w:sdt><w:sdtPr/></w:sdt>'), "sdt thieu sdtContent")
+    chan(lam_docx(H, f'<w:sdt><w:sdtContent>{A}</w:sdtContent><w:p/></w:sdt>'), "sdt co con la")
+    chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là </w:t></w:r><w:sdt><w:sdtContent><w:r><w:t>tài liệu.</w:t></w:r></w:sdtContent><w:r/></w:sdt>')),
+         "sdt noi dong co con la")
+    kst = f'<w:styles {_WNS}><w:style w:styleId="G"/><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    chan(lam_docx(H, A, styles=kst), "styleId khai hai lan")
+    import io as _io23
+    import zipfile as _zip23
+    _b23 = _io23.BytesIO()
+    with _zip23.ZipFile(_b23, "w") as _z23:
+        _z23.writestr("word/document.xml", f'<w:document {_WNS}><w:body>{H}{A}</w:body><w:body>{B2}</w:body></w:document>')
+        _z23.writestr("word/numbering.xml", _NUMBERING_CHUAN)
+    chan(_b23.getvalue(), "document hai body")
     # r21 W5: hai `w:lvl` cùng cấp / hai `lvlOverride` cùng cấp ở danh sách ĐANG DÙNG ⇒ chặn.
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)")
                                                                      + _lvl(1, "lowerLetter", "%2)", start=3))), "lvl cung cap trung")
@@ -1806,7 +1829,7 @@ DOT_BIEN = [
     ('wp1514_l6_cau_dan_mo_rong_chu_ngu', ('r"(?:Trong|Tại) (?:Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư liên tịch|Quyết định) này, "', 'r".*"'), 'ca_wp1514_luot6'),
     # #1525: đường cấu trúc .docx — mỗi chốt một đột biến.
     ('wp1525_nhan_bang', ('    if any(d["loai"] != "p" or d["trong_bang"] for d in doan):', '    if False:'), 'ca_cau_truc_docx_bang'),
-    ('wp1525_bo_qua_sdt', ('            nd = el.find(_W + "sdtContent")\n            if nd is not None:\n                yield from _doan_trong(nd, trong_bang)\n', '            pass\n'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_bo_qua_sdt', ('            else:\n                yield from _doan_trong(nd, trong_bang)\n', '            else:\n                pass\n'), 'ca_cau_truc_docx_dat'),
     ('wp1525_customxmlpr_la', ('"commentRangeEnd", "customXmlPr", "sdtPr", "sdtEndPr",', '"commentRangeEnd", "sdtPr", "sdtEndPr",'), 'ca_cau_truc_docx_dat'),
     ('wp1525_khoi_la_bo_qua', ('        elif ten not in _KHOI_BO_QUA:\n            yield ("la", el, trong_bang)', '        elif False:\n            yield ("la", el, trong_bang)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_noi_dung_truoc_tieu_de', ('    if not re_dau.match(doan[i0]["chu"]):', '    if False:'), 'ca_cau_truc_docx_chan'),
@@ -1834,8 +1857,18 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_diem_bo_dang_cham', ('\\5*)\\.|', '\\5*)\\x00|'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_ngoac_mo', ('r"^(\\(?(?:', 'r"^((?:'), 'ca_khoan_mat_so_co_diem_dat'),
+    # r23 (lượt 22 Y1/Y2/Y3): mỗi nhánh ngữ pháp nhãn một đột biến.
+    ('wp1525_diem_bo_ngoac_kin', ('    rf"\\({_KC}{_chu_nhan(1)}{_KC}\\)",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_cham_ngoac', ('    rf"\\(?{_chu_nhan(2)}{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_dang_gach', ('    rf"{_chu_nhan(3)}{_KC}[-–](?=\\s)",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_thap_phan', ('    r"\\d+(?:\\.\\d+)+\\.?(?=\\s)",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_khoang_dem', ('_KC = r"[ \\t\\u00a0]*"', '_KC = r""'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_chu_hoa', ('|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"', '|(?P<h{i}>[a-zđ])(?P=h{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_chu_lap', ('(?:(?P<t{i}>[a-zđ])(?P=t{i})*|', '(?:(?P<t{i}>[a-zđ])|'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_gach_doc_ruot_rieng', ('            ruot = _ruot_bi_bo(r)   # r23', '            ruot = "".join(chu_run)   # r23'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_sdt_nhan_con_la', ('    return all(c.tag in (_W + "sdtPr", _W + "sdtEndPr", _W + "sdtContent") for c in el)', '    return True'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_style_trung_ghi_de', ('        if st.get(_W + "styleId") in kq:   # r23', '        if False:   # r23'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_body_khong_don_tri', ('"document": ("body",), ', ''), 'ca_cau_truc_docx_chan'),
     # r22 (lượt 21 X1/X2/X3).
     ('wp1525_ruot_bo_tab_khong_la_cach', ('        elif ten in ("tab", "ptab", "br", "cr"):\n            phan.append(" ")', '        elif False:\n            phan.append(" ")'), 'ca_cau_truc_docx_dat'),
     ('wp1525_deltext_lac_bo_cach', ('                if c.text and not c.text.strip():\n                    chu_run.append(c.text)', '                if False:\n                    chu_run.append(c.text)'), 'ca_cau_truc_docx_dat'),
@@ -1844,10 +1877,7 @@ DOT_BIEN = [
     ('wp1525_bo_don_tri_lvl', ('            if any(len(lvl.findall(_W + t)) > 1 for t in _DON_TRI_LVL):', '            if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_don_tri_num', ('        if len(num.findall(_W + "abstractNumId")) > 1:', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_don_tri_lvl_nem_ngay', ('                loi = loi or f"cap {il}: truong don tri khai nhieu lan"', '                raise ValueError("x")'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_diem_bo_dang_gach', (' ?[-–](?=\\s)|', ' ?\\x00|'), 'ca_khoan_mat_so_co_diem_dat'),
     # r21 (lượt 20 W2/W4/W5).
-    ('wp1525_diem_bo_chu_hoa', ('(?:([a-zđ])\\2*|([A-ZĐ])\\3*)\\)', '(?:([a-zđ])\\2*|([a-zđ])\\3*)\\)'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_chu_lap', ('(?:([a-zđ])\\4*|([A-ZĐ])\\5*)\\.', '(?:([a-zđ])|([A-ZĐ]))\\.'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_gach_bo_ca_khoang_trang', ('            if ruot and not ruot.strip():\n                kq["phan"].append(ruot)\n            return', '            return'), 'ca_cau_truc_docx_dat'),
     ('wp1525_del_bo_ca_khoang_trang', ('                if ruot and not ruot.strip():\n                    kq["phan"].append(ruot)\n                continue', '                continue'), 'ca_cau_truc_docx_dat'),
     ('wp1525_lvl_trung_ghi_de', ('            if il in muc:   # r20→r21', '            if False:   # r20→r21'), 'ca_cau_truc_docx_chan'),

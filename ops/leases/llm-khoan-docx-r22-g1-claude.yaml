@@ -160,3 +160,5 @@ revision_ly_do: 'Cross-review luot 21 (X1-X2 P1, X3 P2); theo quyen dung cua chu
 review_calls_limit: 22
 review_calls_used_truoc: 21
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r23-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 22; revision r23 (ops/specs/llm-khoan-docx-r23.md), tran 23.'

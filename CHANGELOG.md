@@ -58,6 +58,8 @@
   hạn bộ lọc markup và bộ chuyển chữ của `tl extract` (theo quyết định chủ kho); thông báo trần CAP chỉ đường `.docx`.
 - r22 (sau cross-review lượt 21, đặc tả `ops/specs/llm-khoan-docx-r22.md`): tab/ngắt trong nội dung bị bỏ và `delText` lạc chỉ có
   khoảng trắng giữ phân cách; trường đơn trị khai nhiều lần ⇒ chặn; nhãn điểm thô `a-` / `A –` ⇒ chặn.
+- r23 (sau cross-review lượt 22, đặc tả `ops/specs/llm-khoan-docx-r23.md`): một phép đọc ruột cho mọi nội dung bị bỏ; `body`/`sdtContent`
+  /`styleId` đơn trị, `w:sdt` thiếu nội dung hay có con lạ ⇒ chặn; ngữ pháp nhãn điểm thô có khoảng đệm và nhãn thập phân nhiều cấp.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

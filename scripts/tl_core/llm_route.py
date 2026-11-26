@@ -489,12 +489,23 @@ def chuan_hoa_khai_niem(khai_niem):
 
 # Số khoản: `1.` `1)` `1.Hồ sơ` (dính thân) hoặc `(1)`; `(?!\d)` để "1.5 triệu" không bị đọc thành khoản 1.
 _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
-# r20 (lượt 19 V4): một quy tắc nhãn điểm cho mọi nguồn thô — `a)`, `(a)`, `a.` (dạng `%N.` của cấp con lowerLetter trong .docx)
-# và dấu đầu dòng. Chữ viết tắt nhiều chữ cái (`Tp.`, `e-mail`) không khớp; một chữ cái + dấu chấm ở đầu dòng luôn coi là nhãn.
-# r21 (lượt 20 W4): cùng miền nhãn với cấp con `.docx` — chữ thường HOẶC chữ hoa, đơn HOẶC lặp (`aa`, `BB`, nhãn Word sau z),
-# với `)` / `.` / `(…)`.
-# r22 (lượt 21 X3): thêm nhãn chữ + gạch (`a-`, `a –`, lvlText `%N-`/`%N –`) khi sau gạch là khoảng trắng — từ ghép `e-mail` không khớp.
-_RE_DIEM = re.compile(r"^(\(?(?:([a-zđ])\2*|([A-ZĐ])\3*)\)|(?:([a-zđ])\4*|([A-ZĐ])\5*)\.|(?:([a-zđ])\6*|([A-ZĐ])\7*) ?[-–](?=\s)|[-–•+])\s*")
+# r20 (lượt 19 V4) → r21 (W4) → r22 (X3) → r23 (lượt 22 Y3): NGỮ PHÁP nhãn điểm của nguồn thô, cùng miền với nhãn `_nhan` dựng từ
+# `lvlText` (dấu `.` `)` `(` `-` `–` + khoảng đệm): chữ cái đơn/lặp, thường/hoa, khoảng đệm ngang (dấu cách, tab, NBSP) giữa chữ và dấu;
+# nhãn thập phân nhiều cấp (`1.1.`, `1.2`); dấu đầu dòng. Từ ghép `e-mail` và viết tắt nhiều chữ cái khác nhau (`Tp.`) không khớp.
+_KC = r"[ \t\u00a0]*"
+
+
+def _chu_nhan(i):
+    return f"(?:(?P<t{i}>[a-zđ])(?P=t{i})*|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"
+
+
+_RE_DIEM = re.compile("^(?:" + "|".join([
+    rf"\({_KC}{_chu_nhan(1)}{_KC}\)",
+    rf"\(?{_chu_nhan(2)}{_KC}[.)]",
+    rf"{_chu_nhan(3)}{_KC}[-–](?=\s)",
+    r"\d+(?:\.\d+)+\.?(?=\s)",
+    r"[-–•+]",
+]) + r")\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 # Câu dẫn của Điều "Giải thích từ ngữ" — r6 (lượt 6 F2, Review Rescue sau sáu lượt cùng lớp): DANH SÁCH CHO PHÉP NGUYÊN DÒNG.
@@ -618,7 +629,9 @@ _MC = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
 # r22 (lượt 21 X2): TRƯỜNG ĐƠN TRỊ — mọi phần tử con mà bộ đọc lấy bằng `.find()` (phần tử ĐẦU) phải xuất hiện ≤ 1 lần; khai nhiều
 # lần ⇒ mâu thuẫn, không đoán Word chọn cái nào. Part chính và styles ⇒ ValueError cả tệp; numbering ⇒ `loi` của định nghĩa (A5).
 _DON_TRI_DOCUMENT = {"p": ("pPr",), "r": ("rPr",), "pPr": ("pStyle", "numPr", "rPr"), "numPr": ("numId", "ilvl"),
-                     "rPr": ("rStyle", "strike", "dstrike")}
+                     "rPr": ("rStyle", "strike", "dstrike"),
+                     # r23 (lượt 22 Y2): nút CHỌN VÙNG cũng đơn trị — hai `body`, hai `sdtContent` ⇒ bộ đọc chỉ thấy phần đầu.
+                     "document": ("body",), "sdt": ("sdtPr", "sdtEndPr", "sdtContent")}
 _DON_TRI_STYLES = {"style": ("basedOn", "pPr", "rPr"), "pPr": ("numPr",), "numPr": ("numId", "ilvl"),
                    "rPr": ("strike", "dstrike"), "docDefaults": ("rPrDefault", "pPrDefault"), "rPrDefault": ("rPr",),
                    "pPrDefault": ("pPr",)}
@@ -864,6 +877,8 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
             except ValueError:
                 il = "!"
         rpr = st.find(_W + "rPr")
+        if st.get(_W + "styleId") in kq:   # r23 (lượt 22 Y2): hai style cùng `styleId` ⇒ định nghĩa sau ghi đè ngầm
+            raise ValueError(f"styles: styleId {st.get(_W + 'styleId')!r} khai nhieu lan — khong ho tro")
         kq[st.get(_W + "styleId")] = (b.get(_W + "val") if b is not None else None, nid, il,
                                       gach(rpr, "strike"), gach(rpr, "dstrike"))
         if st.get(_W + "type") == "paragraph" and st.get(_W + "default") in ("1", "true", "on"):
@@ -954,13 +969,22 @@ def _doan_trong(cha, trong_bang=False):
             # r7: tệp chỉ chứa Điều cần đọc ⇒ bảng ở BẤT KỲ đâu bị chặn; không cần duyệt ô để đếm số trước Điều.
             yield ("bang", el, trong_bang)
         elif ten == "sdt":
+            # r23 (lượt 22 Y2): wrapper phải có ĐÚNG MỘT `sdtContent` (đơn trị, `_DON_TRI_DOCUMENT`) và không con lạ — thiếu nội dung
+            # hay con ngoài {sdtPr, sdtEndPr, sdtContent} ⇒ khối lạ (trước đây thiếu `sdtContent` thì bỏ qua lặng lẽ).
             nd = el.find(_W + "sdtContent")
-            if nd is not None:
+            if nd is None or not _sdt_hop_le(el):
+                yield ("la", el, trong_bang)
+            else:
                 yield from _doan_trong(nd, trong_bang)
         elif ten == "customXml":
             yield from _doan_trong(el, trong_bang)
         elif ten not in _KHOI_BO_QUA:
             yield ("la", el, trong_bang)
+
+
+def _sdt_hop_le(el):
+    """r23 (lượt 22 Y2): con của `w:sdt` chỉ được là `sdtPr` / `sdtEndPr` / `sdtContent` (theo QName đầy đủ)."""
+    return all(c.tag in (_W + "sdtPr", _W + "sdtEndPr", _W + "sdtContent") for c in el)
 
 
 def _ruot_bi_bo(el):
@@ -1046,7 +1070,7 @@ def _phan_tich_doan(p, kieu):
             # giới đoạn khi run rỗng tự đóng đứng trước run gạch).
             # r21 (lượt 20 W2; chính sách r222 của `docx_markup`): run gạch mà ruột CHỈ có khoảng trắng là tàn dư định dạng — giữ
             # khoảng trắng, kẻo hai từ hiệu lực hai bên DÍNH thành một chữ không có trong văn bản.
-            ruot = "".join(chu_run)
+            ruot = _ruot_bi_bo(r)   # r23 (lượt 22 Y1): CÙNG phép đọc ruột với `del`/`moveFrom` — tính cả `delText` có chữ
             if ruot and not ruot.strip():
                 kq["phan"].append(ruot)
             return
@@ -1063,7 +1087,7 @@ def _phan_tich_doan(p, kieu):
                 duyet(c)
             elif ten == "sdt":   # r4 (lượt 3 C5): content control NỘI DÒNG — đi vào nội dung, bỏ thuộc tính
                 nd = c.find(_W + "sdtContent")
-                if nd is None:
+                if nd is None or not _sdt_hop_le(c):   # r23 (lượt 22 Y2)
                     kq["la"] = True
                 else:
                     duyet(nd)

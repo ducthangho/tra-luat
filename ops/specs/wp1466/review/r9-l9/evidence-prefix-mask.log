@@ -1,0 +1,15 @@
+COMMAND ["python", "-B", "out/prefix_mask.py"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+K02 comment RC 9 EXPECTED_REASON True
+K02 fence RC 9 EXPECTED_REASON True
+K04 comment RC 9 EXPECTED_REASON True
+K04 fence RC 9 EXPECTED_REASON True
+K05 comment RC 9 EXPECTED_REASON True
+K05 fence RC 9 EXPECTED_REASON True
+K06 comment RC 9 EXPECTED_REASON True
+K06 fence RC 9 EXPECTED_REASON True
+K07 comment RC 9 EXPECTED_REASON True
+K07 fence RC 9 EXPECTED_REASON True
+MASKED_HEADING_BOUNDARY 10/10 PASS
+
+RC 0 ELAPSED 2.9

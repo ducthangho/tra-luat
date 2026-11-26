@@ -1,0 +1,16 @@
+head_tree rc=0
+b0079956d230ccb09b1c1d48f5a2633aaf09a173
+adf0abe3ff1368437ca16dc62b9010badb6a293f
+
+source_status rc=0
+
+source_diff rc=0
+
+prototype_check rc=0
+
+LOCAL_BLOB_EQUAL True SHA256 7b6457fda836f740e0d491bd0940532107fa9b4518c0eadf93522e4eb46ee454
+PROTOTYPE_SHA256 .claude/dev/packet_loop.py 2c254505078ba5ae5547eedea2f1944da6b2e91bd8137322da56716a3c54cbd9
+PROTOTYPE_SHA256 .claude/dev/packet_loop_test.py 6fd12a590d632e4e163d456a9d53988dd149c657909ceb6ab0e0cc7a5ff80fe4
+PROTOTYPE_SHA256 docs/PROTOCOL_DA_PHIEN.md ec489baf6619b1ea18ae2f8400850f9f48e0db912c06eec2c78768a6c5c01bf9
+PROTOTYPE_SHA256 docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md 66fcfba86ab71b1bb875a7e0c8d4e41be80f0a92dc401c3187b6c98d70121e37
+COMPLETED_AT 2026-11-21T00:38:30.073848+00:00

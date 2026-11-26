@@ -1,0 +1,128 @@
+{
+ "luot": {
+  "45547652858": {
+   "hop_le_schema": true,
+   "ok": true,
+   "sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "run_id": 45547652858,
+   "kiem_ke_job": {
+    "ky_vong": [
+     "bien-nhan-audit",
+     "dot-bien-du",
+     "dot-bien-gop",
+     "dot-bien-manh (0)",
+     "dot-bien-manh (1)",
+     "dot-bien-manh (2)",
+     "dot-bien-manh (3)",
+     "dot-bien-manh (4)",
+     "dot-bien-manh (5)",
+     "dot-bien-manh (6)",
+     "dot-bien-manh (7)"
+    ],
+    "thuc_co": [
+     "bien-nhan-audit",
+     "dot-bien-du",
+     "dot-bien-gop",
+     "dot-bien-manh (0)",
+     "dot-bien-manh (1)",
+     "dot-bien-manh (2)",
+     "dot-bien-manh (3)",
+     "dot-bien-manh (4)",
+     "dot-bien-manh (5)",
+     "dot-bien-manh (6)",
+     "dot-bien-manh (7)"
+    ]
+   },
+   "vi_pham": [],
+   "canh_bao": [],
+   "moc": "2026-11-25T04:33:59Z",
+   "run_status": "completed",
+   "run_conclusion": "success",
+   "jobs": {
+    "dot-bien-du": "success",
+    "dot-bien-manh (7)": "success",
+    "dot-bien-manh (3)": "success",
+    "dot-bien-manh (6)": "success",
+    "dot-bien-manh (4)": "success",
+    "dot-bien-manh (0)": "success",
+    "dot-bien-manh (1)": "success",
+    "dot-bien-manh (5)": "success",
+    "dot-bien-manh (2)": "success",
+    "dot-bien-gop": "success",
+    "bien-nhan-audit": "success"
+   },
+   "so_artifact_tai": 19,
+   "definition": "measured"
+  },
+  "45548809800": {
+   "hop_le_schema": true,
+   "ok": true,
+   "sha": "f5af7469c03e7fe421a3704c731f390842260304",
+   "run_id": 45548809800,
+   "kiem_ke_job": {
+    "ky_vong": [
+     "bien-nhan-audit",
+     "dot-bien-du",
+     "dot-bien-gop",
+     "dot-bien-manh (0)",
+     "dot-bien-manh (1)",
+     "dot-bien-manh (2)",
+     "dot-bien-manh (3)",
+     "dot-bien-manh (4)",
+     "dot-bien-manh (5)",
+     "dot-bien-manh (6)",
+     "dot-bien-manh (7)"
+    ],
+    "thuc_co": [
+     "bien-nhan-audit",
+     "dot-bien-du",
+     "dot-bien-gop",
+     "dot-bien-manh (0)",
+     "dot-bien-manh (1)",
+     "dot-bien-manh (2)",
+     "dot-bien-manh (3)",
+     "dot-bien-manh (4)",
+     "dot-bien-manh (5)",
+     "dot-bien-manh (6)",
+     "dot-bien-manh (7)"
+    ]
+   },
+   "vi_pham": [],
+   "canh_bao": [],
+   "moc": "2026-11-25T04:44:19Z",
+   "run_status": "completed",
+   "run_conclusion": "success",
+   "jobs": {
+    "dot-bien-du": "success",
+    "dot-bien-manh (3)": "success",
+    "dot-bien-manh (1)": "success",
+    "dot-bien-manh (2)": "success",
+    "dot-bien-manh (5)": "success",
+    "dot-bien-manh (0)": "success",
+    "dot-bien-manh (4)": "success",
+    "dot-bien-manh (7)": "success",
+    "dot-bien-manh (6)": "success",
+    "dot-bien-gop": "success",
+    "bien-nhan-audit": "success"
+   },
+   "so_artifact_tai": 19,
+   "definition": "measured"
+  }
+ },
+ "job_ky_vong": [
+  "dot-bien-du",
+  "dot-bien-manh (0)",
+  "dot-bien-manh (1)",
+  "dot-bien-manh (2)",
+  "dot-bien-manh (3)",
+  "dot-bien-manh (4)",
+  "dot-bien-manh (5)",
+  "dot-bien-manh (6)",
+  "dot-bien-manh (7)",
+  "dot-bien-gop",
+  "bien-nhan-audit"
+ ],
+ "tree_h": "3f977dc24ae10e4d5007845584469ba3247b9c1d",
+ "cung_kiem_ke_job": true,
+ "khac_run_id": true
+}

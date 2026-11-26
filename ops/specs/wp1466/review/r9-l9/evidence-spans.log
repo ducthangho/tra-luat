@@ -1,0 +1,22 @@
+COMMAND ["python", "-B", "out/spans.py"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+BLOCK p1-moi SPANS 3 FLAGS 0 ADVISORIES 0
+[]
+BLOCK p2-moi SPANS 118 FLAGS 0 ADVISORIES 0
+[]
+BLOCK p3-moi SPANS 2 FLAGS 0 ADVISORIES 0
+[]
+BLOCK p4-moi SPANS 1 FLAGS 0 ADVISORIES 0
+[]
+BLOCK p5-moi SPANS 4 FLAGS 0 ADVISORIES 0
+[]
+BLOCK p6-moi SPANS 5 FLAGS 0 ADVISORIES 0
+[]
+BLOCK adr SPANS 100 FLAGS 0 ADVISORIES 0
+[]
+TOTAL_SPANS 233 LAYER_FINDINGS {} ACTIVE_LAYERS {'L10': '24/30 version GAS được dẫn không có tệp .gs — kho giữ 6 bản gần nhất là có chủ đích', 'L11': '2/2 hit ở tài liệu sống đều viết ĐÚNG (số hiệu chính thức là dạng bare); bất biến NN-YYYY-VBHN-XXX áp cho khoá registry, đã có cổng vbhn-year-fix'}
+R8_P2_FLAGS [{"layer": "L12", "file": "docs/PROTOCOL_DA_PHIEN.md", "line": 7, "claim": "r812_nguoi_giu_khac", "reason": "TEST_ID_UNKNOWN"}, {"layer": "L12", "file": "docs/PROTOCOL_DA_PHIEN.md", "line": 8, "claim": "r812_nguoi_giu_prefix_giao_nhau", "reason": "TEST_ID_UNKNOWN"}, {"layer": "L12", "file": "docs/PROTOCOL_DA_PHIEN.md", "line": 20, "claim": "r1252_ghi_trong_git", "reason": "TEST_ID_UNKNOWN"}]
+INV_ROWS 28 CA_POINTERS 18 CA_WITH_BACKTICK 0
+GATED 15 GATED_WITH_DEBT 15 DISCIPLINE 12 UNMEASURED 1
+
+RC 0 ELAPSED 1.21

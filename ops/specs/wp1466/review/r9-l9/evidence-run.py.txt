@@ -1,0 +1,10 @@
+import os,sys,pathlib,subprocess,time,json
+O=pathlib.Path(__file__).resolve().parent
+name,cwd,*cmd=sys.argv[1:]; cwd=str(pathlib.Path(cwd).resolve()); tmp=O/'tmp'/name;tmp.mkdir(parents=True,exist_ok=True)
+env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','TMPDIR':str(tmp),'TMP':str(tmp),'TEMP':str(tmp)}
+t=time.time()
+with (O/(name+'.log')).open('w') as f:
+ f.write('COMMAND '+json.dumps(cmd,ensure_ascii=False)+'\nCWD '+cwd+'\n');f.flush()
+ r=subprocess.run(cmd,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT)
+ f.write('\nRC '+str(r.returncode)+' ELAPSED '+str(round(time.time()-t,2))+'\n')
+print(name,'RC',r.returncode,'SECONDS',round(time.time()-t,2),flush=True)

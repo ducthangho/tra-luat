@@ -1,7 +1,7 @@
 ---
 name: proxima-control
 description: Điều khiển MỘT đích Proxima khai báo tường minh qua px hoặc Run-Px.ps1 (trợ giúp, cấu hình, trạng thái, model, hỏi, start/stop/restart, connect/disconnect), luôn kèm ConfigPath, RepositoryRoot, TargetId và dùng -WhatIf để xem trước.
-version: 2.1.0
+version: 2.2.0
 ---
 ## Phạm vi (Scope)
 - Add-on tùy chọn, độc lập, chỉ công bố trong repository để dễ tìm: không tự cài, không tự kích hoạt, không đổi endpoint, dịch vụ,
@@ -42,6 +42,16 @@ px connect -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<T
 - Chỉ `connect` nhận `-Credential` (PSCredential); hành động khác không hỏi và không đọc thông tin đăng nhập.
 - Không suy diễn: `ask` khi chưa `use` (và không có `-Model`) báo `NoModelSelected`; model không được quảng bá báo
   `ModelNotAdvertised`. Không fallback sang model hay đích khác, không tự thử lại.
+- Kết quả `ask` (từ 2.2.0): `answer` đã bỏ mọi khối `<ElicitationsGroup …>…</ElicitationsGroup>` hoàn chỉnh (tên thẻ so Ordinal);
+  khoảng trắng cuối chỉ bị cắt khi sau khối cuối cùng không còn gì ngoài khoảng trắng. `answerMarkup` là `none` (không có khối),
+  `removed` (đã bỏ) hoặc `unterminated` (thẻ mở cụt, thiếu thẻ đóng hay lồng sai: `answer` giữ nguyên, người gọi tự xử).
+  `answerMarkupRemoved` là số khối đã bỏ. Nội dung đã bỏ không được trả lại. `reportedModel` là `$null` khi `answerMarkup` là
+  `removed`; ngoài ca ấy chỉ được trả khi bằng đúng (Ordinal) một id mà chính lời gọi `ask` ấy nhận từ `GET /v1/models`, giá trị
+  khác thành `$null`. Căn cứ: #1457 r2 kể đúng một câu trả lời Gemini qua gateway
+  có khối này, chứa gợi ý câu hỏi mà chủ đề có vẻ lấy từ lịch sử trò chuyện; hồ sơ ấy là lời khai chưa xác minh trong kho.
+- Chạy tự động với Gemini thì nên dùng `gemini:auto`. Căn cứ, cũng là lời khai chưa xác minh của #1457 r2: một lời gọi model chỉ định
+  (`gemini:3-5-flash-lite`) trả HTTP 500 vì luồng treo, còn một lời gọi `gemini:auto` trả được câu trả lời sau một lần treo. Đây là
+  hướng dẫn, module không chặn model nào.
 
 ## Xem trước (WhatIf)
 `px` gọi ShouldProcess TRƯỚC mọi tác động, kể cả truy vấn `status`/`models`; mọi hành động có `-WhatIf` và `-Confirm`, wrapper chuyển
@@ -53,9 +63,10 @@ px restart -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<T
 
 ## Phiên bản (Versions)
 Ba miền danh tính tách biệt, không suy miền này từ miền kia:
-1. Add-on trong repository: `ModuleVersion` 2.1.0 của manifest, cộng commit và tree Git chứa nó. Major 2 tách khỏi module 1.0.1
+1. Add-on trong repository: `ModuleVersion` 2.2.0 của manifest, cộng commit và tree Git chứa nó. Major 2 tách khỏi module 1.0.1
    đã thấy ở P0; không khẳng định module trên máy chủ đã được cập nhật.
 2. Module điều khiển đã cài trên endpoint: cặp băm `moduleSha256` + `configModuleSha256` do handshake trả về khi `connect`.
+   Mỗi bản module mới (ví dụ 2.2.0) đổi băm, nên handshake với endpoint còn chạy bản cũ sẽ lệch cho tới khi endpoint được cập nhật.
 3. Gateway runtime: `FileVersion` của `Proxima.exe` là NOT_MEASURED ở S2/S3; đo nó thuộc quan sát P4, không lén thêm vào S2.
    `status`/`models` không xác lập phiên bản runtime, quota, xác thực hay danh tính model upstream.
 

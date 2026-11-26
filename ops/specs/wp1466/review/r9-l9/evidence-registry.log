@@ -1,0 +1,6 @@
+COMMAND ["python", "-B", "out/so-dang-ky.txt", "out/baseline", "out/candidate"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+{"cases": [1804, 1864], "linux": [1803, 1863], "T": 60, "mutants": [2077, 2106], "mutants_cu_doi": [], "day_con_giu_thu_tu": true, "T_bang_hai_hieu": true, "T_dung_tien_to": true, "mutants_cu_giu_nguyen": true, "nham_nen_trong_h": true}
+SỔ ĐĂNG KÝ: ĐẠT
+
+RC 0 ELAPSED 6.95

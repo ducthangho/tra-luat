@@ -1,0 +1,8 @@
+UTC 2026-11-21T04:16:40.814670+00:00
+SOURCE_SNAPSHOT_SAVED
+SPEC_BLOB_EQUALS True SHA256 fe67bfffe8cb0cb49bb31a945fcde5955f657669bd2d43ccb2de46ed05f75e45
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/setup.py", line 31, in <module>
+    assert len(blocks)==1
+           ^^^^^^^^^^^^^^
+AssertionError

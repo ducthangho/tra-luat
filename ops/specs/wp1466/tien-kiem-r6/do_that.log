@@ -1,0 +1,14 @@
+2026-11-21T04:06:27Z
+may_chu 392 cuc_bo 392 thieu 0 thua 0
+.claude/dev/packet_loop.py rc=11 :: HẾT_HẠN	doctrine-scan-r1-g1-antigravity	refs/heads/master:ops/leases/doctrine-scan-r1-g1-antigravity.yaml HẾT_HẠN	wp55-r4-exec-1-claude-20260816	refs/heads/master:ops/leases/wp55-r4-exec-1-cla
+.claude/dev/packet_loop_test.py rc=11 :: HẾT_HẠN	doctrine-scan-r1-g1-antigravity	refs/heads/master:ops/leases/doctrine-scan-r1-g1-antigravity.yaml HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/master:ops/leases/wp-codex-cred
+docs/PROTOCOL_DA_PHIEN.md rc=0 :: HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/master:ops/leases/wp538-r1-g1-codex-windows.yaml HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/master:ops/leases/wp538-r2-g2-codex-windows.yaml HẾ
+docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md rc=0 :: NGƯỜI_GIỮ 0: không có 
+ref_co_adr_0068_tro_len 0
+66
+2026-11-21T04:06:59Z
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1462-r7-g1-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r7-g1-claude.yaml CÒN_HẠN	wp1462-r8-g2-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml NGƯỜI_GIỮ 1: wp1462-r8-g2-claude 
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1462-r7-g1-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r7-g1-claude.yaml CÒN_HẠN	wp1462-r8-g2-claude	refs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml NGƯỜI_GIỮ 1: wp1462-r8-g2-claude 
+NGƯỜI_GIỮ 0: không có 
+NGƯỜI_GIỮ 0: không có 
+2026-11-21T04:07:39Z ban_ghi 550 con_han 17 bia_mo 12 song 5 ['wp1236-a-r10-g1-claude-20261121', 'wp1448-r4-g5-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude', 'wp433-r9-g5-claude']

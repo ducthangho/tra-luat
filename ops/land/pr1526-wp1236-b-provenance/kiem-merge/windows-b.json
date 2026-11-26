@@ -1,0 +1,9 @@
+{"sha": "bca55c1cd09c57180d60b05d5ca1813828ae1d10", "os": "Windows", "may": "DESKTOP-T9R33P2", "bien_nhan": "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7161189686",
+ "ghi_chu": "ops/ci_duong_nhanh_test.py do san tren Windows o CA base lan ung (t56/t101/t103), tap do ung = nen, delta 0 (ADR-0060 M3 b); khong liet ke duoi day vi khong o trang thai passed",
+ "tests": [
+  {"id": "scripts/tl.py --selftest (1786/1786)", "ket_qua": "passed"},
+  {"id": "ops/land_evidence_nguon.py --root . (174 ho so)", "ket_qua": "passed"},
+  {"id": "ops/land_evidence_nguon_test.py (CA 38/38, DOT BIEN 145/145)", "ket_qua": "passed"},
+  {"id": ".claude/dev/ci_dang_ky_test.py (1212/1212)", "ket_qua": "passed"},
+  {"id": "ops/gate_output_doi_chieu_test.py (CA 51/51, DOT BIEN 149/149)", "ket_qua": "passed"}
+ ]}

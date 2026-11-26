@@ -1,0 +1,14 @@
+CI_PR docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md'")
+CI_PR docs/PROTOCOL_DA_PHIEN.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/PROTOCOL_DA_PHIEN.md'")
+CI_PR .claude/dev/packet_loop.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop.py'")
+CI_PR .claude/dev/packet_loop_test.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop_test.py'")
+CI_PUSH ('chay', 'PACKET_LOOP: chay vi push nhanh mac dinh: chay bo ca packet-loop hau merge')
+I2_CLOSURE_READER False
+I2_PUBLISHED_LEASE_DEPENDENCIES {'ls-remote': True, 'lease_path': True, 'BOT_LEASE': True, 'I2(R)': True, 'effective_write_set': True}
+POLICY_EXISTS False
+PREFIX_OVERLAP True
+CASE_OVERLAP True
+NFC_OVERLAP True
+RAW_POLICY_EXAMPLE_OVERLAP False
+SPEC_1460_WRITESET .github/workflows/ci-dot-bien-du.yml, .claude/dev/ci_dang_ky_test.py, 2 hop_dong files; no literal overlap wp1466
+SPEC_B4_WRITESET .claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py; wait predecessor merged

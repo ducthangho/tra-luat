@@ -1,0 +1,494 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ac523aebd876640b369e94511fd44e81bace0908/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T11:57:18Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T12:39:20Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "feat(kiem-dong-wp): D2b — gate_output cua bien ban M8 phai khop tep danh gia tai oid (wp1236 dot C)\n\nDac ta ops/specs/wp1236-r12.md (sha256 4589daf1...), muc \"D2b chi tiet\", bang ca C1-C9.\n\npacket_loop.py\n- _d2b / _d2b_kiem: khi moc_10_2_2.gate_output la passed hoac owner_waived, bien ban\n  phai tro mot tep danh gia (hoac readback mien) TAI mot commit dang nam tren\n  refs/remotes/origin/*. Du lieu doc qua git ls-tree + git archive cua oid, khong\n  doc cay lam viec; ma cong (ops/gate_output_doi_chieu.py) nap tu origin/master.\n- Ly do co dinh: thieu_nguon, attempt_kieu, oid_khong_tren_remote, duong_dan_sai,\n  symlink_hoac_mode:<duong dan>, kiem_tep:<trang thai>:<ly do dau>, neo_run,\n  neo_attempt, neo_head, mien:<dieu kien>. Dat thi in dung mot dong \"D2b DAT\".\n- Loi do (module khong nap duoc, git loi, du lieu nem) => rc 8 KHONG DO DUOC,\n  khong traceback, khong gop vao rc 12.\n\npacket_loop_test.py\n- Fixture _d1106 tach thanh _d1106_kho / _d1106_chay: kho tam co module tren\n  origin/master va commit O (provenance + readback) tren origin/ops/x.\n- 15 ca cong_d2b_* va 31 dot bien d2b_*; GIET chi khi chinh ca nem ChotB4\n  (nhanh cong_d2b_ cua chay_suite), CLI sap hay dung fixture hong la tin dung gia.\n- _rev_list_loi nhan ten lenh git bi ngat de do rc khac 0 ma stdout con nguyen.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "e62a4e166e9f181f2a291337d8c527dd84fbaf7e",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/e62a4e166e9f181f2a291337d8c527dd84fbaf7e"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ac523aebd876640b369e94511fd44e81bace0908",
+   "verification": {
+    "payload": "tree e62a4e166e9f181f2a291337d8c527dd84fbaf7e\nparent f602325574c62184caf16309631f5f680ca5cee2\nauthor Claude <noreply@anthropic.com> 1795521438 +0000\ncommitter Claude <noreply@anthropic.com> 1795523960 +0000\n\nfeat(kiem-dong-wp): D2b — gate_output cua bien ban M8 phai khop tep danh gia tai oid (wp1236 dot C)\n\nDac ta ops/specs/wp1236-r12.md (sha256 4589daf1...), muc \"D2b chi tiet\", bang ca C1-C9.\n\npacket_loop.py\n- _d2b / _d2b_kiem: khi moc_10_2_2.gate_output la passed hoac owner_waived, bien ban\n  phai tro mot tep danh gia (hoac readback mien) TAI mot commit dang nam tren\n  refs/remotes/origin/*. Du lieu doc qua git ls-tree + git archive cua oid, khong\n  doc cay lam viec; ma cong (ops/gate_output_doi_chieu.py) nap tu origin/master.\n- Ly do co dinh: thieu_nguon, attempt_kieu, oid_khong_tren_remote, duong_dan_sai,\n  symlink_hoac_mode:<duong dan>, kiem_tep:<trang thai>:<ly do dau>, neo_run,\n  neo_attempt, neo_head, mien:<dieu kien>. Dat thi in dung mot dong \"D2b DAT\".\n- Loi do (module khong nap duoc, git loi, du lieu nem) => rc 8 KHONG DO DUOC,\n  khong traceback, khong gop vao rc 12.\n\npacket_loop_test.py\n- Fixture _d1106 tach thanh _d1106_kho / _d1106_chay: kho tam co module tren\n  origin/master va commit O (provenance + readback) tren origin/ops/x.\n- 15 ca cong_d2b_* va 31 dot bien d2b_*; GIET chi khi chinh ca nem ChotB4\n  (nhanh cong_d2b_ cua chay_suite), CLI sap hay dung fixture hong la tin dung gia.\n- _rev_list_loi nhan ten lenh git bi ngat de do rc khac 0 ma stdout con nguyen.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJl/nl2J\nmrgTKEwnN4tiYcu7p/rxGeqEepd3+bYMGQmRULoMTajDlVEfo4AD/j/H0qPTX2NPQukRJElQlNVd\nCQU=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ac523aebd876640b369e94511fd44e81bace0908",
+  "node_id": "C_kwDOTNeRjdoAKGFjNTIzYWViZDg3NjY0MGIzNjllOTQ1MTFmZDQ0ZTgxYmFjZTA5MDg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f602325574c62184caf16309631f5f680ca5cee2",
+    "sha": "f602325574c62184caf16309631f5f680ca5cee2",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f602325574c62184caf16309631f5f680ca5cee2"
+   }
+  ],
+  "sha": "ac523aebd876640b369e94511fd44e81bace0908",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ac523aebd876640b369e94511fd44e81bace0908"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2439922c67a091c53e277c9e0b13d8fc04089453/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:36:45Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:36:45Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "fix(kiem-dong-wp): D2b — ban bung phai dung la cay cua oid; duong dan chi nhan ASCII in duoc (wp1236 dot C, luot 2)\n\nVa theo LOP hai finding cua review ma luot 1 tren ac523ae\n(ops/reviews/wp1236-c-r12-ma-1-codex tren nhanh ops/wp1236-bc-lease @ 8ccc146).\n\nLop archive-loc-mat-du-lieu-kiem (C01, P1)\n- Bo loc tar xoa symlink truoc validator: thu muc provenance co YAML thuong hop le\n  kem mot symlink YAML thi module tra not_measured [symlink] ma D2b lai DAT.\n- Nay bung dung cay cua oid (ca symlink) de validator tu thay va tu tu choi theo K2,\n  roi doi chieu TUNG muc cua git ls-tree -r voi ban bung: symlink van la symlink,\n  tep khop bam blob, khong hai ten chi khac hoa/thuong. Lech => rc 8.\n- Cung co che, tu tim them: .gitattributes cua chinh oid lam git archive an tep\n  (export-ignore) hoac doi byte (eol); nen khong tao duoc symlink thi tarfile chep dich.\n\nLop hop-dong-dau-ra-duong-dan-tu-do (C02, P2)\n- Quyet dinh chu kho (#1236 issuecomment-7134458601): moi thanh phan duong dan cua\n  tep va readback_thu_muc chi nhan ASCII 0x21-0x7E tru \"/\". Kiem tren chuoi tho,\n  truoc moi lenh git va moi dong in => dong in ra luon dung mot dong.\n- Thong diep rc 8 in repr cua ngoai le: thong diep mang LF khong tach duoc dong.\n\ngit(): lenh hoi (cat-file, branch, show) rc khac 0 coi nhu tra rong; lenh con lai\nrc khac 0 la loi do. Test: 16 ca cong_d2b_*, 42 dot bien d2b_*.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "b2ba746fdbe08bff82d66467c0e9b0306fad38cd",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/b2ba746fdbe08bff82d66467c0e9b0306fad38cd"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/2439922c67a091c53e277c9e0b13d8fc04089453",
+   "verification": {
+    "payload": "tree b2ba746fdbe08bff82d66467c0e9b0306fad38cd\nparent ac523aebd876640b369e94511fd44e81bace0908\nauthor Claude <noreply@anthropic.com> 1795534605 +0000\ncommitter Claude <noreply@anthropic.com> 1795534605 +0000\n\nfix(kiem-dong-wp): D2b — ban bung phai dung la cay cua oid; duong dan chi nhan ASCII in duoc (wp1236 dot C, luot 2)\n\nVa theo LOP hai finding cua review ma luot 1 tren ac523ae\n(ops/reviews/wp1236-c-r12-ma-1-codex tren nhanh ops/wp1236-bc-lease @ 8ccc146).\n\nLop archive-loc-mat-du-lieu-kiem (C01, P1)\n- Bo loc tar xoa symlink truoc validator: thu muc provenance co YAML thuong hop le\n  kem mot symlink YAML thi module tra not_measured [symlink] ma D2b lai DAT.\n- Nay bung dung cay cua oid (ca symlink) de validator tu thay va tu tu choi theo K2,\n  roi doi chieu TUNG muc cua git ls-tree -r voi ban bung: symlink van la symlink,\n  tep khop bam blob, khong hai ten chi khac hoa/thuong. Lech => rc 8.\n- Cung co che, tu tim them: .gitattributes cua chinh oid lam git archive an tep\n  (export-ignore) hoac doi byte (eol); nen khong tao duoc symlink thi tarfile chep dich.\n\nLop hop-dong-dau-ra-duong-dan-tu-do (C02, P2)\n- Quyet dinh chu kho (#1236 issuecomment-7134458601): moi thanh phan duong dan cua\n  tep va readback_thu_muc chi nhan ASCII 0x21-0x7E tru \"/\". Kiem tren chuoi tho,\n  truoc moi lenh git va moi dong in => dong in ra luon dung mot dong.\n- Thong diep rc 8 in repr cua ngoai le: thong diep mang LF khong tach duoc dong.\n\ngit(): lenh hoi (cat-file, branch, show) rc khac 0 coi nhu tra rong; lenh con lai\nrc khac 0 la loi do. Test: 16 ca cong_d2b_*, 42 dot bien d2b_*.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQIjfzjlQ\nSPdGXV9HZfkeRyUiHiSw4iOE3ersu0ZkH/CEawE7CbTiT9NkU7V2Irdt1vzJv2G5iWwCrxnQhswL\negc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/2439922c67a091c53e277c9e0b13d8fc04089453",
+  "node_id": "C_kwDOTNeRjdoAKDI0Mzk5MjJjNjdhMDkxYzUzZTI3N2M5ZTBiMTNkOGZjMDQwODk0NTM",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ac523aebd876640b369e94511fd44e81bace0908",
+    "sha": "ac523aebd876640b369e94511fd44e81bace0908",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ac523aebd876640b369e94511fd44e81bace0908"
+   }
+  ],
+  "sha": "2439922c67a091c53e277c9e0b13d8fc04089453",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2439922c67a091c53e277c9e0b13d8fc04089453"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/dbe650d2a3c3fb6da9573ea485adc65934efdc78/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-25T04:43:03Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-25T04:58:18Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "fix(kiem-dong-wp): D2b — ban bung phai khop DANH MUC day du cua cay oid, ca thu muc (wp1236 dot C, luot 3)\n\nVa theo LOP phan con mo cua C01 `archive-loc-mat-du-lieu-kiem` sau review ma luot 2\n(ops/reviews/wp1236-c-r12-ma-2-codex tren nhanh ops/wp1236-bc-lease @ ed9d958).\n\n- Lo: `git ls-tree -r` tran khong liet ke cay con, nen phep kiem trung khoa chi xet tep la.\n  Cay co `A/note.txt` va `a/readback-...json`: hai la khac khoa, nhung nen gop `A` voi `a`\n  thi `readback_thu_muc=.../A` nhan readback cua `a` (reviewer mo phong: rc 0, DAT).\n- Nay ba luat, ba thong diep rc 8 rieng:\n  1. ten trung khoa: moi muc cua `ls-tree -r -t` (tep, thu muc, symlink) khong duoc trung\n     nhau sau NFC + casefold; kiem TRUOC khi bung.\n  2. danh muc: tap (duong dan, loai) liet ke tu dia bang os.walk phai BANG dung danh muc\n     cua cay, hai chieu. Liet ke chu khong tra theo ten: tra theo ten di qua dung phep\n     gop ten cua nen (hoa/thuong, dau cham cuoi, ten danh rieng) nen khong thay no.\n  3. noi dung: tep khop bam blob, va dich cua symlink cung khop bam blob.\n- Cung co che, tu tim: bo loc `data` cua tarfile viet lai dich symlink (`./x` thanh `x`,\n  `sub//y` thanh `sub/y`), nen dich tren dia khac blob trong git.\n\nTest: 4 bien the trung khoa thu muc / thu muc-tep va doi chung anh em cung tien to;\n4 bien the nen lam ban bung lech cay sau khi bung (gop, thua, thieu, viet lai dich);\n12 dot bien rieng cho ba luat.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "b0a8b1bd4360ac33e5e0b076d820393e65d6f5bb",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/b0a8b1bd4360ac33e5e0b076d820393e65d6f5bb"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+   "verification": {
+    "payload": "tree b0a8b1bd4360ac33e5e0b076d820393e65d6f5bb\nparent 2439922c67a091c53e277c9e0b13d8fc04089453\nauthor Claude <noreply@anthropic.com> 1795581783 +0000\ncommitter Claude <noreply@anthropic.com> 1795582698 +0000\n\nfix(kiem-dong-wp): D2b — ban bung phai khop DANH MUC day du cua cay oid, ca thu muc (wp1236 dot C, luot 3)\n\nVa theo LOP phan con mo cua C01 `archive-loc-mat-du-lieu-kiem` sau review ma luot 2\n(ops/reviews/wp1236-c-r12-ma-2-codex tren nhanh ops/wp1236-bc-lease @ ed9d958).\n\n- Lo: `git ls-tree -r` tran khong liet ke cay con, nen phep kiem trung khoa chi xet tep la.\n  Cay co `A/note.txt` va `a/readback-...json`: hai la khac khoa, nhung nen gop `A` voi `a`\n  thi `readback_thu_muc=.../A` nhan readback cua `a` (reviewer mo phong: rc 0, DAT).\n- Nay ba luat, ba thong diep rc 8 rieng:\n  1. ten trung khoa: moi muc cua `ls-tree -r -t` (tep, thu muc, symlink) khong duoc trung\n     nhau sau NFC + casefold; kiem TRUOC khi bung.\n  2. danh muc: tap (duong dan, loai) liet ke tu dia bang os.walk phai BANG dung danh muc\n     cua cay, hai chieu. Liet ke chu khong tra theo ten: tra theo ten di qua dung phep\n     gop ten cua nen (hoa/thuong, dau cham cuoi, ten danh rieng) nen khong thay no.\n  3. noi dung: tep khop bam blob, va dich cua symlink cung khop bam blob.\n- Cung co che, tu tim: bo loc `data` cua tarfile viet lai dich symlink (`./x` thanh `x`,\n  `sub//y` thanh `sub/y`), nen dich tren dia khac blob trong git.\n\nTest: 4 bien the trung khoa thu muc / thu muc-tep va doi chung anh em cung tien to;\n4 bien the nen lam ban bung lech cay sau khi bung (gop, thua, thieu, viet lai dich);\n12 dot bien rieng cho ba luat.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQNkdGFI+\nWu5DnMr1bQlyDm4uidAPHROHLl8HNPFt/F4m2lpI73+QsOXNrGQtHvReXGvB8TClhICI90InkNVL\nFAk=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+  "node_id": "C_kwDOTNeRjdoAKGRiZTY1MGQyYTNjM2ZiNmRhOTU3M2VhNDg1YWRjNjU5MzRlZmRjNzg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/2439922c67a091c53e277c9e0b13d8fc04089453",
+    "sha": "2439922c67a091c53e277c9e0b13d8fc04089453",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2439922c67a091c53e277c9e0b13d8fc04089453"
+   }
+  ],
+  "sha": "dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/dbe650d2a3c3fb6da9573ea485adc65934efdc78"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d5a7d8510af03e0d08545f677ad5de687e0264f4/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-25T18:41:17Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-25T19:01:20Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "fix(kiem-dong-wp): D2b — K2 tinh symlink tro thu muc tren DANH MUC CAY, khong hoi nen (wp1236 dot C, luot 4)\n\nVa lop `symlink-tren-dia-lech-cay` sau M3 Windows local do tren dbe650d\n(#1236 issuecomment-7170894289; chu kho chon va trong write set, issuecomment-7170968907).\n\n- Lo: tren Windows symlink mang LOAI (tep hay thu muc), gan luc tao. `git archive` xep\n  `d` (-> sub) truoc `sub`, nen tarfile tao `d` thanh symlink TEP; `os.walk` cua module\n  dot A xep no vao danh sach tep va K2 bo sot => D2b DAT (rc 0) thay vi rc 12.\n  Do them tren may ay: symlink co dich chua \"/\" khong phan giai duoc, bat ke thu tu.\n- Nay, nhanh passed, truoc khi goi kiem_tep: voi moi muc 120000 cua `ls-tree -r -t`,\n  dich = posixpath.normpath(join(dirname(muc), readlink)). Dich la mot muc 040000 cua\n  cay, hoac la goc ban bung => `kiem_tep:not_measured:symlink`, khong goi module.\n  Chuoi readlink da duoc luat noi dung ghim bang bam blob ngay truoc do. Khong lenh nao\n  hoi dia ve LOAI cua symlink. Pham vi K2 giu nguyen: symlink tep khong phai *.yaml\n  van khong bi xet (chu kho chon giu pham vi K2).\n- Doi hanh vi tren moi nen: cay co symlink tro thu muc thi D2b bao `symlink` truoc ca\n  loi K1 cua tep danh gia (truoc day module bao ly do K1 truoc). Van rc 12.\n\nTest: moc git_loi=\"tep\" thay os.walk trong tien trinh de xep symlink tro thu muc vao\ndanh sach TEP (mo hinh Windows; tren ma dbe650d ba bien the nay ra rc 0, tuc tai hien\nca do M3). Fixture lk6 (dich \"../../..\", goc ban bung) va lk7 (dich co \"/\" toi thu muc\ncon + chuoi c -> e). 7 bien the moi trong cong_d2b_c4_symlink, 4 dot bien d2b_k2_*.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "241bd084f5979b02a1221d7d645e113227feee59",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/241bd084f5979b02a1221d7d645e113227feee59"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/d5a7d8510af03e0d08545f677ad5de687e0264f4",
+   "verification": {
+    "payload": "tree 241bd084f5979b02a1221d7d645e113227feee59\nparent dbe650d2a3c3fb6da9573ea485adc65934efdc78\nauthor Claude <noreply@anthropic.com> 1795632077 +0000\ncommitter Claude <noreply@anthropic.com> 1795633280 +0000\n\nfix(kiem-dong-wp): D2b — K2 tinh symlink tro thu muc tren DANH MUC CAY, khong hoi nen (wp1236 dot C, luot 4)\n\nVa lop `symlink-tren-dia-lech-cay` sau M3 Windows local do tren dbe650d\n(#1236 issuecomment-7170894289; chu kho chon va trong write set, issuecomment-7170968907).\n\n- Lo: tren Windows symlink mang LOAI (tep hay thu muc), gan luc tao. `git archive` xep\n  `d` (-> sub) truoc `sub`, nen tarfile tao `d` thanh symlink TEP; `os.walk` cua module\n  dot A xep no vao danh sach tep va K2 bo sot => D2b DAT (rc 0) thay vi rc 12.\n  Do them tren may ay: symlink co dich chua \"/\" khong phan giai duoc, bat ke thu tu.\n- Nay, nhanh passed, truoc khi goi kiem_tep: voi moi muc 120000 cua `ls-tree -r -t`,\n  dich = posixpath.normpath(join(dirname(muc), readlink)). Dich la mot muc 040000 cua\n  cay, hoac la goc ban bung => `kiem_tep:not_measured:symlink`, khong goi module.\n  Chuoi readlink da duoc luat noi dung ghim bang bam blob ngay truoc do. Khong lenh nao\n  hoi dia ve LOAI cua symlink. Pham vi K2 giu nguyen: symlink tep khong phai *.yaml\n  van khong bi xet (chu kho chon giu pham vi K2).\n- Doi hanh vi tren moi nen: cay co symlink tro thu muc thi D2b bao `symlink` truoc ca\n  loi K1 cua tep danh gia (truoc day module bao ly do K1 truoc). Van rc 12.\n\nTest: moc git_loi=\"tep\" thay os.walk trong tien trinh de xep symlink tro thu muc vao\ndanh sach TEP (mo hinh Windows; tren ma dbe650d ba bien the nay ra rc 0, tuc tai hien\nca do M3). Fixture lk6 (dich \"../../..\", goc ban bung) va lk7 (dich co \"/\" toi thu muc\ncon + chuoi c -> e). 7 bien the moi trong cong_d2b_c4_symlink, 4 dot bien d2b_k2_*.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQDqJUTfC\nquiHQBQkYHzP88PoUBhzmP9TcFQ+GSz92dfuX5+V//xfzLawKO0V8toJx7TnRqS1GNazTaPRLvjR\n1A0=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/d5a7d8510af03e0d08545f677ad5de687e0264f4",
+  "node_id": "C_kwDOTNeRjdoAKGQ1YTdkODUxMGFmMDNlMGQwODU0NWY2NzdhZDVkZTY4N2UwMjY0ZjQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+    "sha": "dbe650d2a3c3fb6da9573ea485adc65934efdc78",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/dbe650d2a3c3fb6da9573ea485adc65934efdc78"
+   }
+  ],
+  "sha": "d5a7d8510af03e0d08545f677ad5de687e0264f4",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d5a7d8510af03e0d08545f677ad5de687e0264f4"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8aab9dabb6f3f150e4ab1872e37757c2620912c3/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-26T01:54:10Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-26T02:08:43Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "fix(kiem-dong-wp): D2b — symlink chi qua khi dich la TEP THUONG cua danh muc cay (danh sach cho phep; wp1236 dot C, luot 5)\n\nTra loi review ma luot 4 tren d5a7d85 (ops/reviews/wp1236-c-r12-ma-4-codex tren nhanh\nops/wp1236-bc-lease: C03 P1, C04 P2) theo quyet dinh chu kho o #1236 issuecomment-7180063460:\ndoi chot symlink tu \"chan dich la thu muc\" sang DANH SACH CHO PHEP.\n\n- Lo (C03): chot luot 4 so dich voi danh muc THU MUC bang chuoi chinh xac, nen mot bi danh\n  cua thu muc (khac hoa/thuong, dung dau cheo nguoc, khac NFC) khong nam trong danh muc va\n  di lot khi nen xep symlink vao danh sach tep. Danh sach cam phai doan truoc moi cach viet.\n- Nay, nhanh passed, truoc kiem_tep: moi muc 120000 cua `ls-tree -r -t <oid> -- <thu muc\n  provenance>` chi qua khi posixpath.normpath(join(dirname(muc), readlink)) trung TUNG BYTE\n  duong dan mot muc kieu tep cua chinh danh muc ay. Con lai => kiem_tep:not_measured:symlink:\n  thu muc, goc ban bung, bi danh, dich hong, dich ngoai thu muc provenance, symlink khac.\n- C04 (chan thua symlink hong khong phai yaml) nay la fail-closed co chu dich. Day la siet mot\n  phan K2 so voi dac ta r12, chu kho da duyet; symlink tro dung tep thuong van qua (rc 0).\n- Thay ba dong chot cu, khong cong them.\n\nTest: _D2B_TC — 7 thu muc fixture, moi thu muc mot lop ten ngoai danh sach (bi danh thu muc,\nbi danh tep, dau cheo nguoc, hong, ngoai thu muc provenance, tro symlink, NFD cua ten NFC);\n17 dot bien d2b_k2_*, trong do 7 cai noi danh sach cho dung MOT ten tan cong.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "5474259bbb71e3be6e3f7d3eaf4661142906ca0d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/5474259bbb71e3be6e3f7d3eaf4661142906ca0d"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+   "verification": {
+    "payload": "tree 5474259bbb71e3be6e3f7d3eaf4661142906ca0d\nparent d5a7d8510af03e0d08545f677ad5de687e0264f4\nauthor Claude <noreply@anthropic.com> 1795658050 +0000\ncommitter Claude <noreply@anthropic.com> 1795658923 +0000\n\nfix(kiem-dong-wp): D2b — symlink chi qua khi dich la TEP THUONG cua danh muc cay (danh sach cho phep; wp1236 dot C, luot 5)\n\nTra loi review ma luot 4 tren d5a7d85 (ops/reviews/wp1236-c-r12-ma-4-codex tren nhanh\nops/wp1236-bc-lease: C03 P1, C04 P2) theo quyet dinh chu kho o #1236 issuecomment-7180063460:\ndoi chot symlink tu \"chan dich la thu muc\" sang DANH SACH CHO PHEP.\n\n- Lo (C03): chot luot 4 so dich voi danh muc THU MUC bang chuoi chinh xac, nen mot bi danh\n  cua thu muc (khac hoa/thuong, dung dau cheo nguoc, khac NFC) khong nam trong danh muc va\n  di lot khi nen xep symlink vao danh sach tep. Danh sach cam phai doan truoc moi cach viet.\n- Nay, nhanh passed, truoc kiem_tep: moi muc 120000 cua `ls-tree -r -t <oid> -- <thu muc\n  provenance>` chi qua khi posixpath.normpath(join(dirname(muc), readlink)) trung TUNG BYTE\n  duong dan mot muc kieu tep cua chinh danh muc ay. Con lai => kiem_tep:not_measured:symlink:\n  thu muc, goc ban bung, bi danh, dich hong, dich ngoai thu muc provenance, symlink khac.\n- C04 (chan thua symlink hong khong phai yaml) nay la fail-closed co chu dich. Day la siet mot\n  phan K2 so voi dac ta r12, chu kho da duyet; symlink tro dung tep thuong van qua (rc 0).\n- Thay ba dong chot cu, khong cong them.\n\nTest: _D2B_TC — 7 thu muc fixture, moi thu muc mot lop ten ngoai danh sach (bi danh thu muc,\nbi danh tep, dau cheo nguoc, hong, ngoai thu muc provenance, tro symlink, NFD cua ten NFC);\n17 dot bien d2b_k2_*, trong do 7 cai noi danh sach cho dung MOT ten tan cong.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQK1BoBLP\nMhR/Tf1kqTvVY1WcTVLfWX8yQw1eLyg6iwoUZganKnXKleZKspNyX7kti4QDWSnNh6NxkgWz06sA\n2gE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+  "node_id": "C_kwDOTNeRjdoAKDhhYWI5ZGFiYjZmM2YxNTBlNGFiMTg3MmUzNzc1N2MyNjIwOTEyYzM",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/d5a7d8510af03e0d08545f677ad5de687e0264f4",
+    "sha": "d5a7d8510af03e0d08545f677ad5de687e0264f4",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d5a7d8510af03e0d08545f677ad5de687e0264f4"
+   }
+  ],
+  "sha": "8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8aab9dabb6f3f150e4ab1872e37757c2620912c3"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/45944c7c3f4c75beaa87f36138b2bba9fb9198a3/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-26T04:34:39Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-26T04:59:32Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "fix(kiem-dong-wp): D2b — cam dau cheo nguoc tren duong dan dich va doi dich tho chuan tac (C05; wp1236 dot C, luot 6)\n\nTra loi review ma luot 5/6 tren 8aab9da (changes_requested: C05 P2) theo quyet dinh cua chu kho\no #1236 issuecomment-7182681531, bo sung cho luat danh sach cho phep (issuecomment-7180063460).\n\nMot symlink (120000) trong thu muc provenance nay chi qua khi ca ba dieu sau dung:\n(a) join(dirname(link), readlink), TRUOC khi chuan hoa, khong mang dau cheo nguoc: ca dich tho lan\n    thu muc chua link. Luot 5 chi so tung byte voi danh muc, nen tren POSIX mot tep mang dung ten\n    co dau cheo nguoc lam link tro toi no lot voi rc 0 (reviewer do native tren 3.13.18 va 3.12.3);\n(b) dich tho da o dang chuan tac: posixpath.normpath(d) == d. Bo bung cua Python truoc 3.12.11 /\n    3.13.4 giu nguyen van ban dich, nen `a/../x` voi `a` vang (dich hong) tung chuan hoa ra dung\n    mot tep thuong va lot. He qua co chu dich: `./x`, `a//b`, `sub/../x` cung bi chan;\n(c) duong dan dich sau chuan hoa trung tung byte mot tep thuong cua danh muc (nhu luot 5).\nCon lai tra kiem_tep:not_measured:symlink (rc 12) ma khong goi module.\n\nTest: bang _D2B_TB (chi POSIX: Git for Windows khong nhan duong dan index mang dau cheo nguoc) co\nnam thu muc ma cay CO THAT ten mang dau cheo nguoc (tep 100644, 100755, thanh phan thu muc, link\nlong, link nam trong thu muc ay); thu muc lkl va mo hinh git_loi=\"nguyen\" (bo bung giu nguyen van\nban dich) cho dich hong khong chuan tac. Dot bien moi: bo_cam_cheo, cam_cheo_chi_dich_tho,\nbo_chuan_tac; cho_ten_lka bo vi dieu cam rieng da chan lka.\n\nChua do: Windows voi Python >= 3.12.11 / 3.13.4 (data_filter dung ntpath.normpath, doi `/` trong\ndich thanh dau cheo nguoc => cac bien the lk6, lk7, lkc se ra rc 8 thay vi rc 12).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL",
+   "tree": {
+    "sha": "66a0f315c1cf27eaac67beae06ee20cd1789f23a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/66a0f315c1cf27eaac67beae06ee20cd1789f23a"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/45944c7c3f4c75beaa87f36138b2bba9fb9198a3",
+   "verification": {
+    "payload": "tree 66a0f315c1cf27eaac67beae06ee20cd1789f23a\nparent 8aab9dabb6f3f150e4ab1872e37757c2620912c3\nauthor Claude <noreply@anthropic.com> 1795667679 +0000\ncommitter Claude <noreply@anthropic.com> 1795669172 +0000\n\nfix(kiem-dong-wp): D2b — cam dau cheo nguoc tren duong dan dich va doi dich tho chuan tac (C05; wp1236 dot C, luot 6)\n\nTra loi review ma luot 5/6 tren 8aab9da (changes_requested: C05 P2) theo quyet dinh cua chu kho\no #1236 issuecomment-7182681531, bo sung cho luat danh sach cho phep (issuecomment-7180063460).\n\nMot symlink (120000) trong thu muc provenance nay chi qua khi ca ba dieu sau dung:\n(a) join(dirname(link), readlink), TRUOC khi chuan hoa, khong mang dau cheo nguoc: ca dich tho lan\n    thu muc chua link. Luot 5 chi so tung byte voi danh muc, nen tren POSIX mot tep mang dung ten\n    co dau cheo nguoc lam link tro toi no lot voi rc 0 (reviewer do native tren 3.13.18 va 3.12.3);\n(b) dich tho da o dang chuan tac: posixpath.normpath(d) == d. Bo bung cua Python truoc 3.12.11 /\n    3.13.4 giu nguyen van ban dich, nen `a/../x` voi `a` vang (dich hong) tung chuan hoa ra dung\n    mot tep thuong va lot. He qua co chu dich: `./x`, `a//b`, `sub/../x` cung bi chan;\n(c) duong dan dich sau chuan hoa trung tung byte mot tep thuong cua danh muc (nhu luot 5).\nCon lai tra kiem_tep:not_measured:symlink (rc 12) ma khong goi module.\n\nTest: bang _D2B_TB (chi POSIX: Git for Windows khong nhan duong dan index mang dau cheo nguoc) co\nnam thu muc ma cay CO THAT ten mang dau cheo nguoc (tep 100644, 100755, thanh phan thu muc, link\nlong, link nam trong thu muc ay); thu muc lkl va mo hinh git_loi=\"nguyen\" (bo bung giu nguyen van\nban dich) cho dich hong khong chuan tac. Dot bien moi: bo_cam_cheo, cam_cheo_chi_dich_tho,\nbo_chuan_tac; cho_ten_lka bo vi dieu cam rieng da chan lka.\n\nChua do: Windows voi Python >= 3.12.11 / 3.13.4 (data_filter dung ntpath.normpath, doi `/` trong\ndich thanh dau cheo nguoc => cac bien the lk6, lk7, lkc se ra rc 8 thay vi rc 12).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZsYAFm7iLa11eWogL\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQAx0YzGd\nXWQDu8VuEH5w9VPeyUCh82P0qipaVDHp8/byXeHJJMRW2h8DxW0RUJ7Ay7ofsSfqAwaafNVOQazt\nkw8=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T07:27:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/45944c7c3f4c75beaa87f36138b2bba9fb9198a3",
+  "node_id": "C_kwDOTNeRjdoAKDQ1OTQ0YzdjM2Y0Yzc1YmVhYTg3ZjM2MTM4YjJiYmE5ZmI5MTk4YTM",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+    "sha": "8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8aab9dabb6f3f150e4ab1872e37757c2620912c3"
+   }
+  ],
+  "sha": "45944c7c3f4c75beaa87f36138b2bba9fb9198a3",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/45944c7c3f4c75beaa87f36138b2bba9fb9198a3"
+ }
+]

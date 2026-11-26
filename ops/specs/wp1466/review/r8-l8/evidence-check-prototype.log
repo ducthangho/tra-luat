@@ -1,0 +1,78 @@
+CMD ['git', 'clone', '--shared', '--no-checkout', '-q', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/kho.git', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/out/base'] RC 0 OUTPUT  
+CMD ['git', 'config', 'core.abbrev', '7'] RC 0 OUTPUT  
+CMD ['git', 'checkout', '-q', '--detach', '48d372e14f190dae83a75ccbca8ee9a0b25635c5'] RC 0 OUTPUT  
+CMD ['git', 'clone', '--shared', '--no-checkout', '-q', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/kho.git', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/out/prototype'] RC 0 OUTPUT  
+CMD ['git', 'config', 'core.abbrev', '7'] RC 0 OUTPUT  
+CMD ['git', 'checkout', '-q', '--detach', '48d372e14f190dae83a75ccbca8ee9a0b25635c5'] RC 0 OUTPUT  
+CMD ['git', 'apply', '--index', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/cay-kho/ops/specs/wp1466/nguyen-mau-r5/nguyen-mau.patch'] RC 0 OUTPUT  
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'doctrine-scan', '--root', '.'] RC 0 OUTPUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'adr-song', '--root', '.'] RC 0 OUTPUT adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'doctrine-scan', '--root', '.'] RC 0 OUTPUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'adr-song', '--root', '.'] RC 0 OUTPUT adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+CMD ['git', 'diff', '--cached', '--numstat'] RC 0 OUTPUT 76	1	.claude/dev/packet_loop.py
+163	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md
+149	0	docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md 
+CMD ['git', 'diff', '--cached', '--check'] RC 0 OUTPUT  
+CMD ['/usr/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv8.3ZQK/out/independent.py'] RC 0 OUTPUT SIX_ANCHORS [1, 1, 1, 1, 1, 1]
+PROTOCOL_EXACT_ASSEMBLY True
+INDEPENDENT_LOCK K01 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K02 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K03 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K04 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K05 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K06 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+INDEPENDENT_LOCK K07 ADDRESS_MATCH True HASH_MATCH True RAW_OCCURRENCES 1
+CODE_LOCKS_EQUALS_INDEPENDENT True
+INV_COUNTS 28 15 12 1 GATE_WITH_DEBT 15 TEST_REFS 18
+DEBT_REFERENCED 25 DEBT_TOTAL 27 MISSING []
+SOURCE_INVARIANT 1 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 2 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 3 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 4 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 5 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 6 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 7 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 8 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 9 EXACT_AFTER_REFLOW True
+SOURCE_INVARIANT 10 EXACT_AFTER_REFLOW True
+VECTOR bang_lop [0, 7, 0, 0, 0, 0] MATCH True
+VECTOR class_slug [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR review_verdict [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR KET_LUAN [0, 2, 0, 0, 0, 0] MATCH True
+VECTOR ai-dang-giu|ai_dang_giu|RC_DANG_GIU [11, 5, 0, 0, 0, 0] MATCH True
+VECTOR refs/pull/ [0, 1, 1, 0, 0, 0] MATCH True
+VECTOR eol|EOL|gitattributes [0, 0, 0, 0, 24, 0] MATCH True
+VECTOR RC_PROVIDER [0, 9, 0, 0, 0, 0] MATCH True
+VECTOR reviewed_sha|reviewing_head_sha [4, 49, 0, 0, 0, 0] MATCH True
+VECTOR spec_hash|spec_sha256 [0, 28, 0, 0, 0, 0] MATCH True
+VECTOR model_family|ho_model [15, 33, 0, 0, 0, 0] MATCH True
+VECTOR effective_review_class|_kiem_lop_review|RC_LOP [15, 0, 0, 0, 0, 0] MATCH True
+VECTOR chup-workspace|chup_workspace|ghi_workspace [0, 0, 21, 0, 0, 0] MATCH True
+VECTOR MOC_10_2_2|moc_10_2_2 [0, 3, 0, 0, 0, 0] MATCH True
+VECTOR codex_review_calls|RC_TRAN [0, 34, 0, 0, 0, 0] MATCH True
+VECTOR NGUOI_CO_THAM_QUYEN|RC_TU_CAP [13, 15, 0, 0, 0, 1] MATCH True
+VECTOR doctrine [1, 27, 5, 0, 5, 1] MATCH True
+VECTOR mien_p3 [0, 3, 0, 0, 0, 0] MATCH True
+VECTOR \bLIVE\b [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR changed_paths [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR tested_sha [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR ADR-0067|uy_quyen_quyet_dinh [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR Drive MCP|Sheets MCP [0, 0, 0, 0, 0, 0] MATCH True
+VECTOR integration [0, 1, 0, 0, 0, 0] MATCH True
+VECTOR label|assignee|board [1, 2, 8, 6, 1, 0] MATCH True
+VECTOR diff --check [0, 0, 0, 0, 1, 0] MATCH True
+VECTOR push_them|so_lan_push|M5 [0, 5, 3, 0, 0, 0] MATCH True
+VECTOR writer_slot|hai writer|max_writers|executor_writers [0, 0, 1, 0, 0, 0] MATCH True
+VECTOR numstat [0, 0, 0, 0, 0, 0] MATCH True
+VECTORS_TOTAL 29
+N8_ANCHOR packet_loop.py     proto_words = _doc_nguon_protocol(root) 1
+N8_ANCHOR packet_loop.py 9 bảng ADR §20 lệch với docs/adr/ 1
+N8_ANCHOR packet_loop_test.py protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding= 1
+ADR_TEMPLATE_EQUALS True
+AUDIT_LINES 62 
+CMD ['git', 'checkout', '-q', '--detach', 'e215940d15286add6fe30947cfccda09a09d82c0'] RC 0 OUTPUT  
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'doctrine-scan', '--root', '.'] RC 0 OUTPUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'adr-song', '--root', '.'] RC 0 OUTPUT adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'doctrine-scan', '--root', '.'] RC 0 OUTPUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+CMD ['/usr/bin/python3', '-B', '.claude/dev/packet_loop.py', 'adr-song', '--root', '.'] RC 0 OUTPUT adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 

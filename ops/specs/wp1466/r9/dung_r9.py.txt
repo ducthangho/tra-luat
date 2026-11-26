@@ -1,0 +1,18 @@
+import re, sys, hashlib
+src, dst = sys.argv[1], sys.argv[2]
+t = open(src, encoding="utf-8").read()
+def rep(old, new, n=1):
+    global t
+    c = t.count(old); assert c == n, (old[:80], c); t = t.replace(old, new)
+rep("# wp1466 r8 —", "# wp1466 r9 —")
+rep("\nrevision: 8\n", "\nrevision: 9\n")
+# p2-moi: bo backtick quanh con tro ca
+a = t.index("~~~ p2-moi\n"); b = t.index("\n~~~\n", a)
+blk = t[a:b]
+blk2, n = re.subn(r"· ca: `([^`]+::[^`]+)`", r"· ca: \1", blk)
+assert n == 18, n
+old_intro = "· `chưa đo`. Mọi nợ được trỏ"
+assert blk2.count(old_intro) == 1
+blk2 = blk2.replace(old_intro, "· `chưa đo`. Con trỏ ca `<tệp ca>::<tên ca>` viết KHÔNG có backtick: `doc-claims-check` (lớp L12, bước bắt buộc của CI) đọc mọi chuỗi dạng `r<số>_…` hay `wp<số>_…` trong backtick là tên ca selftest của `scripts/tl.py`, nên tên ca của tệp khác bị báo là không tồn tại. Mọi nợ được trỏ")
+t = t[:a] + blk2 + t[b:]
+open(dst, "w", encoding="utf-8").write(t)

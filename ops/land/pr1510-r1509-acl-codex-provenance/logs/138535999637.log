@@ -1,0 +1,304 @@
+﻿2026-11-24T14:57:28.0609651Z Current runner version: '2.338.2'
+2026-11-24T14:57:28.0633801Z ##[group]Runner Image Provisioner
+2026-11-24T14:57:28.0634680Z Hosted Compute Agent
+2026-11-24T14:57:28.0635267Z Version: 20261111.635
+2026-11-24T14:57:28.0635901Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-24T14:57:28.0636593Z Build Date: 2026-11-11T01:49:01Z
+2026-11-24T14:57:28.0637254Z Worker ID: {ef2eff5c-dca0-4c23-97e3-14e6cf3a46f5}
+2026-11-24T14:57:28.0638052Z Region: us-east-1
+2026-11-24T14:57:28.0638777Z Cloud: AWS
+2026-11-24T14:57:28.0639364Z ##[endgroup]
+2026-11-24T14:57:28.0640839Z ##[group]Operating System
+2026-11-24T14:57:28.0641515Z Ubuntu
+2026-11-24T14:57:28.0642027Z 26.04.1
+2026-11-24T14:57:28.0642572Z LTS
+2026-11-24T14:57:28.0643053Z ##[endgroup]
+2026-11-24T14:57:28.0643597Z ##[group]Runner Image
+2026-11-24T14:57:28.0644175Z Image: ubuntu-26.04
+2026-11-24T14:57:28.0644869Z Version: 20261116.88.1
+2026-11-24T14:57:28.0646188Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.88/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-24T14:57:28.0647713Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.88
+2026-11-24T14:57:28.0648882Z ##[endgroup]
+2026-11-24T14:57:28.0652024Z ##[group]GITHUB_TOKEN Permissions
+2026-11-24T14:57:28.0654248Z Actions: write
+2026-11-24T14:57:28.0654971Z ArtifactMetadata: write
+2026-11-24T14:57:28.0655555Z Attestations: write
+2026-11-24T14:57:28.0656130Z Checks: write
+2026-11-24T14:57:28.0656670Z CodeQuality: write
+2026-11-24T14:57:28.0657235Z Contents: write
+2026-11-24T14:57:28.0657824Z CopilotRequests: write
+2026-11-24T14:57:28.0658408Z Deployments: write
+2026-11-24T14:57:28.0659230Z Discussions: write
+2026-11-24T14:57:28.0659805Z Drives: write
+2026-11-24T14:57:28.0660328Z Issues: write
+2026-11-24T14:57:28.0661028Z Metadata: read
+2026-11-24T14:57:28.0661556Z Models: read
+2026-11-24T14:57:28.0662081Z Packages: write
+2026-11-24T14:57:28.0662621Z Pages: write
+2026-11-24T14:57:28.0663229Z PullRequests: write
+2026-11-24T14:57:28.0663793Z RepositoryProjects: write
+2026-11-24T14:57:28.0664400Z SecurityEvents: write
+2026-11-24T14:57:28.0664950Z Statuses: write
+2026-11-24T14:57:28.0665580Z VulnerabilityAlerts: read
+2026-11-24T14:57:28.0666148Z ##[endgroup]
+2026-11-24T14:57:28.0668952Z Secret source: Actions
+2026-11-24T14:57:28.0669829Z Cache mode: write
+2026-11-24T14:57:28.0670688Z Prepare workflow directory
+2026-11-24T14:57:28.1030994Z Prepare all required actions
+2026-11-24T14:57:28.1066912Z Getting action download info
+2026-11-24T14:57:28.2855005Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-24T14:57:29.3758098Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-24T14:57:29.5439491Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-11-24T14:57:29.7279598Z Complete job name: gate-packet-loop (ubuntu-latest)
+2026-11-24T14:57:29.7782466Z ##[group]Run git config --global core.autocrlf false
+2026-11-24T14:57:29.7783146Z [36;1mgit config --global core.autocrlf false[0m
+2026-11-24T14:57:29.7783596Z [36;1mgit config --global core.eol lf[0m
+2026-11-24T14:57:29.7783997Z [36;1mgit config --global core.abbrev 7[0m
+2026-11-24T14:57:29.7805403Z shell: /usr/bin/bash -e {0}
+2026-11-24T14:57:29.7806291Z env:
+2026-11-24T14:57:29.7806632Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:57:29.7806989Z   PYTHONUTF8: 1
+2026-11-24T14:57:29.7807356Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:57:29.7807701Z ##[endgroup]
+2026-11-24T14:57:29.8345609Z ##[group]Run actions/checkout@v4
+2026-11-24T14:57:29.8346138Z with:
+2026-11-24T14:57:29.8346499Z   repository: ducthangho/tra-luat
+2026-11-24T14:57:29.8348918Z   token: ***
+2026-11-24T14:57:29.8349253Z   ssh-strict: true
+2026-11-24T14:57:29.8349572Z   ssh-user: git
+2026-11-24T14:57:29.8349928Z   persist-credentials: true
+2026-11-24T14:57:29.8350285Z   clean: true
+2026-11-24T14:57:29.8350649Z   sparse-checkout-cone-mode: true
+2026-11-24T14:57:29.8351011Z   fetch-depth: 1
+2026-11-24T14:57:29.8351490Z   fetch-tags: false
+2026-11-24T14:57:29.8351847Z   show-progress: true
+2026-11-24T14:57:29.8352160Z   lfs: false
+2026-11-24T14:57:29.8352451Z   submodules: false
+2026-11-24T14:57:29.8352773Z   set-safe-directory: true
+2026-11-24T14:57:29.8353132Z   allow-unsafe-pr-checkout: false
+2026-11-24T14:57:29.8353521Z env:
+2026-11-24T14:57:29.8353815Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:57:29.8354164Z   PYTHONUTF8: 1
+2026-11-24T14:57:29.8354485Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:57:29.8354849Z ##[endgroup]
+2026-11-24T14:57:32.6050634Z Syncing repository: ducthangho/tra-luat
+2026-11-24T14:57:32.6052742Z ##[group]Getting Git version info
+2026-11-24T14:57:32.6053323Z Working directory is '/home/runner/work/tra-luat/tra-luat'
+2026-11-24T14:57:32.6054220Z [command]/usr/bin/git version
+2026-11-24T14:57:32.6054662Z git version 2.56.1
+2026-11-24T14:57:32.6064575Z ##[endgroup]
+2026-11-24T14:57:32.6072311Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/184510ec-ff81-40cc-9c3c-d04e2f7df638/.gitconfig'
+2026-11-24T14:57:32.6077578Z Temporarily overriding HOME='/home/runner/work/_temp/184510ec-ff81-40cc-9c3c-d04e2f7df638' before making global git config changes
+2026-11-24T14:57:32.6078393Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T14:57:32.6081057Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-11-24T14:57:32.6105212Z Deleting the contents of '/home/runner/work/tra-luat/tra-luat'
+2026-11-24T14:57:32.6107480Z ##[group]Initializing the repository
+2026-11-24T14:57:32.6110762Z [command]/usr/bin/git init /home/runner/work/tra-luat/tra-luat
+2026-11-24T14:57:32.6885971Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-24T14:57:32.6886833Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-24T14:57:32.6887538Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-24T14:57:32.6887958Z hint: call:
+2026-11-24T14:57:32.6888203Z hint:
+2026-11-24T14:57:32.6888730Z hint: 	git config --global init.defaultBranch <name>
+2026-11-24T14:57:32.6889071Z hint:
+2026-11-24T14:57:32.6889454Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-24T14:57:32.6889920Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-24T14:57:32.6890304Z hint:
+2026-11-24T14:57:32.6890592Z hint: 	git branch -m <name>
+2026-11-24T14:57:32.6890855Z hint:
+2026-11-24T14:57:32.6891312Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-24T14:57:32.6901119Z Initialized empty Git repository in /home/runner/work/tra-luat/tra-luat/.git/
+2026-11-24T14:57:32.6907853Z [command]/usr/bin/git remote add origin https://github.com/ducthangho/tra-luat
+2026-11-24T14:57:32.6953883Z ##[endgroup]
+2026-11-24T14:57:32.6954441Z ##[group]Disabling automatic garbage collection
+2026-11-24T14:57:32.6956152Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-24T14:57:32.6975986Z ##[endgroup]
+2026-11-24T14:57:32.6976417Z ##[group]Setting up auth
+2026-11-24T14:57:32.6980545Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T14:57:32.7001212Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T14:57:32.9534375Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T14:57:32.9556094Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T14:57:32.9729501Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T14:57:32.9752439Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T14:57:32.9925298Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-24T14:57:32.9949899Z ##[endgroup]
+2026-11-24T14:57:32.9950684Z ##[group]Fetching the repository
+2026-11-24T14:57:32.9959941Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a03a28ef076503c7fe93c208a4998c32590a977f:refs/remotes/origin/master
+2026-11-24T14:57:36.2181507Z From https://github.com/ducthangho/tra-luat
+2026-11-24T14:57:36.2181960Z  * [new ref]         a03a28ef076503c7fe93c208a4998c32590a977f -> origin/master
+2026-11-24T14:57:36.2193072Z ##[endgroup]
+2026-11-24T14:57:36.2194063Z ##[group]Determining the checkout info
+2026-11-24T14:57:36.2194900Z ##[endgroup]
+2026-11-24T14:57:36.2195606Z [command]/usr/bin/git sparse-checkout disable
+2026-11-24T14:57:36.2235302Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-24T14:57:36.2259506Z ##[group]Checking out the ref
+2026-11-24T14:57:36.2260987Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-11-24T14:57:37.1633601Z Reset branch 'master'
+2026-11-24T14:57:37.1634761Z branch 'master' set up to track 'origin/master'.
+2026-11-24T14:57:37.1688215Z ##[endgroup]
+2026-11-24T14:57:37.1715095Z [command]/usr/bin/git log -1 --format=%H
+2026-11-24T14:57:37.1733315Z a03a28ef076503c7fe93c208a4998c32590a977f
+2026-11-24T14:57:37.1913350Z ##[group]Run actions/setup-python@v5
+2026-11-24T14:57:37.1913667Z with:
+2026-11-24T14:57:37.1913885Z   python-version: 3.12
+2026-11-24T14:57:37.1914119Z   check-latest: false
+2026-11-24T14:57:37.1915849Z   token: ***
+2026-11-24T14:57:37.1916060Z   update-environment: true
+2026-11-24T14:57:37.1916348Z   allow-prereleases: false
+2026-11-24T14:57:37.1916584Z   freethreaded: false
+2026-11-24T14:57:37.1916807Z env:
+2026-11-24T14:57:37.1917213Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:57:37.1917453Z   PYTHONUTF8: 1
+2026-11-24T14:57:37.1917733Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:57:37.1917978Z ##[endgroup]
+2026-11-24T14:57:37.2927202Z ##[group]Installed versions
+2026-11-24T14:57:37.6141275Z (node:2381) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T14:57:37.6141882Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T14:57:37.6142402Z Successfully set up CPython (3.12.16)
+2026-11-24T14:57:37.6143123Z ##[endgroup]
+2026-11-24T14:57:37.6287219Z ##[group]Run actions/download-artifact@v4
+2026-11-24T14:57:37.6287528Z with:
+2026-11-24T14:57:37.6287805Z   pattern: gate-packet-loop-manh-ubuntu-latest-*
+2026-11-24T14:57:37.6288096Z   path: manh
+2026-11-24T14:57:37.6288311Z   merge-multiple: true
+2026-11-24T14:57:37.6288765Z   repository: ducthangho/tra-luat
+2026-11-24T14:57:37.6289063Z   run-id: 45418608352
+2026-11-24T14:57:37.6289312Z env:
+2026-11-24T14:57:37.6289525Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:57:37.6289761Z   PYTHONUTF8: 1
+2026-11-24T14:57:37.6290027Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:57:37.6290338Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:37.6290730Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:57:37.6291124Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:37.6291486Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:37.6291902Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:37.6292277Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:57:37.6292589Z ##[endgroup]
+2026-11-24T14:57:37.8536287Z (node:2390) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T14:57:37.8537227Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T14:57:37.9883271Z Found 24 artifact(s)
+2026-11-24T14:57:37.9883914Z Filtering artifacts by pattern 'gate-packet-loop-manh-ubuntu-latest-*'
+2026-11-24T14:57:37.9897884Z Preparing to download the following artifacts:
+2026-11-24T14:57:37.9898906Z - gate-packet-loop-manh-ubuntu-latest-0 (ID: 14933886733, Size: 1115, Expected Digest: sha256:bad3c59f8b0b3cea381d943d39e6cb665d2490078793089df40a3e70bf70b3cd)
+2026-11-24T14:57:37.9899842Z - gate-packet-loop-manh-ubuntu-latest-9 (ID: 14933676305, Size: 1538, Expected Digest: sha256:81b3fdd5e334daa40c7709d9d4aabba08709e08e8c24aa43860bbfe43a3fd68c)
+2026-11-24T14:57:37.9900693Z - gate-packet-loop-manh-ubuntu-latest-6 (ID: 14933616503, Size: 1480, Expected Digest: sha256:ddbac3beff655f89880f9431aca45318b820ea189ec0db42e611a51f7828f529)
+2026-11-24T14:57:37.9901512Z - gate-packet-loop-manh-ubuntu-latest-15 (ID: 14933532673, Size: 1573, Expected Digest: sha256:4f305220a4f6ec1c79a9822818c1823c4cc3c11770627bcd5034a1201a75659b)
+2026-11-24T14:57:37.9902382Z - gate-packet-loop-manh-ubuntu-latest-2 (ID: 14933417071, Size: 1590, Expected Digest: sha256:d082f304c5f58f54be145078e2226eb42c513ddad7171a789429dc4f2f017573)
+2026-11-24T14:57:37.9903206Z - gate-packet-loop-manh-ubuntu-latest-10 (ID: 14933172700, Size: 1476, Expected Digest: sha256:14c47b0db879a41b5d8af40aff077db8bcbef88784755668f5e767bf982085eb)
+2026-11-24T14:57:37.9904089Z - gate-packet-loop-manh-ubuntu-latest-11 (ID: 14933103662, Size: 1544, Expected Digest: sha256:83d8bbadb4a604f1b4a9de61d753f1507d23cd7b5870ddbb07233539fe38623b)
+2026-11-24T14:57:37.9905050Z - gate-packet-loop-manh-ubuntu-latest-7 (ID: 14933083162, Size: 1496, Expected Digest: sha256:a898fd9b98b08c80f40f69a2eb48d3bbaf66d295a20b22c98411b76d65da85ca)
+2026-11-24T14:57:37.9905866Z - gate-packet-loop-manh-ubuntu-latest-14 (ID: 14933082821, Size: 1570, Expected Digest: sha256:2d9b87a8966170efdf59629538bebcb14f6a1eead723270140cb81c3cdf0759c)
+2026-11-24T14:57:37.9906721Z - gate-packet-loop-manh-ubuntu-latest-1 (ID: 14932943160, Size: 573, Expected Digest: sha256:932b11c52055c9e9e24b51e286b2d3fb57f3c26627dca78cc24ed4fa0590a151)
+2026-11-24T14:57:37.9907597Z - gate-packet-loop-manh-ubuntu-latest-4 (ID: 14932823348, Size: 1546, Expected Digest: sha256:ad0558965d75e76854c1ac66087a8f796f47d73ff8ac2f428435c663e1b2f96e)
+2026-11-24T14:57:37.9908825Z - gate-packet-loop-manh-ubuntu-latest-12 (ID: 14932803205, Size: 1490, Expected Digest: sha256:9bfda0cec0de9039bfd9cfd5f1caee5fb3844153a0a3c35ef85bfc0a5a47a580)
+2026-11-24T14:57:37.9910073Z - gate-packet-loop-manh-ubuntu-latest-8 (ID: 14932802984, Size: 1485, Expected Digest: sha256:7ed9e09aa9e231bf2e5d61376b96bf1df305b875604bf70b572fe781ea0aefd7)
+2026-11-24T14:57:37.9911159Z - gate-packet-loop-manh-ubuntu-latest-5 (ID: 14932713303, Size: 1531, Expected Digest: sha256:da7c627d744cbc12230cb2493c3a5037894612f685d1f0027a942930aa03d87b)
+2026-11-24T14:57:37.9912000Z - gate-packet-loop-manh-ubuntu-latest-3 (ID: 14931989174, Size: 1537, Expected Digest: sha256:4db91c06662f02ef83687648d400de9014a2ea6119597134fa56cd3e0f90ba3a)
+2026-11-24T14:57:37.9912843Z - gate-packet-loop-manh-ubuntu-latest-13 (ID: 14931964222, Size: 1494, Expected Digest: sha256:283fbf7c1e8d309b79fb58efa6f87d756002d272ca90a33b862ce8c25f7239ab)
+2026-11-24T14:57:38.2420416Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-1f60e40e-bd4b-51af-ad48-0812ae42f4f9/artifacts/8c87eb9b051084a5b3f5f54ada76321f744a9fd686299268304c8f72c83adb40.zip
+2026-11-24T14:57:38.2421984Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.2874534Z (node:2390) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-11-24T14:57:38.2897280Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-490413b6-6740-50ae-9093-10236c14f73f/artifacts/187c204ad3d695d19f70fbf042dcb95f2efae4556ff6503285db1982197fa44e.zip
+2026-11-24T14:57:38.2899120Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.2913978Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-adfea864-7e27-5cf3-ba78-c2d6ab00d0a0/artifacts/1318c9ddf747b76777445d75f81114c38efc838dba060e1945a72d28cf72fe78.zip
+2026-11-24T14:57:38.2914956Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.2922822Z SHA256 digest of downloaded artifact is bad3c59f8b0b3cea381d943d39e6cb665d2490078793089df40a3e70bf70b3cd
+2026-11-24T14:57:38.2923979Z Artifact download completed successfully.
+2026-11-24T14:57:38.2955298Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-b5c94b8d-912b-5249-869e-9983e3f4ce08/artifacts/a068241e3a301194ed398945a23c7a6cfb8afae24c4e5712d0a9b078cca39fe7.zip
+2026-11-24T14:57:38.2956425Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.2964870Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-e90c3083-d8ab-5ba8-b26e-39d0b2d738df/artifacts/e9d6d5cdfe65340cc4f0e1a660ba0c3a0790524bb7cf5f92abf3c19cf5a0cd43.zip
+2026-11-24T14:57:38.2966495Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.2984359Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-cf9eb76d-262c-5d59-b601-ed4d0fc65e4b/artifacts/f2e9b9bc86977461960e4c5ca684e8ce8261a7003507a8cdf7559ae22e702529.zip
+2026-11-24T14:57:38.2985828Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3033904Z SHA256 digest of downloaded artifact is 7ed9e09aa9e231bf2e5d61376b96bf1df305b875604bf70b572fe781ea0aefd7
+2026-11-24T14:57:38.3034484Z Artifact download completed successfully.
+2026-11-24T14:57:38.3090139Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-1b025f14-2858-5f0c-aa52-daa45a184ccf/artifacts/dc51cf642ed414aaab11807c2c11c502f93c9aaa37ad9abd9a117e81c7d0573f.zip
+2026-11-24T14:57:38.3091707Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3095579Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-04be1f06-10f1-5b93-80f2-b34044bab8d8/artifacts/ea2a77e6f93e09a5422b1336b3a3cc3df9690ecfb18367becf91f171399ec19a.zip
+2026-11-24T14:57:38.3096863Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3103955Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-3db11f84-2cd3-5c47-b48a-74b652def96e/artifacts/101e057c7a22bec0e82198a29f5ed05fba6f1a2354562a63dfa40b57f9e147b2.zip
+2026-11-24T14:57:38.3105518Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3124974Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-541d7ed7-6a6f-5e4c-992c-6ca34e2f0eaf/artifacts/30dc9413751b902a06281a6a02914875ebc00daf74629a625f80c1bcf9facf18.zip
+2026-11-24T14:57:38.3126204Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3143315Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-335673ff-5533-55f7-be7c-266033c6b03e/artifacts/f4160f6dd20cdabd58a0eaa235161b431c7dd72231d36ed737df09865efbe721.zip
+2026-11-24T14:57:38.3144452Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3234117Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-17b040d4-c02a-5dd9-b139-7ba5a7bf6a5f/artifacts/a02e49d7ae7cf9523c52655a7e56a72835b74ea4286a1051ee9c4cce1b67642f.zip
+2026-11-24T14:57:38.3235193Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3271453Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-03b8a22b-b419-5646-964f-a778c8e0e8e0/artifacts/bb729099774a6d0d6a7d9873e6ebaf50f810bbbdcc606d1619cae965453c1b25.zip
+2026-11-24T14:57:38.3272837Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3556141Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-18aadba6-0269-5c79-912d-44fee8f56120/artifacts/d0c9f0b7726e07362adeda34176b4ecd2dd92e75cba823581cbc52d589e66160.zip
+2026-11-24T14:57:38.3557591Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3604082Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-8d015a29-5c10-56c9-9242-1954f755cf40/artifacts/9980e124cb2de7276334eecbd26ad20b5f7bd1a1ba19ab84cb275d4f07b367f2.zip
+2026-11-24T14:57:38.3605289Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3670863Z SHA256 digest of downloaded artifact is d082f304c5f58f54be145078e2226eb42c513ddad7171a789429dc4f2f017573
+2026-11-24T14:57:38.3671802Z Artifact download completed successfully.
+2026-11-24T14:57:38.3741765Z SHA256 digest of downloaded artifact is 4f305220a4f6ec1c79a9822818c1823c4cc3c11770627bcd5034a1201a75659b
+2026-11-24T14:57:38.3742721Z Artifact download completed successfully.
+2026-11-24T14:57:38.3743959Z SHA256 digest of downloaded artifact is ad0558965d75e76854c1ac66087a8f796f47d73ff8ac2f428435c663e1b2f96e
+2026-11-24T14:57:38.3744640Z Artifact download completed successfully.
+2026-11-24T14:57:38.3745378Z SHA256 digest of downloaded artifact is 283fbf7c1e8d309b79fb58efa6f87d756002d272ca90a33b862ce8c25f7239ab
+2026-11-24T14:57:38.3746110Z Artifact download completed successfully.
+2026-11-24T14:57:38.3746854Z SHA256 digest of downloaded artifact is 83d8bbadb4a604f1b4a9de61d753f1507d23cd7b5870ddbb07233539fe38623b
+2026-11-24T14:57:38.3747497Z Artifact download completed successfully.
+2026-11-24T14:57:38.3748030Z SHA256 digest of downloaded artifact is 14c47b0db879a41b5d8af40aff077db8bcbef88784755668f5e767bf982085eb
+2026-11-24T14:57:38.3748785Z Artifact download completed successfully.
+2026-11-24T14:57:38.3749361Z SHA256 digest of downloaded artifact is ddbac3beff655f89880f9431aca45318b820ea189ec0db42e611a51f7828f529
+2026-11-24T14:57:38.3749909Z Artifact download completed successfully.
+2026-11-24T14:57:38.3750480Z SHA256 digest of downloaded artifact is 9bfda0cec0de9039bfd9cfd5f1caee5fb3844153a0a3c35ef85bfc0a5a47a580
+2026-11-24T14:57:38.3751043Z Artifact download completed successfully.
+2026-11-24T14:57:38.3751576Z SHA256 digest of downloaded artifact is 2d9b87a8966170efdf59629538bebcb14f6a1eead723270140cb81c3cdf0759c
+2026-11-24T14:57:38.3752145Z Artifact download completed successfully.
+2026-11-24T14:57:38.3752752Z SHA256 digest of downloaded artifact is 81b3fdd5e334daa40c7709d9d4aabba08709e08e8c24aa43860bbfe43a3fd68c
+2026-11-24T14:57:38.3753283Z Artifact download completed successfully.
+2026-11-24T14:57:38.3753816Z SHA256 digest of downloaded artifact is da7c627d744cbc12230cb2493c3a5037894612f685d1f0027a942930aa03d87b
+2026-11-24T14:57:38.3754389Z Artifact download completed successfully.
+2026-11-24T14:57:38.3909865Z Redirecting to blob download url: https://productionresultssa8.blob.core.windows.net/actions-results/9d620f04-bd54-8476-908e-60ed96c51313/workflow-job-run-ce04534c-86c4-589c-8415-2109b74502be/artifacts/e05ac9e84f69a0b192e2641f5ac056d86e9977696613c750d8d6149dc86fc341.zip
+2026-11-24T14:57:38.3911322Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-11-24T14:57:38.3960444Z SHA256 digest of downloaded artifact is a898fd9b98b08c80f40f69a2eb48d3bbaf66d295a20b22c98411b76d65da85ca
+2026-11-24T14:57:38.3961297Z Artifact download completed successfully.
+2026-11-24T14:57:38.4039136Z SHA256 digest of downloaded artifact is 4db91c06662f02ef83687648d400de9014a2ea6119597134fa56cd3e0f90ba3a
+2026-11-24T14:57:38.4039812Z Artifact download completed successfully.
+2026-11-24T14:57:38.4040624Z SHA256 digest of downloaded artifact is 932b11c52055c9e9e24b51e286b2d3fb57f3c26627dca78cc24ed4fa0590a151
+2026-11-24T14:57:38.4041247Z Artifact download completed successfully.
+2026-11-24T14:57:38.4041655Z Total of 16 artifact(s) downloaded
+2026-11-24T14:57:38.4045780Z Download artifact has finished successfully
+2026-11-24T14:57:38.4155155Z ##[group]Run python .claude/dev/packet_loop_test_manh.py --gom manh --n 16
+2026-11-24T14:57:38.4155756Z [36;1mpython .claude/dev/packet_loop_test_manh.py --gom manh --n 16[0m
+2026-11-24T14:57:38.4519566Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T14:57:38.4520127Z env:
+2026-11-24T14:57:38.4520527Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:57:38.4520893Z   PYTHONUTF8: 1
+2026-11-24T14:57:38.4521252Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:57:38.4521789Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:38.4522299Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:57:38.4522918Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:38.4523453Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:38.4523919Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:57:38.4524491Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:57:38.4524993Z   PACKET_LOOP: chay
+2026-11-24T14:57:38.4525401Z   KQ_MANH: success
+2026-11-24T14:57:38.4525923Z ##[endgroup]
+2026-11-24T14:57:39.4822695Z /home/runner/work/tra-luat/tra-luat/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+2026-11-24T14:57:39.4823891Z   '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+2026-11-24T14:57:43.7014673Z GOM: mọi mảnh khớp phân hoạch
+2026-11-24T14:57:43.7016123Z GOM: ĐẠT · 16 mảnh · 1784 ca bắt buộc (sổ 1786 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+2026-11-24T14:57:43.7340884Z Post job cleanup.
+2026-11-24T14:57:43.8266008Z (node:2451) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T14:57:43.8267047Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T14:57:43.8384185Z Post job cleanup.
+2026-11-24T14:57:43.8988786Z [command]/usr/bin/git version
+2026-11-24T14:57:43.9014375Z git version 2.56.1
+2026-11-24T14:57:43.9033090Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/3390eb78-51c1-4aea-b756-7fe13d0015fa/.gitconfig'
+2026-11-24T14:57:43.9039855Z Temporarily overriding HOME='/home/runner/work/_temp/3390eb78-51c1-4aea-b756-7fe13d0015fa' before making global git config changes
+2026-11-24T14:57:43.9041088Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T14:57:43.9042960Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-11-24T14:57:43.9068877Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T14:57:43.9090845Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T14:57:43.9299684Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T14:57:43.9312720Z http.https://github.com/.extraheader
+2026-11-24T14:57:43.9319088Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-24T14:57:43.9339946Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T14:57:43.9532533Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T14:57:43.9552415Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T14:57:43.9837324Z Cleaning up orphan processes
+2026-11-24T14:57:44.0104158Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

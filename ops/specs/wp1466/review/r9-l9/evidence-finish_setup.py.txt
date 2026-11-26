@@ -1,0 +1,9 @@
+from pathlib import Path
+import subprocess
+O=Path('out').resolve(); p=O/'baseline'
+for args in [('checkout','--detach','1fac6ced8e5a8c76fdb2699edac779a4251f6149'),('config','core.abbrev','7'),('config','core.autocrlf','false')]: subprocess.run(['git','-C',str(p),*args],check=True)
+a=subprocess.check_output(['git','-C','cay-kho','show','434846a:ops/specs/wp1466.md'])
+import re
+old=re.search(rb'^~~~ p2-moi\n(.*?)^~~~',a,re.M|re.S)[1]
+p=O/'candidate/docs/PROTOCOL_DA_PHIEN.md'; proto=p.read_bytes(); assert proto.count(old)==1; p.write_bytes(proto.replace(old,(O/'p2-moi.txt').read_bytes()))
+c=O/'candidate/.claude/dev/packet_loop.py'; code=c.read_bytes(); oldhash=b'607431f20721e3700adb72ba501b5220cab4e2ff96864ff8bbe9094bb4740531'; newhash=(O/'khoa.txt').read_bytes().splitlines()[0].split(b' | ')[3]; assert code.count(oldhash)==1;c.write_bytes(code.replace(oldhash,newhash)); print('BUILD DONE; only protocol and K01 modified over H')

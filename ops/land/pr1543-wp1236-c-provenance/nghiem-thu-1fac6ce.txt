@@ -1,0 +1,34 @@
+# nghiem thu doc lap tren merge 1fac6ced8e5a8c76fdb2699edac779a4251f6149 (clone sach tai /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/hk-c, core.abbrev 7, 2026-11-26T14:42:13Z)
+HEAD 1fac6ced8e5a8c76fdb2699edac779a4251f6149 tree 356f7428c9588a5bd02f7b4fa32b9633170d639e cha 1a7c5244e96734e5aa0102ab878ba1f2c7070a53 45944c7c3f4c75beaa87f36138b2bba9fb9198a3
+## numstat 1fac6ced8e5a8c76fdb2699edac779a4251f6149^1..1fac6ced8e5a8c76fdb2699edac779a4251f6149
+96	1	.claude/dev/packet_loop.py
+342	12	.claude/dev/packet_loop_test.py
+blob .claude/dev/packet_loop.py merge=80e6f3e8d4520bec325df89e48acb8f94ceb9fdc head45944c7=80e6f3e8d4520bec325df89e48acb8f94ceb9fdc
+blob .claude/dev/packet_loop_test.py merge=10246de2b22cbfd72a48f7c0ded17dbd7257f102 head45944c7=10246de2b22cbfd72a48f7c0ded17dbd7257f102
+git diff --check rc=0
+## ops/land_evidence_nguon.py --root .
+land_evidence_nguon: 155 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 180
+TỔNG: ĐẠT
+rc=0
+## cong_d2b_* (chay_suite CANONICAL, chi_chay = 17 ca cong_d2b_)
+so ca 17
+Counter({'NoneType': 17})
+cong_d2b_c1_passed_dat None
+cong_d2b_c2_thieu_nguon None
+cong_d2b_c3_attempt_kieu None
+cong_d2b_c3_neo None
+cong_d2b_c4_kiem_tep None
+cong_d2b_c4_symlink None
+cong_d2b_c5_duong_dan None
+cong_d2b_c5_mien_ky_tu None
+cong_d2b_c5_mode None
+cong_d2b_c6_mien None
+cong_d2b_c7_module_vang None
+cong_d2b_c7_module_khong_nap None
+cong_d2b_c7_module_nem None
+cong_d2b_c7_git_loi None
+cong_d2b_c9_oid None
+cong_d2b_c9_oid_khong_phai_commit None
+cong_d2b_tu_kiem_phan_hang None
+## release-verify --strict
+ok True expected_file_count 187 checked_file_count 187 failed [] package_hash_match True (dong in lan dau doc sai ten khoa expected/checked => None; do lai cung luc, cung clone)

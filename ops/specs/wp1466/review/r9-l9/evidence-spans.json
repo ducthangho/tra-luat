@@ -1,0 +1,1167 @@
+[
+  {
+    "block": "p1-moi",
+    "line": 1,
+    "text": "class_slug"
+  },
+  {
+    "block": "p1-moi",
+    "line": 2,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p1-moi",
+    "line": 4,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "nguồn"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "cổng"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "cổng: <tệp> <chốt> · ca: <tệp ca>::<tên ca> · còn nợ: <TÊN-NỢ>"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": " · ca: …"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": " · còn nợ: …"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "còn nợ"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "kỷ luật, 0 cổng · nợ: <TÊN-NỢ>"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "chưa đo"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "<tệp ca>::<tên ca>"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "doc-claims-check"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "r<số>_…"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "wp<số>_…"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "scripts/tl.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "python .claude/dev/packet_loop.py doctrine-scan --root ."
+  },
+  {
+    "block": "p2-moi",
+    "line": 3,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p2-moi",
+    "line": 7,
+    "text": "INV-01"
+  },
+  {
+    "block": "p2-moi",
+    "line": 7,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 7,
+    "text": "record-lease --lease-ref"
+  },
+  {
+    "block": "p2-moi",
+    "line": 7,
+    "text": "CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": "INV-02"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": "record-lease --lease-ref"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": "INV-02-NHANH-WORKTREE-RIENG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": "INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE"
+  },
+  {
+    "block": "p2-moi",
+    "line": 8,
+    "text": "CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC"
+  },
+  {
+    "block": "p2-moi",
+    "line": 9,
+    "text": "INV-03"
+  },
+  {
+    "block": "p2-moi",
+    "line": 10,
+    "text": "INV-04"
+  },
+  {
+    "block": "p2-moi",
+    "line": 10,
+    "text": "land apply"
+  },
+  {
+    "block": "p2-moi",
+    "line": 10,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 10,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "p2-moi",
+    "line": 10,
+    "text": "INV-04-UY-QUYEN-LAND-VA-DEPLOY"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": "INV-05"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": "*.cmd"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": "*.bat"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": ".github/workflows/ci.yml"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": "eol-policy survey"
+  },
+  {
+    "block": "p2-moi",
+    "line": 11,
+    "text": "INV-DO-PHU-CA-CHUA-REVIEW-RIENG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 12,
+    "text": "INV-06"
+  },
+  {
+    "block": "p2-moi",
+    "line": 12,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 12,
+    "text": "init"
+  },
+  {
+    "block": "p2-moi",
+    "line": 12,
+    "text": "INV-06-PHIEN-VA-VAI"
+  },
+  {
+    "block": "p2-moi",
+    "line": 13,
+    "text": "INV-07"
+  },
+  {
+    "block": "p2-moi",
+    "line": 13,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 13,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "p2-moi",
+    "line": 13,
+    "text": "INV-DO-PHU-CA-CHUA-REVIEW-RIENG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 14,
+    "text": "INV-08"
+  },
+  {
+    "block": "p2-moi",
+    "line": 14,
+    "text": "spec_hash"
+  },
+  {
+    "block": "p2-moi",
+    "line": 14,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 14,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "p2-moi",
+    "line": 14,
+    "text": "INV-DO-PHU-CA-CHUA-REVIEW-RIENG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 15,
+    "text": "INV-09"
+  },
+  {
+    "block": "p2-moi",
+    "line": 15,
+    "text": "INV-09-DIFF-NGOAI-WRITE-SET"
+  },
+  {
+    "block": "p2-moi",
+    "line": 16,
+    "text": "INV-10"
+  },
+  {
+    "block": "p2-moi",
+    "line": 16,
+    "text": "tested_sha"
+  },
+  {
+    "block": "p2-moi",
+    "line": 16,
+    "text": "INV-10-HANDOFF-KHONG-CO-CONG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "INV-11"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "sensitive"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "cross_approved"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "human_audited"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "ops/bien_nhan_v2.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 17,
+    "text": "INV-11-K4-KHONG-DOC-HO-MODEL"
+  },
+  {
+    "block": "p2-moi",
+    "line": 18,
+    "text": "INV-12"
+  },
+  {
+    "block": "p2-moi",
+    "line": 18,
+    "text": "class_slug"
+  },
+  {
+    "block": "p2-moi",
+    "line": 18,
+    "text": "INV-12-CONG-VERDICT-THEO-LOP"
+  },
+  {
+    "block": "p2-moi",
+    "line": 19,
+    "text": "INV-13"
+  },
+  {
+    "block": "p2-moi",
+    "line": 19,
+    "text": "ops/lease_publish.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 19,
+    "text": "_kiem_lop_review"
+  },
+  {
+    "block": "p2-moi",
+    "line": 19,
+    "text": "INV-13-LEASE-SCHEMA-CU"
+  },
+  {
+    "block": "p2-moi",
+    "line": 20,
+    "text": "INV-14"
+  },
+  {
+    "block": "p2-moi",
+    "line": 20,
+    "text": ".claude/dev/launcher.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 20,
+    "text": "run --chup-workspace"
+  },
+  {
+    "block": "p2-moi",
+    "line": 20,
+    "text": "INV-14-CHUP-WORKSPACE-TUY-CHON"
+  },
+  {
+    "block": "p2-moi",
+    "line": 21,
+    "text": "INV-15"
+  },
+  {
+    "block": "p2-moi",
+    "line": 21,
+    "text": "landed"
+  },
+  {
+    "block": "p2-moi",
+    "line": 21,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 21,
+    "text": "kiem-dong-wp"
+  },
+  {
+    "block": "p2-moi",
+    "line": 21,
+    "text": "INV-15-D2-DOC-NHAN-KHONG-DOC-NGUON"
+  },
+  {
+    "block": "p2-moi",
+    "line": 22,
+    "text": "INV-16"
+  },
+  {
+    "block": "p2-moi",
+    "line": 22,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 22,
+    "text": "record-codex-call"
+  },
+  {
+    "block": "p2-moi",
+    "line": 22,
+    "text": "INV-16-BO-DEM-NGOAI-TRUC-LOI-GOI"
+  },
+  {
+    "block": "p2-moi",
+    "line": 23,
+    "text": "INV-17"
+  },
+  {
+    "block": "p2-moi",
+    "line": 23,
+    "text": "INV-17-DANH-SACH-DONG-0-CONG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 24,
+    "text": "INV-18"
+  },
+  {
+    "block": "p2-moi",
+    "line": 24,
+    "text": "CLAUDE.md"
+  },
+  {
+    "block": "p2-moi",
+    "line": 24,
+    "text": "INV-18-DUONG-GHI-REGISTRY-0-CONG"
+  },
+  {
+    "block": "p2-moi",
+    "line": 25,
+    "text": "INV-19"
+  },
+  {
+    "block": "p2-moi",
+    "line": 25,
+    "text": "ops/lease_publish.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 25,
+    "text": "granted_by"
+  },
+  {
+    "block": "p2-moi",
+    "line": 25,
+    "text": "INV-19-TEN-KHAI-KHONG-PHAI-DANH-TINH"
+  },
+  {
+    "block": "p2-moi",
+    "line": 25,
+    "text": "INV-22-AUTHORITY-CHUYEN-STATE"
+  },
+  {
+    "block": "p2-moi",
+    "line": 26,
+    "text": "INV-20"
+  },
+  {
+    "block": "p2-moi",
+    "line": 26,
+    "text": "CLAUDE.md"
+  },
+  {
+    "block": "p2-moi",
+    "line": 26,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 26,
+    "text": "doctrine-scan"
+  },
+  {
+    "block": "p2-moi",
+    "line": 26,
+    "text": "INV-20-CHI-DO-CHEP-NGUYEN-VAN"
+  },
+  {
+    "block": "p2-moi",
+    "line": 27,
+    "text": "INV-21"
+  },
+  {
+    "block": "p2-moi",
+    "line": 27,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "p2-moi",
+    "line": 27,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "p2-moi",
+    "line": 27,
+    "text": "INV-12-CONG-VERDICT-THEO-LOP"
+  },
+  {
+    "block": "p2-moi",
+    "line": 28,
+    "text": "INV-22"
+  },
+  {
+    "block": "p2-moi",
+    "line": 28,
+    "text": "INV-22-AUTHORITY-CHUYEN-STATE"
+  },
+  {
+    "block": "p2-moi",
+    "line": 29,
+    "text": "INV-23"
+  },
+  {
+    "block": "p2-moi",
+    "line": 29,
+    "text": "INV-23-NGUON-SU-THAT"
+  },
+  {
+    "block": "p2-moi",
+    "line": 30,
+    "text": "INV-24"
+  },
+  {
+    "block": "p2-moi",
+    "line": 30,
+    "text": "INV-24-CONG-TAI-CHO-TRUOC-PUSH"
+  },
+  {
+    "block": "p2-moi",
+    "line": 31,
+    "text": "INV-25"
+  },
+  {
+    "block": "p2-moi",
+    "line": 31,
+    "text": "INV-25-PUSH-THEM"
+  },
+  {
+    "block": "p2-moi",
+    "line": 32,
+    "text": "INV-26"
+  },
+  {
+    "block": "p2-moi",
+    "line": 32,
+    "text": "INV-26-NHANH-SO-SACH"
+  },
+  {
+    "block": "p2-moi",
+    "line": 33,
+    "text": "INV-27"
+  },
+  {
+    "block": "p2-moi",
+    "line": 33,
+    "text": "INV-27-HAI-WRITER"
+  },
+  {
+    "block": "p2-moi",
+    "line": 34,
+    "text": "INV-28"
+  },
+  {
+    "block": "p2-moi",
+    "line": 34,
+    "text": "nang_tran"
+  },
+  {
+    "block": "p2-moi",
+    "line": 34,
+    "text": "ADR-0044"
+  },
+  {
+    "block": "p2-moi",
+    "line": 34,
+    "text": "ADR-0053"
+  },
+  {
+    "block": "p2-moi",
+    "line": 34,
+    "text": "INV-28-TRAN-KICH-THUOC"
+  },
+  {
+    "block": "p3-moi",
+    "line": 1,
+    "text": "INV-12"
+  },
+  {
+    "block": "p3-moi",
+    "line": 1,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p4-moi",
+    "line": 2,
+    "text": "INV-12"
+  },
+  {
+    "block": "p5-moi",
+    "line": 1,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "p5-moi",
+    "line": 2,
+    "text": "xet_lai_cach_lam"
+  },
+  {
+    "block": "p5-moi",
+    "line": 2,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "p5-moi",
+    "line": 2,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p6-moi",
+    "line": 1,
+    "text": "ADR-0068"
+  },
+  {
+    "block": "p6-moi",
+    "line": 1,
+    "text": "packet_loop.py"
+  },
+  {
+    "block": "p6-moi",
+    "line": 1,
+    "text": "doctrine-scan"
+  },
+  {
+    "block": "p6-moi",
+    "line": 1,
+    "text": "INV-BANG-DOI-CHIEU-NGU-NGHIA"
+  },
+  {
+    "block": "p6-moi",
+    "line": 1,
+    "text": "INV-12-CONG-VERDICT-THEO-LOP"
+  },
+  {
+    "block": "adr",
+    "line": 3,
+    "text": "ducthangho"
+  },
+  {
+    "block": "adr",
+    "line": 3,
+    "text": "spec_hash"
+  },
+  {
+    "block": "adr",
+    "line": 3,
+    "text": "98790505d927224bc5e1e42e8f9460376a911a913e2e1d1b12bdf36c5eb20834"
+  },
+  {
+    "block": "adr",
+    "line": 3,
+    "text": "wp1466"
+  },
+  {
+    "block": "adr",
+    "line": 9,
+    "text": "origin/master"
+  },
+  {
+    "block": "adr",
+    "line": 9,
+    "text": "48d372e14f190dae83a75ccbca8ee9a0b25635c5"
+  },
+  {
+    "block": "adr",
+    "line": 11,
+    "text": "bang_lop"
+  },
+  {
+    "block": "adr",
+    "line": 11,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "adr",
+    "line": 12,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "adr",
+    "line": 12,
+    "text": "ADR-0062"
+  },
+  {
+    "block": "adr",
+    "line": 12,
+    "text": "KET_LUAN"
+  },
+  {
+    "block": "adr",
+    "line": 12,
+    "text": "class_slug"
+  },
+  {
+    "block": "adr",
+    "line": 13,
+    "text": "ops/reviews/**/*.receipt.yaml"
+  },
+  {
+    "block": "adr",
+    "line": 13,
+    "text": "bang_lop"
+  },
+  {
+    "block": "adr",
+    "line": 14,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "adr",
+    "line": 22,
+    "text": "INV-12"
+  },
+  {
+    "block": "adr",
+    "line": 25,
+    "text": "class_slug"
+  },
+  {
+    "block": "adr",
+    "line": 32,
+    "text": "uy_quyen_quyet_dinh.v1"
+  },
+  {
+    "block": "adr",
+    "line": 32,
+    "text": "loai: xet_lai_cach_lam"
+  },
+  {
+    "block": "adr",
+    "line": 32,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "adr",
+    "line": 33,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "adr",
+    "line": 36,
+    "text": "INV-NN"
+  },
+  {
+    "block": "adr",
+    "line": 39,
+    "text": "còn nợ: <TÊN-NỢ>"
+  },
+  {
+    "block": "adr",
+    "line": 39,
+    "text": "còn nợ"
+  },
+  {
+    "block": "adr",
+    "line": 42,
+    "text": "packet_loop.py doctrine-scan"
+  },
+  {
+    "block": "adr",
+    "line": 60,
+    "text": "packet_loop.py doctrine-scan"
+  },
+  {
+    "block": "adr",
+    "line": 64,
+    "text": "kiem_verdict_lop.py"
+  },
+  {
+    "block": "adr",
+    "line": 70,
+    "text": "git show <H>:<tệp> | grep -cE 'ADR-0068|INV_|_inv_'"
+  },
+  {
+    "block": "adr",
+    "line": 72,
+    "text": "ops/lease_publish.py"
+  },
+  {
+    "block": "adr",
+    "line": 73,
+    "text": ".claude/dev/packet_loop.py"
+  },
+  {
+    "block": "adr",
+    "line": 74,
+    "text": ".claude/dev/launcher.py"
+  },
+  {
+    "block": "adr",
+    "line": 75,
+    "text": ".claude/dev/gate_lifecycle.py"
+  },
+  {
+    "block": "adr",
+    "line": 76,
+    "text": ".github/workflows/ci.yml"
+  },
+  {
+    "block": "adr",
+    "line": 77,
+    "text": ".github/workflows/ops-publish-lease.yml"
+  },
+  {
+    "block": "adr",
+    "line": 79,
+    "text": "doctrine-scan"
+  },
+  {
+    "block": "adr",
+    "line": 79,
+    "text": ".claude/dev/packet_loop_test.py"
+  },
+  {
+    "block": "adr",
+    "line": 80,
+    "text": "gate-packet-loop"
+  },
+  {
+    "block": "adr",
+    "line": 84,
+    "text": "CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC"
+  },
+  {
+    "block": "adr",
+    "line": 84,
+    "text": "record-lease"
+  },
+  {
+    "block": "adr",
+    "line": 84,
+    "text": "init"
+  },
+  {
+    "block": "adr",
+    "line": 84,
+    "text": "record-codex-call"
+  },
+  {
+    "block": "adr",
+    "line": 85,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "adr",
+    "line": 85,
+    "text": "ADR-0062"
+  },
+  {
+    "block": "adr",
+    "line": 86,
+    "text": "INV-02-NHANH-WORKTREE-RIENG"
+  },
+  {
+    "block": "adr",
+    "line": 87,
+    "text": "INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE"
+  },
+  {
+    "block": "adr",
+    "line": 87,
+    "text": "ai-dang-giu"
+  },
+  {
+    "block": "adr",
+    "line": 89,
+    "text": "INV-04-UY-QUYEN-LAND-VA-DEPLOY"
+  },
+  {
+    "block": "adr",
+    "line": 91,
+    "text": "INV-06-PHIEN-VA-VAI"
+  },
+  {
+    "block": "adr",
+    "line": 91,
+    "text": "init"
+  },
+  {
+    "block": "adr",
+    "line": 93,
+    "text": "INV-09-DIFF-NGOAI-WRITE-SET"
+  },
+  {
+    "block": "adr",
+    "line": 94,
+    "text": "INV-10-HANDOFF-KHONG-CO-CONG"
+  },
+  {
+    "block": "adr",
+    "line": 94,
+    "text": "tested_sha"
+  },
+  {
+    "block": "adr",
+    "line": 95,
+    "text": "INV-11-K4-KHONG-DOC-HO-MODEL"
+  },
+  {
+    "block": "adr",
+    "line": 95,
+    "text": "ops/reviews/"
+  },
+  {
+    "block": "adr",
+    "line": 97,
+    "text": "INV-12-CONG-VERDICT-THEO-LOP"
+  },
+  {
+    "block": "adr",
+    "line": 99,
+    "text": "INV-13-LEASE-SCHEMA-CU"
+  },
+  {
+    "block": "adr",
+    "line": 99,
+    "text": "_kiem_lop_review"
+  },
+  {
+    "block": "adr",
+    "line": 99,
+    "text": "schema_version"
+  },
+  {
+    "block": "adr",
+    "line": 100,
+    "text": "INV-14-CHUP-WORKSPACE-TUY-CHON"
+  },
+  {
+    "block": "adr",
+    "line": 100,
+    "text": "--chup-workspace"
+  },
+  {
+    "block": "adr",
+    "line": 102,
+    "text": "INV-15-D2-DOC-NHAN-KHONG-DOC-NGUON"
+  },
+  {
+    "block": "adr",
+    "line": 102,
+    "text": "moc_10_2_2"
+  },
+  {
+    "block": "adr",
+    "line": 103,
+    "text": "INV-16-BO-DEM-NGOAI-TRUC-LOI-GOI"
+  },
+  {
+    "block": "adr",
+    "line": 103,
+    "text": "record-codex-call"
+  },
+  {
+    "block": "adr",
+    "line": 105,
+    "text": "INV-17-DANH-SACH-DONG-0-CONG"
+  },
+  {
+    "block": "adr",
+    "line": 105,
+    "text": "uy_quyen_quyet_dinh.v1"
+  },
+  {
+    "block": "adr",
+    "line": 105,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "adr",
+    "line": 106,
+    "text": "INV-18-DUONG-GHI-REGISTRY-0-CONG"
+  },
+  {
+    "block": "adr",
+    "line": 106,
+    "text": "CLAUDE.md"
+  },
+  {
+    "block": "adr",
+    "line": 107,
+    "text": "INV-19-TEN-KHAI-KHONG-PHAI-DANH-TINH"
+  },
+  {
+    "block": "adr",
+    "line": 107,
+    "text": "granted_by"
+  },
+  {
+    "block": "adr",
+    "line": 108,
+    "text": "ADR-0067"
+  },
+  {
+    "block": "adr",
+    "line": 109,
+    "text": "INV-20-CHI-DO-CHEP-NGUYEN-VAN"
+  },
+  {
+    "block": "adr",
+    "line": 109,
+    "text": "doctrine-scan"
+  },
+  {
+    "block": "adr",
+    "line": 110,
+    "text": "phep-do-doctrine-khong-du-rang"
+  },
+  {
+    "block": "adr",
+    "line": 111,
+    "text": "INV-22-AUTHORITY-CHUYEN-STATE"
+  },
+  {
+    "block": "adr",
+    "line": 111,
+    "text": "kiem-merge"
+  },
+  {
+    "block": "adr",
+    "line": 113,
+    "text": "INV-23-NGUON-SU-THAT"
+  },
+  {
+    "block": "adr",
+    "line": 114,
+    "text": "INV-24-CONG-TAI-CHO-TRUOC-PUSH"
+  },
+  {
+    "block": "adr",
+    "line": 114,
+    "text": "pre-push"
+  },
+  {
+    "block": "adr",
+    "line": 114,
+    "text": "refs/heads/master"
+  },
+  {
+    "block": "adr",
+    "line": 115,
+    "text": "core.hooksPath"
+  },
+  {
+    "block": "adr",
+    "line": 116,
+    "text": "INV-25-PUSH-THEM"
+  },
+  {
+    "block": "adr",
+    "line": 117,
+    "text": "INV-26-NHANH-SO-SACH"
+  },
+  {
+    "block": "adr",
+    "line": 118,
+    "text": "INV-27-HAI-WRITER"
+  },
+  {
+    "block": "adr",
+    "line": 119,
+    "text": "INV-28-TRAN-KICH-THUOC"
+  },
+  {
+    "block": "adr",
+    "line": 119,
+    "text": "ADR-0044"
+  },
+  {
+    "block": "adr",
+    "line": 119,
+    "text": "ADR-0053"
+  },
+  {
+    "block": "adr",
+    "line": 119,
+    "text": "git diff --numstat"
+  },
+  {
+    "block": "adr",
+    "line": 119,
+    "text": "nang_tran"
+  },
+  {
+    "block": "adr",
+    "line": 120,
+    "text": "INV-BANG-DOI-CHIEU-NGU-NGHIA"
+  },
+  {
+    "block": "adr",
+    "line": 122,
+    "text": "INV-DO-PHU-CA-CHUA-REVIEW-RIENG"
+  },
+  {
+    "block": "adr",
+    "line": 124,
+    "text": "COT-CONG-20-CHUA-CO-CONG"
+  },
+  {
+    "block": "adr",
+    "line": 135,
+    "text": "INV-03"
+  },
+  {
+    "block": "adr",
+    "line": 135,
+    "text": "20856202"
+  },
+  {
+    "block": "adr",
+    "line": 140,
+    "text": "doctrine-scan"
+  },
+  {
+    "block": "adr",
+    "line": 140,
+    "text": "doctrine-scan --root ."
+  },
+  {
+    "block": "adr",
+    "line": 141,
+    "text": "ci.yml"
+  },
+  {
+    "block": "adr",
+    "line": 141,
+    "text": "sạch"
+  },
+  {
+    "block": "adr",
+    "line": 149,
+    "text": "ADR-0053"
+  }
+]

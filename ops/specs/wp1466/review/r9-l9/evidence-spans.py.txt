@@ -1,0 +1,23 @@
+from pathlib import Path
+import sys,re,json,collections,subprocess
+O=Path(__file__).resolve().parent; C=O/'candidate';sys.path.insert(0,str(C/'scripts'));import tl
+from tl_core import workflow as wf
+ctx=tl._doc_claims_context(C);inventory=[];total=collections.Counter()
+for block in [f'p{i}-moi' for i in range(1,7)]+['adr']:
+ rel='docs/PROTOCOL_DA_PHIEN.md' if block!='adr' else 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md'
+ raw=(O/(block+'.txt')).read_text() if block!='adr' else (C/rel).read_text()
+ nf,ns=tl._doc_claims_mask(raw);spans=list(wf._DOC_CLAIMS_SPAN_RE.finditer(nf)); findings=tl._doc_claims_scan_one(C/rel,nf,ns,tl._doc_claims_linestarts(raw),root=C,ctx=ctx)
+ flags=[f for f in findings if not f.get('_advisory')];adv=[f for f in findings if f.get('_advisory')]
+ print('BLOCK',block,'SPANS',len(spans),'FLAGS',len(flags),'ADVISORIES',len(adv));print(json.dumps(findings,ensure_ascii=False))
+ for s in spans:inventory.append({'block':block,'line':raw[:s.start()].count('\n')+1,'text':s[1]})
+ total.update(f['layer'] for f in findings);assert not flags
+(O/'spans.json').write_text(json.dumps(inventory,ensure_ascii=False,indent=2))
+print('TOTAL_SPANS',len(inventory),'LAYER_FINDINGS',dict(total),'ACTIVE_LAYERS',ctx['basis'].get('layers_bac'))
+# A/B nguyên văn p2 của r8, nguồn blob thay vì diễn giải lại.
+a=subprocess.check_output(['git','-C',str(C),'show','434846a:ops/specs/wp1466.md']).decode();raw=re.search(r'^~~~ p2-moi\n(.*?)^~~~',a,re.M|re.S)[1]
+nf,ns=tl._doc_claims_mask(raw);f=tl._doc_claims_scan_one(C/'docs/PROTOCOL_DA_PHIEN.md',nf,ns,tl._doc_claims_linestarts(raw),root=C,ctx=ctx)
+print('R8_P2_FLAGS',json.dumps([x for x in f if not x.get('_advisory')],ensure_ascii=False))
+# Nợ, con trỏ ca và bất biến §1, lấy nguyên các hàng.
+p2=(O/'p2-moi.txt').read_text();rows=[l for l in p2.splitlines() if l.startswith('| `INV-')]
+refs=re.findall(r'· ca: ([^·|]+)','\n'.join(rows)); print('INV_ROWS',len(rows),'CA_POINTERS',len(refs),'CA_WITH_BACKTICK',sum('`' in x for x in refs))
+print('GATED',sum('cổng:' in x for x in rows),'GATED_WITH_DEBT',sum('cổng:' in x and 'còn nợ:' in x for x in rows),'DISCIPLINE',sum('kỷ luật, 0 cổng' in x for x in rows),'UNMEASURED',sum('chưa đo' in x for x in rows))

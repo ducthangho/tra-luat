@@ -1,0 +1,10 @@
+{
+  "utc": "2026-11-21T04:35:35.702689+00:00",
+  "verdict_sha256": "2a0590460bc42eb0324c11ea69706112fc2dda49108ab29f7a7b04265068d34c",
+  "required_fields": true,
+  "finding_classes": 1,
+  "hunt_directions": 12,
+  "local_links_checked": 6,
+  "evidence_files_hashed": 71,
+  "source_unchanged": true
+}

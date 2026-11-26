@@ -1,0 +1,17 @@
+UTC 2026-11-26T12:40:57Z
+H 78	1	.claude/dev/packet_loop.py
+170	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md
+149	0	docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+ FILES 4 ADDED 443 REMOVED 4
+R9_BUILD 78	1	.claude/dev/packet_loop.py
+170	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md
+149	0	docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+ FILES 4 ADDED 443 REMOVED 4
+DIFF_CHECK 0
+OPT_IN 0055 RC [0, 128] FIRST_PARENT True
+OPT_IN 0053 RC [0, 128] FIRST_PARENT True
+SHALLOW false
+claims-base OK True FLAGGED 392 FLAGS 0 ADVISORIES 392 SKIPPED {} LAYERS {'L1': 0, 'L2': 0, 'L3': 0, 'L4': 0, 'L5': 0, 'L6': 0, 'L7': 0, 'L8': 0, 'L9': 0, 'L12': 0}
+claims-r9 OK True FLAGGED 392 FLAGS 0 ADVISORIES 392 SKIPPED {} LAYERS {'L1': 0, 'L2': 0, 'L3': 0, 'L4': 0, 'L5': 0, 'L6': 0, 'L7': 0, 'L8': 0, 'L9': 0, 'L12': 0}

@@ -1,0 +1,8 @@
+COMMAND ["python", "-B", "exec-out/sc/chay_ca.py", "out/candidate", "out/baseline", "out/tmp/tests-old", "ca-cu"]
+CWD /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv9.S079/out/candidate/.claude/dev/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+CASES nền=1804 H=1864 (tên khác nhau 1864) · T=60 · MUTANTS nền=2077 H=2106 · đột biến mới=29 · họ doctrine cũ=132 · đột biến cũ có đích trong họ=21
+[ca-cu] CHỌN 133 · CHẠY 133 · ĐẠT 133/133 · ĐỎ 0 · BỎ QUA 0 · 36 giây
+
+RC 0 ELAPSED 39.66

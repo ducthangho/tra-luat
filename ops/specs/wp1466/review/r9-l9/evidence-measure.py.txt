@@ -1,0 +1,14 @@
+from pathlib import Path
+import subprocess,re,hashlib,time,json
+O=Path(__file__).resolve().parent;C=O/'candidate';S=O.parent/'cay-kho'
+def g(root,*cmd):return subprocess.check_output(['git','-C',str(root),*cmd])
+print('UTC',time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()))
+for label,args in [('H',('diff','--numstat','1fac6ce','refs/exec/h')),('R9_BUILD',('diff','--numstat','1fac6ce'))]:
+ b=g(S if label=='H' else C,*args);rows=[r.split('\t') for r in b.decode().splitlines()];print(label,b.decode(), 'FILES',len(rows),'ADDED',sum(int(r[0]) for r in rows),'REMOVED',sum(int(r[1]) for r in rows))
+print('DIFF_CHECK',subprocess.run(['git','-C',str(C),'diff','--check','1fac6ce'],capture_output=True,text=True).returncode)
+for n,rev in [('0055','d2e3052d479d140b7e7b91df41ec4914fab7d544'),('0053','8ab100793df9831505f495543a74044b91c2c9ab')]:
+ path=list((S/'docs/adr').glob(n+'-*'))[0].relative_to(S).as_posix();rcs=[subprocess.run(['git','-C',str(S),'cat-file','-e',r+':'+path],capture_output=True).returncode for r in [rev,rev+'^1']]
+ print('OPT_IN',n,'RC',rcs,'FIRST_PARENT',rev in g(S,'rev-list','--first-parent','origin/master').decode().splitlines())
+print('SHALLOW',g(S,'rev-parse','--is-shallow-repository').decode().strip())
+for label in ['claims-base','claims-r9']:
+ s=(O/(label+'.log')).read_text();d=json.loads(s[s.index('{'):s.rindex('}')+1]);print(label,'OK',d['ok'],'FLAGGED',d['claims_flagged'],'FLAGS',len(d['flags']),'ADVISORIES',d['advisory_count'],'SKIPPED',d['layers_skipped'],'LAYERS',d['by_layer'])

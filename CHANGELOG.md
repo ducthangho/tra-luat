@@ -91,6 +91,9 @@
 - r37 (sau cross-review lượt 36 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r37.md`): khai giới hạn nhãn điểm số trùng số khoản trên
   văn bản thô (chủ kho quyết) và ghi vào `pham_vi_kiem`; `Đa dạng …` được nhận; tiền kiểm cùng quy tắc dòng/BOM; trần byte và số
   member của gói `.docx`; phân giải style có nhớ; số thứ tự âm bị chặn; ngân sách nhãn và tổng chữ trừ dần.
+- r38 (sau cross-review lượt 37 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r38.md`): danh sách cho phép đòi từ đầu là TỪ TRỌN —
+  nhãn điểm gõ tay `đ)`, `(đ)` bị chặn; `tl extract` đọc có trần và bị dừng khi vượt; gói `.docx` đếm entry trước khi mở ZIP; số
+  thứ tự âm bị chặn ở mọi kiểu cấp.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

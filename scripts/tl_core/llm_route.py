@@ -575,7 +575,7 @@ def vuot_ngan_sach(van_ban):
 #   [số khoản `N.` / `N)` / `(N)`, N ≤ 4 chữ số, rồi đệm ngang tuỳ ý]  [một dấu mở `“` `"` `‘` `(` tuỳ ý]  TỪ ĐẦU
 # TỪ ĐẦU = dải chữ cái liền đầu thân, và phải (a) chứa ít nhất một chữ NGOÀI bảng placeholder ASCII (`Hồ`, `Dữ`, `Cơ` — `_nhan` chỉ
 # sinh chữ số, chữ ASCII và dấu `lvlText`, nên chữ có dấu thanh/mũ không thể là nhãn), hoặc (b) là chữ ASCII dài ≥ 2, KHÔNG phải một
-# chữ lặp (`aa`, `BB` là nhãn Word sau `z`), và theo sau là ĐỆM ngang rồi một CHỮ CÁI (`Quy trình`). Mọi thứ khác bị chặn oan có chủ đích:
+# chữ lặp (`aa`, `BB` là nhãn Word sau `z`), và — ở CẢ HAI nhánh (r38) — theo sau là ĐỆM ngang rồi một CHỮ CÁI (`Quy trình`, `Hồ sơ`). Mọi thứ khác bị chặn oan có chủ đích:
 # `Tp. …`, `e-mail …`, `A1 …`, `ASEAN (…)`, thân mở bằng chữ số hay dấu lạ — chặn oan rẻ hơn nhận nhầm.
 # r36 (lượt 36): bảng placeholder = ĐÚNG miền thật của `_chu_cai` (a–z, A–Z) — `đ/Đ` không bao giờ là nhãn nên thuộc nhánh (a).
 _CHU_PH = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -596,13 +596,16 @@ def dau_dong_cho_phep(ln):
     tu = ln[i:j]
     if not tu:
         return None
+    k = j
+    while k < len(ln) and ln[k] in _DEM_NGANG:
+        k += 1
+    if k == j or k >= len(ln) or not ln[k].isalnum():
+        # r38 (lượt 37): CẢ HAI nhánh — từ đầu phải là một TỪ TRỌN đứng trước đệm rồi một chữ cái/chữ số (`Điều 3 của …`). Nhãn điểm GÕ TAY bằng chữ tiếng
+        # Việt (`đ)`, `(đ)`, `đ.`, `ơ-`) có chữ ngoài bảng placeholder Word nhưng theo sau là DẤU nhãn ⇒ không phải thân.
+        return None
     co_dau = any(c not in _CHU_PH for c in tu)
-    if not co_dau:
-        k = j
-        while k < len(ln) and ln[k] in _DEM_NGANG:
-            k += 1
-        if len(tu) < 2 or tu == tu[0] * len(tu) or k == j or k >= len(ln) or not ln[k].isalpha():
-            return None   # (b): chữ ASCII phải là một TỪ đứng trước một từ khác (`Quy trình`), không đứng trước dấu/ký hiệu
+    if not co_dau and (len(tu) < 2 or tu == tu[0] * len(tu)):
+        return None   # (b): chữ ASCII dài ≥ 2 và không phải một chữ lặp (`aa`, `BB` là nhãn Word sau `z`)
     if m:
         return ("so", int(m.group(1) or m.group(2)), m.end())
     return ("than",)
@@ -1342,10 +1345,37 @@ def doc_dieu_docx(nguon, dieu):
     đường thô, vì ranh giới cuối Điều trong .docx không đánh số chỉ có bằng chứng tiền tố)."""
     doc_gioi_han = _nap_doc_gioi_han()
     import io
-    co = len(nguon) if isinstance(nguon, (bytes, bytearray)) else os.path.getsize(nguon)
-    if co > _TRAN_GOI:
-        raise ValueError(f"goi .docx {co} byte vuot tran {_TRAN_GOI} — khong ho tro")   # r36 (lượt 36): trước khi nạp thư mục ZIP
-    with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
+    # r36 → r38 (lượt 37): đo byte và mở gói trên CÙNG một handle; đếm entry từ bản ghi EOCD TRƯỚC khi `ZipFile` nạp thư mục trung tâm.
+    with (io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else open(nguon, "rb")) as fh:
+        co = fh.seek(0, 2)
+        if co > _TRAN_GOI:
+            raise ValueError(f"goi .docx {co} byte vuot tran {_TRAN_GOI} — khong ho tro")
+        n_entry = _dem_entry_zip(fh, co)
+        if n_entry > _TRAN_MEMBER:
+            raise ValueError(f"goi .docx co {n_entry} member vuot tran {_TRAN_MEMBER} — khong ho tro")
+        fh.seek(0)
+        z_cm = zipfile.ZipFile(fh)
+        return _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han)
+
+
+def _dem_entry_zip(fh, co):
+    """r38 (lượt 37): số entry khai trong bản ghi End-Of-Central-Directory (cùng cách tìm như `zipfile`: chữ ký CUỐI trong 64 KiB +
+    22 byte đuôi). Không thấy ⇒ ValueError; ZIP64 (0xFFFF) ⇒ không hỗ trợ."""
+    doc = min(co, 22 + 65535)
+    fh.seek(co - doc)
+    b = fh.read(doc)
+    i = b.rfind(b"PK\x05\x06")
+    if i < 0 or len(b) < i + 22:
+        raise ValueError("goi .docx khong co ban ghi EOCD — khong phai ZIP hop le")
+    n = int.from_bytes(b[i + 10:i + 12], "little")
+    if n == 0xFFFF:
+        raise ValueError("goi .docx dang ZIP64 — khong ho tro")
+    return n
+
+
+def _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han):
+    """Phần thân của `doc_dieu_docx` sau khi gói đã qua trần byte/entry (r38 tách ra để đọc trên một handle)."""
+    with z_cm as z:
         # r24 (lượt 23 Z2): tên member TRÙNG trong thư mục ZIP ⇒ đọc theo tên chỉ lấy MỘT bản ngầm ⇒ dừng (cả gói).
         _ten = z.namelist()
         if len(_ten) > _TRAN_MEMBER:
@@ -1385,12 +1415,17 @@ def doc_dieu_docx(nguon, dieu):
     # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số (kể cả trong bảng/sdt) — bộ đếm Word chạy suốt tài liệu theo numId.
     bo_dem_tl = {}
     doan = []   # dict: chu, so (numId, ilvl)|None, dem, loai ("p"|"bang"|"la"), trong_bang, ngat, la, so_tu_style
+    tong_doan = [0]
     for loai, el, trong_bang in _doan_trong(body):
         if loai != "p":
             doan.append({"chu": "", "so": None, "dem": None, "loai": loai, "trong_bang": trong_bang,
                          "ngat": False, "la": loai == "la", "so_tu_style": False, "ky_tu_la": None})
             continue
         pt = _phan_tich_doan(el, kieu)
+        tong_doan[0] += len(pt["chu"])
+        if tong_doan[0] > _TRAN_VAN_BAN:
+            # r38 (lượt 37): tệp chỉ chứa Điều cần đọc ⇒ chữ hiệu lực cộng dồn NGAY khi phân tích từng đoạn, không đợi lưu hết.
+            raise ValueError(f"Dieu trong .docx vuot tran {_TRAN_VAN_BAN} ky tu — khong ho tro")
         so = pt["so"]
         dem_snap = None
         if so is not None:
@@ -1400,7 +1435,7 @@ def doc_dieu_docx(nguon, dieu):
                 muc = dn["muc"]
                 dem = bo_dem_tl.setdefault(nid, {})
                 dem[il] = dem.get(il, muc[il][2] - 1) + 1
-                if dem[il] > _TRAN_SO:
+                if dem[il] > _TRAN_SO or dem[il] < 0:   # r38 (lượt 37): miền 0.._TRAN_SO chốt NGAY khi cập nhật, mọi kiểu cấp
                     raise ValueError(f"so thu tu numId {nid} cap {il} vuot {_TRAN_SO}")   # r7 (lượt 6 F4)
                 for k in [k for k in dem if k > il]:
                     del dem[k]
@@ -1498,9 +1533,9 @@ def doc_dieu_docx(nguon, dieu):
             tieu(1 + len(f"{d['dem'][cap0]}. ") + len(chu))
             khoan.append([d["dem"][cap0], [chu], chu])   # r35: gom dòng, nối MỘT lần (không sao chép lặp chuỗi khoản)
         elif nid == nid0 and il > cap0 and khoan:
-            dong_diem = f"{_nhan(muc0, il, d['dem'])} {chu}"
-            tieu(1 + len(dong_diem))
-            khoan[-1][1].append(dong_diem)
+            nhan = _nhan(muc0, il, d['dem'])
+            tieu(1 + len(nhan) + 1 + len(chu))   # r38 (lượt 37): trừ ngân sách TRƯỚC khi ghép dòng điểm
+            khoan[-1][1].append(f"{nhan} {chu}")
         else:
             # cấp khoản của danh sách KHÁC, cấp con của danh sách khác, hay cấp con trước khoản đầu ⇒ ranh giới không rõ.
             raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")
@@ -1561,8 +1596,6 @@ def tach_khoan(van_ban):
         # không được thành ranh giới dòng) ⇒ từ chối CẢ nguồn.
         return None
     dong = [ln.strip() for ln in s.splitlines() if ln.strip()]
-    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
-        return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
         if not _RE_TIEU_DE_TRON.match(" ".join(dong[0].split())):
             # lượt 11 X3 → r2 A2c → r3 C1: tiêu đề có phần dư ⇒ có thể DÍNH khoản đầu ⇒ bỏ dòng là bỏ luôn khoản ⇒ mơ hồ.
@@ -1577,6 +1610,10 @@ def tach_khoan(van_ban):
     # None); ở nguồn mất số nó là một khoản và bị `_tu_noi` chặn.
     loai = [dau_dong_cho_phep(ln) for ln in dong]
     if any(q is None for q in loai):
+        return None
+    # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn. r38 (lượt 37): đo trên CHÍNH span thân mà
+    # danh sách cho phép đã chọn (sau số khoản) — không để `_bo_dau_dong` tự cấp một span khác (nó từng bóc `đ)` như nhãn điểm).
+    if any(_dong_mo_ho(ln[q[2]:] if q[0] == "so" else ln) for ln, q in zip(dong, loai)):
         return None
     co_so = any(q[0] == "so" for q in loai)
     khoan: list[list] = []
@@ -1811,7 +1848,45 @@ def trang_thai_duong(env=None, tim=shutil.which) -> dict:
 
 # ----------------------------------------------------------------- lấy nguyên văn Điều
 
-def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
+def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
+    """r38 (lượt 37, `can-tai-nguyen-doc-nguon`): chạy tiến trình con, đọc stdout + stderr THEO KHỐI với trần byte mỗi ống — vượt trần
+    thì GIẾT tiến trình và ném ValueError TRƯỚC khi nhận hết; quá hạn ⇒ `subprocess.TimeoutExpired` (CLI đã bắt `SubprocessError`).
+    Trả đối tượng có `returncode`/`stdout`/`stderr` (chuỗi UTF-8, `errors=replace`) như `subprocess.run(text=True)`."""
+    import threading
+    import types
+    tran = TRAN_BYTE_TEP if tran is None else tran
+    p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    buf, vuot = {"out": bytearray(), "err": bytearray()}, []
+
+    def doc(ong, ten):
+        while True:
+            k = ong.read1(65536)
+            if not k:
+                return
+            buf[ten] += k
+            if len(buf[ten]) > tran:
+                vuot.append(ten)
+                p.kill()
+                return
+    luong = [threading.Thread(target=doc, args=(p.stdout, "out"), daemon=True),
+             threading.Thread(target=doc, args=(p.stderr, "err"), daemon=True)]
+    for t in luong:
+        t.start()
+    han = time.monotonic() + timeout
+    for t in luong:
+        t.join(max(0.0, han - time.monotonic()))
+    if any(t.is_alive() for t in luong):
+        p.kill()
+        p.wait()
+        raise subprocess.TimeoutExpired(args, timeout)
+    p.wait()
+    if vuot:
+        raise ValueError(f"tl extract in qua {tran} byte ra {'stdout' if vuot[0] == 'out' else 'stderr'} — vuot ngan sach doc")
+    return types.SimpleNamespace(returncode=p.returncode, stdout=bytes(buf["out"]).decode("utf-8", "replace"),
+                                 stderr=bytes(buf["err"]).decode("utf-8", "replace"))
+
+
+def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=_chay_gioi_han, them=()):
     """Lấy nguyên văn Điều bằng CHÍNH `tl extract` (đường đọc đã verify, có cảnh báo markup/dự thảo
     riêng) — không dựng đường đọc thứ hai. Trả (văn bản, stderr của extract)."""
     # r20 (lượt 19 V1): `--markup-strict` — nguồn dự thảo KHÔNG chứng minh được đã lọc chữ gạch bỏ ⇒ `tl extract` rc 3, không in chữ

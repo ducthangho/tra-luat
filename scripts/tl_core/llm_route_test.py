@@ -1068,9 +1068,9 @@ def ca_nguon_mo_ho_luot8(m):
         ('Điều 3.\n1. Quy tắc là văn bản ghi \u201c1. Bước đầu là chuẩn bị;\n2. Bước sau là thực hiện\u201d.',
          kn(("Quy tắc", "văn bản ghi \u201c1. Bước đầu là chuẩn bị;"), ("Bước sau", "thực hiện\u201d."))),
         # U1: trích dẫn cong lồng cùng kiểu.
-        ("Điều 3.\n1. \u201cCụm \u201cx\u201d là y\u201d là tên gọi.", kn(("\u201cCụm \u201cx\u201d", "y\u201d là tên gọi."))),
+        ("Điều 3.\n1. Tên gọi \u201cCụm \u201cx\u201d là y\u201d là tên.", kn(("Tên gọi \u201cCụm \u201cx\u201d", "y\u201d là tên."))),
         # Lồng mà dòng vẫn "cân" về số dấu: chỉ chốt trích-dẫn-lồng bắt được.
-        ("Điều 3.\n1. \u201cCụm \u201cx\u201d là y \u201cz\u201d là tên gọi.", kn(("\u201cCụm \u201cx\u201d", "y \u201cz\u201d là tên gọi."))),
+        ("Điều 3.\n1. Tên gọi \u201cCụm \u201cx\u201d là y \u201cz\u201d là tên.", kn(("Tên gọi \u201cCụm \u201cx\u201d", "y \u201cz\u201d là tên."))),
         # `)` lẻ rồi `(` bù lại về 0: chỉ chốt `)` lẻ bắt được.
         ("Điều 3.\nHồ sơ) là (tài liệu.", kn(("Hồ sơ)", "(tài liệu."))),
         ("Điều 3.\nHồ sơ (bản chính là tài liệu.", kn(("Hồ sơ (bản chính", "tài liệu."))),
@@ -1080,12 +1080,12 @@ def ca_nguon_mo_ho_luot8(m):
     )
     # Lượt 9 V1: kiểu dấu bộ quét KHÔNG hiểu — dù cân trong dòng — ⇒ mơ hồ (danh sách CHO PHÉP).
     # Lượt 11 X1 (nháy đơn thẳng) và X3 (tiêu đề Điều dính khoản đầu).
-    mo_ho += (("Điều 3.\n1. Cụm 'Tổ chức là gì' là tên gọi.", kn(("Cụm 'Tổ chức", "gì' là tên gọi."))),
+    mo_ho += (("Điều 3.\n1. Cụm từ 'Tổ chức là gì' là tên gọi.", kn(("Cụm từ 'Tổ chức", "gì' là tên gọi."))),
               ("Điều 3. Giải thích từ ngữ Hồ sơ là tài liệu.\nDữ liệu là thông tin.", kn(("Dữ liệu", "thông tin."))))
     for mo, dong in (("\u00ab", "\u00bb"), ("\u2018", "\u2019"), ("\u201e", "\u201c"), ("[", "]"), ("\u300c", "\u300d"),
                      ("\uff02", "\uff02"), ("\u2039", "\u203a")):
-        vb = f"Điều 3.\n1. Cụm {mo}Tổ chức là gì{dong} là tên gọi."   # r36: dấu GIỮA dòng — đầu dòng thuộc danh sách cho phép
-        mo_ho += ((vb, kn((f"Cụm {mo}Tổ chức", f"gì{dong} là tên gọi."))),)
+        vb = f"Điều 3.\n1. Cụm từ {mo}Tổ chức là gì{dong} là tên gọi."   # r36: dấu GIỮA dòng — đầu dòng thuộc danh sách cho phép
+        mo_ho += ((vb, kn((f"Cụm từ {mo}Tổ chức", f"gì{dong} là tên gọi."))),)
     for vb, k in mo_ho:
         bang(m.tach_khoan(vb) is None and m.lech_nguyen_van(k, vb) == [0], f"nguon mo ho phai bi tu choi: {vb!r}")
     dung = ("Điều 3.\n(1) Hồ sơ (bản chính) là tài liệu;\na) bản giấy;\nb) bản số.\n2) Dữ liệu là thông tin.",
@@ -1944,7 +1944,22 @@ def ca_r35_lop_loi(m):
              f"so khoan + than hop le bi chan oan: {than!r}")
         bang(tach(f"Điều 3.\n{than}\nDữ liệu là thông tin.") == [(None, than), (None, "Dữ liệu là thông tin.")],
              f"dong mat so hop le bi chan oan: {than!r}")
+    # r38 (lượt 37): nhãn điểm GÕ TAY bằng chữ tiếng Việt (`đ)`, `(đ)`, `đ.`, `đ-`, có/không đệm) ở hai vị trí × hai đường.
+    for L in ("đ) Dữ liệu là b.", "(đ) Dữ liệu là b.", "đ. Dữ liệu là b.", "đ - Dữ liệu là b.", "đ ) Dữ liệu là b.", "ơ) Dữ liệu là b.",
+              "Đ) Dữ liệu là b.", "đđ) Dữ liệu là b."):
+        bang(tach(f"Điều 3.\n1. Hồ sơ là a.\n2. {L}") is None, f"nhan chu Viet sau so khoan lot: {L!r}")
+        bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"nhan chu Viet dau dong lot: {L!r}")
+    bang(tach("Điều 3.\nĐiều 3 của quy chế là điều khoản.\nDữ liệu là thông tin.") is not None, "tu truoc chu so bi chan oan")
     # --- can-tai-nguyen-doc-nguon
+    # r38 (lượt 37): bộ chạy `tl extract` đọc ống THEO KHỐI có trần — vượt ⇒ giết tiến trình + ValueError; trong hạn ⇒ trả đủ.
+    _ok = m._chay_gioi_han([sys.executable, "-c", "import sys; sys.stdout.write('x' * 1000); sys.stderr.write('e')"], tran=5000)
+    bang(_ok.returncode == 0 and _ok.stdout == "x" * 1000 and _ok.stderr == "e", f"chay gioi han sai ket qua: {_ok!r}"[:120])
+    for _ong in ("stdout", "stderr"):
+        try:
+            m._chay_gioi_han([sys.executable, "-c", f"import sys; sys.{_ong}.write('x' * 200000)"], tran=5000)
+            raise TinHieuChotCa(f"{_ong} vuot tran khong bi chan")
+        except ValueError:
+            pass
     try:
         _dai = tach("Điều 3.\n" + "1" * 5000 + ". Hồ sơ là a.")
     except ValueError as e:   # đúng tính chất đang đo: số dài không được làm `int` ném
@@ -1978,6 +1993,9 @@ def ca_r35_lop_loi(m):
     # r36 (lượt 36): số thứ tự ÂM ở cấp con decimal ⇒ chặn trước khi dựng nhãn.
     am = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "decimal", "%2.", start=-5))
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=am), "so thu tu am")
+    # r38 (lượt 37): miền bộ đếm chốt khi CẬP NHẬT — cả cấp bullet (không qua callback `%N`).
+    am_b = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "bullet", "-", start=-5))
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=am_b), "so thu tu am cap bullet")
     # r36 (lượt 36): chuỗi `basedOn` dài dùng chung bởi nhiều đoạn — phân giải có nhớ, không bậc hai.
     _n = 2500
     _st = "".join(f'<w:style w:type="paragraph" w:styleId="S{i}">' + (f'<w:basedOn w:val="S{i - 1}"/>' if i else "") + "</w:style>"
@@ -2043,12 +2061,13 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 
 DOT_BIEN = [
+    ('wp1525_extract_khong_tran', ('            if len(buf[ten]) > tran:', '            if False:'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_gioi_han', ("""                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "\n""", ""), 'ca_r35_lop_loi'),
     # r36 (§2.38): danh sách cho phép đầu dòng — mỗi điều kiện một đột biến riêng.
     ('wp1525_cho_phep_bo_chot', ('    loai = [dau_dong_cho_phep(ln) for ln in dong]', '    loai = [dau_dong_cho_phep(ln) or ("than",) for ln in dong]'), 'ca_r35_lop_loi'),
     ('wp1525_cho_phep_moi_chu_ascii', ('    co_dau = any(c not in _CHU_PH for c in tu)', '    co_dau = True'), 'ca_r35_lop_loi'),
-    ('wp1525_cho_phep_bo_chu_lap', ('        if len(tu) < 2 or tu == tu[0] * len(tu) or k == j', '        if len(tu) < 2 or k == j'), 'ca_r35_lop_loi'),
-    ('wp1525_cho_phep_bo_tu_sau', ('k >= len(ln) or not ln[k].isalpha():', 'k >= len(ln):'), 'ca_r35_lop_loi'),
+    ('wp1525_cho_phep_bo_chu_lap', ('    if not co_dau and (len(tu) < 2 or tu == tu[0] * len(tu)):', '    if not co_dau and len(tu) < 2:'), 'ca_r35_lop_loi'),
+    ('wp1525_cho_phep_bo_tu_sau', ('    if k == j or k >= len(ln) or not ln[k].isalnum():', '    if k == j or k >= len(ln):'), 'ca_r35_lop_loi'),
     ('wp1525_cho_phep_so_khong_tran', [('% (_TRAN_CHU_SO, _TRAN_CHU_SO))', '% (9999, 9999))'),
                                        ('    if any(_RE_SO_QUA_DAI.match(', '    if False and any(_RE_SO_QUA_DAI.match(')], 'ca_r35_lop_loi'),
     # r35 (lượt 34): mỗi chốt của ba lớp một đột biến riêng.
@@ -2057,7 +2076,9 @@ DOT_BIEN = [
     ('wp1525_xml_sau_bo', ('                if tt["sau"] > _TRAN_SAU_XML:', '                if False:'), 'ca_r35_lop_loi'),
     ('wp1525_xml_nut_bo', ('                if tt["nut"] > _TRAN_NUT_XML:', '                if False:'), 'ca_r35_lop_loi'),
     ('wp1525_nhan_dai_bo', ('        if dai[0] > _TRAN_NHAN:', '        if False:'), 'ca_r35_lop_loi'),
-    ('wp1525_nhan_so_am', ('        if n < 0:\n            raise ValueError(f"so thu tu am', '        if False:\n            raise ValueError(f"so thu tu am'), 'ca_r35_lop_loi'),
+    ('wp1525_nhan_so_am', [('        if n < 0:\n            raise ValueError(f"so thu tu am', '        if False:\n            raise ValueError(f"so thu tu am'),
+                           ('                if dem[il] > _TRAN_SO or dem[il] < 0:', '                if dem[il] > _TRAN_SO:')], 'ca_r35_lop_loi'),
+    ('wp1525_dem_am_cap_bullet', ('                if dem[il] > _TRAN_SO or dem[il] < 0:', '                if dem[il] > _TRAN_SO:'), 'ca_r35_lop_loi'),
     ('wp1525_tong_docx_bo', [('        if con[0] < 0:', '        if False:'),
                              ('    if sum(len(d["chu"]) for d in vung) > _TRAN_VAN_BAN:', '    if False:')], 'ca_r35_lop_loi'),
     ('wp1525_tong_docx_thua_mot', ('    con = [_TRAN_VAN_BAN - len(tieu_de)]', '    con = [_TRAN_VAN_BAN - len(tieu_de) - 1]'), 'ca_r35_lop_loi'),
@@ -2124,7 +2145,6 @@ DOT_BIEN = [
     ('wp1525_basedon_doi_loai', ('        if goc_sid in loai and loai[goc_sid] != ten_loai:', '        if False:'), 'ca_cau_truc_docx_chan'),
     # r29 (lượt 28 E1): tiền tố dấu của nhãn.
     # r28 (lượt 27 D1): ngữ pháp nhãn nhiều thành phần — mỗi nhánh một đột biến.
-    ('wp1525_chu_rieng_dinh_chu', ('(?P=R{i})*)(?![^\\\\W\\\\d_])"', '(?P=R{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
     # r27 (lượt 26 C1/C2).
     ('wp1525_la_ghi_truoc_gach', ('                la_run = True   # B4', '                kq["la"] = True   # B4'), 'ca_cau_truc_docx_dat'),
     # r26 (lượt 25 B1–B3): mỗi nhánh ngữ pháp nhãn một đột biến; trạng thái ngắt; `xml:space` đặt lại / ruột / delText.
@@ -2183,7 +2203,7 @@ DOT_BIEN = [
     ('wp1525_bo_qua_override_la', ('                loi = loi or f"lvlOverride cap {il} ngoai startOverride"\n', ''), 'ca_cau_truc_docx_chan'),
     ('wp1525_ilvl_ngoai_mien', ('            if not 0 <= il <= 8:   # r6 (lượt 5 E6): miền cấp OOXML 0–8', '            if False:   # r6 (lượt 5 E6): miền cấp OOXML 0–8'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ilvl_override_ngoai_mien', ('                loi = loi or f"lvlOverride ilvl {il} ngoai mien 0-8"', '                pass'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_dem_vuot_tran', ('                if dem[il] > _TRAN_SO:', '                if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_dem_vuot_tran', ('                if dem[il] > _TRAN_SO or dem[il] < 0:', '                if dem[il] < 0:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numid_trung', ('        if nid in kq:\n            kq[nid] = {"muc": {}, "loi": f"numId {nid} trung sau chuan hoa"}', '        if False:\n            kq[nid] = {"muc": {}, "loi": f"numId {nid} trung sau chuan hoa"}'), 'ca_cau_truc_docx_chan'),
     ('wp1525_khong_loc_gach', ('        if hl["strike"] or hl["dstrike"]:\n            # r5', '        if False:\n            # r5'), 'ca_cau_truc_docx_chan'),
     ('wp1525_gach_kep_bi_che', ('        if hl["strike"] or hl["dstrike"]:\n            # r5', '        if hl["strike"]:\n            # r5'), 'ca_cau_truc_docx_chan'),
@@ -2262,9 +2282,9 @@ DOT_BIEN = [
     ("chi_xet_pi_pf", ('unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf")', 'unicodedata.category(c) in ("Pi", "Pf")'), "ca_nguon_mo_ho_luot8"),
     ("bo_dau_kep_po", ("or c in _DAU_KEP_PO):", "):"), "ca_nguon_mo_ho_luot8"),
     # Lượt 8 U1/U3/U2: mỗi chốt của `_dong_mo_ho` một đột biến.
-    ("bo_chot_nguon_mo_ho", ("    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):\n        return None", "    if False:\n        return None"),
+    ("bo_chot_nguon_mo_ho", ("    if any(_dong_mo_ho(ln[q[2]:] if q[0] == \"so\" else ln) for ln, q in zip(dong, loai)):\n        return None", "    if False:\n        return None"),
      "ca_nguon_mo_ho_luot8"),
-    ("khong_bo_dau_dong", ("    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):", "    if any(_dong_mo_ho(ln) for ln in dong):"), "ca_nguon_mo_ho_luot8"),
+    ("mo_ho_khong_dung_span", ("_dong_mo_ho(ln[q[2]:] if q[0] == \"so\" else ln)", "_dong_mo_ho(ln)"), "ca_nguon_mo_ho_luot8"),
     ("cho_trich_dan_long", ('            elif c == "\\u201c" and trich == "\\u201d":\n                return True\n', ""), "ca_nguon_mo_ho_luot8"),
     ("cho_ngoac_dong_le", ("            if not sau:\n                return True\n", ""), "ca_nguon_mo_ho_luot8"),
     ("cho_dong_cong_le", ('        elif c == "\\u201d":\n            return True\n', ""), "ca_nguon_mo_ho_luot8"),

@@ -416,13 +416,13 @@ biến môi trường của environment.
   cache cũng không tới được chốt; bộ lọc markup của `tl extract` chỉ xét gạch TRỰC TIẾP trên run (chữ gạch qua style có thể còn
   trong văn bản dù `--markup-strict` cho qua) và chặn cả bản export sạch không có dấu sửa; bộ chuyển XML→chữ của nó có thể bỏ
   `w:tab`/`w:br`. Cần ranh giới và nguyên văn chắc chắn thì dùng `--tep <tệp .docx>`. Từ r36 (danh sách CHO PHÉP) đường thô chỉ nhận dòng mà đầu dòng là: số khoản `N.` / `N)` / `(N)` (tối đa 4 chữ số, có thể không
-  có), một dấu mở `“` `"` `‘` `(` tuỳ chọn, rồi một từ có chữ mang dấu tiếng Việt (`Hồ sơ`, `Dữ liệu`) hoặc một từ ASCII dài ≥ 2 đứng
-  trước một từ khác (`Quy trình`, `Ban hành`). Mọi đầu dòng khác — `Tp. …`, `e-mail …`, `A1 …`, `1. A là …`, `ASEAN (…)`, chữ số, ký
+  có), một dấu mở `“` `"` `‘` `(` tuỳ chọn, rồi một TỪ TRỌN đứng trước một từ khác hoặc chữ số — từ có chữ mang dấu tiếng Việt (`Hồ sơ`, `Dữ liệu`) hoặc từ
+  ASCII dài ≥ 2 (`Quy trình`, `Ban hành`); nhãn điểm gõ tay như `đ)`, `(đ)`, `đ.` vì thế bị chặn. Mọi đầu dòng khác — `Tp. …`, `e-mail …`, `A1 …`, `1. A là …`, `ASEAN (…)`, chữ số, ký
   hiệu, dấu đầu dòng, mọi nhãn điểm — chặn CẢ nguồn: dùng `--tep <tệp .docx>`. Nhãn dính thân không có dấu phân biệt (`aHồ…`) và nhãn
   chỉ ngăn bằng khoảng trắng (`ab Hồ …`) không phân biệt được với thân — thuộc bước duyệt ranh giới. Điểm đánh số dạng `N.` / `N)` / `(N)` trùng hình
   dạng số khoản: nếu dãy số sau khi mất cấp vẫn liên tục từ 1, một điểm có thể bị nhận thành khoản riêng — `pham_vi_kiem` của
   đường thô nêu rõ điều này; cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Ngân sách đọc: văn bản thô quá
-  400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, nhãn mở rộng dài quá 64
+  400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số, hay `tl extract` in quá 1 600 000 byte ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, nhãn mở rộng dài quá 64
   ký tự, hay Điều dựng ra quá 400 000 ký tự ⇒ chặn — Điều dài hơn thì đọc thủ công. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên, hay đoạn tham chiếu style không có / sai loại (paragraph ↔ character) ⇒ chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

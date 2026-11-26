@@ -810,21 +810,28 @@ def _iso(dt): return dt.astimezone(datetime.timezone.utc).isoformat(timespec="mi
 # #651 (CI-REGISTRY-THU-HEP-VUNG r1): bộ thứ ba `subagent_ghi_detect_test`, cùng luật vùng + `.claude/settings.json`.
 _PTG, _SGD = ".claude/hooks/pretooluse_guard_test.py", ".claude/hooks/subagent_ghi_detect_test.py"
 NHE = {"ops/nhanh_don_duoc_test.py": {"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"},
-       _PTG: {"PRETOOLUSE_GUARD_KHONG_DOT_BIEN": "1"}, _SGD: {"SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN": "1"}}
+       _PTG: {"PRETOOLUSE_GUARD_KHONG_DOT_BIEN": "1"}, _SGD: {"SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN": "1"},
+       "ops/ci_provenance_test.py": {"CI_PROVENANCE_KHONG_DOT_BIEN": "1"}}   # wp1463 (PR2): bộ thứ tư, cùng luật vùng
 _DONG_DU_HOOK = r"^TONG: CA \d+/\d+ dat · DOT BIEN (\d+)/(\d+) bi giet$"
 MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong giet = 0 · khong do duoc = 0 / tong (\d+)$",
-              _PTG: _DONG_DU_HOOK, _SGD: _DONG_DU_HOOK}
+              _PTG: _DONG_DU_HOOK, _SGD: _DONG_DU_HOOK, "ops/ci_provenance_test.py": MOI["ops/ci_provenance_test.py"]}
 # Mẫu RIÊNG của chế độ nhẹ, chỉ được cộng thêm khi kế hoạch là nhẹ. Bộ vắng mặt ⇒ mẫu `MOI` tự nó đã chấp nhận dòng nhẹ.
 # #651 M1 (P2 #649 r4111733460): bộ CÓ mặt ở đây mà in dòng khớp `MAU_DAY_DU` lúc nhẹ ⇒ ĐỎ — cờ rò hoặc nhánh hồi quy.
 _DONG_NHE_HOOK = r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN [1-9]\d* muc CHE DO NHE — do khi diff cham vung.*TONG: DAT"
-MAU_NHE = {_PTG: _DONG_NHE_HOOK, _SGD: _DONG_NHE_HOOK}
+MAU_NHE = {_PTG: _DONG_NHE_HOOK, _SGD: _DONG_NHE_HOOK,
+           "ops/ci_provenance_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: [1-9]\d* muc CHE DO NHE — do khi diff cham vung\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z"}
 # #651 M2: `ci_dang_ky_test.py` ra khỏi vùng (bộ chọn tự canh bằng `phan_chung` mọi lượt); `.github/**` → riêng `ci.yml`.
 # Phần chốt nới ra được bù bằng lượt ĐỦ hằng tuần `ci-dot-bien-du.yml` (chốt `loi_workflow_dot_bien_du`).
 VUNG_CHUNG = (".github/workflows/ci.yml", "requirements.txt")
 # Tệp/tiền tố NGOÀI cặp bộ/đích. `_PTG`: mutant chạy lại `t15`/`t33` ⇒ `--kiem-bang` ⇒ `tl.py tool-inventory` + `--help`;
 # audit hook `open` (d4a84ef): 32 tệp, TẤT CẢ dưới `scripts/` ⇒ tiền tố cả lớp. Đó là kiểm kê `--kiem-bang`, KHÔNG phải
 # toàn vòng: `t11` chạy `ruff check .` (~264 tệp, Codex lượt 4) — NGOÀI VÙNG CÓ CHỦ ĐÍCH; ca nền chạy mọi lượt, lượt tuần bù.
-VUNG_THEM = {_SGD: (".claude/settings.json",)}
+VUNG_THEM = {_SGD: (".claude/settings.json",),
+             # wp1463: tệp NGOÀI cặp bộ/đích mà bộ và `phan_chung()` (ca K8) mở — đo bằng audit hook `open`, spec mục 3.
+             "ops/ci_provenance_test.py": (
+                 ".claude/dev/ci_dang_ky_test.py", ".github/workflows/ops-do-workflow-definition.yml", "ops/bash_nen.py",
+                 ".github/workflows/ci-dot-bien-du.yml", ".github/workflows/launcher-windows.yml",
+                 "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json", "ops/specs/wp1460-r1/hop_dong/fixture.json")}
 TIEN_TO_THEM = {_PTG: ("scripts/",)}
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
 # TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.

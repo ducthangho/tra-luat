@@ -11,7 +11,7 @@ r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang gi�
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
 #1322: dòng đầu `TIEN TRINH: n`; vòng đột biến chạy `n` luồng (`CI_PROVENANCE_TIEN_TRINH`), kết quả in theo thứ tự `DOT_BIEN`.
 """
-import ast, collections, contextlib, warnings, hashlib, importlib.util, io, json, os, platform, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import ast, collections, contextlib, warnings, hashlib, secrets, importlib.util, io, json, os, platform, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -26,6 +26,11 @@ HERE = Path(__file__).resolve().parent
 ROOT_THAT = HERE.parent
 MA = Path(os.environ.get("CI_PROVENANCE_MA") or HERE / "ci_provenance.py")
 CI_DANG_KY = ROOT_THAT / ".claude/dev/ci_dang_ky_test.py"
+# wp1463 (PR2, SPEC r11): cờ nhẹ, kênh kết quả con, và bản registry mà ca K4/K6/K8 nạp. Bản sao test (đột biến `DOT_BIEN_TEST`)
+# nằm ở thư mục tạm nên cha truyền gốc kho THẬT qua `BIEN_KHO`; đột biến dữ liệu registry đi qua `BIEN_DANG_KY`.
+BIEN_NHE, BIEN_KQ_CA, BIEN_KQ_PHIEN = "CI_PROVENANCE_KHONG_DOT_BIEN", "CI_PROVENANCE_KET_QUA_CA", "CI_PROVENANCE_KET_QUA_PHIEN"
+BIEN_KHO, BIEN_DANG_KY, BO = "CI_PROVENANCE_KHO", "CI_PROVENANCE_DANG_KY", "ops/ci_provenance_test.py"
+DANG_KY_THAT = Path(os.environ.get(BIEN_KHO) or ROOT_THAT) / ".claude/dev/ci_dang_ky_test.py"
 H = "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
 P1, P2, TREE = "5618020a67709ca6f2c93138905df0aa8d9c2df6", "400589368e09ab2ee0e734b7af08b93478035503", "857bc47e6bc5f0024e442b400819ac51286dfc55"
 GIT = {H: {"tree": TREE, "parents": [P1, P2]}}
@@ -1446,23 +1451,23 @@ def c63_ban_goc_mot_lan_moi_ca():   # #997 hậu merge: bản gốc chạy MỘT
     goi = []
     def gia(ten_ca, ma):
         goi.append((ten_ca, Path(ma).name))
-        return (0, "") if Path(ma).name == "goc.py" else (3, f"DO:{ten_ca}: x")
+        return (0, "", "hoan_tat") if Path(ma).name == "goc.py" else (3, f"DO:{ten_ca}: x", "hoan_tat")
     nhom = [d for d in DOT_BIEN if d[3] == "c34"][:2]
     bang(len(nhom) == 2, f"cần 2 mục đột biến nhắm c34, có {len(nhom)}")
     with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", side_effect=gia):
         hang = [chay_dot_bien(*d)[0] for d in nhom]
     bang(hang == ["GIET", "GIET"] and [x for x in goi if x[1] == "goc.py"] == [("c34_git_blob_that", "goc.py")]
          and sum(x[1] != "goc.py" for x in goi) == 2, f"bản gốc phải chạy đúng 1 lần cho 2 mục: {hang} {goi}")
-    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", return_value=(3, "DO:c34_git_blob_that: goc do")) as cc:
+    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", return_value=(3, "DO:c34_git_blob_that: goc do", "hoan_tat")) as cc:
         hang = [chay_dot_bien(*d)[0] for d in nhom]
     bang(hang == ["HONG", "HONG"] and cc.call_count == 1, f"bản gốc đỏ ⇒ MỌI mục HONG, chạy gốc 1 lần: {hang} {cc.call_count}")
     with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con",   # Codex lượt 1 P3: KHOÁ gồm CẢ ca lẫn nội dung bản gốc
-                                                       side_effect=lambda t, ma: (0, f"{t}:{Path(ma).read_text(encoding='utf-8')}")) as cc:
+                                                       side_effect=lambda t, ma: (0, f"{t}:{Path(ma).read_text(encoding='utf-8')}", "hoan_tat")) as cc:
         kq = [nen_cua(t, g)[1] for t, g in (("ca_a", "x"), ("ca_a", "y"), ("ca_b", "x"), ("ca_a", "x"), ("ca_b", "x"))]
     bang(kq == ["ca_a:x", "ca_a:y", "ca_b:x", "ca_a:x", "ca_b:x"] and cc.call_count == 3, f"khoá cache (ca, nội dung): {kq} {cc.call_count}")
     with mock.patch.object(subprocess, "run", side_effect=subprocess.TimeoutExpired("python", 300)):
         try:
-            rc, ra = chay_con("c34_git_blob_that", HERE / "ci_provenance.py")
+            rc, ra, _ = chay_con("c34_git_blob_that", HERE / "ci_provenance.py")
         except subprocess.TimeoutExpired:
             rc, ra = None, "TimeoutExpired lọt khỏi chay_con"
     bang(rc == 124 and "QUA_HAN:c34_git_blob_that" in ra and phan_hang(rc, ra, "c34_git_blob_that") == "HONG", f"quá hạn ⇒ 124/HONG: {rc} {ra}")
@@ -1552,22 +1557,30 @@ def c65_chay_theo_thu_tu():   # #1322 M4/A3: thứ tự xong bị ĐẢO ⇒ đ�
 
 @ca
 def c66_mien_sai_chan_truoc_moi_ca():   # #1322 A2: giá trị lạ ⇒ rc≠0 TRƯỚC khi chạy ca nào
-    with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "0"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")) as cc, \
-            mock.patch(__name__ + ".lam_nong_nen"), mock.patch(__name__ + ".chay_dot_bien", return_value=("GIET", "")), \
-            mock.patch(__name__ + ".chay_dot_bien_test", return_value=("GIET", "")), \
+    with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "0"}), mock.patch(__name__ + ".chay_ca_a3", return_value=(0, "", "hoan_tat", "passed")) as cc, \
+            mock.patch(__name__ + ".lam_nong_nen"), mock.patch(__name__ + ".chay_dot_bien", return_value=("GIET", "", "hoan_tat")), \
+            mock.patch(__name__ + ".chay_dot_bien_test", return_value=("GIET", "", "hoan_tat")), \
+            mock.patch(__name__ + ".chay_dot_bien_dk", return_value=("GIET", "", "hoan_tat")), \
             contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as loi:
         rc = main([])
     bang(rc == 2 and cc.call_count == 0 and BIEN_TIEN_TRINH in loi.getvalue(), f"rc={rc}, số ca đã chạy {cc.call_count}")
-    # review lượt 1 F3 + lượt 5 F3b/F3c: kết quả phải khớp KẾ HOẠCH (tên, thứ tự, số lần) — thiếu, lặp, đảo, rỗng ⇒ TONG: DO
+    # review lượt 1 F3 + lượt 5 F3b/F3c: kết quả phải khớp KẾ HOẠCH (tên, thứ tự, số lần) — thiếu, lặp, đảo, rỗng ⇒ TONG: DO.
+    # wp1463 r13 (PR2-S17): công thức cũ `cong_thuc_cu` được quan sát ĐỘC LẬP với kết cục gộp — thiếu một việc (T8) và đảo thứ
+    # tự (T18) phải ra False ở chính hàm ấy; kết cục gộp (`main`) phải không xanh cho danh sách hỏng và xanh cho nền khoẻ (T19).
     for ten_kq, rc_mong in ((("m1", "m2"), 0), (("m2",), 1), (("m1",), 1), ((), 1), (("m1", "m1"), 1), (("m2", "m1"), 1),
                             (("m1", "m2", "m2"), 1)):
-        with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "2"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")), \
-                mock.patch(__name__ + ".TU_KIEM", ()), mock.patch(__name__ + ".DOT_BIEN", (("m1",),)), \
-                mock.patch(__name__ + ".DOT_BIEN_TEST", (("m2",),)), \
-                mock.patch(__name__ + ".chay_vong_dot_bien", return_value=[(t, "GIET", "") for t in ten_kq]), \
+        with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "2"}), mock.patch(__name__ + ".chay_ca_a3", return_value=(0, "", "hoan_tat", "passed")), \
+                mock.patch(__name__ + ".TU_KIEM", (("tk1", "", "", "c00", "GIET"),)), mock.patch(__name__ + ".DOT_BIEN", (("m1",),)), \
+                mock.patch(__name__ + ".DOT_BIEN_TEST", (("m2",),)), mock.patch(__name__ + ".DOT_BIEN_DK", ()), \
+                mock.patch(__name__ + ".chay_tu_kiem", return_value=[("tk1", "GIET", "hoan_tat")]), \
+                mock.patch(__name__ + ".chay_vong_dot_bien", return_value=[(t, "GIET", "", "hoan_tat") for t in ten_kq]), \
                 contextlib.redirect_stdout(io.StringIO()) as ra:
+            os.environ.pop(BIEN_NHE, None)   # ca này đo lượt ĐỦ dù bộ đang chạy ở chế độ nhẹ
             rc = main([])
+            cu = cong_thuc_cu(list(CA), DOT_BIEN, [("tk1", "GIET")], ["m1", "m2"], [(t, 0) for t in CA], [(t, "GIET", "") for t in ten_kq],
+                              [("tk1", "GIET", "hoan_tat")], {})["ok"]
         bang(rc == rc_mong and ra.getvalue().endswith(f"TONG: {'DO' if rc_mong else 'DAT'}\n"), f"kết quả {ten_kq!r} cho kế hoạch m1,m2: rc={rc}")
+        bang(cu is (rc_mong == 0), f"công thức cũ trên kết quả {ten_kq!r} phải ra {rc_mong == 0}, được {cu!r}")
 
 @ca
 def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản gốc của MỌI ca đích (cả `DOT_BIEN_TEST`) xong TRƯỚC đột biến đầu tiên, mỗi khoá một lần
@@ -1579,8 +1592,9 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
         def con(ten_ca, loai):
             with khoa:
                 nhat_ky.append((loai, ten_ca))
-            return (0, "") if loai == "goc" else (3, f"DO:{ten_ca}: x")
+            return (0, "", "hoan_tat") if loai == "goc" else (3, f"DO:{ten_ca}: x", "hoan_tat")
         with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".DOT_BIEN", nhom), mock.patch(__name__ + ".TU_KIEM", ()), \
+                mock.patch(__name__ + ".DOT_BIEN_DK", ()), \
                 mock.patch(__name__ + ".DOT_BIEN_TEST", DOT_BIEN_TEST[:1]), \
                 mock.patch(__name__ + ".chay_con", side_effect=lambda t, ma: con(t, "goc" if Path(ma).name == "goc.py" else "db")), \
                 mock.patch(__name__ + ".chay_con_ban_test", side_effect=lambda t, ban: con(t, "db")):
@@ -1591,7 +1605,7 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
         bang(sorted(goc) == sorted(dich), f"n={n}: mỗi ca đích chạy bản gốc ĐÚNG một lần: {goc}")
         bang({loai for loai, _ in nhat_ky[:dau]} == {"goc"} and "goc" not in {loai for loai, _ in nhat_ky[dau:]},
              f"n={n}: mọi bản gốc phải xong TRƯỚC đột biến đầu tiên: {nhat_ky}")
-        bang([(t, h) for t, h, _ in kq] == [(d[0], "GIET") for _, d in viec] and len(viec) == 4, f"n={n}: mỗi việc đúng một kết quả, đúng tên: {kq}")
+        bang([(t, h) for t, h, _, _ in kq] == [(d[0], "GIET") for _, d in viec] and len(viec) == 4, f"n={n}: mỗi việc đúng một kết quả, đúng tên: {kq}")
 
 @ca
 def c68_moi_viec_dung_ket_qua_cua_no():   # #1322 review lượt 6 F3d: runner THẬT, mỗi việc một kết quả RIÊNG (có SONG_SOT) — gắn tên đúng mà chạy nhầm việc ⇒ đỏ
@@ -2429,6 +2443,293 @@ _F2W_DON_CHUNG = _F2W_DON_VA_GHI.replace(
     "        ngu_thu_lai(", "        " + _F2W_DEM + "            _f2w_da_thu += 1\n        ngu_thu_lai(", 1
 )
 
+# ===== wp1463 (PR2, SPEC r14): ca của K1–K6 và K8. Bảng vùng và oracle CHÉP từ đặc tả mục 3, không đọc hằng của registry =====
+_WV, _HV = ".github/workflows/", "ops/specs/wp1460-r1/"
+BANG_VUNG = (
+    ("khong_do_duoc", None, "day_du"), ("rong", [], "nhe"), ("bo", ["ops/ci_provenance_test.py"], "day_du"), ("dich", ["ops/ci_provenance.py"], "day_du"), ("ci_yml", [_WV + "ci.yml"], "day_du"),
+    ("requirements", ["requirements.txt"], "day_du"), ("bo_chon", [".claude/dev/ci_dang_ky_test.py"], "day_du"), ("wf_wd", [_WV + "ops-do-workflow-definition.yml"], "day_du"),
+    ("bash_nen", ["ops/bash_nen.py"], "day_du"), ("wf_dot_bien_du", [_WV + "ci-dot-bien-du.yml"], "day_du"), ("wf_launcher", [_WV + "launcher-windows.yml"], "day_du"),
+    ("cai_cong_cu", ["ops/cai_cong_cu.sh"], "day_du"), ("cong_cu_yaml", ["ops/cong_cu.yaml"], "day_du"), ("goc_la", ["pyproject.toml"], "day_du"), ("goc_ten_bo", ["ci_provenance.py"], "day_du"),
+    ("goc_tai_lieu", ["README.md", "CLAUDE.md", "CHANGELOG.md"], "nhe"), ("tai_lieu", ["docs/x.md"], "nhe"), ("spec_ho_so", ["ops/specs/wp1463-r1/SPEC.md", "ops/land/x.yaml"], "nhe"),
+    ("ops_khac", ["ops/ci_duong_nhanh.py", "ops/cong_cu_test.py"], "day_du"), ("ops_khac_nhe", ["ops/ci_duong_nhanh.py", "ops/nhanh_don_duoc_test.py"], "nhe"),
+    ("gan_dung_hau_to", ["ops/ci_provenance.pyi", "ops/ci_provenance_test.py.bak", "ops/bash_nen.py~"], "nhe"),
+    ("gan_dung_thu_muc", ["x/ops/ci_provenance.py", "ops/ci_provenance/x.py", ".claude/dev/ci_dang_ky_test.pyc"], "nhe"),
+    ("gan_dung_workflow", [_WV + "ci-dot-bien-du.yml.bak", _WV + "launcher-windows.yaml", "x/" + _WV + "ci-dot-bien-du.yml", ".github/launcher-windows.yml"], "nhe"),
+    ("workflow_khac", [_WV + "khac.yml", _WV + "ops-publish-lease.yml"], "nhe"), ("dev_khac", [".claude/dev/packet_loop.py", ".claude/settings.json"], "nhe"),
+    ("hon_hop", ["docs/x.md", "ops/bash_nen.py"], "day_du"), ("hon_hop_workflow", ["docs/x.md", _WV + "launcher-windows.yml"], "day_du"),
+    ("hop_dong_schema", [_HV + "hop_dong/bien_nhan_audit.v1.schema.json"], "day_du"), ("hop_dong_fixture", [_HV + "hop_dong/fixture.json"], "day_du"),
+    ("hop_dong_gan_dung", [_HV + "hop_dong/khac.json", _HV + "fixture.json", _HV + "hop_dong/fixture.json.bak"], "nhe"))
+VT_THEM = (".claude/dev/ci_dang_ky_test.py", _WV + "ops-do-workflow-definition.yml", "ops/bash_nen.py", _WV + "ci-dot-bien-du.yml",
+           _WV + "launcher-windows.yml", _HV + "hop_dong/bien_nhan_audit.v1.schema.json", _HV + "hop_dong/fixture.json")
+Z_VUNG = frozenset({"ops/ci_provenance_test.py", "ops/ci_provenance.py", ".github/workflows/ci.yml", "requirements.txt", *VT_THEM})
+GOC_VUNG = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
+BON_KHOA = ("NHE", "MAU_DAY_DU", "MAU_NHE", "VUNG_THEM")
+A1_K8, M2_K8 = "set(ke_hoach(set())) == set(NHE) <= set(MOI) and set(MAU_DAY_DU) == set(NHE)", "set(MAU_NHE) <= set(NHE)"
+
+def oracle_vung(doi):
+    if doi is None:
+        return "day_du"
+    for x in doi:
+        if x in Z_VUNG or x.startswith("ops/cai_") or x.startswith("ops/cong_cu") or ("/" not in x and x not in GOC_VUNG):
+            return "day_du"
+    return "nhe"
+
+def troi_k8(nguon):
+    """Chốt trôi của K8: registry phải còn ĐÚNG hai dòng `_them` mang nguyên văn A1, M2; trả danh sách dòng lệch."""
+    dong = [d.strip() for d in nguon.splitlines()]
+    return [x for x in (f'_them("p643-A1-chi-bo-trong-NHE", {A1_K8})', f'_them("p647-M2-mau-nhe-chi-cho-bo-trong-NHE", {M2_K8})')
+            if dong.count(x) != 1]
+
+def _kc(che="day_du", ten_db=("m1",), kq_db=None, E=None, tk=(("t1", "GIET"),), kq_tk=None, ten_ca=("a",), kq_ca=None, goc=(1,)):
+    """Kết cục trên một lượt TỔNG HỢP: mặc định là nền khoẻ, mỗi ca đổi đúng trường nó nêu."""
+    return tinh_ket_cuc(che, list(ten_ca), list(ten_db), list(tk), [(t, 0, "hoan_tat", "passed") for t in ten_ca] if kq_ca is None else kq_ca,
+                        ([(t, "GIET", "hoan_tat") for t in ten_db] if che != "nhe" else []) if kq_db is None else kq_db,
+                        [(t, h, "hoan_tat") for t, h in tk] if kq_tk is None else kq_tk, {} if E is None else E, goc)
+
+def _khoi(che, M=3, dat=5, tong=5, tk=True, ket="xanh"):
+    return f"TIEN TRINH: 1\nCHE DO: {che}\nKET_CUC_A3: {{}}\n" + "\n".join(dong_ket_luan(che, dat, tong, M, M, tk, 2, ket)) + "\n"
+
+@ca
+def c78_co_nhe_dung_chuoi_1():   # K1: miền cờ — đúng `1` ⇒ nhe; vắng và mọi giá trị khác ⇒ day_du
+    bang(doc_che_do({BIEN_NHE: "1"}) == "nhe" and doc_che_do({}) == "day_du", "`1` ⇒ nhe, vắng ⇒ day_du")
+    for v in ("", "0", " 1", "1 ", "1\n", "01", "true", "TRUE", "１", "11"):
+        bang(doc_che_do({BIEN_NHE: v}) == "day_du", f"giá trị {v!r} phải ra day_du")
+
+@ca
+def c79_nhe_chi_bo_vong_dot_bien():   # K2 + K3: bộ chạy giả đếm lời gọi; rồi `main` thật ở cả hai chế độ
+    for che, mong in (("nhe", [1, 0, 1]), ("day_du", [1, 1, 1])):
+        dem = [0, 0, 0]
+        def gia(i):
+            def f():
+                dem[i] += 1
+                return [i]
+            return f
+        kq = chay_theo_che_do(che, gia(0), gia(1), gia(2))
+        bang(dem == mong and kq == ([0], [1] if mong[1] else [], [2]), f"{che}: lời gọi (ca, vòng, tự kiểm) = {dem}, kết quả {kq}")
+    ke = [d[0] for d in DOT_BIEN + DOT_BIEN_TEST + DOT_BIEN_DK]
+    for co, che in (("1", "nhe"), (None, "day_du"), ("true", "day_du")):
+        with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "1"}), mock.patch(__name__ + ".chay_ca_a3", return_value=(0, "", "hoan_tat", "passed")) as cc, \
+                mock.patch(__name__ + ".lam_nong_nen") as ln, mock.patch(__name__ + ".chay_tu_kiem", return_value=[(d[0], d[4], "hoan_tat") for d in TU_KIEM]) as tk, \
+                mock.patch(__name__ + ".chay_theo_thu_tu", side_effect=lambda ham, viec, n: [(d[0], "GIET", "", "hoan_tat") for _, d in viec]) as vong, \
+                contextlib.redirect_stdout(io.StringIO()) as ra:
+            os.environ.pop(BIEN_NHE, None)
+            if co is not None:
+                os.environ[BIEN_NHE] = co
+            rc = main([])
+        dong = ra.getvalue().split("\n")
+        cuoi = [f"CA: {len(CA)}/{len(CA)} dat", f"DOT BIEN: {len(ke)} muc CHE DO NHE — do khi diff cham vung" if che == "nhe"
+                else f"DOT BIEN: {len(ke)}/{len(ke)} bi giet dung ly do", f"TU KIEM PHAN HANG: DAT ({len(TU_KIEM)} dot bien)", "TONG: DAT", ""]
+        bang(rc == 0 and dong[1] == f"CHE DO: {che}" and dong[-5:] == cuoi and dong[-6].startswith("KET_CUC_A3: {"), f"cờ {co!r}: rc={rc}, {dong[1:2]} {dong[-6:]!r:.300}")
+        bang((ln.call_count, vong.call_count) == ((0, 0) if che == "nhe" else (1, 1)) and cc.call_count == len(CA) and tk.call_count == 1,
+             f"cờ {co!r}: làm nóng {ln.call_count}, vòng {vong.call_count}, ca {cc.call_count}, tự kiểm {tk.call_count}")
+        kc = json.loads(dong[-6][len("KET_CUC_A3: "):])
+        bang(kc["che_do"] == che and kc["ket_luan_tong"] == "xanh" and [x["ten"] for x in kc["dot_bien"]] == ([] if che == "nhe" else ke)
+             and kc["ke_hoach_dot_bien"] == len(ke) and sum("CHE DO NHE" in d for d in dong) == (che == "nhe")
+             and sum(bool(re.match(r"DOT BIEN: \d+/\d+ bi giet", d)) for d in dong) == (che != "nhe"), f"cờ {co!r}: KET_CUC_A3 lệch chế độ")
+
+@ca
+def c80_khoi_ket_luan_qua_registry_that():   # K4: mẫu ĐẦY ĐỦ và `chay_moi` THẬT của registry phân biệt khối nhẹ với khối đủ
+    m = nap_dang_ky()
+    moi, mau_nhe, nhe, du = m.MOI.get(BO, "(?!)"), m.MAU_NHE.get(BO, "(?!)"), _khoi("nhe"), _khoi("day_du")
+    bang(m.bang_chung_xanh(nhe, mau_nhe) and not m.bang_chung_xanh(nhe, moi) and m.bang_chung_xanh(du, moi) and not m.bang_chung_xanh(du, mau_nhe),
+         "khối nhẹ: MAU_NHE nhận, MOI từ chối; khối đủ ngược lại")
+    for ten, khoi, che, mong, dau in (("nhe/nhe", nhe, "nhe", True, ""), ("nhe/du", du, "nhe", False, "chế độ nhẹ mà VẪN in dòng đột biến ĐỦ"),
+                                      ("du/nhe", nhe, "day_du", False, ""), ("du/du", du, "day_du", True, ""),
+                                      ("nhe M=0", _khoi("nhe", M=0), "nhe", False, ""), ("nhe CA thiếu", _khoi("nhe", dat=4), "nhe", False, ""),
+                                      ("nhe TU KIEM DO", _khoi("nhe", tk=False), "nhe", False, "")):
+        with contextlib.redirect_stdout(io.StringIO()) as ra:
+            do = m.chay_moi(moi={BO: moi}, cach_ly={}, chay_mot=lambda p: (0, khoi), doc_moi_truong=lambda: "github-actions/linux",
+                            doc_trong_ci=lambda: True, doc_nen_windows=lambda: False, kh={BO: (che, "x")})
+        bang((do == 0) is mong and dau in ra.getvalue() and f"CI_DANG_KY {BO}: {'ĐẠT' if mong else 'ĐỎ'}" in ra.getvalue(), f"{ten}: đỏ={do}: {ra.getvalue()[-200:]}")
+
+@ca
+def c81_ket_cuc_a3():   # K5 + K5b + K5c: mỗi hàng bảng ánh xạ, mỗi vế luật `ket_luan_tong`, có vế chặn và đối chứng
+    HL, ht = {"ly_do": " vì x ", "nguoi_xac_nhan": "A"}, "hoan_tat"
+    def pt(k, i=0, nhom="dot_bien"):
+        return k[nhom][i]["trang_thai_thuc_thi"], k[nhom][i].get("phan_hang_dot_bien", k[nhom][i].get("quan_sat_ca", k[nhom][i].get("dung_ky_vong")))
+    bang(TUONG_DUONG_A3 == {}, "bảng tương đương sản xuất phải RỖNG ở PR2")
+    for ten, kw, ket, phan_tu in (
+            ("nền khoẻ / giết đúng đích", {}, "xanh", (ht, "giet")), ("nhẹ khoẻ", {"che": "nhe"}, "xanh", None),
+            ("tín dụng giả", {"kq_db": [("m1", "TIN_DUNG_GIA", ht)]}, "do", (ht, "tin_dung_gia")),
+            ("sống", {"kq_db": [("m1", "SONG_SOT", ht)]}, "do", (ht, "song")),
+            ("tương đương có xét duyệt", {"kq_db": [("m1", "SONG_SOT", ht)], "E": {"m1": HL}}, "xanh", (ht, "equivalent_reviewed")),
+            ("mục thiếu nguoi_xac_nhan", {"kq_db": [("m1", "SONG_SOT", ht)], "E": {"m1": {"ly_do": "x", "nguoi_xac_nhan": "  "}}}, "do", (ht, "song")),
+            ("lời khai tương đương bị giết", {"E": {"m1": HL}}, "do", (ht, "giet")),
+            ("quá hạn", {"kq_db": [("m1", "TIN_DUNG_GIA", "timed_out")]}, "khong_ket_luan", ("timed_out", None)),
+            ("hạ tầng", {"kq_db": [("m1", "GIET", "infrastructure_error")]}, "khong_ket_luan", ("infrastructure_error", None)),
+            ("hoàn tất mà hạng HONG", {"kq_db": [("m1", "HONG", ht)]}, "khong_ket_luan", ("infrastructure_error", None)),
+            ("thiếu kết quả", {"kq_db": []}, "khong_ket_luan", ("not_run", None)),
+            ("kết quả sai tên", {"kq_db": [("m9", "GIET", ht)]}, "khong_ket_luan", ("not_run", None)),
+            ("kế hoạch trùng tên", {"ten_db": ("m1", "m1")}, "khong_ket_luan", (ht, "giet")), ("đối chứng một tên", {"ten_db": ("m1",)}, "xanh", None),
+            ("kế hoạch trùng tên, nhẹ", {"che": "nhe", "ten_db": ("m1", "m1")}, "khong_ket_luan", None),
+            ("TU_KIEM trùng tên", {"tk": (("t1", "GIET"), ("t1", "GIET"))}, "khong_ket_luan", None),
+            ("khoá tương đương lạ", {"E": {"la": HL}}, "khong_ket_luan", None),
+            ("kết quả đảo thứ tự", {"ten_db": ("m1", "m2"), "kq_db": [("m2", "GIET", ht), ("m1", "GIET", ht)]}, "khong_ket_luan", ("not_run", None)),
+            ("nhẹ mà có kết quả đột biến", {"che": "nhe", "kq_db": [("m1", "GIET", ht)]}, "khong_ket_luan", None),
+            ("CA rỗng", {"ten_ca": ()}, "khong_ket_luan", None), ("DOT_BIEN rỗng", {"goc": ()}, "khong_ket_luan", None),
+            ("DOT_BIEN rỗng, nhẹ", {"che": "nhe", "goc": ()}, "khong_ket_luan", None),
+            ("kế hoạch rỗng", {"ten_db": ()}, "khong_ket_luan", None), ("kế hoạch rỗng, nhẹ", {"che": "nhe", "ten_db": ()}, "khong_ket_luan", None),
+            ("TU_KIEM rỗng", {"tk": ()}, "khong_ket_luan", None), ("TU_KIEM lệch tên", {"kq_tk": [("t9", "GIET", ht)]}, "khong_ket_luan", None),
+            ("ca lệch thứ tự", {"ten_ca": ("a", "b"), "kq_ca": [("b", 0, ht, "passed"), ("a", 0, ht, "passed")]}, "khong_ket_luan", None)):
+        k = _kc(**kw)
+        bang(k["ket_luan_tong"] == ket and (phan_tu is None or pt(k) == phan_tu), f"{ten}: {k['ket_luan_tong']} {k['dot_bien'][:1]}")
+        bang(dong_ket_luan(k["che_do"], 1, 1, 1, 1, True, 1, k["ket_luan_tong"])[-1] == f"TONG: {'DAT' if ket == 'xanh' else 'DO'}", f"{ten}: TONG ⇔ xanh")
+    for ten, kw, ket, nhom, phan_tu in (
+            ("ca failed", {"kq_ca": [("a", 3, ht, "failed")]}, "do", "ca", (ht, "failed")),
+            ("ca quá hạn", {"kq_ca": [("a", 4, "timed_out", None)]}, "khong_ket_luan", "ca", ("timed_out", None)),
+            ("ca thiếu", {"kq_ca": []}, "khong_ket_luan", "ca", ("not_run", None)),
+            ("TU_KIEM sai hạng", {"kq_tk": [("t1", "SONG_SOT", ht)]}, "do", "tu_kiem", (ht, False)),
+            ("TU_KIEM đúng hạng", {}, "xanh", "tu_kiem", (ht, True)),
+            ("TU_KIEM quá hạn", {"kq_tk": [("t1", "GIET", "timed_out")]}, "khong_ket_luan", "tu_kiem", ("timed_out", None)),
+            ("TU_KIEM thiếu", {"kq_tk": []}, "khong_ket_luan", "tu_kiem", ("not_run", None))):
+        for che in ("nhe", "day_du"):
+            k = _kc(che=che, **kw)
+            bang(k["ket_luan_tong"] == ket and pt(k, 0, nhom) == phan_tu, f"{ten} ({che}): {k['ket_luan_tong']} {k[nhom]}")
+    # K5c: bằng chứng tương đương ra tới bên đọc, NGUYÊN VĂN, buộc bằng tên trong chính phần tử
+    doc = [json.loads(json.dumps(_kc(ten_db=("m1", "m2"), kq_db=[("m1", "SONG_SOT", ht), ("m2", "GIET", ht)], E={"m1": e}), ensure_ascii=False, sort_keys=True))["dot_bien"]
+           for e in (HL, {"ly_do": "lý do khác", "nguoi_xac_nhan": "B "}, {"ly_do": "", "nguoi_xac_nhan": "A"})]
+    bang(doc[0][0] == {"ten": "m1", "trang_thai_thuc_thi": ht, "phan_hang_dot_bien": "equivalent_reviewed", **HL}
+         and (doc[1][0]["ly_do"], doc[1][0]["nguoi_xac_nhan"]) == ("lý do khác", "B ") and doc[0][0] != doc[1][0], f"hai bảng hợp lệ khác nhau: {doc[:2]}")
+    bang(set(doc[2][0]) == {"ten", "trang_thai_thuc_thi", "phan_hang_dot_bien"} and doc[2][0]["phan_hang_dot_bien"] == "song"
+         and all(set(d[1]) == {"ten", "trang_thai_thuc_thi", "phan_hang_dot_bien"} for d in doc), f"mục không hợp lệ / tên không có mục: {doc[2]}")
+
+@ca
+def c82_tang_thuc_thi_ca_va_con():   # K5a: bộ phân loại theo KIỂU, hợp đồng cũ của `chay_ca`, và bộ kiểm kết quả con qua HAI bộ chạy cha thật
+    qh, ht, ha = subprocess.TimeoutExpired("x", 1), "hoan_tat", "infrastructure_error"
+    for e, mong, rc, ket in ((None, (ht, "passed"), 0, "xanh"), (TinHieuChotCa("x"), (ht, "failed"), 3, "do"), (qh, ("timed_out", None), 4, "khong_ket_luan"),
+                             (FileNotFoundError(2, "x"), (ha, None), 4, "khong_ket_luan"), (PermissionError(13, "x"), (ha, None), 4, "khong_ket_luan"),
+                             (KeyError("k"), (ht, "failed"), 4, "do")):
+        def than(e=e):
+            if e is not None:
+                raise e
+        with mock.patch.dict(CA, {"c00_gia": than}):
+            kq, cu = chay_ca_a3("c00_gia"), chay_ca("c00_gia")
+        bang(phan_loai_ngoai_le(e) == mong and kq[2:] == mong and kq[:2] == cu and cu[0] == rc and (rc == 0 or cu[1].startswith(("DO:" if rc == 3 else "HONG:") + "c00_gia:")),
+             f"{type(e).__name__}: {kq!r} / {cu!r}")
+        for che in ("nhe", "day_du"):
+            kq_ca, _, _ = chay_theo_che_do(che, lambda: [("a", kq[0], *kq[2:])], lambda: [], lambda: [])
+            bang(_kc(che=che, kq_ca=kq_ca)["ket_luan_tong"] == ket, f"{type(e).__name__} ({che}) phải ra {ket}")
+    def tep(rc, tt, qs, **sua):   # véc-tơ: hàm (phiên, ca) → nội dung tệp kết quả con
+        return lambda ph, ten: {"schema": "ket_qua_ca.v1", "phien": ph, "ten": ten, "rc": rc, "trang_thai_thuc_thi": tt, "quan_sat_ca": qs, **sua}
+    def bo(k):
+        return lambda ph, ten: {x: v for x, v in tep(0, ht, "passed")(ph, ten).items() if x != k}
+    def dem(n):   # R15-2: kết quả HỢP LỆ, đệm khoảng trắng CUỐI tới đúng n BYTE — chỉ chốt kích thước phân biệt 65 536 (nhận) với 65 537 (từ chối)
+        return lambda ph, ten: json.dumps(tep(0, ht, "passed")(ph, ten)).encode("utf-8").ljust(n)
+    bang([len(dem(n)("p", "c00_gia")) for n in (65536, 65537)] == [65536, 65537], "véc-tơ kích thước phải đúng 65 536 và 65 537 byte")
+    VEC = [(rc, tep(rc, tt, qs), tt) for rc, tt, qs in sorted(BO_BA_KQ, key=str)] + [(0, dem(65536), ht)] + [(rc, v, ha) for rc, v in (
+        (0, tep(0, ht, "passed", phien="lech")), (0, tep(0, ht, "passed", them=1)), (0, tep(False, ht, "passed")), (0, tep("0", ht, "passed")),
+        (0, tep(0, ht, "passed", ten="khac")), (0, tep(3, ht, "failed")), (0, tep(0, ht, "passed", schema="ket_qua_ca.v2")),
+        (0, tep(0, "bogus", "passed")), (0, tep(0, "cancelled", None)), (0, tep(0, "not_run", None)), (0, tep(0, ht, None)), (4, tep(4, "timed_out", "passed")),
+        (3, tep(3, ht, "passed")), *[(0, bo(k)) for k in sorted(KHOA_KQ)], (0, lambda ph, ten: None), (0, lambda ph, ten: b"\xff\xfe{}"),
+        (0, lambda ph, ten: b"khong phai json"), (0, lambda ph, ten: b"[]"), (0, dem(65537)),
+        (0, lambda ph, ten: json.dumps(tep(0, ht, "passed")(ph, ten)).replace("{", '{"rc": 0, ', 1).encode()))]
+    def con_gia(vec, rc, nem=None):   # hàm khởi chạy GIẢ: ghi véc-tơ vào ĐÚNG đường dẫn cha cấp rồi trả rc (hoặc ném)
+        def khoi_chay(argv, env):
+            d = vec(env[BIEN_KQ_PHIEN], argv[-1])
+            if d is not None:
+                Path(env[BIEN_KQ_CA]).write_bytes(d if isinstance(d, bytes) else json.dumps(d).encode("utf-8"))
+            if nem is not None:
+                raise nem
+            return types.SimpleNamespace(returncode=rc, stdout=f"DO:{argv[-1]}: x".encode() if rc == 3 else b"", stderr=b"")
+        return khoi_chay
+    for ten, chay in (("chay_con", lambda kc: chay_con("c00_gia", "ma.py", khoi_chay=kc)), ("chay_con_ban_test", lambda kc: chay_con_ban_test("c00_gia", "ban.py", khoi_chay=kc))):
+        for i, (rc, vec, mong) in enumerate(VEC):
+            r, ra, tt = chay(con_gia(vec, rc))
+            bang(tt == mong and r == rc and phan_hang(r, ra, "c00_gia") == {0: "SONG_SOT", 3: "GIET", 4: "TIN_DUNG_GIA"}[rc], f"{ten} véc-tơ {i}: mong {mong}, được {tt} (rc {r})")
+        for nem, mong in ((qh, (124, "timed_out")), (FileNotFoundError(2, "x"), (125, ha))):   # cha không đọc tệp dù con đã ghi tệp KHOẺ
+            r, ra, tt = chay(con_gia(tep(0, ht, "passed"), 0, nem))
+            bang((r, tt) == mong and phan_hang(r, ra, "c00_gia") == "HONG", f"{ten} cha bắt {type(nem).__name__}: {(r, tt)}")
+    with tempfile.TemporaryDirectory(prefix="cip_k5a_") as thu:
+        try:
+            tt = kiem_ket_qua_con(thu, "c00_gia", 0, "p")
+        except OSError as e:   # tính "không ném" là hợp đồng: CHỈ véc-tơ này bọc OSError thành tín hiệu chốt
+            tt = f"NÉM {type(e).__name__}"
+        bang(tt == ha, f"đường dẫn là thư mục: {tt}")
+        duong = Path(thu) / "kq.json"
+        ghi_ket_qua_con("cA", 3, ht, "failed", {BIEN_KQ_CA: str(duong), BIEN_KQ_PHIEN: "p1"})
+        bang(kiem_ket_qua_con(str(duong), "cA", 3, "p1") == ht and sorted(json.loads(duong.read_text(encoding="utf-8"))) == sorted(KHOA_KQ), "con ghi đúng sáu khoá")
+        duong.unlink()
+        ghi_ket_qua_con("cA", 0, ht, "passed", {BIEN_KQ_CA: str(duong)})
+        ghi_ket_qua_con("cA", 0, ht, "passed", {BIEN_KQ_CA: str(Path(thu) / "khong_co" / "kq.json"), BIEN_KQ_PHIEN: "p"})
+        bang(not duong.exists(), "thiếu một trong hai biến ⇒ con KHÔNG ghi; lỗi ghi bị bỏ qua")
+
+@ca
+def c83_hop_thanh_trang_thai_viec():   # K5a (r4): trạng thái của MỘT việc là hợp thành của mọi lời gọi bắt buộc, kể cả khi trúng đệm
+    ht, ha = "hoan_tat", "infrastructure_error"
+    bang([hop_thanh(*x) for x in ((False, []), (True, [(0, "timed_out")]), (True, [(0, ha), (3, ht)]), (True, [(3, ht)]), (True, [(0, ht), (3, "timed_out")]),
+                                  (True, [(0, ht), (3, ht)]), (True, [(0, ht)]), (True, [(3, "timed_out")]))]
+         == [ha, "timed_out", ha, ha, "timed_out", ht, ha, "timed_out"], "bảng hợp thành: bước đầu tiên khớp quyết định")
+    def con(tt_goc, rc_db=3):
+        return lambda ten_ca, ma, **k: (0, "", tt_goc) if Path(ma).name == "goc.py" else (rc_db, f"DO:{ten_ca}: x", ht)
+    tk0 = [(d, {"TIN_DUNG_GIA": 4, "SONG_SOT": 0, "GIET": 3}[d[4]]) for d in TU_KIEM]
+    for tt_goc in (ha, "timed_out", ht):
+        for ham, d in ((chay_dot_bien, DOT_BIEN[0]), (chay_dot_bien_test, DOT_BIEN_TEST[0]), (chay_dot_bien_dk, DOT_BIEN_DK[0])):
+            with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".chay_con", side_effect=con(tt_goc)), \
+                    mock.patch(__name__ + ".chay_con_ban_test", side_effect=lambda t, b: (3, f"DO:{t}: x", ht)):
+                lan = [ham(*d)[::2], ham(*d)[::2]]   # lần hai TRÚNG đệm: vẫn phải mang trạng thái của lời gọi bản gốc thật
+            k = _kc(ten_db=(d[0],), kq_db=[(d[0], *lan[1])])
+            bang(lan == [("GIET", tt_goc)] * 2 and k["cu"]["dot_bien"] == [[d[0], "GIET"]] and (k["ket_luan_tong"] == "xanh") is (tt_goc == ht)
+                 and k["dot_bien"][0]["phan_hang_dot_bien"] == ("giet" if tt_goc == ht else None), f"{ham.__name__} bản gốc {tt_goc}: {lan} {k['ket_luan_tong']}")
+        for d, rc_db in tk0:
+            with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".TU_KIEM", (d,)), mock.patch(__name__ + ".chay_con", side_effect=con(tt_goc, rc_db)):
+                kq_tk = chay_tu_kiem()
+            for che in ("nhe", "day_du"):
+                k = _kc(che=che, tk=((d[0], d[4]),), kq_tk=kq_tk)
+                bang(kq_tk == [(d[0], d[4], tt_goc)] and k["cu"]["tu_kiem"] == [[d[0], d[4]]] and (k["ket_luan_tong"] == "xanh") is (tt_goc == ht)
+                     and k["tu_kiem"][0]["dung_ky_vong"] is (True if tt_goc == ht else None), f"TU_KIEM {d[0]} ({che}) bản gốc {tt_goc}: {kq_tk}")
+    nhom = tuple(d for d in DOT_BIEN if d[3] == "c34")[:2]
+    with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".DOT_BIEN", nhom), mock.patch(__name__ + ".TU_KIEM", ()), \
+            mock.patch(__name__ + ".DOT_BIEN_TEST", ()), mock.patch(__name__ + ".DOT_BIEN_DK", ()), mock.patch(__name__ + ".chay_con", side_effect=con(ha)) as cc:
+        lam_nong_nen(1)
+        tt = [chay_dot_bien(*d)[2] for d in nhom]
+    bang(tt == [ha, ha] and len(nhom) == 2 and cc.call_count == 3, f"đệm do lam_nong_nen làm nóng: CẢ HAI việc phải {ha}: {tt}, {cc.call_count} lời gọi")
+
+@ca
+def c84_cu_tho_ra_toi_ben_doc():   # K5d: khối `cu` là kết quả CŨ THÔ, thứ tự thật, không căn theo kế hoạch, không suy từ tầng A+3
+    ht = "hoan_tat"
+    k = _kc(ten_db=("m1", "m2"), kq_db=[("m1", "GIET", "infrastructure_error")], tk=(("t1", "TIN_DUNG_GIA"),), kq_tk=[("t1", "TIN_DUNG_GIA", "timed_out")],
+            ten_ca=("a", "b"), kq_ca=[("a", 3, ht, "failed"), ("b", 4, ht, "failed")])
+    bang(k["cu"] == {"ca": [["a", 3], ["b", 4]], "dot_bien": [["m1", "GIET"]], "tu_kiem": [["t1", "TIN_DUNG_GIA"]]}, f"cu thô: {k['cu']}")
+    bang([(x["trang_thai_thuc_thi"], x["phan_hang_dot_bien"]) for x in k["dot_bien"]] == [("infrastructure_error", None), ("not_run", None)]
+         and k["tu_kiem"] == [{"ten": "t1", "trang_thai_thuc_thi": "timed_out", "dung_ky_vong": None}], f"phần tử căn kế hoạch: {k['dot_bien']} {k['tu_kiem']}")
+    for kq in ([("m2", "GIET", ht), ("m1", "GIET", ht)], [("m1", "GIET", ht), ("m1", "GIET", ht)], [("m1", "SONG_SOT", ht), ("m2", "TIN_DUNG_GIA", ht)]):
+        bang(_kc(ten_db=("m1", "m2"), kq_db=kq)["cu"]["dot_bien"] == [[t, h] for t, h, _ in kq], f"cu.dot_bien phải giữ nguyên thứ tự, số lần, hạng: {kq}")
+    k = _kc(ten_db=("m1", "m2"))
+    bang(k["cu"]["dot_bien"] == [["m1", "GIET"], ["m2", "GIET"]] and all(x["trang_thai_thuc_thi"] == ht for x in k["ca"] + k["dot_bien"] + k["tu_kiem"])
+         and set(k) == {"schema", "bo", "che_do", "ke_hoach_dot_bien", "ca", "dot_bien", "tu_kiem", "cu", "ket_luan_tong"} and k["ke_hoach_dot_bien"] == 2
+         and (k["schema"], k["bo"]) == ("ket_cuc_a3.v1", BO), "đối chứng lượt khoẻ: cu khớp kế hoạch, đúng chín khoá")
+
+@ca
+def c85_vung_va_env_registry_that():   # K6: bảng fixture vùng 30 hàng (băm ghim) so với `ke_hoach` THẬT và oracle độc lập; `env_theo_che_do` THẬT
+    bam = hashlib.sha256("".join(f"{n}\t{json.dumps(d)}\t{e}\n" for n, d, e in BANG_VUNG).encode("utf-8")).hexdigest()
+    bang(bam == "0aba13e7b73bee2a09d4a5aac541dfba76dbe4497edde2d77a938ac04a375e58" and len(BANG_VUNG) == 30, f"bảng fixture vùng lệch băm đặc tả: {bam}")
+    m = nap_dang_ky()
+    for n, d, e in BANG_VUNG:
+        che = m.ke_hoach(d).get(BO, ("VẮNG",))[0]
+        bang(che == e and oracle_vung(d) == e, f"hàng {n}: registry {che}, oracle {oracle_vung(d)}, kỳ vọng {e}")
+    bang(m.env_theo_che_do(BO, "nhe") == {BIEN_NHE: "1"} and m.env_theo_che_do(BO, "day_du") == {BIEN_NHE: None},
+         f"env theo chế độ: {m.env_theo_che_do(BO, 'nhe')} / {m.env_theo_che_do(BO, 'day_du')}")
+    bang(m.MAU_NHE.get(BO) is not None and m.MAU_DAY_DU.get(BO) is not None and m.MAU_DAY_DU.get(BO) == m.MOI.get(BO)
+         and m.VUNG_THEM.get(BO) == VT_THEM, "bốn mục dữ liệu của bộ: MAU_NHE có, MAU_DAY_DU là chính MOI, VUNG_THEM đúng bảy phần tử")
+
+@ca
+def c86_hoan_tac_bon_khoa():   # K8 (r12): gỡ TẠI CHỖ bốn khoá ⇒ hai vị từ A1, M2 của registry đúng, bộ về day_du; gỡ thiếu ⇒ sai; kèm chốt trôi
+    nguon = Path(os.environ.get(BIEN_DANG_KY) or DANG_KY_THAT).read_text(encoding="utf-8")
+    bang(not troi_k8(nguon), f"registry đổi luật A1/M2 — K8 phải được cập nhật: {troi_k8(nguon)}")
+    bang(len(troi_k8(nguon.replace(M2_K8, "set(MAU_NHE) < set(NHE)"))) == 1 and len(troi_k8(nguon.replace(A1_K8 + ")", A1_K8 + ") "))) == 0
+         and len(troi_k8("")) == 2, "chốt trôi phải ĐỎ khi một trong hai dòng `_them` đổi biểu thức")
+    def sau_go(khoa):
+        m = nap_dang_ky()
+        truoc = {t: {k: v for k, v in getattr(m, t).items() if k != BO} for t in BON_KHOA}
+        for t in khoa:
+            bang(BO in getattr(m, t), f"bản nạp thiếu mục {t} của bộ trước khi gỡ")
+            del getattr(m, t)[BO]   # tại chỗ: `ke_hoach` buộc `nhe=NHE` lúc định nghĩa
+        return m, [bool(eval(x, m.__dict__)) for x in (A1_K8, M2_K8)], truoc == {t: {k: v for k, v in getattr(m, t).items() if k != BO} for t in BON_KHOA}
+    m, vi_tu, bo_khac_nguyen = sau_go(BON_KHOA)   # vế khoẻ
+    bang(vi_tu == [True, True] and bo_khac_nguyen and not any(BO in getattr(m, t) for t in BON_KHOA), f"gỡ đủ bốn khoá: A1, M2 = {vi_tu}")
+    bang(all(m.ke_hoach(d).get(BO, (m.DAY_DU,))[0] == "day_du" for _, d, _ in BANG_VUNG), "sau khi gỡ, bộ phải về day_du ở cả 30 hàng")
+    bang(sau_go(("NHE",))[1] == [False, False] and sau_go(("NHE", "MAU_NHE"))[1] == [False, True], "gỡ thiếu khoá phải làm A1 (và M2) sai")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -2903,6 +3204,9 @@ TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
      "        raise AssertionError(f'doi kieu {type(e).__name__}')\n", "c03", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "TRANG = 100\n", "TRANG = 100  # vo hai\n", "c20", "SONG_SOT"),
 )
+def _n(s):
+    return s.replace("¦", "")
+
 _XD = chr(10)   # xuống dòng dựng bằng mã: neo nhiều dòng của `DOT_BIEN_TEST` không được tự xuất hiện lần thứ hai trong tệp này
 DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — sửa CHÍNH tệp này để đo răng của bộ máy song song. Neo một dòng ghép
                     # từ hai mảnh vì cùng lý do; `chay_dot_bien_test` vẫn đòi neo xuất hiện ĐÚNG MỘT lần.
@@ -2919,26 +3223,137 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T19_ke_hoach_tu_ket_qua", 'ten_kh = [d[0] for _, d in ' + 'viec]', 'ten_kh = [d[0] for _, d in ' + 'viec][:0]', "c66"),
     ("T20_chay_nham_viec_gan_dung_ten", 'chay_theo_thu_tu(lambda v: v[0](' + '*v[1]), viec, n)', 'chay_theo_thu_tu(lambda v: viec[0][0](*viec[0][1]), viec, n)', "c68"),   # review lượt 6 F3d
     ("T21_ten_tu_runner_khong_tu_doi_so", '        return (ten, ' + '*ham(ten, *con_lai))', '        return (ten, *ham("v0", *con_lai))', "c68"),
+    # wp1463 (PR2): mỗi chốt K1–K5, K8 một đột biến RIÊNG trên CHÍNH tệp này. `_n` bỏ dấu `¦` để neo không tự xuất hiện lần hai.
+    ("T22_K1_co_nhe_cat_khoang_trang", _n('.get(BIEN_NHE) ¦== "1" else'), '.get(BIEN_NHE, "").strip() == "1" else', "c78"),
+    ("T23_K2_co_nhe_ro_sang_luot_du", _n('kq_db = [] if che_do ¦== "nhe" else chay_vong()'), 'kq_db = []', "c79"),
+    ("T24_K3_co_nhe_bo_tu_kiem", _n('return kq_ca, kq_db, ¦chay_tk()'), 'return kq_ca, kq_db, (chay_tk() if che_do != "nhe" else [])', "c79"),
+    ("T25_K3_co_nhe_bo_ca", _n('kq_ca = ¦chay_cac_ca()'), _n('kq_ca = ¦chay_cac_ca() if che_do != "nhe" else []'), "c79"),
+    ("T26_K4_khoi_nhe_in_dong_du", _n('db = f"DOT BIEN: {M} muc CHE DO NHE — do khi diff cham vung" ¦if che_do == "nhe" else'), 'db = f"DOT BIEN: {M}/{M} bi giet dung ly do" if che_do == "nhe" else', "c80"),
+    ("T27_K5_E_khac_rong_ep_khong_xanh", _n('any(k not in ten_db ¦for k in E)'), 'bool(E)', "c81"),
+    ("T28_K5b_bo_kiem_ten_trung_ke_hoach", _n('or len(set(ten_db)) ¦!= len(ten_db) or'), 'or', "c81"),
+    ("T29_K5c_bo_ly_do", _n('pt["ly_do"] ¦= E[t]["ly_do"]'), 'pass', "c81"),
+    ("T30_K5c_bo_nguoi_xac_nhan", _n('pt["nguoi_xac_nhan"] ¦= E[t]["nguoi_xac_nhan"]'), 'pass', "c81"),
+    ("T31_K5a_timeout_ca_nen_thanh_failed", _n('subprocess.TimeoutExpired):¦' + _XD + '        return "timed_out", None'), 'subprocess.TimeoutExpired):' + _XD + '        return "hoan_tat", "failed"', "c82"),
+    ("T32_K5a_loi_khoi_chay_ca_nen_thanh_failed", _n('if isinstance(e, OSError):¦' + _XD + '        return "infrastructure_error", None'), 'if isinstance(e, OSError):' + _XD + '        return "hoan_tat", "failed"', "c82"),
+    ("T33_K5a_bo_chay_bo_tep_ket_qua", _n('"replace"), ¦kiem_ket_qua_con(duong, ten_ca, r.returncode, phien)'), '"replace"), ("hoan_tat" if r.returncode in (0, 3, 4) else "infrastructure_error")', "c82"),
+    ("T34_K5a_bo_kiem_bo_kiem_tap_khoa", _n('is not dict ¦or set(d) != KHOA_KQ:'), 'is not dict:', "c82"),
+    ("T35_K5a_bo_kiem_nhan_bool_lam_int", _n('and type(d.get("rc")) ¦is int'), 'and isinstance(d.get("rc"), int)', "c82"),
+    ("T36_K5a_bo_kiem_bo_kiem_phien", _n('(d.get("schema"), d.get("phien"), ¦d.get("ten"), d.get("rc")) != ("ket_qua_ca.v1", phien, ten_ca, rc):'),
+     '(d.get("schema"), d.get("ten"), d.get("rc")) != ("ket_qua_ca.v1", ten_ca, rc):', "c82"),
+    ("T37_K5a_bo_kiem_bo_kiem_bo_ba", _n('(d.get("rc"), d.get("trang_thai_thuc_thi"), d.get("quan_sat_ca")) ¦not in BO_BA_KQ:'),
+     'not (d.get("trang_thai_thuc_thi") in ("hoan_tat", "timed_out", "infrastructure_error", "cancelled", "not_run") and d.get("quan_sat_ca") in ("passed", "failed", None)):', "c82"),
+    ("T38_K5a_bo_kiem_de_loi_doc_thoat_ra", _n('except (OSError, ¦ValueError, RecursionError):'), 'except (FileNotFoundError, ValueError, RecursionError):', "c82"),
+    ("T39_K5a_chay_con_tu_doc_tep", _n('"replace"), ¦kiem_ket_qua_con(duong, ten_ca, r.returncode, phien)'), '"replace"), json.loads(Path(duong).read_text(encoding="utf-8"))["trang_thai_thuc_thi"]', "c82"),
+    ("T40_K5a_chay_con_ban_test_tu_doc_tep", _n('tt = ¦kiem_ket_qua_con(duong, ten_ca, r.returncode, phien)'), 'tt = json.loads(Path(duong).read_text(encoding="utf-8"))["trang_thai_thuc_thi"]', "c82"),
+    ("T41_K5a_chi_xet_ban_goc_khi_hang_cu_HONG", _n('if tt_goc ¦!= "hoan_tat":'), 'if tt_goc != "hoan_tat" and rc_goc != 0:', "c83"),
+    ("T42_K5a_dem_bo_trang_thai_ban_goc", _n('if khoa in _NEN:¦' + _XD + '        return _NEN[khoa]'), 'if khoa in _NEN:' + _XD + '        return (*_NEN[khoa][:2], "hoan_tat")', "c83"),
+    ("T43_K5d_cu_lay_tu_tang_A3", _n('"dot_bien": [[k[0], k[1]] ¦for k in kq_db]'),
+     '"dot_bien": [[x["ten"], {"giet": "GIET", "song": "SONG_SOT", "tin_dung_gia": "TIN_DUNG_GIA"}.get(x["phan_hang_dot_bien"], "HONG")] for x in db]', "c84"),
+    ("T44_K5d_cu_can_theo_ke_hoach", _n('"dot_bien": [[k[0], k[1]] ¦for k in kq_db]'), '"dot_bien": [[t, (k or (t, "HONG"))[1]] for t, k in zip(ten_db, can(ten_db, kq_db))]', "c84"),
+    ("T45_K8_hoan_tac_de_sot_MAU_DAY_DU", _n('sau_go(BON_KHOA)¦   # vế khoẻ'), 'sau_go(("NHE", "MAU_NHE", "VUNG_THEM"))', "c86"),
+    ("T46_K8_bo_chot_troi", _n('if dong.count(x) ¦!= 1]'), 'if False]', "c86"),
+    # SPEC r15 R15-2 (PR2-C02): hai đột biến của chốt 65 536 BYTE; cả hai chết ở véc-tơ `dem(65537)` của c82 (JSON hợp lệ), không ở lỗi phân tích.
+    ("T47_R15_2_bo_kiem_bo_chot_kich_thuoc", _n('tho.decode("utf-8") ¦if len(tho) <= 65536 else "qua 65536 byte"'), 'tho.decode("utf-8")', "c82"),
+    ("T48_R15_2_bo_kiem_doc_65536_thay_65537", _n('tho = f.read(¦65537)'), 'tho = f.read(65536)', "c82"),
+)
+_NEO_DK, _BO_DK = 'TIEN_TO_CHUNG = ("ops/cai_", "ops/cong_cu")' + _XD, 'ops/ci_provenance_test.py'
+DOT_BIEN_DK = (   # wp1463 K4/K6: (tên, gốc, thay, TIỀN TỐ ca đích) — sửa BẢN SAO TẠM của `.claude/dev/ci_dang_ky_test.py` (`chay_dot_bien_dk`)
+    ("D1_K6_vung_thieu_tep_dich", 'vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG', 'vung = {p, *VUNG_CHUNG', "c85"),
+    ("D2_K6_bo_bo_khoi_vung_cua_chinh_no", 'vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG', 'vung = {p[:-len("_test.py")] + ".py", *VUNG_CHUNG', "c85"),
+    *[(f"D{3 + i}_K6_bo_vung_them_{Path(x).stem.replace('.', '_').replace('-', '_')}", _NEO_DK,
+       _NEO_DK + f'VUNG_THEM["{_BO_DK}"] = tuple(x for x in VUNG_THEM["{_BO_DK}"] if x != "{x}")' + _XD, "c85") for i, x in enumerate(VT_THEM)],
+    ("D10_K6_xoa_muc_NHE", _NEO_DK, _NEO_DK + f'NHE.pop("{_BO_DK}")' + _XD, "c85"),
+    ("D11_K6_xoa_muc_MAU_NHE", _NEO_DK, _NEO_DK + f'MAU_NHE.pop("{_BO_DK}")' + _XD, "c85"),
+    ("D12_K4_xoa_MAU_NHE_thi_khoi_nhe_bi_tu_choi", _NEO_DK, _NEO_DK + f'MAU_NHE.pop("{_BO_DK}")' + _XD, "c80"),
 )
 
-def chay_con(ten_ca, ma):
-    try:
-        r = subprocess.run([sys.executable, "-B", str(HERE / "ci_provenance_test.py"), "--mot-ca", ten_ca], capture_output=True,
-                           env=dict(os.environ, CI_PROVENANCE_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"), timeout=300)
-    except subprocess.TimeoutExpired:   # Windows that (#997): ca nang qua han ⇒ HONG co ten, khong lam sap ca bo
-        return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s"
-    return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+# ===== wp1463 (PR2): tầng THỰC THI tách khỏi tầng quan sát bằng trường có cấu trúc (SPEC r11 mục 4), không dò chuỗi =====
+KHOA_KQ = frozenset({"schema", "phien", "ten", "rc", "trang_thai_thuc_thi", "quan_sat_ca"})
+BO_BA_KQ = frozenset({(0, "hoan_tat", "passed"), (3, "hoan_tat", "failed"), (4, "hoan_tat", "failed"), (4, "timed_out", None),
+                      (4, "infrastructure_error", None)})   # ĐÚNG năm đầu ra của bộ phân loại ghép với rc của `chay_ca`
+TUONG_DUONG_A3 = {}   # {tên: {"ly_do", "nguoi_xac_nhan"}} — RỖNG ở PR2 (c81 khẳng định); thêm mục cần packet riêng
 
-_NEN = {}   # (ca đích, sha256 bản gốc) -> (rc, ra): bản gốc chạy MỘT lần mỗi ca, không phải mỗi mục đột biến
+def doc_che_do(env=None):
+    """Mục 1: ĐÚNG chuỗi `1` ⇒ nhe; vắng và MỌI giá trị khác ⇒ day_du (fail-closed về phía chạy đủ)."""
+    return "nhe" if (os.environ if env is None else env).get(BIEN_NHE) == "1" else "day_du"
+
+def phan_loai_ngoai_le(e):
+    """Hàm THUẦN, theo KIỂU: ngoại lệ đã thoát khỏi thân ca (hoặc None) → (trang_thai_thuc_thi, quan_sat_ca)."""
+    if e is None:
+        return "hoan_tat", "passed"
+    if isinstance(e, TinHieuChotCa):
+        return "hoan_tat", "failed"
+    if isinstance(e, subprocess.TimeoutExpired):
+        return "timed_out", None
+    if isinstance(e, OSError):
+        return "infrastructure_error", None
+    return "hoan_tat", "failed"
+
+def _khong_khoa_trung(cap):
+    d = dict(cap)
+    if len(d) != len(cap):
+        raise ValueError("khoa trung")
+    return d
+
+def kiem_ket_qua_con(duong, ten_ca, rc, phien):
+    """Bộ kiểm kết quả con DÙNG CHUNG: chấp nhận ⇔ đủ sáu bước của SPEC; thiếu một ⇒ `infrastructure_error`. Không ném."""
+    try:
+        with open(duong, "rb") as f:
+            tho = f.read(65537)
+        d = json.loads(tho.decode("utf-8") if len(tho) <= 65536 else "qua 65536 byte", object_pairs_hook=_khong_khoa_trung)
+    except (OSError, ValueError, RecursionError):
+        return "infrastructure_error"
+    if type(d) is not dict or set(d) != KHOA_KQ:
+        return "infrastructure_error"
+    if not (all(type(d.get(k)) is str for k in ("schema", "phien", "ten", "trang_thai_thuc_thi")) and type(d.get("rc")) is int
+            and (d.get("quan_sat_ca") is None or type(d.get("quan_sat_ca")) is str)):
+        return "infrastructure_error"
+    if (d.get("schema"), d.get("phien"), d.get("ten"), d.get("rc")) != ("ket_qua_ca.v1", phien, ten_ca, rc):
+        return "infrastructure_error"
+    if (d.get("rc"), d.get("trang_thai_thuc_thi"), d.get("quan_sat_ca")) not in BO_BA_KQ:
+        return "infrastructure_error"
+    return d.get("trang_thai_thuc_thi")
+
+def _khoi_chay_con(argv, env):
+    return subprocess.run(argv, capture_output=True, env=env, timeout=300)
+
+def chay_con(ten_ca, ma, khoi_chay=_khoi_chay_con, dang_ky=None):
+    """Trả (rc, ra, trang_thai_thuc_thi). Mỗi lời gọi một thư mục tạm MỚI và một chuỗi phiên mới; `dang_ky` = bản registry đột biến."""
+    with tempfile.TemporaryDirectory(prefix="cip_kq_") as thu_kq:
+        duong, phien = str(Path(thu_kq) / "kq.json"), secrets.token_hex(16)
+        env = dict(os.environ, CI_PROVENANCE_MA=str(ma), PYTHONDONTWRITEBYTECODE="1", **{BIEN_KQ_CA: duong, BIEN_KQ_PHIEN: phien},
+                   **({BIEN_DANG_KY: str(dang_ky)} if dang_ky else {}))
+        try:
+            r = khoi_chay([sys.executable, "-B", str(HERE / "ci_provenance_test.py"), "--mot-ca", ten_ca], env)
+        except subprocess.TimeoutExpired:   # Windows that (#997): ca nang qua han ⇒ HONG co ten, khong lam sap ca bo
+            return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s", "timed_out"
+        except OSError as e:   # base để lỗi khởi chạy làm sập cả bộ; nay là rc 125 (`phan_hang` cũ: HONG) + tầng thực thi
+            return 125, f"KHONG_KHOI_CHAY:{ten_ca}: {type(e).__name__}: {e}", "infrastructure_error"
+        return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace"), kiem_ket_qua_con(duong, ten_ca, r.returncode, phien)
+
+_NEN = {}   # (ca đích, sha256 bản gốc) -> (rc, ra, trang_thai_thuc_thi): bản gốc chạy MỘT lần mỗi ca; trạng thái ghi CÙNG mục
 
 def nen_cua(ten_ca, goc):
     khoa = (ten_ca, hashlib.sha256(goc.encode("utf-8")).hexdigest())
-    if khoa not in _NEN:
-        with tempfile.TemporaryDirectory(prefix="cip_nen_") as thu:
-            ban_goc = Path(thu) / "goc.py"
-            ban_goc.write_text(goc, encoding="utf-8")
-            _NEN[khoa] = chay_con(ten_ca, ban_goc)
+    if khoa in _NEN:
+        return _NEN[khoa]
+    with tempfile.TemporaryDirectory(prefix="cip_nen_") as thu:
+        ban_goc = Path(thu) / "goc.py"
+        ban_goc.write_text(goc, encoding="utf-8")
+        _NEN[khoa] = chay_con(ten_ca, ban_goc)
     return _NEN[khoa]
+
+def hop_thanh(kiem_truoc, loi_goi):
+    """Hàm THUẦN: trạng thái thực thi của MỘT việc từ mọi lời gọi bắt buộc `[(rc, trang_thai)]` (bản gốc, rồi đột biến nếu đã chạy).
+    Bước đầu tiên khớp quyết định; hạng cũ không bao giờ là cổng mà trạng thái bản gốc phải đi qua."""
+    if not kiem_truoc or not loi_goi:
+        return "infrastructure_error"
+    rc_goc, tt_goc = loi_goi[0]
+    if tt_goc != "hoan_tat":
+        return tt_goc
+    if rc_goc != 0 or len(loi_goi) < 2:
+        return "infrastructure_error"
+    return loi_goi[1][1]
 
 BIEN_TIEN_TRINH = "CI_PROVENANCE_TIEN_TRINH"
 
@@ -2970,7 +3385,7 @@ def lam_nong_nen(n):
     ĐỌC `_NEN` — không có hai luồng cùng tính và cùng ghi một khoá. Bản gốc đọc Ở ĐÂY (cùng cách `chay_dot_bien` đọc), không
     truyền từ `main`: đối số tính trước lời gọi nên sẽ chạy cả khi hàm bị thay (c66)."""
     goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
-    dich = set()
+    dich = {c for muc in DOT_BIEN_DK for c in CA if c.split("_")[0] == muc[3]}
     for muc in DOT_BIEN + TU_KIEM + DOT_BIEN_TEST:
         khop = [c for c in CA if c.split("_")[0] == muc[3]]
         if len(khop) == 1:
@@ -2988,34 +3403,54 @@ def chay_vong_dot_bien(n, viec):
     lam_nong_nen(n)
     return chay_theo_thu_tu(lambda v: v[0](*v[1]), viec, n)
 
-def chay_con_ban_test(ten_ca, ban_test):
-    """#1322 M4: chạy MỘT ca trên bản sao (đã đột biến) của CHÍNH tệp test; mã sản phẩm là bản thật."""
-    try:
-        r = subprocess.run([sys.executable, "-B", str(ban_test), "--mot-ca", ten_ca], capture_output=True,
-                           env=dict(os.environ, CI_PROVENANCE_MA=str(HERE / "ci_provenance.py"), PYTHONDONTWRITEBYTECODE="1"),
-                           timeout=300)
-    except subprocess.TimeoutExpired:
-        return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s"
-    return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+def chay_con_ban_test(ten_ca, ban_test, khoi_chay=_khoi_chay_con):
+    """#1322 M4: chạy MỘT ca trên bản sao (đã đột biến) của CHÍNH tệp test; mã sản phẩm là bản thật. wp1463: như `chay_con`."""
+    with tempfile.TemporaryDirectory(prefix="cip_kq_") as thu_kq:
+        duong, phien = str(Path(thu_kq) / "kq.json"), secrets.token_hex(16)
+        try:
+            r = khoi_chay([sys.executable, "-B", str(ban_test), "--mot-ca", ten_ca],
+                          dict(os.environ, CI_PROVENANCE_MA=str(HERE / "ci_provenance.py"), PYTHONDONTWRITEBYTECODE="1",
+                               **{BIEN_KQ_CA: duong, BIEN_KQ_PHIEN: phien, BIEN_KHO: str(DANG_KY_THAT.parents[2])}))
+        except subprocess.TimeoutExpired:
+            return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s", "timed_out"
+        except OSError as e:
+            return 125, f"KHONG_KHOI_CHAY:{ten_ca}: {type(e).__name__}: {e}", "infrastructure_error"
+        tt = kiem_ket_qua_con(duong, ten_ca, r.returncode, phien)
+        return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace"), tt
 
 def chay_dot_bien_test(ten, cu, moi, tien_to):
     """Như `chay_dot_bien`, nhưng đột biến sửa `ci_provenance_test.py`; cùng phân hạng `phan_hang`, cùng đòi bản gốc XANH."""
     khop = [c for c in CA if c.split("_")[0] == tien_to]
     if len(khop) != 1:
-        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
+        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}", hop_thanh(False, [])
     ten_ca = khop[0]
     goc_test = (HERE / "ci_provenance_test.py").read_text(encoding="utf-8")
     if goc_test.count(cu) != 1 or cu == moi:
-        return "HONG", f"neo phải xuất hiện đúng 1 lần trong tệp test và đột biến phải đổi mã (thấy {goc_test.count(cu)})"
-    rc, ra = nen_cua(ten_ca, (HERE / "ci_provenance.py").read_text(encoding="utf-8"))
+        return "HONG", f"neo phải xuất hiện đúng 1 lần trong tệp test và đột biến phải đổi mã (thấy {goc_test.count(cu)})", hop_thanh(False, [])
+    rc, ra, tt_goc = nen_cua(ten_ca, (HERE / "ci_provenance.py").read_text(encoding="utf-8"))
     if rc != 0:
-        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}", hop_thanh(True, [(rc, tt_goc)])
     with tempfile.TemporaryDirectory(prefix="cip_dbt_") as thu:   # bản sao test ĐỨNG CẠNH mã sản phẩm thật: ca nào đọc `HERE` cũng thấy nó
         ban = Path(thu) / "ci_provenance_test.py"
         ban.write_text(goc_test.replace(cu, moi), encoding="utf-8")
         (Path(thu) / "ci_provenance.py").write_bytes((HERE / "ci_provenance.py").read_bytes())
-        rc, ra = chay_con_ban_test(ten_ca, ban)
-        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
+        rc, ra, tt = chay_con_ban_test(ten_ca, ban)
+        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:], hop_thanh(True, [(0, tt_goc), (rc, tt)])
+
+def chay_dot_bien_dk(ten, cu, moi, tien_to):
+    """wp1463 K4/K6: như `chay_dot_bien`, nhưng đột biến sửa BẢN SAO TẠM của registry; ca đích nạp nó qua `BIEN_DANG_KY`."""
+    khop = [c for c in CA if c.split("_")[0] == tien_to]
+    goc_dk = DANG_KY_THAT.read_text(encoding="utf-8")
+    if len(khop) != 1 or goc_dk.count(cu) != 1 or cu == moi:
+        return "HONG", f"ca đích {tien_to!r} khớp {khop}; neo thấy {goc_dk.count(cu)} lần trong registry", hop_thanh(False, [])
+    rc, ra, tt_goc = nen_cua(khop[0], (HERE / "ci_provenance.py").read_text(encoding="utf-8"))
+    if rc != 0:
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}", hop_thanh(True, [(rc, tt_goc)])
+    with tempfile.TemporaryDirectory(prefix="cip_dk_") as thu:
+        ban = Path(thu) / f"dk_{ten}.py"
+        ban.write_text(goc_dk.replace(cu, moi), encoding="utf-8")
+        rc, ra, tt = chay_con(khop[0], HERE / "ci_provenance.py", dang_ky=ban)
+        return phan_hang(rc, ra, khop[0]), ra.strip()[-200:], hop_thanh(True, [(0, tt_goc), (rc, tt)])
 
 def phan_hang(rc, ra, ten_ca):
     if rc == 0:
@@ -3027,29 +3462,125 @@ def phan_hang(rc, ra, ten_ca):
 def chay_dot_bien(ten, cu, moi, tien_to):
     khop = [c for c in CA if c.split("_")[0] == tien_to]
     if len(khop) != 1:
-        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
+        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}", hop_thanh(False, [])
     ten_ca = khop[0]
     goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
     if goc.count(cu) != 1 or cu == moi:
-        return "HONG", f"neo phải xuất hiện đúng 1 lần và đột biến phải đổi mã (thấy {goc.count(cu)})"
-    rc, ra = nen_cua(ten_ca, goc)
+        return "HONG", f"neo phải xuất hiện đúng 1 lần và đột biến phải đổi mã (thấy {goc.count(cu)})", hop_thanh(False, [])
+    rc, ra, tt_goc = nen_cua(ten_ca, goc)
     if rc != 0:
-        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}", hop_thanh(True, [(rc, tt_goc)])
     with tempfile.TemporaryDirectory(prefix="cip_db_") as thu:
         ban_db = Path(thu) / f"db_{ten}.py"
         ban_db.write_text(goc.replace(cu, moi), encoding="utf-8")
-        rc, ra = chay_con(ten_ca, ban_db)
-        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
+        rc, ra, tt = chay_con(ten_ca, ban_db)
+        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:], hop_thanh(True, [(0, tt_goc), (rc, tt)])
 
-def chay_ca(ten):
-    """(rc, dòng): 0 đạt · 3 `DO:<ca>:` (chỉ `TinHieuChotCa`) · 4 lỗi vô can — KHÔNG đổi lỗi vô can thành tín hiệu chốt."""
+def chay_ca_a3(ten):
+    """(rc, dòng, trang_thai_thuc_thi, quan_sat_ca): hai phần tử đầu ĐÚNG hợp đồng cũ; cặp sau lấy trong CÙNG khối bắt ngoại lệ."""
     try:
         CA[ten]()
     except TinHieuChotCa as e:
-        return 3, f"DO:{ten}:{e}"
+        return (3, f"DO:{ten}:{e}", *phan_loai_ngoai_le(e))
     except Exception as e:
-        return 4, f"HONG:{ten}:{type(e).__name__}: {e}"
-    return 0, ""
+        return (4, f"HONG:{ten}:{type(e).__name__}: {e}", *phan_loai_ngoai_le(e))
+    return (0, "", *phan_loai_ngoai_le(None))
+
+def chay_ca(ten):
+    """(rc, dòng): 0 đạt · 3 `DO:<ca>:` (chỉ `TinHieuChotCa`) · 4 lỗi vô can — KHÔNG đổi lỗi vô can thành tín hiệu chốt."""
+    return chay_ca_a3(ten)[:2]
+
+def ghi_ket_qua_con(ten, rc, tt, qs, env=None):
+    """Con `--mot-ca`: CHỈ khi CẢ HAI biến được đặt thì ghi `ket_qua_ca.v1`; lỗi ghi bị bỏ qua (cha thấy tệp vắng)."""
+    env = os.environ if env is None else env
+    duong, phien = env.get(BIEN_KQ_CA), env.get(BIEN_KQ_PHIEN)
+    if duong is None or phien is None:
+        return
+    try:
+        Path(duong).write_text(json.dumps({"schema": "ket_qua_ca.v1", "phien": phien, "ten": ten, "rc": rc, "trang_thai_thuc_thi": tt,
+                                           "quan_sat_ca": qs}), encoding="utf-8")
+    except Exception:
+        pass
+
+def chay_tu_kiem():
+    """`TU_KIEM` theo thứ tự: [(tên, hạng cũ, trang_thai_thuc_thi)] — cùng `chay_dot_bien`, cùng hàm hợp thành."""
+    return [(ten, *chay_dot_bien(ten, cu, moi, dich)[::2]) for ten, cu, moi, dich, _mong in TU_KIEM]
+
+def chay_theo_che_do(che_do, chay_cac_ca, chay_vong, chay_tk):
+    """MỘT chỗ quyết định "chạy những gì": nhẹ CHỈ bỏ vòng đột biến (và lượt làm nóng của nó); ca và `TU_KIEM` chạy mọi chế độ."""
+    kq_ca = chay_cac_ca()
+    kq_db = [] if che_do == "nhe" else chay_vong()
+    return kq_ca, kq_db, chay_tk()
+
+def dong_ket_luan(che_do, dat, tong_ca, g, M, tk_dat, so_tk, ket_luan):
+    """Hàm THUẦN: bốn dòng cuối. Khối nhẹ và khối đủ khác nhau ở ĐÚNG dòng `DOT BIEN`."""
+    db = f"DOT BIEN: {M} muc CHE DO NHE — do khi diff cham vung" if che_do == "nhe" else f"DOT BIEN: {g}/{M} bi giet dung ly do"
+    return [f"CA: {dat}/{tong_ca} dat", db, f"TU KIEM PHAN HANG: {'DAT' if tk_dat else 'DO'} ({so_tk} dot bien)",
+            f"TONG: {'DAT' if ket_luan == 'xanh' else 'DO'}"]
+
+def _muc_hop_le(E, ten):
+    m = E.get(ten)
+    return isinstance(m, dict) and all(isinstance(m.get(k), str) and m.get(k).strip() for k in ("ly_do", "nguoi_xac_nhan"))
+
+def cong_thuc_cu(CA, DOT_BIEN, TU_KIEM, ten_kh, kq, kq_db, kq_tk, E):
+    """Công thức `ok` cũ của `main` (blob base `21b23dbc`) — ĐÚNG MỘT hàm thuần: sàn bước 3 của `tinh_ket_cuc`, các dòng cũ của
+    `main` và ca `c66` cùng gọi nó. `kq` [(tên, rc)] · `kq_db` [(tên, hạng, _)] · `kq_tk` [(tên, hạng, _)] · `TU_KIEM` [(tên, mong)].
+    Trả dict; `ok` là `ok_cu_E`: None khi tên của `kq`/`kq_tk` lệch định nghĩa (không tính được), `xau` bỏ `SONG_SOT` có mục hợp lệ trong E."""
+    dat = sum(rc == 0 for _, rc in kq)
+    du = len(set(ten_kh)) == len(ten_kh) and [t for t, _, _ in kq_db] == ten_kh   # đúng tên, đúng thứ tự, đúng số lần — không chỉ đếm
+    xau = [x for x in kq_db if x[1] != "GIET"]
+    xau_e = [x for x in xau if not (x[1] == "SONG_SOT" and _muc_hop_le(E, x[0]))]
+    mong = dict(TU_KIEM)
+    loi_tk = [f"{ten}: mong {mong.get(ten)}, duoc {h}" for ten, h, _ in kq_tk if h != mong.get(ten)]
+    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and du and not xau_e and not loi_tk
+    tinh_duoc = [t for t, _ in kq] == list(CA) and [t for t, _, _ in kq_tk] == [t for t, _ in TU_KIEM]
+    return {"ok": ok if tinh_duoc else None, "dat": dat, "du": du, "xau": xau, "loi_tk": loi_tk}
+
+def tinh_ket_cuc(che_do, ten_ca, ten_db, tu_kiem, kq_ca, kq_db, kq_tk, E, dot_bien_goc):
+    """Kết cục A+3 (SPEC mục 4). Kế hoạch: `ten_ca`, `ten_db`, `tu_kiem` = [(tên, hạng mong)]; `dot_bien_goc` = bảng `DOT_BIEN`.
+    Kết quả THẬT: `kq_ca` [(tên, rc, trạng thái, quan sát)] · `kq_db`, `kq_tk` [(tên, hạng cũ, trạng thái)]. Phần tử căn theo
+    kế hoạch và khối `cu` (thứ tự thật) là hai biểu diễn TÁCH RỜI: không cái nào dựng từ cái kia."""
+    def can(ke, kq):   # kết quả ĐÚNG vị trí và ĐÚNG tên, không thì None ⇒ `not_run`
+        return [kq[i] if i < len(kq) and kq[i][0] == t else None for i, t in enumerate(ke)]
+    ten_tk = [t for t, _ in tu_kiem]
+    ca = [{"ten": t, "trang_thai_thuc_thi": k[2] if k else "not_run", "quan_sat_ca": k[3] if k else None}
+          for t, k in zip(ten_ca, can(ten_ca, kq_ca))]
+    db = []
+    for t, k in (zip(ten_db, can(ten_db, kq_db)) if che_do != "nhe" else ()):
+        tt = k[2] if k else "not_run"
+        if tt == "hoan_tat" and k[1] not in ("GIET", "SONG_SOT", "TIN_DUNG_GIA"):
+            tt = "infrastructure_error"   # `hoan_tat` kéo theo hạng cũ khác HONG; lệch ⇒ đóng về phía không kết luận
+        hang = None if tt != "hoan_tat" else {"GIET": "giet", "TIN_DUNG_GIA": "tin_dung_gia",
+                                              "SONG_SOT": "equivalent_reviewed" if _muc_hop_le(E, t) else "song"}[k[1]]
+        pt = {"ten": t, "trang_thai_thuc_thi": tt, "phan_hang_dot_bien": hang}
+        if _muc_hop_le(E, t):
+            pt["ly_do"] = E[t]["ly_do"]
+            pt["nguoi_xac_nhan"] = E[t]["nguoi_xac_nhan"]
+        db.append(pt)
+    tk = [{"ten": t, "trang_thai_thuc_thi": k[2] if k else "not_run", "dung_ky_vong": (k[1] == mong) if k and k[2] == "hoan_tat" else None}
+          for (t, mong), k in zip(tu_kiem, can(ten_tk, kq_tk))]
+    cu = {"ca": [[k[0], k[1]] for k in kq_ca], "dot_bien": [[k[0], k[1]] for k in kq_db], "tu_kiem": [[k[0], k[1]] for k in kq_tk]}
+    if (any(x["quan_sat_ca"] == "failed" for x in ca) or any(x["phan_hang_dot_bien"] in ("song", "tin_dung_gia") for x in db)
+            or any(x["dung_ky_vong"] is False for x in tk) or any(x["phan_hang_dot_bien"] == "giet" and "ly_do" in x for x in db)):
+        ket = "do"
+    elif (any(x["trang_thai_thuc_thi"] != "hoan_tat" for x in ca + tk + db)
+          or len(set(ten_db)) != len(ten_db) or len(set(ten_tk)) != len(ten_tk) or any(k not in ten_db for k in E)
+          or [k[0] for k in kq_db] != (list(ten_db) if che_do != "nhe" else []) or [k[0] for k in kq_tk] != ten_tk
+          or [k[0] for k in kq_ca] != list(ten_ca) or not ten_ca or not dot_bien_goc or not ten_db or not ten_tk):
+        ket = "khong_ket_luan"
+    elif che_do != "nhe" and cong_thuc_cu(ten_ca, dot_bien_goc, tu_kiem, list(ten_db), cu["ca"], kq_db, kq_tk, E)["ok"] is not True:
+        ket = "khong_ket_luan"   # bước 3 (r12): công thức cũ là SÀN lúc chạy — `xanh` không bao giờ lỏng hơn `ok_cu_E`
+    else:
+        ket = "xanh"
+    return {"schema": "ket_cuc_a3.v1", "bo": BO, "che_do": che_do, "ke_hoach_dot_bien": len(ten_db), "ca": ca, "dot_bien": db,
+            "tu_kiem": tk, "cu": cu, "ket_luan_tong": ket}
+
+def nap_dang_ky():
+    """Bản registry cho K4/K6/K8: MÃ đọc từ bản sao đột biến nếu `BIEN_DANG_KY` đặt, `__file__` vẫn là tệp THẬT (ROOT đúng)."""
+    m = types.ModuleType("ci_dang_ky_nap")
+    m.__file__ = str(DANG_KY_THAT)
+    exec(compile(Path(os.environ.get(BIEN_DANG_KY) or DANG_KY_THAT).read_text(encoding="utf-8"), str(DANG_KY_THAT), "exec"), m.__dict__)
+    return m
 
 HAM_DONG = ("_env_chan", "doc_wf", "ghep_job", "ten_du_kien", "_gio", "ghep_buoc", "chan_buoc", "tach_buoc", "do_dau_duong")
 DOI_SO_SANH = {ast.Eq: [ast.NotEq], ast.NotEq: [ast.Eq], ast.Lt: [ast.LtE, ast.Gt], ast.LtE: [ast.Lt, ast.GtE], ast.Gt: [ast.GtE, ast.Lt],
@@ -3185,7 +3716,8 @@ def chay_dot_bien_dong(song_song):
 
 def main(argv):
     if len(argv) == 2 and argv[0] == "--mot-ca" and argv[1] in CA:
-        rc, dong = chay_ca(argv[1])
+        rc, dong, tt, qs = chay_ca_a3(argv[1])
+        ghi_ket_qua_con(argv[1], rc, tt, qs)
         print(dong)
         return rc
     if argv == ["--tat-ca-ca"]:   # ca nhẹ trước, ca bảng/oracle sau; dừng ở ca ĐẦU TIÊN chết bởi `TinHieuChotCa` (đã đủ để xếp GIET)
@@ -3207,28 +3739,28 @@ def main(argv):
         print(f"CI_PROVENANCE: {e}", file=sys.stderr)
         return 2
     print(f"TIEN TRINH: {n}")
-    kq = [chay_ca(ten) for ten in CA]
-    print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
-    dat = sum(rc == 0 for rc, _ in kq)
-    print(f"CA: {dat}/{len(CA)} dat")
-    viec = [(co_ten(chay_dot_bien), d) for d in DOT_BIEN] + [(co_ten(chay_dot_bien_test), d) for d in DOT_BIEN_TEST]   # kế hoạch ĐỘC LẬP (review lượt 5 F3b/F3c)
+    che_do = doc_che_do()   # wp1463 mục 1: cờ đọc MỘT lần, chỉ ở nhánh không đối số
+    print(f"CHE DO: {che_do}")
+    viec = ([(co_ten(chay_dot_bien), d) for d in DOT_BIEN] + [(co_ten(chay_dot_bien_test), d) for d in DOT_BIEN_TEST]
+            + [(co_ten(chay_dot_bien_dk), d) for d in DOT_BIEN_DK])   # kế hoạch ĐỘC LẬP (review lượt 5 F3b/F3c)
     ten_kh = [d[0] for _, d in viec]
-    kq_db = chay_vong_dot_bien(n, list(viec))   # bản sao: hàm bị kiểm không đổi được kế hoạch của người gọi
-    du = len(set(ten_kh)) == len(ten_kh) and [t for t, _, _ in kq_db] == ten_kh   # đúng tên, đúng thứ tự, đúng số lần — không chỉ đếm
-    if not du:
+    kq_a3, kq_db_a3, kq_tk = chay_theo_che_do(che_do, lambda: [(ten, *chay_ca_a3(ten)) for ten in CA],
+                                              lambda: chay_vong_dot_bien(n, list(viec)), chay_tu_kiem)   # bản sao: hàm bị kiểm không đổi được kế hoạch của người gọi
+    kq_db = [x[:3] for x in kq_db_a3]   # danh sách CŨ, đúng hình base
+    print("".join(f"[{dong}]\n" for _, rc, dong, _, _ in kq_a3 if rc), end="")
+    kc = tinh_ket_cuc(che_do, list(CA), ten_kh, [(d[0], d[4]) for d in TU_KIEM], [(t, rc, tt, qs) for t, rc, _, tt, qs in kq_a3],
+                      [(t, h, tt) for t, h, _, tt in kq_db_a3], kq_tk, TUONG_DUONG_A3, DOT_BIEN)
+    cu = cong_thuc_cu(list(CA), DOT_BIEN, [(d[0], d[4]) for d in TU_KIEM], ten_kh, [x[:2] for x in kq_a3], kq_db, kq_tk, TUONG_DUONG_A3)
+    if not cu["du"] and che_do != "nhe":
         print(f"[DOT BIEN THIEU/LAP/DAO VIEC] ke hoach {len(ten_kh)} viec, ket qua {len(kq_db)}")
-    xau = [f"{t}: {h} {ct}" for t, h, ct in kq_db if h != "GIET"]
-    for x in xau:
-        print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    print(f"DOT BIEN: {sum(h == 'GIET' for _, h, _ in kq_db)}/{len(ten_kh)} bi giet dung ly do")   # tử số từ KẾT QUẢ thật (F3), mẫu số từ KẾ HOẠCH
-    loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
-              for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
-    for x in loi_tk:
+    for t, h, ct in cu["xau"]:
+        print(f"[DOT BIEN KHONG BI GIET DUNG] {t}: {h} {ct}")
+    for x in cu["loi_tk"]:
         print(f"[TU KIEM] {x}")
-    print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")
-    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and du and not xau and not loi_tk
-    print(f"TONG: {'DAT' if ok else 'DO'}")
-    return 0 if ok else 1
+    print("KET_CUC_A3: " + json.dumps(kc, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+    print("\n".join(dong_ket_luan(che_do, cu["dat"], len(CA), sum(h == "GIET" for _, h, _ in kq_db), len(ten_kh), not cu["loi_tk"],
+                                  len(TU_KIEM), kc["ket_luan_tong"])))   # tử số từ KẾT QUẢ thật (F3), mẫu số từ KẾ HOẠCH
+    return 0 if kc["ket_luan_tong"] == "xanh" else 1
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

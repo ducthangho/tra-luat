@@ -534,6 +534,9 @@ _RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
     rf"(?:\d+|{_chu_rieng(6)}){_KC}[.)(\-–](?:{_KC}[.)\-–])+",
     # r31 (lượt 30 G2): số + dấu DÍNH chữ cái đứng riêng (`1.a …`, `2)b …`) — khác `1. a …` (có đệm: khoản thân mở bằng chữ cái).
     rf"\d+{_KC}[.)(\-–]+{_chu_rieng(9)}",   # r32 (lượt 31 H2): cho phép đệm TRƯỚC dấu (`1 .a`); chữ vẫn phải DÍNH sau dấu
+    # r33 (lượt 32 I2): HAI placeholder chữ trở lên KỀ NHAU (`1.ab.`, `1.aB)`) — chỉ khi có dấu `lvlText` THEO SAU: không có dấu kết thì
+    # `1.ab …` trùng hình dạng thân dính sau số mở bằng một từ ASCII (`2.Quy trình …`) ⇒ ngoài miền nhận diện (giới hạn đã khai §2.35).
+    rf"\d+{_KC}[.)(\-–]+(?:(?P<k10>[a-zđA-ZĐ])(?P=k10)*){{2,}}{_KC}[.)(\-–]",
     rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
@@ -944,7 +947,7 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
 def _theo_kieu(kieu, sid, chi_so):
     """Giá trị hiệu lực theo chuỗi `basedOn` (chi_so: 1 numId, 2 ilvl, 3 strike, 4 dstrike). Vòng lặp ⇒ ValueError."""
     da = set()
-    while sid and sid in kieu and sid != "":
+    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1): chỉ ID đã XÁC THỰC là định nghĩa (không trúng khoá nội bộ)
         if sid in da:
             raise ValueError(f"style {sid}: vong lap basedOn")
         da.add(sid)
@@ -958,7 +961,7 @@ def _theo_kieu(kieu, sid, chi_so):
 def _dem_bat_trong_chuoi(kieu, sid, chi_so):
     """r6 (lượt 5 E2): SỐ tầng trong chuỗi `basedOn` bật thuộc tính toggle (gạch ngang)."""
     da, n = set(), 0
-    while sid and sid in kieu and sid != "":
+    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)
         if sid in da:
             raise ValueError(f"style {sid}: vong lap basedOn")
         da.add(sid)
@@ -1114,7 +1117,7 @@ def _phan_tich_doan(p, kieu):
     # coi như không style ⇒ chữ gạch có thể lọt. Không đoán fallback: đoạn ấy là "lạ" (chặn nếu nằm trong Điều).
     # r31 (lượt 30 G1): ID có mà SAI LOẠI (không phải paragraph style) cũng là tham chiếu không phân giải được.
     loai_kieu = kieu.get("#loai", {})
-    kq = {"phan": [], "ngat": False, "la": ps is not None and (psid not in kieu or loai_kieu.get(psid) != "paragraph"),
+    kq = {"phan": [], "ngat": False, "la": ps is not None and loai_kieu.get(psid) != "paragraph",   # r33 (lượt 32 I1): tra trên ID đã xác thực
           "sau_ngat_trang": False}
 
     def run(r):

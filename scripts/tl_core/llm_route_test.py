@@ -716,7 +716,9 @@ def ca_khoan_mat_so_co_diem_dat(m):
               # r31 (lượt 30 G2): số + dấu dính chữ cái (`1.a`), nhãn có đệm `1. a.`.
               "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2. a. Dữ liệu là thông tin.",
               # r32 (lượt 31 H2): đệm TRƯỚC dấu nối, chữ dính sau dấu.
-              "Điều 3.\n1. Hồ sơ là tài liệu.\n2 .a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2 )b Dữ liệu là thông tin."):
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2 .a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2 )b Dữ liệu là thông tin.",
+              # r33 (lượt 32 I2): hai placeholder chữ kề nhau có dấu kết.
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.ab. Dữ liệu là thông tin."):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
@@ -1527,6 +1529,16 @@ def ca_cau_truc_docx_dat(m):
            '</w:docDefaults></w:styles>')
     _, cap33, _ = _doc_hop_le(m, lam_docx(H, A, styles=kgd))
     bang(cap33 == [(1, "Hồ sơ là tài liệu.")], f"mac dinh doan khong danh so bi chan oan: {cap33}")
+    # r33 I1 đối chứng: `rStyle` trỏ khoá nội bộ = style VẮNG (Word bỏ qua) — đọc bình thường, không traceback.
+    knb2 = f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="TD"/></w:styles>'
+    _, cap49, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3.", kieu="TD"),
+                                          p_tho('<w:r><w:rPr><w:rStyle w:val="#loai"/></w:rPr><w:t>Hồ sơ là tài liệu.</w:t></w:r>'), styles=knb2))
+    bang(cap49 == [(1, "Hồ sơ là tài liệu.")], f"rStyle tro khoa noi bo: {cap49}")
+    # `basedOn` trỏ khoá nội bộ = cha VẮNG (Word bỏ qua) — chuỗi dừng, không traceback.
+    knb3 = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="TD"/><w:style w:type="paragraph" w:styleId="BB">'
+            '<w:basedOn w:val="#numPr_mac_dinh"/></w:style></w:styles>')
+    _, cap50, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3.", kieu="TD"), p_docx("Hồ sơ là tài liệu.", 1, kieu="BB"), styles=knb3))
+    bang(cap50 == [(1, "Hồ sơ là tài liệu.")], f"basedOn tro khoa noi bo: {cap50}")
     # r32 H1: style đoạn mặc định KHÔNG khai `w:type` (ngầm paragraph) mang gạch — đoạn không `pStyle` bị lọc theo nó.
     kmd0 = (f'<w:styles {_WNS}><w:style w:default="1" w:styleId="MD"><w:rPr><w:strike/></w:rPr></w:style>'
             '<w:style w:type="paragraph" w:styleId="TD"/></w:styles>')
@@ -1735,6 +1747,9 @@ def ca_cau_truc_docx_chan(m):
     kloai3 = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="PG"/><w:style w:type="character" w:styleId="KC">'
               '<w:basedOn w:val="PG"/></w:style></w:styles>')
     chan(lam_docx(H, A, styles=kloai3), "basedOn doi loai")
+    # r33 I1: THAM CHIẾU (pStyle / rStyle / basedOn) tới khoá nội bộ ⇒ chẩn đoán có kiểm soát, không traceback.
+    knb = f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="TD"/><w:style w:type="paragraph" w:styleId="BB"><w:basedOn w:val="#numPr_mac_dinh"/></w:style></w:styles>'
+    chan(lam_docx(p_docx("Điều 3.", kieu="TD"), p_docx("Hồ sơ là tài liệu.", 1, kieu="#numPr_mac_dinh"), styles=knb), "pStyle tro khoa noi bo")
     # r32 H3: styleId trùng miền khoá nội bộ (`#…`, rỗng) ⇒ từ chối có chẩn đoán (không traceback), kể cả style không dùng.
     for sid_la in ("#numPr_mac_dinh", "#loai", ""):
         chan(lam_docx(H, A, styles=f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="{sid_la}"/></w:styles>'), f"styleId noi bo {sid_la!r}")
@@ -1959,6 +1974,12 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r33 (lượt 32 I1/I2).
+    ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": False,'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_pstyle_chi_kiem_co_mat', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": ps is not None and psid not in kieu,'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_theo_kieu_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1): chỉ ID', '    while sid and sid in kieu and sid != "":   # r33 (lượt 32 I1): chỉ ID'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_dem_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)\n', '    while sid and sid in kieu and sid != "":\n'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_chu_ke_nhau_bo', ('{{2,}}{_KC}[.)(\\-–]",', '{{2,}}(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     # r30 (lượt 29 F1/F2) → r31 (lượt 30 G1/G2).
     ('wp1525_mot_cho_hai_dau', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)\\-–]){2,}",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_hai_dau_nhan_ngoac_mo', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)(\\-–])+",'), 'ca_khoan_mat_so_co_diem_dat'),
@@ -1966,8 +1987,6 @@ DOT_BIEN = [
     ('wp1525_so_dinh_chu_khong_dem', ('    rf"\\d+{_KC}[.)(\\-–]+{_chu_rieng(9)}",', '    rf"\\d+[.)(\\-–]+{_chu_rieng(9)}",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_mac_dinh_loai_tho', ('        if (st.get(_W + "type") or "paragraph") == "paragraph" and', '        if st.get(_W + "type") == "paragraph" and'), 'ca_cau_truc_docx_dat'),
     ('wp1525_style_id_noi_bo', ('        if not st.get(_W + "styleId") or st.get(_W + "styleId").startswith("#"):', '        if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_pstyle_dut_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(psid not in kieu)'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_pstyle_vang_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(loai_kieu.get(psid, "paragraph") != "paragraph")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_rstyle_sai_loai', ('                kq["la"] = True   # r31', '                pass   # r31'), 'ca_cau_truc_docx_chan'),
     ('wp1525_basedon_doi_loai', ('        if goc_sid in loai and loai[goc_sid] != ten_loai:', '        if False:'), 'ca_cau_truc_docx_chan'),
     # r29 (lượt 28 E1): tiền tố dấu của nhãn.

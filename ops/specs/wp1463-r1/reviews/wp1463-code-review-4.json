@@ -1,0 +1,602 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "generation": 5,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "b2d53b0f042e45f68d08610f0bec57c6",
+  "model_reviewer_identity": {
+    "provider": "openai_codex",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "xhigh",
+    "source": "Launcher /tmp/claude-0/-home-user-tra-luat/c4f557a5-3dc1-52de-8f7c-efef0dc5741c/scratchpad/rc4/runs/b2d53b0f/run.json reports provider=openai_codex, execution_surface=codex_cli, transport=machine, run_id=b2d53b0f042e45f68d08610f0bec57c6. Served model/effort fields absent; assignment is not runtime measurement.",
+    "independent_session": true,
+    "session_id": "b2d53b0f042e45f68d08610f0bec57c6",
+    "execution_surface": "codex_cli",
+    "transport": "machine"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "d84f45c1b4a346d6c9c17da0ba9579a7d0fcc7c5",
+  "reviewed_tree": "22b64e981758e5c7fb2e5cbd4ecfcb8be31d53b0",
+  "spec_sha256": "2848e163bed43cdc825eaa1fa8add2f2820ddc011cb4e95f258b5e0649ec81d8",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "code",
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "approve",
+  "assurance": "cross_approved",
+  "evidence_url": null,
+  "created_at": "2026-11-26T12:47:20.795166+00:00",
+  "updated_at": "2026-11-26T12:58:49.960169+00:00",
+  "findings": [],
+  "tests": [
+    {
+      "name": "scope/static",
+      "command": "Python static audit; git diff --numstat 1260fa0 HEAD; git diff --quiet {02ebcea,9333dd9} HEAD -- <each test file>",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "4 files +1150/-78; test blobs identical; spec hash matches; master drift outside write set; no skip-CI marker in 12 messages",
+      "artifact": "/tmp/wp1463-review4/static.json"
+    },
+    {
+      "name": "removal",
+      "command": "grep -nE <Acceptance 4(a) pattern> do_pr2.py; python3 -B do_pr2.py vung",
+      "status": "passed",
+      "exit_code": null,
+      "evidence": "grep rc1, zero lines; removed subcommand prints usage rc2",
+      "artifact": "/tmp/wp1463-review4/static.json"
+    },
+    {
+      "name": "self-check",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "26/26 comparator; 6/6 runner; DAT",
+      "artifact": "/tmp/wp1463-review4/tu.out"
+    },
+    {
+      "name": "self-check mutants",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py tu-kiem --dot-bien",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "19/19 (15 comparator + 4 runner); DAT",
+      "artifact": "/tmp/wp1463-review4/tu-mutants.out"
+    },
+    {
+      "name": "targeted and independent probes",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review4/targeted.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "10 targeted cases; T8/T18/T19 DO:c66/GIET; T47/T48 DO:c82/GIET at vector29; own byte boundaries 65535/65536 accepted and 65537/70000 rejected; own rc42 each stage rejected; both saved modes rc42 rejected; four runner mutants each fail exactly its named case.",
+      "artifact": "/tmp/wp1463-review4/targeted.out"
+    },
+    {
+      "name": "Ruff bare lint",
+      "command": "python3 -m ruff check --no-cache --select F <3 H Python files>; same command on 2 base blobs in /tmp",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "ruff 0.15.15; zero F findings on H and base; delta0. Not a pin/probe contract check.",
+      "artifact": null
+    },
+    {
+      "name": "full provenance suite",
+      "command": "python3 -B ops/ci_provenance_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "CA: 86/86 dat; DOT BIEN: 524/524 bi giet dung ly do; TU KIEM PHAN HANG: DAT (2 dot bien); TONG: DAT. A3 independently parsed: 86 completed/passed cases, 524 completed/giet mutants, 2 completed/correct self-checks. Stdout byte-identical to executor saved H full log; stderr empty. Full mode executed exactly once.",
+      "artifact": "/tmp/wp1463-review4/full.out"
+    },
+    {
+      "name": "full registry suite",
+      "command": "python3 -B .claude/dev/ci_dang_ky_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "PHẢN CHỨNG: 1677/1677 đỏ đúng; TỔNG: ĐẠT. p643-A1 and p647-M2 each ĐỎ đúng; RUFF CI: 3/3 contract. Empty stderr.",
+      "artifact": "/tmp/wp1463-review4/registry-suite.out"
+    },
+    {
+      "name": "retained AST, selector, diagnostic and report checks",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review4/retained.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Core comparator functions identical AST; do_ab/lenh_ab/lenh_registry identical after removing diagnostic print. All11 zone paths force full and unset inherited light flag; docs-only and near-name controls remain light. Removing diagnostic leaves rc/conclusion/other output unchanged. ab clone error rc3 carries one diagnostic.52 retained output lines identical. Both self-check output blocks match KET_QUA byte-for-byte.",
+      "artifact": "/tmp/wp1463-review4/retained.out"
+    },
+    {
+      "name": "real saved registry replay",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry --tu /tmp/wp1463/luu5",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "ĐẠT/ĐẠT/ĐỎ/ĐỎ; one diagnostic immediately before KET_LUAN_REGISTRY:DAT. Uses executor saved real logs, not new suite execution.",
+      "artifact": "/tmp/wp1463-review4/registry-saved.out"
+    },
+    {
+      "name": "A/B saved-output verification",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1463-review4/replay.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Exact base/H module and blob comparison with saved outputs:9/9, rc0/0/0.524 completed/giet saved entries,42T and13D. H differs from95fc954 only in KET_QUA. This checks replay consistency, not original process provenance or wall time.",
+      "artifact": "/tmp/wp1463-review4/replay.out"
+    },
+    {
+      "name": "light provenance suite",
+      "command": "CI_PROVENANCE_KHONG_DOT_BIEN=1 PYTHONDONTWRITEBYTECODE=1 python3 -B ops/ci_provenance_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "CA86/86; advertised plan524; actual A3 mutation jobs0; two self-checks completed and correct; TONG:DAT. Stdout byte-identical to executor saved light log.",
+      "artifact": "/tmp/wp1463-review4/light.out"
+    },
+    {
+      "name": "six retained runner cases do not spawn",
+      "command": "Import do_pr2.py and run tu_kiem_chay with subprocess.Popen patched to raise AssertionError",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "6/6 comparisons true; Popen call_count0. Reviewer-only probe; no repository mutation."
+    },
+    {
+      "name": "registry with fresh reviewer logs",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/specs/wp1463-r1/do/do_pr2.py registry --tu /tmp/wp1463-review4/fresh-saved",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Four combinations return ĐẠT/ĐẠT/ĐỎ/ĐỎ as required; KET_LUAN_REGISTRY: DAT. Uses fresh reviewer full/light stdout and actual saved rc files.",
+      "artifact": "/tmp/wp1463-review4/registry-fresh.out"
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-C01"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "scope": "PR2 retained",
+      "source_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+      "evidence": "All three rc42 boundaries, saved rc42 in both modes and healthy controls; independent runner mutants.",
+      "common_fix": "Existing fix retained",
+      "closure_test": "All three rc42 boundaries, saved rc42 in both modes and healthy controls; independent runner mutants.",
+      "blocks_current_packet": false
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "PR2-C02"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "highest_open_severity": null,
+      "scope": "PR2 retained",
+      "source_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+      "evidence": "Independent valid UTF-8 JSON boundary; T47/T48 fail at oversized valid JSON vector.",
+      "common_fix": "Existing fix retained",
+      "closure_test": "Independent valid UTF-8 JSON boundary; T47/T48 fail at oversized valid JSON vector.",
+      "blocks_current_packet": false
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-C04",
+        "PR2-C06",
+        "PR2-C07"
+      ],
+      "status": "MỞ — chuyển NO-PR2-DO-CAP-HDH, không phải ĐÃ VÁ THẬT",
+      "highest_open_severity": "P2",
+      "scope": "successor only",
+      "source_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+      "evidence": "Source hook, probe, classifier, zone fixtures, zone tests/mutants removed from do_pr2.py; grep zero; vung rc2. Selector fixtures in unchanged provenance test remain authorized.",
+      "common_fix": "Removal under owner-approved revision17; not repair",
+      "closure_test": "Not closed. Verified removal from PR2 by source/AST inspection, required grep rc1 with zero lines, vung rc2, six retained cases and four runner mutants. Repair and OS-level coverage belong to the successor.",
+      "blocks_current_packet": false,
+      "successor": "NO-PR2-DO-CAP-HDH"
+    },
+    {
+      "class_slug": "observation-timeout-leaves-process-running",
+      "finding_ids": [
+        "PR2-C03",
+        "PR2-C05",
+        "PR2-C08"
+      ],
+      "status": "MỞ — chuyển NO-PR2-DO-CAP-HDH, không phải ĐÃ VÁ THẬT",
+      "highest_open_severity": "P2",
+      "scope": "successor only",
+      "source_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+      "evidence": "chay_quan_sat and group cleanup code/tests/mutants gone. chay_bo subprocess.run remains with explicit lack of cleanup guarantee.",
+      "common_fix": "Removal under owner-approved revision17; not repair",
+      "closure_test": "Not closed. Verified removal from PR2 by source/AST inspection, required grep rc1 with zero lines, vung rc2, six retained cases and four runner mutants. Repair and OS-level coverage belong to the successor.",
+      "blocks_current_packet": false,
+      "successor": "NO-PR2-DO-CAP-HDH"
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "PR2-C01",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": "All three rc42 boundaries, saved rc42 in both modes and healthy controls; independent runner mutants."
+    },
+    {
+      "id": "PR2-C02",
+      "class_slug": "b4-predicate-mutation-proof",
+      "status": "ĐÃ VÁ THẬT",
+      "evidence": "Independent valid UTF-8 JSON boundary; T47/T48 fail at oversized valid JSON vector."
+    },
+    {
+      "id": "PR2-C03",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "chay_quan_sat and group cleanup code/tests/mutants gone. chay_bo subprocess.run remains with explicit lack of cleanup guarantee."
+    },
+    {
+      "id": "PR2-C04",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "Source hook, probe, classifier, zone fixtures, zone tests/mutants removed from do_pr2.py; grep zero; vung rc2. Selector fixtures in unchanged provenance test remain authorized."
+    },
+    {
+      "id": "PR2-C05",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "chay_quan_sat and group cleanup code/tests/mutants gone. chay_bo subprocess.run remains with explicit lack of cleanup guarantee."
+    },
+    {
+      "id": "PR2-C06",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "Source hook, probe, classifier, zone fixtures, zone tests/mutants removed from do_pr2.py; grep zero; vung rc2. Selector fixtures in unchanged provenance test remain authorized."
+    },
+    {
+      "id": "PR2-C07",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "Source hook, probe, classifier, zone fixtures, zone tests/mutants removed from do_pr2.py; grep zero; vung rc2. Selector fixtures in unchanged provenance test remain authorized."
+    },
+    {
+      "id": "PR2-C08",
+      "class_slug": "observation-timeout-leaves-process-running",
+      "status": "chuyển NO-PR2-DO-CAP-HDH",
+      "evidence": "chay_quan_sat and group cleanup code/tests/mutants gone. chay_bo subprocess.run remains with explicit lack of cleanup guarantee."
+    }
+  ],
+  "prior_class_status": {
+    "source_sha": "02ebcea54883744a5c79f983f3a310de30e6b8e1",
+    "inherited_classes": 4,
+    "verified_fixed_classes": 2,
+    "moved_open_classes": 2,
+    "new_classes": 0,
+    "open_findings_in_current_scope": 0,
+    "open_manifestations_in_current_scope": 0,
+    "note": "Four inherited classes remain in history: two retained fixes independently verified; two still open under the owner-approved successor split. Removal is not repair."
+  },
+  "hunt_table": [
+    {
+      "direction": "removal",
+      "hypothesis": "Dead audit or cleanup survives",
+      "command": "static audit",
+      "observed_output": "0 forbidden lines; vung rc2; no added function",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "nonregression",
+      "hypothesis": "Test files changed during removal",
+      "command": "git diff --quiet 02ebcea/9333dd9 HEAD -- each test",
+      "observed_output": "4 rc0 comparisons",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "return codes",
+      "hypothesis": "Positive output hides failed process",
+      "command": "targeted.py",
+      "observed_output": "three independent rc42 stages rejected; saved rc42 both modes rejected",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "byte limit",
+      "hypothesis": "Size mutant dies due invalid JSON",
+      "command": "targeted.py",
+      "observed_output": "valid JSON boundary checked; both mutants accept oversized JSON and die at DO:c82 vector29",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "legacy observation",
+      "hypothesis": "A+3 shadows c66 checks",
+      "command": "targeted.py",
+      "observed_output": "T8/T18/T19 killed DO:c66",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "documentation",
+      "hypothesis": "Removed guarantees still claimed",
+      "command": "KET_QUA and docstring inspection",
+      "observed_output": "0 forbidden output strings; one Giới hạn; explicit successor and no cleanup guarantee",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "lint",
+      "hypothesis": "Removal leaves dangling imports",
+      "command": "ruff 0.15.15 --select F --no-cache",
+      "observed_output": "H0/base0 F errors",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "declared zone selection",
+      "hypothesis": "Inherited light flag can silently skip mutants when the diff touches the declared zone",
+      "command": "python3 -B /tmp/wp1463-review4/retained.py",
+      "observed_output": "All11 exact zone paths =>day_du and CI_PROVENANCE_KHONG_DOT_BIEN=None; None diff =>day_du; docs-only/near-name controls=>nhe; c85 also passes30 frozen fixture rows.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "diagnostic influence",
+      "hypothesis": "GIOI_HAN_PR2 changes outcomes or remains a mutant target",
+      "command": "retained.py; inspect DOT_BIEN_SO/DOT_BIEN_CHAY",
+      "observed_output": "Removing print leaves rc, conclusion and all other output unchanged; tables target comparator/rc only; ab error route rc3 prints once.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "identifier/cardinality consistency",
+      "hypothesis": "SpecT1–T48 falsely promises48 mutants",
+      "command": "retained.py; replay.py; read r17 scope/section5/Acceptance4e",
+      "observed_output": "42T entries overall (4 in DOT_BIEN+38 in DOT_BIEN_TEST);13D (D01+12 registry). Existing full identifiers are preserved; numbering has gaps and repeated numeric prefixes with distinct names. Spec uses identifier range; no48-entry count is asserted.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "secrets and CI suppression",
+      "hypothesis": "Diff embeds secrets or commit messages suppress CI",
+      "command": "regex scan of added lines; git log --format=%H%n%B 1260fa0..HEAD",
+      "observed_output": "0 private-key/PAT/AWS/API-secret-literal signatures;12 commit messages,0 skip markers; manual inspection found no secret value.",
+      "result": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "full mutation outcomes and fresh registry",
+      "hypothesis": "A retained mutation survives or earns credit from an unrelated failure; fresh light output is accepted under a full plan",
+      "command": "python3 -B ops/ci_provenance_test.py; targeted.py; do_pr2.py registry --tu /tmp/wp1463-review4/fresh-saved",
+      "observed_output": "Full: 86/86 and 524/524, rc0; every A3 mutant completed/giet. T8/T18/T19 separately DO:c66; T47/T48 separately DO:c82 vector29. Fresh registry matrix ĐẠT/ĐẠT/ĐỎ/ĐỎ, rc0.",
+      "result": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "4 files +1150/-78",
+      "status": "passed",
+      "evidence": "independently measured exact"
+    },
+    {
+      "claim": "test byte identity",
+      "status": "passed",
+      "evidence": "4 exact Git comparisons rc0"
+    },
+    {
+      "claim": "grep0",
+      "status": "passed",
+      "evidence": "grep rc1 stdout empty"
+    },
+    {
+      "claim": "tu-kiem 26/26+6/6",
+      "status": "passed",
+      "evidence": "independent run rc0"
+    },
+    {
+      "claim": "tu-kiem --dot-bien19/19",
+      "status": "passed",
+      "evidence": "independent run rc0"
+    },
+    {
+      "claim": "ruff F delta0",
+      "status": "passed",
+      "evidence": "H0/base0 using0.15.15"
+    },
+    {
+      "claim": "one Giới hạn, no forbidden strings",
+      "status": "passed",
+      "evidence": "independent text check"
+    },
+    {
+      "claim": "52 retained lines unchanged",
+      "status": "passed",
+      "evidence": "Fresh tu-kiem --dot-bien versus KET_QUA at02ebcea:52 identical lines",
+      "command": "retained.py"
+    },
+    {
+      "claim": "A/B9/9 and RC0/0/0 on95fc954, H code same",
+      "status": "passed",
+      "evidence": "Replay of saved outputs with exact modules yields9/9 and rc0/0/0; git diff95fc954..H changes only KET_QUA. Not fresh base-suite execution.",
+      "command": "replay.py; git diff --name-only95fc954 HEAD"
+    },
+    {
+      "claim": "historical timing718.6/655.7/152.8 seconds",
+      "status": "not_run",
+      "evidence": "No independent historical wall-clock receipt; replay duration0.0 is synthetic and not credited. Full/light current runs overlap registry work and are not comparable benchmarks.",
+      "command": null
+    },
+    {
+      "claim": "42T and13D entries",
+      "status": "passed",
+      "evidence": "Count across all three tables and saved KET_CUC_A3 agrees; table-local DOT_BIEN_TEST count38 is not totalT count.",
+      "command": "retained.py; replay.py"
+    },
+    {
+      "claim": "ci_dang_ky_test1677/1677",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B .claude/dev/ci_dang_ky_test.py",
+      "exit_code": 0,
+      "evidence": "Independent full registry suite1677/1677, TỔNG:ĐẠT; stdout1684lines; stderr0bytes."
+    },
+    {
+      "claim": "H light86/86 with524 advertised mutants",
+      "status": "passed",
+      "command": "CI_PROVENANCE_KHONG_DOT_BIEN=1 PYTHONDONTWRITEBYTECODE=1 python3 -B ops/ci_provenance_test.py",
+      "exit_code": 0,
+      "evidence": "Fresh H light output86/86,524 planned,0 executed,2/2 self-checks; exact saved-output byte match."
+    },
+    {
+      "claim": "H full 86/86 and 524/524",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B ops/ci_provenance_test.py",
+      "exit_code": 0,
+      "evidence": "Independently executed once; complete A3 validation and exact byte match to saved H stdout."
+    },
+    {
+      "claim": "registry DAT",
+      "status": "passed",
+      "command": "do_pr2.py registry --tu /tmp/wp1463-review4/fresh-saved",
+      "exit_code": 0,
+      "evidence": "Fresh full/light logs yield all four expected results and exactly one diagnostic before DAT."
+    },
+    {
+      "claim": "prior +1905 lines versus H +1150",
+      "status": "passed",
+      "command": "git diff --numstat 1260fa0 02ebcea; git diff --numstat 1260fa0 HEAD",
+      "exit_code": 0,
+      "evidence": "Prior additions 11+606+229+1059=1905; H 11+606+161+372=1150. Four files; reduction 755 lines; within all caps."
+    },
+    {
+      "claim": "H report code hashes",
+      "status": "passed",
+      "command": "sha256 via hashlib over the three changed Python files",
+      "exit_code": 0,
+      "evidence": "All three hashes match KET_QUA; exact hashes are in static.json."
+    },
+    {
+      "claim": "six runner cases, four runner mutants, no process spawning",
+      "status": "passed",
+      "command": "targeted.py; tu-kiem --dot-bien; tu_kiem_chay with Popen patched to raise",
+      "exit_code": 0,
+      "evidence": "Exactly six named cases and four named mutants retained; each mutant changes only its target case; zero Popen calls."
+    },
+    {
+      "claim": "Acceptance 9: four command blocks, no forbidden strings, one limit section, no H SHA/tree",
+      "status": "passed",
+      "command": "static audit; retained.py; inspect KET_QUA.md",
+      "exit_code": 0,
+      "evidence": "Four raw command blocks; both self-check blocks equal fresh stdout; prohibited strings absent; exactly one ## Giới hạn; no H SHA/tree embedded."
+    }
+  ],
+  "notes": [
+    "Approve the retained revision-17 code/spec slice at the exact SHA/tree only. Zero current-scope findings. This is neither human_audited nor merge/land/deploy authorization.",
+    "First complete verdict saved at 2026-11-26T12:47:20.795166+00:00; launcher started at 2026-11-26T12:42:56.538393+00:00 (within the first 15 minutes). It was updated as measurements completed.",
+    "Actual launcher identity: openai_codex / codex_cli / machine, run b2d53b0f042e45f68d08610f0bec57c6. The verdict schema uses provider=codex as requested. Executor is separately recorded as claude / claude_code / machine/local. No executor context was reused and no subagent was spawned.",
+    "Cross-provider local code review evidence only; delivery receipt and terminal launcher binding must be recorded by the caller. Served model/effort remain KHONG_DO_DUOC under protocol §8.1/ADR-0065; no GitHub submitter identity inferred.",
+    "PR2-C01/C02 are independently verified retained fixes. PR2-C03 through C08 are chuyển NO-PR2-DO-CAP-HDH, not repaired. Source audit/cleanup code and their tests/mutants are gone from do_pr2.py. The unchanged selector fixtures/oracle in ci_provenance_test.py test the declared selection rule, not zone completeness.",
+    "Revision 17 scope overrides prior zone/cleanup requirements explicitly. Historical spec sections retain history and do not constitute an active H guarantee. No active assertion of complete zone measurement or cleaned descendants was found in the changed code output/docstrings or KET_QUA.",
+    "All writes were confined to reviewer scratch under /tmp and REVIEW_OUT. Repository tracked/untracked/ignored status, working diff, index diff, HEAD and tree match the initial snapshot. The only visible ignored item is the pre-existing empty .codex directory. Endpoint snapshots do not prove absence of every possible transient write.",
+    "The supplied sandbox is workspace-write; read-only review conduct is not claimed to be an OS-enforced read-only mount. /tmp/.git exists and was left untouched; launcher_test was not run and no unrelated launcher failure was credited.",
+    "No credentials or secret-like literals were found by manual review and a bounded added-line signature scan. Twelve commit messages contain no literal CI-suppression marker. No all-history secret-scan claim is made.",
+    "Only one actual full-mode provenance-suite execution occurred. Registry full suite and one light provenance suite also ran; fresh result logs and return codes are preserved. Historical A/B timing remains unverified."
+  ],
+  "environment": {
+    "os": "Linux-6.18.44-fc-v880-x86_64-with-glibc2.39",
+    "python": "3.13.18",
+    "cpu_count": 4,
+    "sandbox": "workspace-write (supplied runtime policy)",
+    "repo_read_only_conduct": true,
+    "core_abbrev": "7",
+    "origin": "https://github.com/ducthangho/tra-luat.git",
+    "preexisting_ignored": ".codex/ (empty directory in visible filesystem)",
+    "preexisting_tmp_git": true,
+    "ruff": "0.15.15",
+    "actionlint": "1.7.7",
+    "shellcheck": "0.9.0"
+  },
+  "preflight": {
+    "repository": "/tmp/claude-0/-home-user-tra-luat/c4f557a5-3dc1-52de-8f7c-efef0dc5741c/scratchpad/rc3/kho",
+    "head_detached": true,
+    "base_sha": "1260fa0cba89353911e2f97188b2c04dab8139d7",
+    "master_at_bootstrap": "4f954fec424651cc3b94234a03b1e96cd41ff69b",
+    "spec_revision": 17,
+    "lease": "wp1463-r17-g5-claude",
+    "lease_expires_utc": "2026-11-27T17:00:00Z",
+    "review_round": "4/4",
+    "review_class": "sensitive",
+    "effective_write_set": [
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/ci_provenance_test.py",
+      "ops/specs/wp1463-r1/do/KET_QUA.md",
+      "ops/specs/wp1463-r1/do/do_pr2.py"
+    ],
+    "authority": "Explicit read-only review assignment; frozen spec at63aac4b and lease on supplied origin/ops/wp1463-r1; Missionr125/r126 successor split. No live GitHub authority or land authorization inferred."
+  },
+  "handoff_interpretations": [
+    {
+      "number": 1,
+      "judgment": "consistent",
+      "reason": "Acceptance2 explicitly requires comparator(a) sets and reasons in KET_QUA; explanation alongside raw output is permitted."
+    },
+    {
+      "number": 2,
+      "judgment": "consistent",
+      "reason": "Acceptance9 asks for both tu-kiem commands; separate raw blocks legitimately repeat the shared prefix."
+    },
+    {
+      "number": 3,
+      "judgment": "consistent",
+      "reason": "Existing ab clone-failure conclusion now has the required preceding diagnostic; independently reproduced rc3 with one line."
+    },
+    {
+      "number": 4,
+      "judgment": "consistent",
+      "reason": "Acceptance9 places exact-H gate/size evidence in handoff/Issue rather than the report committed in H."
+    },
+    {
+      "number": 5,
+      "judgment": "consistent, not overclaim",
+      "reason": "T1–T48 denotes retained full identifiers in that numeric range, not a cardinality claim. Measured42T (4+38),13D (1+12); specsection5 expressly does not precommit a test/mutant count; byte identity fixes the actual set."
+    }
+  ],
+  "completed_at": "2026-11-26T12:58:49.960169+00:00",
+  "first_complete_verdict_at": "2026-11-26T12:47:20.795166+00:00",
+  "review_scope": "Code review round 4/4 of the retained revision-17 slice; not land authorization.",
+  "unmeasured": [
+    {
+      "item": "Historical wall times: base 718.6 s, H full 655.7 s, H light 152.8 s",
+      "status": "not_run",
+      "reason": "Saved log replay verifies results, not historical wall-clock provenance. Fresh runs overlapped other review tests and are not comparable performance benchmarks."
+    },
+    {
+      "item": "Fresh base full run and ab end-to-end on exact H",
+      "status": "not_run",
+      "reason": "Avoided additional full-suite executions. Verified exact base/H modules and saved base result by A/B replay; fresh H full/light stdout is byte-identical to the saved H logs."
+    },
+    {
+      "item": "PR Ubuntu CI, K7 workflow, Windows run or exact-H waiver, owner audit, post-merge Acceptance 10",
+      "status": "not_run",
+      "reason": "Outside this local pre-push code review; no GitHub write or workflow dispatch performed. No pass or land credit assigned."
+    },
+    {
+      "item": "Zone completeness and descendant-process cleanup",
+      "status": "not_run",
+      "reason": "Explicitly removed from PR2 by revision 17 and moved to NO-PR2-DO-CAP-HDH; inherited classes remain open."
+    },
+    {
+      "item": "Served model and effort",
+      "status": "not_measured",
+      "reason": "Current launcher record exposes provider/surface/transport/run, but no served-model/effort measurement. Requested model is not treated as served-model evidence."
+    }
+  ],
+  "snapshot": {
+    "initial_status_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52",
+    "final_status_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52",
+    "tracked_diff_bytes": 0,
+    "index_diff_bytes": 0,
+    "head_tree_unchanged": true,
+    "ignored_visible_files": 0
+  },
+  "evidence_artifacts": {
+    "directory": "/tmp/wp1463-review4",
+    "manifest": "/tmp/wp1463-review4/artifacts.json",
+    "full_stdout_sha256": "b47d062d122994f8ca2c671210ac25b3165d2aa67b3fb715c2a1e77be3bdfc87",
+    "light_stdout_sha256": "0355cfa79d5aa315e33945548c2da9615abcd13704b515c0a76ec2f6a0901a9d",
+    "registry_stdout_sha256": "a6cab0b365941f471972e7edc6bf7cca7b55558b21a670aeeba02cd4577c4c84",
+    "targeted_stdout_sha256": "f94180f36d97c6fb5c2ce203cdec09f4c15a51493ef681c3fdac48b3a4289bde"
+  },
+  "test_status_counts": {
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "not_run": 0
+  }
+}

@@ -1,0 +1,1569 @@
+﻿2026-11-24T14:50:56.5467011Z Current runner version: '2.338.2'
+2026-11-24T14:50:56.5484826Z ##[group]Runner Image Provisioner
+2026-11-24T14:50:56.5485360Z Hosted Compute Agent
+2026-11-24T14:50:56.5485808Z Version: 20261111.635
+2026-11-24T14:50:56.5486256Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-24T14:50:56.5487013Z Build Date: 2026-11-11T01:49:01Z
+2026-11-24T14:50:56.5487452Z Worker ID: {2a033e01-9425-4b9b-8c4d-68faa6a6ec15}
+2026-11-24T14:50:56.5487873Z Region: centralus
+2026-11-24T14:50:56.5488246Z Cloud: Azure
+2026-11-24T14:50:56.5488622Z ##[endgroup]
+2026-11-24T14:50:56.5489544Z ##[group]Operating System
+2026-11-24T14:50:56.5489967Z Ubuntu
+2026-11-24T14:50:56.5490286Z 26.04.1
+2026-11-24T14:50:56.5490620Z LTS
+2026-11-24T14:50:56.5491010Z ##[endgroup]
+2026-11-24T14:50:56.5491332Z ##[group]Runner Image
+2026-11-24T14:50:56.5491943Z Image: ubuntu-26.04
+2026-11-24T14:50:56.5492299Z Version: 20261116.202.1
+2026-11-24T14:50:56.5493126Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.202/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-24T14:50:56.5494011Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.202
+2026-11-24T14:50:56.5494622Z ##[endgroup]
+2026-11-24T14:50:56.5496354Z ##[group]GITHUB_TOKEN Permissions
+2026-11-24T14:50:56.5498008Z Actions: write
+2026-11-24T14:50:56.5498405Z ArtifactMetadata: write
+2026-11-24T14:50:56.5498817Z Attestations: write
+2026-11-24T14:50:56.5499246Z Checks: write
+2026-11-24T14:50:56.5499575Z CodeQuality: write
+2026-11-24T14:50:56.5499991Z Contents: write
+2026-11-24T14:50:56.5500332Z CopilotRequests: write
+2026-11-24T14:50:56.5500707Z Deployments: write
+2026-11-24T14:50:56.5501055Z Discussions: write
+2026-11-24T14:50:56.5501390Z Drives: write
+2026-11-24T14:50:56.5501960Z Issues: write
+2026-11-24T14:50:56.5502361Z Metadata: read
+2026-11-24T14:50:56.5502717Z Models: read
+2026-11-24T14:50:56.5503056Z Packages: write
+2026-11-24T14:50:56.5503388Z Pages: write
+2026-11-24T14:50:56.5503790Z PullRequests: write
+2026-11-24T14:50:56.5504162Z RepositoryProjects: write
+2026-11-24T14:50:56.5504522Z SecurityEvents: write
+2026-11-24T14:50:56.5504913Z Statuses: write
+2026-11-24T14:50:56.5505260Z VulnerabilityAlerts: read
+2026-11-24T14:50:56.5505705Z ##[endgroup]
+2026-11-24T14:50:56.5507075Z Secret source: Actions
+2026-11-24T14:50:56.5507637Z Cache mode: write
+2026-11-24T14:50:56.5508061Z Prepare workflow directory
+2026-11-24T14:50:56.5766561Z Prepare all required actions
+2026-11-24T14:50:56.5808569Z Getting action download info
+2026-11-24T14:50:56.8348289Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-24T14:50:56.9058214Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-24T14:50:56.9790974Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-24T14:50:57.1464624Z Complete job name: gate-cong-cu (ubuntu-latest, 7)
+2026-11-24T14:50:57.1949108Z ##[group]Run git config --global core.autocrlf false
+2026-11-24T14:50:57.1949584Z [36;1mgit config --global core.autocrlf false[0m
+2026-11-24T14:50:57.1949945Z [36;1mgit config --global core.eol lf[0m
+2026-11-24T14:50:57.1950395Z [36;1m# r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.[0m
+2026-11-24T14:50:57.1950835Z [36;1mgit config --global core.abbrev 7[0m
+2026-11-24T14:50:57.1979737Z shell: /usr/bin/bash -e {0}
+2026-11-24T14:50:57.1980146Z env:
+2026-11-24T14:50:57.1980390Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:50:57.1980660Z   PYTHONUTF8: 1
+2026-11-24T14:50:57.1980914Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:50:57.1981193Z ##[endgroup]
+2026-11-24T14:50:57.2268554Z ##[group]Run actions/checkout@v4
+2026-11-24T14:50:57.2268879Z with:
+2026-11-24T14:50:57.2269110Z   fetch-depth: 0
+2026-11-24T14:50:57.2269370Z   repository: ducthangho/tra-luat
+2026-11-24T14:50:57.2271490Z   token: ***
+2026-11-24T14:50:57.2271942Z   ssh-strict: true
+2026-11-24T14:50:57.2272187Z   ssh-user: git
+2026-11-24T14:50:57.2272441Z   persist-credentials: true
+2026-11-24T14:50:57.2272910Z   clean: true
+2026-11-24T14:50:57.2273160Z   sparse-checkout-cone-mode: true
+2026-11-24T14:50:57.2273446Z   fetch-tags: false
+2026-11-24T14:50:57.2273693Z   show-progress: true
+2026-11-24T14:50:57.2273947Z   lfs: false
+2026-11-24T14:50:57.2274260Z   submodules: false
+2026-11-24T14:50:57.2274628Z   set-safe-directory: true
+2026-11-24T14:50:57.2274955Z   allow-unsafe-pr-checkout: false
+2026-11-24T14:50:57.2275243Z env:
+2026-11-24T14:50:57.2275477Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:50:57.2275739Z   PYTHONUTF8: 1
+2026-11-24T14:50:57.2275992Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:50:57.2276290Z ##[endgroup]
+2026-11-24T14:50:57.4537860Z Syncing repository: ducthangho/tra-luat
+2026-11-24T14:50:57.4538981Z ##[group]Getting Git version info
+2026-11-24T14:50:57.4539401Z Working directory is '/home/runner/work/tra-luat/tra-luat'
+2026-11-24T14:50:57.4540000Z [command]/usr/bin/git version
+2026-11-24T14:50:57.4550369Z git version 2.56.1
+2026-11-24T14:50:57.4561568Z ##[endgroup]
+2026-11-24T14:50:57.4568850Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/5637f373-550d-4c14-b7f7-1238b014caa9/.gitconfig'
+2026-11-24T14:50:57.4575065Z Temporarily overriding HOME='/home/runner/work/_temp/5637f373-550d-4c14-b7f7-1238b014caa9' before making global git config changes
+2026-11-24T14:50:57.4576498Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T14:50:57.4578180Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-11-24T14:50:57.4608911Z Deleting the contents of '/home/runner/work/tra-luat/tra-luat'
+2026-11-24T14:50:57.4611276Z ##[group]Initializing the repository
+2026-11-24T14:50:57.4614166Z [command]/usr/bin/git init /home/runner/work/tra-luat/tra-luat
+2026-11-24T14:50:57.4704170Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-24T14:50:57.4704829Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-24T14:50:57.4705430Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-24T14:50:57.4705878Z hint: call:
+2026-11-24T14:50:57.4706130Z hint:
+2026-11-24T14:50:57.4706441Z hint: 	git config --global init.defaultBranch <name>
+2026-11-24T14:50:57.4706808Z hint:
+2026-11-24T14:50:57.4707159Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-24T14:50:57.4707716Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-24T14:50:57.4708156Z hint:
+2026-11-24T14:50:57.4708416Z hint: 	git branch -m <name>
+2026-11-24T14:50:57.4708703Z hint:
+2026-11-24T14:50:57.4709089Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-24T14:50:57.4716483Z Initialized empty Git repository in /home/runner/work/tra-luat/tra-luat/.git/
+2026-11-24T14:50:57.4723166Z [command]/usr/bin/git remote add origin https://github.com/ducthangho/tra-luat
+2026-11-24T14:50:57.4765088Z ##[endgroup]
+2026-11-24T14:50:57.4765609Z ##[group]Disabling automatic garbage collection
+2026-11-24T14:50:57.4767031Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-24T14:50:57.4791173Z ##[endgroup]
+2026-11-24T14:50:57.4791613Z ##[group]Setting up auth
+2026-11-24T14:50:57.4795325Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T14:50:57.4820760Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T14:50:57.5160126Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T14:50:57.5184594Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T14:50:57.5403426Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T14:50:57.5428499Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T14:50:57.5634379Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-24T14:50:57.5665783Z ##[endgroup]
+2026-11-24T14:50:57.5666492Z ##[group]Fetching the repository
+2026-11-24T14:50:57.5674490Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-11-24T14:51:04.5432181Z From https://github.com/ducthangho/tra-luat
+2026-11-24T14:51:04.5432992Z  * [new branch]      agent/windows-local-may-chu-kho-r3-bien-nhan -> origin/agent/windows-local-may-chu-kho-r3-bien-nhan
+2026-11-24T14:51:04.5433633Z  * [new branch]      agent/wp1170-g5-codex       -> origin/agent/wp1170-g5-codex
+2026-11-24T14:51:04.5434178Z  * [new branch]      agent/wp1173-r2-g1-codex    -> origin/agent/wp1173-r2-g1-codex
+2026-11-24T14:51:04.5434724Z  * [new branch]      agent/wp1173-r3-g2-codex    -> origin/agent/wp1173-r3-g2-codex
+2026-11-24T14:51:04.5435239Z  * [new branch]      agent/wp1173-r4-g3-codex    -> origin/agent/wp1173-r4-g3-codex
+2026-11-24T14:51:04.5435759Z  * [new branch]      agent/wp1176-r3-g2-codex    -> origin/agent/wp1176-r3-g2-codex
+2026-11-24T14:51:04.5436285Z  * [new branch]      agent/wp1236-a-r12-g2-codex -> origin/agent/wp1236-a-r12-g2-codex
+2026-11-24T14:51:04.5436917Z  * [new branch]      agent/wp1315-r3-g3-codex    -> origin/agent/wp1315-r3-g3-codex
+2026-11-24T14:51:04.5437453Z  * [new branch]      agent/wp1448-r7-g9-opus     -> origin/agent/wp1448-r7-g9-opus
+2026-11-24T14:51:04.5437954Z  * [new branch]      agent/wp1462-r9-g6-codex    -> origin/agent/wp1462-r9-g6-codex
+2026-11-24T14:51:04.5438480Z  * [new branch]      agent/wp1475-g3-codex       -> origin/agent/wp1475-g3-codex
+2026-11-24T14:51:04.5438982Z  * [new branch]      agent/wp1499-r4-g1-codex    -> origin/agent/wp1499-r4-g1-codex
+2026-11-24T14:51:04.5439501Z  * [new branch]      agent/wp1499-r5-g2-codex    -> origin/agent/wp1499-r5-g2-codex
+2026-11-24T14:51:04.5440059Z  * [new branch]      agent/wp1499-r5-g3-codex    -> origin/agent/wp1499-r5-g3-codex
+2026-11-24T14:51:04.5440583Z  * [new branch]      agent/wp1499-r6-g4-codex    -> origin/agent/wp1499-r6-g4-codex
+2026-11-24T14:51:04.5441112Z  * [new branch]      agent/wp1499-r6-g5-codex    -> origin/agent/wp1499-r6-g5-codex
+2026-11-24T14:51:04.5441623Z  * [new branch]      agent/wp1499-r6-g6-codex    -> origin/agent/wp1499-r6-g6-codex
+2026-11-24T14:51:04.5442270Z  * [new branch]      agent/wp1500-r1-g1-codex    -> origin/agent/wp1500-r1-g1-codex
+2026-11-24T14:51:04.5442811Z  * [new branch]      agent/wp433-r10-g1-claude   -> origin/agent/wp433-r10-g1-claude
+2026-11-24T14:51:04.5443332Z  * [new branch]      agent/wp433-r11-g1-claude   -> origin/agent/wp433-r11-g1-claude
+2026-11-24T14:51:04.5443863Z  * [new branch]      agent/wp433-r8-g1-claude    -> origin/agent/wp433-r8-g1-claude
+2026-11-24T14:51:04.5444412Z  * [new branch]      agent/wp433-r9-g5-claude    -> origin/agent/wp433-r9-g5-claude
+2026-11-24T14:51:04.5444917Z  * [new branch]      ccr-89c0d2e2-inanqb         -> origin/ccr-89c0d2e2-inanqb
+2026-11-24T14:51:04.5445400Z  * [new branch]      ccr-8ee03d7f-vnmqk0         -> origin/ccr-8ee03d7f-vnmqk0
+2026-11-24T14:51:04.5445863Z  * [new branch]      ccr-a1ff05af-u99yr7         -> origin/ccr-a1ff05af-u99yr7
+2026-11-24T14:51:04.5446375Z  * [new branch]      claude/agy-ghim-1.5.16      -> origin/claude/agy-ghim-1.5.16
+2026-11-24T14:51:04.5447316Z  * [new branch]      claude/ci-github-path-hoan-ghi -> origin/claude/ci-github-path-hoan-ghi
+2026-11-24T14:51:04.5447933Z  * [new branch]      claude/ci-toi-uu-do-dac-20261115 -> origin/claude/ci-toi-uu-do-dac-20261115
+2026-11-24T14:51:04.5448623Z  * [new branch]      claude/codex-acl-sandbox-r1509 -> origin/claude/codex-acl-sandbox-r1509
+2026-11-24T14:51:04.5449257Z  * [new branch]      claude/ghi-so-land-1144     -> origin/claude/ghi-so-land-1144
+2026-11-24T14:51:04.5449965Z  * [new branch]      claude/handoff-land-81-r2-c00561c -> origin/claude/handoff-land-81-r2-c00561c
+2026-11-24T14:51:04.5450566Z  * [new branch]      claude/handoff-p3c-kiem-merge -> origin/claude/handoff-p3c-kiem-merge
+2026-11-24T14:51:04.5451149Z  * [new branch]      claude/handoff-wp1105-kiem-merge -> origin/claude/handoff-wp1105-kiem-merge
+2026-11-24T14:51:04.5452536Z  * [new branch]      claude/handoff-wp1132-aad4865 -> origin/claude/handoff-wp1132-aad4865
+2026-11-24T14:51:04.5453093Z  * [new branch]      claude/handoff-wp1189-2758691 -> origin/claude/handoff-wp1189-2758691
+2026-11-24T14:51:04.5453658Z  * [new branch]      claude/handoff-wp1236-b-f4e93b3 -> origin/claude/handoff-wp1236-b-f4e93b3
+2026-11-24T14:51:04.5454223Z  * [new branch]      claude/handoff-wp1236-c-ac523ae -> origin/claude/handoff-wp1236-c-ac523ae
+2026-11-24T14:51:04.5454785Z  * [new branch]      claude/handoff-wp1240-review-l2 -> origin/claude/handoff-wp1240-review-l2
+2026-11-24T14:51:04.5455411Z  * [new branch]      claude/handoff-wp433-26fbacd -> origin/claude/handoff-wp433-26fbacd
+2026-11-24T14:51:04.5455967Z  * [new branch]      claude/handoff-wp433-36dc91a -> origin/claude/handoff-wp433-36dc91a
+2026-11-24T14:51:04.5456480Z  * [new branch]      claude/handoff-wp433-4e74fe1 -> origin/claude/handoff-wp433-4e74fe1
+2026-11-24T14:51:04.5457000Z  * [new branch]      claude/handoff-wp433-5293a85 -> origin/claude/handoff-wp433-5293a85
+2026-11-24T14:51:04.5457511Z  * [new branch]      claude/handoff-wp433-6330653 -> origin/claude/handoff-wp433-6330653
+2026-11-24T14:51:04.5458070Z  * [new branch]      claude/handoff-wp978-aebc808 -> origin/claude/handoff-wp978-aebc808
+2026-11-24T14:51:04.5458591Z  * [new branch]      claude/handoff-wp978-cebf7ac -> origin/claude/handoff-wp978-cebf7ac
+2026-11-24T14:51:04.5459108Z  * [new branch]      claude/land-pr1502-wp1236-a -> origin/claude/land-pr1502-wp1236-a
+2026-11-24T14:51:04.5459602Z  * [new branch]      claude/spec-1236-r8         -> origin/claude/spec-1236-r8
+2026-11-24T14:51:04.5460075Z  * [new branch]      claude/spec-1236-r9         -> origin/claude/spec-1236-r9
+2026-11-24T14:51:04.5460540Z  * [new branch]      claude/spec-1473-r1         -> origin/claude/spec-1473-r1
+2026-11-24T14:51:04.5461008Z  * [new branch]      claude/wp1236-a1-g1         -> origin/claude/wp1236-a1-g1
+2026-11-24T14:51:04.5461487Z  * [new branch]      claude/wp1236-r10-a-g1      -> origin/claude/wp1236-r10-a-g1
+2026-11-24T14:51:04.5462207Z  * [new branch]      claude/wp1236-r9-a-g1       -> origin/claude/wp1236-r9-a-g1
+2026-11-24T14:51:04.5462694Z  * [new branch]      claude/wp1475-spec          -> origin/claude/wp1475-spec
+2026-11-24T14:51:04.5463198Z  * [new branch]      claude/wp1507-don-rac-a     -> origin/claude/wp1507-don-rac-a
+2026-11-24T14:51:04.5463723Z  * [new branch]      coord/wp1475-r1-g2-staging  -> origin/coord/wp1475-r1-g2-staging
+2026-11-24T14:51:04.5464260Z  * [new branch]      coord/wp1475-r1-g3-staging  -> origin/coord/wp1475-r1-g3-staging
+2026-11-24T14:51:04.5464769Z  * [new branch]      do-ci/p1-a1-20261115        -> origin/do-ci/p1-a1-20261115
+2026-11-24T14:51:04.5465116Z  * [new branch]      do-ci/p1-gom-20261116       -> origin/do-ci/p1-gom-20261116
+2026-11-24T14:51:04.5465433Z  * [new branch]      do-ci/p2-a1-20261115        -> origin/do-ci/p2-a1-20261115
+2026-11-24T14:51:04.5465762Z  * [new branch]      do-ci/pl-profile-20261115   -> origin/do-ci/pl-profile-20261115
+2026-11-24T14:51:04.5466106Z  * [new branch]      do-ci/pl-spawn-20261115     -> origin/do-ci/pl-spawn-20261115
+2026-11-24T14:51:04.5466471Z  * [new branch]      luu-tru/238-ho-so-cross-review -> origin/luu-tru/238-ho-so-cross-review
+2026-11-24T14:51:04.5466933Z  * [new branch]      master                      -> origin/master
+2026-11-24T14:51:04.5467314Z  * [new branch]      ops/a13-k1-canary-spec      -> origin/ops/a13-k1-canary-spec
+2026-11-24T14:51:04.5467891Z  * [new branch]      ops/adr-0060-mac-dinh-r1-lease -> origin/ops/adr-0060-mac-dinh-r1-lease
+2026-11-24T14:51:04.5468518Z  * [new branch]      ops/bundled-gate-oracle-spec -> origin/ops/bundled-gate-oracle-spec
+2026-11-24T14:51:04.5469219Z  * [new branch]      ops/bundled-tach-manh-spec  -> origin/ops/bundled-tach-manh-spec
+2026-11-24T14:51:04.5469746Z  * [new branch]      ops/cap-lease-1009-g1       -> origin/ops/cap-lease-1009-g1
+2026-11-24T14:51:04.5470246Z  * [new branch]      ops/cap-lease-1038-g1       -> origin/ops/cap-lease-1038-g1
+2026-11-24T14:51:04.5470605Z  * [new branch]      ops/cap-lease-1039-g1       -> origin/ops/cap-lease-1039-g1
+2026-11-24T14:51:04.5470926Z  * [new branch]      ops/cap-lease-1089-g1       -> origin/ops/cap-lease-1089-g1
+2026-11-24T14:51:04.5471253Z  * [new branch]      ops/cap-lease-1099-g1       -> origin/ops/cap-lease-1099-g1
+2026-11-24T14:51:04.5471568Z  * [new branch]      ops/cap-lease-1105-g1       -> origin/ops/cap-lease-1105-g1
+2026-11-24T14:51:04.5472054Z  * [new branch]      ops/cap-lease-1189-g1       -> origin/ops/cap-lease-1189-g1
+2026-11-24T14:51:04.5472377Z  * [new branch]      ops/cap-lease-p3c-g1        -> origin/ops/cap-lease-p3c-g1
+2026-11-24T14:51:04.5472765Z  * [new branch]      ops/ci-concurrency-master-r1-lease -> origin/ops/ci-concurrency-master-r1-lease
+2026-11-24T14:51:04.5473339Z  * [new branch]      ops/ci-duong-nhanh-bo-dot-bien-r1-lease -> origin/ops/ci-duong-nhanh-bo-dot-bien-r1-lease
+2026-11-24T14:51:04.5473753Z  * [new branch]      ops/ci-lan-luu-tru-r1-lease -> origin/ops/ci-lan-luu-tru-r1-lease
+2026-11-24T14:51:04.5474235Z  * [new branch]      ops/ci-provenance-wd-r1-lease -> origin/ops/ci-provenance-wd-r1-lease
+2026-11-24T14:51:04.5474883Z  * [new branch]      ops/dieu-kien-merge-cong-r1-lease -> origin/ops/dieu-kien-merge-cong-r1-lease
+2026-11-24T14:51:04.5475486Z  * [new branch]      ops/dieu-kien-merge-r1-lease -> origin/ops/dieu-kien-merge-r1-lease
+2026-11-24T14:51:04.5476104Z  * [new branch]      ops/doc-claims-dau-cham-g2-lease -> origin/ops/doc-claims-dau-cham-g2-lease
+2026-11-24T14:51:04.5476701Z  * [new branch]      ops/doc-claims-dau-cham-lease -> origin/ops/doc-claims-dau-cham-lease
+2026-11-24T14:51:04.5477364Z  * [new branch]      ops/evidence-local-gates-no-actions -> origin/ops/evidence-local-gates-no-actions
+2026-11-24T14:51:04.5477995Z  * [new branch]      ops/ghi-so-land-1099-lease  -> origin/ops/ghi-so-land-1099-lease
+2026-11-24T14:51:04.5478577Z  * [new branch]      ops/ghi-so-land-1193-1186-lease -> origin/ops/ghi-so-land-1193-1186-lease
+2026-11-24T14:51:04.5479144Z  * [new branch]      ops/ghi-so-land-1237-lease  -> origin/ops/ghi-so-land-1237-lease
+2026-11-24T14:51:04.5479676Z  * [new branch]      ops/ghi-so-land-1258-lease  -> origin/ops/ghi-so-land-1258-lease
+2026-11-24T14:51:04.5480199Z  * [new branch]      ops/giam-hoi-p1-lease       -> origin/ops/giam-hoi-p1-lease
+2026-11-24T14:51:04.5480690Z  * [new branch]      ops/giam-hoi-p2-lease       -> origin/ops/giam-hoi-p2-lease
+2026-11-24T14:51:04.5481050Z  * [new branch]      ops/hotfix-r1252-posix-lease -> origin/ops/hotfix-r1252-posix-lease
+2026-11-24T14:51:04.5481415Z  * [new branch]      ops/k3-connector-state-spec -> origin/ops/k3-connector-state-spec
+2026-11-24T14:51:04.5481928Z  * [new branch]      ops/k3-connector-state-v1-lease -> origin/ops/k3-connector-state-v1-lease
+2026-11-24T14:51:04.5482299Z  * [new branch]      ops/k6k7-merge-base-spec    -> origin/ops/k6k7-merge-base-spec
+2026-11-24T14:51:04.5482649Z  * [new branch]      ops/kiem-merge-m9-r1-lease  -> origin/ops/kiem-merge-m9-r1-lease
+2026-11-24T14:51:04.5483062Z  * [new branch]      ops/land-1322-ci-provenance-song-song -> origin/ops/land-1322-ci-provenance-song-song
+2026-11-24T14:51:04.5483454Z  * [new branch]      ops/land-81-ha-cap-lease    -> origin/ops/land-81-ha-cap-lease
+2026-11-24T14:51:04.5483910Z  * [new branch]      ops/land-81-ha-cap-r2-lease -> origin/ops/land-81-ha-cap-r2-lease
+2026-11-24T14:51:04.5484253Z  * [new branch]      ops/land-81-pr963-lease     -> origin/ops/land-81-pr963-lease
+2026-11-24T14:51:04.5484567Z  * [new branch]      ops/land-pr1485             -> origin/ops/land-pr1485
+2026-11-24T14:51:04.5484879Z  * [new branch]      ops/land-pr1490-wp433       -> origin/ops/land-pr1490-wp433
+2026-11-24T14:51:04.5485280Z  * [new branch]      ops/lease-1195-t191-g1      -> origin/ops/lease-1195-t191-g1
+2026-11-24T14:51:04.5485640Z  * [new branch]      ops/mission1238-handoff-20261117 -> origin/ops/mission1238-handoff-20261117
+2026-11-24T14:51:04.5486002Z  * [new branch]      ops/pr1187-p2-g4-proposal   -> origin/ops/pr1187-p2-g4-proposal
+2026-11-24T14:51:04.5486372Z  * [new branch]      ops/pr1187-r1-g1-lease      -> origin/ops/pr1187-r1-g1-lease
+2026-11-24T14:51:04.5486794Z  * [new branch]      ops/pr1187-r2-g2-lease      -> origin/ops/pr1187-r2-g2-lease
+2026-11-24T14:51:04.5487129Z  * [new branch]      ops/pr1187-r2-g3-lease      -> origin/ops/pr1187-r2-g3-lease
+2026-11-24T14:51:04.5487444Z  * [new branch]      ops/pr1187-r2-g4-lease      -> origin/ops/pr1187-r2-g4-lease
+2026-11-24T14:51:04.5487766Z  * [new branch]      ops/pr1187-r2-g4-review     -> origin/ops/pr1187-r2-g4-review
+2026-11-24T14:51:04.5488082Z  * [new branch]      ops/pr1187-r2-g5-lease      -> origin/ops/pr1187-r2-g5-lease
+2026-11-24T14:51:04.5488452Z  * [new branch]      ops/proxima-playwright-p0-spec -> origin/ops/proxima-playwright-p0-spec
+2026-11-24T14:51:04.5488814Z  * [new branch]      ops/px-gemini-500-r5        -> origin/ops/px-gemini-500-r5
+2026-11-24T14:51:04.5489142Z  * [new branch]      ops/release-1.36.70-lease   -> origin/ops/release-1.36.70-lease
+2026-11-24T14:51:04.5489490Z  * [new branch]      ops/spec-doc-claims-dau-cham -> origin/ops/spec-doc-claims-dau-cham
+2026-11-24T14:51:04.5489845Z  * [new branch]      ops/spec-giam-hoi-p2-r11    -> origin/ops/spec-giam-hoi-p2-r11
+2026-11-24T14:51:04.5490175Z  * [new branch]      ops/spec-wp1174-r18         -> origin/ops/spec-wp1174-r18
+2026-11-24T14:51:04.5490483Z  * [new branch]      ops/spec-wp1174-r19         -> origin/ops/spec-wp1174-r19
+2026-11-24T14:51:04.5490789Z  * [new branch]      ops/spec-wp1174-r20         -> origin/ops/spec-wp1174-r20
+2026-11-24T14:51:04.5491088Z  * [new branch]      ops/spec-wp1174-r21         -> origin/ops/spec-wp1174-r21
+2026-11-24T14:51:04.5491398Z  * [new branch]      ops/spec-wp1174-r22         -> origin/ops/spec-wp1174-r22
+2026-11-24T14:51:04.5491846Z  * [new branch]      ops/spec-wp1174-r23         -> origin/ops/spec-wp1174-r23
+2026-11-24T14:51:04.5492144Z  * [new branch]      ops/spec-wp1174-r24         -> origin/ops/spec-wp1174-r24
+2026-11-24T14:51:04.5492505Z  * [new branch]      ops/spec-wp1174-r25         -> origin/ops/spec-wp1174-r25
+2026-11-24T14:51:04.5492804Z  * [new branch]      ops/spec-wp1174-r26         -> origin/ops/spec-wp1174-r26
+2026-11-24T14:51:04.5493110Z  * [new branch]      ops/spec-wp1302-r1          -> origin/ops/spec-wp1302-r1
+2026-11-24T14:51:04.5493415Z  * [new branch]      ops/spec-wp1303-r2          -> origin/ops/spec-wp1303-r2
+2026-11-24T14:51:04.5493715Z  * [new branch]      ops/spec-wp1303-r3          -> origin/ops/spec-wp1303-r3
+2026-11-24T14:51:04.5494019Z  * [new branch]      ops/spec-wp1303-r4          -> origin/ops/spec-wp1303-r4
+2026-11-24T14:51:04.5494329Z  * [new branch]      ops/spec-wp1303-r5          -> origin/ops/spec-wp1303-r5
+2026-11-24T14:51:04.5494622Z  * [new branch]      ops/spec-wp1303-r6          -> origin/ops/spec-wp1303-r6
+2026-11-24T14:51:04.5494943Z  * [new branch]      ops/thu-concurrency-1132    -> origin/ops/thu-concurrency-1132
+2026-11-24T14:51:04.5495345Z  * [new branch]      ops/windows-local-may-chu-kho-r1-lease -> origin/ops/windows-local-may-chu-kho-r1-lease
+2026-11-24T14:51:04.5495798Z  * [new branch]      ops/windows-local-may-chu-kho-r2-lease -> origin/ops/windows-local-may-chu-kho-r2-lease
+2026-11-24T14:51:04.5496354Z  * [new branch]      ops/windows-local-may-chu-kho-r3-lease -> origin/ops/windows-local-may-chu-kho-r3-lease
+2026-11-24T14:51:04.5496736Z  * [new branch]      ops/wp1006-r1-g1-lease      -> origin/ops/wp1006-r1-g1-lease
+2026-11-24T14:51:04.5497058Z  * [new branch]      ops/wp1017-r1-g1-lease      -> origin/ops/wp1017-r1-g1-lease
+2026-11-24T14:51:04.5497375Z  * [new branch]      ops/wp1021-r2-g1-lease      -> origin/ops/wp1021-r2-g1-lease
+2026-11-24T14:51:04.5497771Z  * [new branch]      ops/wp1030-r4-g1-lease      -> origin/ops/wp1030-r4-g1-lease
+2026-11-24T14:51:04.5498079Z  * [new branch]      ops/wp1037-r1-g1-lease      -> origin/ops/wp1037-r1-g1-lease
+2026-11-24T14:51:04.5498388Z  * [new branch]      ops/wp1045-r1-g1-lease      -> origin/ops/wp1045-r1-g1-lease
+2026-11-24T14:51:04.5498701Z  * [new branch]      ops/wp1052-r2-g1-lease      -> origin/ops/wp1052-r2-g1-lease
+2026-11-24T14:51:04.5499015Z  * [new branch]      ops/wp1077-r1-g1-lease      -> origin/ops/wp1077-r1-g1-lease
+2026-11-24T14:51:04.5499332Z  * [new branch]      ops/wp1078-r1-g1-lease      -> origin/ops/wp1078-r1-g1-lease
+2026-11-24T14:51:04.5499643Z  * [new branch]      ops/wp1079-r1-g1-lease      -> origin/ops/wp1079-r1-g1-lease
+2026-11-24T14:51:04.5499950Z  * [new branch]      ops/wp1117-r1-g1-lease      -> origin/ops/wp1117-r1-g1-lease
+2026-11-24T14:51:04.5500260Z  * [new branch]      ops/wp1121-r4-g1-lease      -> origin/ops/wp1121-r4-g1-lease
+2026-11-24T14:51:04.5500572Z  * [new branch]      ops/wp1122-r1-g1-lease      -> origin/ops/wp1122-r1-g1-lease
+2026-11-24T14:51:04.5500884Z  * [new branch]      ops/wp1124-r3-g1-lease      -> origin/ops/wp1124-r3-g1-lease
+2026-11-24T14:51:04.5501189Z  * [new branch]      ops/wp1124-r4-g1-lease      -> origin/ops/wp1124-r4-g1-lease
+2026-11-24T14:51:04.5501496Z  * [new branch]      ops/wp1124-r6-g1-lease      -> origin/ops/wp1124-r6-g1-lease
+2026-11-24T14:51:04.5502033Z  * [new branch]      ops/wp1134-land-r2-g1-lease -> origin/ops/wp1134-land-r2-g1-lease
+2026-11-24T14:51:04.5502384Z  * [new branch]      ops/wp1134-r2-g1-lease      -> origin/ops/wp1134-r2-g1-lease
+2026-11-24T14:51:04.5502692Z  * [new branch]      ops/wp1147-r1-g1-lease      -> origin/ops/wp1147-r1-g1-lease
+2026-11-24T14:51:04.5503034Z  * [new branch]      ops/wp1166-concurrency-canary -> origin/ops/wp1166-concurrency-canary
+2026-11-24T14:51:04.5503372Z  * [new branch]      ops/wp1166-r4-g5            -> origin/ops/wp1166-r4-g5
+2026-11-24T14:51:04.5503678Z  * [new branch]      ops/wp1170-r3-g1-lease      -> origin/ops/wp1170-r3-g1-lease
+2026-11-24T14:51:04.5503984Z  * [new branch]      ops/wp1170-r3-g2-lease      -> origin/ops/wp1170-r3-g2-lease
+2026-11-24T14:51:04.5504293Z  * [new branch]      ops/wp1170-r3-spec          -> origin/ops/wp1170-r3-spec
+2026-11-24T14:51:04.5504599Z  * [new branch]      ops/wp1170-r4-g3-lease      -> origin/ops/wp1170-r4-g3-lease
+2026-11-24T14:51:04.5504905Z  * [new branch]      ops/wp1170-r4-spec          -> origin/ops/wp1170-r4-spec
+2026-11-24T14:51:04.5505211Z  * [new branch]      ops/wp1170-r5-g4-lease      -> origin/ops/wp1170-r5-g4-lease
+2026-11-24T14:51:04.5505517Z  * [new branch]      ops/wp1170-r5-spec          -> origin/ops/wp1170-r5-spec
+2026-11-24T14:51:04.5505823Z  * [new branch]      ops/wp1170-r6-g5-lease      -> origin/ops/wp1170-r6-g5-lease
+2026-11-24T14:51:04.5506125Z  * [new branch]      ops/wp1170-r6-spec          -> origin/ops/wp1170-r6-spec
+2026-11-24T14:51:04.5506420Z  * [new branch]      ops/wp1170-r7-spec          -> origin/ops/wp1170-r7-spec
+2026-11-24T14:51:04.5506746Z  * [new branch]      ops/wp1172-kiem83-thamkhao  -> origin/ops/wp1172-kiem83-thamkhao
+2026-11-24T14:51:04.5507068Z  * [new branch]      ops/wp1172-plan-r3          -> origin/ops/wp1172-plan-r3
+2026-11-24T14:51:04.5507366Z  * [new branch]      ops/wp1172-plan-r4          -> origin/ops/wp1172-plan-r4
+2026-11-24T14:51:04.5507676Z  * [new branch]      ops/wp1174-r10-g7-lease     -> origin/ops/wp1174-r10-g7-lease
+2026-11-24T14:51:04.5507993Z  * [new branch]      ops/wp1174-r11-g8-lease     -> origin/ops/wp1174-r11-g8-lease
+2026-11-24T14:51:04.5508411Z  * [new branch]      ops/wp1174-r12-g9-lease     -> origin/ops/wp1174-r12-g9-lease
+2026-11-24T14:51:04.5508735Z  * [new branch]      ops/wp1174-r13-g10-lease    -> origin/ops/wp1174-r13-g10-lease
+2026-11-24T14:51:04.5509061Z  * [new branch]      ops/wp1174-r14-g11-lease    -> origin/ops/wp1174-r14-g11-lease
+2026-11-24T14:51:04.5509384Z  * [new branch]      ops/wp1174-r15-g12-lease    -> origin/ops/wp1174-r15-g12-lease
+2026-11-24T14:51:04.5509841Z  * [new branch]      ops/wp1174-r16-g13-lease    -> origin/ops/wp1174-r16-g13-lease
+2026-11-24T14:51:04.5510155Z  * [new branch]      ops/wp1174-r17-g14-lease    -> origin/ops/wp1174-r17-g14-lease
+2026-11-24T14:51:04.5510472Z  * [new branch]      ops/wp1174-r18-g15-lease    -> origin/ops/wp1174-r18-g15-lease
+2026-11-24T14:51:04.5510785Z  * [new branch]      ops/wp1174-r19-g16-lease    -> origin/ops/wp1174-r19-g16-lease
+2026-11-24T14:51:04.5511100Z  * [new branch]      ops/wp1174-r20-g17-lease    -> origin/ops/wp1174-r20-g17-lease
+2026-11-24T14:51:04.5511425Z  * [new branch]      ops/wp1174-r21-g18-lease    -> origin/ops/wp1174-r21-g18-lease
+2026-11-24T14:51:04.5511894Z  * [new branch]      ops/wp1174-r22-g19-lease    -> origin/ops/wp1174-r22-g19-lease
+2026-11-24T14:51:04.5512211Z  * [new branch]      ops/wp1174-r23-g20-lease    -> origin/ops/wp1174-r23-g20-lease
+2026-11-24T14:51:04.5512527Z  * [new branch]      ops/wp1174-r24-g21-lease    -> origin/ops/wp1174-r24-g21-lease
+2026-11-24T14:51:04.5512846Z  * [new branch]      ops/wp1174-r25-g22-lease    -> origin/ops/wp1174-r25-g22-lease
+2026-11-24T14:51:04.5513159Z  * [new branch]      ops/wp1174-r26-g23-lease    -> origin/ops/wp1174-r26-g23-lease
+2026-11-24T14:51:04.5513474Z  * [new branch]      ops/wp1174-r7-g5-lease      -> origin/ops/wp1174-r7-g5-lease
+2026-11-24T14:51:04.5513790Z  * [new branch]      ops/wp1174-r9-g6-lease      -> origin/ops/wp1174-r9-g6-lease
+2026-11-24T14:51:04.5514105Z  * [new branch]      ops/wp1178-r1-g1-lease      -> origin/ops/wp1178-r1-g1-lease
+2026-11-24T14:51:04.5514420Z  * [new branch]      ops/wp1178-r3-g3-lease      -> origin/ops/wp1178-r3-g3-lease
+2026-11-24T14:51:04.5514730Z  * [new branch]      ops/wp1178-r4-g4-lease      -> origin/ops/wp1178-r4-g4-lease
+2026-11-24T14:51:04.5515045Z  * [new branch]      ops/wp1178-r4-g4-review     -> origin/ops/wp1178-r4-g4-review
+2026-11-24T14:51:04.5515377Z  * [new branch]      ops/wp1178-r4-p2-proposal   -> origin/ops/wp1178-r4-p2-proposal
+2026-11-24T14:51:04.5515732Z  * [new branch]      ops/wp1178-r5-ci-proposal   -> origin/ops/wp1178-r5-ci-proposal
+2026-11-24T14:51:04.5516054Z  * [new branch]      ops/wp1178-r5-g5-lease      -> origin/ops/wp1178-r5-g5-lease
+2026-11-24T14:51:04.5516368Z  * [new branch]      ops/wp1178-r5-g5-review     -> origin/ops/wp1178-r5-g5-review
+2026-11-24T14:51:04.5516680Z  * [new branch]      ops/wp1179-r9-g1-lease      -> origin/ops/wp1179-r9-g1-lease
+2026-11-24T14:51:04.5517006Z  * [new branch]      ops/wp1196-land-r2-g1-lease -> origin/ops/wp1196-land-r2-g1-lease
+2026-11-24T14:51:04.5517339Z  * [new branch]      ops/wp1196-r2-g1-lease      -> origin/ops/wp1196-r2-g1-lease
+2026-11-24T14:51:04.5517648Z  * [new branch]      ops/wp1210-spec             -> origin/ops/wp1210-spec
+2026-11-24T14:51:04.5517949Z  * [new branch]      ops/wp1221-r2-g1-lease      -> origin/ops/wp1221-r2-g1-lease
+2026-11-24T14:51:04.5518263Z  * [new branch]      ops/wp1221-r3-g1-lease      -> origin/ops/wp1221-r3-g1-lease
+2026-11-24T14:51:04.5518563Z  * [new branch]      ops/wp1221-spec             -> origin/ops/wp1221-spec
+2026-11-24T14:51:04.5518871Z  * [new branch]      ops/wp1236-a1-r7-g1-lease   -> origin/ops/wp1236-a1-r7-g1-lease
+2026-11-24T14:51:04.5519192Z  * [new branch]      ops/wp1236-bc-lease         -> origin/ops/wp1236-bc-lease
+2026-11-24T14:51:04.5519499Z  * [new branch]      ops/wp1236-r10-a-lease      -> origin/ops/wp1236-r10-a-lease
+2026-11-24T14:51:04.5519813Z  * [new branch]      ops/wp1236-r9-a-lease       -> origin/ops/wp1236-r9-a-lease
+2026-11-24T14:51:04.5520120Z  * [new branch]      ops/wp1236-spec             -> origin/ops/wp1236-spec
+2026-11-24T14:51:04.5520521Z  * [new branch]      ops/wp1237-r1-g1-lease      -> origin/ops/wp1237-r1-g1-lease
+2026-11-24T14:51:04.5520821Z  * [new branch]      ops/wp1237-spec             -> origin/ops/wp1237-spec
+2026-11-24T14:51:04.5521153Z  * [new branch]      ops/wp1239-p0-review-evidence -> origin/ops/wp1239-p0-review-evidence
+2026-11-24T14:51:04.5521491Z  * [new branch]      ops/wp1239-r2-g1-lease      -> origin/ops/wp1239-r2-g1-lease
+2026-11-24T14:51:04.5522042Z  * [new branch]      ops/wp1239-r2-g2-lease      -> origin/ops/wp1239-r2-g2-lease
+2026-11-24T14:51:04.5522393Z  * [new branch]      ops/wp1239-r2-g2-reviewer-lease -> origin/ops/wp1239-r2-g2-reviewer-lease
+2026-11-24T14:51:04.5522741Z  * [new branch]      ops/wp1239-r4-g3-lease      -> origin/ops/wp1239-r4-g3-lease
+2026-11-24T14:51:04.5523052Z  * [new branch]      ops/wp1239-r5-g4-lease      -> origin/ops/wp1239-r5-g4-lease
+2026-11-24T14:51:04.5523360Z  * [new branch]      ops/wp1239-r6-g5-lease      -> origin/ops/wp1239-r6-g5-lease
+2026-11-24T14:51:04.5523671Z  * [new branch]      ops/wp1240-r1-g1-lease      -> origin/ops/wp1240-r1-g1-lease
+2026-11-24T14:51:04.5523976Z  * [new branch]      ops/wp1252-r1-g1-lease      -> origin/ops/wp1252-r1-g1-lease
+2026-11-24T14:51:04.5524283Z  * [new branch]      ops/wp1254-r1-g1-lease      -> origin/ops/wp1254-r1-g1-lease
+2026-11-24T14:51:04.5524595Z  * [new branch]      ops/wp1265-r13-g1-lease     -> origin/ops/wp1265-r13-g1-lease
+2026-11-24T14:51:04.5524916Z  * [new branch]      ops/wp1266-r13-g1-lease     -> origin/ops/wp1266-r13-g1-lease
+2026-11-24T14:51:04.5525217Z  * [new branch]      ops/wp1271-spec             -> origin/ops/wp1271-spec
+2026-11-24T14:51:04.5525504Z  * [new branch]      ops/wp1279-spec             -> origin/ops/wp1279-spec
+2026-11-24T14:51:04.5525787Z  * [new branch]      ops/wp1285-spec             -> origin/ops/wp1285-spec
+2026-11-24T14:51:04.5526097Z  * [new branch]      ops/wp1287-r4-diagnostic    -> origin/ops/wp1287-r4-diagnostic
+2026-11-24T14:51:04.5526405Z  * [new branch]      ops/wp1287-spec             -> origin/ops/wp1287-spec
+2026-11-24T14:51:04.5526688Z  * [new branch]      ops/wp1296-spec             -> origin/ops/wp1296-spec
+2026-11-24T14:51:04.5526986Z  * [new branch]      ops/wp1302-r1-g2-lease      -> origin/ops/wp1302-r1-g2-lease
+2026-11-24T14:51:04.5527299Z  * [new branch]      ops/wp1302-r1-lease         -> origin/ops/wp1302-r1-lease
+2026-11-24T14:51:04.5527610Z  * [new branch]      ops/wp1302-r2-g3-lease      -> origin/ops/wp1302-r2-g3-lease
+2026-11-24T14:51:04.5527916Z  * [new branch]      ops/wp1303-r1-g1-lease      -> origin/ops/wp1303-r1-g1-lease
+2026-11-24T14:51:04.5528372Z  * [new branch]      ops/wp1303-r2-g2-lease      -> origin/ops/wp1303-r2-g2-lease
+2026-11-24T14:51:04.5528854Z  * [new branch]      ops/wp1303-r3-g3-lease      -> origin/ops/wp1303-r3-g3-lease
+2026-11-24T14:51:04.5529313Z  * [new branch]      ops/wp1303-r4-g4-lease      -> origin/ops/wp1303-r4-g4-lease
+2026-11-24T14:51:04.5529623Z  * [new branch]      ops/wp1303-r5-g5-lease      -> origin/ops/wp1303-r5-g5-lease
+2026-11-24T14:51:04.5529928Z  * [new branch]      ops/wp1303-r6-g6-codex      -> origin/ops/wp1303-r6-g6-codex
+2026-11-24T14:51:04.5530236Z  * [new branch]      ops/wp1303-r6-g7-codex      -> origin/ops/wp1303-r6-g7-codex
+2026-11-24T14:51:04.5530550Z  * [new branch]      ops/wp1308-canary-r4-g4     -> origin/ops/wp1308-canary-r4-g4
+2026-11-24T14:51:04.5530870Z  * [new branch]      ops/wp1308-target-r1-g1     -> origin/ops/wp1308-target-r1-g1
+2026-11-24T14:51:04.5531271Z  * [new branch]      ops/wp1308-target-r2-g2     -> origin/ops/wp1308-target-r2-g2
+2026-11-24T14:51:04.5531780Z  * [new branch]      ops/wp1308-target-r3-g3     -> origin/ops/wp1308-target-r3-g3
+2026-11-24T14:51:04.5532102Z  * [new branch]      ops/wp1308-target-r4-g4     -> origin/ops/wp1308-target-r4-g4
+2026-11-24T14:51:04.5532412Z  * [new branch]      ops/wp1308-target-r5-g5     -> origin/ops/wp1308-target-r5-g5
+2026-11-24T14:51:04.5532730Z  * [new branch]      ops/wp1308-target-r5-g6     -> origin/ops/wp1308-target-r5-g6
+2026-11-24T14:51:04.5533141Z  * [new branch]      ops/wp1308-target-r5-g7     -> origin/ops/wp1308-target-r5-g7
+2026-11-24T14:51:04.5533452Z  * [new branch]      ops/wp1308-target-r5-g8     -> origin/ops/wp1308-target-r5-g8
+2026-11-24T14:51:04.5533766Z  * [new branch]      ops/wp1309-r1-g1-meta       -> origin/ops/wp1309-r1-g1-meta
+2026-11-24T14:51:04.5534077Z  * [new branch]      ops/wp1313-r2-g1-lease      -> origin/ops/wp1313-r2-g1-lease
+2026-11-24T14:51:04.5534552Z  * [new branch]      ops/wp1315-r1-g1-private-prepare -> origin/ops/wp1315-r1-g1-private-prepare
+2026-11-24T14:51:04.5535089Z  * [new branch]      ops/wp1315-r2-g2            -> origin/ops/wp1315-r2-g2
+2026-11-24T14:51:04.5535542Z  * [new branch]      ops/wp1315-r3-g3            -> origin/ops/wp1315-r3-g3
+2026-11-24T14:51:04.5535884Z  * [new branch]      ops/wp1315-r4-g4-validation -> origin/ops/wp1315-r4-g4-validation
+2026-11-24T14:51:04.5536196Z  * [new branch]      ops/wp1315-r5-g5            -> origin/ops/wp1315-r5-g5
+2026-11-24T14:51:04.5536509Z  * [new branch]      ops/wp1315-r5-g6-validation -> origin/ops/wp1315-r5-g6-validation
+2026-11-24T14:51:04.5536818Z  * [new branch]      ops/wp1315-r5-g7            -> origin/ops/wp1315-r5-g7
+2026-11-24T14:51:04.5537118Z  * [new branch]      ops/wp1321-r1-g1-lease      -> origin/ops/wp1321-r1-g1-lease
+2026-11-24T14:51:04.5537431Z  * [new branch]      ops/wp1322-r1-g1-lease      -> origin/ops/wp1322-r1-g1-lease
+2026-11-24T14:51:04.5537737Z  * [new branch]      ops/wp1325-r1-g1            -> origin/ops/wp1325-r1-g1
+2026-11-24T14:51:04.5538035Z  * [new branch]      ops/wp1325-r1-spec          -> origin/ops/wp1325-r1-spec
+2026-11-24T14:51:04.5538327Z  * [new branch]      ops/wp1325-r2-g2            -> origin/ops/wp1325-r2-g2
+2026-11-24T14:51:04.5538607Z  * [new branch]      ops/wp1325-r3-g3            -> origin/ops/wp1325-r3-g3
+2026-11-24T14:51:04.5538891Z  * [new branch]      ops/wp1325-r4-g4            -> origin/ops/wp1325-r4-g4
+2026-11-24T14:51:04.5539179Z  * [new branch]      ops/wp1325-r5-g5            -> origin/ops/wp1325-r5-g5
+2026-11-24T14:51:04.5539484Z  * [new branch]      ops/wp1325-r6-g6            -> origin/ops/wp1325-r6-g6
+2026-11-24T14:51:04.5539860Z  * [new branch]      ops/wp1331-r1-g1-lease      -> origin/ops/wp1331-r1-g1-lease
+2026-11-24T14:51:04.5540214Z  * [new branch]      ops/wp1334-r2-g1-lease      -> origin/ops/wp1334-r2-g1-lease
+2026-11-24T14:51:04.5540524Z  * [new branch]      ops/wp1335-r3-g1-lease      -> origin/ops/wp1335-r3-g1-lease
+2026-11-24T14:51:04.5540835Z  * [new branch]      ops/wp1336-r2-g1-lease      -> origin/ops/wp1336-r2-g1-lease
+2026-11-24T14:51:04.5541141Z  * [new branch]      ops/wp1342-r1-g1-lease      -> origin/ops/wp1342-r1-g1-lease
+2026-11-24T14:51:04.5541445Z  * [new branch]      ops/wp1342-r2-g1-lease      -> origin/ops/wp1342-r2-g1-lease
+2026-11-24T14:51:04.5541910Z  * [new branch]      ops/wp1342-r3-spec          -> origin/ops/wp1342-r3-spec
+2026-11-24T14:51:04.5542209Z  * [new branch]      ops/wp1342-r4-spec          -> origin/ops/wp1342-r4-spec
+2026-11-24T14:51:04.5542509Z  * [new branch]      ops/wp1342-r5-spec          -> origin/ops/wp1342-r5-spec
+2026-11-24T14:51:04.5542807Z  * [new branch]      ops/wp1343-r1-g1-lease      -> origin/ops/wp1343-r1-g1-lease
+2026-11-24T14:51:04.5543121Z  * [new branch]      ops/wp1345-r1-g1-lease      -> origin/ops/wp1345-r1-g1-lease
+2026-11-24T14:51:04.5543418Z  * [new branch]      ops/wp1350-r1-g1            -> origin/ops/wp1350-r1-g1
+2026-11-24T14:51:04.5543719Z  * [new branch]      ops/wp1353-r1-g1-lease      -> origin/ops/wp1353-r1-g1-lease
+2026-11-24T14:51:04.5544025Z  * [new branch]      ops/wp1356-r1-g1-lease      -> origin/ops/wp1356-r1-g1-lease
+2026-11-24T14:51:04.5544328Z  * [new branch]      ops/wp1361-r1-g1-lease      -> origin/ops/wp1361-r1-g1-lease
+2026-11-24T14:51:04.5544631Z  * [new branch]      ops/wp1365-r1-g1-lease      -> origin/ops/wp1365-r1-g1-lease
+2026-11-24T14:51:04.5544923Z  * [new branch]      ops/wp1370-r1-g1            -> origin/ops/wp1370-r1-g1
+2026-11-24T14:51:04.5545326Z  * [new branch]      ops/wp1375-r1-g1-lease      -> origin/ops/wp1375-r1-g1-lease
+2026-11-24T14:51:04.5545623Z  * [new branch]      ops/wp1393-r1-g1            -> origin/ops/wp1393-r1-g1
+2026-11-24T14:51:04.5545909Z  * [new branch]      ops/wp1422-r1               -> origin/ops/wp1422-r1
+2026-11-24T14:51:04.5546190Z  * [new branch]      ops/wp1434-r1               -> origin/ops/wp1434-r1
+2026-11-24T14:51:04.5546549Z  * [new branch]      ops/wp1448-r1               -> origin/ops/wp1448-r1
+2026-11-24T14:51:04.5546823Z  * [new branch]      ops/wp1460-r1               -> origin/ops/wp1460-r1
+2026-11-24T14:51:04.5547096Z  * [new branch]      ops/wp1461-r1               -> origin/ops/wp1461-r1
+2026-11-24T14:51:04.5547447Z  * [new branch]      ops/wp1462-r1               -> origin/ops/wp1462-r1
+2026-11-24T14:51:04.5547883Z  * [new branch]      ops/wp1463-r1               -> origin/ops/wp1463-r1
+2026-11-24T14:51:04.5548336Z  * [new branch]      ops/wp1466-spec             -> origin/ops/wp1466-spec
+2026-11-24T14:51:04.5548719Z  * [new branch]      ops/wp1475-r1-g1-lease      -> origin/ops/wp1475-r1-g1-lease
+2026-11-24T14:51:04.5549015Z  * [new branch]      ops/wp1494-r1               -> origin/ops/wp1494-r1
+2026-11-24T14:51:04.5549328Z  * [new branch]      ops/wp1500-spec-r1-proposed -> origin/ops/wp1500-spec-r1-proposed
+2026-11-24T14:51:04.5549662Z  * [new branch]      ops/wp1507-r1-g1-lease      -> origin/ops/wp1507-r1-g1-lease
+2026-11-24T14:51:04.5549978Z  * [new branch]      ops/wp1509-r1-g1-lease      -> origin/ops/wp1509-r1-g1-lease
+2026-11-24T14:51:04.5550289Z  * [new branch]      ops/wp1509-spec-review      -> origin/ops/wp1509-spec-review
+2026-11-24T14:51:04.5550594Z  * [new branch]      ops/wp387-b-spec            -> origin/ops/wp387-b-spec
+2026-11-24T14:51:04.5550896Z  * [new branch]      ops/wp387-r1-g1-lease       -> origin/ops/wp387-r1-g1-lease
+2026-11-24T14:51:04.5551204Z  * [new branch]      ops/wp433-p2a-spec          -> origin/ops/wp433-p2a-spec
+2026-11-24T14:51:04.5551515Z  * [new branch]      ops/wp433-p2b-spec          -> origin/ops/wp433-p2b-spec
+2026-11-24T14:51:04.5552002Z  * [new branch]      ops/wp433-p2bw-spec         -> origin/ops/wp433-p2bw-spec
+2026-11-24T14:51:04.5552306Z  * [new branch]      ops/wp433-p2c-spec          -> origin/ops/wp433-p2c-spec
+2026-11-24T14:51:04.5552607Z  * [new branch]      ops/wp433-p2n-spec          -> origin/ops/wp433-p2n-spec
+2026-11-24T14:51:04.5552906Z  * [new branch]      ops/wp433-p2r-spec          -> origin/ops/wp433-p2r-spec
+2026-11-24T14:51:04.5553211Z  * [new branch]      ops/wp433-r1-g1-lease       -> origin/ops/wp433-r1-g1-lease
+2026-11-24T14:51:04.5553538Z  * [new branch]      ops/wp433-secrets-set-spec  -> origin/ops/wp433-secrets-set-spec
+2026-11-24T14:51:04.5553996Z  * [new branch]      ops/wp564-a1a-r4-g1-lease   -> origin/ops/wp564-a1a-r4-g1-lease
+2026-11-24T14:51:04.5554329Z  * [new branch]      ops/wp564-a1a-r6-g2-lease   -> origin/ops/wp564-a1a-r6-g2-lease
+2026-11-24T14:51:04.5554845Z  * [new branch]      ops/wp646-r1-g1-lease       -> origin/ops/wp646-r1-g1-lease
+2026-11-24T14:51:04.5555359Z  * [new branch]      ops/wp748-r27-g27-lease     -> origin/ops/wp748-r27-g27-lease
+2026-11-24T14:51:04.5555676Z  * [new branch]      ops/wp748-r28-l7-lease      -> origin/ops/wp748-r28-l7-lease
+2026-11-24T14:51:04.5555985Z  * [new branch]      ops/wp813-r2-g1-lease       -> origin/ops/wp813-r2-g1-lease
+2026-11-24T14:51:04.5556289Z  * [new branch]      ops/wp813-r2-spec           -> origin/ops/wp813-r2-spec
+2026-11-24T14:51:04.5556597Z  * [new branch]      ops/wp814-r2-g1-lease       -> origin/ops/wp814-r2-g1-lease
+2026-11-24T14:51:04.5557091Z  * [new branch]      ops/wp814-r2-spec           -> origin/ops/wp814-r2-spec
+2026-11-24T14:51:04.5557559Z  * [new branch]      ops/wp814-r3-g2-lease       -> origin/ops/wp814-r3-g2-lease
+2026-11-24T14:51:04.5557987Z  * [new branch]      ops/wp814-r3-spec           -> origin/ops/wp814-r3-spec
+2026-11-24T14:51:04.5558292Z  * [new branch]      ops/wp825-r1-g1-lease       -> origin/ops/wp825-r1-g1-lease
+2026-11-24T14:51:04.5558833Z  * [new branch]      ops/wp834-r1-g1-lease       -> origin/ops/wp834-r1-g1-lease
+2026-11-24T14:51:04.5559138Z  * [new branch]      ops/wp90-r2-spec            -> origin/ops/wp90-r2-spec
+2026-11-24T14:51:04.5559435Z  * [new branch]      ops/wp923-r2-g2-lease       -> origin/ops/wp923-r2-g2-lease
+2026-11-24T14:51:04.5559733Z  * [new branch]      ops/wp923-r2-spec           -> origin/ops/wp923-r2-spec
+2026-11-24T14:51:04.5560115Z  * [new branch]      ops/wp923-r3-g3-lease       -> origin/ops/wp923-r3-g3-lease
+2026-11-24T14:51:04.5560417Z  * [new branch]      ops/wp943-r1-g1-lease       -> origin/ops/wp943-r1-g1-lease
+2026-11-24T14:51:04.5560773Z  * [new branch]      ops/wp960-r1-g1-lease       -> origin/ops/wp960-r1-g1-lease
+2026-11-24T14:51:04.5561143Z  * [new branch]      ops/wp960-r2-g1-lease       -> origin/ops/wp960-r2-g1-lease
+2026-11-24T14:51:04.5561612Z  * [new branch]      ops/wp960-r2-g2-lease       -> origin/ops/wp960-r2-g2-lease
+2026-11-24T14:51:04.5562057Z  * [new branch]      ops/wp972-r1-lease          -> origin/ops/wp972-r1-lease
+2026-11-24T14:51:04.5562365Z  * [new branch]      ops/wp977-r1-g1-lease       -> origin/ops/wp977-r1-g1-lease
+2026-11-24T14:51:04.5562729Z  * [new branch]      ops/wp977-spec              -> origin/ops/wp977-spec
+2026-11-24T14:51:04.5563027Z  * [new branch]      ops/wp978-r1-g1-lease       -> origin/ops/wp978-r1-g1-lease
+2026-11-24T14:51:04.5563335Z  * [new branch]      ops/wp981-r1-g1-lease       -> origin/ops/wp981-r1-g1-lease
+2026-11-24T14:51:04.5563645Z  * [new branch]      ops/wp981-r2-g2-lease       -> origin/ops/wp981-r2-g2-lease
+2026-11-24T14:51:04.5563951Z  * [new branch]      ops/wp981-r2-review-4       -> origin/ops/wp981-r2-review-4
+2026-11-24T14:51:04.5564257Z  * [new branch]      ops/wp987-r1-g1-lease       -> origin/ops/wp987-r1-g1-lease
+2026-11-24T14:51:04.5564554Z  * [new branch]      ops/wp999-spec              -> origin/ops/wp999-spec
+2026-11-24T14:51:04.5564907Z  * [new tag]         archive/codex-gate-lifecycle-ec8d08c -> archive/codex-gate-lifecycle-ec8d08c
+2026-11-24T14:51:04.5565287Z  * [new tag]         archive/dlbrut-ke-hoach-dau -> archive/dlbrut-ke-hoach-dau
+2026-11-24T14:51:04.5565647Z  * [new tag]         archive/rasoat-design-docs-2026-07-26 -> archive/rasoat-design-docs-2026-07-26
+2026-11-24T14:51:04.5565987Z  * [new tag]         bak/pre-renumber            -> bak/pre-renumber
+2026-11-24T14:51:04.5566280Z  * [new tag]         evidence/wp1287-h4-reviewed -> evidence/wp1287-h4-reviewed
+2026-11-24T14:51:04.5566575Z  * [new tag]         luu-tru/238-verdict-1       -> luu-tru/238-verdict-1
+2026-11-24T14:51:04.5566854Z  * [new tag]         luu-tru/238-verdict-2       -> luu-tru/238-verdict-2
+2026-11-24T14:51:04.5567163Z  * [new tag]         luu-tru/238-verdict-3       -> luu-tru/238-verdict-3
+2026-11-24T14:51:04.5567602Z  * [new tag]         luu-tru/bookkeeping-831-land-79045a0 -> luu-tru/bookkeeping-831-land-79045a0
+2026-11-24T14:51:04.5568000Z  * [new tag]         luu-tru/doctor-github-mcp-verdict-6 -> luu-tru/doctor-github-mcp-verdict-6
+2026-11-24T14:51:04.5568391Z  * [new tag]         luu-tru/doctor-github-mcp-verdict-9 -> luu-tru/doctor-github-mcp-verdict-9
+2026-11-24T14:51:04.5568769Z  * [new tag]         luu-tru/land-81-ha-cap-r2-bien-nhan -> luu-tru/land-81-ha-cap-r2-bien-nhan
+2026-11-24T14:51:04.5569162Z  * [new tag]         luu-tru/land-evidence-l7-r2-bien-nhan -> luu-tru/land-evidence-l7-r2-bien-nhan
+2026-11-24T14:51:04.5569550Z  * [new tag]         luu-tru/land-evidence-l7-r2-lease -> luu-tru/land-evidence-l7-r2-lease
+2026-11-24T14:51:04.5569973Z  * [new tag]         luu-tru/lease-publish-windows-do-r1-verdict -> luu-tru/lease-publish-windows-do-r1-verdict
+2026-11-24T14:51:04.5570472Z  * [new tag]         luu-tru/nhanh/agent/ag-packet3-launcher-windows-plan -> luu-tru/nhanh/agent/ag-packet3-launcher-windows-plan
+2026-11-24T14:51:04.5570971Z  * [new tag]         luu-tru/nhanh/agent/ag-t0-05-registry-ratchet -> luu-tru/nhanh/agent/ag-t0-05-registry-ratchet
+2026-11-24T14:51:04.5571543Z  * [new tag]         luu-tru/nhanh/agent/codex-credential-refresh-g1 -> luu-tru/nhanh/agent/codex-credential-refresh-g1
+2026-11-24T14:51:04.5572141Z  * [new tag]         luu-tru/nhanh/agent/land-81-pr963-claude -> luu-tru/nhanh/agent/land-81-pr963-claude
+2026-11-24T14:51:04.5572560Z  * [new tag]         luu-tru/nhanh/agent/local-gates-no-actions -> luu-tru/nhanh/agent/local-gates-no-actions
+2026-11-24T14:51:04.5572996Z  * [new tag]         luu-tru/nhanh/agent/ra04a-envelope-g1-claude -> luu-tru/nhanh/agent/ra04a-envelope-g1-claude
+2026-11-24T14:51:04.5573488Z  * [new tag]         luu-tru/nhanh/agent/wp1166-g1-codex -> luu-tru/nhanh/agent/wp1166-g1-codex
+2026-11-24T14:51:04.5573855Z  * [new tag]         luu-tru/nhanh/agent/wp1170-g3-codex -> luu-tru/nhanh/agent/wp1170-g3-codex
+2026-11-24T14:51:04.5574216Z  * [new tag]         luu-tru/nhanh/agent/wp1170-g4-codex -> luu-tru/nhanh/agent/wp1170-g4-codex
+2026-11-24T14:51:04.5574587Z  * [new tag]         luu-tru/nhanh/agent/wp1176-r2-g1-codex -> luu-tru/nhanh/agent/wp1176-r2-g1-codex
+2026-11-24T14:51:04.5574971Z  * [new tag]         luu-tru/nhanh/agent/wp122-g1-codex -> luu-tru/nhanh/agent/wp122-g1-codex
+2026-11-24T14:51:04.5575331Z  * [new tag]         luu-tru/nhanh/agent/wp125-g1-claude -> luu-tru/nhanh/agent/wp125-g1-claude
+2026-11-24T14:51:04.5575690Z  * [new tag]         luu-tru/nhanh/agent/wp125-g2-claude -> luu-tru/nhanh/agent/wp125-g2-claude
+2026-11-24T14:51:04.5576046Z  * [new tag]         luu-tru/nhanh/agent/wp430-g1-codex -> luu-tru/nhanh/agent/wp430-g1-codex
+2026-11-24T14:51:04.5576480Z  * [new tag]         luu-tru/nhanh/agent/wp564-a1a-r4-g1-codex-20261102 -> luu-tru/nhanh/agent/wp564-a1a-r4-g1-codex-20261102
+2026-11-24T14:51:04.5576900Z  * [new tag]         luu-tru/nhanh/agent/wp710-g1-codex -> luu-tru/nhanh/agent/wp710-g1-codex
+2026-11-24T14:51:04.5577284Z  * [new tag]         luu-tru/nhanh/agent/wp744-g2-antigravity -> luu-tru/nhanh/agent/wp744-g2-antigravity
+2026-11-24T14:51:04.5577662Z  * [new tag]         luu-tru/nhanh/agent/wp77-g1-claude -> luu-tru/nhanh/agent/wp77-g1-claude
+2026-11-24T14:51:04.5578019Z  * [new tag]         luu-tru/nhanh/agent/wp77-g2-claude -> luu-tru/nhanh/agent/wp77-g2-claude
+2026-11-24T14:51:04.5578372Z  * [new tag]         luu-tru/nhanh/agent/wp77-g3-claude -> luu-tru/nhanh/agent/wp77-g3-claude
+2026-11-24T14:51:04.5578732Z  * [new tag]         luu-tru/nhanh/agent/wp814-g2-claude -> luu-tru/nhanh/agent/wp814-g2-claude
+2026-11-24T14:51:04.5579101Z  * [new tag]         luu-tru/nhanh/agent/wp835-g2-claude -> luu-tru/nhanh/agent/wp835-g2-claude
+2026-11-24T14:51:04.5579467Z  * [new tag]         luu-tru/nhanh/agent/wp977-g1-claude -> luu-tru/nhanh/agent/wp977-g1-claude
+2026-11-24T14:51:04.5579823Z  * [new tag]         luu-tru/nhanh/agent/wp99-g2-codex -> luu-tru/nhanh/agent/wp99-g2-codex
+2026-11-24T14:51:04.5580181Z  * [new tag]         luu-tru/nhanh/agent/wp99-g3-claude -> luu-tru/nhanh/agent/wp99-g3-claude
+2026-11-24T14:51:04.5580538Z  * [new tag]         luu-tru/nhanh/agent/wp99-g4-claude -> luu-tru/nhanh/agent/wp99-g4-claude
+2026-11-24T14:51:04.5580989Z  * [new tag]         luu-tru/nhanh/claude/audit-errors-patch-plan-56x4rq -> luu-tru/nhanh/claude/audit-errors-patch-plan-56x4rq
+2026-11-24T14:51:04.5581487Z  * [new tag]         luu-tru/nhanh/claude/bai-hoc-do-luong-20260822 -> luu-tru/nhanh/claude/bai-hoc-do-luong-20260822
+2026-11-24T14:51:04.5582169Z  * [new tag]         luu-tru/nhanh/claude/bia-mo-wp538-g2-20260916 -> luu-tru/nhanh/claude/bia-mo-wp538-g2-20260916
+2026-11-24T14:51:04.5582621Z  * [new tag]         luu-tru/nhanh/claude/bia-mo-wp538-g3-20260916 -> luu-tru/nhanh/claude/bia-mo-wp538-g3-20260916
+2026-11-24T14:51:04.5583070Z  * [new tag]         luu-tru/nhanh/claude/bia-mo-wp540-g1-20260916 -> luu-tru/nhanh/claude/bia-mo-wp540-g1-20260916
+2026-11-24T14:51:04.5583527Z  * [new tag]         luu-tru/nhanh/claude/bn-523-human-audit-20260921 -> luu-tru/nhanh/claude/bn-523-human-audit-20260921
+2026-11-24T14:51:04.5583983Z  * [new tag]         luu-tru/nhanh/claude/bookkeeping-677-pr689 -> luu-tru/nhanh/claude/bookkeeping-677-pr689
+2026-11-24T14:51:04.5584513Z  * [new tag]         luu-tru/nhanh/claude/bookkeeping-831-land -> luu-tru/nhanh/claude/bookkeeping-831-land
+2026-11-24T14:51:04.5584926Z  * [new tag]         luu-tru/nhanh/claude/cap-lease-704-g2 -> luu-tru/nhanh/claude/cap-lease-704-g2
+2026-11-24T14:51:04.5585408Z  * [new tag]         luu-tru/nhanh/claude/cham-dot-bien-mien-nhiem-lease-suite -> luu-tru/nhanh/claude/cham-dot-bien-mien-nhiem-lease-suite
+2026-11-24T14:51:04.5585900Z  * [new tag]         luu-tru/nhanh/claude/ci-bang-phu-thuoc-1 -> luu-tru/nhanh/claude/ci-bang-phu-thuoc-1
+2026-11-24T14:51:04.5586448Z  * [new tag]         luu-tru/nhanh/claude/ci-bang-phu-thuoc-exec-3v3kco -> luu-tru/nhanh/claude/ci-bang-phu-thuoc-exec-3v3kco
+2026-11-24T14:51:04.5586944Z  * [new tag]         luu-tru/nhanh/claude/code-task-assignment-7e4a5b -> luu-tru/nhanh/claude/code-task-assignment-7e4a5b
+2026-11-24T14:51:04.5587461Z  * [new tag]         luu-tru/nhanh/claude/codegraph-github-evaluation-749y38 -> luu-tru/nhanh/claude/codegraph-github-evaluation-749y38
+2026-11-24T14:51:04.5587986Z  * [new tag]         luu-tru/nhanh/claude/cong-ci-packet-loop-exec-1 -> luu-tru/nhanh/claude/cong-ci-packet-loop-exec-1
+2026-11-24T14:51:04.5588449Z  * [new tag]         luu-tru/nhanh/claude/cong-same-failure-exec-1 -> luu-tru/nhanh/claude/cong-same-failure-exec-1
+2026-11-24T14:51:04.5588899Z  * [new tag]         luu-tru/nhanh/claude/cuu-viec-treo-2026-08-03 -> luu-tru/nhanh/claude/cuu-viec-treo-2026-08-03
+2026-11-24T14:51:04.5589355Z  * [new tag]         luu-tru/nhanh/claude/determined-euler-rw6l8i -> luu-tru/nhanh/claude/determined-euler-rw6l8i
+2026-11-24T14:51:04.5589849Z  * [new tag]         luu-tru/nhanh/claude/doctrine-allowlist-reviewer-exec-1 -> luu-tru/nhanh/claude/doctrine-allowlist-reviewer-exec-1
+2026-11-24T14:51:04.5590312Z  * [new tag]         luu-tru/nhanh/claude/elegant-bun-cd554f -> luu-tru/nhanh/claude/elegant-bun-cd554f
+2026-11-24T14:51:04.5590712Z  * [new tag]         luu-tru/nhanh/claude/ghi-so-land-1132 -> luu-tru/nhanh/claude/ghi-so-land-1132
+2026-11-24T14:51:04.5591136Z  * [new tag]         luu-tru/nhanh/claude/ho-so-audit-551-20260919 -> luu-tru/nhanh/claude/ho-so-audit-551-20260919
+2026-11-24T14:51:04.5591607Z  * [new tag]         luu-tru/nhanh/claude/human-audited-khai-ai-dang-r1 -> luu-tru/nhanh/claude/human-audited-khai-ai-dang-r1
+2026-11-24T14:51:04.5592213Z  * [new tag]         luu-tru/nhanh/claude/land-318-334 -> luu-tru/nhanh/claude/land-318-334
+2026-11-24T14:51:04.5592604Z  * [new tag]         luu-tru/nhanh/claude/launcher-chot-cong-cu -> luu-tru/nhanh/claude/launcher-chot-cong-cu
+2026-11-24T14:51:04.5593054Z  * [new tag]         luu-tru/nhanh/claude/lease-publish-windows-do -> luu-tru/nhanh/claude/lease-publish-windows-do
+2026-11-24T14:51:04.5593520Z  * [new tag]         luu-tru/nhanh/claude/n8-review-kem-patch-exec-1 -> luu-tru/nhanh/claude/n8-review-kem-patch-exec-1
+2026-11-24T14:51:04.5593959Z  * [new tag]         luu-tru/nhanh/claude/new-session-i0kv8e -> luu-tru/nhanh/claude/new-session-i0kv8e
+2026-11-24T14:51:04.5594403Z  * [new tag]         luu-tru/nhanh/claude/nhap-dinh-chinh-578-20260920 -> luu-tru/nhanh/claude/nhap-dinh-chinh-578-20260920
+2026-11-24T14:51:04.5594868Z  * [new tag]         luu-tru/nhanh/claude/nhap-gia-han-578-20260921 -> luu-tru/nhanh/claude/nhap-gia-han-578-20260921
+2026-11-24T14:51:04.5595323Z  * [new tag]         luu-tru/nhanh/claude/nhap-lease-541-g2-20260918 -> luu-tru/nhanh/claude/nhap-lease-541-g2-20260918
+2026-11-24T14:51:04.5595779Z  * [new tag]         luu-tru/nhanh/claude/nhap-lease-541-g3-20260919 -> luu-tru/nhanh/claude/nhap-lease-541-g3-20260919
+2026-11-24T14:51:04.5596223Z  * [new tag]         luu-tru/nhanh/claude/nhap-lease-552-20260917 -> luu-tru/nhanh/claude/nhap-lease-552-20260917
+2026-11-24T14:51:04.5596661Z  * [new tag]         luu-tru/nhanh/claude/nhap-lease-562-20260918 -> luu-tru/nhanh/claude/nhap-lease-562-20260918
+2026-11-24T14:51:04.5597106Z  * [new tag]         luu-tru/nhanh/claude/nhap-thu-hep-579-20260921 -> luu-tru/nhanh/claude/nhap-thu-hep-579-20260921
+2026-11-24T14:51:04.5597688Z  * [new tag]         luu-tru/nhanh/claude/nlm-registry-sheet-dup-s22fk7 -> luu-tru/nhanh/claude/nlm-registry-sheet-dup-s22fk7
+2026-11-24T14:51:04.5598120Z  * [new tag]         luu-tru/nhanh/claude/no-ton-677-687 -> luu-tru/nhanh/claude/no-ton-677-687
+2026-11-24T14:51:04.5598567Z  * [new tag]         luu-tru/nhanh/claude/plan-protocol-refinement-9qrcua -> luu-tru/nhanh/claude/plan-protocol-refinement-9qrcua
+2026-11-24T14:51:04.5599053Z  * [new tag]         luu-tru/nhanh/claude/prompt-541-exec-1-20260918 -> luu-tru/nhanh/claude/prompt-541-exec-1-20260918
+2026-11-24T14:51:04.5599594Z  * [new tag]         luu-tru/nhanh/claude/prompt-541-exec-2-20260918 -> luu-tru/nhanh/claude/prompt-541-exec-2-20260918
+2026-11-24T14:51:04.5600051Z  * [new tag]         luu-tru/nhanh/claude/quy-trinh-lap-review-r2 -> luu-tru/nhanh/claude/quy-trinh-lap-review-r2
+2026-11-24T14:51:04.5600530Z  * [new tag]         luu-tru/nhanh/claude/ras-17-data-pr13-windows-bjovq2 -> luu-tru/nhanh/claude/ras-17-data-pr13-windows-bjovq2
+2026-11-24T14:51:04.5601065Z  * [new tag]         luu-tru/nhanh/claude/read-handoff-phien-dieu-phoi-oqbsz4 -> luu-tru/nhanh/claude/read-handoff-phien-dieu-phoi-oqbsz4
+2026-11-24T14:51:04.5601566Z  * [new tag]         luu-tru/nhanh/claude/review-541-luot3-20260918 -> luu-tru/nhanh/claude/review-541-luot3-20260918
+2026-11-24T14:51:04.5602168Z  * [new tag]         luu-tru/nhanh/claude/review-546-luot1-20260916 -> luu-tru/nhanh/claude/review-546-luot1-20260916
+2026-11-24T14:51:04.5602676Z  * [new tag]         luu-tru/nhanh/claude/review-546-luot2-20260917 -> luu-tru/nhanh/claude/review-546-luot2-20260917
+2026-11-24T14:51:04.5603246Z  * [new tag]         luu-tru/nhanh/claude/review-546-luot3-20260917 -> luu-tru/nhanh/claude/review-546-luot3-20260917
+2026-11-24T14:51:04.5603686Z  * [new tag]         luu-tru/nhanh/claude/review-546-luot4-20260917 -> luu-tru/nhanh/claude/review-546-luot4-20260917
+2026-11-24T14:51:04.5604131Z  * [new tag]         luu-tru/nhanh/claude/review-546-luot5-20260917 -> luu-tru/nhanh/claude/review-546-luot5-20260917
+2026-11-24T14:51:04.5604578Z  * [new tag]         luu-tru/nhanh/claude/review-548-luot1-20260917 -> luu-tru/nhanh/claude/review-548-luot1-20260917
+2026-11-24T14:51:04.5605017Z  * [new tag]         luu-tru/nhanh/claude/review-548-luot2-20260917 -> luu-tru/nhanh/claude/review-548-luot2-20260917
+2026-11-24T14:51:04.5605454Z  * [new tag]         luu-tru/nhanh/claude/review-548-luot3-20260917 -> luu-tru/nhanh/claude/review-548-luot3-20260917
+2026-11-24T14:51:04.5606058Z  * [new tag]         luu-tru/nhanh/claude/review-548-luot4-20260917 -> luu-tru/nhanh/claude/review-548-luot4-20260917
+2026-11-24T14:51:04.5606733Z  * [new tag]         luu-tru/nhanh/claude/review-wp538-20260916 -> luu-tru/nhanh/claude/review-wp538-20260916
+2026-11-24T14:51:04.5607179Z  * [new tag]         luu-tru/nhanh/claude/review-wp538-luot2-20260916 -> luu-tru/nhanh/claude/review-wp538-luot2-20260916
+2026-11-24T14:51:04.5607635Z  * [new tag]         luu-tru/nhanh/claude/slice-523-skills-20260920 -> luu-tru/nhanh/claude/slice-523-skills-20260920
+2026-11-24T14:51:04.5608079Z  * [new tag]         luu-tru/nhanh/claude/spec-541-r1-20260917 -> luu-tru/nhanh/claude/spec-541-r1-20260917
+2026-11-24T14:51:04.5608477Z  * [new tag]         luu-tru/nhanh/claude/spec-541-r2-20260917 -> luu-tru/nhanh/claude/spec-541-r2-20260917
+2026-11-24T14:51:04.5608878Z  * [new tag]         luu-tru/nhanh/claude/spec-541-r3-20260918 -> luu-tru/nhanh/claude/spec-541-r3-20260918
+2026-11-24T14:51:04.5609275Z  * [new tag]         luu-tru/nhanh/claude/spec-548-r1-20260916 -> luu-tru/nhanh/claude/spec-548-r1-20260916
+2026-11-24T14:51:04.5609673Z  * [new tag]         luu-tru/nhanh/claude/spec-548-r2-20260917 -> luu-tru/nhanh/claude/spec-548-r2-20260917
+2026-11-24T14:51:04.5610065Z  * [new tag]         luu-tru/nhanh/claude/spec-551-r2-20260918 -> luu-tru/nhanh/claude/spec-551-r2-20260918
+2026-11-24T14:51:04.5610456Z  * [new tag]         luu-tru/nhanh/claude/spec-551-r3-20260918 -> luu-tru/nhanh/claude/spec-551-r3-20260918
+2026-11-24T14:51:04.5610847Z  * [new tag]         luu-tru/nhanh/claude/spec-552-r1-20260917 -> luu-tru/nhanh/claude/spec-552-r1-20260917
+2026-11-24T14:51:04.5611316Z  * [new tag]         luu-tru/nhanh/claude/spec-552-r2-20260917 -> luu-tru/nhanh/claude/spec-552-r2-20260917
+2026-11-24T14:51:04.5611849Z  * [new tag]         luu-tru/nhanh/claude/spec-562-r1-20260918 -> luu-tru/nhanh/claude/spec-562-r1-20260918
+2026-11-24T14:51:04.5612244Z  * [new tag]         luu-tru/nhanh/claude/spec-565-r1-20260919 -> luu-tru/nhanh/claude/spec-565-r1-20260919
+2026-11-24T14:51:04.5612764Z  * [new tag]         luu-tru/nhanh/claude/spec-566-r1-20260919 -> luu-tru/nhanh/claude/spec-566-r1-20260919
+2026-11-24T14:51:04.5613158Z  * [new tag]         luu-tru/nhanh/claude/spec-568-r1-20260919 -> luu-tru/nhanh/claude/spec-568-r1-20260919
+2026-11-24T14:51:04.5613548Z  * [new tag]         luu-tru/nhanh/claude/spec-570-r1-20260919 -> luu-tru/nhanh/claude/spec-570-r1-20260919
+2026-11-24T14:51:04.5613954Z  * [new tag]         luu-tru/nhanh/claude/spec-570-r2-20260920 -> luu-tru/nhanh/claude/spec-570-r2-20260920
+2026-11-24T14:51:04.5614352Z  * [new tag]         luu-tru/nhanh/claude/spec-570-r3-20260920 -> luu-tru/nhanh/claude/spec-570-r3-20260920
+2026-11-24T14:51:04.5614750Z  * [new tag]         luu-tru/nhanh/claude/spec-570-r4-20260920 -> luu-tru/nhanh/claude/spec-570-r4-20260920
+2026-11-24T14:51:04.5615142Z  * [new tag]         luu-tru/nhanh/claude/spec-570-r6-20260921 -> luu-tru/nhanh/claude/spec-570-r6-20260921
+2026-11-24T14:51:04.5615542Z  * [new tag]         luu-tru/nhanh/claude/spec-578-r1-20260920 -> luu-tru/nhanh/claude/spec-578-r1-20260920
+2026-11-24T14:51:04.5616062Z  * [new tag]         luu-tru/nhanh/claude/spec-assurance-ho-model-r1 -> luu-tru/nhanh/claude/spec-assurance-ho-model-r1
+2026-11-24T14:51:04.5616617Z  * [new tag]         luu-tru/nhanh/claude/spec-doctrine-scan-r1-20260916 -> luu-tru/nhanh/claude/spec-doctrine-scan-r1-20260916
+2026-11-24T14:51:04.5617100Z  * [new tag]         luu-tru/nhanh/claude/spec-moi-truong-r1-20260916 -> luu-tru/nhanh/claude/spec-moi-truong-r1-20260916
+2026-11-24T14:51:04.5617526Z  * [new tag]         luu-tru/nhanh/claude/spec-no-p3-r6 -> luu-tru/nhanh/claude/spec-no-p3-r6
+2026-11-24T14:51:04.5617941Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r10-20260913 -> luu-tru/nhanh/claude/spec-quy-trinh-r10-20260913
+2026-11-24T14:51:04.5618406Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r11-20260913 -> luu-tru/nhanh/claude/spec-quy-trinh-r11-20260913
+2026-11-24T14:51:04.5618870Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r12-20260920 -> luu-tru/nhanh/claude/spec-quy-trinh-r12-20260920
+2026-11-24T14:51:04.5619338Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r13-20260921 -> luu-tru/nhanh/claude/spec-quy-trinh-r13-20260921
+2026-11-24T14:51:04.5619798Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r3-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-r3-20260912
+2026-11-24T14:51:04.5620261Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r4-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-r4-20260912
+2026-11-24T14:51:04.5620718Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r5-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-r5-20260912
+2026-11-24T14:51:04.5621169Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r6-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-r6-20260912
+2026-11-24T14:51:04.5621620Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r7-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-r7-20260912
+2026-11-24T14:51:04.5622143Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r8-20260913 -> luu-tru/nhanh/claude/spec-quy-trinh-r8-20260913
+2026-11-24T14:51:04.5622603Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-r9-20260913 -> luu-tru/nhanh/claude/spec-quy-trinh-r9-20260913
+2026-11-24T14:51:04.5623247Z  * [new tag]         luu-tru/nhanh/claude/spec-quy-trinh-review-r2-20260912 -> luu-tru/nhanh/claude/spec-quy-trinh-review-r2-20260912
+2026-11-24T14:51:04.5624013Z  * [new tag]         luu-tru/nhanh/claude/spec-r5-overclaim-exec-1 -> luu-tru/nhanh/claude/spec-r5-overclaim-exec-1
+2026-11-24T14:51:04.5624873Z  * [new tag]         luu-tru/nhanh/claude/spec-tran-vong-r3-20260912 -> luu-tru/nhanh/claude/spec-tran-vong-r3-20260912
+2026-11-24T14:51:04.5625317Z  * [new tag]         luu-tru/nhanh/claude/spec-wp538-r3-20260916 -> luu-tru/nhanh/claude/spec-wp538-r3-20260916
+2026-11-24T14:51:04.5625734Z  * [new tag]         luu-tru/nhanh/claude/spec-wp538-r4-20260916 -> luu-tru/nhanh/claude/spec-wp538-r4-20260916
+2026-11-24T14:51:04.5626233Z  * [new tag]         luu-tru/nhanh/claude/spec-wp540-r2-20260916 -> luu-tru/nhanh/claude/spec-wp540-r2-20260916
+2026-11-24T14:51:04.5626669Z  * [new tag]         luu-tru/nhanh/claude/tai-sinh-manifest-725-727 -> luu-tru/nhanh/claude/tai-sinh-manifest-725-727
+2026-11-24T14:51:04.5627163Z  * [new tag]         luu-tru/nhanh/claude/tra-luat-deployment-d1-d2-otcxau -> luu-tru/nhanh/claude/tra-luat-deployment-d1-d2-otcxau
+2026-11-24T14:51:04.5627663Z  * [new tag]         luu-tru/nhanh/claude/vong-8-va-4-khe-ho-launcher -> luu-tru/nhanh/claude/vong-8-va-4-khe-ho-launcher
+2026-11-24T14:51:04.5628249Z  * [new tag]         luu-tru/nhanh/claude/wp-f3-03-release-nested -> luu-tru/nhanh/claude/wp-f3-03-release-nested
+2026-11-24T14:51:04.5628783Z  * [new tag]         luu-tru/nhanh/claude/wp1221-g1 -> luu-tru/nhanh/claude/wp1221-g1
+2026-11-24T14:51:04.5629127Z  * [new tag]         luu-tru/nhanh/claude/wp55-f3-03 -> luu-tru/nhanh/claude/wp55-f3-03
+2026-11-24T14:51:04.5629548Z  * [new tag]         luu-tru/nhanh/claude/wp55-r2-review-codex-bang-chung -> luu-tru/nhanh/claude/wp55-r2-review-codex-bang-chung
+2026-11-24T14:51:04.5630042Z  * [new tag]         luu-tru/nhanh/claude/wp60-g1-f3-01-github-schema -> luu-tru/nhanh/claude/wp60-g1-f3-01-github-schema
+2026-11-24T14:51:04.5630504Z  * [new tag]         luu-tru/nhanh/claude/wp60-g2-f3-01-github-schema -> luu-tru/nhanh/claude/wp60-g2-f3-01-github-schema
+2026-11-24T14:51:04.5630925Z  * [new tag]         luu-tru/nhanh/claude/wp685-r22-de-xuat -> luu-tru/nhanh/claude/wp685-r22-de-xuat
+2026-11-24T14:51:04.5631406Z  * [new tag]         luu-tru/nhanh/claude/wp86-cloud-linux-migration-ix5keq -> luu-tru/nhanh/claude/wp86-cloud-linux-migration-ix5keq
+2026-11-24T14:51:04.5632142Z  * [new tag]         luu-tru/nhanh/codex/f2-d-reopen-writer -> luu-tru/nhanh/codex/f2-d-reopen-writer
+2026-11-24T14:51:04.5632550Z  * [new tag]         luu-tru/nhanh/codex/f3-02-impact-policy -> luu-tru/nhanh/codex/f3-02-impact-policy
+2026-11-24T14:51:04.5632989Z  * [new tag]         luu-tru/nhanh/codex/gate-463-g4-lease-20260914 -> luu-tru/nhanh/codex/gate-463-g4-lease-20260914
+2026-11-24T14:51:04.5633661Z  * [new tag]         luu-tru/nhanh/codex/gate-463-g5-lease-20260914 -> luu-tru/nhanh/codex/gate-463-g5-lease-20260914
+2026-11-24T14:51:04.5634097Z  * [new tag]         luu-tru/nhanh/codex/gate-463-g6-lease-20260914 -> luu-tru/nhanh/codex/gate-463-g6-lease-20260914
+2026-11-24T14:51:04.5634523Z  * [new tag]         luu-tru/nhanh/codex/gate-463-lease-20260913 -> luu-tru/nhanh/codex/gate-463-lease-20260913
+2026-11-24T14:51:04.5635760Z  * [new tag]         luu-tru/nhanh/codex/gate-463-r22-lease-20260913 -> luu-tru/nhanh/codex/gate-463-r22-lease-20260913
+2026-11-24T14:51:04.5636247Z  * [new tag]         luu-tru/nhanh/codex/gate-463-review-evidence-20260913 -> luu-tru/nhanh/codex/gate-463-review-evidence-20260913
+2026-11-24T14:51:04.5636692Z  * [new tag]         luu-tru/nhanh/codex/khoa-neo-luot3-wip -> luu-tru/nhanh/codex/khoa-neo-luot3-wip
+2026-11-24T14:51:04.5637101Z  * [new tag]         luu-tru/nhanh/codex/mission-686-versioned -> luu-tru/nhanh/codex/mission-686-versioned
+2026-11-24T14:51:04.5637517Z  * [new tag]         luu-tru/nhanh/codex/probe-agent-r2-exec-1 -> luu-tru/nhanh/codex/probe-agent-r2-exec-1
+2026-11-24T14:51:04.5637965Z  * [new tag]         luu-tru/nhanh/codex/session-credential-bootstrap -> luu-tru/nhanh/codex/session-credential-bootstrap
+2026-11-24T14:51:04.5638460Z  * [new tag]         luu-tru/nhanh/codex/session-credential-bootstrap-r4 -> luu-tru/nhanh/codex/session-credential-bootstrap-r4
+2026-11-24T14:51:04.5639066Z  * [new tag]         luu-tru/nhanh/codex/session-credential-bootstrap-r5 -> luu-tru/nhanh/codex/session-credential-bootstrap-r5
+2026-11-24T14:51:04.5639516Z  * [new tag]         luu-tru/nhanh/codex/thu-hoi-lease-exec-1 -> luu-tru/nhanh/codex/thu-hoi-lease-exec-1
+2026-11-24T14:51:04.5639972Z  * [new tag]         luu-tru/nhanh/codex/w1-p1-van-chuyen-prompt-exec-3 -> luu-tru/nhanh/codex/w1-p1-van-chuyen-prompt-exec-3
+2026-11-24T14:51:04.5640422Z  * [new tag]         luu-tru/nhanh/codex/wp1174-h5-remediation -> luu-tru/nhanh/codex/wp1174-h5-remediation
+2026-11-24T14:51:04.5640936Z  * [new tag]         luu-tru/nhanh/codex/wp422-authority-r1 -> luu-tru/nhanh/codex/wp422-authority-r1
+2026-11-24T14:51:04.5641436Z  * [new tag]         luu-tru/nhanh/codex/wp433-g1-credential-destination-remediation -> luu-tru/nhanh/codex/wp433-g1-credential-destination-remediation
+2026-11-24T14:51:04.5642137Z  * [new tag]         luu-tru/nhanh/codex/wp433-r10-cleanup-claude-evidence -> luu-tru/nhanh/codex/wp433-r10-cleanup-claude-evidence
+2026-11-24T14:51:04.5642655Z  * [new tag]         luu-tru/nhanh/codex/wp433-r11-provider-exec-tl-cleanup -> luu-tru/nhanh/codex/wp433-r11-provider-exec-tl-cleanup
+2026-11-24T14:51:04.5643136Z  * [new tag]         luu-tru/nhanh/codex/wp433-r13-runtime-closure -> luu-tru/nhanh/codex/wp433-r13-runtime-closure
+2026-11-24T14:51:04.5643648Z  * [new tag]         luu-tru/nhanh/codex/wp433-r4-unified-credential-boundaries -> luu-tru/nhanh/codex/wp433-r4-unified-credential-boundaries
+2026-11-24T14:51:04.5644190Z  * [new tag]         luu-tru/nhanh/codex/wp433-r5-final-review-remediation -> luu-tru/nhanh/codex/wp433-r5-final-review-remediation
+2026-11-24T14:51:04.5644685Z  * [new tag]         luu-tru/nhanh/codex/wp433-r6-provider-boundaries -> luu-tru/nhanh/codex/wp433-r6-provider-boundaries
+2026-11-24T14:51:04.5645198Z  * [new tag]         luu-tru/nhanh/codex/wp433-r7-provider-identity-live-check -> luu-tru/nhanh/codex/wp433-r7-provider-identity-live-check
+2026-11-24T14:51:04.5645691Z  * [new tag]         luu-tru/nhanh/codex/wp433-r8-final-boundaries -> luu-tru/nhanh/codex/wp433-r8-final-boundaries
+2026-11-24T14:51:04.5646145Z  * [new tag]         luu-tru/nhanh/codex/wp433-r9-capability-status -> luu-tru/nhanh/codex/wp433-r9-capability-status
+2026-11-24T14:51:04.5646562Z  * [new tag]         luu-tru/nhanh/codex/wp484-g4-windows -> luu-tru/nhanh/codex/wp484-g4-windows
+2026-11-24T14:51:04.5646940Z  * [new tag]         luu-tru/nhanh/codex/wp498-authority-r1 -> luu-tru/nhanh/codex/wp498-authority-r1
+2026-11-24T14:51:04.5647336Z  * [new tag]         luu-tru/nhanh/codex/wp523-r13-authority -> luu-tru/nhanh/codex/wp523-r13-authority
+2026-11-24T14:51:04.5647725Z  * [new tag]         luu-tru/nhanh/codex/wp523-r14-authority -> luu-tru/nhanh/codex/wp523-r14-authority
+2026-11-24T14:51:04.5648101Z  * [new tag]         luu-tru/nhanh/codex/wp568-r7-authority -> luu-tru/nhanh/codex/wp568-r7-authority
+2026-11-24T14:51:04.5648521Z  * [new tag]         luu-tru/nhanh/codex/wp60-g7-f3-01-github-schema -> luu-tru/nhanh/codex/wp60-g7-f3-01-github-schema
+2026-11-24T14:51:04.5648935Z  * [new tag]         luu-tru/nhanh/codex/wp607-authority -> luu-tru/nhanh/codex/wp607-authority
+2026-11-24T14:51:04.5649296Z  * [new tag]         luu-tru/nhanh/codex/wp610-authority -> luu-tru/nhanh/codex/wp610-authority
+2026-11-24T14:51:04.5649688Z  * [new tag]         luu-tru/nhanh/codex/wp68-g8-release-nested -> luu-tru/nhanh/codex/wp68-g8-release-nested
+2026-11-24T14:51:04.5650078Z  * [new tag]         luu-tru/nhanh/codex/wp709-bootstrap -> luu-tru/nhanh/codex/wp709-bootstrap
+2026-11-24T14:51:04.5650439Z  * [new tag]         luu-tru/nhanh/codex/wp744-spec-r2 -> luu-tru/nhanh/codex/wp744-spec-r2
+2026-11-24T14:51:04.5650877Z  * [new tag]         luu-tru/nhanh/codex/wp84-r3-g3-protocol-hash-hardening -> luu-tru/nhanh/codex/wp84-r3-g3-protocol-hash-hardening
+2026-11-24T14:51:04.5651394Z  * [new tag]         luu-tru/nhanh/codex/wp84-r5-g5-protocol-hash-hardening -> luu-tru/nhanh/codex/wp84-r5-g5-protocol-hash-hardening
+2026-11-24T14:51:04.5652014Z  * [new tag]         luu-tru/nhanh/codex/wp86-g4-sandbox-oracle -> luu-tru/nhanh/codex/wp86-g4-sandbox-oracle
+2026-11-24T14:51:04.5652579Z  * [new tag]         luu-tru/nhanh/dispatcher/wp99-r3-target-schema-632401a -> luu-tru/nhanh/dispatcher/wp99-r3-target-schema-632401a
+2026-11-24T14:51:04.5653011Z  * [new tag]         luu-tru/nhanh/do-windows/vong-8 -> luu-tru/nhanh/do-windows/vong-8
+2026-11-24T14:51:04.5653361Z  * [new tag]         luu-tru/nhanh/do-windows/vong-8-do -> luu-tru/nhanh/do-windows/vong-8-do
+2026-11-24T14:51:04.5653803Z  * [new tag]         luu-tru/nhanh/docs/goi-claude-cli -> luu-tru/nhanh/docs/goi-claude-cli
+2026-11-24T14:51:04.5654161Z  * [new tag]         luu-tru/nhanh/ducthangho-patch-1 -> luu-tru/nhanh/ducthangho-patch-1
+2026-11-24T14:51:04.5654531Z  * [new tag]         luu-tru/nhanh/fix/wp1174-connector-k3 -> luu-tru/nhanh/fix/wp1174-connector-k3
+2026-11-24T14:51:04.5654933Z  * [new tag]         luu-tru/nhanh/fix/wp1174-connector-k3-ci -> luu-tru/nhanh/fix/wp1174-connector-k3-ci
+2026-11-24T14:51:04.5655339Z  * [new tag]         luu-tru/nhanh/mission/76/integration -> luu-tru/nhanh/mission/76/integration
+2026-11-24T14:51:04.5655690Z  * [new tag]         luu-tru/nhanh/nhap/wp802-n9-do -> luu-tru/nhanh/nhap/wp802-n9-do
+2026-11-24T14:51:04.5656061Z  * [new tag]         luu-tru/nhanh/ops/bai-hoc-cong-cu-da-nen -> luu-tru/nhanh/ops/bai-hoc-cong-cu-da-nen
+2026-11-24T14:51:04.5656456Z  * [new tag]         luu-tru/nhanh/ops/bai-hoc-github-mcp -> luu-tru/nhanh/ops/bai-hoc-github-mcp
+2026-11-24T14:51:04.5656832Z  * [new tag]         luu-tru/nhanh/ops/ban-giao-cap-nhat -> luu-tru/nhanh/ops/ban-giao-cap-nhat
+2026-11-24T14:51:04.5657259Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-4-packet-20260826 -> luu-tru/nhanh/ops/cap-lease-4-packet-20260826
+2026-11-24T14:51:04.5657665Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-461-g4 -> luu-tru/nhanh/ops/cap-lease-461-g4
+2026-11-24T14:51:04.5658006Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-463 -> luu-tru/nhanh/ops/cap-lease-463
+2026-11-24T14:51:04.5658337Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-488 -> luu-tru/nhanh/ops/cap-lease-488
+2026-11-24T14:51:04.5658668Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-502 -> luu-tru/nhanh/ops/cap-lease-502
+2026-11-24T14:51:04.5659064Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-503 -> luu-tru/nhanh/ops/cap-lease-503
+2026-11-24T14:51:04.5659392Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-504 -> luu-tru/nhanh/ops/cap-lease-504
+2026-11-24T14:51:04.5659717Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-513 -> luu-tru/nhanh/ops/cap-lease-513
+2026-11-24T14:51:04.5660072Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-522-523 -> luu-tru/nhanh/ops/cap-lease-522-523
+2026-11-24T14:51:04.5660435Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-523-g19 -> luu-tru/nhanh/ops/cap-lease-523-g19
+2026-11-24T14:51:04.5660795Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-523-g20 -> luu-tru/nhanh/ops/cap-lease-523-g20
+2026-11-24T14:51:04.5661154Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-523-r12 -> luu-tru/nhanh/ops/cap-lease-523-r12
+2026-11-24T14:51:04.5661513Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-523-r17 -> luu-tru/nhanh/ops/cap-lease-523-r17
+2026-11-24T14:51:04.5661997Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-523-r18 -> luu-tru/nhanh/ops/cap-lease-523-r18
+2026-11-24T14:51:04.5662341Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-530 -> luu-tru/nhanh/ops/cap-lease-530
+2026-11-24T14:51:04.5662689Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-538-r3 -> luu-tru/nhanh/ops/cap-lease-538-r3
+2026-11-24T14:51:04.5663047Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-538-r4 -> luu-tru/nhanh/ops/cap-lease-538-r4
+2026-11-24T14:51:04.5663399Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-540-r2 -> luu-tru/nhanh/ops/cap-lease-540-r2
+2026-11-24T14:51:04.5663737Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-541 -> luu-tru/nhanh/ops/cap-lease-541
+2026-11-24T14:51:04.5664081Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-541-g2 -> luu-tru/nhanh/ops/cap-lease-541-g2
+2026-11-24T14:51:04.5664431Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-541-g3 -> luu-tru/nhanh/ops/cap-lease-541-g3
+2026-11-24T14:51:04.5664881Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-541-g4 -> luu-tru/nhanh/ops/cap-lease-541-g4
+2026-11-24T14:51:04.5665224Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-543 -> luu-tru/nhanh/ops/cap-lease-543
+2026-11-24T14:51:04.5665551Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-546 -> luu-tru/nhanh/ops/cap-lease-546
+2026-11-24T14:51:04.5665882Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-548 -> luu-tru/nhanh/ops/cap-lease-548
+2026-11-24T14:51:04.5666300Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-548-r2 -> luu-tru/nhanh/ops/cap-lease-548-r2
+2026-11-24T14:51:04.5666641Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-551 -> luu-tru/nhanh/ops/cap-lease-551
+2026-11-24T14:51:04.5666971Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-552 -> luu-tru/nhanh/ops/cap-lease-552
+2026-11-24T14:51:04.5667294Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-562 -> luu-tru/nhanh/ops/cap-lease-562
+2026-11-24T14:51:04.5667628Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-565 -> luu-tru/nhanh/ops/cap-lease-565
+2026-11-24T14:51:04.5667949Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-566 -> luu-tru/nhanh/ops/cap-lease-566
+2026-11-24T14:51:04.5668274Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-568 -> luu-tru/nhanh/ops/cap-lease-568
+2026-11-24T14:51:04.5668600Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570 -> luu-tru/nhanh/ops/cap-lease-570
+2026-11-24T14:51:04.5668948Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g10 -> luu-tru/nhanh/ops/cap-lease-570-g10
+2026-11-24T14:51:04.5669310Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g11 -> luu-tru/nhanh/ops/cap-lease-570-g11
+2026-11-24T14:51:04.5669666Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g12 -> luu-tru/nhanh/ops/cap-lease-570-g12
+2026-11-24T14:51:04.5670029Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g13 -> luu-tru/nhanh/ops/cap-lease-570-g13
+2026-11-24T14:51:04.5670386Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g14 -> luu-tru/nhanh/ops/cap-lease-570-g14
+2026-11-24T14:51:04.5670746Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g15 -> luu-tru/nhanh/ops/cap-lease-570-g15
+2026-11-24T14:51:04.5671105Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g16 -> luu-tru/nhanh/ops/cap-lease-570-g16
+2026-11-24T14:51:04.5671463Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g17 -> luu-tru/nhanh/ops/cap-lease-570-g17
+2026-11-24T14:51:04.5671988Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g18 -> luu-tru/nhanh/ops/cap-lease-570-g18
+2026-11-24T14:51:04.5672344Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g19 -> luu-tru/nhanh/ops/cap-lease-570-g19
+2026-11-24T14:51:04.5672765Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g2 -> luu-tru/nhanh/ops/cap-lease-570-g2
+2026-11-24T14:51:04.5673176Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g20 -> luu-tru/nhanh/ops/cap-lease-570-g20
+2026-11-24T14:51:04.5673531Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g21 -> luu-tru/nhanh/ops/cap-lease-570-g21
+2026-11-24T14:51:04.5673892Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g22 -> luu-tru/nhanh/ops/cap-lease-570-g22
+2026-11-24T14:51:04.5674395Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g23 -> luu-tru/nhanh/ops/cap-lease-570-g23
+2026-11-24T14:51:04.5674956Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g24 -> luu-tru/nhanh/ops/cap-lease-570-g24
+2026-11-24T14:51:04.5675471Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g25 -> luu-tru/nhanh/ops/cap-lease-570-g25
+2026-11-24T14:51:04.5675837Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g26 -> luu-tru/nhanh/ops/cap-lease-570-g26
+2026-11-24T14:51:04.5676190Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g27 -> luu-tru/nhanh/ops/cap-lease-570-g27
+2026-11-24T14:51:04.5676610Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g28 -> luu-tru/nhanh/ops/cap-lease-570-g28
+2026-11-24T14:51:04.5677075Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g29 -> luu-tru/nhanh/ops/cap-lease-570-g29
+2026-11-24T14:51:04.5677658Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g3 -> luu-tru/nhanh/ops/cap-lease-570-g3
+2026-11-24T14:51:04.5678257Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g30 -> luu-tru/nhanh/ops/cap-lease-570-g30
+2026-11-24T14:51:04.5678843Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g31 -> luu-tru/nhanh/ops/cap-lease-570-g31
+2026-11-24T14:51:04.5679437Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g32 -> luu-tru/nhanh/ops/cap-lease-570-g32
+2026-11-24T14:51:04.5680120Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g33 -> luu-tru/nhanh/ops/cap-lease-570-g33
+2026-11-24T14:51:04.5680684Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g34 -> luu-tru/nhanh/ops/cap-lease-570-g34
+2026-11-24T14:51:04.5681251Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g35 -> luu-tru/nhanh/ops/cap-lease-570-g35
+2026-11-24T14:51:04.5681976Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g36 -> luu-tru/nhanh/ops/cap-lease-570-g36
+2026-11-24T14:51:04.5682556Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g37 -> luu-tru/nhanh/ops/cap-lease-570-g37
+2026-11-24T14:51:04.5683150Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g38 -> luu-tru/nhanh/ops/cap-lease-570-g38
+2026-11-24T14:51:04.5683783Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g39 -> luu-tru/nhanh/ops/cap-lease-570-g39
+2026-11-24T14:51:04.5684505Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g4 -> luu-tru/nhanh/ops/cap-lease-570-g4
+2026-11-24T14:51:04.5684870Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g40 -> luu-tru/nhanh/ops/cap-lease-570-g40
+2026-11-24T14:51:04.5685231Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g41 -> luu-tru/nhanh/ops/cap-lease-570-g41
+2026-11-24T14:51:04.5685583Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g42 -> luu-tru/nhanh/ops/cap-lease-570-g42
+2026-11-24T14:51:04.5685935Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g43 -> luu-tru/nhanh/ops/cap-lease-570-g43
+2026-11-24T14:51:04.5686292Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g44 -> luu-tru/nhanh/ops/cap-lease-570-g44
+2026-11-24T14:51:04.5686648Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g45 -> luu-tru/nhanh/ops/cap-lease-570-g45
+2026-11-24T14:51:04.5687003Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g46 -> luu-tru/nhanh/ops/cap-lease-570-g46
+2026-11-24T14:51:04.5687355Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g5 -> luu-tru/nhanh/ops/cap-lease-570-g5
+2026-11-24T14:51:04.5687707Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g6 -> luu-tru/nhanh/ops/cap-lease-570-g6
+2026-11-24T14:51:04.5704809Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g7 -> luu-tru/nhanh/ops/cap-lease-570-g7
+2026-11-24T14:51:04.5705246Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g8 -> luu-tru/nhanh/ops/cap-lease-570-g8
+2026-11-24T14:51:04.5705609Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-570-g9 -> luu-tru/nhanh/ops/cap-lease-570-g9
+2026-11-24T14:51:04.5705947Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574 -> luu-tru/nhanh/ops/cap-lease-574
+2026-11-24T14:51:04.5706319Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g10 -> luu-tru/nhanh/ops/cap-lease-574-g10
+2026-11-24T14:51:04.5706909Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g11 -> luu-tru/nhanh/ops/cap-lease-574-g11
+2026-11-24T14:51:04.5707329Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g12 -> luu-tru/nhanh/ops/cap-lease-574-g12
+2026-11-24T14:51:04.5707687Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g13 -> luu-tru/nhanh/ops/cap-lease-574-g13
+2026-11-24T14:51:04.5708049Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g14 -> luu-tru/nhanh/ops/cap-lease-574-g14
+2026-11-24T14:51:04.5708406Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g15 -> luu-tru/nhanh/ops/cap-lease-574-g15
+2026-11-24T14:51:04.5708764Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g16 -> luu-tru/nhanh/ops/cap-lease-574-g16
+2026-11-24T14:51:04.5709248Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g17 -> luu-tru/nhanh/ops/cap-lease-574-g17
+2026-11-24T14:51:04.5709816Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g18 -> luu-tru/nhanh/ops/cap-lease-574-g18
+2026-11-24T14:51:04.5710171Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g19 -> luu-tru/nhanh/ops/cap-lease-574-g19
+2026-11-24T14:51:04.5710527Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g20 -> luu-tru/nhanh/ops/cap-lease-574-g20
+2026-11-24T14:51:04.5710882Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g21 -> luu-tru/nhanh/ops/cap-lease-574-g21
+2026-11-24T14:51:04.5711350Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g22 -> luu-tru/nhanh/ops/cap-lease-574-g22
+2026-11-24T14:51:04.5712042Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g23 -> luu-tru/nhanh/ops/cap-lease-574-g23
+2026-11-24T14:51:04.5712633Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g24 -> luu-tru/nhanh/ops/cap-lease-574-g24
+2026-11-24T14:51:04.5713199Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g25 -> luu-tru/nhanh/ops/cap-lease-574-g25
+2026-11-24T14:51:04.5713808Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g26 -> luu-tru/nhanh/ops/cap-lease-574-g26
+2026-11-24T14:51:04.5714389Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g27 -> luu-tru/nhanh/ops/cap-lease-574-g27
+2026-11-24T14:51:04.5714964Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g28 -> luu-tru/nhanh/ops/cap-lease-574-g28
+2026-11-24T14:51:04.5715537Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g29 -> luu-tru/nhanh/ops/cap-lease-574-g29
+2026-11-24T14:51:04.5716143Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g30 -> luu-tru/nhanh/ops/cap-lease-574-g30
+2026-11-24T14:51:04.5716777Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g31 -> luu-tru/nhanh/ops/cap-lease-574-g31
+2026-11-24T14:51:04.5717368Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g32 -> luu-tru/nhanh/ops/cap-lease-574-g32
+2026-11-24T14:51:04.5717962Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g33 -> luu-tru/nhanh/ops/cap-lease-574-g33
+2026-11-24T14:51:04.5718565Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g34 -> luu-tru/nhanh/ops/cap-lease-574-g34
+2026-11-24T14:51:04.5719157Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g35 -> luu-tru/nhanh/ops/cap-lease-574-g35
+2026-11-24T14:51:04.5719747Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g36 -> luu-tru/nhanh/ops/cap-lease-574-g36
+2026-11-24T14:51:04.5720337Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g37 -> luu-tru/nhanh/ops/cap-lease-574-g37
+2026-11-24T14:51:04.5720937Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g38 -> luu-tru/nhanh/ops/cap-lease-574-g38
+2026-11-24T14:51:04.5721521Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g39 -> luu-tru/nhanh/ops/cap-lease-574-g39
+2026-11-24T14:51:04.5722209Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g4 -> luu-tru/nhanh/ops/cap-lease-574-g4
+2026-11-24T14:51:04.5722793Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g40 -> luu-tru/nhanh/ops/cap-lease-574-g40
+2026-11-24T14:51:04.5723382Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g41 -> luu-tru/nhanh/ops/cap-lease-574-g41
+2026-11-24T14:51:04.5723981Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g42 -> luu-tru/nhanh/ops/cap-lease-574-g42
+2026-11-24T14:51:04.5724572Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g43 -> luu-tru/nhanh/ops/cap-lease-574-g43
+2026-11-24T14:51:04.5725173Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g5 -> luu-tru/nhanh/ops/cap-lease-574-g5
+2026-11-24T14:51:04.5725771Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g6 -> luu-tru/nhanh/ops/cap-lease-574-g6
+2026-11-24T14:51:04.5726362Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g7 -> luu-tru/nhanh/ops/cap-lease-574-g7
+2026-11-24T14:51:04.5726947Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g8 -> luu-tru/nhanh/ops/cap-lease-574-g8
+2026-11-24T14:51:04.5727533Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-g9 -> luu-tru/nhanh/ops/cap-lease-574-g9
+2026-11-24T14:51:04.5728111Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-r3 -> luu-tru/nhanh/ops/cap-lease-574-r3
+2026-11-24T14:51:04.5728807Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-574-r4 -> luu-tru/nhanh/ops/cap-lease-574-r4
+2026-11-24T14:51:04.5729378Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-578 -> luu-tru/nhanh/ops/cap-lease-578
+2026-11-24T14:51:04.5729946Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-578-g2 -> luu-tru/nhanh/ops/cap-lease-578-g2
+2026-11-24T14:51:04.5730537Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-578-g3 -> luu-tru/nhanh/ops/cap-lease-578-g3
+2026-11-24T14:51:04.5731243Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-578-g4 -> luu-tru/nhanh/ops/cap-lease-578-g4
+2026-11-24T14:51:04.5731912Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579 -> luu-tru/nhanh/ops/cap-lease-579
+2026-11-24T14:51:04.5732493Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g10 -> luu-tru/nhanh/ops/cap-lease-579-g10
+2026-11-24T14:51:04.5733093Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g11 -> luu-tru/nhanh/ops/cap-lease-579-g11
+2026-11-24T14:51:04.5733694Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g12 -> luu-tru/nhanh/ops/cap-lease-579-g12
+2026-11-24T14:51:04.5734287Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g13 -> luu-tru/nhanh/ops/cap-lease-579-g13
+2026-11-24T14:51:04.5734891Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g14 -> luu-tru/nhanh/ops/cap-lease-579-g14
+2026-11-24T14:51:04.5735484Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g15 -> luu-tru/nhanh/ops/cap-lease-579-g15
+2026-11-24T14:51:04.5736115Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g16 -> luu-tru/nhanh/ops/cap-lease-579-g16
+2026-11-24T14:51:04.5736716Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g17 -> luu-tru/nhanh/ops/cap-lease-579-g17
+2026-11-24T14:51:04.5737422Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g18 -> luu-tru/nhanh/ops/cap-lease-579-g18
+2026-11-24T14:51:04.5738038Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g19 -> luu-tru/nhanh/ops/cap-lease-579-g19
+2026-11-24T14:51:04.5738638Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g2 -> luu-tru/nhanh/ops/cap-lease-579-g2
+2026-11-24T14:51:04.5739233Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g20 -> luu-tru/nhanh/ops/cap-lease-579-g20
+2026-11-24T14:51:04.5739834Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g21 -> luu-tru/nhanh/ops/cap-lease-579-g21
+2026-11-24T14:51:04.5740434Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g22 -> luu-tru/nhanh/ops/cap-lease-579-g22
+2026-11-24T14:51:04.5741040Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g23 -> luu-tru/nhanh/ops/cap-lease-579-g23
+2026-11-24T14:51:04.5741751Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g24 -> luu-tru/nhanh/ops/cap-lease-579-g24
+2026-11-24T14:51:04.5742348Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g25 -> luu-tru/nhanh/ops/cap-lease-579-g25
+2026-11-24T14:51:04.5742942Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g26 -> luu-tru/nhanh/ops/cap-lease-579-g26
+2026-11-24T14:51:04.5743536Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g27 -> luu-tru/nhanh/ops/cap-lease-579-g27
+2026-11-24T14:51:04.5744138Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g28 -> luu-tru/nhanh/ops/cap-lease-579-g28
+2026-11-24T14:51:04.5744737Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g29 -> luu-tru/nhanh/ops/cap-lease-579-g29
+2026-11-24T14:51:04.5745336Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g3 -> luu-tru/nhanh/ops/cap-lease-579-g3
+2026-11-24T14:51:04.5745936Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g4 -> luu-tru/nhanh/ops/cap-lease-579-g4
+2026-11-24T14:51:04.5746530Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g5 -> luu-tru/nhanh/ops/cap-lease-579-g5
+2026-11-24T14:51:04.5747118Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g6 -> luu-tru/nhanh/ops/cap-lease-579-g6
+2026-11-24T14:51:04.5747705Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g7 -> luu-tru/nhanh/ops/cap-lease-579-g7
+2026-11-24T14:51:04.5748287Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g8 -> luu-tru/nhanh/ops/cap-lease-579-g8
+2026-11-24T14:51:04.5749001Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-579-g9 -> luu-tru/nhanh/ops/cap-lease-579-g9
+2026-11-24T14:51:04.5749577Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-593 -> luu-tru/nhanh/ops/cap-lease-593
+2026-11-24T14:51:04.5750131Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-618 -> luu-tru/nhanh/ops/cap-lease-618
+2026-11-24T14:51:04.5750683Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-650 -> luu-tru/nhanh/ops/cap-lease-650
+2026-11-24T14:51:04.5751329Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-676 -> luu-tru/nhanh/ops/cap-lease-676
+2026-11-24T14:51:04.5752010Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-782 -> luu-tru/nhanh/ops/cap-lease-782
+2026-11-24T14:51:04.5752556Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-784 -> luu-tru/nhanh/ops/cap-lease-784
+2026-11-24T14:51:04.5753201Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-agent-quyen-a1 -> luu-tru/nhanh/ops/cap-lease-agent-quyen-a1
+2026-11-24T14:51:04.5753959Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-bia-mo-mot-chieu -> luu-tru/nhanh/ops/cap-lease-bia-mo-mot-chieu
+2026-11-24T14:51:04.5754756Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-chon-reviewer-20260827 -> luu-tru/nhanh/ops/cap-lease-chon-reviewer-20260827
+2026-11-24T14:51:04.5755645Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-ci-dot-bien-chia-manh -> luu-tru/nhanh/ops/cap-lease-ci-dot-bien-chia-manh
+2026-11-24T14:51:04.5756434Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-ci-idiom-20260827 -> luu-tru/nhanh/ops/cap-lease-ci-idiom-20260827
+2026-11-24T14:51:04.5757213Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-doctrine-allowlist -> luu-tru/nhanh/ops/cap-lease-doctrine-allowlist
+2026-11-24T14:51:04.5757957Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-l7-trich-dan -> luu-tru/nhanh/ops/cap-lease-l7-trich-dan
+2026-11-24T14:51:04.5758662Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-launcher-r3-va -> luu-tru/nhanh/ops/cap-lease-launcher-r3-va
+2026-11-24T14:51:04.5759385Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-mcp-github-doc -> luu-tru/nhanh/ops/cap-lease-mcp-github-doc
+2026-11-24T14:51:04.5760122Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-mu-ref-va-verdict -> luu-tru/nhanh/ops/cap-lease-mu-ref-va-verdict
+2026-11-24T14:51:04.5760911Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-n6-hook-giai-ma-utf8 -> luu-tru/nhanh/ops/cap-lease-n6-hook-giai-ma-utf8
+2026-11-24T14:51:04.5761823Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-n8-review-kem-patch -> luu-tru/nhanh/ops/cap-lease-n8-review-kem-patch
+2026-11-24T14:51:04.5762615Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-n9-ci-manifest-lane -> luu-tru/nhanh/ops/cap-lease-n9-ci-manifest-lane
+2026-11-24T14:51:04.5763359Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-no-p3-20260828 -> luu-tru/nhanh/ops/cap-lease-no-p3-20260828
+2026-11-24T14:51:04.5764021Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-p3-dot -> luu-tru/nhanh/ops/cap-lease-p3-dot
+2026-11-24T14:51:04.5764646Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-plat-x8-2 -> luu-tru/nhanh/ops/cap-lease-plat-x8-2
+2026-11-24T14:51:04.5765378Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-probe-agent-20260828 -> luu-tru/nhanh/ops/cap-lease-probe-agent-20260828
+2026-11-24T14:51:04.5766206Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-probe-agent-r2-20260829 -> luu-tru/nhanh/ops/cap-lease-probe-agent-r2-20260829
+2026-11-24T14:51:04.5767015Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-t33-doi-shellcheck -> luu-tru/nhanh/ops/cap-lease-t33-doi-shellcheck
+2026-11-24T14:51:04.5767721Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-tach-314 -> luu-tru/nhanh/ops/cap-lease-tach-314
+2026-11-24T14:51:04.5768469Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-tach-danh-tinh-20260827 -> luu-tru/nhanh/ops/cap-lease-tach-danh-tinh-20260827
+2026-11-24T14:51:04.5769184Z  * [new tag]         luu-tru/nhanh/ops/cap-lease-w1-p1 -> luu-tru/nhanh/ops/cap-lease-w1-p1
+2026-11-24T14:51:04.5769791Z  * [new tag]         luu-tru/nhanh/ops/ci-bang-phu-thuoc -> luu-tru/nhanh/ops/ci-bang-phu-thuoc
+2026-11-24T14:51:04.5770539Z  * [new tag]         luu-tru/nhanh/ops/ci-noi-bang-vao-gate -> luu-tru/nhanh/ops/ci-noi-bang-vao-gate
+2026-11-24T14:51:04.5771233Z  * [new tag]         luu-tru/nhanh/ops/cong-duyet-tham-quyen-386 -> luu-tru/nhanh/ops/cong-duyet-tham-quyen-386
+2026-11-24T14:51:04.5772036Z  * [new tag]         luu-tru/nhanh/ops/dac-ta-n6-loi-khai -> luu-tru/nhanh/ops/dac-ta-n6-loi-khai
+2026-11-24T14:51:04.5772659Z  * [new tag]         luu-tru/nhanh/ops/danh-sach-don-nhanh -> luu-tru/nhanh/ops/danh-sach-don-nhanh
+2026-11-24T14:51:04.5773487Z  * [new tag]         luu-tru/nhanh/ops/de-xuat-cho-luong-moi-truong -> luu-tru/nhanh/ops/de-xuat-cho-luong-moi-truong
+2026-11-24T14:51:04.5774241Z  * [new tag]         luu-tru/nhanh/ops/de-xuat-lease-8-superseded -> luu-tru/nhanh/ops/de-xuat-lease-8-superseded
+2026-11-24T14:51:04.5775002Z  * [new tag]         luu-tru/nhanh/ops/do-lease-publish-windows-150 -> luu-tru/nhanh/ops/do-lease-publish-windows-150
+2026-11-24T14:51:04.5775697Z  * [new tag]         luu-tru/nhanh/ops/handoff-512-luot6 -> luu-tru/nhanh/ops/handoff-512-luot6
+2026-11-24T14:51:04.5776306Z  * [new tag]         luu-tru/nhanh/ops/handoff-512-luot7 -> luu-tru/nhanh/ops/handoff-512-luot7
+2026-11-24T14:51:04.5776860Z  * [new tag]         luu-tru/nhanh/ops/handoff-530 -> luu-tru/nhanh/ops/handoff-530
+2026-11-24T14:51:04.5777440Z  * [new tag]         luu-tru/nhanh/ops/ke-hoach-tham-dinh -> luu-tru/nhanh/ops/ke-hoach-tham-dinh
+2026-11-24T14:51:04.5778056Z  * [new tag]         luu-tru/nhanh/ops/l7-symbol-aware -> luu-tru/nhanh/ops/l7-symbol-aware
+2026-11-24T14:51:04.5778593Z  * [new tag]         luu-tru/nhanh/ops/land-1179 -> luu-tru/nhanh/ops/land-1179
+2026-11-24T14:51:04.5779168Z  * [new tag]         luu-tru/nhanh/ops/land-574-nen-windows -> luu-tru/nhanh/ops/land-574-nen-windows
+2026-11-24T14:51:04.5779795Z  * [new tag]         luu-tru/nhanh/ops/land-574-tich-hop -> luu-tru/nhanh/ops/land-574-tich-hop
+2026-11-24T14:51:04.5780412Z  * [new tag]         luu-tru/nhanh/ops/land-574-tich-hop-2 -> luu-tru/nhanh/ops/land-574-tich-hop-2
+2026-11-24T14:51:04.5781044Z  * [new tag]         luu-tru/nhanh/ops/land-574-tich-hop-3 -> luu-tru/nhanh/ops/land-574-tich-hop-3
+2026-11-24T14:51:04.5781803Z  * [new tag]         luu-tru/nhanh/ops/land-574-tich-hop-4 -> luu-tru/nhanh/ops/land-574-tich-hop-4
+2026-11-24T14:51:04.5782417Z  * [new tag]         luu-tru/nhanh/ops/lease-ag-t0-01b -> luu-tru/nhanh/ops/lease-ag-t0-01b
+2026-11-24T14:51:04.5783020Z  * [new tag]         luu-tru/nhanh/ops/lease-ag-t0-01b-r2 -> luu-tru/nhanh/ops/lease-ag-t0-01b-r2
+2026-11-24T14:51:04.5783678Z  * [new tag]         luu-tru/nhanh/ops/lease-dong-so-20260820 -> luu-tru/nhanh/ops/lease-dong-so-20260820
+2026-11-24T14:51:04.5784352Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-exec-r2 -> luu-tru/nhanh/ops/lease-donref-exec-r2
+2026-11-24T14:51:04.5785018Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-review-1 -> luu-tru/nhanh/ops/lease-donref-review-1
+2026-11-24T14:51:04.5785680Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-review-2 -> luu-tru/nhanh/ops/lease-donref-review-2
+2026-11-24T14:51:04.5786374Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-review-2b -> luu-tru/nhanh/ops/lease-donref-review-2b
+2026-11-24T14:51:04.5787091Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-review-exec1 -> luu-tru/nhanh/ops/lease-donref-review-exec1
+2026-11-24T14:51:04.5787824Z  * [new tag]         luu-tru/nhanh/ops/lease-donref-xoa-an-toan -> luu-tru/nhanh/ops/lease-donref-xoa-an-toan
+2026-11-24T14:51:04.5788497Z  * [new tag]         luu-tru/nhanh/ops/lease-m4-review-2 -> luu-tru/nhanh/ops/lease-m4-review-2
+2026-11-24T14:51:04.5789071Z  * [new tag]         luu-tru/nhanh/ops/lease-m4-v0 -> luu-tru/nhanh/ops/lease-m4-v0
+2026-11-24T14:51:04.5789665Z  * [new tag]         luu-tru/nhanh/ops/lease-plat-m4-exec-1 -> luu-tru/nhanh/ops/lease-plat-m4-exec-1
+2026-11-24T14:51:04.5790276Z  * [new tag]         luu-tru/nhanh/ops/lease-plat-x2 -> luu-tru/nhanh/ops/lease-plat-x2
+2026-11-24T14:51:04.5790875Z  * [new tag]         luu-tru/nhanh/ops/lease-review-m4-x4 -> luu-tru/nhanh/ops/lease-review-m4-x4
+2026-11-24T14:51:04.5791608Z  * [new tag]         luu-tru/nhanh/ops/lease-slice-b-c -> luu-tru/nhanh/ops/lease-slice-b-c
+2026-11-24T14:51:04.5792307Z  * [new tag]         luu-tru/nhanh/ops/lease-x5-exec-r4 -> luu-tru/nhanh/ops/lease-x5-exec-r4
+2026-11-24T14:51:04.5792910Z  * [new tag]         luu-tru/nhanh/ops/lease-x5-review-2 -> luu-tru/nhanh/ops/lease-x5-review-2
+2026-11-24T14:51:04.5793515Z  * [new tag]         luu-tru/nhanh/ops/lease-x5-review-3 -> luu-tru/nhanh/ops/lease-x5-review-3
+2026-11-24T14:51:04.5794262Z  * [new tag]         luu-tru/nhanh/ops/manifest-725-727-lease -> luu-tru/nhanh/ops/manifest-725-727-lease
+2026-11-24T14:51:04.5794982Z  * [new tag]         luu-tru/nhanh/ops/master-ac19-evidence-block -> luu-tru/nhanh/ops/master-ac19-evidence-block
+2026-11-24T14:51:04.5795699Z  * [new tag]         luu-tru/nhanh/ops/master-ac19-viet-lai -> luu-tru/nhanh/ops/master-ac19-viet-lai
+2026-11-24T14:51:04.5796422Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-1-verdict -> luu-tru/nhanh/ops/moi-truong-review-1-verdict
+2026-11-24T14:51:04.5797142Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-10 -> luu-tru/nhanh/ops/moi-truong-review-10
+2026-11-24T14:51:04.5797869Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-10-verdict -> luu-tru/nhanh/ops/moi-truong-review-10-verdict
+2026-11-24T14:51:04.5798582Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-2 -> luu-tru/nhanh/ops/moi-truong-review-2
+2026-11-24T14:51:04.5799296Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-2-verdict -> luu-tru/nhanh/ops/moi-truong-review-2-verdict
+2026-11-24T14:51:04.5799997Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-3 -> luu-tru/nhanh/ops/moi-truong-review-3
+2026-11-24T14:51:04.5800715Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-3-verdict -> luu-tru/nhanh/ops/moi-truong-review-3-verdict
+2026-11-24T14:51:04.5801422Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-4 -> luu-tru/nhanh/ops/moi-truong-review-4
+2026-11-24T14:51:04.5802231Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-4-verdict -> luu-tru/nhanh/ops/moi-truong-review-4-verdict
+2026-11-24T14:51:04.5802934Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-5 -> luu-tru/nhanh/ops/moi-truong-review-5
+2026-11-24T14:51:04.5803570Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-6 -> luu-tru/nhanh/ops/moi-truong-review-6
+2026-11-24T14:51:04.5804275Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-6-verdict -> luu-tru/nhanh/ops/moi-truong-review-6-verdict
+2026-11-24T14:51:04.5804984Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-7 -> luu-tru/nhanh/ops/moi-truong-review-7
+2026-11-24T14:51:04.5805697Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-7-verdict -> luu-tru/nhanh/ops/moi-truong-review-7-verdict
+2026-11-24T14:51:04.5806400Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-8 -> luu-tru/nhanh/ops/moi-truong-review-8
+2026-11-24T14:51:04.5807110Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-8-verdict -> luu-tru/nhanh/ops/moi-truong-review-8-verdict
+2026-11-24T14:51:04.5807817Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-9 -> luu-tru/nhanh/ops/moi-truong-review-9
+2026-11-24T14:51:04.5808529Z  * [new tag]         luu-tru/nhanh/ops/moi-truong-review-9-verdict -> luu-tru/nhanh/ops/moi-truong-review-9-verdict
+2026-11-24T14:51:04.5809302Z  * [new tag]         luu-tru/nhanh/ops/nghien-cuu-tat-dinh-cong-cu -> luu-tru/nhanh/ops/nghien-cuu-tat-dinh-cong-cu
+2026-11-24T14:51:04.5809995Z  * [new tag]         luu-tru/nhanh/ops/no-ky-thuat-muc6 -> luu-tru/nhanh/ops/no-ky-thuat-muc6
+2026-11-24T14:51:04.5810581Z  * [new tag]         luu-tru/nhanh/ops/pkg-windows -> luu-tru/nhanh/ops/pkg-windows
+2026-11-24T14:51:04.5811222Z  * [new tag]         luu-tru/nhanh/ops/review-674-ci-duong-nhanh -> luu-tru/nhanh/ops/review-674-ci-duong-nhanh
+2026-11-24T14:51:04.5811977Z  * [new tag]         luu-tru/nhanh/ops/so-sach-18-08 -> luu-tru/nhanh/ops/so-sach-18-08
+2026-11-24T14:51:04.5812683Z  * [new tag]         luu-tru/nhanh/ops/soan-w0m4-20260828 -> luu-tru/nhanh/ops/soan-w0m4-20260828
+2026-11-24T14:51:04.5813406Z  * [new tag]         luu-tru/nhanh/ops/song-song-write-set-exclusion -> luu-tru/nhanh/ops/song-song-write-set-exclusion
+2026-11-24T14:51:04.5814159Z  * [new tag]         luu-tru/nhanh/ops/spec-donref-xoa-an-toan -> luu-tru/nhanh/ops/spec-donref-xoa-an-toan
+2026-11-24T14:51:04.5814879Z  * [new tag]         luu-tru/nhanh/ops/spec-harness-tu-kiem-694 -> luu-tru/nhanh/ops/spec-harness-tu-kiem-694
+2026-11-24T14:51:04.5815732Z  * [new tag]         luu-tru/nhanh/ops/spec-launcher-con-song-esrch -> luu-tru/nhanh/ops/spec-launcher-con-song-esrch
+2026-11-24T14:51:04.5816456Z  * [new tag]         luu-tru/nhanh/ops/spec-probe-agent-r2 -> luu-tru/nhanh/ops/spec-probe-agent-r2
+2026-11-24T14:51:04.5817127Z  * [new tag]         luu-tru/nhanh/ops/spec-thua-huong-actor -> luu-tru/nhanh/ops/spec-thua-huong-actor
+2026-11-24T14:51:04.5817735Z  * [new tag]         luu-tru/nhanh/ops/spec-w1-p1 -> luu-tru/nhanh/ops/spec-w1-p1
+2026-11-24T14:51:04.5818435Z  * [new tag]         luu-tru/nhanh/ops/successor-packet-session-mutex -> luu-tru/nhanh/ops/successor-packet-session-mutex
+2026-11-24T14:51:04.5819147Z  * [new tag]         luu-tru/nhanh/ops/thu-canary-1143 -> luu-tru/nhanh/ops/thu-canary-1143
+2026-11-24T14:51:04.5819766Z  * [new tag]         luu-tru/nhanh/ops/thu-hoi-lease-538 -> luu-tru/nhanh/ops/thu-hoi-lease-538
+2026-11-24T14:51:04.5820369Z  * [new tag]         luu-tru/nhanh/ops/verdict-donref -> luu-tru/nhanh/ops/verdict-donref
+2026-11-24T14:51:04.5820984Z  * [new tag]         luu-tru/nhanh/ops/verdict-m4-review-2 -> luu-tru/nhanh/ops/verdict-m4-review-2
+2026-11-24T14:51:04.5821758Z  * [new tag]         luu-tru/nhanh/ops/wp1124-r5-windows-hosts -> luu-tru/nhanh/ops/wp1124-r5-windows-hosts
+2026-11-24T14:51:04.5822381Z  * [new tag]         luu-tru/nhanh/ops/wp484-r7-spec -> luu-tru/nhanh/ops/wp484-r7-spec
+2026-11-24T14:51:04.5822971Z  * [new tag]         luu-tru/nhanh/ops/wp55-lease-exec-3 -> luu-tru/nhanh/ops/wp55-lease-exec-3
+2026-11-24T14:51:04.5823610Z  * [new tag]         luu-tru/nhanh/ops/wp55-lease-review-5 -> luu-tru/nhanh/ops/wp55-lease-review-5
+2026-11-24T14:51:04.5824292Z  * [new tag]         luu-tru/nhanh/ops/wp55-r2-review-5-verdict -> luu-tru/nhanh/ops/wp55-r2-review-5-verdict
+2026-11-24T14:51:04.5824924Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-exec-4 -> luu-tru/nhanh/ops/wp55-r3-exec-4
+2026-11-24T14:51:04.5825487Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-exec-5 -> luu-tru/nhanh/ops/wp55-r3-exec-5
+2026-11-24T14:51:04.5826056Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-exec-9 -> luu-tru/nhanh/ops/wp55-r3-exec-9
+2026-11-24T14:51:04.5826728Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-fix-html-table-token -> luu-tru/nhanh/ops/wp55-r3-fix-html-table-token
+2026-11-24T14:51:04.5827415Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-10 -> luu-tru/nhanh/ops/wp55-r3-review-10
+2026-11-24T14:51:04.5828091Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-10-verdict -> luu-tru/nhanh/ops/wp55-r3-review-10-verdict
+2026-11-24T14:51:04.5828759Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-11 -> luu-tru/nhanh/ops/wp55-r3-review-11
+2026-11-24T14:51:04.5829423Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-11-verdict -> luu-tru/nhanh/ops/wp55-r3-review-11-verdict
+2026-11-24T14:51:04.5830086Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-12 -> luu-tru/nhanh/ops/wp55-r3-review-12
+2026-11-24T14:51:04.5830683Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-6 -> luu-tru/nhanh/ops/wp55-r3-review-6
+2026-11-24T14:51:04.5831284Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-7 -> luu-tru/nhanh/ops/wp55-r3-review-7
+2026-11-24T14:51:04.5831977Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-8 -> luu-tru/nhanh/ops/wp55-r3-review-8
+2026-11-24T14:51:04.5832669Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-8-ngoai-lease -> luu-tru/nhanh/ops/wp55-r3-review-8-ngoai-lease
+2026-11-24T14:51:04.5833345Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-9 -> luu-tru/nhanh/ops/wp55-r3-review-9
+2026-11-24T14:51:04.5834118Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-review-9-verdict -> luu-tru/nhanh/ops/wp55-r3-review-9-verdict
+2026-11-24T14:51:04.5834745Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3-spec -> luu-tru/nhanh/ops/wp55-r3-spec
+2026-11-24T14:51:04.5835385Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3g4-exec-4-evidence -> luu-tru/nhanh/ops/wp55-r3g4-exec-4-evidence
+2026-11-24T14:51:04.5836206Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3g5-exec-5-evidence -> luu-tru/nhanh/ops/wp55-r3g5-exec-5-evidence
+2026-11-24T14:51:04.5836916Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3g9-exec-9-an-ninh -> luu-tru/nhanh/ops/wp55-r3g9-exec-9-an-ninh
+2026-11-24T14:51:04.5837578Z  * [new tag]         luu-tru/nhanh/ops/wp55-r3g9-handoff -> luu-tru/nhanh/ops/wp55-r3g9-handoff
+2026-11-24T14:51:04.5838174Z  * [new tag]         luu-tru/nhanh/ops/wp55-verdict-6 -> luu-tru/nhanh/ops/wp55-verdict-6
+2026-11-24T14:51:04.5838775Z  * [new tag]         luu-tru/nhanh/ops/wp685-r18-g1-lease -> luu-tru/nhanh/ops/wp685-r18-g1-lease
+2026-11-24T14:51:04.5839429Z  * [new tag]         luu-tru/nhanh/ops/wp685-r19-g2-metadata -> luu-tru/nhanh/ops/wp685-r19-g2-metadata
+2026-11-24T14:51:04.5840088Z  * [new tag]         luu-tru/nhanh/ops/wp685-r20-g3-metadata -> luu-tru/nhanh/ops/wp685-r20-g3-metadata
+2026-11-24T14:51:04.5840806Z  * [new tag]         luu-tru/nhanh/ops/wp685-r28-g5-su-kien-review-1 -> luu-tru/nhanh/ops/wp685-r28-g5-su-kien-review-1
+2026-11-24T14:51:04.5841557Z  * [new tag]         luu-tru/nhanh/ops/wp710-g5-hien-vat-review -> luu-tru/nhanh/ops/wp710-g5-hien-vat-review
+2026-11-24T14:51:04.5842337Z  * [new tag]         luu-tru/nhanh/ops/wp744-r1-g1-lease -> luu-tru/nhanh/ops/wp744-r1-g1-lease
+2026-11-24T14:51:04.5842953Z  * [new tag]         luu-tru/nhanh/ops/wp744-r2-g2-lease -> luu-tru/nhanh/ops/wp744-r2-g2-lease
+2026-11-24T14:51:04.5843558Z  * [new tag]         luu-tru/nhanh/ops/wp744-r3-g3-lease -> luu-tru/nhanh/ops/wp744-r3-g3-lease
+2026-11-24T14:51:04.5844162Z  * [new tag]         luu-tru/nhanh/ops/wp748-r1-g1-lease -> luu-tru/nhanh/ops/wp748-r1-g1-lease
+2026-11-24T14:51:04.5844781Z  * [new tag]         luu-tru/nhanh/ops/wp748-r10-g10-lease -> luu-tru/nhanh/ops/wp748-r10-g10-lease
+2026-11-24T14:51:04.5845408Z  * [new tag]         luu-tru/nhanh/ops/wp748-r11-g11-lease -> luu-tru/nhanh/ops/wp748-r11-g11-lease
+2026-11-24T14:51:04.5846027Z  * [new tag]         luu-tru/nhanh/ops/wp748-r12-g12-lease -> luu-tru/nhanh/ops/wp748-r12-g12-lease
+2026-11-24T14:51:04.5846646Z  * [new tag]         luu-tru/nhanh/ops/wp748-r13-g13-lease -> luu-tru/nhanh/ops/wp748-r13-g13-lease
+2026-11-24T14:51:04.5847276Z  * [new tag]         luu-tru/nhanh/ops/wp748-r14-g14-lease -> luu-tru/nhanh/ops/wp748-r14-g14-lease
+2026-11-24T14:51:04.5847897Z  * [new tag]         luu-tru/nhanh/ops/wp748-r15-g15-lease -> luu-tru/nhanh/ops/wp748-r15-g15-lease
+2026-11-24T14:51:04.5848505Z  * [new tag]         luu-tru/nhanh/ops/wp748-r16-g16-lease -> luu-tru/nhanh/ops/wp748-r16-g16-lease
+2026-11-24T14:51:04.5849085Z  * [new tag]         luu-tru/nhanh/ops/wp748-r17-g17-lease -> luu-tru/nhanh/ops/wp748-r17-g17-lease
+2026-11-24T14:51:04.5849798Z  * [new tag]         luu-tru/nhanh/ops/wp748-r18-g18-lease -> luu-tru/nhanh/ops/wp748-r18-g18-lease
+2026-11-24T14:51:04.5850392Z  * [new tag]         luu-tru/nhanh/ops/wp748-r19-g19-lease -> luu-tru/nhanh/ops/wp748-r19-g19-lease
+2026-11-24T14:51:04.5850989Z  * [new tag]         luu-tru/nhanh/ops/wp748-r2-g2-lease -> luu-tru/nhanh/ops/wp748-r2-g2-lease
+2026-11-24T14:51:04.5851529Z  * [new tag]         luu-tru/nhanh/ops/wp748-r20-g20-lease -> luu-tru/nhanh/ops/wp748-r20-g20-lease
+2026-11-24T14:51:04.5852096Z  * [new tag]         luu-tru/nhanh/ops/wp748-r21-g21-lease -> luu-tru/nhanh/ops/wp748-r21-g21-lease
+2026-11-24T14:51:04.5852459Z  * [new tag]         luu-tru/nhanh/ops/wp748-r22-g22-lease -> luu-tru/nhanh/ops/wp748-r22-g22-lease
+2026-11-24T14:51:04.5852828Z  * [new tag]         luu-tru/nhanh/ops/wp748-r23-g23-lease -> luu-tru/nhanh/ops/wp748-r23-g23-lease
+2026-11-24T14:51:04.5853305Z  * [new tag]         luu-tru/nhanh/ops/wp748-r24-g24-lease -> luu-tru/nhanh/ops/wp748-r24-g24-lease
+2026-11-24T14:51:04.5853672Z  * [new tag]         luu-tru/nhanh/ops/wp748-r25-g25-lease -> luu-tru/nhanh/ops/wp748-r25-g25-lease
+2026-11-24T14:51:04.5854224Z  * [new tag]         luu-tru/nhanh/ops/wp748-r3-g3-lease -> luu-tru/nhanh/ops/wp748-r3-g3-lease
+2026-11-24T14:51:04.5854811Z  * [new tag]         luu-tru/nhanh/ops/wp748-r4-g4-lease -> luu-tru/nhanh/ops/wp748-r4-g4-lease
+2026-11-24T14:51:04.5855550Z  * [new tag]         luu-tru/nhanh/ops/wp748-r5-g5-lease -> luu-tru/nhanh/ops/wp748-r5-g5-lease
+2026-11-24T14:51:04.5856130Z  * [new tag]         luu-tru/nhanh/ops/wp748-r6-g6-lease -> luu-tru/nhanh/ops/wp748-r6-g6-lease
+2026-11-24T14:51:04.5856720Z  * [new tag]         luu-tru/nhanh/ops/wp748-r7-g7-lease -> luu-tru/nhanh/ops/wp748-r7-g7-lease
+2026-11-24T14:51:04.5857308Z  * [new tag]         luu-tru/nhanh/ops/wp748-r8-g8-lease -> luu-tru/nhanh/ops/wp748-r8-g8-lease
+2026-11-24T14:51:04.5857905Z  * [new tag]         luu-tru/nhanh/ops/wp748-r9-g9-lease -> luu-tru/nhanh/ops/wp748-r9-g9-lease
+2026-11-24T14:51:04.5858502Z  * [new tag]         luu-tru/nhanh/ops/wp752-r4-g1-lease -> luu-tru/nhanh/ops/wp752-r4-g1-lease
+2026-11-24T14:51:04.5859072Z  * [new tag]         luu-tru/nhanh/ops/wp760-spec -> luu-tru/nhanh/ops/wp760-spec
+2026-11-24T14:51:04.5859629Z  * [new tag]         luu-tru/nhanh/ops/wp763-r2-g1-lease -> luu-tru/nhanh/ops/wp763-r2-g1-lease
+2026-11-24T14:51:04.5860180Z  * [new tag]         luu-tru/nhanh/ops/wp768-spec -> luu-tru/nhanh/ops/wp768-spec
+2026-11-24T14:51:04.5860682Z  * [new tag]         luu-tru/nhanh/ops/wp769-spec -> luu-tru/nhanh/ops/wp769-spec
+2026-11-24T14:51:04.5861177Z  * [new tag]         luu-tru/nhanh/ops/wp770-spec -> luu-tru/nhanh/ops/wp770-spec
+2026-11-24T14:51:04.5861816Z  * [new tag]         luu-tru/nhanh/ops/wp775-spec -> luu-tru/nhanh/ops/wp775-spec
+2026-11-24T14:51:04.5862317Z  * [new tag]         luu-tru/nhanh/ops/wp780-spec -> luu-tru/nhanh/ops/wp780-spec
+2026-11-24T14:51:04.5862825Z  * [new tag]         luu-tru/nhanh/ops/wp788-spec -> luu-tru/nhanh/ops/wp788-spec
+2026-11-24T14:51:04.5863377Z  * [new tag]         luu-tru/nhanh/ops/wp802-r1-g1-lease -> luu-tru/nhanh/ops/wp802-r1-g1-lease
+2026-11-24T14:51:04.5863971Z  * [new tag]         luu-tru/nhanh/ops/wp812-g2-reviews -> luu-tru/nhanh/ops/wp812-g2-reviews
+2026-11-24T14:51:04.5864523Z  * [new tag]         luu-tru/nhanh/ops/wp812-spec -> luu-tru/nhanh/ops/wp812-spec
+2026-11-24T14:51:04.5865072Z  * [new tag]         luu-tru/nhanh/ops/wp822-g1-reviews -> luu-tru/nhanh/ops/wp822-g1-reviews
+2026-11-24T14:51:04.5865614Z  * [new tag]         luu-tru/nhanh/ops/wp822-spec -> luu-tru/nhanh/ops/wp822-spec
+2026-11-24T14:51:04.5866168Z  * [new tag]         luu-tru/nhanh/ops/wp831-r1-g1-lease -> luu-tru/nhanh/ops/wp831-r1-g1-lease
+2026-11-24T14:51:04.5866765Z  * [new tag]         luu-tru/nhanh/ops/wp831-r2-g2-lease -> luu-tru/nhanh/ops/wp831-r2-g2-lease
+2026-11-24T14:51:04.5867356Z  * [new tag]         luu-tru/nhanh/ops/wp831-r3-g3-lease -> luu-tru/nhanh/ops/wp831-r3-g3-lease
+2026-11-24T14:51:04.5867966Z  * [new tag]         luu-tru/nhanh/ops/wp831-r4-g4-lease -> luu-tru/nhanh/ops/wp831-r4-g4-lease
+2026-11-24T14:51:04.5868513Z  * [new tag]         luu-tru/nhanh/ops/wp831-spec -> luu-tru/nhanh/ops/wp831-spec
+2026-11-24T14:51:04.5869066Z  * [new tag]         luu-tru/nhanh/ops/wp835-r1-g1-lease -> luu-tru/nhanh/ops/wp835-r1-g1-lease
+2026-11-24T14:51:04.5869661Z  * [new tag]         luu-tru/nhanh/ops/wp835-r2-g2-lease -> luu-tru/nhanh/ops/wp835-r2-g2-lease
+2026-11-24T14:51:04.5870263Z  * [new tag]         luu-tru/nhanh/ops/wp835-r3-g3-lease -> luu-tru/nhanh/ops/wp835-r3-g3-lease
+2026-11-24T14:51:04.5870860Z  * [new tag]         luu-tru/nhanh/ops/wp835-r4-g4-lease -> luu-tru/nhanh/ops/wp835-r4-g4-lease
+2026-11-24T14:51:04.5871445Z  * [new tag]         luu-tru/nhanh/ops/wp845-r1-g1-lease -> luu-tru/nhanh/ops/wp845-r1-g1-lease
+2026-11-24T14:51:04.5872163Z  * [new tag]         luu-tru/nhanh/ops/wp854-r1-g1-lease -> luu-tru/nhanh/ops/wp854-r1-g1-lease
+2026-11-24T14:51:04.5872818Z  * [new tag]         luu-tru/nhanh/ops/wp854-spec -> luu-tru/nhanh/ops/wp854-spec
+2026-11-24T14:51:04.5873370Z  * [new tag]         luu-tru/nhanh/ops/wp856-g1-reviews -> luu-tru/nhanh/ops/wp856-g1-reviews
+2026-11-24T14:51:04.5873915Z  * [new tag]         luu-tru/nhanh/ops/wp856-spec -> luu-tru/nhanh/ops/wp856-spec
+2026-11-24T14:51:04.5874467Z  * [new tag]         luu-tru/nhanh/ops/wp858-r1-g1-lease -> luu-tru/nhanh/ops/wp858-r1-g1-lease
+2026-11-24T14:51:04.5875161Z  * [new tag]         luu-tru/nhanh/ops/wp858-r1-g2-lease -> luu-tru/nhanh/ops/wp858-r1-g2-lease
+2026-11-24T14:51:04.5875708Z  * [new tag]         luu-tru/nhanh/ops/wp858-spec -> luu-tru/nhanh/ops/wp858-spec
+2026-11-24T14:51:04.5876265Z  * [new tag]         luu-tru/nhanh/ops/wp868-r1-g1-lease -> luu-tru/nhanh/ops/wp868-r1-g1-lease
+2026-11-24T14:51:04.5876817Z  * [new tag]         luu-tru/nhanh/ops/wp868-spec -> luu-tru/nhanh/ops/wp868-spec
+2026-11-24T14:51:04.5877364Z  * [new tag]         luu-tru/nhanh/ops/wp871-r1-g1-lease -> luu-tru/nhanh/ops/wp871-r1-g1-lease
+2026-11-24T14:51:04.5877913Z  * [new tag]         luu-tru/nhanh/ops/wp871-spec -> luu-tru/nhanh/ops/wp871-spec
+2026-11-24T14:51:04.5878466Z  * [new tag]         luu-tru/nhanh/ops/wp878-r1-g1-lease -> luu-tru/nhanh/ops/wp878-r1-g1-lease
+2026-11-24T14:51:04.5879014Z  * [new tag]         luu-tru/nhanh/ops/wp878-spec -> luu-tru/nhanh/ops/wp878-spec
+2026-11-24T14:51:04.5879566Z  * [new tag]         luu-tru/nhanh/ops/wp879-r1-g1-lease -> luu-tru/nhanh/ops/wp879-r1-g1-lease
+2026-11-24T14:51:04.5880122Z  * [new tag]         luu-tru/nhanh/ops/wp879-spec -> luu-tru/nhanh/ops/wp879-spec
+2026-11-24T14:51:04.5880686Z  * [new tag]         luu-tru/nhanh/ops/wp886-r1-g1-lease -> luu-tru/nhanh/ops/wp886-r1-g1-lease
+2026-11-24T14:51:04.5881277Z  * [new tag]         luu-tru/nhanh/ops/wp886-r2-g2-lease -> luu-tru/nhanh/ops/wp886-r2-g2-lease
+2026-11-24T14:51:04.5881961Z  * [new tag]         luu-tru/nhanh/ops/wp886-spec -> luu-tru/nhanh/ops/wp886-spec
+2026-11-24T14:51:04.5882464Z  * [new tag]         luu-tru/nhanh/ops/wp890-spec -> luu-tru/nhanh/ops/wp890-spec
+2026-11-24T14:51:04.5883021Z  * [new tag]         luu-tru/nhanh/ops/wp892-r1-g1-lease -> luu-tru/nhanh/ops/wp892-r1-g1-lease
+2026-11-24T14:51:04.5883615Z  * [new tag]         luu-tru/nhanh/ops/wp892-r2-g2-lease -> luu-tru/nhanh/ops/wp892-r2-g2-lease
+2026-11-24T14:51:04.5884171Z  * [new tag]         luu-tru/nhanh/ops/wp892-spec -> luu-tru/nhanh/ops/wp892-spec
+2026-11-24T14:51:04.5884728Z  * [new tag]         luu-tru/nhanh/ops/wp899-g1-luu-tru -> luu-tru/nhanh/ops/wp899-g1-luu-tru
+2026-11-24T14:51:04.5885313Z  * [new tag]         luu-tru/nhanh/ops/wp899-g2-luu-tru -> luu-tru/nhanh/ops/wp899-g2-luu-tru
+2026-11-24T14:51:04.5885895Z  * [new tag]         luu-tru/nhanh/ops/wp899-g3-luu-tru -> luu-tru/nhanh/ops/wp899-g3-luu-tru
+2026-11-24T14:51:04.5886470Z  * [new tag]         luu-tru/nhanh/ops/wp899-g4-luu-tru -> luu-tru/nhanh/ops/wp899-g4-luu-tru
+2026-11-24T14:51:04.5887054Z  * [new tag]         luu-tru/nhanh/ops/wp899-r3-g2-lease -> luu-tru/nhanh/ops/wp899-r3-g2-lease
+2026-11-24T14:51:04.5887670Z  * [new tag]         luu-tru/nhanh/ops/wp899-r4-g3-lease -> luu-tru/nhanh/ops/wp899-r4-g3-lease
+2026-11-24T14:51:04.5888258Z  * [new tag]         luu-tru/nhanh/ops/wp899-r4-g4-lease -> luu-tru/nhanh/ops/wp899-r4-g4-lease
+2026-11-24T14:51:04.5888846Z  * [new tag]         luu-tru/nhanh/ops/wp899-r4-g5-lease -> luu-tru/nhanh/ops/wp899-r4-g5-lease
+2026-11-24T14:51:04.5889389Z  * [new tag]         luu-tru/nhanh/ops/wp899-spec -> luu-tru/nhanh/ops/wp899-spec
+2026-11-24T14:51:04.5889948Z  * [new tag]         luu-tru/nhanh/ops/wp906-r1-g1-lease -> luu-tru/nhanh/ops/wp906-r1-g1-lease
+2026-11-24T14:51:04.5890495Z  * [new tag]         luu-tru/nhanh/ops/wp906-spec -> luu-tru/nhanh/ops/wp906-spec
+2026-11-24T14:51:04.5891039Z  * [new tag]         luu-tru/nhanh/ops/wp910-r1-g1-lease -> luu-tru/nhanh/ops/wp910-r1-g1-lease
+2026-11-24T14:51:04.5891761Z  * [new tag]         luu-tru/nhanh/ops/wp910-r2-g2-lease -> luu-tru/nhanh/ops/wp910-r2-g2-lease
+2026-11-24T14:51:04.5892458Z  * [new tag]         luu-tru/nhanh/ops/wp910-r3-g3-lease -> luu-tru/nhanh/ops/wp910-r3-g3-lease
+2026-11-24T14:51:04.5893002Z  * [new tag]         luu-tru/nhanh/ops/wp910-spec -> luu-tru/nhanh/ops/wp910-spec
+2026-11-24T14:51:04.5893550Z  * [new tag]         luu-tru/nhanh/ops/wp919-r1-g1-lease -> luu-tru/nhanh/ops/wp919-r1-g1-lease
+2026-11-24T14:51:04.5894133Z  * [new tag]         luu-tru/nhanh/ops/wp923-r1-g1-lease -> luu-tru/nhanh/ops/wp923-r1-g1-lease
+2026-11-24T14:51:04.5894827Z  * [new tag]         luu-tru/nhanh/ops/wp923-spec -> luu-tru/nhanh/ops/wp923-spec
+2026-11-24T14:51:04.5895333Z  * [new tag]         luu-tru/nhanh/ops/wp943-spec -> luu-tru/nhanh/ops/wp943-spec
+2026-11-24T14:51:04.5895895Z  * [new tag]         luu-tru/nhanh/packet/wp710-spec-r4 -> luu-tru/nhanh/packet/wp710-spec-r4
+2026-11-24T14:51:04.5896495Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-di-tru -> luu-tru/nhanh/wp55-r4-lease-di-tru
+2026-11-24T14:51:04.5897104Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-exec-1 -> luu-tru/nhanh/wp55-r4-lease-exec-1
+2026-11-24T14:51:04.5897711Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-exec-2 -> luu-tru/nhanh/wp55-r4-lease-exec-2
+2026-11-24T14:51:04.5898296Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-rebase -> luu-tru/nhanh/wp55-r4-lease-rebase
+2026-11-24T14:51:04.5898902Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-review-1 -> luu-tru/nhanh/wp55-r4-lease-review-1
+2026-11-24T14:51:04.5899527Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-review-2 -> luu-tru/nhanh/wp55-r4-lease-review-2
+2026-11-24T14:51:04.5900153Z  * [new tag]         luu-tru/nhanh/wp55-r4-lease-viet-lai -> luu-tru/nhanh/wp55-r4-lease-viet-lai
+2026-11-24T14:51:04.5900842Z  * [new tag]         luu-tru/nhanh/wp55-r4-review-1-codex-verdict -> luu-tru/nhanh/wp55-r4-review-1-codex-verdict
+2026-11-24T14:51:04.5901588Z  * [new tag]         luu-tru/nhanh/wp55-r4-review-2-codex-verdict -> luu-tru/nhanh/wp55-r4-review-2-codex-verdict
+2026-11-24T14:51:04.5902365Z  * [new tag]         luu-tru/nhanh/wp55-r4-spec-draft -> luu-tru/nhanh/wp55-r4-spec-draft
+2026-11-24T14:51:04.5902987Z  * [new tag]         luu-tru/nhanh/wp55-r4-verdict-di-tru -> luu-tru/nhanh/wp55-r4-verdict-di-tru
+2026-11-24T14:51:04.5903651Z  * [new tag]         luu-tru/nhanh/wp55-r4-verdict-viet-lai -> luu-tru/nhanh/wp55-r4-verdict-viet-lai
+2026-11-24T14:51:04.5904246Z  * [new tag]         luu-tru/nhanh/wp55-r4g1-handoff -> luu-tru/nhanh/wp55-r4g1-handoff
+2026-11-24T14:51:04.5904773Z  * [new tag]         luu-tru/nhanh/wp55-r4g1-wip -> luu-tru/nhanh/wp55-r4g1-wip
+2026-11-24T14:51:04.5905329Z  * [new tag]         luu-tru/tao-tag-luu-tru-verdict-1 -> luu-tru/tao-tag-luu-tru-verdict-1
+2026-11-24T14:51:04.5906008Z  * [new tag]         luu-tru/verdict/moi-truong-review-1-verdict -> luu-tru/verdict/moi-truong-review-1-verdict
+2026-11-24T14:51:04.5906763Z  * [new tag]         luu-tru/verdict/moi-truong-review-10-verdict -> luu-tru/verdict/moi-truong-review-10-verdict
+2026-11-24T14:51:04.5907506Z  * [new tag]         luu-tru/verdict/moi-truong-review-2-verdict -> luu-tru/verdict/moi-truong-review-2-verdict
+2026-11-24T14:51:04.5908235Z  * [new tag]         luu-tru/verdict/moi-truong-review-3-verdict -> luu-tru/verdict/moi-truong-review-3-verdict
+2026-11-24T14:51:04.5908964Z  * [new tag]         luu-tru/verdict/moi-truong-review-4-verdict -> luu-tru/verdict/moi-truong-review-4-verdict
+2026-11-24T14:51:04.5909693Z  * [new tag]         luu-tru/verdict/moi-truong-review-6-verdict -> luu-tru/verdict/moi-truong-review-6-verdict
+2026-11-24T14:51:04.5910417Z  * [new tag]         luu-tru/verdict/moi-truong-review-7-verdict -> luu-tru/verdict/moi-truong-review-7-verdict
+2026-11-24T14:51:04.5911150Z  * [new tag]         luu-tru/verdict/moi-truong-review-8-verdict -> luu-tru/verdict/moi-truong-review-8-verdict
+2026-11-24T14:51:04.5912000Z  * [new tag]         luu-tru/verdict/moi-truong-review-9-verdict -> luu-tru/verdict/moi-truong-review-9-verdict
+2026-11-24T14:51:04.5912730Z  * [new tag]         luu-tru/verdict/plat-x4-ho-so-review-1-2-3 -> luu-tru/verdict/plat-x4-ho-so-review-1-2-3
+2026-11-24T14:51:04.5913547Z  * [new tag]         luu-tru/verdict/wp55-r2-review-5-verdict -> luu-tru/verdict/wp55-r2-review-5-verdict
+2026-11-24T14:51:04.5914262Z  * [new tag]         luu-tru/verdict/wp55-r3-review-10-verdict -> luu-tru/verdict/wp55-r3-review-10-verdict
+2026-11-24T14:51:04.5914979Z  * [new tag]         luu-tru/verdict/wp55-r3-review-11-verdict -> luu-tru/verdict/wp55-r3-review-11-verdict
+2026-11-24T14:51:04.5915642Z  * [new tag]         luu-tru/verdict/wp55-r3-review-9-verdict -> luu-tru/verdict/wp55-r3-review-9-verdict
+2026-11-24T14:51:04.5916347Z  * [new tag]         luu-tru/verdict/wp55-verdict-6 -> luu-tru/verdict/wp55-verdict-6
+2026-11-24T14:51:04.5917022Z  * [new tag]         luu-tru/windows-local-may-chu-kho-r1-bien-nhan -> luu-tru/windows-local-may-chu-kho-r1-bien-nhan
+2026-11-24T14:51:04.5917822Z  * [new tag]         luu-tru/windows-local-may-chu-kho-r2-bien-nhan -> luu-tru/windows-local-may-chu-kho-r2-bien-nhan
+2026-11-24T14:51:04.5918460Z  * [new tag]         luu-tru/wp1021-g1-claude    -> luu-tru/wp1021-g1-claude
+2026-11-24T14:51:04.5918982Z  * [new tag]         luu-tru/wp523-r12-human-audited -> luu-tru/wp523-r12-human-audited
+2026-11-24T14:51:04.5919492Z  * [new tag]         luu-tru/wp523-spec-r11      -> luu-tru/wp523-spec-r11
+2026-11-24T14:51:04.5920008Z  * [new tag]         luu-tru/wp55-r4-verdict-di-tru -> luu-tru/wp55-r4-verdict-di-tru
+2026-11-24T14:51:04.5920553Z  * [new tag]         luu-tru/wp55-r4-verdict-rebase -> luu-tru/wp55-r4-verdict-rebase
+2026-11-24T14:51:04.5921114Z  * [new tag]         luu-tru/wp55-r4-verdict-review-1 -> luu-tru/wp55-r4-verdict-review-1
+2026-11-24T14:51:04.5921903Z  * [new tag]         luu-tru/wp55-r4-verdict-review-1-ban-dau -> luu-tru/wp55-r4-verdict-review-1-ban-dau
+2026-11-24T14:51:04.5922532Z  * [new tag]         luu-tru/wp55-r4-verdict-review-2 -> luu-tru/wp55-r4-verdict-review-2
+2026-11-24T14:51:04.5923094Z  * [new tag]         luu-tru/wp55-r4-verdict-viet-lai -> luu-tru/wp55-r4-verdict-viet-lai
+2026-11-24T14:51:04.5923613Z  * [new tag]         luu-tru/wp812-g2-reviews    -> luu-tru/wp812-g2-reviews
+2026-11-24T14:51:04.5924078Z  * [new tag]         luu-tru/wp812-spec          -> luu-tru/wp812-spec
+2026-11-24T14:51:04.5924552Z  * [new tag]         luu-tru/wp929-merge-ab94c4f -> luu-tru/wp929-merge-ab94c4f
+2026-11-24T14:51:04.5924993Z  * [new tag]         v1.29.7                     -> v1.29.7
+2026-11-24T14:51:04.5925372Z  * [new tag]         v1.33.0                     -> v1.33.0
+2026-11-24T14:51:04.5925748Z  * [new tag]         v1.33.1                     -> v1.33.1
+2026-11-24T14:51:04.5926126Z  * [new tag]         v1.33.10                    -> v1.33.10
+2026-11-24T14:51:04.5926505Z  * [new tag]         v1.33.11                    -> v1.33.11
+2026-11-24T14:51:04.5926876Z  * [new tag]         v1.33.12                    -> v1.33.12
+2026-11-24T14:51:04.5927252Z  * [new tag]         v1.33.13                    -> v1.33.13
+2026-11-24T14:51:04.5927631Z  * [new tag]         v1.33.14                    -> v1.33.14
+2026-11-24T14:51:04.5928010Z  * [new tag]         v1.33.2                     -> v1.33.2
+2026-11-24T14:51:04.5928394Z  * [new tag]         v1.33.3                     -> v1.33.3
+2026-11-24T14:51:04.5928768Z  * [new tag]         v1.33.4                     -> v1.33.4
+2026-11-24T14:51:04.5929143Z  * [new tag]         v1.33.5                     -> v1.33.5
+2026-11-24T14:51:04.5929503Z  * [new tag]         v1.33.6                     -> v1.33.6
+2026-11-24T14:51:04.5929864Z  * [new tag]         v1.33.7                     -> v1.33.7
+2026-11-24T14:51:04.5930230Z  * [new tag]         v1.33.8                     -> v1.33.8
+2026-11-24T14:51:04.5930596Z  * [new tag]         v1.33.9                     -> v1.33.9
+2026-11-24T14:51:04.5931004Z  * [new tag]         rescue/d0-2026-08-04        -> rescue/d0-2026-08-04
+2026-11-24T14:51:04.5932481Z [command]/usr/bin/git branch --list --remote origin/master
+2026-11-24T14:51:04.5932843Z   origin/master
+2026-11-24T14:51:04.5933500Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-24T14:51:04.5933878Z a03a28ef076503c7fe93c208a4998c32590a977f
+2026-11-24T14:51:04.5934840Z ##[endgroup]
+2026-11-24T14:51:04.5935284Z ##[group]Determining the checkout info
+2026-11-24T14:51:04.5935736Z ##[endgroup]
+2026-11-24T14:51:04.5936018Z [command]/usr/bin/git sparse-checkout disable
+2026-11-24T14:51:04.5936832Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-24T14:51:04.5937727Z ##[group]Checking out the ref
+2026-11-24T14:51:04.5938295Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-11-24T14:51:05.5874295Z Updating files:  97% (17609/17992)
+2026-11-24T14:51:05.6079679Z Updating files:  98% (17633/17992)
+2026-11-24T14:51:05.6414559Z Updating files:  99% (17813/17992)
+2026-11-24T14:51:05.6414886Z Updating files: 100% (17992/17992)
+2026-11-24T14:51:05.6540807Z Updating files: 100% (17992/17992), done.
+2026-11-24T14:51:05.6541096Z Reset branch 'master'
+2026-11-24T14:51:05.6546235Z branch 'master' set up to track 'origin/master'.
+2026-11-24T14:51:05.6636123Z ##[endgroup]
+2026-11-24T14:51:05.6682455Z [command]/usr/bin/git log -1 --format=%H
+2026-11-24T14:51:05.6704212Z a03a28ef076503c7fe93c208a4998c32590a977f
+2026-11-24T14:51:05.6870476Z ##[group]Run actions/setup-python@v5
+2026-11-24T14:51:05.6870639Z with:
+2026-11-24T14:51:05.6870766Z   python-version: 3.12
+2026-11-24T14:51:05.6870897Z   check-latest: false
+2026-11-24T14:51:05.6872618Z   token: ***
+2026-11-24T14:51:05.6872747Z   update-environment: true
+2026-11-24T14:51:05.6872907Z   allow-prereleases: false
+2026-11-24T14:51:05.6873042Z   freethreaded: false
+2026-11-24T14:51:05.6873171Z env:
+2026-11-24T14:51:05.6873287Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:05.6873419Z   PYTHONUTF8: 1
+2026-11-24T14:51:05.6873543Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:05.6873681Z ##[endgroup]
+2026-11-24T14:51:05.7741371Z ##[group]Installed versions
+2026-11-24T14:51:05.7838781Z (node:2213) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T14:51:05.7839329Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T14:51:05.7839954Z Successfully set up CPython (3.12.16)
+2026-11-24T14:51:05.7840499Z ##[endgroup]
+2026-11-24T14:51:05.7939171Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-24T14:51:05.7939471Z [36;1mpython -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0[0m
+2026-11-24T14:51:05.7980729Z shell: /usr/bin/bash -e {0}
+2026-11-24T14:51:05.7980883Z env:
+2026-11-24T14:51:05.7981009Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:05.7981145Z   PYTHONUTF8: 1
+2026-11-24T14:51:05.7981271Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:05.7981449Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:05.7981842Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:51:05.7982078Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:05.7982295Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:05.7982509Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:05.7982721Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:51:05.7982938Z ##[endgroup]
+2026-11-24T14:51:07.3587371Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-24T14:51:07.3587595Z [36;1mbash ops/cai_actionlint.sh[0m
+2026-11-24T14:51:07.3619045Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T14:51:07.3619255Z env:
+2026-11-24T14:51:07.3619386Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:07.3619528Z   PYTHONUTF8: 1
+2026-11-24T14:51:07.3619656Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:07.3619836Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.3620085Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:51:07.3620332Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.3620557Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.3620778Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.3621003Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:51:07.3621206Z   AL_VER: 1.7.7
+2026-11-24T14:51:07.3621357Z ##[endgroup]
+2026-11-24T14:51:07.5905056Z /home/runner/work/_temp/actionlint
+2026-11-24T14:51:07.5931279Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-24T14:51:07.5931491Z [36;1mbash ops/cai_cong_cu.sh shellcheck[0m
+2026-11-24T14:51:07.5959116Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T14:51:07.5959298Z env:
+2026-11-24T14:51:07.5959416Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:07.5959548Z   PYTHONUTF8: 1
+2026-11-24T14:51:07.5959669Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:07.5959839Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.5960069Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:51:07.5960299Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.5960501Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.5960708Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:07.5960917Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:51:07.5961093Z ##[endgroup]
+2026-11-24T14:51:08.7801368Z cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+2026-11-24T14:51:08.8245945Z {
+2026-11-24T14:51:08.8246248Z   "trang_thai_tong": "DAT",
+2026-11-24T14:51:08.8246514Z   "pham_vi": "mot-cong-cu",
+2026-11-24T14:51:08.8246742Z   "canary_da_quet": false,
+2026-11-24T14:51:08.8247003Z   "ghi_chu_pham_vi": "chua quet canary toan bo",
+2026-11-24T14:51:08.8247267Z   "cong_cu": [
+2026-11-24T14:51:08.8247437Z     {
+2026-11-24T14:51:08.8247611Z       "ten": "shellcheck",
+2026-11-24T14:51:08.8247823Z       "bat_buoc": false,
+2026-11-24T14:51:08.8248028Z       "ban_ghim": null,
+2026-11-24T14:51:08.8248220Z       "ban_thay": {
+2026-11-24T14:51:08.8248493Z         "mac_dinh": "0.11.0"
+2026-11-24T14:51:08.8248693Z       },
+2026-11-24T14:51:08.8248865Z       "trang_thai": "DAT",
+2026-11-24T14:51:08.8249071Z       "chi_tiet": "dat"
+2026-11-24T14:51:08.8249264Z     }
+2026-11-24T14:51:08.8249423Z   ],
+2026-11-24T14:51:08.8249584Z   "canary": []
+2026-11-24T14:51:08.8249797Z }
+2026-11-24T14:51:08.8904302Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-24T14:51:08.8904511Z [36;1mbash ops/cai_cong_cu.sh rg[0m
+2026-11-24T14:51:08.8930854Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T14:51:08.8931036Z env:
+2026-11-24T14:51:08.8931154Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:08.8931288Z   PYTHONUTF8: 1
+2026-11-24T14:51:08.8931412Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:08.8931589Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:08.8931947Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:51:08.8932179Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:08.8932386Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:08.8932590Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:08.8932797Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:51:08.8932976Z ##[endgroup]
+2026-11-24T14:51:11.4542065Z 
+2026-11-24T14:51:11.4542464Z Running kernel seems to be up-to-date.
+2026-11-24T14:51:11.4542638Z 
+2026-11-24T14:51:11.4542706Z Restarting services...
+2026-11-24T14:51:11.4615002Z 
+2026-11-24T14:51:11.4615437Z Service restarts being deferred:
+2026-11-24T14:51:11.4617877Z  systemctl restart hosted-compute-agent.service
+2026-11-24T14:51:11.4618083Z 
+2026-11-24T14:51:11.4618728Z No containers need to be restarted.
+2026-11-24T14:51:11.4618901Z 
+2026-11-24T14:51:11.4619014Z No user sessions are running outdated binaries.
+2026-11-24T14:51:11.4619193Z 
+2026-11-24T14:51:11.4619366Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-24T14:51:12.1995523Z cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+2026-11-24T14:51:12.2427251Z {
+2026-11-24T14:51:12.2427547Z   "trang_thai_tong": "DAT",
+2026-11-24T14:51:12.2427763Z   "pham_vi": "mot-cong-cu",
+2026-11-24T14:51:12.2427910Z   "canary_da_quet": false,
+2026-11-24T14:51:12.2428101Z   "ghi_chu_pham_vi": "chua quet canary toan bo",
+2026-11-24T14:51:12.2428271Z   "cong_cu": [
+2026-11-24T14:51:12.2428380Z     {
+2026-11-24T14:51:12.2428486Z       "ten": "rg",
+2026-11-24T14:51:12.2428599Z       "bat_buoc": true,
+2026-11-24T14:51:12.2429033Z       "ban_ghim": null,
+2026-11-24T14:51:12.2429151Z       "ban_thay": {
+2026-11-24T14:51:12.2429271Z         "mac_dinh": "15.1.0"
+2026-11-24T14:51:12.2429400Z       },
+2026-11-24T14:51:12.2429504Z       "trang_thai": "DAT",
+2026-11-24T14:51:12.2429626Z       "chi_tiet": "dat"
+2026-11-24T14:51:12.2429744Z     }
+2026-11-24T14:51:12.2429842Z   ],
+2026-11-24T14:51:12.2429941Z   "canary": []
+2026-11-24T14:51:12.2430047Z }
+2026-11-24T14:51:12.3105941Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-24T14:51:12.3106191Z [36;1mpython ops/cong_cu.py kiem-tra --json[0m
+2026-11-24T14:51:12.3106369Z [36;1mpython ops/cong_cu_test.py[0m
+2026-11-24T14:51:12.3133241Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T14:51:12.3133426Z env:
+2026-11-24T14:51:12.3133546Z   PYTHONIOENCODING: utf-8
+2026-11-24T14:51:12.3133679Z   PYTHONUTF8: 1
+2026-11-24T14:51:12.3133805Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T14:51:12.3133987Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:12.3134236Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T14:51:12.3134474Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:12.3134687Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:12.3134904Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T14:51:12.3135146Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T14:51:12.3135330Z   CONG_CU_TEST_MANH: 7/8
+2026-11-24T14:51:12.3135468Z   CONG_CU_TEST_MANH_RA: manh/manh-7.txt
+2026-11-24T14:51:12.3135616Z ##[endgroup]
+2026-11-24T14:51:13.1529581Z {
+2026-11-24T14:51:13.1529876Z   "trang_thai_tong": "DAT",
+2026-11-24T14:51:13.1530127Z   "pham_vi": "toan-bo",
+2026-11-24T14:51:13.1530323Z   "canary_da_quet": true,
+2026-11-24T14:51:13.1530624Z   "ghi_chu_pham_vi": "da quet canary toan bo (khong co nghia moi canary dat)",
+2026-11-24T14:51:13.1530943Z   "cong_cu": [
+2026-11-24T14:51:13.1531131Z     {
+2026-11-24T14:51:13.1531285Z       "ten": "git",
+2026-11-24T14:51:13.1531459Z       "bat_buoc": true,
+2026-11-24T14:51:13.1531774Z       "ban_ghim": null,
+2026-11-24T14:51:13.1531957Z       "ban_thay": {
+2026-11-24T14:51:13.1532133Z         "mac_dinh": "2.56.1"
+2026-11-24T14:51:13.1532322Z       },
+2026-11-24T14:51:13.1532483Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1532668Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1532840Z     },
+2026-11-24T14:51:13.1533006Z     {
+2026-11-24T14:51:13.1533159Z       "ten": "python",
+2026-11-24T14:51:13.1533338Z       "bat_buoc": true,
+2026-11-24T14:51:13.1533514Z       "ban_ghim": null,
+2026-11-24T14:51:13.1533692Z       "ban_thay": {
+2026-11-24T14:51:13.1533868Z         "mac_dinh": "3.12.16"
+2026-11-24T14:51:13.1534063Z       },
+2026-11-24T14:51:13.1534232Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1534425Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1534599Z     },
+2026-11-24T14:51:13.1534750Z     {
+2026-11-24T14:51:13.1534916Z       "ten": "PyYAML",
+2026-11-24T14:51:13.1535040Z       "bat_buoc": true,
+2026-11-24T14:51:13.1535161Z       "ban_ghim": null,
+2026-11-24T14:51:13.1535276Z       "ban_thay": {
+2026-11-24T14:51:13.1535393Z         "mac_dinh": "6.0.3"
+2026-11-24T14:51:13.1535515Z       },
+2026-11-24T14:51:13.1535622Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1535777Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1535889Z     },
+2026-11-24T14:51:13.1536009Z     {
+2026-11-24T14:51:13.1536116Z       "ten": "actionlint",
+2026-11-24T14:51:13.1536241Z       "bat_buoc": true,
+2026-11-24T14:51:13.1536360Z       "ban_ghim": "1.7.7",
+2026-11-24T14:51:13.1536484Z       "ban_thay": {
+2026-11-24T14:51:13.1536602Z         "mac_dinh": "1.7.7"
+2026-11-24T14:51:13.1536725Z       },
+2026-11-24T14:51:13.1536836Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1536963Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1537075Z     },
+2026-11-24T14:51:13.1537171Z     {
+2026-11-24T14:51:13.1537280Z       "ten": "jsonschema",
+2026-11-24T14:51:13.1537404Z       "bat_buoc": true,
+2026-11-24T14:51:13.1537918Z       "ban_ghim": "4.26.0",
+2026-11-24T14:51:13.1538043Z       "ban_thay": {
+2026-11-24T14:51:13.1538163Z         "mac_dinh": "4.26.0"
+2026-11-24T14:51:13.1538289Z       },
+2026-11-24T14:51:13.1538394Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1538524Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1538639Z     },
+2026-11-24T14:51:13.1538736Z     {
+2026-11-24T14:51:13.1538842Z       "ten": "shellcheck",
+2026-11-24T14:51:13.1539162Z       "bat_buoc": false,
+2026-11-24T14:51:13.1539287Z       "ban_ghim": null,
+2026-11-24T14:51:13.1539407Z       "ban_thay": {
+2026-11-24T14:51:13.1539523Z         "mac_dinh": "0.11.0"
+2026-11-24T14:51:13.1539647Z       },
+2026-11-24T14:51:13.1539754Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1539880Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1539995Z     },
+2026-11-24T14:51:13.1540097Z     {
+2026-11-24T14:51:13.1540198Z       "ten": "rg",
+2026-11-24T14:51:13.1540315Z       "bat_buoc": true,
+2026-11-24T14:51:13.1540437Z       "ban_ghim": null,
+2026-11-24T14:51:13.1540556Z       "ban_thay": {
+2026-11-24T14:51:13.1540670Z         "mac_dinh": "15.1.0"
+2026-11-24T14:51:13.1540789Z       },
+2026-11-24T14:51:13.1540893Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1541015Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1541127Z     },
+2026-11-24T14:51:13.1541224Z     {
+2026-11-24T14:51:13.1541324Z       "ten": "bash",
+2026-11-24T14:51:13.1541447Z       "bat_buoc": true,
+2026-11-24T14:51:13.1541569Z       "ban_ghim": null,
+2026-11-24T14:51:13.1541848Z       "ban_thay": {
+2026-11-24T14:51:13.1541964Z         "mac_dinh": "5.3.9"
+2026-11-24T14:51:13.1542088Z       },
+2026-11-24T14:51:13.1542195Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1542317Z       "chi_tiet": "dat"
+2026-11-24T14:51:13.1542431Z     }
+2026-11-24T14:51:13.1542529Z   ],
+2026-11-24T14:51:13.1542631Z   "canary": [
+2026-11-24T14:51:13.1542738Z     {
+2026-11-24T14:51:13.1542858Z       "ten": "actionlint_shellcheck",
+2026-11-24T14:51:13.1543010Z       "chu_so_huu": "actionlint",
+2026-11-24T14:51:13.1543158Z       "chinh_sach": "blocking",
+2026-11-24T14:51:13.1543294Z       "trang_thai": "DAT",
+2026-11-24T14:51:13.1543442Z       "chi_tiet": "canary bat dung SC1003 (rc=1)"
+2026-11-24T14:51:13.1543597Z     }
+2026-11-24T14:51:13.1543694Z   ]
+2026-11-24T14:51:13.1543791Z }
+2026-11-24T14:51:13.3105581Z /home/runner/work/tra-luat/tra-luat/ops/lease_publish_test.py:3640: SyntaxWarning: invalid escape sequence '\s'
+2026-11-24T14:51:13.3106430Z   2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+2026-11-24T14:51:13.3330467Z /home/runner/work/tra-luat/tra-luat/ops/lease_publish_test.py:5783: SyntaxWarning: invalid escape sequence '\d'
+2026-11-24T14:51:13.3331376Z   KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+2026-11-24T14:51:16.0152776Z <unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+2026-11-24T14:51:17.2156452Z <unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+2026-11-24T14:51:17.2366035Z <unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+2026-11-24T15:05:21.9754789Z 
+2026-11-24T15:05:21.9755720Z cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+2026-11-24T15:05:21.9756053Z 
+2026-11-24T15:05:21.9756325Z BÁN KÍNH ĐỘT BIẾN — MẢNH 7/8 (62/499 đột biến; 4 tiến trình):
+2026-11-24T15:05:21.9756858Z   ok  t8_mat_field_ten → giết đúng 't8_van_tay_cong_cu_co_trong_ho_so' · bán kính 1/61
+2026-11-24T15:05:21.9757626Z   ok  t21_git_regex_cat_hau_to → giết đúng 't21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron' · bán kính 1/61
+2026-11-24T15:05:21.9758349Z   ok  t35_thu_pham_vi_ve_ops → giết đúng 't35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops' · bán kính 1/61
+2026-11-24T15:05:21.9758984Z   ok  bn_bo_kiem_doi_so_1 → giết đúng 't23_bash_nen_tu_choi_bash_nuot_argv' · bán kính 1/61
+2026-11-24T15:05:21.9759630Z   ok  bn_han_ngach_0_bi_bo_qua → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-11-24T15:05:21.9760300Z   ok  bn_executable_cong_them → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9761312Z   ok  bn_bo_type_params → giết đúng 't50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc' · bán kính 1/61
+2026-11-24T15:05:21.9762193Z   ok  bn_ghi_de_ten_tran_khong_giai → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-11-24T15:05:21.9762953Z   ok  bn_api_vi_tri_luon_dau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9763349Z   ok  bn_giai_dong_quet_lai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9763723Z   ok  bn_phu_thuoc_dai_dien → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9764121Z   ok  bn_quet_bo_rglob_hong → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-11-24T15:05:21.9764532Z   ok  bn_git_giu_moi_ban_ghi → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-11-24T15:05:21.9764931Z   ok  ct_bo_tu_khoa_dk → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-11-24T15:05:21.9765339Z   ok  ct_mien_tru_quet_truc_tiep_bo → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-11-24T15:05:21.9765731Z   ok  bn_gap_het_sau_im → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9766106Z   ok  bn_nap_dong_khong_giai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9766476Z   ok  bn_tai_bo_bytes → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9766851Z   ok  ct_bo_get_truong → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-11-24T15:05:21.9767236Z   ok  bn_exec_khong_rang_buoc → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9767608Z   ok  bn_walrus_comp_la_cuc_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9767978Z   ok  bn_shell_ra_nhan_path → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9768376Z   ok  bn_alias_khong_mo_pham_vi → giết đúng 't50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc' · bán kính 1/61
+2026-11-24T15:05:21.9768805Z   ok  bn_dinh_nghia_giai_o_pham_vi_trong → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9769219Z   ok  bn_bo_qua_walrus_comprehension → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-11-24T15:05:21.9769646Z   ok  t39_de_ten_chet_trong_danh_sach → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-11-24T15:05:21.9770059Z   ok  f6_main_manh_mot_tien_trinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9770444Z   ok  f2_main_manh_do_ca_bang → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9770856Z   ok  g668_gom_bo_sha → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9771306Z   ok  g668_gom_tin_ten_cua_manh → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9771967Z   ok  g668_che_do_bo_ca_hai → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9772704Z   ok  wp892_strip → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9773194Z   ok  wp892_bo_cr → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9773651Z   ok  wp892_dispatcher_noi_giet → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9774071Z   ok  f7_bo_qua_thanh_hong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9774604Z   ok  f7_bo_song_song → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9774996Z   ok  f8_gop_nuot_ma → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9775387Z   ok  f12_bk_chi_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9775828Z   ok  f15_nen_chi_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9776193Z   ok  f15_bo_thong_bao_giao → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9776568Z   ok  f18_ghi_lon_hon_mot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9776974Z   ok  f19_gom_lap_mot_ten → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9777416Z   ok  f24_kieu_phien_ban → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9777815Z   ok  f27_entry_drop → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9778163Z   ok  f28_du_nuot_ma → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9778569Z   ok  f32_do_dai → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9779031Z   ok  f33_k_unicode_tail → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9779510Z   ok  f34_head_64_ascii_extra → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9779988Z   ok  f34_head_timeout → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9780446Z   ok  f35_gom_drop_oserror → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9780848Z   ok  f42_ra_strip → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9781193Z   ok  f44_nen_ten_n8 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9781618Z   ok  w698_e49_nfkc_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9782224Z   ok  w698_e49_ra_normpath → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9782685Z   ok  w698_s_ra_cf → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9783149Z   ok  w698_q_cf_mid_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9783617Z   ok  w698_m_co_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9784025Z   ok  w698_s2_tk_va_khong_bq → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9784403Z   ok  w698_x_main_ra_normpath → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-11-24T15:05:21.9784828Z   ok  f36_suffix_64 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-11-24T15:05:21.9785274Z   ok  f40_false_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9785738Z   ok  wp1448_g5_bo_doi_chieu_so_lan_thu → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-11-24T15:05:21.9786125Z MẢNH 7/8: 62/62 đột biến bán kính 1 · ghi manh/manh-7.txt
+2026-11-24T15:05:21.9786718Z G5_THOI_GIAN {"bat_dau": 1795531909.757, "ca_dich": "t8_van_tay_cong_cu_co_trong_ho_so", "ca_dich_s": 0.0586, "ca_khac_s": 52.5002, "don_cay_s": 0.0011, "dung_cay_s": 0.001, "ket_thuc": 1795531962.318, "loai": "dot_bien", "so_ca_khac": 60, "ten": "t8_mat_field_ten", "tong_s": 52.5612, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9787905Z G5_THOI_GIAN {"bat_dau": 1795531962.319, "ca_dich": "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI", "ca_dich_s": 0.1566, "ca_khac_s": 52.1205, "don_cay_s": 0.0055, "dung_cay_s": 0.0013, "ket_thuc": 1795532014.603, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_han_ngach_0_bi_bo_qua", "tong_s": 52.2842, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9788880Z G5_THOI_GIAN {"bat_dau": 1795532014.603, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0468, "ca_khac_s": 50.7177, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532065.369, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_api_vi_tri_luon_dau", "tong_s": 50.7664, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9789852Z G5_THOI_GIAN {"bat_dau": 1795532065.37, "ca_dich": "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec", "ca_dich_s": 1.1241, "ca_khac_s": 51.0874, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532117.583, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_git_giu_moi_ban_ghi", "tong_s": 52.2137, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9790806Z G5_THOI_GIAN {"bat_dau": 1795532117.583, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0526, "ca_khac_s": 52.1264, "don_cay_s": 0.0005, "dung_cay_s": 0.0012, "ket_thuc": 1795532169.764, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_nap_dong_khong_giai", "tong_s": 52.181, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9791858Z G5_THOI_GIAN {"bat_dau": 1795532169.765, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0335, "ca_khac_s": 52.4823, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532222.282, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_walrus_comp_la_cuc_bo", "tong_s": 52.5178, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9792831Z G5_THOI_GIAN {"bat_dau": 1795532222.283, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0869, "ca_khac_s": 51.739, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532274.111, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_bo_qua_walrus_comprehension", "tong_s": 51.8279, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9793861Z G5_THOI_GIAN {"bat_dau": 1795532274.111, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 15.5257, "ca_khac_s": 36.4781, "don_cay_s": 0.001, "dung_cay_s": 0.0031, "ket_thuc": 1795532326.119, "loai": "dot_bien", "so_ca_khac": 60, "ten": "g668_gom_bo_sha", "tong_s": 52.0082, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9794860Z G5_THOI_GIAN {"bat_dau": 1795532326.119, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 15.289, "ca_khac_s": 35.6011, "don_cay_s": 0.0012, "dung_cay_s": 0.003, "ket_thuc": 1795532377.014, "loai": "dot_bien", "so_ca_khac": 60, "ten": "wp892_bo_cr", "tong_s": 50.8947, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9795859Z G5_THOI_GIAN {"bat_dau": 1795532377.014, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 15.0362, "ca_khac_s": 34.8333, "don_cay_s": 0.001, "dung_cay_s": 0.0035, "ket_thuc": 1795532426.889, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f8_gop_nuot_ma", "tong_s": 49.8744, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9796824Z G5_THOI_GIAN {"bat_dau": 1795532426.889, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 3.1277, "ca_khac_s": 45.4476, "don_cay_s": 0.0012, "dung_cay_s": 0.0031, "ket_thuc": 1795532475.469, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f18_ghi_lon_hon_mot", "tong_s": 48.58, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9797794Z G5_THOI_GIAN {"bat_dau": 1795532475.469, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 3.7852, "ca_khac_s": 47.0691, "don_cay_s": 0.001, "dung_cay_s": 0.004, "ket_thuc": 1795532526.329, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f28_du_nuot_ma", "tong_s": 50.8598, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9799044Z G5_THOI_GIAN {"bat_dau": 1795532526.329, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 4.3383, "ca_khac_s": 47.1879, "don_cay_s": 0.0012, "dung_cay_s": 0.003, "ket_thuc": 1795532577.86, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f34_head_timeout", "tong_s": 51.5309, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9800204Z G5_THOI_GIAN {"bat_dau": 1795532577.86, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 4.5641, "ca_khac_s": 47.5258, "don_cay_s": 0.0011, "dung_cay_s": 0.0031, "ket_thuc": 1795532629.954, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_e49_nfkc_mh", "tong_s": 52.0944, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9801297Z G5_THOI_GIAN {"bat_dau": 1795532629.955, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 4.4651, "ca_khac_s": 46.5688, "don_cay_s": 0.0011, "dung_cay_s": 0.0027, "ket_thuc": 1795532680.993, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_m_co_bk", "tong_s": 51.0382, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9802487Z G5_THOI_GIAN {"bat_dau": 1795532680.993, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 11.2005, "ca_khac_s": 29.7202, "don_cay_s": 0.001, "dung_cay_s": 0.0035, "ket_thuc": 1795532721.919, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f40_false_luon", "tong_s": 40.9255, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9803221Z G5_THOI_GIAN {"bat_dau": 1795531909.756, "cpu_s": 714.09, "ket_thuc": 1795532721.922, "loai": "con", "pid": 3473, "so_dot_bien": 16}
+2026-11-24T15:05:21.9803994Z G5_THOI_GIAN {"bat_dau": 1795531909.702, "ca_dich": "t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron", "ca_dich_s": 0.067, "ca_khac_s": 45.8183, "don_cay_s": 0.0011, "dung_cay_s": 0.0009, "ket_thuc": 1795531955.589, "loai": "dot_bien", "so_ca_khac": 60, "ten": "t21_git_regex_cat_hau_to", "tong_s": 45.8876, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9805005Z G5_THOI_GIAN {"bat_dau": 1795531955.59, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0829, "ca_khac_s": 50.3919, "don_cay_s": 0.0005, "dung_cay_s": 0.0012, "ket_thuc": 1795532006.066, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_executable_cong_them", "tong_s": 50.4769, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9805981Z G5_THOI_GIAN {"bat_dau": 1795532006.067, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.7384, "ca_khac_s": 49.8714, "don_cay_s": 0.0004, "dung_cay_s": 0.0011, "ket_thuc": 1795532056.678, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_giai_dong_quet_lai", "tong_s": 50.6117, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9806919Z G5_THOI_GIAN {"bat_dau": 1795532056.679, "ca_dich": "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai", "ca_dich_s": 0.75, "ca_khac_s": 50.92, "don_cay_s": 0.001, "dung_cay_s": 0.003, "ket_thuc": 1795532108.353, "loai": "dot_bien", "so_ca_khac": 60, "ten": "ct_bo_tu_khoa_dk", "tong_s": 51.6744, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9807878Z G5_THOI_GIAN {"bat_dau": 1795532108.353, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0557, "ca_khac_s": 50.2847, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532158.696, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_tai_bo_bytes", "tong_s": 50.3424, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9808842Z G5_THOI_GIAN {"bat_dau": 1795532158.696, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.074, "ca_khac_s": 50.6144, "don_cay_s": 0.0006, "dung_cay_s": 0.0012, "ket_thuc": 1795532209.386, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_shell_ra_nhan_path", "tong_s": 50.6905, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9809888Z G5_THOI_GIAN {"bat_dau": 1795532209.387, "ca_dich": "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai", "ca_dich_s": 1.0965, "ca_khac_s": 52.1145, "don_cay_s": 0.0015, "dung_cay_s": 0.0035, "ket_thuc": 1795532262.603, "loai": "dot_bien", "so_ca_khac": 60, "ten": "t39_de_ten_chet_trong_danh_sach", "tong_s": 53.2164, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9811102Z G5_THOI_GIAN {"bat_dau": 1795532262.603, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 14.0541, "ca_khac_s": 38.3523, "don_cay_s": 0.001, "dung_cay_s": 0.0075, "ket_thuc": 1795532315.018, "loai": "dot_bien", "so_ca_khac": 60, "ten": "g668_gom_tin_ten_cua_manh", "tong_s": 52.4153, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9812287Z G5_THOI_GIAN {"bat_dau": 1795532315.019, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 13.5352, "ca_khac_s": 36.3787, "don_cay_s": 0.0013, "dung_cay_s": 0.0034, "ket_thuc": 1795532364.938, "loai": "dot_bien", "so_ca_khac": 60, "ten": "wp892_dispatcher_noi_giet", "tong_s": 49.9189, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9813266Z G5_THOI_GIAN {"bat_dau": 1795532364.938, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 3.0237, "ca_khac_s": 46.9723, "don_cay_s": 0.0024, "dung_cay_s": 0.0034, "ket_thuc": 1795532414.94, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f12_bk_chi_dau", "tong_s": 50.0022, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9814277Z G5_THOI_GIAN {"bat_dau": 1795532414.94, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 14.3369, "ca_khac_s": 35.8727, "don_cay_s": 0.0012, "dung_cay_s": 0.0036, "ket_thuc": 1795532465.155, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f19_gom_lap_mot_ten", "tong_s": 50.2148, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9815356Z G5_THOI_GIAN {"bat_dau": 1795532465.155, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 3.2599, "ca_khac_s": 47.2771, "don_cay_s": 0.0012, "dung_cay_s": 0.0031, "ket_thuc": 1795532515.697, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f32_do_dai", "tong_s": 50.5417, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9816369Z G5_THOI_GIAN {"bat_dau": 1795532515.697, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 14.7837, "ca_khac_s": 36.1489, "don_cay_s": 0.0013, "dung_cay_s": 0.003, "ket_thuc": 1795532566.635, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f35_gom_drop_oserror", "tong_s": 50.9373, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9817389Z G5_THOI_GIAN {"bat_dau": 1795532566.635, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 2.5806, "ca_khac_s": 47.0499, "don_cay_s": 0.0012, "dung_cay_s": 0.0035, "ket_thuc": 1795532616.271, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_e49_ra_normpath", "tong_s": 49.6356, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9818381Z G5_THOI_GIAN {"bat_dau": 1795532616.271, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.3811, "ca_khac_s": 47.825, "don_cay_s": 0.0013, "dung_cay_s": 0.0036, "ket_thuc": 1795532666.482, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_s2_tk_va_khong_bq", "tong_s": 50.2114, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9819370Z G5_THOI_GIAN {"bat_dau": 1795532666.482, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 11.0019, "ca_khac_s": 33.951, "don_cay_s": 0.0011, "dung_cay_s": 0.0035, "ket_thuc": 1795532711.44, "loai": "dot_bien", "so_ca_khac": 60, "ten": "wp1448_g5_bo_doi_chieu_so_lan_thu", "tong_s": 44.9578, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9820095Z G5_THOI_GIAN {"bat_dau": 1795531909.701, "cpu_s": 702.45, "ket_thuc": 1795532711.444, "loai": "con", "pid": 3474, "so_dot_bien": 16}
+2026-11-24T15:05:21.9820774Z G5_THOI_GIAN {"bat_dau": 1795531909.732, "ca_dich": "t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops", "ca_dich_s": 0.135, "ca_khac_s": 52.6986, "don_cay_s": 0.0005, "dung_cay_s": 0.0012, "ket_thuc": 1795531962.567, "loai": "dot_bien", "so_ca_khac": 60, "ten": "t35_thu_pham_vi_ve_ops", "tong_s": 52.8357, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9822058Z G5_THOI_GIAN {"bat_dau": 1795531962.568, "ca_dich": "t50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc", "ca_dich_s": 0.0807, "ca_khac_s": 52.7416, "don_cay_s": 0.0006, "dung_cay_s": 0.0012, "ket_thuc": 1795532015.392, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_bo_type_params", "tong_s": 52.8245, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9823085Z G5_THOI_GIAN {"bat_dau": 1795532015.392, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 7.7859, "ca_khac_s": 51.8918, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532075.072, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_phu_thuoc_dai_dien", "tong_s": 59.6797, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9824053Z G5_THOI_GIAN {"bat_dau": 1795532075.072, "ca_dich": "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai", "ca_dich_s": 1.3493, "ca_khac_s": 51.0042, "don_cay_s": 0.001, "dung_cay_s": 0.0035, "ket_thuc": 1795532127.431, "loai": "dot_bien", "so_ca_khac": 60, "ten": "ct_mien_tru_quet_truc_tiep_bo", "tong_s": 52.3583, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9825042Z G5_THOI_GIAN {"bat_dau": 1795532127.431, "ca_dich": "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai", "ca_dich_s": 1.3148, "ca_khac_s": 49.6538, "don_cay_s": 0.0011, "dung_cay_s": 0.0027, "ket_thuc": 1795532178.404, "loai": "dot_bien", "so_ca_khac": 60, "ten": "ct_bo_get_truong", "tong_s": 50.9728, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9826018Z G5_THOI_GIAN {"bat_dau": 1795532178.404, "ca_dich": "t50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc", "ca_dich_s": 0.104, "ca_khac_s": 52.4704, "don_cay_s": 0.0004, "dung_cay_s": 0.0009, "ket_thuc": 1795532230.98, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_alias_khong_mo_pham_vi", "tong_s": 52.5761, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9826991Z G5_THOI_GIAN {"bat_dau": 1795532230.98, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 3.0412, "ca_khac_s": 50.1562, "don_cay_s": 0.001, "dung_cay_s": 0.0028, "ket_thuc": 1795532284.182, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f6_main_manh_mot_tien_trinh", "tong_s": 53.2015, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9827997Z G5_THOI_GIAN {"bat_dau": 1795532284.182, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 3.8035, "ca_khac_s": 48.1484, "don_cay_s": 0.0012, "dung_cay_s": 0.0029, "ket_thuc": 1795532336.138, "loai": "dot_bien", "so_ca_khac": 60, "ten": "g668_che_do_bo_ca_hai", "tong_s": 51.9564, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9828987Z G5_THOI_GIAN {"bat_dau": 1795532336.139, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.528, "ca_khac_s": 48.8588, "don_cay_s": 0.001, "dung_cay_s": 0.0037, "ket_thuc": 1795532387.53, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f7_bo_qua_thanh_hong", "tong_s": 51.3919, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9829916Z G5_THOI_GIAN {"bat_dau": 1795532387.531, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.3715, "ca_khac_s": 48.422, "don_cay_s": 0.0012, "dung_cay_s": 0.0028, "ket_thuc": 1795532438.328, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f15_nen_chi_dau", "tong_s": 50.7978, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9830882Z G5_THOI_GIAN {"bat_dau": 1795532438.329, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 15.7046, "ca_khac_s": 34.4269, "don_cay_s": 0.0009, "dung_cay_s": 0.0031, "ket_thuc": 1795532488.465, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f24_kieu_phien_ban", "tong_s": 50.1359, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9832028Z G5_THOI_GIAN {"bat_dau": 1795532488.465, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 3.5763, "ca_khac_s": 46.7462, "don_cay_s": 0.001, "dung_cay_s": 0.0029, "ket_thuc": 1795532538.791, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f33_k_unicode_tail", "tong_s": 50.3267, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9833090Z G5_THOI_GIAN {"bat_dau": 1795532538.792, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.1151, "ca_khac_s": 49.5424, "don_cay_s": 0.001, "dung_cay_s": 0.0029, "ket_thuc": 1795532590.453, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f42_ra_strip", "tong_s": 51.6618, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9834231Z G5_THOI_GIAN {"bat_dau": 1795532590.454, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 3.8299, "ca_khac_s": 48.9085, "don_cay_s": 0.0011, "dung_cay_s": 0.0028, "ket_thuc": 1795532643.196, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_s_ra_cf", "tong_s": 52.7427, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9835222Z G5_THOI_GIAN {"bat_dau": 1795532643.197, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.2885, "ca_khac_s": 48.8871, "don_cay_s": 0.0013, "dung_cay_s": 0.0034, "ket_thuc": 1795532694.377, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_x_main_ra_normpath", "tong_s": 51.1807, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9835897Z G5_THOI_GIAN {"bat_dau": 1795531909.731, "cpu_s": 690.13, "ket_thuc": 1795532694.38, "loai": "con", "pid": 3475, "so_dot_bien": 15}
+2026-11-24T15:05:21.9836557Z G5_THOI_GIAN {"bat_dau": 1795531909.701, "ca_dich": "t23_bash_nen_tu_choi_bash_nuot_argv", "ca_dich_s": 0.3321, "ca_khac_s": 51.1706, "don_cay_s": 0.0005, "dung_cay_s": 0.001, "ket_thuc": 1795531961.206, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_bo_kiem_doi_so_1", "tong_s": 51.5045, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9837546Z G5_THOI_GIAN {"bat_dau": 1795531961.206, "ca_dich": "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi", "ca_dich_s": 2.784, "ca_khac_s": 48.2639, "don_cay_s": 0.0005, "dung_cay_s": 0.001, "ket_thuc": 1795532012.256, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_ghi_de_ten_tran_khong_giai", "tong_s": 51.0498, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9838538Z G5_THOI_GIAN {"bat_dau": 1795532012.256, "ca_dich": "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec", "ca_dich_s": 0.6815, "ca_khac_s": 51.3905, "don_cay_s": 0.0005, "dung_cay_s": 0.0012, "ket_thuc": 1795532064.33, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_quet_bo_rglob_hong", "tong_s": 52.074, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9839484Z G5_THOI_GIAN {"bat_dau": 1795532064.33, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.1679, "ca_khac_s": 51.9652, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532116.465, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_gap_het_sau_im", "tong_s": 52.1351, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9840426Z G5_THOI_GIAN {"bat_dau": 1795532116.466, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0513, "ca_khac_s": 49.6555, "don_cay_s": 0.0005, "dung_cay_s": 0.0011, "ket_thuc": 1795532166.174, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_exec_khong_rang_buoc", "tong_s": 49.7088, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9841404Z G5_THOI_GIAN {"bat_dau": 1795532166.175, "ca_dich": "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG", "ca_dich_s": 0.0307, "ca_khac_s": 51.8194, "don_cay_s": 0.0006, "dung_cay_s": 0.001, "ket_thuc": 1795532218.027, "loai": "dot_bien", "so_ca_khac": 60, "ten": "bn_dinh_nghia_giai_o_pham_vi_trong", "tong_s": 51.8521, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9842444Z G5_THOI_GIAN {"bat_dau": 1795532218.027, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 17.4351, "ca_khac_s": 49.7258, "don_cay_s": 0.0017, "dung_cay_s": 0.0036, "ket_thuc": 1795532285.194, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f2_main_manh_do_ca_bang", "tong_s": 67.1666, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9843441Z G5_THOI_GIAN {"bat_dau": 1795532285.194, "ca_dich": "t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG", "ca_dich_s": 16.164, "ca_khac_s": 35.7042, "don_cay_s": 0.0065, "dung_cay_s": 0.0026, "ket_thuc": 1795532337.072, "loai": "dot_bien", "so_ca_khac": 60, "ten": "wp892_strip", "tong_s": 51.8777, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9844495Z G5_THOI_GIAN {"bat_dau": 1795532337.072, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.0673, "ca_khac_s": 48.8732, "don_cay_s": 0.0012, "dung_cay_s": 0.0026, "ket_thuc": 1795532388.016, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f7_bo_song_song", "tong_s": 50.9446, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9845501Z G5_THOI_GIAN {"bat_dau": 1795532388.017, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.4509, "ca_khac_s": 47.4622, "don_cay_s": 0.001, "dung_cay_s": 0.0036, "ket_thuc": 1795532437.935, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f15_bo_thong_bao_giao", "tong_s": 49.9181, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9846440Z G5_THOI_GIAN {"bat_dau": 1795532437.935, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.5435, "ca_khac_s": 47.7167, "don_cay_s": 0.0039, "dung_cay_s": 0.0042, "ket_thuc": 1795532488.204, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f27_entry_drop", "tong_s": 50.2687, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9847445Z G5_THOI_GIAN {"bat_dau": 1795532488.204, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 3.3829, "ca_khac_s": 47.7101, "don_cay_s": 0.0012, "dung_cay_s": 0.0027, "ket_thuc": 1795532539.301, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f34_head_64_ascii_extra", "tong_s": 51.0972, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9848441Z G5_THOI_GIAN {"bat_dau": 1795532539.301, "ca_dich": "t54_main_chon_DUNG_vong_ban_kinh_theo_che_do", "ca_dich_s": 2.2318, "ca_khac_s": 49.2686, "don_cay_s": 0.0011, "dung_cay_s": 0.0034, "ket_thuc": 1795532590.807, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f44_nen_ten_n8", "tong_s": 51.5052, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9849431Z G5_THOI_GIAN {"bat_dau": 1795532590.807, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 4.1552, "ca_khac_s": 48.8362, "don_cay_s": 0.0009, "dung_cay_s": 0.0032, "ket_thuc": 1795532643.803, "loai": "dot_bien", "so_ca_khac": 60, "ten": "w698_q_cf_mid_head", "tong_s": 52.9959, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9850493Z G5_THOI_GIAN {"bat_dau": 1795532643.803, "ca_dich": "t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON", "ca_dich_s": 4.0083, "ca_khac_s": 47.8396, "don_cay_s": 0.001, "dung_cay_s": 0.0026, "ket_thuc": 1795532695.655, "loai": "dot_bien", "so_ca_khac": 60, "ten": "f36_suffix_64", "tong_s": 51.8519, "trang_thai": "do_duoc"}
+2026-11-24T15:05:21.9851207Z G5_THOI_GIAN {"bat_dau": 1795531909.7, "cpu_s": 692.59, "ket_thuc": 1795532695.659, "loai": "con", "pid": 3476, "so_dot_bien": 15}
+2026-11-24T15:05:21.9852013Z G5_THOI_GIAN {"bat_dau": 1795531873.496, "cpu_con_s": 2799.26, "hop_con_s": 812.222, "ket_thuc": 1795532721.976, "khe_giua_con_s": 0.0, "khong_phan_bo_s": 36.257, "loai": "cha", "manh": 7, "sau_con_s": 0.054, "so_con": 4, "so_manh": 8, "tong_con_s": 3184.517, "trang_thai": "do_duoc", "truoc_con_s": 36.204, "tuong_s": 848.479}
+2026-11-24T15:05:22.0147125Z ##[group]Run actions/upload-artifact@v4
+2026-11-24T15:05:22.0147301Z with:
+2026-11-24T15:05:22.0147438Z   name: gate-cong-cu-manh-ubuntu-latest-7
+2026-11-24T15:05:22.0147610Z   path: manh/manh-7.txt
+2026-11-24T15:05:22.0147745Z   if-no-files-found: error
+2026-11-24T15:05:22.0147885Z   compression-level: 6
+2026-11-24T15:05:22.0148009Z   overwrite: false
+2026-11-24T15:05:22.0148135Z   include-hidden-files: false
+2026-11-24T15:05:22.0148271Z env:
+2026-11-24T15:05:22.0148386Z   PYTHONIOENCODING: utf-8
+2026-11-24T15:05:22.0148521Z   PYTHONUTF8: 1
+2026-11-24T15:05:22.0148653Z   PYTHONDONTWRITEBYTECODE: 1
+2026-11-24T15:05:22.0148830Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T15:05:22.0149072Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-24T15:05:22.0149309Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T15:05:22.0149527Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T15:05:22.0149902Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-24T15:05:22.0150119Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-24T15:05:22.0150301Z ##[endgroup]
+2026-11-24T15:05:22.1382516Z (node:62655) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T15:05:22.1382971Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T15:05:22.1421562Z With the provided path, there will be 1 file uploaded
+2026-11-24T15:05:22.1425240Z Artifact name is valid!
+2026-11-24T15:05:22.1425675Z Root directory input is valid!
+2026-11-24T15:05:22.4545287Z Beginning upload of artifact content to blob storage
+2026-11-24T15:05:22.4795912Z (node:62655) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-24T15:05:22.6962734Z Uploaded bytes 23033
+2026-11-24T15:05:22.7461960Z Finished uploading artifact content to blob storage!
+2026-11-24T15:05:22.7463021Z SHA256 digest of uploaded artifact zip is d41e7a403055fb9e43043a1b78f7d808baefcbb1a187b4a01adf288c8bb5bb34
+2026-11-24T15:05:22.7463667Z Finalizing artifact upload
+2026-11-24T15:05:23.1502474Z Artifact gate-cong-cu-manh-ubuntu-latest-7.zip successfully finalized. Artifact ID 14933828190
+2026-11-24T15:05:23.1503477Z Artifact gate-cong-cu-manh-ubuntu-latest-7 has been successfully uploaded! Final size is 23033 bytes. Artifact ID is 14933828190
+2026-11-24T15:05:23.1511606Z Artifact download URL: https://github.com/ducthangho/tra-luat/actions/runs/45418608352/artifacts/14933828190
+2026-11-24T15:05:23.1693445Z Post job cleanup.
+2026-11-24T15:05:23.2535298Z (node:62667) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T15:05:23.2535925Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T15:05:23.2676226Z Post job cleanup.
+2026-11-24T15:05:23.3273083Z [command]/usr/bin/git version
+2026-11-24T15:05:23.3305167Z git version 2.56.1
+2026-11-24T15:05:23.3325933Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/ecdd9c84-c508-42ee-9932-5703b648e9eb/.gitconfig'
+2026-11-24T15:05:23.3331468Z Temporarily overriding HOME='/home/runner/work/_temp/ecdd9c84-c508-42ee-9932-5703b648e9eb' before making global git config changes
+2026-11-24T15:05:23.3332308Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T15:05:23.3335412Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-11-24T15:05:23.3371770Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T15:05:23.3404346Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T15:05:23.3664810Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T15:05:23.3693628Z http.https://github.com/.extraheader
+2026-11-24T15:05:23.3705326Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-24T15:05:23.3747961Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T15:05:23.4032745Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T15:05:23.4072471Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T15:05:23.4478646Z Cleaning up orphan processes
+2026-11-24T15:05:23.4735464Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -718,12 +718,22 @@ def ca_khoan_mat_so_co_diem_dat(m):
               # r32 (lượt 31 H2): đệm TRƯỚC dấu nối, chữ dính sau dấu.
               "Điều 3.\n1. Hồ sơ là tài liệu.\n2 .a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2 )b Dữ liệu là thông tin.",
               # r33 (lượt 32 I2): hai placeholder chữ kề nhau có dấu kết.
-              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.ab. Dữ liệu là thông tin."):
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.ab. Dữ liệu là thông tin.",
+              # r34 (lượt 33 J1): dải chữ có đệm trước / số dính dải chữ, có dấu kết.
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2. ab. Dữ liệu là thông tin.", sach.replace("Dữ liệu", "1ab. Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
          "ma hang A1/B2 bi chan oan")
     bang(m.tach_khoan("Điều 3.\n1. A là x.\n2. B là y.") == [(1, "A là x."), (2, "B là y.")], "khoan so than mo bang chu cai bi chan oan")
+    # r34 đối chứng: thân mở bằng từ ghép có gạch (`e-mail`) và từ ASCII không dấu kết vẫn là khoản.
+    bang(m.tach_khoan("Điều 3.\n1. e-mail là thư điện tử.\n2. Ban hành là công bố.") == [(1, "e-mail là thư điện tử."), (2, "Ban hành là công bố.")],
+         "khoan than mo bang e-mail / tu ASCII bi chan oan")
+    # r34 (lượt 33 J2): nhãn chữ dài không dấu kết — không backtracking cấp số nhân.
+    import time as _t34
+    _d34 = _t34.monotonic()
+    m.tach_khoan("Điều 3.\n1." + "a" * 4000 + "b là x.\n2. B là y.")
+    bang(_t34.monotonic() - _d34 < 2.0, "regex nhan chu dai chay qua cham (backtracking)")
     # r31 (lượt 30 G2) đối chứng: khoản có thân mở bằng cụm ngoặc `(…)` không phải nhãn nhiều dấu.
     bang(m.tach_khoan("Điều 3.\n1. (Hồ sơ) là tài liệu.\n2. Dữ liệu là thông tin.") == [(1, "(Hồ sơ) là tài liệu."), (2, "Dữ liệu là thông tin.")],
          "khoan than mo bang ngoac bi chan oan")
@@ -1974,12 +1984,16 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r34 (lượt 33 J1/J2): dải chữ phẳng + dấu kết.
+    ('wp1525_dai_chu_bo', ('    rf"\\d+(?:{_KC}[.)(\\-–])*{_KC}[a-zđA-ZĐ]+{_KC}(?:[.)]|[-–](?=\\s))",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_dai_chu_khong_dem', ('    rf"\\d+(?:{_KC}[.)(\\-–])*{_KC}[a-zđA-ZĐ]+{_KC}(?:[.)]', '    rf"\\d+(?:[.)(\\-–])*[a-zđA-ZĐ]+(?:[.)]'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_dai_chu_gach_khong_doi_trang', ('{_KC}(?:[.)]|[-–](?=\\s))",', '{_KC}(?:[.)]|[-–])",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_so_so_bo', ('    rf"\\d+{_NOI_NHIEU}\\d+",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     # r33 (lượt 32 I1/I2).
     ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": False,'), 'ca_cau_truc_docx_chan'),
     ('wp1525_pstyle_chi_kiem_co_mat', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": ps is not None and psid not in kieu,'), 'ca_cau_truc_docx_chan'),
     ('wp1525_theo_kieu_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1): chỉ ID', '    while sid and sid in kieu and sid != "":   # r33 (lượt 32 I1): chỉ ID'), 'ca_cau_truc_docx_chan'),
     ('wp1525_dem_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)\n', '    while sid and sid in kieu and sid != "":\n'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_chu_ke_nhau_bo', ('{{2,}}{_KC}[.)(\\-–]",', '{{2,}}(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     # r30 (lượt 29 F1/F2) → r31 (lượt 30 G1/G2).
     ('wp1525_mot_cho_hai_dau', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)\\-–]){2,}",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_hai_dau_nhan_ngoac_mo', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)(\\-–])+",'), 'ca_khoan_mat_so_co_diem_dat'),
@@ -1994,9 +2008,7 @@ DOT_BIEN = [
     ('wp1525_bo_nhan_dau_dau', ('    rf"{_TIEN_TO_DAU}(?:\\d+|{_chu_rieng(7)})', '    r"(?!)(?:\\d+|{_chu_rieng(7)})'), 'ca_khoan_mat_so_co_diem_dat'),
     # r28 (lượt 27 D1): ngữ pháp nhãn nhiều thành phần — mỗi nhánh một đột biến.
     ('wp1525_nhieu_cap_noi_chi_cham', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.])+{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_nhieu_cap_bo_so_chu', ('    rf"\\d+{_NOI_NHIEU}(?:\\d+|{_chu_rieng(2)}{_KC}[.)(\\-–])",', '    rf"\\d+{_NOI_NHIEU}\\d+",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_chu_truoc', ('    rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\\d+|{_chu_rieng(5)})",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_nhieu_cap_bo_so_dinh_chu', ('    rf"\\d+{_chu_rieng(3)}{_KC}[.)(\\-–]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_bo_chu_dinh_so', ('    rf"{_chu_rieng(4)}\\d+{_KC}[.)(\\-–]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_chu_rieng_dinh_chu', ('(?P=R{i})*)(?![^\\\\W\\\\d_])"', '(?P=R{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
     # r27 (lượt 26 C1/C2).

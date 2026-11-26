@@ -524,19 +524,20 @@ def _chu_rieng(i):
 _TIEN_TO = rf"(?:{_KC}[.)(\-–])*{_KC}"
 _TIEN_TO_DAU = rf"(?:{_KC}[.)(\-–])+{_KC}"
 _RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
-    # số rồi chữ: chữ phải có dấu `lvlText` theo sau (`1.a.`) — `1. A là …` là khoản số 1 có thân mở bằng `A`.
-    rf"\d+{_NOI_NHIEU}(?:\d+|{_chu_rieng(2)}{_KC}[.)(\-–])",
+    # số–số (`1.1`, `1. 1`, `1(1)`, `1).1`). Số rồi CHỮ (`1.a.`, `1ab.`) do nhánh "dải chữ + dấu kết" dưới xử lý.
+    rf"\d+{_NOI_NHIEU}\d+",
     rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\d+|{_chu_rieng(5)})",
-    # số–chữ liền nhau phải có dấu `lvlText` ngay sau (`1a.`, `a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
-    rf"\d+{_chu_rieng(3)}{_KC}[.)(\-–]",
+    # chữ–số liền nhau phải có dấu `lvlText` ngay sau (`a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
     # r30 (lượt 29 F1): MỘT placeholder rồi HAI dấu `lvlText` trở lên (`1..`, `1.)`, `a).`) — nhãn, không phải số khoản `1.`.
     # r31 (lượt 30 G2): dấu thứ hai trở đi KHÔNG gồm `(` — `1. (Hồ sơ) là …` là khoản có thân mở bằng cụm ngoặc, không phải nhãn.
     rf"(?:\d+|{_chu_rieng(6)}){_KC}[.)(\-–](?:{_KC}[.)\-–])+",
     # r31 (lượt 30 G2): số + dấu DÍNH chữ cái đứng riêng (`1.a …`, `2)b …`) — khác `1. a …` (có đệm: khoản thân mở bằng chữ cái).
     rf"\d+{_KC}[.)(\-–]+{_chu_rieng(9)}",   # r32 (lượt 31 H2): cho phép đệm TRƯỚC dấu (`1 .a`); chữ vẫn phải DÍNH sau dấu
-    # r33 (lượt 32 I2): HAI placeholder chữ trở lên KỀ NHAU (`1.ab.`, `1.aB)`) — chỉ khi có dấu `lvlText` THEO SAU: không có dấu kết thì
-    # `1.ab …` trùng hình dạng thân dính sau số mở bằng một từ ASCII (`2.Quy trình …`) ⇒ ngoài miền nhận diện (giới hạn đã khai §2.35).
-    rf"\d+{_KC}[.)(\-–]+(?:(?P<k10>[a-zđA-ZĐ])(?P=k10)*){{2,}}{_KC}[.)(\-–]",
+    # r33 (lượt 32 I2) → r34 (lượt 33 J1/J2): số, rồi (đệm/dấu `lvlText` tuỳ ý), rồi MỘT DẢI chữ cái placeholder (lớp ký tự PHẲNG — không
+    # lặp lồng nhau, tuyến tính), rồi DẤU KẾT `.` `)` (hoặc gạch có khoảng trắng sau) — `1.ab.`, `1. ab.`, `1ab.`, `1 a.`. Không có dấu kết
+    # thì `1.ab …` trùng thân dính chữ (`2.Quy trình …`) ⇒ ngoài miền (§2.35). Cái giá đã khai: khoản mà thân mở bằng chữ viết tắt ASCII có
+    # dấu chấm (`1. Tp. Hồ Chí Minh là …`) bị chặn.
+    rf"\d+(?:{_KC}[.)(\-–])*{_KC}[a-zđA-ZĐ]+{_KC}(?:[.)]|[-–](?=\s))",
     rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"

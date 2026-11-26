@@ -79,6 +79,8 @@
   `2 .a …` ⇒ chặn; styleId trùng khoá nội bộ ⇒ chặn có chẩn đoán.
 - r33 (sau cross-review lượt 32 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r33.md`): tra cứu style chỉ trên ID đã xác thực (không
   traceback với tham chiếu tới khoá nội bộ); nhãn `1.ab.` ⇒ chặn.
+- r34 (sau cross-review lượt 33 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r34.md`): một nhánh "số + dải chữ + dấu kết" thời gian tuyến
+  tính (bỏ lặp lồng nhau gây backtracking); `1. e-mail là …` không còn bị chặn oan.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

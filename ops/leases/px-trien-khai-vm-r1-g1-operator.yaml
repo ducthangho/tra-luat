@@ -1,0 +1,37 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1562
+packet_id: px-trien-khai-vm
+revision: 1
+generation: 1
+lease_id: px-trien-khai-vm-r1-g1-operator
+role: operator
+reviewer: 'Codex offline qua launcher.py truoc push (ADR-0060 M5/M12) + connector Codex tren PR khi con draft'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 695916ea3bfffdd7b2e8fcb94b0740b3c421fe70
+target_hosts:
+- tra-luat-win
+live_change: 'Ghi de 3 tep module 2.2.0 vao <base>\control\ tren VM (giu ban sao luu control.bak-*); dung 2 loi goi inference gemini:auto qua px ask Local. Khong khoi dong lai dich vu, khong doi cau hinh, khong doc profile hay thong tin dang nhap.'
+spec_path: ops/specs/px-trien-khai-vm-r1.md
+spec_hash: 9fc895a1da0a56185b53bc471abc890ca3aaee52856c3a765d6da5bc6c5a6243
+write_set:
+- ops/acceptance/px-trien-khai-vm/r1/RESULTS.md
+- ops/leases/px-trien-khai-vm-r1-g1-operator.yaml
+- ops/specs/px-trien-khai-vm-r1.md
+write_set_hash: 17029e196b2e40a2a56aa7b95df8b3e09d073b10fb458f3c985baf924dff8436
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ops/px-trien-khai-vm-r1
+base_sha: 695916ea3bfffdd7b2e8fcb94b0740b3c421fe70
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 26-11-2026 "Toi dong y duyet bam"; ghi ho https://github.com/ducthangho/tra-luat/issues/1562#issuecomment-7198340124'
+recorded_by: 'phien operator (vai operator cua packet px-trien-khai-vm)'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet. ai-dang-giu NGUOI_GIU 0 cho ca 3 duong dan luc 16:59:40Z.'
+leased_at_utc: '2026-11-26T16:59:52Z'
+heartbeat_at: '2026-11-26T16:59:52Z'
+lease_until: '2026-11-26T20:59:52Z'
+lease_expires_at_utc: '2026-11-26T20:59:52Z'
+max_lease_hours: 4
+native_runs_limit_per_host: 1
+inference_calls_limit_per_host: 2

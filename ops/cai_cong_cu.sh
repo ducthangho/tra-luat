@@ -55,6 +55,18 @@ sys.exit(0 if len(c) == 1 and c[0].get("ten") == sys.argv[1] and c[0].get(sys.ar
 }
 cong_cu_dat() { cong_cu_json_dung "$1" trang_thai '"DAT"'; }  # <ten>
 
+# wp1488 r6 (ops/specs/wp1488-r6.md B7, lop `thay-the-lenh-lam-mat-du-lieu`, Codex luot 4/5/8): MOT ham doc giu byte cho
+# MOI ranh gioi dua dau ra vao bien tren duong du lieu toi PATH/$GITHUB_PATH (kenh, `cygpath -u`, `cygpath -w`, stdout roi
+# ve). `$( )` cua Bash bo byte NUL (chi canh bao) va an moi LF duoi: doi NUL thanh 0x01 trong CUNG lan doc (pipefail: loi
+# cua bat ky ve nao la loi doc), sentinel `x` giu LF duoi. Noi goi tu choi moi 0x01 TRUOC side effect, roi moi bo delimiter
+# cua giao thuc cua minh. Khong mo nguon lan hai. allexport: go export ca ham.
+_tl1488_doc() {  # <ten bien dich> <lenh> [doi so]...
+  local _tl1488_ten="$1" _tl1488_v; shift
+  _tl1488_v="$("$@" | tr '\000' '\001' && printf x)" || return 1
+  printf -v "$_tl1488_ten" '%s' "${_tl1488_v%x}"
+}
+export -nf _tl1488_doc
+
 chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
   local win="" ten d dich="" nhan
   [ -n "${KENH_KQ:-}" ] || { echo "cai_cong_cu: chon_thu_muc_chay_duoc chi chay duoi cai_cong_cu.sh (thieu KENH_KQ)" >&2; return 1; }
@@ -67,7 +79,10 @@ chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
   fi
   for d in "$@"; do
     if [ -n "$win" ]; then
-      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
+      _tl1488_doc d cygpath -u "$d" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
+      d="${d%$'\n'}"   # wp1488 r6 B1: bo DUNG MOT LF ket thuc dong; NUL/0x01, LF/CR con lai hay rong => loi nhu cygpath -u hong
+      case "$d" in ""|*$'\001'*|*$'\n'*|*$'\r'*)
+        echo "cai_cong_cu: cygpath -u tra dau ra sai dang cho ung vien cua '$ten' — tu choi" >&2; return 1 ;; esac
     fi
     if PATH="$d:$PATH" cong_cu_dat "$ten"; then dich="$d"; break; fi
   done
@@ -226,10 +241,13 @@ _tl1488_ghi_github_path() {  # <DICH cua lan doc kenh duy nhat> <che do: win | r
   [ -n "${GITHUB_PATH:-}" ] || return 0
   case "$2" in
     win)
-      # Codex wp1488 luot 4 (P3): `$( )` an MOI LF o duoi, nen dau ra `W:<dir>\n\n` lot chot xuong dong. Giu nguyen bang
-      # sentinel `x`, bo DUNG MOT LF ket thuc dong cua giao thuc, phan con lai de chot `\n`/`\r` ben duoi xet.
-      _tl1488_w="$(cygpath -w "$1" && printf x)" || { echo "cai_cong_cu: cygpath -w hong cho '$1'" >&2; return 1; }
-      _tl1488_w="${_tl1488_w%x}"; _tl1488_w="${_tl1488_w%$'\n'}" ;;
+      # Codex wp1488 luot 4 (P3) + r6 B7: doc qua `_tl1488_doc` (giu LF duoi va dau vet NUL), bo DUNG MOT LF ket thuc dong
+      # cua giao thuc, phan con lai de chot 0x01 / `\n` / `\r` ben duoi xet.
+      _tl1488_doc _tl1488_w cygpath -w "$1" || { echo "cai_cong_cu: cygpath -w hong cho '$1'" >&2; return 1; }
+      _tl1488_w="${_tl1488_w%$'\n'}" ;;
+  esac
+  case "$_tl1488_w" in
+    *$'\001'*) echo "cai_cong_cu: dau ra cygpath -w co byte NUL hoac 0x01 — tu choi ghi \$GITHUB_PATH" >&2; return 1 ;;
   esac
   case "$1$_tl1488_w" in
     *$'\n'*|*$'\r'*) echo "cai_cong_cu: duong dan co ky tu xuong dong — tu choi ghi \$GITHUB_PATH" >&2; return 1 ;;
@@ -240,11 +258,10 @@ _tl1488_ghi_github_path() {  # <DICH cua lan doc kenh duy nhat> <che do: win | r
 export -nf _tl1488_ghi_github_path
 # F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
 # wp1488 r5 (ops/specs/wp1488-r5.md B2, no WP1488-NUL-KENH, Codex luot 5 P2): `$( )` cua Bash BO byte NUL (chi canh bao),
-# nen `DICH_WIN\0\n<dir>` tung duoc nhan nhu `DICH_WIN\n<dir>`. Doi NUL thanh 0x01 TRONG CHINH lan doc duy nhat (pipefail:
-# loi `cat` van la loi doc => 7), roi tu choi moi 0x01 TRUOC moi phan nhanh: khong ghi $GITHUB_PATH, khong goi cygpath.
+# nen `DICH_WIN\0\n<dir>` tung duoc nhan nhu `DICH_WIN\n<dir>`. r6: doc qua `_tl1488_doc` (B7; loi doc => 7), roi tu choi
+# moi 0x01 TRUOC moi phan nhanh: khong ghi $GITHUB_PATH, khong goi cygpath.
 if [ "$RC_CAI" -eq 0 ]; then
-KQ="$(cat -- "$KENH_KQ" | tr '\000' '\001' && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
-KQ="${KQ%x}"
+_tl1488_doc KQ cat -- "$KENH_KQ" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
 export -n KQ
 case "$KQ" in *$'\001'*) echo "cai_cong_cu: kenh ket qua co byte NUL hoac 0x01 — tu choi" >&2; exit 7 ;; esac
 case "$KQ" in
@@ -266,7 +283,11 @@ case "$KQ" in
   DICH$'\n'?*) DICH="${KQ#DICH$'\n'}" ;;
   DICH_WIN$'\n'?*) DICH="${KQ#DICH_WIN$'\n'}" ;;
   "")  # cong thuc khong goi bo chon (pip, cai_actionlint.sh): dong cuoi stdout nhu truoc (N3)
-    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"
+    # wp1488 r6 (B7, §5): doc qua `_tl1488_doc`; byte NUL/0x01 => 7. Giao thuc "dong cuoi khong rong" giu nguyen: bo moi LF
+    # cuoi nhu `$( )` cu (ten thu muc ket thuc bang LF khong bieu dien duoc qua stdout — gioi han da biet).
+    _tl1488_doc KET_QUA_CAI cat -- "$TAM_CAI/stdout" || { echo "cai_cong_cu: khong doc duoc stdout cua cong thuc" >&2; exit 1; }
+    case "$KET_QUA_CAI" in *$'\001'*) echo "cai_cong_cu: stdout cua cong thuc co byte NUL hoac 0x01 — tu choi" >&2; exit 7 ;; esac
+    while [ "${KET_QUA_CAI%$'\n'}" != "$KET_QUA_CAI" ]; do KET_QUA_CAI="${KET_QUA_CAI%$'\n'}"; done
     DICH="$(printf '%s\n' "$KET_QUA_CAI" | tail -1)"
     DICH="${DICH%$'\r'}" ;;  # trinh cai Windows (choco) in CRLF; \r lam `[ -d ]` sai am tham
   *) echo "cai_cong_cu: kenh ket qua hong: $(printf '%q' "$KQ")" >&2; exit 7 ;;

@@ -62,6 +62,8 @@
   /`styleId` đơn trị, `w:sdt` thiếu nội dung hay có con lạ ⇒ chặn; ngữ pháp nhãn điểm thô có khoảng đệm và nhãn thập phân nhiều cấp.
 - r24 (sau cross-review lượt 23, đặc tả `ops/specs/llm-khoan-docx-r24.md`): ruột bị bỏ đọc theo danh sách cho phép (ký hiệu là nội
   dung); member ZIP trùng tên ⇒ chặn; nhãn thập phân nhiều cấp trong ngoặc / dính thân ⇒ chặn.
+- r25 (sau cross-review lượt 24, đặc tả `ops/specs/llm-khoan-docx-r25.md`): khoảng trắng biên của `w:t`/`w:delText` theo `xml:space`
+  hiệu lực (quy tắc Word); nhãn thập phân nhiều cấp kết bằng gạch ⇒ chặn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

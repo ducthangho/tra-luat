@@ -694,7 +694,9 @@ def ca_khoan_mat_so_co_diem_dat(m):
               sach.replace("Dữ liệu", "( a ) Dữ liệu"), sach.replace("Dữ liệu", "a . Dữ liệu"), sach.replace("Dữ liệu", "a\t- Dữ liệu"),
               sach.replace("Dữ liệu", "a\u00a0) Dữ liệu"), sach.replace("Dữ liệu", "1.1. Dữ liệu"),
               # r24 (lượt 23 Z3): thập phân nhiều cấp trong ngoặc / dính thân.
-              sach.replace("Dữ liệu", "(1.1) Dữ liệu"), sach.replace("Dữ liệu", "1.1.Dữ liệu"), sach.replace("Dữ liệu", "1.2) Dữ liệu")):
+              sach.replace("Dữ liệu", "(1.1) Dữ liệu"), sach.replace("Dữ liệu", "1.1.Dữ liệu"), sach.replace("Dữ liệu", "1.2) Dữ liệu"),
+              # r25 (lượt 24 A2): thập phân nhiều cấp kết bằng gạch.
+              sach.replace("Dữ liệu", "1.1- Dữ liệu"), sach.replace("Dữ liệu", "1.2 – Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
@@ -1354,7 +1356,7 @@ def ca_cau_truc_docx_dat(m):
     # Nhãn chữ kiểu Word sau z là aa, bb.
     bang((m._chu_cai(26, False), m._chu_cai(27, False), m._chu_cai(28, True)) == ("z", "aa", "BB"), "nhan chu sau z sai")
     # Content control NỘI DÒNG đọc được.
-    _, cap13, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là </w:t></w:r><w:sdt><w:sdtPr/><w:sdtContent>'
+    _, cap13, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là </w:t></w:r><w:sdt><w:sdtPr/><w:sdtContent>'
                                                 '<w:r><w:t>tài liệu.</w:t></w:r></w:sdtContent></w:sdt>')))
     bang(cap13 == [(1, "Hồ sơ là tài liệu.")], f"sdt noi dong bi chan: {cap13}")
     # Tắt gạch TRỰC TIẾP trên run là tuyệt đối.
@@ -1416,7 +1418,7 @@ def ca_cau_truc_docx_dat(m):
                'Target="numbering.xml"/></Relationships>')
     kng = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     _, cap27, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr>'
-                                                '<w:t> Thêm.</w:t></w:r>'),
+                                                '<w:t xml:space="preserve"> Thêm.</w:t></w:r>'),
                                           them={"word/_rels/document.xml.rels": rels_mr, "word/ngoai.xml": kng}))
     bang(cap27 == [(1, "Hồ sơ là tài liệu. Thêm.")], f"quan he mo rong bi nhan lam styles: {cap27}")
     # r12 L5: part chính mã hoá UTF-16 có khai báo — parser tự đọc.
@@ -1455,6 +1457,12 @@ def ca_cau_truc_docx_dat(m):
     _, cap38, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t></w:r><w:r><w:rPr><w:strike/></w:rPr><w:delText>cũ</w:delText><w:tab/>'
                                                 '</w:r><w:r><w:t>tài liệu.</w:t></w:r>')))
     bang(cap38 == [(1, "Hồ sơ làtài liệu.")], f"run gach co chu van giu phan cach: {cap38}")
+    # r25 A1: khoảng trắng BIÊN của `w:t` chỉ có hiệu lực khi `xml:space="preserve"` (kế thừa từ tổ tiên).
+    _, cap40, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>liệu.</w:t></w:r>')))
+    bang(cap40 == [(1, "Hồ sơ là tàiliệu.")], f"khoang trang bien khong preserve phai bi bo: {cap40}")
+    _, cap41, _ = _doc_hop_le(m, lam_docx(H, '<w:p xml:space="preserve"><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>'
+                                              '<w:r><w:t>Hồ sơ là tài </w:t></w:r><w:r><w:t>liệu.</w:t></w:r></w:p>'))
+    bang(cap41 == [(1, "Hồ sơ là tài liệu.")], f"xml:space preserve ke thua tu doan bi bo qua: {cap41}")
     # r24 Z1: `w:del` chứa ký hiệu (`w:sym`) cùng tab ⇒ bỏ TRỌN (ký hiệu là nội dung, không phải khoảng trắng).
     _, cap39, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t></w:r><w:del w:id="9" w:author="x"><w:r><w:sym w:font="S" w:char="F0B7"/>'
                                                 '<w:tab/></w:r></w:del><w:r><w:t>tài liệu.</w:t></w:r>')))
@@ -1779,7 +1787,7 @@ def ca_cau_truc_docx_chan(m):
     # Markup không giải được.
     k22 = (f'<w:styles {_WNS}><w:style w:styleId="Cha"><w:rPr><w:strike/></w:rPr></w:style>'
            '<w:style w:styleId="Con"><w:basedOn w:val="Cha"/><w:rPr><w:strike/></w:rPr></w:style></w:styles>')
-    chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu</w:t></w:r><w:r><w:rPr><w:rStyle w:val="Con"/></w:rPr><w:t> số.</w:t></w:r>'),
+    chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu</w:t></w:r><w:r><w:rPr><w:rStyle w:val="Con"/></w:rPr><w:t xml:space="preserve"> số.</w:t></w:r>'),
                   styles=k22), "gach toggle bat hai tang")
     gop = ('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:rPr><w:del w:id="9" w:author="x"/></w:rPr></w:pPr>'
            '<w:r><w:t>Hồ sơ là</w:t></w:r></w:p>')
@@ -1878,6 +1886,10 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r25 (lượt 24 A1/A2).
+    ('wp1525_bo_xml_space', ('    return s if id(e) in _GIU_TRANG["tap"] else s.strip(" \\t\\r\\n")', '    return s'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_xml_space_khong_ke_thua', ('        gia = el.get(_XML_SPACE, gia)', '        gia = el.get(_XML_SPACE, "default")'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_thap_phan_bo_gach', ('[.)\\-–]?{_KC}\\)?(?=', '[.)]?{_KC}\\)?(?='), 'ca_khoan_mat_so_co_diem_dat'),
     # r24 (lượt 23 Z1–Z4).
     ('wp1525_ruot_ky_hieu_la_trang', ('            else:\n                phan.append("\\x00")\n    return "".join(phan)', '            else:\n                pass\n    return "".join(phan)'), 'ca_cau_truc_docx_dat'),
     ('wp1525_zip_trung_ten', ('        if len(_ten) != len(set(_ten)):', '        if False:'), 'ca_cau_truc_docx_chan'),
@@ -1887,7 +1899,7 @@ DOT_BIEN = [
     ('wp1525_diem_bo_ngoac_kin', ('    rf"\\({_KC}{_chu_nhan(1)}{_KC}\\)",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_cham_ngoac', ('    rf"\\(?{_chu_nhan(2)}{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_dang_gach', ('    rf"{_chu_nhan(3)}{_KC}[-–](?=\\s)",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_thap_phan', ('    rf"\\(?{_KC}\\d+(?:\\.\\d+)+{_KC}[.)]?{_KC}\\)?(?=\\s|[^\\W\\d_])",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_thap_phan', ('    rf"\\(?{_KC}\\d+(?:\\.\\d+)+{_KC}[.)\\-–]?{_KC}\\)?(?=\\s|[^\\W\\d_])",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_khoang_dem', ('_KC = r"[ \\t\\u00a0]*"', '_KC = r""'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_chu_hoa', ('|(?P<h{i}>[A-ZĐ])(?P=h{i})*)"', '|(?P<h{i}>[a-zđ])(?P=h{i})*)"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_chu_lap', ('(?:(?P<t{i}>[a-zđ])(?P=t{i})*|', '(?:(?P<t{i}>[a-zđ])|'), 'ca_khoan_mat_so_co_diem_dat'),
@@ -1897,7 +1909,7 @@ DOT_BIEN = [
     ('wp1525_body_khong_don_tri', ('"document": ("body",), ', ''), 'ca_cau_truc_docx_chan'),
     # r22 (lượt 21 X1/X2/X3).
     ('wp1525_ruot_bo_tab_khong_la_cach', ('            elif ten in ("tab", "ptab", "br", "cr"):\n                phan.append(" ")', '            elif False:\n                phan.append(" ")'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_deltext_lac_bo_cach', ('                if c.text and not c.text.strip():\n                    chu_run.append(c.text)', '                if False:\n                    chu_run.append(c.text)'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_deltext_lac_bo_cach', ('                if _chu_t(c) and not _chu_t(c).strip():', '                if False:'), 'ca_cau_truc_docx_dat'),
     ('wp1525_bo_don_tri_document', ('    _kiem_don_tri(goc_cay, _DON_TRI_DOCUMENT, "document")', '    pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_don_tri_styles', ('    _kiem_don_tri(goc, _DON_TRI_STYLES, "styles")', '    pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_don_tri_lvl', ('            if any(len(lvl.findall(_W + t)) > 1 for t in _DON_TRI_LVL):', '            if False:'), 'ca_cau_truc_docx_chan'),

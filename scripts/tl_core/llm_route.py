@@ -504,7 +504,7 @@ _RE_DIEM = re.compile("^(?:" + "|".join([
     rf"\(?{_chu_nhan(2)}{_KC}[.)]",
     rf"{_chu_nhan(3)}{_KC}[-–](?=\s)",
     # r24 (lượt 23 Z3): thập phân nhiều cấp, có thể trong ngoặc, có thể dính thân sau dấu cuối (`(1.1)`, `1.1.Dữ`, `1.2)`).
-    rf"\(?{_KC}\d+(?:\.\d+)+{_KC}[.)]?{_KC}\)?(?=\s|[^\W\d_])",
+    rf"\(?{_KC}\d+(?:\.\d+)+{_KC}[.)\-–]?{_KC}\)?(?=\s|[^\W\d_])",   # r25 (lượt 24 A2): + kết bằng gạch
     r"[-–•+]",
 ]) + r")\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
@@ -988,6 +988,34 @@ def _sdt_hop_le(el):
     return all(c.tag in (_W + "sdtPr", _W + "sdtEndPr", _W + "sdtContent") for c in el)
 
 
+_XML_SPACE = "{http://www.w3.org/XML/1998/namespace}space"
+
+
+def _danh_dau_giu_trang(goc):
+    """r25 (lượt 24 A1): `xml:space` HIỆU LỰC (kế thừa từ tổ tiên, `default` đặt lại) cho từng `w:t`/`w:delText` — tập id các phần tử
+    giữ khoảng trắng biên (`preserve`). Không `preserve` ⇒ Word BỎ khoảng trắng đầu/cuối của phần tử ấy."""
+    giu = set()
+
+    def di(el, gia):
+        gia = el.get(_XML_SPACE, gia)
+        if el.tag in (_W + "t", _W + "delText") and gia == "preserve":
+            giu.add(id(el))
+        for c in el:
+            di(c, gia)
+    di(goc, "default")
+    return frozenset(giu)
+
+
+_GIU_TRANG = {"tap": frozenset()}   # tập id do `doc_dieu_docx` đặt cho lần đọc hiện hành
+
+
+def _chu_t(e):
+    """r25 (lượt 24 A1): chữ HIỆU LỰC của `w:t`/`w:delText` — bỏ khoảng trắng XML ở hai biên khi `xml:space` hiệu lực không phải
+    `preserve` (quy tắc Word, cùng r222)."""
+    s = e.text or ""
+    return s if id(e) in _GIU_TRANG["tap"] else s.strip(" \t\r\n")
+
+
 def _ruot_bi_bo(el):
     """r22 (lượt 21 X1, chính sách r222 `chunk_payload`): chữ HIỂN THỊ của nội dung bị bỏ (`w:del`/`w:moveFrom`) — `t`/`delText` theo chữ,
     `tab`/`ptab`/`br`/`cr` là khoảng trắng, `noBreakHyphen` là `-`; phần tử khác bỏ qua."""
@@ -1006,7 +1034,7 @@ def _ruot_bi_bo(el):
         for e in r:
             ten = e.tag[len(_W):] if isinstance(e.tag, str) and e.tag.startswith(_W) else None
             if ten in ("t", "delText"):
-                phan.append(e.text or "")
+                phan.append(_chu_t(e))   # r25 (lượt 24 A1)
             elif ten in ("tab", "ptab", "br", "cr"):
                 phan.append(" ")
             elif ten == "noBreakHyphen":
@@ -1060,7 +1088,7 @@ def _phan_tich_doan(p, kieu):
         for c in r:
             ten = c.tag[len(_W):] if c.tag.startswith(_W) else None
             if ten in _CON_RUN_CHU:
-                chu = (c.text or "") if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten]
+                chu = _chu_t(c) if _CON_RUN_CHU[ten] is None else _CON_RUN_CHU[ten]   # r25 (lượt 24 A1): `xml:space` hiệu lực
                 if kq["sau_ngat_trang"] and chu.strip():
                     chu_sau_ngat = True   # r9 (lượt 8 H5); r10 (lượt 9 J5): chỉ tính khi run KHÔNG bị gạch (xét bên dưới)
                 chu_run.append(chu)
@@ -1073,8 +1101,8 @@ def _phan_tich_doan(p, kieu):
             elif ten in ("delText",):
                 # chữ đã xoá (track changes) — không vào nguyên văn; r22 (lượt 21 X1, lưới phụ r222): `delText` lạc chỉ có khoảng
                 # trắng ⇒ giữ khoảng trắng.
-                if c.text and not c.text.strip():
-                    chu_run.append(c.text)
+                if _chu_t(c) and not _chu_t(c).strip():   # r25 (lượt 24 A1): theo `xml:space` hiệu lực
+                    chu_run.append(_chu_t(c))
                 continue
             elif ten in _CON_RUN_BO_QUA:
                 continue
@@ -1174,6 +1202,7 @@ def doc_dieu_docx(nguon, dieu):
     goc_cay = ET.fromstring(goc_xml)
     _chan_mc(goc_cay, "document")
     _kiem_don_tri(goc_cay, _DON_TRI_DOCUMENT, "document")   # r22 (lượt 21 X2)
+    _GIU_TRANG["tap"] = _danh_dau_giu_trang(goc_cay)   # r25 (lượt 24 A1)
     if goc_cay.tag != _W + "document":
         # r5 (lượt 4 D5): .docx Strict (namespace purl.oclc.org) hay tệp lạ — giới hạn đã khai.
         raise ValueError("document.xml khong phai WordprocessingML Transitional (vd .docx Strict) — luu lai dang Word Document")

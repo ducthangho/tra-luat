@@ -170,3 +170,5 @@ revision_ly_do: 'Cross-review luot 23 (Z1-Z2 P1, Z3-Z4 P2); theo quyen dung cua 
 review_calls_limit: 24
 review_calls_used_truoc: 23
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r25-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 24; revision r25 (ops/specs/llm-khoan-docx-r25.md), tran 25.'

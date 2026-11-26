@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r14. KHÔNG phải `*_test.py`, không đăng ký vào registry. Chạy bằng `python3 -B`:
+"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r15. KHÔNG phải `*_test.py`, không đăng ký vào registry. Chạy bằng `python3 -B`:
   do_pr2.py vung [--root KHO] [--luu DIR]            Nghiệm thu 4 (rc 0 SACH · 4 NGOAI_VUNG · 3 KHONG_DO_DUOC)
   do_pr2.py ab <SHA_BASE> [--root KHO] [--luu DIR]   Nghiệm thu 1, 2, 5 (hai clone dựng trong MỘT lệnh; chín phép của bộ so)
   do_pr2.py registry [--root KHO] [--tu DIR]         Nghiệm thu 3 (`--tu` = thư mục `--luu` của `ab`, khỏi chạy lại bộ)
   do_pr2.py tu-kiem [--dot-bien] [--root KHO]        tự kiểm bộ so và phép đo vùng (không cần cây git)
 Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ
-đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r14 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
-lần đọc không phát sự kiện audit `open`, và Python con không hook bị che bởi dòng khởi động thừa đều KHÔNG bị quan sát.
+đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r15 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
+lần đọc không phát sự kiện audit `open`, Python con không hook bị che bởi dòng khởi động thừa, và Python con KHÔNG NHẬN RA ĐƯỢC theo
+`la_python` (bản sao/bản đổi tên của trình thông dịch chạy không hook — PR2-C04, giao packet NO-PR2-VUNG-CAP-HDH) đều KHÔNG bị quan sát.
 """
 import ast
 import contextlib
@@ -18,6 +19,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -162,6 +164,8 @@ print("PROBE_KQ " + json.dumps(kq, ensure_ascii=False), flush=True)
 '''
 
 def la_python(sinh):
+    """Python con NHẬN RA ĐƯỢC (SPEC r15 Nghiệm thu 4, R15-4): `exe` hoặc `argv[0]` có tên cơ sở khớp `_RE_PY`, hoặc có realpath trùng
+    realpath của trình thông dịch đang chạy. CỐ Ý không mở rộng biểu thức tên: bản sao/bản đổi tên ở đường dẫn khác thuộc PHẦN CÒN HỞ."""
     for x in (sinh.get("exe"), (sinh.get("argv") or [None])[0]):
         if x and (_RE_PY.search(os.path.basename(x)) or os.path.realpath(x) == os.path.realpath(sys.executable)):
             return True
@@ -277,17 +281,47 @@ def lenh_phep(ten, root, tam):
         return [sys.executable, "-B", K]
     return [sys.executable, "-B", os.path.join(tam, "probe_vung.py"), root, CHE_DO_PROBE[ten], json.dumps([[n, d] for n, d, _e in BANG])]
 
-def chay_quan_sat(cmd, cwd, log, tam, timeout=7200):
+def don_nhom(p, tran):
+    """R15-3: kết thúc rồi THU HỒI nhóm tiến trình do `chay_quan_sat` tự sinh (`start_new_session` ⇒ PGID == p.pid). Tới sau lệnh KILL `p`
+    CHƯA được thu hồi, nên PID ấy (cũng là PGID) không thể được cấp lại: tín hiệu không bao giờ tới nhóm tiến trình khác. TERM, chờ `p` thoát
+    tối đa tran/2 giây, KILL cả nhóm, rồi đọc nốt đầu ra tới EOF (mọi tiến trình còn giữ ống đã hết) trong tối đa tran/2 giây. Trả (mô tả, byte
+    đã bắt). Giới hạn khai thẳng: hậu duệ tự rời nhóm (`setsid`/`setpgid`) không bị tín hiệu chạm; nền không có nhóm kiểu POSIX chỉ giết được con."""
+    if p.returncode is None and hasattr(os, "killpg"):   # đã thu hồi thì PGID hết được ghim ⇒ không gửi tín hiệu nào nữa
+        for th in (signal.SIGTERM, signal.SIGKILL):
+            try:
+                os.killpg(p.pid, th)
+                het = time.monotonic() + tran / 2
+                while th == signal.SIGTERM and time.monotonic() < het and os.waitid(os.P_PID, p.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+                    time.sleep(0.02)
+            except OSError:
+                pass
+    elif p.returncode is None:
+        p.kill()
+    try:
+        out, _ = p.communicate(timeout=tran / 2)
+        return f"da ket thuc va thu hoi nhom tien trinh {p.pid} (rc={p.returncode})", out or b""
+    except subprocess.TimeoutExpired as e:
+        return f"DON KHONG HET nhom tien trinh {p.pid} trong {tran} s", e.output or b""
+
+def chay_quan_sat(cmd, cwd, log, tam, timeout=7200, tran_don=20.0):
+    """Chạy MỘT phép dưới hook, trong phiên/nhóm tiến trình RIÊNG mà hàm này sở hữu. Quá hạn (hoặc bị ngắt) ⇒ `don_nhom` rồi mới trả không
+    đo được, kèm lý do hết giờ và đầu ra đã bắt (R15-3)."""
     env = {k: v for k, v in os.environ.items() if k != "CI_PROVENANCE_KHONG_DOT_BIEN"}
     env["PYTHONPATH"] = tam + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
     env.update(WP1463_VUNG_LOG=log, PYTHONDONTWRITEBYTECODE="1")
     open(log, "w").close()
     try:
-        p = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+    except OSError as e:   # không chạy được ⇒ không đo được
+        return None, None, f"LOI_CHAY: {type(e).__name__}: {e}"
+    try:
         out, _ = p.communicate(timeout=timeout)
         return p.pid, p.returncode, out.decode("utf-8", "replace")
-    except Exception as e:   # không chạy được / quá hạn ⇒ không đo được
-        return None, None, f"LOI_CHAY: {type(e).__name__}: {e}"
+    except BaseException as e:   # quá hạn hay bị ngắt: nhóm do TA sinh phải hết trước khi rời hàm
+        mo_ta, out = don_nhom(p, tran_don)
+        if not isinstance(e, subprocess.TimeoutExpired):
+            raise
+        return None, None, f"LOI_CHAY: TimeoutExpired: qua han {timeout} s · {mo_ta}\n" + out.decode("utf-8", "replace")
 
 def do_cay(root, tracked, luu=None):
     """Chạy ba phép trên cây `root` (mỗi phép một tiến trình con, một nhật ký riêng). Trả (kết luận, chi tiết, quan sát)."""
@@ -301,6 +335,8 @@ def do_cay(root, tracked, luu=None):
             pid, rc, txt = chay_quan_sat(lenh_phep(ten, root, tam), root, log, tam)
             o = {"ten": ten, "rc": rc, **doc_log(log, root, tracked, pid)}
             dong = [d for d in txt.splitlines() if d.strip()]
+            if rc is None and dong:
+                o["hong"].append(dong[0][:200])   # lý do không chạy được / hết giờ ra tới báo cáo
             if ten == "bo_day_du":
                 o["dong_cuoi"], o["khoi_cuoi"] = (dong[-1] if dong else None), dong[-4:]
             else:
@@ -330,6 +366,9 @@ def in_vung(kl, ct, obs):
     for c in ct:
         for x in c["ly_do"]:
             print(f"  KHONG DO DUOC ({c['ten']}): {x}")
+    print(f"GIOI_HAN_VUNG (SPEC r15 R15-4, bao dam GIAM, chu kho chap nhan): Python con chi duoc DEM khi NHAN RA DUOC — exe/argv[0] co ten co so khop"
+          f" {_RE_PY.pattern} hoac realpath trung trinh thong dich dang chay; ban sao/ban doi ten cua trinh thong dich chay KHONG hook thi KHONG bi do"
+          " (PR2-C04, giao packet NO-PR2-VUNG-CAP-HDH).")
     print(f"KET_LUAN_VUNG: {kl}")
 
 def git_tracked(root):
@@ -453,45 +492,56 @@ def _git(root, *a):
     r = subprocess.run(["git", "-C", root, *a], capture_output=True, text=True)
     return r.stdout.strip() if r.returncode == 0 else None
 
+LUOT_AB = (("base", "day_du"), ("H", "day_du"), ("H", "nhe"))   # ba lượt = ba ranh giới tiến trình của `ab`
+
+def do_ab(cay, oid, sha_base, chay=chay_bo, luu=None):
+    """Phần ĐO của `ab` trên hai cây đã dựng: ba lượt, chín phép, kết luận. R15-1: `DAT` đòi CẢ BA lượt thoát rc 0, xét SAU kết quả dương; mã
+    thoát thuộc BỘ CHẠY và KHÔNG gộp vào chín phép so ngữ nghĩa. rc khác 0 được in nguyên (`LUOT … rc=`, `RC_LUOT`), lưu nguyên (`.rc`) cùng
+    đầu ra chẩn đoán, và lệnh thoát 1. `chay` là tham số để tự kiểm bơm rc ở TỪNG ranh giới."""
+    kq = {luot: chay(cay[luot[0]], luot[1] == "nhe") for luot in LUOT_AB}
+    vb, vh = xem(nap_tep(os.path.join(cay["base"], K), "cpt_base")), xem(nap_tep(os.path.join(cay["H"], K), "cpt_h"))
+    moi_b, E = nap_dang_ky(cay["base"]).MOI[K], sys.modules["cpt_h"].TUONG_DUONG_A3
+    phep = so_sanh(vb, vh, kq["base", "day_du"][1], kq["H", "day_du"][1], kq["H", "nhe"][1], oid["base"], oid["H"], moi_b, E)
+    for p in (K, ".claude/dev/ci_dang_ky_test.py"):
+        print(f"SHA256 {p}: {bam_tep(cay['H'], p)}")
+    print(f"AB base={sha_base} blob ops/ci_provenance.py base={oid['base']} H={oid['H']} (H = HEAD cua kho do, khong ghi o day)")
+    for ten, che in LUOT_AB:
+        rc, ra, giay = kq[ten, che]
+        print(f"LUOT {ten} {che}: rc={rc} · {giay} s · {' · '.join(d for d in ra.splitlines() if d.startswith(('TIEN TRINH', 'CHE DO')))} · CPU {os.cpu_count()}")
+        print("  " + " · ".join(ra.rstrip("\n").split("\n")[-4:]))
+        for duoi, nd in ((".out", ra), (".rc", f"{rc}\n")) if luu else ():
+            with open(os.path.join(luu, f"{ten}.{che}{duoi}"), "w", encoding="utf-8") as f:
+                f.write(nd)
+    print(f"KE HOACH DOT BIEN: base {len(vb['ke_hoach'])} viec · H {len(vh['ke_hoach'])} viec · ten base ⊆ H: {set(vb['ke_hoach']) <= set(vh['ke_hoach'])}")
+    for p in PHEP_SO:
+        print(f"PHEP {p}: {'DUNG' if phep.get(p) is True else 'SAI'}")
+    rc_luot = [(f"{ten}/{che}", kq[ten, che][0]) for ten, che in LUOT_AB]
+    print("RC_LUOT: " + " · ".join(f"{k}={v}" for k, v in rc_luot) + " (ca ba phai bang 0)")
+    hong = [k for k, v in rc_luot if v != 0]
+    dat = all(phep.get(p) is True for p in PHEP_SO) and set(phep) == set(PHEP_SO) and not hong
+    print(f"KET_LUAN_AB: {'DAT' if dat else 'DO'} ({sum(phep.get(p) is True for p in PHEP_SO)}/{len(PHEP_SO)} phep dung{' · rc khac 0 o luot ' + ', '.join(hong) if hong else ''})")
+    return 0 if dat else 1
+
 def lenh_ab(root, sha_base, luu=None):
-    """Hai clone (base của lease và HEAD của `root`) dựng trong MỘT lệnh, cùng các bước; lượt đủ ở cả hai, lượt nhẹ ở H."""
-    sha_h, kq = _git(root, "rev-parse", "HEAD"), {}
+    """Hai clone (base của lease và HEAD của `root`) dựng trong MỘT lệnh, cùng các bước, XONG cả hai rồi mới đo (`do_ab`)."""
+    cay, oid = {}, {}
     with tempfile.TemporaryDirectory(prefix="wp1463-ab-") as tam:
-        for ten, sha in (("base", sha_base), ("H", sha_h)):
-            d = os.path.join(tam, ten)
+        for ten, sha in (("base", sha_base), ("H", _git(root, "rev-parse", "HEAD"))):
+            d = cay[ten] = os.path.join(tam, ten)
             for c in (["git", "clone", "-q", "--no-hardlinks", root, d], ["git", "-C", d, "-c", "advice.detachedHead=false", "checkout", "-q", sha], ["git", "-C", d, "config", "core.abbrev", "7"]):
                 if subprocess.run(c).returncode:
                     print(f"KET_LUAN_AB: KHONG_DO_DUOC (lenh hong: {' '.join(c)})")
                     return 3
-            kq[ten] = {"root": d, "sha": _git(d, "rev-parse", "HEAD"), "oid": _git(d, "rev-parse", "HEAD:ops/ci_provenance.py"), "day_du": chay_bo(d, False)}
-        kq["H"]["nhe"] = chay_bo(kq["H"]["root"], True)
-        vb, vh = xem(nap_tep(os.path.join(kq["base"]["root"], K), "cpt_base")), xem(nap_tep(os.path.join(kq["H"]["root"], K), "cpt_h"))
-        moi_b, E = nap_dang_ky(kq["base"]["root"]).MOI[K], sys.modules["cpt_h"].TUONG_DUONG_A3
-        phep = so_sanh(vb, vh, kq["base"]["day_du"][1], kq["H"]["day_du"][1], kq["H"]["nhe"][1], kq["base"]["oid"], kq["H"]["oid"], moi_b, E)
-        for p in (K, ".claude/dev/ci_dang_ky_test.py"):
-            print(f"SHA256 {p}: {bam_tep(kq['H']['root'], p)}")
-    print(f"AB base={kq['base']['sha']} blob ops/ci_provenance.py base={kq['base']['oid']} H={kq['H']['oid']} (H = HEAD cua kho do, khong ghi o day)")
-    for ten, che in (("base", "day_du"), ("H", "day_du"), ("H", "nhe")):
-        rc, ra, giay = kq[ten][che]
-        print(f"LUOT {ten} {che}: rc={rc} · {giay} s · {' · '.join(d for d in ra.splitlines() if d.startswith(('TIEN TRINH', 'CHE DO')))} · CPU {os.cpu_count()}")
-        print("  " + " · ".join(ra.rstrip("\n").split("\n")[-4:]))
-        if luu:
-            with open(os.path.join(luu, f"{ten}.{che}.out"), "w", encoding="utf-8") as f:
-                f.write(ra)
-    print(f"KE HOACH DOT BIEN: base {len(vb['ke_hoach'])} viec · H {len(vh['ke_hoach'])} viec · ten base ⊆ H: {set(vb['ke_hoach']) <= set(vh['ke_hoach'])}")
-    for p in PHEP_SO:
-        print(f"PHEP {p}: {'DUNG' if phep.get(p) is True else 'SAI'}")
-    dat = all(phep.get(p) is True for p in PHEP_SO) and set(phep) == set(PHEP_SO) and kq["H"]["nhe"][0] == 0
-    print(f"KET_LUAN_AB: {'DAT' if dat else 'DO'} ({sum(phep.get(p) is True for p in PHEP_SO)}/{len(PHEP_SO)} phep dung)")
-    return 0 if dat else 1
+            oid[ten] = _git(d, "rev-parse", "HEAD:ops/ci_provenance.py")
+        return do_ab(cay, oid, _git(cay["base"], "rev-parse", "HEAD"), luu=luu)
 
 def lenh_registry(root, tu=None):
     """Nghiệm thu 3: đầu ra THẬT của lượt nhẹ và lượt đủ trên H đi qua `chay_moi` THẬT của registry H với bộ chạy giả trả lại nó."""
     ra = {}
     for che in ("nhe", "day_du"):
-        if tu:
-            with open(os.path.join(tu, f"H.{che}.out"), encoding="utf-8") as f:
-                ra[che] = (0, f.read())
+        if tu:   # R15-1 (quét cùng lớp): rc là rc THẬT của lượt mà `ab` đã lưu, không mặc định 0; thiếu tệp `.rc` ⇒ lệnh hỏng, không ĐẠT
+            with open(os.path.join(tu, f"H.{che}.out"), encoding="utf-8") as f, open(os.path.join(tu, f"H.{che}.rc"), encoding="utf-8") as g:
+                ra[che] = (int(g.read()), f.read())
         else:
             ra[che] = chay_bo(root, che == "nhe")[:2]
     m, dat = nap_dang_ky(root), True
@@ -599,8 +649,10 @@ def gay(phep):   # hành vi của ca tự kiểm, CHỈ ở phép bị nhắm
         return
     if CA == "doc_thang":
         open(X).read()
-    elif CA in ("doc_con", "con_I", "con_S", "con_E"):
-        subprocess.run([sys.executable, *{"doc_con": [], "con_I": ["-I"], "con_S": ["-S"], "con_E": ["-E"]}[CA], "-c", f"open({X!r}).read()"], check=True)
+    elif CA in ("doc_con", "con_I", "con_S", "con_E", "doc_con_doi_ten"):
+        # `doc_con_doi_ten`: BẢN SAO đổi tên của trình thông dịch, thừa kế môi trường (có hook); PYTHONHOME chỉ để bản sao ở đường dẫn khác tìm được thư viện chuẩn
+        py, env = (os.environ["WP_PY"], dict(os.environ, PYTHONHOME=sys.base_prefix)) if CA == "doc_con_doi_ten" else (sys.executable, None)
+        subprocess.run([py, *{"con_I": ["-I"], "con_S": ["-S"], "con_E": ["-E"]}.get(CA, []), "-c", f"open({X!r}).read()"], check=True, env=env)
     elif CA == "doc_dirfd":
         fd = os.open("ops", os.O_RDONLY)
         os.close(os.open("x_ngoai.txt", os.O_RDONLY, dir_fd=fd))
@@ -636,7 +688,7 @@ if not (PH == "bo_day_du" and CA == "thieu_nhan_chung"):
 gay("bo_day_du")
 print("TONG: DO" if PH == "bo_day_du" and CA == "tong_do" else "TONG: DAT", flush=True)
 """
-CA_VUNG = {**dict.fromkeys(("doc_thang", "doc_con", "doc_dirfd", "doc_symlink"), NGOAI),
+CA_VUNG = {**dict.fromkeys(("doc_thang", "doc_con", "doc_dirfd", "doc_symlink", "doc_con_doi_ten"), NGOAI),
            **dict.fromkeys(("con_I", "con_S", "con_E", "rc_sau", "log_rong", "thieu_nhan_chung"), KDD)}
 
 def tu_kiem_vung():
@@ -674,19 +726,26 @@ def tu_kiem_vung():
     them("thuan_tap_phep_lap", KDD, [qs(PHEP[0], tap_bo), qs(pr[0], tap_pr), qs(pr[0], tap_pr)])
     them("thuan_tap_phep_thieu", KDD, ba()[:2])
     kq = [(ten, mong, duoc if isinstance(mong, tuple) else duoc[0]) for ten, mong, duoc in kq]
+    for x in ("python", "python3", "python3.13", "python.exe"):   # R15-4 (a): hàm phân loại nhận ĐÚNG các tên này, ở `exe` lẫn `argv[0]`
+        kq += [(f"thuan_la_python_exe_{x}", True, la_python({"exe": "/x/" + x, "argv": ["khac"]})), (f"thuan_la_python_argv0_{x}", True, la_python({"exe": None, "argv": [x]}))]
+    kq.append(("thuan_la_python_tu_choi_ten_khac", False, la_python({"exe": "/bin/bash", "argv": ["bash", "-c", "python3 x.py"]})))
     with tempfile.TemporaryDirectory(prefix="wp1463-gia-") as tam:
-        root = os.path.join(tam, "kho")
+        root, lk, ban = os.path.join(tam, "kho"), os.path.join(tam, "thong_dich_lk"), os.path.join(tam, "thong_dich_x")   # hai tên KHÔNG khớp biểu thức
+        os.symlink(sys.executable, lk)
+        shutil.copy2(os.path.realpath(sys.executable), ban)   # bản sao byte-nguyên của trình thông dịch ở đường dẫn khác
+        kq.append(("that_la_python_realpath_trung", True, la_python({"exe": lk, "argv": ["x"]})))
+        kq.append(("that_la_python_ban_sao_doi_ten_KHONG_nhan_ra", False, la_python({"exe": ban, "argv": [ban]})))   # phần CÒN HỞ, khai thẳng
         tep = {".claude/dev/ci_dang_ky_test.py": REG_GIA, K: BO_GIA, "ops/ci_provenance.py": "", ".github/workflows/ci.yml": "", "ops/x_ngoai.txt": "x"}
         for p, nd in tep.items():
             os.makedirs(os.path.dirname(os.path.join(root, p)), exist_ok=True)
             with open(os.path.join(root, p), "w", encoding="utf-8") as f:
                 f.write(nd)
         def that(ca, phep):
-            os.environ.update(WP_CA=ca, WP_PHEP=phep or "", WP_LK=os.path.join(tam, "lk"))
+            os.environ.update(WP_CA=ca, WP_PHEP=phep or "", WP_LK=os.path.join(tam, "lk"), WP_PY=ban)
             try:
                 kl, ct, _ = do_cay(root, set(tep))
             finally:
-                for k in ("WP_CA", "WP_PHEP", "WP_LK"):
+                for k in ("WP_CA", "WP_PHEP", "WP_LK", "WP_PY"):
                     os.environ.pop(k, None)
             return kl, tuple(c["ket_luan"] for c in ct)
         kq.append(("that_khoe", (SACH, (SACH,) * 3), that("khoe", None)))
@@ -708,27 +767,88 @@ DOT_BIEN_VUNG = [
     ("chay_mot_phep_hai_lan_thay_cho_phep_khac", "chay_quan_sat(¦lenh_phep(ten, root, tam)", 'chay_quan_sat(lenh_phep(ten if ten == "bo_day_du" else "phan_chung_nguyen", root, tam)', "that_khoe"),
     ("bo_so_mot_hang_nhung_van_dem", "zip(hang, mong) ¦if h != m]", 'zip(hang, mong) if h != m and m[0] != "wf_wd"]', "thuan_hang_lech_phan_chung_nguyen_wf_wd"),
     ("phep_go_chay_ban_nap_cua_phep_khac", 'CHE_DO_PROBE[ten], ¦json.dumps([[n, d]', '"nguyen", json.dumps([[n, d]', "that_khoe"),
-    ("go_khong_go_khoa", "getattr(m, t).pop(¦K, None)", "getattr(m, t).get(K, None)", "that_khoe")]
+    ("go_khong_go_khoa", "getattr(m, t).pop(¦K, None)", "getattr(m, t).get(K, None)", "that_khoe"),
+    # SPEC r15 R15-4: hàm phân loại đúng như câu bảo đảm (không hẹp hơn, không rộng hơn), và bản đổi tên CÓ hook vẫn bị quan sát
+    ("phan_loai_bo_realpath", "_RE_PY.search(os.path.basename(x)) ¦or os.path.realpath(x) == os.path.realpath(sys.executable)", "_RE_PY.search(os.path.basename(x))", "that_la_python_realpath_trung"),
+    ("phan_loai_nhan_moi_ten", '_RE_PY = re.compile(¦r"python[0-9.]*(\\.exe)?$")', '_RE_PY = re.compile(r"")', "that_la_python_ban_sao_doi_ten_KHONG_nhan_ra"),
+    ("hook_chi_cai_theo_ten_trinh_thong_dich", '_LOG = os.environ.get("WP1463_VUNG_LOG")\n¦if _LOG:', '_LOG = os.environ.get("WP1463_VUNG_LOG")\nif _LOG and "python" in os.path.basename(sys.executable):', "that_doc_con_doi_ten_bo_day_du")]
+
+# ====================================================================== tự kiểm BỘ CHẠY: rc của `ab`/`registry --tu` (R15-1), quá hạn của `chay_quan_sat` (R15-3)
+MA_QS = r'''
+import os, subprocess, sys, time
+d, tre, vai = sys.argv[1], float(sys.argv[2]), sys.argv[3]
+if vai == "con":
+    subprocess.Popen([sys.executable, __file__, d, sys.argv[2], "chau"])   # cháu cùng nhóm tiến trình, cùng ống đầu ra
+print("DA_CHAY " + vai, flush=True)
+time.sleep(tre)
+open(os.path.join(d, "dau_" + vai), "w").close()   # dấu hẹn ghi SAU `tre` giây
+'''
+
+def tu_kiem_chay(bo, root):
+    """[(tên, mong, được)]. (i) `do_ab` THẬT trên nền khoẻ (base = H = `root`, không cần git) với bộ chạy giả trả đầu ra KHOẺ kèm rc 42 ở ĐÚNG
+    MỘT trong ba ranh giới ⇒ lệnh thất bại mà chín phép vẫn 9/9; đối chứng rc 0 ⇒ DAT. (ii) `registry --tu` đọc rc ĐÃ LƯU. (iii) `chay_quan_sat`
+    quá hạn với con và cháu THẬT hẹn ghi dấu sau hạn ⇒ trả thất bại, giữ đầu ra đã bắt, và KHÔNG dấu nào xuất hiện sau khi dọn."""
+    kq, v, cay = [], xem(bo), {"base": root, "H": os.path.join(root, "")}   # hai cách viết của CÙNG cây: bộ chạy giả phân biệt base với H
+    def ab(bom, luu=None):
+        def chay(r, nhe):
+            luot = ("H" if r == cay["H"] else "base", "nhe" if nhe else "day_du")
+            return (42 if luot == bom else 0), luot_gia(bo, v, che=luot[1]), 0.0
+        with contextlib.redirect_stdout(io.StringIO()) as ra:
+            rc = do_ab(cay, dict.fromkeys(cay, "a" * 40), "tu-kiem", chay, luu)
+        cuoi = ra.getvalue().splitlines()[-1]
+        return rc, cuoi.split(" (")[0], cuoi.split("(")[1].split(" ")[0]
+    def reg(tu):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return lenh_registry(root, tu)
+    def qs(tam, tre, han):
+        if not hasattr(os, "killpg"):
+            return "KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX"
+        d, t0 = tempfile.mkdtemp(dir=tam), time.monotonic()
+        _pid, rc, txt = chay_quan_sat([sys.executable, "-B", os.path.join(tam, "qs.py"), d, str(tre), "con"], tam, os.path.join(d, "log"), d, timeout=han, tran_don=2.0)
+        time.sleep(max(0.0, t0 + tre + 1.0 - time.monotonic()))   # nhìn dấu SAU thời điểm hẹn ghi, không nhìn sớm
+        return rc, txt.startswith("LOI_CHAY: TimeoutExpired"), [x for x in ("DA_CHAY chau", "DA_CHAY con") if x in txt], sorted(x for x in os.listdir(d) if x.startswith("dau_"))
+    with tempfile.TemporaryDirectory(prefix="wp1463-chay-") as tam:
+        kq.append(("ab_rc0_doi_chung", (0, "KET_LUAN_AB: DAT", "9/9"), ab(None, tam)))
+        kq += [(f"ab_rc42_{ten}_{che}", (1, "KET_LUAN_AB: DO", "9/9"), ab((ten, che))) for ten, che in LUOT_AB]
+        kq.append(("registry_tu_rc0_doi_chung", 0, reg(tam)))
+        with open(os.path.join(tam, "H.nhe.rc"), "w", encoding="utf-8") as f:
+            f.write("42\n")
+        kq.append(("registry_tu_rc42_luot_nhe", 1, reg(tam)))
+        with open(os.path.join(tam, "qs.py"), "w", encoding="utf-8") as f:
+            f.write(MA_QS)
+        day_du = ["DA_CHAY chau", "DA_CHAY con"]
+        kq.append(("quan_sat_khoe_doi_chung", (0, False, day_du, ["dau_chau", "dau_con"]), qs(tam, 0.0, 60)))
+        kq.append(("quan_sat_qua_han_con_va_chau_khong_de_dau", (None, True, day_du, []), qs(tam, 2.0, 1.0)))
+    return kq
+
+DOT_BIEN_CHAY = [(f"ab_bo_chot_rc_luot_{ten}_{che}", "hong = [k for k, v in rc_luot ¦if v != 0]", f'hong = [k for k, v in rc_luot if v != 0 and k != "{ten}/{che}"]',
+                  f"ab_rc42_{ten}_{che}") for ten, che in LUOT_AB] + [
+    ("registry_tu_mac_dinh_rc_0", "ra[che] = (¦int(g.read()), f.read())", "ra[che] = (0, f.read())", "registry_tu_rc42_luot_nhe"),
+    ("quan_sat_bo_buoc_don", "mo_ta, out = ¦don_nhom(p, tran_don)", 'mo_ta, out = "khong don", getattr(e, "output", None) or b""', "quan_sat_qua_han_con_va_chau_khong_de_dau"),
+    ("quan_sat_chi_ket_thuc_con_khong_ket_thuc_nhom", "os.killpg(¦p.pid, th)", "p.send_signal(th)", "quan_sat_qua_han_con_va_chau_khong_de_dau")]
 
 def lenh_tu_kiem(root, dot_bien):
     bo = nap_tep(os.path.join(root, K), "cpt_tu_kiem")
-    so, vung = tu_kiem_so(bo), tu_kiem_vung()
+    so, vung, chay = tu_kiem_so(bo), tu_kiem_vung(), tu_kiem_chay(bo, root)
     so_sai = [(t, sorted(k), sorted(p for p in PHEP_SO if v.get(p) is not True)) for t, k, v in so if {p for p in PHEP_SO if v.get(p) is not True} != k or set(v) != set(PHEP_SO)]
-    vung_sai = [x for x in vung if x[1] != x[2]]
+    vung_sai = [x for x in vung + chay if x[1] != x[2]]
     for t, k, v in so:
         print(f"SO {t}: khai sai {sorted(k)} · vec-to {''.join('1' if v.get(p) is True else '0' for p in PHEP_SO)}")
     thieu = [p for p in PHEP_SO if not any(p in k for _, k, _ in so)]
     for x in so_sai + vung_sai:
         print(f"LECH: {x}")
     print(f"TU_KIEM_SO: {len(so) - len(so_sai)}/{len(so)} dat · moi phep co dau vao am: {not thieu}")
-    print(f"TU_KIEM_VUNG: {len(vung) - len(vung_sai)}/{len(vung)} dat")
+    print(f"TU_KIEM_VUNG: {sum(x[1] == x[2] for x in vung)}/{len(vung)} dat")
+    for x in chay:
+        print(f"CHAY {x[0]}: mong {x[1]} · duoc {x[2]}")
+    print(f"TU_KIEM_CHAY: {sum(x[1] == x[2] for x in chay)}/{len(chay)} dat")
     ok, bat = not (so_sai or vung_sai or thieu), 0
     if dot_bien and ok:
         with open(os.path.abspath(__file__), encoding="utf-8") as f:
             src = f.read()
         sys.dont_write_bytecode = True
         with tempfile.TemporaryDirectory(prefix="wp1463-db-") as tam:
-            for nhom, ds in (("SO", DOT_BIEN_SO), ("VUNG", DOT_BIEN_VUNG)):
+            for nhom, ds in (("SO", DOT_BIEN_SO), ("VUNG", DOT_BIEN_VUNG), ("CHAY", DOT_BIEN_CHAY)):
                 for ten, cu, moi, dich in ds:
                     cu = _n(cu)
                     if src.count(cu) != 1:
@@ -742,12 +862,12 @@ def lenh_tu_kiem(root, dot_bien):
                         lech = [(t, p, p not in k, v.get(p) is True) for t, k, v in m.tu_kiem_so(bo) for p in dich if (v.get(p) is True) != (p not in k)]
                         mo_ta = "; ".join(f"{t}: {p} {'DUNG' if truoc else 'SAI'}→{'DUNG' if sau else 'SAI'}" for t, p, truoc, sau in lech[:4])
                     else:      # phải đổi kết quả ở ĐÚNG đầu vào tương ứng
-                        lech = [x for x in m.tu_kiem_vung() if x[1] != x[2] and x[0] == dich]
+                        lech = [x for x in (m.tu_kiem_vung() if nhom == "VUNG" else m.tu_kiem_chay(bo, root)) if x[1] != x[2] and x[0] == dich]
                         mo_ta = "; ".join(f"{t}: mong {a} duoc {b}" for t, a, b in lech)
                     bat += bool(lech)
                     print(f"DB_{nhom} {ten}: {'BAT' if lech else 'SONG'} · {mo_ta}")
-        tong = len(DOT_BIEN_SO) + len(DOT_BIEN_VUNG)
-        print(f"DOT_BIEN_TU_KIEM: {bat}/{tong} bi bat dung cho ({len(DOT_BIEN_SO)} cua bo so, {len(DOT_BIEN_VUNG)} cua phep do vung)")
+        tong = len(DOT_BIEN_SO) + len(DOT_BIEN_VUNG) + len(DOT_BIEN_CHAY)
+        print(f"DOT_BIEN_TU_KIEM: {bat}/{tong} bi bat dung cho ({len(DOT_BIEN_SO)} cua bo so, {len(DOT_BIEN_VUNG)} cua phep do vung, {len(DOT_BIEN_CHAY)} cua bo chay)")
         ok = bat == tong
     print(f"KET_LUAN_TU_KIEM: {'DAT' if ok else 'DO'}")
     return 0 if ok else 1

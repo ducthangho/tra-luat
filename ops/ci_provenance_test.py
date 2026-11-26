@@ -2613,12 +2613,15 @@ def c82_tang_thuc_thi_ca_va_con():   # K5a: bộ phân loại theo KIỂU, hợp
         return lambda ph, ten: {"schema": "ket_qua_ca.v1", "phien": ph, "ten": ten, "rc": rc, "trang_thai_thuc_thi": tt, "quan_sat_ca": qs, **sua}
     def bo(k):
         return lambda ph, ten: {x: v for x, v in tep(0, ht, "passed")(ph, ten).items() if x != k}
-    VEC = [(rc, tep(rc, tt, qs), tt) for rc, tt, qs in sorted(BO_BA_KQ, key=str)] + [(rc, v, ha) for rc, v in (
+    def dem(n):   # R15-2: kết quả HỢP LỆ, đệm khoảng trắng CUỐI tới đúng n BYTE — chỉ chốt kích thước phân biệt 65 536 (nhận) với 65 537 (từ chối)
+        return lambda ph, ten: json.dumps(tep(0, ht, "passed")(ph, ten)).encode("utf-8").ljust(n)
+    bang([len(dem(n)("p", "c00_gia")) for n in (65536, 65537)] == [65536, 65537], "véc-tơ kích thước phải đúng 65 536 và 65 537 byte")
+    VEC = [(rc, tep(rc, tt, qs), tt) for rc, tt, qs in sorted(BO_BA_KQ, key=str)] + [(0, dem(65536), ht)] + [(rc, v, ha) for rc, v in (
         (0, tep(0, ht, "passed", phien="lech")), (0, tep(0, ht, "passed", them=1)), (0, tep(False, ht, "passed")), (0, tep("0", ht, "passed")),
         (0, tep(0, ht, "passed", ten="khac")), (0, tep(3, ht, "failed")), (0, tep(0, ht, "passed", schema="ket_qua_ca.v2")),
         (0, tep(0, "bogus", "passed")), (0, tep(0, "cancelled", None)), (0, tep(0, "not_run", None)), (0, tep(0, ht, None)), (4, tep(4, "timed_out", "passed")),
         (3, tep(3, ht, "passed")), *[(0, bo(k)) for k in sorted(KHOA_KQ)], (0, lambda ph, ten: None), (0, lambda ph, ten: b"\xff\xfe{}"),
-        (0, lambda ph, ten: b"khong phai json"), (0, lambda ph, ten: b"[]"), (0, lambda ph, ten: b"x" * 65537),
+        (0, lambda ph, ten: b"khong phai json"), (0, lambda ph, ten: b"[]"), (0, dem(65537)),
         (0, lambda ph, ten: json.dumps(tep(0, ht, "passed")(ph, ten)).replace("{", '{"rc": 0, ', 1).encode()))]
     def con_gia(vec, rc, nem=None):   # hàm khởi chạy GIẢ: ghi véc-tơ vào ĐÚNG đường dẫn cha cấp rồi trả rc (hoặc ném)
         def khoi_chay(argv, env):
@@ -3249,6 +3252,9 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T44_K5d_cu_can_theo_ke_hoach", _n('"dot_bien": [[k[0], k[1]] ¦for k in kq_db]'), '"dot_bien": [[t, (k or (t, "HONG"))[1]] for t, k in zip(ten_db, can(ten_db, kq_db))]', "c84"),
     ("T45_K8_hoan_tac_de_sot_MAU_DAY_DU", _n('sau_go(BON_KHOA)¦   # vế khoẻ'), 'sau_go(("NHE", "MAU_NHE", "VUNG_THEM"))', "c86"),
     ("T46_K8_bo_chot_troi", _n('if dong.count(x) ¦!= 1]'), 'if False]', "c86"),
+    # SPEC r15 R15-2 (PR2-C02): hai đột biến của chốt 65 536 BYTE; cả hai chết ở véc-tơ `dem(65537)` của c82 (JSON hợp lệ), không ở lỗi phân tích.
+    ("T47_R15_2_bo_kiem_bo_chot_kich_thuoc", _n('tho.decode("utf-8") ¦if len(tho) <= 65536 else "qua 65536 byte"'), 'tho.decode("utf-8")', "c82"),
+    ("T48_R15_2_bo_kiem_doc_65536_thay_65537", _n('tho = f.read(¦65537)'), 'tho = f.read(65536)', "c82"),
 )
 _NEO_DK, _BO_DK = 'TIEN_TO_CHUNG = ("ops/cai_", "ops/cong_cu")' + _XD, 'ops/ci_provenance_test.py'
 DOT_BIEN_DK = (   # wp1463 K4/K6: (tên, gốc, thay, TIỀN TỐ ca đích) — sửa BẢN SAO TẠM của `.claude/dev/ci_dang_ky_test.py` (`chay_dot_bien_dk`)

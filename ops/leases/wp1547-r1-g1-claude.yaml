@@ -44,8 +44,9 @@ xung_dot_write_set_do_luc_cap:
 branch: claude/wp1547-shellcheck-win
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: 210ceff
-start_from_sha: a0ac083
+base_sha: 210ceff7457e9df95b2e3780f8ea72ec7492c34d
+start_from_sha: a0ac083542436f63aadd514b3381463288433947
+reviewed_sha_required: a0ac083542436f63aadd514b3381463288433947
 reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1547

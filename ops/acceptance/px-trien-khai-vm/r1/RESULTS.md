@@ -9,7 +9,7 @@ Bí danh: `D` = thư mục làm việc của packet trên VM (ngoài `<base>`), 
 `<base>\control\` chuyển từ 1.0.1 sang **2.2.0**, bản cũ giữ ở `BAK`. Hai lời gọi `px ask gemini -Model gemini:auto` chạy chế độ Local
 bằng module 2.2.0 (manifest `2.2.0`, `.psm1` nạp từ `D`, băm `d26bf828…339f`): cả hai HTTP **200**, `outcome: ok`. Bộ lọc 2.2.0 trả
 `answerMarkup: none`, `answerMarkupRemoved: 0` trên đúng hai câu trả lời nhận được; r1 không đo gateway sinh khối `ElicitationsGroup`
-với tần suất nào (N4 không đòi). Inference: **2/2**. Có hai lệch đặc tả, chủ kho đã chấp nhận (mục 5).
+với tần suất nào (N4 không đòi). Inference: **2/2**. Có bốn điểm lệch đặc tả, chủ kho đã chấp nhận (mục 5).
 
 ## 2. Các lượt chạy (đủ mọi lượt)
 | lượt | thời điểm (UTC) | kết quả | hiện vật |
@@ -36,7 +36,7 @@ Số chủ kho dán sau mỗi lần B4 khớp băm phiên đo lại qua Desktop 
 ## 4. Nghiệm thu
 | tiêu chí | trạng thái |
 |---|---|
-| N1 cửa sổ | **đạt theo câu chữ đặc tả** — phép đo B0 (17:12:24, 5 phút 16 giây trước lần ghi đầu 17:17:40) ghi mục mới nhất 11:13:01, cách 359,4 phút. **Tại đúng lúc ghi: chưa đo được** — phép đọc lại sau B4 lần 1 cho cùng 164 mục và cùng mốc 11:13:01, nhưng hai ảnh chụp không loại trừ được một mục tạo rồi bị xoá ở khoảng giữa |
+| N1 cửa sổ | **không chấm đạt; chủ kho chấp nhận** (mục 5.3) — phép đo B0 (17:12:24, 5 phút 16 giây trước lần ghi đầu 17:17:40) ghi mục mới nhất 11:13:01, cách 359,4 phút. **Tại đúng lúc ghi: chưa đo được** — phép đọc lại sau B4 lần 1 cho cùng 164 mục và cùng mốc 11:13:01, nhưng hai ảnh chụp không loại trừ được một mục tạo rồi bị xoá ở khoảng giữa |
 | N2 sao lưu | **đạt** — `BAK`, băm từng tệp = B0 |
 | N3 triển khai (tĩnh Remote) | **đạt** — băm `control\ProximaControl.psm1`/`ProximaConfig.psm1` = 2.2.0; `control\` chỉ thêm `ProximaConfig.psm1` |
 | N4 chạy thật | **đạt** — 2/2 `ask_ok`, mỗi lời gọi đúng một bản ghi `px.active.v1` mới |
@@ -50,6 +50,12 @@ Số chủ kho dán sau mỗi lần B4 khớp băm phiên đo lại qua Desktop 
 2. **Điểm đọc của module** (`runtime-access-outside-boundary`): đặc tả ghi "không đọc profile"; module 2.2.0 tự đọc
    `<base>\profile\rest-port.json` (port/pid; `ProximaControl.psm1` dòng 155) và tra biến môi trường `PROXIMA_API_KEY` (dòng 205, không
    in giá trị). Chủ kho xếp hai điểm đọc này vào phạm vi.
+3. **N1 tại giờ triển khai chưa đo được** (`deployment-window-at-write`): đặc tả đòi mục `px-active` mới nhất cách giờ triển khai
+   ≥ 15 phút. B0 đo 5 phút 16 giây trước lần ghi đầu; tuổi của mục mới nhất đúng lúc 17:17:40 không đo được và không đo lại được.
+   N1 không chấm đạt; chủ kho chấp nhận (`issuecomment-7200299504` và quyết định ghi hộ sau verdict lượt 3).
+4. **Thứ tự bước B4** (`b4-version-check-order`): đặc tả ghi "nạp module, ghi `ModuleVersion` và băm" trước `px config`; cả hai lần B4
+   chạy `config` (bước nạp module qua `Run-Px.ps1`) trước, rồi mới ghi/kiểm phiên bản. Kiểm phiên bản vẫn chạy trước `status`,
+   `models` và mọi `ask`. Chủ kho miễn P3 này cho đúng SHA ghi trong quyết định.
 
 ## 6. Còn lại trên VM
 `BAK` và `D` (clone kho, cấu hình, các script, log) để lại; dọn khi chủ kho yêu cầu. Đường Remote chạy thật (WinRM) chưa đo.

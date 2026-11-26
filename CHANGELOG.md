@@ -88,6 +88,9 @@
 - r36 (Review Rescue §12 sau lượt 35, đặc tả `ops/specs/llm-khoan-docx-r36.md`): đường thô đổi sang DANH SÁCH CHO PHÉP đầu dòng
   (số khoản + từ có dấu tiếng Việt hoặc từ ASCII đứng trước từ khác) thay cho danh sách cấm nhãn — `Tp.`, `e-mail`, `A1` nay bị chặn
   có chủ đích; đọc `--tep` có giới hạn byte; số đầu dòng quá 4 chữ số dừng trước model; XML đếm độ sâu và số nút ngay khi parse.
+- r37 (sau cross-review lượt 36 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r37.md`): khai giới hạn nhãn điểm số trùng số khoản trên
+  văn bản thô (chủ kho quyết) và ghi vào `pham_vi_kiem`; `Đa dạng …` được nhận; tiền kiểm cùng quy tắc dòng/BOM; trần byte và số
+  member của gói `.docx`; phân giải style có nhớ; số thứ tự âm bị chặn; ngân sách nhãn và tổng chữ trừ dần.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

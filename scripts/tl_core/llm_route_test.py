@@ -1975,6 +1975,31 @@ def ca_r35_lop_loi(m):
     # r36: lvlText NGẮN mà nhãn MỞ RỘNG dài (chữ lặp 33 ký tự × 2) ⇒ chốt sau mở rộng.
     mo_rong = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2.%2)", start=833))
     chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=mo_rong), "nhan mo rong qua dai")
+    # r36 (lượt 36): số thứ tự ÂM ở cấp con decimal ⇒ chặn trước khi dựng nhãn.
+    am = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "decimal", "%2.", start=-5))
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=am), "so thu tu am")
+    # r36 (lượt 36): chuỗi `basedOn` dài dùng chung bởi nhiều đoạn — phân giải có nhớ, không bậc hai.
+    _n = 2500
+    _st = "".join(f'<w:style w:type="paragraph" w:styleId="S{i}">' + (f'<w:basedOn w:val="S{i - 1}"/>' if i else "") + "</w:style>"
+                  for i in range(_n))
+    _sty = f'<w:styles {_WNS}>{_st}</w:styles>'
+    _d36 = _t35.monotonic()
+    chan(lam_docx(H, A, *[p_docx("Dữ liệu.", kieu=f"S{_n - 1}")] * _n, styles=_sty), "doan khong so sau khoan")
+    bang(_t35.monotonic() - _d36 < 3.0, "phan giai chuoi basedOn bac hai")
+    # r36 (lượt 36): trần byte cả gói đo TRƯỚC khi mở ZIP.
+    _cu = m._TRAN_GOI
+    m._TRAN_GOI = 100
+    try:
+        chan(lam_docx(H, A, B), "goi vuot tran byte")
+    finally:
+        m._TRAN_GOI = _cu
+    # r37 (lượt 36, quyết định chủ kho "khai giới hạn"): nhãn điểm số trùng số khoản là giới hạn ĐÃ KHAI, khoá vào `pham_vi_kiem`.
+    bang("trung hinh dang so khoan" in m.PHAM_VI_KIEM and "--tep" in m.PHAM_VI_KIEM, "pham_vi_kiem duong tho thieu gioi han nhan so")
+    # r36 (lượt 36): tiền kiểm số dài dùng CÙNG quy tắc dòng/BOM với `tach_khoan`.
+    for x in ("\ufeff12345. Hồ sơ là a.", "Điều 3.\r12345. Hồ sơ là a.", "Điều 3.\r\n12345. Hồ sơ là a."):
+        bang(m.vuot_ngan_sach(x) is not None, f"tien kiem so dai lot: {x!r}")
+    bang(tach("Điều 3.\nĐa dạng sinh học là sự phong phú.") == [(None, "Đa dạng sinh học là sự phong phú.")],
+         "tu mo bang Đ bi chan oan")
     # r36 (lượt 35): trần SỐ NÚT đo ở parser — hạ trần tạm thời để fixture nhỏ.
     _cu = m._TRAN_NUT_XML
     m._TRAN_NUT_XML = 50
@@ -2018,6 +2043,7 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 
 DOT_BIEN = [
+    ('wp1525_pham_vi_bo_gioi_han', ("""                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "\n""", ""), 'ca_r35_lop_loi'),
     # r36 (§2.38): danh sách cho phép đầu dòng — mỗi điều kiện một đột biến riêng.
     ('wp1525_cho_phep_bo_chot', ('    loai = [dau_dong_cho_phep(ln) for ln in dong]', '    loai = [dau_dong_cho_phep(ln) or ("than",) for ln in dong]'), 'ca_r35_lop_loi'),
     ('wp1525_cho_phep_moi_chu_ascii', ('    co_dau = any(c not in _CHU_PH for c in tu)', '    co_dau = True'), 'ca_r35_lop_loi'),
@@ -2030,10 +2056,14 @@ DOT_BIEN = [
     ('wp1525_ket_cau_regex', ("""    s = str(txt)\n    i = len(s)\n    while i and""", """    s = re.sub(r'[\\s)"\\u201d]+$', "", str(txt))\n    i = len(s)\n    while False and"""), 'ca_r35_lop_loi'),
     ('wp1525_xml_sau_bo', ('                if tt["sau"] > _TRAN_SAU_XML:', '                if False:'), 'ca_r35_lop_loi'),
     ('wp1525_xml_nut_bo', ('                if tt["nut"] > _TRAN_NUT_XML:', '                if False:'), 'ca_r35_lop_loi'),
-    ('wp1525_nhan_dai_bo', ('    if len(nhan.strip()) > _TRAN_NHAN:', '    if False:'), 'ca_r35_lop_loi'),
-    ('wp1525_tong_docx_bo', [('    if sum(len(x) for x in dong) + len(dong) - 1 > _TRAN_VAN_BAN:', '    if False:'),
+    ('wp1525_nhan_dai_bo', ('        if dai[0] > _TRAN_NHAN:', '        if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_nhan_so_am', ('        if n < 0:\n            raise ValueError(f"so thu tu am', '        if False:\n            raise ValueError(f"so thu tu am'), 'ca_r35_lop_loi'),
+    ('wp1525_tong_docx_bo', [('        if con[0] < 0:', '        if False:'),
                              ('    if sum(len(d["chu"]) for d in vung) > _TRAN_VAN_BAN:', '    if False:')], 'ca_r35_lop_loi'),
-    ('wp1525_tong_docx_thua_mot', ('    if sum(len(x) for x in dong) + len(dong) - 1 > _TRAN_VAN_BAN:', '    if sum(len(x) for x in dong) + len(dong) > _TRAN_VAN_BAN:'), 'ca_r35_lop_loi'),
+    ('wp1525_tong_docx_thua_mot', ('    con = [_TRAN_VAN_BAN - len(tieu_de)]', '    con = [_TRAN_VAN_BAN - len(tieu_de) - 1]'), 'ca_r35_lop_loi'),
+    ('wp1525_style_khong_nho', ('    while sid and sid in loai and (sid, chi_so, gop) not in nho:', '    nho = {}\n    while sid and sid in loai and (sid, chi_so, gop) not in nho:'), 'ca_r35_lop_loi'),
+    ('wp1525_goi_khong_tran', ('    if co > _TRAN_GOI:', '    if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_ngan_sach_khong_bom', ('for ln in _bo_mot_bom(s).splitlines()):', 'for ln in s.split("\\n")):'), 'ca_r35_lop_loi'),
     ('wp1525_ngan_sach_so_bo', ('    if any(_RE_SO_QUA_DAI.match(', '    if False and any(_RE_SO_QUA_DAI.match('), 'ca_r35_lop_loi'),
     # wp1514 lượt 2 (A1/A2/A3/A4).
     ('wp1514_l2_cau_dan_bo_tu_noi', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif i_dong == 0 and " ".join(ln.split()).endswith("được hiểu như sau:"):'), 'ca_wp1514_luot2'),
@@ -2086,8 +2116,7 @@ DOT_BIEN = [
     # r33 (lượt 32 I1/I2).
     ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": False,'), 'ca_cau_truc_docx_chan'),
     ('wp1525_pstyle_chi_kiem_co_mat', ('"la": ps is not None and loai_kieu.get(psid) != "paragraph",', '"la": ps is not None and psid not in kieu,'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_theo_kieu_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1): chỉ ID', '    while sid and sid in kieu and sid != "":   # r33 (lượt 32 I1): chỉ ID'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_dem_tra_khoa_noi_bo', ('    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)\n', '    while sid and sid in kieu and sid != "":\n'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_style_tra_khoa_noi_bo', ('    loai = kieu.get("#loai", {})   # r33 (lượt 32 I1)', '    loai = {k: 1 for k in kieu if k != ""}   # r33 (lượt 32 I1)'), 'ca_cau_truc_docx_chan'),
     # r30 (lượt 29 F1/F2) → r31 (lượt 30 G1/G2).
     ('wp1525_mac_dinh_loai_tho', ('        if (st.get(_W + "type") or "paragraph") == "paragraph" and', '        if st.get(_W + "type") == "paragraph" and'), 'ca_cau_truc_docx_dat'),
     ('wp1525_style_id_noi_bo', ('        if not st.get(_W + "styleId") or st.get(_W + "styleId").startswith("#"):', '        if False:'), 'ca_cau_truc_docx_chan'),

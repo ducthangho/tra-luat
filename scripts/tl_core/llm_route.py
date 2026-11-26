@@ -562,7 +562,8 @@ def vuot_ngan_sach(van_ban):
     if len(s) > _TRAN_VAN_BAN:
         return f"van ban {len(s)} ky tu vuot tran {_TRAN_VAN_BAN}"
     # r36 (lượt 35): số đầu dòng quá `_TRAN_CHU_SO` chữ số cũng là vượt ngân sách — chặn TRƯỚC model ở mọi đường thô, cùng một chốt.
-    if any(_RE_SO_QUA_DAI.match(ln.lstrip(" \t\u00a0")) for ln in s.split("\n")):
+    # r36 (lượt 36): CÙNG quy tắc với `tach_khoan` — gỡ đúng một BOM, tách dòng bằng `splitlines` (LF/CRLF/CR).
+    if any(_RE_SO_QUA_DAI.match(ln.lstrip(" \t\u00a0")) for ln in _bo_mot_bom(s).splitlines()):
         return f"so dau dong qua {_TRAN_CHU_SO} chu so"
     return None
 
@@ -572,11 +573,12 @@ def vuot_ngan_sach(van_ban):
 # hình dạng lọt, vì danh sách cấm phải đoán mọi cách viết của `lvlText`. Nay một dòng thô chỉ được nhận khi đầu dòng thuộc TẬP NHỎ đã
 # biết; mọi đầu dòng khác (nhãn điểm, nhãn nhiều thành phần, ký hiệu, chữ số, dấu lạ…) ⇒ từ chối CẢ nguồn, chuyển `--tep <tệp .docx>`:
 #   [số khoản `N.` / `N)` / `(N)`, N ≤ 4 chữ số, rồi đệm ngang tuỳ ý]  [một dấu mở `“` `"` `‘` `(` tuỳ ý]  TỪ ĐẦU
-# TỪ ĐẦU = dải chữ cái liền đầu thân, và phải (a) chứa ít nhất một chữ NGOÀI bảng placeholder ASCII+đ (`Hồ`, `Dữ`, `Cơ` — `_nhan` chỉ
+# TỪ ĐẦU = dải chữ cái liền đầu thân, và phải (a) chứa ít nhất một chữ NGOÀI bảng placeholder ASCII (`Hồ`, `Dữ`, `Cơ` — `_nhan` chỉ
 # sinh chữ số, chữ ASCII và dấu `lvlText`, nên chữ có dấu thanh/mũ không thể là nhãn), hoặc (b) là chữ ASCII dài ≥ 2, KHÔNG phải một
 # chữ lặp (`aa`, `BB` là nhãn Word sau `z`), và theo sau là ĐỆM ngang rồi một CHỮ CÁI (`Quy trình`). Mọi thứ khác bị chặn oan có chủ đích:
 # `Tp. …`, `e-mail …`, `A1 …`, `ASEAN (…)`, thân mở bằng chữ số hay dấu lạ — chặn oan rẻ hơn nhận nhầm.
-_CHU_PH = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZđĐ")
+# r36 (lượt 36): bảng placeholder = ĐÚNG miền thật của `_chu_cai` (a–z, A–Z) — `đ/Đ` không bao giờ là nhãn nên thuộc nhánh (a).
+_CHU_PH = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 _DEM_NGANG = frozenset(" \t\u00a0")
 _RE_SO_DAU = re.compile("(?:([0-9]{1,%d})[.)]|\\(([0-9]{1,%d})\\))[ \t\u00a0]*" % (_TRAN_CHU_SO, _TRAN_CHU_SO))
 _MO_CHO_PHEP = frozenset("“\"‘(")
@@ -618,6 +620,8 @@ _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_mem
 # đệ quy theo wrapper; cây sâu hơn ⇒ `RecursionError` (không thuộc lỗi nguồn CLI bắt). Word/Google Docs xuất sâu dưới 20 tầng.
 _TRAN_SAU_XML = 128
 _TRAN_NUT_XML = 2_000_000   # r36 (lượt 35): trần SỐ NÚT mỗi part
+_TRAN_GOI = 64 * 1024 * 1024   # r36 (lượt 36): trần byte cả gói .docx, đo TRƯỚC khi mở ZIP
+_TRAN_MEMBER = 2000   # r36: trần số member trong gói
 # r35: trần độ dài NHÃN mở rộng từ `lvlText` và tổng chữ Điều dựng từ .docx.
 _TRAN_NHAN = 64
 
@@ -1015,35 +1019,35 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
     return kq
 
 
-def _theo_kieu(kieu, sid, chi_so):
-    """Giá trị hiệu lực theo chuỗi `basedOn` (chi_so: 1 numId, 2 ilvl, 3 strike, 4 dstrike). Vòng lặp ⇒ ValueError."""
-    da = set()
-    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1): chỉ ID đã XÁC THỰC là định nghĩa (không trúng khoá nội bộ)
+def _giai_chuoi(kieu, sid, chi_so, gop):
+    """r36 (lượt 36, `can-tai-nguyen-doc-nguon`): MỘT bộ phân giải chuỗi `basedOn` có NHỚ cho MỌI hậu tố đã đi qua (kể cả kết quả
+    vắng) — mỗi cạnh style đi tối đa một lần cho cả tệp. `gop`: "dau" = giá trị khác None đầu tiên; "dem" = số tầng bật. Vòng lặp ⇒
+    ValueError (bảo thủ hơn bản cũ: vòng ở bất kỳ đâu trong chuỗi đều chặn)."""
+    nho = kieu.setdefault("#nho", {})
+    loai = kieu.get("#loai", {})   # r33 (lượt 32 I1): chỉ ID đã XÁC THỰC là định nghĩa (không trúng khoá nội bộ)
+    duong, da = [], set()
+    while sid and sid in loai and (sid, chi_so, gop) not in nho:
         if sid in da:
             raise ValueError(f"style {sid}: vong lap basedOn")
         da.add(sid)
-        v = kieu[sid][chi_so]
-        if v is not None:
-            return v
+        duong.append(sid)
         sid = kieu[sid][0]
-    return None
+    kq = nho[(sid, chi_so, gop)] if (sid, chi_so, gop) in nho else (None if gop == "dau" else 0)
+    for x in reversed(duong):
+        v = kieu[x][chi_so]
+        kq = (v if v is not None else kq) if gop == "dau" else kq + (1 if v else 0)
+        nho[(x, chi_so, gop)] = kq
+    return kq
+
+
+def _theo_kieu(kieu, sid, chi_so):
+    """Giá trị hiệu lực theo chuỗi `basedOn` (chi_so: 1 numId, 2 ilvl, 3 strike, 4 dstrike). Vòng lặp ⇒ ValueError."""
+    return _giai_chuoi(kieu, sid, chi_so, "dau")
 
 
 def _dem_bat_trong_chuoi(kieu, sid, chi_so):
-    """r6 (lượt 5 E2): SỐ tầng trong chuỗi `basedOn` bật thuộc tính toggle (gạch ngang). r36 (lượt 35): NHỚ kết quả theo (style,
-    chỉ số) trong `kieu["#nho"]` — mỗi chuỗi đi một lần cho cả tệp, không nhân số run × độ dài chuỗi."""
-    nho = kieu.setdefault("#nho", {})
-    if (sid, chi_so) in nho:
-        return nho[(sid, chi_so)]
-    goc_sid, da, n = sid, set(), 0
-    while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)
-        if sid in da:
-            raise ValueError(f"style {sid}: vong lap basedOn")
-        da.add(sid)
-        n += 1 if kieu[sid][chi_so] else 0
-        sid = kieu[sid][0]
-    nho[(goc_sid, chi_so)] = n
-    return n
+    """r6 (lượt 5 E2): SỐ tầng trong chuỗi `basedOn` bật thuộc tính toggle (gạch ngang)."""
+    return _giai_chuoi(kieu, sid, chi_so, "dem")
 
 
 def _chu_cai(n, hoa):
@@ -1066,6 +1070,11 @@ def _nhan(muc, ilvl, bo_dem):
             raise ValueError(f"lvlText {txt!r} tro cap {k}")
         f, _, _ = muc[k]
         n = bo_dem[k]
+        if n < 0:
+            raise ValueError(f"so thu tu am {n} — khong ho tro")   # r36 (lượt 36): số âm không có hình dạng Word đã đo
+        dai[0] += len(str(n)) if f == "decimal" else (max(n, 1) - 1) // 26 + 1
+        if dai[0] > _TRAN_NHAN:
+            raise ValueError(f"nhan mo rong dai hon {_TRAN_NHAN} ky tu — khong ho tro")   # r36: đo TRƯỚC khi dựng chuỗi
         if f == "decimal":
             return str(n)
         if f in ("lowerLetter", "upperLetter"):
@@ -1079,11 +1088,10 @@ def _nhan(muc, ilvl, bo_dem):
         # r10 (lượt 9 J3) → r11 (lượt 10 K3): DANH SÁCH CHO PHÉP toàn chuỗi — chỉ placeholder `%N` (ít nhất một), các dấu `.` `)`
         # `(` `-` `–` và khoảng trắng; chữ, chữ số trần, `%` lẻ, ký tự vô hình ⇒ không hỗ trợ.
         raise ValueError(f"lvlText {txt!r} ngoai danh sach cho phep — khong ho tro")
+    dai = [len(txt) - 2 * txt.count("%")]   # r36: độ dài phần dấu, cộng dần độ dài từng placeholder trước khi dựng
     nhan = re.sub(r"%(\d)", thay, txt)
     if not nhan.strip():
         raise ValueError("lvlText rong")
-    if len(nhan.strip()) > _TRAN_NHAN:
-        raise ValueError(f"nhan mo rong dai hon {_TRAN_NHAN} ky tu — khong ho tro")   # r35 (lượt 34)
     return nhan.strip()
 
 
@@ -1334,9 +1342,14 @@ def doc_dieu_docx(nguon, dieu):
     đường thô, vì ranh giới cuối Điều trong .docx không đánh số chỉ có bằng chứng tiền tố)."""
     doc_gioi_han = _nap_doc_gioi_han()
     import io
+    co = len(nguon) if isinstance(nguon, (bytes, bytearray)) else os.path.getsize(nguon)
+    if co > _TRAN_GOI:
+        raise ValueError(f"goi .docx {co} byte vuot tran {_TRAN_GOI} — khong ho tro")   # r36 (lượt 36): trước khi nạp thư mục ZIP
     with zipfile.ZipFile(io.BytesIO(nguon) if isinstance(nguon, (bytes, bytearray)) else nguon) as z:
         # r24 (lượt 23 Z2): tên member TRÙNG trong thư mục ZIP ⇒ đọc theo tên chỉ lấy MỘT bản ngầm ⇒ dừng (cả gói).
         _ten = z.namelist()
+        if len(_ten) > _TRAN_MEMBER:
+            raise ValueError(f"goi .docx co {len(_ten)} member vuot tran {_TRAN_MEMBER} — khong ho tro")
         if len(_ten) != len(set(_ten)):
             raise ValueError("goi .docx co member trung ten — khong ho tro")
         chinh = _phan_chinh(z, doc_gioi_han)
@@ -1461,10 +1474,17 @@ def doc_dieu_docx(nguon, dieu):
         # lượt 1 A2: nhãn khoản phải CHÍNH LÀ số của cấp khoản (`%N.`/`%N)`), không cố định/ghép cấp khác.
         raise ValueError(f"cap khoan co numFmt {fmt0!r}, lvlText {txt0!r} (can decimal, '%{cap0 + 1}.')")
     cau_dan, khoan = [], []
+    con = [_TRAN_VAN_BAN - len(tieu_de)]   # r36 (lượt 36): NGÂN SÁCH trừ dần khi thêm từng dòng/nhãn/phân cách, trước khi dựng
+
+    def tieu(n):
+        con[0] -= n
+        if con[0] < 0:
+            raise ValueError(f"Dieu dung tu .docx vuot tran {_TRAN_VAN_BAN} ky tu — khong ho tro")
     for d in vung:
         chu = d["chu"]
         if d["so"] is None:
             if not khoan:
+                tieu(1 + len(chu))
                 cau_dan.append(chu)   # trước khoản đầu: không phải khoản theo cấu trúc
             else:
                 # đoạn KHÔNG đánh số sau khoản đầu: khoản mất số, tiếp dòng, lời dẫn nhóm hay điểm GÕ TAY (r7, lượt 6 F2: dấu
@@ -1475,9 +1495,12 @@ def doc_dieu_docx(nguon, dieu):
         if _RE_SO_GO_TAY_DOCX.match(chu):
             raise ValueError(f"doan danh so tu dong con mang so go tay: {chu[:60]!r}")
         if il == cap0 and nid == nid0:
+            tieu(1 + len(f"{d['dem'][cap0]}. ") + len(chu))
             khoan.append([d["dem"][cap0], [chu], chu])   # r35: gom dòng, nối MỘT lần (không sao chép lặp chuỗi khoản)
         elif nid == nid0 and il > cap0 and khoan:
-            khoan[-1][1].append(f"{_nhan(muc0, il, d['dem'])} {chu}")
+            dong_diem = f"{_nhan(muc0, il, d['dem'])} {chu}"
+            tieu(1 + len(dong_diem))
+            khoan[-1][1].append(dong_diem)
         else:
             # cấp khoản của danh sách KHÁC, cấp con của danh sách khác, hay cấp con trước khoản đầu ⇒ ranh giới không rõ.
             raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")
@@ -1485,8 +1508,6 @@ def doc_dieu_docx(nguon, dieu):
         raise ValueError(f"so khoan khong lien tuc tu 1: {[so for so, _, _ in khoan]}")
     khoan = [(so, "\n".join(cac), dau) for so, cac, dau in khoan]
     dong = [tieu_de, *cau_dan] + [f"{so}. {txt}" for so, txt, _ in khoan]
-    if sum(len(x) for x in dong) + len(dong) - 1 > _TRAN_VAN_BAN:   # r36 (lượt 35): đúng số dấu xuống dòng GIỮA các dòng
-        raise ValueError(f"Dieu dung tu .docx vuot tran {_TRAN_VAN_BAN} ky tu — khong ho tro")   # r35 (lượt 34)
     return {"van_ban": "\n".join(dong), "khoan": [(so, txt, dau) for so, txt, dau in khoan], "cau_dan": cau_dan,
             "chu_doan": [d["chu"] for d in vung]}
 
@@ -1512,7 +1533,10 @@ def doc_dieu_cau_truc(nguon, dieu):
 
 
 PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
-                "KHONG chung minh ranh gioi khoan (tach tu van ban tho) — can nguoi duyet")
+                "KHONG chung minh ranh gioi khoan (tach tu van ban tho) — can nguoi duyet; "
+                # r37 (lượt 36, quyết định chủ kho): giới hạn đã khai được KHOÁ vào tín hiệu đầu ra của đường thô.
+                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "
+                "can ranh gioi chac chan thi dung --tep <tep .docx>")
 
 
 def tach_khoan(van_ban):

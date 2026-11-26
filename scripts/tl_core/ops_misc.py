@@ -3064,7 +3064,11 @@ def cmd_llm_khai_niem(a) -> int:
             if len(_b) > lr.TRAN_BYTE_TEP:
                 print(f"[tl] {a.tep} lon hon {lr.TRAN_BYTE_TEP} byte — vuot ngan sach doc, khong goi model", file=sys.stderr)
                 return 2
-            van_ban = _b.decode("utf-8").strip(" \t\r\n")
+            _tho = _b.decode("utf-8")
+            if lr.vuot_ngan_sach(_tho):   # r36 (lượt 36): đo trên chữ GỐC (trước khi bỏ biên), cùng chốt với văn bản
+                print(f"[tl] {a.tep}: {lr.vuot_ngan_sach(_tho)} — khong goi model", file=sys.stderr)
+                return 2
+            van_ban = _tho.strip(" \t\r\n")
         except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
             print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
             return 2

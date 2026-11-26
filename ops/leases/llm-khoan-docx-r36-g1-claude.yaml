@@ -232,3 +232,5 @@ review_calls_limit: 37
 review_calls_used_truoc: 36
 inference_calls_limit: 0
 review_calls_ghi_chu: 'r34 dung 2 loi goi (luot 34 chay lai theo lop); r35 dung 1 (run db0f1b9b bi ngat khi worker khoi dong lai, verdict tam); tong da dung 36, tran 37.'
+da_bi_thay_the: llm-khoan-docx-r37-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 36; revision r37 (ops/specs/llm-khoan-docx-r37.md), tran 38.'

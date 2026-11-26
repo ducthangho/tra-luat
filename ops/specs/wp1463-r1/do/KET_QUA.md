@@ -1,21 +1,17 @@
 # wp1463 (PR2) — kết quả đo của SPEC r14, lease `wp1463-r14-g2-claude` (lượt 2)
-
-Đo 2026-11-26 05:15Z–06:04Z, phiên cloud Linux, 4 CPU, Python 3.13.18, có `actionlint` và `shellcheck`, trên MỘT clone cục bộ của
-commit mang đúng hai tệp dưới đây (`core.abbrev 7`); base của lease `1260fa0cba89353911e2f97188b2c04dab8139d7`. Mỗi khối là đầu ra
-NGUYÊN VĂN của lệnh ghi ở tiêu đề (bỏ lời nhắc `detached HEAD` của git trên stderr); `rc=` là mã thoát của lệnh.
+Đo 2026-11-26 06:13Z–06:59Z, phiên cloud Linux, 4 CPU, Python 3.13.18, có `actionlint` và `shellcheck`, trên MỘT clone cục bộ
+(`core.abbrev 7`) của commit mang đúng ba tệp mã của PR; base của lease `1260fa0cba89353911e2f97188b2c04dab8139d7`. Mỗi khối là đầu
+ra NGUYÊN VĂN của lệnh ở tiêu đề (bỏ lời nhắc `detached HEAD` mà lệnh clone của git in ra stderr), `rc=` là mã thoát. Giây ở `ab` là giây tường cục bộ, ba lượt chạy NỐI TIẾP (không phải số CI). Dòng `KET_LUAN_REGISTRY: DAT (dau ra doc tu <thư mục nháp ngoài kho>)` của `registry` đứng trước `rc=0`; đường dẫn nháp không chép vào đây. Tệp đã chạy:
 - `ops/ci_provenance_test.py` sha256 `295986a1ec9fe7aab8905d8ef68bd02896dd98f140a33efc2ddd1bfca480beec`
 - `.claude/dev/ci_dang_ky_test.py` sha256 `92516f3f45fef47bfee810a26f53bd1f36724af0cd0d0e0a95ab629b6cc834d2`
-
-## `do_pr2.py ab 1260fa0…` (Nghiệm thu 1, 2, 5)
+## `do_pr2.py ab 1260fa0cba89353911e2f97188b2c04dab8139d7` (Nghiệm thu 1, 2, 5)
 ```
-SHA256 ops/ci_provenance_test.py: 295986a1ec9fe7aab8905d8ef68bd02896dd98f140a33efc2ddd1bfca480beec
-SHA256 .claude/dev/ci_dang_ky_test.py: 92516f3f45fef47bfee810a26f53bd1f36724af0cd0d0e0a95ab629b6cc834d2
 AB base=1260fa0cba89353911e2f97188b2c04dab8139d7 blob ops/ci_provenance.py base=2b2b9218892814e94c0ad95fe3bae77d41edd5fe H=2b2b9218892814e94c0ad95fe3bae77d41edd5fe (H = HEAD cua kho do, khong ghi o day)
-LUOT base day_du: rc=0 · 622.2 s · TIEN TRINH: 4 · CPU 4
+LUOT base day_du: rc=0 · 646.5 s · TIEN TRINH: 4 · CPU 4
   CA: 77/77 dat · DOT BIEN: 485/485 bi giet dung ly do · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT
-LUOT H day_du: rc=0 · 592.0 s · TIEN TRINH: 4 · CHE DO: day_du · CPU 4
+LUOT H day_du: rc=0 · 634.6 s · TIEN TRINH: 4 · CHE DO: day_du · CPU 4
   CA: 86/86 dat · DOT BIEN: 522/522 bi giet dung ly do · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT
-LUOT H nhe: rc=0 · 151.3 s · TIEN TRINH: 4 · CHE DO: nhe · CPU 4
+LUOT H nhe: rc=0 · 153.5 s · TIEN TRINH: 4 · CHE DO: nhe · CPU 4
   CA: 86/86 dat · DOT BIEN: 522 muc CHE DO NHE — do khi diff cham vung · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT
 KE HOACH DOT BIEN: base 485 viec · H 522 viec · ten base ⊆ H: True
 PHEP ca_bo_day_du: DUNG
@@ -30,18 +26,14 @@ PHEP kho_va_ben_doc_cu: DUNG
 KET_LUAN_AB: DAT (9/9 phep dung)
 rc=0
 ```
-Giây là giây tường cục bộ, ba lượt chạy NỐI TIẾP trên cùng máy; không phải số CI.
-
-## `do_pr2.py registry --tu <đầu ra H của lệnh ab>` (Nghiệm thu 3)
+## `do_pr2.py registry --tu <thư mục --luu của lệnh ab>` (Nghiệm thu 3)
 ```
 REGISTRY dau ra nhe / ke hoach nhe: ĐẠT (mong ĐẠT) · CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
 REGISTRY dau ra day_du / ke hoach day_du: ĐẠT (mong ĐẠT) · CI_DANG_KY ops/ci_provenance_test.py: ĐẠT rc=0
 REGISTRY dau ra day_du / ke hoach nhe: ĐỎ (mong ĐỎ) · CI_DANG_KY ops/ci_provenance_test.py: chế độ nhẹ mà VẪN in dòng đột biến ĐỦ — cờ nhẹ không có tác dụng | CI_DANG_KY ops/ci_provenance_test.py: ĐỎ rc=0
 REGISTRY dau ra nhe / ke hoach day_du: ĐỎ (mong ĐỎ) · CI_DANG_KY ops/ci_provenance_test.py: ĐỎ rc=0
 rc=0
-KET_LUAN_REGISTRY: DAT (dau ra doc tu thu muc --luu cua lenh ab o tren)
 ```
-
 ## `do_pr2.py vung` trên H (Nghiệm thu 4)
 ```
 PHEP bo_day_du: SACH · rc=0 · (1) khac rong=True · (2) nhan chung ops/ci_provenance.py=True · (3) ngoai vung=[] · Python con/dong khoi dong con=608/608
@@ -56,13 +48,9 @@ PHEP phan_chung_go_bon_khoa: SACH · rc=0 · (1) khac rong=True · (2) nhan chun
 KET_LUAN_VUNG: SACH
 rc=0
 ```
-Lần chạy SỚM (việc đầu tiên của lượt 2, trên base + bốn thay đổi dữ liệu mục 3 + `vung`, `ops/ci_provenance_test.py` còn blob base
-`e381a597…`): `KET_LUAN_VUNG: SACH`, rc 0 — `bo_day_du` 5 tệp, 562/562, `DOT BIEN: 485/485`; hai probe mỗi cái 7 tệp như trên, 79/92 và 79/93.
-Lượt 1 (luật theo từng tiến trình sinh của revision 11) ra `KHONG_DO_DUOC`; revision 12 đổi sang đối chiếu GỘP (bảo đảm giảm, chủ kho chấp nhận).
-
+Lần chạy SỚM của lượt 2 (base + bốn thay đổi dữ liệu mục 3 + `vung`; `ops/ci_provenance_test.py` còn blob base `e381a597…`): `KET_LUAN_VUNG: SACH`, rc 0 — `bo_day_du` 5 tệp, 562/562, `DOT BIEN: 485/485`; hai probe mỗi cái đúng 7 tệp như trên, 79/92 và 79/93.
 ## `do_pr2.py tu-kiem --dot-bien` (gồm trọn các dòng `SO` của `tu-kiem`)
-Véc-tơ chín phép theo thứ tự `ca_bo_day_du cung_bang khong_thieu_ten ast_phan_hang luoi_phan_hang cung_blob_san_pham cong_thuc_cu_dong
-tong_hai_chieu kho_va_ben_doc_cu` (1 = đúng).
+Véc-tơ theo thứ tự `ca_bo_day_du cung_bang khong_thieu_ten ast_phan_hang luoi_phan_hang cung_blob_san_pham cong_thuc_cu_dong tong_hai_chieu kho_va_ben_doc_cu` (1 = đúng).
 ```
 SO nen_khoe: khai sai [] · vec-to 111111111
 SO a_doi_thay_the: khai sai ['ca_bo_day_du'] · vec-to 011111111
@@ -124,10 +112,6 @@ DOT_BIEN_TU_KIEM: 28/28 bi bat dung cho (15 cua bo so, 13 cua phep do vung)
 KET_LUAN_TU_KIEM: DAT
 rc=0
 ```
-`do_pr2.py tu-kiem` (không `--dot-bien`): `TU_KIEM_SO: 26/26 dat · moi phep co dau vao am: True · TU_KIEM_VUNG: 116/116 dat · KET_LUAN_TU_KIEM: DAT · rc=0`.
-
-## Cổng kho và phần chưa đo
-- `python3 .claude/dev/ci_dang_ky_test.py`: `PHẢN CHỨNG: 1677/1677 đỏ đúng` · `TỔNG: ĐẠT` · `rc=0`.
-- `ruff check --select F` trên ba tệp `.py`: 0 lỗi ở H; hai tệp có ở base cũng 0 ⇒ delta 0.
-- CHƯA ĐO (ngoài quyền executor): CI PR Ubuntu, K7 (`ci-dot-bien-du.yml`), Windows, và Nghiệm thu 10 sau merge.
-- Giới hạn của `vung` (SPEC r14 "Bảo đảm giảm"): tiến trình không phải Python, Python gọi qua shell, lần đọc không phát sự kiện `open`.
+`do_pr2.py tu-kiem`: `TU_KIEM_SO: 26/26 dat · moi phep co dau vao am: True · TU_KIEM_VUNG: 116/116 dat · KET_LUAN_TU_KIEM: DAT · rc=0`.
+## Ngoài năm lệnh con
+- `python3 .claude/dev/ci_dang_ky_test.py` (cùng clone): `PHẢN CHỨNG: 1677/1677 đỏ đúng` · `TỔNG: ĐẠT` · `rc=0`. CHƯA ĐO (ngoài quyền executor): CI PR Ubuntu, K7 (`ci-dot-bien-du.yml`), Windows, Nghiệm thu 10 sau merge.

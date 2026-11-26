@@ -1,0 +1,87 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1488
+packet_id: wp1488
+spec_packet_id: CAI-GITHUB-PATH-HOAN-GHI
+revision: 5
+generation: 5
+lease_id: wp1488-r5-g5-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1488-r5.md
+spec_hash: c27e7b6d14422d892e28840897340b1181c1315d5a79fb393e7958ad61967580
+spec_sha256_required: c27e7b6d14422d892e28840897340b1181c1315d5a79fb393e7958ad61967580
+spec_duyet: 'chủ kho duyệt băm c27e7b6d (đặc tả r5) qua AskUserQuestion 25-11-2026 ~18:41Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Duyệt r5, trần 8 (Recommended)"; chỉ thị gốc "vá #1489 cho tôi tới khi review approve". Lease cấp muộn vì wp1511-r2-g2-claude giữ launcher_test.py tới 26-11 16:30Z (chủ kho chọn "Đợi #1511 nhả tệp").'
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/wp1488/RESULTS.md
+- ops/acceptance/wp1488/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/wp1488-r1-g1-claude.yaml
+- ops/leases/wp1488-r2-g2-claude.yaml
+- ops/leases/wp1488-r3-g3-claude.yaml
+- ops/leases/wp1488-r4-g4-claude.yaml
+- ops/leases/wp1488-r5-g5-claude.yaml
+- ops/specs/wp1488-r1.md
+- ops/specs/wp1488-r2.md
+- ops/specs/wp1488-r3.md
+- ops/specs/wp1488-r4.md
+- ops/specs/wp1488-r5.md
+write_set_hash: 7298e0b973c1ee415179d0932e28b138ef373a95ec3a999c3d08233f3af395b8
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-26T16:38:46Z'
+  goc_quet: 'fetch đủ refs/heads/* (ls-remote so tập với refs/remotes/origin: thiếu 0); master cục bộ = origin/master b1db69429'
+  ket_qua: '.claude/dev/launcher_test.py, ops/cai_cong_cu.sh, RESULTS/VERDICT wp1488: ai-dang-giu NGƯỜI_GIỮ 0 (wp1511-r2-g2-claude hết hạn 16:30Z)'
+branch: claude/ci-github-path-hoan-ghi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+start_from_sha: 210ceff7457e9df95b2e3780f8ea72ec7492c34d
+reviewed_sha_required: 4cd2ba29acdb1fba5eac2267a17d049fa0880a41
+reviewed_sha_required_nghia: 'Ứng viên r5 đã được Codex lượt 7 approve TRƯỚC khi lease cấp (review offline, ADR-0060 M12): 4cd2ba2 = 210ceff + merge master d0868db + e9ac35b + 4cd2ba2. Commit sau 4cd2ba2 chỉ được đổi tệp hồ sơ; đổi mã ⇒ lượt 8 trên head mới.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1488
+granted_on_instruction_readback: 'chủ kho 21-11: "Mở packet sửa nợ GITHUB_PATH. Cập nhật thay đổi, kiểm tra trạng thái"; duyệt spec và cấp lease qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa cong_cu.yaml/launcher.py/hook/workflow.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease r4 (wp1488-r4-g4-claude) đã HẾT HẠN 2026-11-21T19:25:05Z nên KHÔNG ghi bia mộ (bia mộ vào lease chết làm workflow đăng lease rc=8, xem CLAUDE.md); write-set exclusion của r4 đã nhả.'
+leased_at_utc: '2026-11-26T16:38:46Z'
+heartbeat_at: '2026-11-26T16:38:46Z'
+lease_until: '2026-11-27T00:38:46Z'
+lease_expires_at_utc: '2026-11-27T00:38:46Z'
+lease_until_ghi_chu: '8h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 7, reserved: 0, limit: 8}
+  codex_review_calls_ghi_chu: 'trần cả packet: r1 2, r2 1, r3 1, r4 1 (request_changes); r5 lượt 6 (e9ac35b) approve + 2 P3, lượt 7 (4cd2ba2) approve, chạy offline trước khi lease cấp được.'
+nang_tran:
+  truc: codex_review_calls
+  tran_cu: 5
+  tran_moi: 8
+  ai_nang: ducthangho
+  can_cu: 'AskUserQuestion 25-11-2026 ~18:41Z: "Duyệt r5, trần 8 (Recommended)" — lượt 6–8 chỉ xét delta từ 210ceff. Các lần trước: 4→5 (21-11 ~13:25Z), 3→4, 2→3.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
+da_bi_thay_the: wp1488-r5-g6-claude
+da_bi_thay_the_ghi_chu: 'generation g6 thay g5 lúc 2026-11-26T16:50:32Z: PR #1489 vượt ADR-0060 M5 (26 lần push), đóng PR, push đúng một lần trên agent/wp1488-g6-claude.'

@@ -1,0 +1,8 @@
+{
+ "ok": true,
+ "files_scanned": 132,
+ "claims_flagged": 392,
+ "advisory_count": 392,
+ "flags": [],
+ "strict": true
+}

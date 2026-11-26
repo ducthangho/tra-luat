@@ -1,0 +1,23 @@
+import sys
+src, dst, k01 = sys.argv[1], sys.argv[2], sys.argv[3]
+t = open(src, encoding="utf-8").read()
+def rep(old, new, n=1):
+    global t
+    c = t.count(old); assert c == n, (old[:90], c); t = t.replace(old, new)
+OLD = "607431f20721e3700adb72ba501b5220cab4e2ff96864ff8bbe9094bb4740531"
+rep(OLD, k01)
+rep("Lịch sử 18 lớp finding ở mục 19.",
+    "Revision 9 soạn ngày 26-11-2026 bởi phiên điều phối Claude Opus 5.5 (cloud, Linux), trên `origin/master` `1fac6ced8e5a8c76fdb2699edac779a4251f6149`, sau lượt 1 của executor (commit cục bộ `96e44721a149b363c83af4fcabe3599232f6512b`) và sau hai quyết định của chủ kho ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7191469520: Q0 (E3) và Q2 (E5). r9 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 9*. Lịch sử 18 lớp finding ở mục 19.")
+rep("- **Khối** của một mục: mỗi dãy dòng không rỗng liền nhau trong thân mục (không kể dòng tiêu đề). Khối đánh số từ 1 theo thứ tự.\n",
+    "- **Khối** của một mục: mỗi dãy dòng không rỗng liền nhau trong thân mục (không kể dòng tiêu đề). Khối đánh số từ 1 theo thứ tự.\n"
+    "- **Phần đầu tệp** (thêm ở r9): các dòng đứng trước dòng tiêu đề đầu tiên. Chúng không thuộc mục nào, nhưng khối của chúng (dãy dòng không rỗng liền nhau, như trên) được phép (3) đếm. Đường tiêu đề của phần này là chuỗi rỗng, nên không địa chỉ nào trỏ tới nó và phép (1), (2) không đổi. Thiếu luật này thì bản sao nguyên byte của một đơn vị dạng khối đặt trên đầu tệp không bị đếm (đo trên nguyên mẫu: rc 0), trái với hệ quả \"nhân đôi nó ở chỗ hiển thị bất kỳ thì hỏng phép (3)\". Ca: `doctrine_inv_nhan_doi_K04_truoc_tieu_de_dau`, `doctrine_inv_nhan_doi_K02_sat_tieu_de_dau`, `doctrine_inv_chu_la_truoc_tieu_de_dau_van_xanh`; đột biến: `inv_bo_dem_truoc_tieu_de_dau`, `inv_truoc_tieu_de_chi_khoi_dau`, `inv_truoc_tieu_de_bo_bien_tieu_de`. Ba ca và ba đột biến ấy không cộng vào tập bắt buộc (57 ca, 26 đột biến), nhưng nằm trong T của N6, và N7 đòi MỌI đột biến có ở H mà không có trên nền đều giết ca đích; nên chúng được đo mà các số của N6, N7 không đổi.\n")
+rep("Bảng không đổi so với r4: trên protocol nền",
+    "Bảng không đổi so với r4, trừ băm đơn vị của `K01` đổi ở r9 vì bảng §1.1 bỏ backtick quanh con trỏ ca (mục 0, đoạn *Revision 9*): trên protocol nền")
+rep("\n## 1. `packet_id`",
+    "\n**Revision 9, sau lượt 1 của executor: hai quyết định của chủ kho.** Lượt 1 (Claude Fable 5.2, commit cục bộ `96e4472`, +443 −4) đúng đặc tả r8 từng byte, nhưng đo tại chỗ cho thấy bước CI bắt buộc `doc-claims-check --strict` đỏ trên H (rc 2) trong khi nền xanh (rc 0): ba cờ L12 `TEST_ID_UNKNOWN` ở dòng `INV-01`, `INV-02`, `INV-14` của bảng §1.1, vì `doc-claims-check` đọc mọi chuỗi dạng `r<số>_…` trong backtick là tên ca selftest của `scripts/tl.py`. Phiên điều phối đo lại độc lập và ra cùng kết quả (`claims_flagged` 392 → 395). Hai quyết định, ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7191469520:\n\n"
+    "1. Q0 (E3), \"Ra đặc tả r9 (Recommended)\": sửa theo LỚP chứ không theo ba dòng bị cờ. Cả 18 con trỏ `ca:` của bảng §1.1 viết không backtick, và đoạn dẫn của §1.1 thêm một câu nêu luật ấy, để dòng thêm về sau không vấp lại cùng cơ chế. Việc đổi này chạm khối `p2-moi`, băm đơn vị của `K01` (khối `khoa`), và hằng `INV_KHOA_PROTOCOL` của mã. Bản nháp đầu của câu thêm viết tên lệnh selftest trong backtick và vấp lớp L8 `TL_COMMAND_UNKNOWN` của cùng cổng; câu cuối không có chuỗi nào trong backtick khớp L8 hay L12. Đo trên H cộng bảng r9 cộng băm `K01` mới: `doc-claims-check --strict` rc 0 (`claims_flagged` 392, bằng nền, 0 cờ), `doctrine-scan` rc 0. Cổng không phân tích nội dung ô `cổng`, nên bỏ backtick chỉ đổi băm.\n"
+    "2. Q2 (E5), \"Giữ bản vá (Recommended)\": luật *Phần đầu tệp* ở mục 8.3, do executor tự phát hiện và vá theo lớp ở lượt 1, nay là hợp đồng.\n\n"
+    "Những gì r9 không đổi: ADR-0068 (khối `adr`), năm khối protocol còn lại, sáu băm `K02` đến `K07`, mọi tiêu chí N1 đến N16, trần, write set. Nguyên mẫu `nguyen-mau-r5/` giữ nguyên làm hồ sơ; mã giao nộp đối chiếu với đặc tả r9, không với nguyên mẫu.\n\n## 1. `packet_id`")
+rep("Không finding nào của bảy lượt bị người soạn bác.",
+    "Không finding nào của bảy lượt bị người soạn bác.\n\n**Lượt 8 (r8 `e215940`) và r9.** Lượt 8 approve r8 (bảng (i) 0 lớp). r9 không phát sinh từ review đặc tả mà từ phép đo của executor (mục 0, đoạn *Revision 9*). Lớp mới, đặt tên ở r9: `con-tro-trong-backtick-bi-cong-khac-doc` — chữ trong backtick của protocol bị `doc-claims-check` đọc như lệnh (L8) hay con trỏ ca (L12). Tám lượt review đặc tả không đo cổng này trên nguyên mẫu, và S10 của r5 cũng không. Hai đường vào, cả hai đã gặp: L12 ở bảng r8, L8 ở bản nháp của câu thêm ở r9.")
+open(dst, "w", encoding="utf-8").write(t)

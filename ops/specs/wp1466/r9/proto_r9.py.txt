@@ -1,0 +1,18 @@
+import sys, re, hashlib
+r8, r9, ph, out = [open(x, encoding="utf-8").read() if i < 3 else x for i, x in enumerate(sys.argv[1:5])]
+khoi = lambda s: re.search(r"(?ms)^~~~ p2-moi\n(.*?)\n^~~~$", s)[1]
+k8, k9 = khoi(r8), khoi(r9)
+assert ph.count(k8) == 1, "H khong chua dung p2-moi r8"
+p9 = ph.replace(k8, k9)
+open(out, "w", encoding="utf-8").write(p9)
+# bam K01: tron muc '### 1.1' toi tieu de ke, bo dong rong cuoi; tren byte tho
+d = p9.encode().split(b"\n")
+i = d.index("### 1.1 Bảng bất biến protocol".encode())
+j = i + 1
+while j < len(d) and not d[j].startswith(b"#"): j += 1
+while d[j-1] == b"": j -= 1
+print("K01 r9 =", hashlib.sha256(b"\n".join(d[i:j])).hexdigest(), "dong", i+1, "..", j)
+d8 = ph.encode().split(b"\n"); j8 = i+1
+while not d8[j8].startswith(b"#"): j8 += 1
+while d8[j8-1] == b"": j8 -= 1
+print("K01 H(r8) =", hashlib.sha256(b"\n".join(d8[i:j8])).hexdigest())

@@ -2573,7 +2573,7 @@ DOT_BIEN = [
     ("bo_chot_nguon_mo_ho", ("    if any(_dong_mo_ho(ln[q[2]:] if q[0] == \"so\" else ln) for ln, q in zip(dong, loai)):\n        return None", "    if False:\n        return None"),
      "ca_nguon_mo_ho_luot8"),
     ("mo_ho_khong_dung_span", ("_dong_mo_ho(ln[q[2]:] if q[0] == \"so\" else ln)", "_dong_mo_ho(ln)"), "ca_nguon_mo_ho_luot8"),
-    ("cho_trich_dan_long", ('            if c == "\\u201c" and trich == "\\u201d":\n                su_kien = "long"\n', ""), "ca_nguon_mo_ho_luot8"),
+    ("cho_trich_dan_long", ('            if c == "\\u201c" and trich == "\\u201d":\n                su_kien = "long"\n', '            if c == "\\u201c" and trich == "\\u201d":\n                su_kien = None\n'), "ca_nguon_mo_ho_luot8"),
     ("cho_ngoac_dong_le", ('        elif c == ")" and not sau:\n            su_kien = "dong_le"\n', ""), "ca_nguon_mo_ho_luot8"),
     ("cho_dong_cong_le", ('        elif c == "\\u201d":\n            su_kien = "dong_cong_le"\n', ""), "ca_nguon_mo_ho_luot8"),
     ("cho_ngoac_mo_qua_dong", ("    return sau != 0 or trich is not None", "    return trich is not None"), "ca_nguon_mo_ho_luot8"),

@@ -61,3 +61,5 @@ full_mutant_audit: 'bat buoc (ADR-0060 M9, K7): ci-dot-bien-du.yml tren H (A11).
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho.'
 push_policy: 'ADR-0060 M5/M12: day nhanh thi cong MOT lan sau khi review offline approve, verdict dang len Issue #1540 va Windows local xanh; mo PR draft; push them can checkpoint chu kho (E2) kem bien nhan SHA truoc/sau.'
+da_bi_thay_the: don-ref-test-vao-ci-r2-g2-claude
+da_bi_thay_the_ghi_chu: 'same_failure_limit (§12) cham o luot 2; chu kho chon generation moi g2 (ghi ho issuecomment-7199972997).'

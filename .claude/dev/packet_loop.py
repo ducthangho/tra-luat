@@ -3982,12 +3982,13 @@ def _d2b_kiem(root: Path, bb: dict) -> list:
         if any(k != "d" and _d2b_blob(os.fsencode(os.readlink(cay / t)) if k == "l" else (cay / t).read_bytes()) != sha for t, (k, sha) in muc.items()):
             raise OSError("bản bung git archive không khớp nội dung của oid")
         if passed:
-            # DANH SÁCH CHO PHÉP (chủ kho, #1236 issuecomment-7180063460): symlink (120000) chỉ qua khi đích, chuẩn hoá trên VĂN BẢN so với thư mục chứa nó,
-            # trùng TỪNG BYTE một tệp thường của danh mục này. Thư mục, gốc bản bung, bí danh (hoa/thường, NFC, `\`), đích hỏng, ngoài danh mục, symlink khác
-            # ⇒ `symlink`. Không hỏi đĩa: Windows gắn LOẠI cho symlink lúc tạo và phân giải tên theo luật riêng, nên K2 của module nhìn nhầm (M3, issuecomment-7170894289).
+            # DANH SÁCH CHO PHÉP (chủ kho, #1236 issuecomment-7180063460): symlink (120000) chỉ qua khi đích THÔ đã chuẩn tắc, đường dẫn đích không mang `\` (kể cả
+            # ở thư mục chứa link) và trùng TỪNG BYTE một tệp thường của danh mục này. Thư mục, gốc bản bung, bí danh (hoa/thường, NFC), `\`, đích hỏng (`a/../x` khi
+            # `a` vắng: bộ bung trước 3.12.11 giữ nguyên văn bản ấy), ngoài danh mục, symlink khác ⇒ `symlink`. Không hỏi đĩa: Windows gắn LOẠI cho symlink lúc tạo (M3, issuecomment-7170894289).
             tep_cay = {t for t, (k, _) in muc.items() if k == "f"}
-            tro = {posixpath.normpath(posixpath.join(posixpath.dirname(t), os.readlink(cay / t))) for t, (k, _) in muc.items() if k == "l"}
-            tt, ly = ("not_measured", ["symlink"]) if tro - tep_cay else mod.kiem_tep(cay / dd, cay / thu)
+            tro = {t: os.readlink(cay / t) for t, (k, _) in muc.items() if k == "l"}
+            xau = any("\\" in (j := posixpath.join(posixpath.dirname(t), d)) or posixpath.normpath(d) != d or posixpath.normpath(j) not in tep_cay for t, d in tro.items())
+            tt, ly = ("not_measured", ["symlink"]) if xau else mod.kiem_tep(cay / dd, cay / thu)
             if tt != "passed":
                 vp.append(f"kiem_tep:{tt}:{ly[0] if ly else '-'}")
             if d := mod.doc_danh_gia((cay / dd).read_bytes())[0]:

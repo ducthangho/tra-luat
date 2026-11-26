@@ -9252,6 +9252,8 @@ def _rev_list_loi(script, args, sd, env=None, lenh="rev-list"):
         os.symlink = lambda *a, **k: (_ for _ in ()).throw(OSError("symlink"))
     if lenh == "tep":  # mô hình Windows: symlink trỏ thư mục được tạo TRƯỚC đích là symlink loại TỆP ⇒ `os.walk` xếp nó vào tệp, không vào thư mục
         os.walk = lambda *a, **k: ((g, [x for x in ds if not (lk := os.path.islink)(os.path.join(g, x))], fs + [x for x in ds if lk(os.path.join(g, x))]) for g, ds, fs in di(*a, **k))
+    if lenh == "nguyen":  # bộ bung GIỮ nguyên văn bản đích: `data_filter` trước 3.12.11 / 3.13.4 không chuẩn hoá linkname (vd 3.12.10); bản mới viết lại ⇒ luật nội dung rc 8
+        tf.extractall = lambda t, cay, **k: bung(t, cay, filter=lambda mb, d: __import__("tarfile").data_filter(mb, d).replace(linkname=mb.linkname))
 
     def bung_roi_doi(t, cay, **k):  # nền làm bản bung lệch cây: biến đổi đĩa NGAY SAU khi bung (bước cuối của mỗi phép là symlink: nền không cho thì thôi)
         bung(t, cay, **k)
@@ -9388,9 +9390,9 @@ def _d1106_kho(c, o=None, sau=None, day=True, module=True):
     _g(w, "checkout", "-qb", "hs"), _d2b_chep(w, m), _d2b_readback(w, m)
     lien = (o or (lambda *_: None))(w, m) or {}
     _g(w, "add", "-A")
-    for p, dich in lien.items():  # mục đi thẳng vào index: chuỗi ⇒ symlink 120000 trỏ `dich`; bytes ⇒ tệp 100644 (tên mà nền không phân biệt hoa/thường không giữ nổi)
+    for p, dich in lien.items():  # mục đi thẳng vào index: chuỗi ⇒ symlink 120000 trỏ `dich`; bytes ⇒ tệp 100644, bytearray ⇒ 100755 (tên mà nền không giữ nổi)
         (goc / "lien").write_bytes(dich.encode() if isinstance(dich, str) else dich)
-        _g(w, "update-index", "--add", "--cacheinfo", f"{'120000' if isinstance(dich, str) else '100644'},{_g(w, 'hash-object', '-w', str(goc / 'lien'))},{p}")
+        _g(w, "update-index", "--add", "--cacheinfo", f"{'120000' if isinstance(dich, str) else '100755' if isinstance(dich, bytearray) else '100644'},{_g(w, 'hash-object', '-w', str(goc / 'lien'))},{p}")
     _g(w, "commit", "-qm", "O")
     O = _g(w, "rev-parse", "HEAD")
     _ = day and _g(w, "push", "-q", "origin", "HEAD:refs/heads/ops/x")
@@ -9607,7 +9609,7 @@ def _d2b_cay(w, m):
     (w / "ops/land/an-provenance").mkdir(), (w / "ops/land/an-provenance/an.yaml").write_bytes(prov)  # trên cây thật: hai provenance khớp ⇒ `provenance_nhieu`
     for ten, co_yaml, rb, sym, dich in (("trong", 0, {"m": "1" * 40}, None, None), ("a!~z", 1, {"m": m}, None, None), ("lk2", 0, {"m": m, "author_association": "MEMBER"}, "p.yaml", "prov.txt"),
                                         ("an", 1, None, None, None), ("crlf", 1, {"m": m}, None, None), ("hoa", 1, None, None, None), ("tm", 1, None, None, None), ("nen", 1, None, None, None),
-                                        ("lk3", 1, {"m": m}, "p.yaml", "ci.yaml"), ("lk4", 1, None, "d", "sub"), ("lk5", 1, None, "danh-gia-gate-output-1.txt", _D2B_F), ("lk6", 1, None, "len", "../../.."), ("lk7", 1, None, "e", "sub/danh-gia-gate-output-3.txt"), *((k, 1, None, *v) for k, v in _D2B_TC.items())):
+                                        ("lk3", 1, {"m": m}, "p.yaml", "ci.yaml"), ("lk4", 1, None, "d", "sub"), ("lk5", 1, None, "danh-gia-gate-output-1.txt", _D2B_F), ("lk6", 1, None, "len", "../../.."), ("lk7", 1, None, "e", "sub/danh-gia-gate-output-3.txt"), ("lkl", 1, None, "c", "khong/../ci.yaml"), *((k, 1, None, *v[:2]) for k, v in {**_D2B_TC, **_D2B_TB}.items())):
         thu = f"ops/land/{ten}-provenance"
         (w / thu / "sub/danh-gia-gate-output-3.txt").mkdir(parents=True, exist_ok=True), (w / thu / "sub/danh-gia-gate-output-3.txt/x").write_bytes(b"x")
         (w / thu / _D2B_F).write_bytes(tep), (w / thu / ("ci.yaml" if co_yaml else "prov.txt")).write_bytes(prov)
@@ -9615,7 +9617,7 @@ def _d2b_cay(w, m):
         lien.update({f"{thu}/{sym}": dich} if sym else {})
     (w / _D2B_L("nen", "x1")).mkdir(), (w / _D2B_L("nen", "x1/note.txt")).write_bytes(b"x"), (w / _D2B_L("nen", "x2")).mkdir(), _d2b_readback(w, m, _D2B_L("nen", "x2"))
     return {**lien, "ops/land/lk3-provenance/readback-lk-issuecomment-7.json": _D2B_RB, "ops/land/hoa-provenance/GHI.txt": b"x", "ops/land/hoa-provenance/ghi.txt": b"y",
-            _D2B_L("tm", "A/note.txt"): b"x", _D2B_L("tm", "a", _D2B_RB): (w / _D2B_L("nen", "x2", _D2B_RB)).read_bytes(), _D2B_L("tf", "B/x"): b"x", _D2B_L("tf", "b"): b"y", _D2B_L("lk7", "c"): "e", _D2B_L("lkd", "t"): "ci.yaml", _D2B_L("lke", "\u00e9.txt"): b"x"}
+            _D2B_L("tm", "A/note.txt"): b"x", _D2B_L("tm", "a", _D2B_RB): (w / _D2B_L("nen", "x2", _D2B_RB)).read_bytes(), _D2B_L("tf", "B/x"): b"x", _D2B_L("tf", "b"): b"y", _D2B_L("lk7", "c"): "e", _D2B_L("lkd", "t"): "ci.yaml", _D2B_L("lke", "\u00e9.txt"): b"x", **{_D2B_L(k, n): d for k, v in _D2B_TB.items() for n, d in v[2].items()}}
 
 
 _NG = lambda **v: lambda bb, ls: bb["gate_output_nguon"].update(v)  # noqa: E731
@@ -9629,6 +9631,10 @@ _D2B_TC = {  # symlink NGOÀI danh sách cho phép, mỗi thư mục một lớp
     # đích ngoài thư mục provenance (có trong cây của O, không có trong bản bung) · trỏ symlink khác (`t` → `ci.yaml`) · bí danh NFD của tệp NFC
     "lk8": ("hoa", "SUB"), "lk9": ("hoa", "CI.YAML"), "lka": ("cheo", "sub\\danh-gia-gate-output-3.txt\\x"), "lkb": ("hong", "khong-co"),
     "lkc": ("ngoai", "../lk5-provenance/ci.yaml"), "lkd": ("c", "t"), "lke": ("nfc", "e\u0301.txt")}
+_D2B_TB = {} if os.sep != "/" else {  # C05: cây CÓ THẬT một tên mang `\` và link trỏ đúng tên ấy (Git for Windows không nhận đường dẫn index ấy ⇒ chỉ POSIX): tệp 100644 · 100755 ·
+    # thành phần thư mục · link lồng · link NẰM TRONG thư mục `\` (đích thô sạch)
+    "lkf": ("c", "a\\b", {"a\\b": b"x"}), "lkg": ("c", "a\\b", {"a\\b": bytearray(b"x")}), "lkh": ("c", "a\\b/x", {"a\\b/x": b"x"}),
+    "lki": ("sub/c", "a\\b", {"sub/a\\b": b"x"}), "lkj": ("a\\b/c", "x", {"a\\b/x": b"x"})}
 _D2B_NEN = {  # nền làm bản bung lệch cây theo cách khoá NFC + casefold KHÔNG đoán trước được (dấu chấm cuối, tên dành riêng, luồng phụ, bộ lọc viết lại đích)
     "gop": lambda c: (os.replace(_D2B_N(c, "x2", _D2B_RB), _D2B_N(c, "x1", _D2B_RB)), _D2B_N(c, "x2").rmdir(), os.symlink("x1", _D2B_N(c, "x2"), target_is_directory=True)),
     "thua": lambda c: _D2B_N(c, "thua").write_bytes(b"x"), "thieu": lambda c: _D2B_N(c, "x1/note.txt").unlink(),
@@ -9689,7 +9695,8 @@ _D2B_CA = {
         # Windows gắn loại cho symlink lúc tạo (`git_loi="tep"`: `os.walk` xếp symlink trỏ thư mục vào TỆP, module đợt A bỏ sót) ⇒ chỉ đích là TỆP THƯỜNG của cây mới qua
         *[(f"nen_bung_symlink_thu_muc_thanh_tep[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), rc, ["kiem_tep:not_measured:symlink"] * (rc > 0), None, {"git_loi": "tep", "sym": True})
           for k, rc in (("lk4", 12), ("lk6", 12), ("lk7", 12), ("lk3", 12), ("lk5", 0))],  # `lk5`: symlink trỏ TỆP, K2 không xét (lượt trong tiến trình không bắt stdout)
-        *[(f"symlink_tro_thu_muc[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), 12, ["kiem_tep:not_measured:symlink"], None, {"sym": True}) for k in ("lk6", "lk7", *_D2B_TC)], o=_d2b_cay),  # `lk6`: gốc bản bung · `lk7`: đích có `/` + chuỗi `c` → `e` · `_D2B_TC`: Linux không coi là thư mục, vẫn bị chặn
+        *[(f"symlink_tro_thu_muc[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), 12, ["kiem_tep:not_measured:symlink"], None, {"sym": True}) for k in ("lk6", "lk7", *_D2B_TC, *_D2B_TB)],  # `lk6`: gốc bản bung · `lk7`: đích có `/` + chuỗi `c` → `e` · `_D2B_TC`, `_D2B_TB`: Linux không coi là thư mục, vẫn bị chặn
+        *[(f"nen_giu_nguyen_dich[{k}]", _NG(tep=_D2B_L(k, _D2B_F)), rc, ["kiem_tep:not_measured:symlink"] * (rc > 0), None, {"git_loi": "nguyen", "sym": True}) for k, rc in (("lkl", 12), ("lk5", 0))], o=_d2b_cay),  # `lkl`: `khong/../ci.yaml` hỏng mà chuẩn hoá ra tệp thường
     "cong_d2b_c5_duong_dan": _d2b_ca(
         *_D2B_SAI(f"{_D2B_PROV}/../pr1440-wp1319-provenance/{_D2B_F}", f"{_D2B_PROV}/./{_D2B_F}", f"ops/khac/pr1440-wp1319-provenance/{_D2B_F}",
                   f"{_D2B_PROV}/danh-gia-gate-output-.txt", f"{_D2B_PROV}/danh-gia-gate-output-x.txt", f"{_D2B_PROV}/danh-gia-gate-output-١.txt",
@@ -9782,12 +9789,13 @@ MUTANTS.update({
     **{f"d2b_trung_khoa_{k}": _d2b_mut(".casefold() for t in muc}) != len(muc):", v, "c4_symlink") for k, v in (  # luật tên trùng khoá: chỉ lá · chỉ thư mục · chỉ cùng loại
         ("chi_xet_la", '.casefold() for t in muc if muc[t][0] != "d"}) != sum(k != "d" for k, _ in muc.values()):'),
         ("chi_xet_thu_muc", '.casefold() for t in muc if muc[t][0] == "d"}) != sum(k == "d" for k, _ in muc.values()):'), ("chi_cung_loai", ".casefold() + muc[t][0] for t in muc}) != len(muc):"))},
-    **{f"d2b_k2_{k}": _d2b_mut(tim, thay, "c4_symlink") for k, tim, thay in (  # danh sách cho phép của symlink: bỏ chốt · chặn hết · quên thư mục chứa link · rồi NỚI theo từng luật
-        ("tin_dia", "if tro - tep_cay else", "if False else"), ("moi_symlink", "if tro - tep_cay else", "if tro else"), ("dich_tho", "posixpath.dirname(t)", '""'),
+    **{f"d2b_k2_{k}": _d2b_mut(tim, thay, "c4_symlink") for k, tim, thay in (  # danh sách cho phép của symlink: bỏ chốt · chặn hết · quên thư mục chứa link · bỏ/thu hẹp điều cấm `\` · bỏ đòi chuẩn tắc · rồi NỚI theo từng luật
+        ("tin_dia", "if xau else", "if False else"), ("moi_symlink", "if xau else", "if tro else"), ("dich_tho", "posixpath.dirname(t)", '""'),
+        ("bo_cam_cheo", '"\\\\" in (j := ', "not (j := "), ("cam_cheo_chi_dich_tho", '"\\\\" in (j := ', '"\\\\" in d or not (j := '), ("bo_chuan_tac", "posixpath.normpath(d) != d or ", ""),
         ("cho_thu_muc", 'if k == "f"}', 'if k != "l"}'), ("cho_symlink", 'if k == "f"}', 'if k != "d"}'), ("cho_goc", 'if k == "f"}', 'if k == "f"} | {"."}'),
-        ("cho_ngoai_danh_muc", "if tro - tep_cay else", "if tro & set(muc) - tep_cay else"), ("cho_cheo_nguoc", "os.readlink(cay / t))) for t", 'os.readlink(cay / t).replace("\\\\", "/"))) for t'),
-        *[(f"cho_{k}", "if tro - tep_cay else", f"if {{{f}(x) for x in tro}} - {{{f}(x) for x in tep_cay}} else") for k, f in (("hoa_thuong", "str.casefold"), ("nfc", '(lambda x: unicodedata.normalize("NFC", x))'))])},
-    **{f"d2b_k2_cho_ten_{k}": _d2b_mut('if k == "f"}', f'if k == "f"}} | {{{__import__("posixpath").normpath(_D2B_L(k, v[1]))!r}}}', "c4_symlink") for k, v in _D2B_TC.items()},  # nới danh sách cho đúng MỘT tên tấn công
+        ("cho_ngoai_danh_muc", "not in tep_cay for", "in set(muc) - tep_cay for"), ("cho_cheo_nguoc", "os.readlink(cay / t) for t", 'os.readlink(cay / t).replace("\\\\", "/") for t'),
+        *[(f"cho_{k}", "posixpath.normpath(j) not in tep_cay for", f"{f}(posixpath.normpath(j)) not in {{{f}(x) for x in tep_cay}} for") for k, f in (("hoa_thuong", "str.casefold"), ("nfc", '(lambda x: unicodedata.normalize("NFC", x))'))])},
+    **{f"d2b_k2_cho_ten_{k}": _d2b_mut('if k == "f"}', f'if k == "f"}} | {{{__import__("posixpath").normpath(_D2B_L(k, v[1]))!r}}}', "c4_symlink") for k, v in _D2B_TC.items() if "\\" not in v[1]},  # nới danh sách cho đúng MỘT tên tấn công (`lka` mang `\`: điều cấm riêng chặn, xem `cho_cheo_nguoc`)
     "d2b_thong_diep_nhieu_dong": _d2b_mut('f"KHÔNG ĐO ĐƯỢC: D2b {ex!r}")', 'f"KHÔNG ĐO ĐƯỢC: D2b {type(ex).__name__}: {ex}")', "c7_module_nem"),
     "d2b_mC12_nhan_hai_cham": _d2b_mut(' or ".." in dd.split("/"):', ":", "c5_duong_dan"),
     "d2b_nhan_mot_cham": _d2b_mut(' or "." in dd.split("/") or', " or", "c5_duong_dan"),

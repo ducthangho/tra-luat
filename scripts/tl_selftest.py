@@ -32349,10 +32349,12 @@ def run() -> int:
                 for _ten2, _nd2 in (("bom2.txt", "\ufeff\ufeffĐiều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập."),
                                     ("nel.txt", "Điều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.\x85"),
                                     # #1525 r35 (lượt 34): nguồn vượt ngân sách đọc ⇒ rc 2 TRƯỚC model.
-                                    ("lon.txt", "Điều 15. Giải thích từ ngữ\nHồ sơ là " + "a" * 400_001 + ".")):
+                                    ("lon.txt", "Điều 15. Giải thích từ ngữ\nHồ sơ là " + "a" * 400_001 + "."),
+                                    # r36 (lượt 35): số đầu dòng quá 4 chữ số ⇒ rc 2 TRƯỚC model (không phải rc 5 sau model).
+                                    ("so5.txt", "Điều 15. Giải thích từ ngữ\n12345. Hồ sơ là tài liệu do cơ quan lập.")):
                     (_d / _ten2).write_bytes(_nd2.encode("utf-8"))
                     _rc_bom2s.append(_chay(tep=str(_d / _ten2))[0])
-                _bom2_ok = _rc_bom2s == [2, 2, 2] and len(_goi_model) == _n_bom2
+                _bom2_ok = _rc_bom2s == [2, 2, 2, 2] and len(_goi_model) == _n_bom2
                 # Lượt 2 N5: `--out` là thư mục ⇒ rc 2 TRƯỚC khi gọi model; ghi đè giữ quyền 0644.
                 _n_truoc = len(_goi_model)
                 _rc_outdir, _ = _chay(tep=str(_t15), out=str(_d))

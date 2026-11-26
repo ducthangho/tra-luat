@@ -85,6 +85,9 @@
   và mất số (thân số khoản mở bằng nhãn ⇒ chặn; `1. Tp. Hồ Chí Minh là …` nay đọc được); ngân sách đọc nguồn (văn bản thô, số khoản,
   độ sâu XML, độ dài nhãn, tổng chữ) — vượt ⇒ dừng có kiểm soát, CLI dừng trước model; kiểm ký tự gốc trên mọi đoạn `.docx` kể cả
   đoạn trắng trước tiêu đề.
+- r36 (Review Rescue §12 sau lượt 35, đặc tả `ops/specs/llm-khoan-docx-r36.md`): đường thô đổi sang DANH SÁCH CHO PHÉP đầu dòng
+  (số khoản + từ có dấu tiếng Việt hoặc từ ASCII đứng trước từ khác) thay cho danh sách cấm nhãn — `Tp.`, `e-mail`, `A1` nay bị chặn
+  có chủ đích; đọc `--tep` có giới hạn byte; số đầu dòng quá 4 chữ số dừng trước model; XML đếm độ sâu và số nút ngay khi parse.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

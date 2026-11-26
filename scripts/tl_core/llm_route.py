@@ -508,10 +508,6 @@ def _tok(i):
 # kết bằng `.` `)` (dính thân được), gạch (sau là khoảng trắng hay dấu mở trích dẫn/ngoặc), hoặc — chỉ khi đã có dấu nối giữa các
 # placeholder — kết ngay sau chữ số. Nhãn chỉ có khoảng trắng (`a tổ chức`) không phân biệt được với chữ ⇒ ngoài miền (§2.28 B1).
 _NOI = rf"{_KC}[.)(\-–]{_KC}"   # r27 (lượt 26 C1): mọi dấu `lvlText` cho phép giữa hai placeholder (`1(1)`, `a)b)`)
-# r27 (lượt 26 C1) → r28 (lượt 27 D1): NHÃN NHIỀU THÀNH PHẦN ở đầu dòng — hai placeholder (số, hoặc chữ cái lặp đứng riêng — không
-# dính chữ cái khác) nối bằng MỘT HAY NHIỀU dấu `lvlText` (có đệm), hoặc số và chữ cái liền nhau kèm dấu (`1a.`, `a1)`). Một ngữ pháp cho
-# mọi kiểu placeholder (`1.1`, `1. 1`, `1(1)`, `1-1`, `1).1`, `1.a.`, `a-b`, `1a.`).
-_NOI_NHIEU = rf"(?:{_KC}[.)(\-–])+{_KC}"
 
 
 def _chu_rieng(i):
@@ -523,20 +519,6 @@ def _chu_rieng(i):
 # cùng vị trí dấu mà `_nhan` cho phép (đầu · giữa · cuối). `_TIEN_TO_DAU` bắt buộc có ít nhất một dấu.
 _TIEN_TO = rf"(?:{_KC}[.)(\-–])*{_KC}"
 _TIEN_TO_DAU = rf"(?:{_KC}[.)(\-–])+{_KC}"
-_RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
-    # số–số (`1.1`, `1. 1`, `1(1)`, `1).1`). Số rồi CHỮ (`1.a.`, `1ab.`) do nhánh "dải chữ + dấu kết" dưới xử lý.
-    rf"\d+{_NOI_NHIEU}\d+",
-    rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\d+|{_chu_rieng(5)})",
-    # chữ–số liền nhau phải có dấu `lvlText` ngay sau (`a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
-    # r30 (lượt 29 F1): MỘT placeholder rồi HAI dấu `lvlText` trở lên (`1..`, `1.)`, `a).`) — nhãn, không phải số khoản `1.`.
-    # r31 (lượt 30 G2): dấu thứ hai trở đi KHÔNG gồm `(` — `1. (Hồ sơ) là …` là khoản có thân mở bằng cụm ngoặc, không phải nhãn.
-    rf"(?:\d+|{_chu_rieng(6)}){_KC}[.)(\-–](?:{_KC}[.)\-–])+",
-    # r31 (lượt 30 G2): số + dấu DÍNH chữ cái đứng riêng (`1.a …`, `2)b …`) — khác `1. a …` (có đệm: khoản thân mở bằng chữ cái).
-    rf"\d+{_KC}[.)(\-–]+{_chu_rieng(9)}",   # r32 (lượt 31 H2): cho phép đệm TRƯỚC dấu (`1 .a`); chữ vẫn phải DÍNH sau dấu
-    # r33 (lượt 32 I2) → r34 (lượt 33 J1/J2) → r35 (lượt 34): nhánh "số + dải chữ + dấu kết" chuyển sang bộ quét `_nhan_dau` (phủ cả dấu
-    # gạch trước trích dẫn/ngoặc, dải chữ ghép mở bằng chữ, đệm làm dấu nối) — một ngữ pháp cho đường có số và mất số.
-    rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
-]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
 _RE_DIEM = re.compile("^(?:" + "|".join([
     rf"{_TIEN_TO}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",
@@ -569,106 +551,58 @@ _RE_SO_NOI_DONG = re.compile(r"(?<![\w.,])(?:\(\d+\)|\d+[^\S\n]*[.)])(?![\d\n]|$
 # traceback, không đình trệ. Một Điều thật dưới 200k ký tự (trần export `tl extract`); số khoản tối đa vài chục.
 _TRAN_VAN_BAN = 400_000
 _TRAN_CHU_SO = 4
+_RE_SO_QUA_DAI = re.compile(r"\(?[0-9]{%d}" % (_TRAN_CHU_SO + 1))
+# r36: trần BYTE khi đọc tệp `--tep` (UTF-8 tối đa 4 byte/ký tự) — đọc có giới hạn, không nạp trọn tệp lớn.
+TRAN_BYTE_TEP = 4 * _TRAN_VAN_BAN
 
 
 def vuot_ngan_sach(van_ban):
     """r35: chuỗi mô tả nếu nguồn thô vượt ngân sách đọc (người gọi dừng TRƯỚC model), None nếu trong hạn."""
-    n = len(str(van_ban))
-    return f"van ban {n} ky tu vuot tran {_TRAN_VAN_BAN}" if n > _TRAN_VAN_BAN else None
+    s = str(van_ban)
+    if len(s) > _TRAN_VAN_BAN:
+        return f"van ban {len(s)} ky tu vuot tran {_TRAN_VAN_BAN}"
+    # r36 (lượt 35): số đầu dòng quá `_TRAN_CHU_SO` chữ số cũng là vượt ngân sách — chặn TRƯỚC model ở mọi đường thô, cùng một chốt.
+    if any(_RE_SO_QUA_DAI.match(ln.lstrip(" \t\u00a0")) for ln in s.split("\n")):
+        return f"so dau dong qua {_TRAN_CHU_SO} chu so"
+    return None
 
 
-# r35 (lượt 34, lớp `ranh-gioi-khoan`): MỘT bộ quét nhãn đầu dòng cho mọi đường thô (`--tep` và chữ của `extract`), thay cho việc
-# cộng thêm từng nhánh regex mỗi lượt (V4 → J1: mười bốn lượt, lượt nào cũng còn một hình dạng lọt). Ngữ pháp CÙNG BẢNG DẤU với
-# `_nhan`: dấu tiền tố* thành_phần (dải số/chữ placeholder DÍNH nhau: `1`, `ab`, `1a`, `a1`) nối bằng dải dấu `.` `)` `(` `-` `–` có
-# đệm ngang. Một thành phần được XÁC NHẬN là nhãn khi dải dấu sau nó có dấu kết `.`/`)`, hoặc kết thúc ở RANH GIỚI NHÌN THẤY (đệm,
-# hết dòng, dấu mở trích dẫn/ngoặc của thân); dấu nối không có ranh giới (`e-mail`, `a(Hồ`) chỉ xác nhận khi thành phần SAU nó được
-# xác nhận. Chữ số đứng sau một dấu nối được xác nhận không cần dấu kết (`1.1 Hồ`). Dải chữ dính chữ ngoài bảng placeholder (`Hồ`,
-# `Nhà`) là chữ của thân. Tuyến tính: mỗi ký tự được đọc một số lần hằng.
-_DAU_NHAN = frozenset(".)(-–")
-_DEM_NGANG = frozenset(" \t ")
+# r36 (Review Rescue Checkpoint §12 sau lượt 34 — lớp `ranh-gioi-khoan` lặp từ lượt 1; chủ kho duyệt): DANH SÁCH CHO PHÉP đầu dòng
+# thay cho mọi ngữ pháp nhãn bị CẤM. Mười lăm lượt (V4 … J1, rồi bộ quét r35) đoán trước hình dạng nhãn để chặn — lượt nào cũng còn một
+# hình dạng lọt, vì danh sách cấm phải đoán mọi cách viết của `lvlText`. Nay một dòng thô chỉ được nhận khi đầu dòng thuộc TẬP NHỎ đã
+# biết; mọi đầu dòng khác (nhãn điểm, nhãn nhiều thành phần, ký hiệu, chữ số, dấu lạ…) ⇒ từ chối CẢ nguồn, chuyển `--tep <tệp .docx>`:
+#   [số khoản `N.` / `N)` / `(N)`, N ≤ 4 chữ số, rồi đệm ngang tuỳ ý]  [một dấu mở `“` `"` `‘` `(` tuỳ ý]  TỪ ĐẦU
+# TỪ ĐẦU = dải chữ cái liền đầu thân, và phải (a) chứa ít nhất một chữ NGOÀI bảng placeholder ASCII+đ (`Hồ`, `Dữ`, `Cơ` — `_nhan` chỉ
+# sinh chữ số, chữ ASCII và dấu `lvlText`, nên chữ có dấu thanh/mũ không thể là nhãn), hoặc (b) là chữ ASCII dài ≥ 2, KHÔNG phải một
+# chữ lặp (`aa`, `BB` là nhãn Word sau `z`), và theo sau là ĐỆM ngang rồi một CHỮ CÁI (`Quy trình`). Mọi thứ khác bị chặn oan có chủ đích:
+# `Tp. …`, `e-mail …`, `A1 …`, `ASEAN (…)`, thân mở bằng chữ số hay dấu lạ — chặn oan rẻ hơn nhận nhầm.
 _CHU_PH = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZđĐ")
-_CHU_SO = frozenset("0123456789")
-_MO_THAN_KT = frozenset("“\"‘'(")
+_DEM_NGANG = frozenset(" \t\u00a0")
+_RE_SO_DAU = re.compile("(?:([0-9]{1,%d})[.)]|\\(([0-9]{1,%d})\\))[ \t\u00a0]*" % (_TRAN_CHU_SO, _TRAN_CHU_SO))
+_MO_CHO_PHEP = frozenset("“\"‘(")
 
 
-def _bo_dem(s, i):
-    while i < len(s) and s[i] in _DEM_NGANG:
+def dau_dong_cho_phep(ln):
+    """r36: phân loại đầu dòng (đã strip) theo DANH SÁCH CHO PHÉP → `("so", số, vị trí thân)` · `("than",)` · None (ngoài danh sách)."""
+    m = _RE_SO_DAU.match(ln)
+    i = m.end() if m else 0
+    if i < len(ln) and ln[i] in _MO_CHO_PHEP:
         i += 1
-    return i
-
-
-def _doc_tp(s, i):
-    """Vị trí sau một thành phần nhãn bắt đầu tại `i`, hoặc None (không có; hay dải chữ dính chữ khác ngoài bảng placeholder)."""
     j = i
-    while j < len(s) and (s[j] in _CHU_SO or s[j] in _CHU_PH):
+    while j < len(ln) and ln[j].isalpha():
         j += 1
-    if j == i or (j < len(s) and s[j].isalpha()):
+    tu = ln[i:j]
+    if not tu:
         return None
-    if j - i >= 2 and s[i].isupper() and s[i + 1:j].islower() and s[i + 1:j].isalpha():
-        # Bảng ngoại lệ (đối chứng đã duyệt): dải chữ HOA ĐẦU + thường (`Tp.`, `Ths.`) là chữ viết tắt của thân — nhãn ghép hai
-        # placeholder khác kiểu chữ (`%1%2` hoa + thường) thuộc giới hạn đã khai (§2.37).
-        return None
-    return j
-
-
-def _doc_dau(s, i):
-    """Dải dấu nhãn (có đệm) tại `i` → `(vị trí sau dải, có dấu, có dấu kết, có ranh giới)`. Dấu `(` mà sau nó (bỏ đệm) không phải
-    hết dòng, dấu nhãn hay thành phần là dấu mở THÂN — dải dừng trước nó."""
-    j, co_dau, co_ket = i, False, False
-    while True:
-        k = _bo_dem(s, j)
-        if k >= len(s) or s[k] not in _DAU_NHAN:
-            break
-        if s[k] == "(":
-            k2 = _bo_dem(s, k + 1)
-            if k2 < len(s) and s[k2] not in _DAU_NHAN and _doc_tp(s, k2) is None:
-                break
-        co_dau, co_ket, j = True, co_ket or s[k] in ".)", k + 1
-    k = _bo_dem(s, j)
-    ranh = k > j or k >= len(s) or s[k] in _MO_THAN_KT
-    return k, co_dau, co_ket, ranh
-
-
-def _nhan_dau(s, i=0):
-    """Số thành phần ĐÃ XÁC NHẬN của nhãn bắt đầu tại `i` (0 ⇒ không có nhãn)."""
-    i, co_noi, _, _ = _doc_dau(s, _bo_dem(s, i))   # dấu tiền tố
-    xn = cho = 0
-    while True:
-        j = _doc_tp(s, i)
-        if j is None:
-            break
-        k, co_dau, co_ket, ranh = _doc_dau(s, j)
-        thuan_so = all(c in _CHU_SO for c in s[i:j])
-        if co_dau and (co_ket or ranh):
-            xn, cho = xn + cho + 1, 0
-        elif co_dau:
-            cho += 1   # dấu nối không ranh giới: chờ thành phần sau
-        elif k > j and _doc_tp(s, k) is not None:
-            cho += 1   # ĐỆM làm dấu nối (`1 a.`): chờ thành phần sau; không tính là dấu nối cho chữ số không dấu kết
-            i = k
-            continue
-        else:
-            if thuan_so and co_noi:
-                xn, cho = xn + cho + 1, 0
-            break
-        i, co_noi = k, True
-    return xn
-
-
-def quet_nhan_dau_dong(ln):
-    """r35: phân loại đầu dòng (đã strip) → `("nhan",)` nhãn điểm/nhãn nhiều thành phần/số quá dài · `("so", số, vị trí thân)` số
-    khoản đơn · `("than",)` dòng không nhãn. Nhãn được phân loại TRƯỚC số khoản đơn: thân của số khoản mở bằng một nhãn đã xác
-    nhận (`1. ab. …`, `1.ab-“…`, `1. (a) …`) là nhãn."""
-    if _RE_NHIEU_CAP.match(ln):
-        return ("nhan",)
-    m = _RE_SO_KHOAN.match(ln)
+    co_dau = any(c not in _CHU_PH for c in tu)
+    if not co_dau:
+        k = j
+        while k < len(ln) and ln[k] in _DEM_NGANG:
+            k += 1
+        if len(tu) < 2 or tu == tu[0] * len(tu) or k == j or k >= len(ln) or not ln[k].isalpha():
+            return None   # (b): chữ ASCII phải là một TỪ đứng trước một từ khác (`Quy trình`), không đứng trước dấu/ký hiệu
     if m:
-        so = m.group(1) or m.group(2)
-        if len(so) > _TRAN_CHU_SO or _nhan_dau(ln, m.end()):
-            return ("nhan",)
-        return ("so", int(so), m.end())
-    if _RE_DIEM.match(ln) or _nhan_dau(ln):
-        return ("nhan",)
+        return ("so", int(m.group(1) or m.group(2)), m.end())
     return ("than",)
 
 
@@ -683,20 +617,36 @@ _TRAN_XML = 64 * 1024 * 1024   # dự phòng khi không nạp được `read_mem
 # r35 (lượt 34, `can-tai-nguyen-doc-nguon`): trần ĐỘ SÂU cây XML — các phép duyệt sau (`_danh_dau_giu_trang`, `_doan_trong`, `duyet`)
 # đệ quy theo wrapper; cây sâu hơn ⇒ `RecursionError` (không thuộc lỗi nguồn CLI bắt). Word/Google Docs xuất sâu dưới 20 tầng.
 _TRAN_SAU_XML = 128
+_TRAN_NUT_XML = 2_000_000   # r36 (lượt 35): trần SỐ NÚT mỗi part
 # r35: trần độ dài NHÃN mở rộng từ `lvlText` và tổng chữ Điều dựng từ .docx.
 _TRAN_NHAN = 64
 
 
 def _xml_cay(du_lieu):
-    """r35: `ET.fromstring` + kiểm ĐỘ SÂU bằng duyệt TƯỜNG MINH (không đệ quy) TRƯỚC mọi phép duyệt đệ quy ⇒ ValueError."""
-    goc = ET.fromstring(du_lieu)
-    ngan = [(goc, 1)]
-    while ngan:
-        el, d = ngan.pop()
-        if d > _TRAN_SAU_XML:
-            raise ValueError(f"cay XML sau hon {_TRAN_SAU_XML} tang — khong ho tro")
-        ngan.extend((c, d + 1) for c in el)
-    return goc
+    """r35 → r36 (lượt 35, `can-tai-nguyen-doc-nguon`): parse TĂNG DẦN (`XMLPullParser`, từng khối 64 KiB) và đếm ĐỘ SÂU + SỐ NÚT ngay
+    ở sự kiện `start` — vượt trần thì dừng TRƯỚC khi dựng hết cây và trước mọi phép duyệt đệ quy ⇒ ValueError."""
+    b = du_lieu if isinstance(du_lieu, (bytes, bytearray)) else str(du_lieu).encode("utf-8")
+    p = ET.XMLPullParser(events=("start", "end"))
+    tt = {"sau": 0, "nut": 0, "goc": None}
+
+    def dem():
+        for su_kien, el in p.read_events():
+            if su_kien == "start":
+                tt["sau"] += 1
+                tt["nut"] += 1
+                tt["goc"] = el if tt["goc"] is None else tt["goc"]
+                if tt["sau"] > _TRAN_SAU_XML:
+                    raise ValueError(f"cay XML sau hon {_TRAN_SAU_XML} tang — khong ho tro")
+                if tt["nut"] > _TRAN_NUT_XML:
+                    raise ValueError(f"cay XML nhieu hon {_TRAN_NUT_XML} nut — khong ho tro")
+            else:
+                tt["sau"] -= 1
+    for i in range(0, len(b), 65536):
+        p.feed(b[i:i + 65536])
+        dem()
+    p.close()
+    dem()
+    return tt["goc"]
 
 # Tiêu đề Điều / ranh giới cấu trúc lớn: chỉ xét ở ĐẦU đoạn (sau khi gộp khoảng trắng).
 # r11 (lượt 10 K2): số thứ tự của tiêu đề cấu trúc còn có dạng viết bằng chữ (`Phần thứ nhất`) và chữ cái đơn.
@@ -1080,14 +1030,19 @@ def _theo_kieu(kieu, sid, chi_so):
 
 
 def _dem_bat_trong_chuoi(kieu, sid, chi_so):
-    """r6 (lượt 5 E2): SỐ tầng trong chuỗi `basedOn` bật thuộc tính toggle (gạch ngang)."""
-    da, n = set(), 0
+    """r6 (lượt 5 E2): SỐ tầng trong chuỗi `basedOn` bật thuộc tính toggle (gạch ngang). r36 (lượt 35): NHỚ kết quả theo (style,
+    chỉ số) trong `kieu["#nho"]` — mỗi chuỗi đi một lần cho cả tệp, không nhân số run × độ dài chuỗi."""
+    nho = kieu.setdefault("#nho", {})
+    if (sid, chi_so) in nho:
+        return nho[(sid, chi_so)]
+    goc_sid, da, n = sid, set(), 0
     while sid and sid in kieu.get("#loai", {}):   # r33 (lượt 32 I1)
         if sid in da:
             raise ValueError(f"style {sid}: vong lap basedOn")
         da.add(sid)
         n += 1 if kieu[sid][chi_so] else 0
         sid = kieu[sid][0]
+    nho[(goc_sid, chi_so)] = n
     return n
 
 
@@ -1119,7 +1074,8 @@ def _nhan(muc, ilvl, bo_dem):
     if fmt not in ("decimal", "lowerLetter", "upperLetter"):
         raise ValueError(f"numFmt {fmt!r} khong ho tro")
     # r17 (lượt 16 S2): khoảng trắng trong nhãn chỉ là dấu cách thường (không `\s` — tab, NBSP, NEL…).
-    if not re.fullmatch(r"(?:%[1-9]|[.)(\-– ])*%[1-9](?:%[1-9]|[.)(\-– ])*", txt):
+    if len(txt) > _TRAN_NHAN or not re.fullmatch(r"(?:%[1-9]|[.)(\-– ])+", txt) or "%" not in txt:
+        # r36 (lượt 35): kiểm độ dài TRƯỚC khi mở rộng; ngữ pháp một vế lặp (tuyến tính, không quay lui chéo hai vế).
         # r10 (lượt 9 J3) → r11 (lượt 10 K3): DANH SÁCH CHO PHÉP toàn chuỗi — chỉ placeholder `%N` (ít nhất một), các dấu `.` `)`
         # `(` `-` `–` và khoảng trắng; chữ, chữ số trần, `%` lẻ, ký tự vô hình ⇒ không hỗ trợ.
         raise ValueError(f"lvlText {txt!r} ngoai danh sach cho phep — khong ho tro")
@@ -1483,6 +1439,9 @@ def doc_dieu_docx(nguon, dieu):
         # r3 (lượt 2 B2/B8): cấp hiển thị của đánh số qua style phụ thuộc liên kết style↔cấp — giới hạn đã khai.
         raise ValueError("doan trong Dieu danh so qua style (khong co numId truc tiep) — khong ho tro")
     vung = [d for d in vung if d["chu"]]   # bỏ đoạn rỗng
+    if sum(len(d["chu"]) for d in vung) > _TRAN_VAN_BAN:
+        # r36 (lượt 35): chốt tổng chữ SỚM, trước khi mở rộng nhãn và dựng chuỗi khoản (chốt cuối vẫn đo cả nhãn).
+        raise ValueError(f"Dieu trong .docx vuot tran {_TRAN_VAN_BAN} ky tu — khong ho tro")
     tieu_de = doan[i0]["chu"]
     co_so = [d for d in vung if d["so"] is not None]
     if not co_so:
@@ -1526,7 +1485,7 @@ def doc_dieu_docx(nguon, dieu):
         raise ValueError(f"so khoan khong lien tuc tu 1: {[so for so, _, _ in khoan]}")
     khoan = [(so, "\n".join(cac), dau) for so, cac, dau in khoan]
     dong = [tieu_de, *cau_dan] + [f"{so}. {txt}" for so, txt, _ in khoan]
-    if sum(len(x) + 1 for x in dong) > _TRAN_VAN_BAN:
+    if sum(len(x) for x in dong) + len(dong) - 1 > _TRAN_VAN_BAN:   # r36 (lượt 35): đúng số dấu xuống dòng GIỮA các dòng
         raise ValueError(f"Dieu dung tu .docx vuot tran {_TRAN_VAN_BAN} ky tu — khong ho tro")   # r35 (lượt 34)
     return {"van_ban": "\n".join(dong), "khoan": [(so, txt, dau) for so, txt, dau in khoan], "cau_dan": cau_dan,
             "chu_doan": [d["chu"] for d in vung]}
@@ -1586,15 +1545,14 @@ def tach_khoan(van_ban):
             # Danh sách CHO PHÉP hình dạng tiêu đề, thay cho dò chữ "là" (bỏ sót khoản dùng từ nối khác và "là" sát dấu câu).
             return None
         dong = dong[1:]
-    # r27 (lượt 26 C1) → r35 (lượt 34, lớp `ranh-gioi-khoan`): MỘT phép quét đầu dòng (`quet_nhan_dau_dong`) cho cả nguồn có số lẫn
-    # mất số, phân loại nhãn TRƯỚC số khoản đơn. Dòng nhãn — nhãn điểm (`a)`, `-`), nhãn nhiều thành phần (`1.1`, `1.ab.`), hay số khoản
-    # mà thân mở bằng nhãn — ⇒ từ chối CẢ nguồn.
+    # r27 (lượt 26 C1) → r35 (bộ quét nhãn) → r36 (Review Rescue §12): DANH SÁCH CHO PHÉP đầu dòng (`dau_dong_cho_phep`) cho cả nguồn
+    # có số lẫn mất số. Dòng nào đầu dòng ngoài danh sách — nhãn điểm (`a)`, `-`), nhãn nhiều thành phần, ký hiệu… — ⇒ từ chối CẢ nguồn.
     # #1525 (đóng K1 lượt 10 #1514): trên văn bản THÔ, dòng điểm có thể thuộc khoản đang mở (khoản có điểm) hoặc là ranh giới mới
     # (lời dẫn nhóm + định nghĩa riêng) — cùng hình dạng ở MỌI loại nguồn. Đường thô chỉ nhận khoản ĐÚNG MỘT DÒNG; khoản có điểm
     # đi đường cấu trúc (`--tep <tệp .docx>`, `doc_dieu_cau_truc`). Dòng "là" ở nguồn có số rơi xuống nhánh cuối (dòng không số ⇒
     # None); ở nguồn mất số nó là một khoản và bị `_tu_noi` chặn.
-    loai = [quet_nhan_dau_dong(ln) for ln in dong]
-    if any(q[0] == "nhan" for q in loai):
+    loai = [dau_dong_cho_phep(ln) for ln in dong]
+    if any(q is None for q in loai):
         return None
     co_so = any(q[0] == "so" for q in loai)
     khoan: list[list] = []

@@ -3058,7 +3058,13 @@ def cmd_llm_khai_niem(a) -> int:
             # r18 (#1525 lượt 17 T2): giải mã `utf-8` THƯỜNG — việc gỡ ĐÚNG MỘT BOM đầu văn bản giao cho MỘT tầng duy nhất
             # (`tach_khoan`, `so_dieu_tu_tieu_de`); `utf-8-sig` + `tach_khoan` từng gỡ hai BOM. Chỉ strip khoảng trắng ASCII
             # (str.strip() còn nuốt NEL, U+3000… trước khi kịp kiểm — r17 S2).
-            van_ban = Path(a.tep).read_text(encoding="utf-8").strip(" \t\r\n")
+            # r36 (#1525 lượt 35): đọc CÓ GIỚI HẠN byte — tệp lớn hơn trần không được nạp trọn trước khi chốt ngân sách.
+            with open(a.tep, "rb") as _f:
+                _b = _f.read(lr.TRAN_BYTE_TEP + 1)
+            if len(_b) > lr.TRAN_BYTE_TEP:
+                print(f"[tl] {a.tep} lon hon {lr.TRAN_BYTE_TEP} byte — vuot ngan sach doc, khong goi model", file=sys.stderr)
+                return 2
+            van_ban = _b.decode("utf-8").strip(" \t\r\n")
         except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
             print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
             return 2

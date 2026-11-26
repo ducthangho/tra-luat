@@ -1925,13 +1925,14 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
     def doc(ong, ten):
         try:
             while True:
-                k = ong.read1(min(65536, tran + 1 - len(buf[ten])))
+                con = tran + 1 - len(buf[ten])
+                if con <= 0:
+                    vuot.append(ten)   # đã đọc quá trần: KHÔNG được coi lần đọc 0 byte kế tiếp là hết dữ liệu
+                    return
+                k = ong.read1(min(65536, con))
                 if not k:
                     return
                 buf[ten] += k
-                if len(buf[ten]) > tran:
-                    vuot.append(ten)
-                    return
         except Exception as e:  # noqa: BLE001 — lỗi đọc phải về người gọi, không được trả dữ liệu đọc dở như đã đủ
             loi.append(e)
 

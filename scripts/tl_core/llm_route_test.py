@@ -1072,9 +1072,9 @@ def ca_nguon_mo_ho_luot8(m):
         # Lồng mà dòng vẫn "cân" về số dấu: chỉ chốt trích-dẫn-lồng bắt được.
         ("Điều 3.\n1. Tên gọi \u201cCụm \u201cx\u201d là y \u201cz\u201d là tên.", kn(("Tên gọi \u201cCụm \u201cx\u201d", "y \u201cz\u201d là tên."))),
         # `)` lẻ rồi `(` bù lại về 0: chỉ chốt `)` lẻ bắt được.
-        ("Điều 3.\nHồ sơ) là (tài liệu.", kn(("Hồ sơ)", "(tài liệu."))),
+        ("Điều 3.\nHồ sơ là tài liệu) gốc (bản.", kn(("Hồ sơ", "tài liệu) gốc (bản."))),   # r39: `)` lẻ SAU "là" (đầu dòng qua miền)
         ("Điều 3.\nHồ sơ (bản chính là tài liệu.", kn(("Hồ sơ (bản chính", "tài liệu."))),
-        ("Điều 3.\nHồ sơ) là tài liệu.", kn(("Hồ sơ)", "tài liệu."))),
+        ("Điều 3.\nHồ sơ là tài liệu) gốc.", kn(("Hồ sơ", "tài liệu) gốc."))),
         ("Điều 3.\nHồ sơ\u201d là tài liệu.", kn(("Hồ sơ\u201d", "tài liệu."))),
         ('Điều 3.\nHồ sơ " là tài liệu.', kn(('Hồ sơ "', "tài liệu."))),
     )
@@ -1946,7 +1946,7 @@ def ca_r35_lop_loi(m):
         bang(tach(f"Điều 3.\nHồ sơ là a.\n{L}") is None, f"r39 mo dau nhieu ve lot (mat so): {L!r}")
     for than in ("Quy trình là cách làm.", "“Hồ sơ” là tài liệu.", "Ban hành là công bố.", "HỒ SƠ là tài liệu.",
                  "Phát triển kinh tế - xã hội là mục tiêu.", "Quy chuẩn kỹ thuật quốc gia (QCVN) là văn bản.",
-                 "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu."):
+                 "Hồ sơ là tài liệu (bản chính).", "Hồ sơ gồm các tài liệu.", "Hồ sơ là tài liệu gốc. Bản sao không dùng."):
         bang(tach(f"Điều 3.\n1. {than}\n2. Dữ liệu là thông tin.") == [(1, than), (2, "Dữ liệu là thông tin.")],
              f"so khoan + than hop le bi chan oan: {than!r}")
         bang(tach(f"Điều 3.\n{than}\nDữ liệu là thông tin.") == [(None, than), (None, "Dữ liệu là thông tin.")],
@@ -1976,7 +1976,7 @@ def ca_r35_lop_loi(m):
     bang(_ok.returncode == 0 and _ok.stdout == "x" * 1000 and _ok.stderr == "e", f"chay gioi han sai ket qua: {_ok!r}"[:120])
     for _ong in ("stdout", "stderr"):
         try:
-            m._chay_gioi_han([sys.executable, "-c", f"import sys; sys.{_ong}.write('x' * 200000)"], tran=5000)
+            m._chay_gioi_han([sys.executable, "-c", f"import sys; sys.{_ong}.write('x' * 6000)"], tran=5000, timeout=20)
             raise TinHieuChotCa(f"{_ong} vuot tran khong bi chan")
         except ValueError:
             pass
@@ -2106,7 +2106,7 @@ DOT_BIEN = [
     ('wp1525_nhieu_ve_bo_dung_la', ('        if ve[-1] == "là":\n            return False', '        if False:\n            return False'), 'ca_r35_lop_loi'),
     ('wp1525_nhieu_ve_gach_khong_gioi_han', ('        return len(ve) <= 3 and all(len(x) <= 3 for x in ve) and', '        return'), 'ca_r35_lop_loi'),
     ('wp1525_nhieu_ve_bo_ngoac_mo', ('    i = 1 if t[:1] == "(" else 0\n    ve, j = [], i', '    i = 0\n    ve, j = [], i'), 'ca_r35_lop_loi'),
-    ('wp1525_extract_khong_tran', ('            if len(buf[ten]) > tran:', '            if False:'), 'ca_r35_lop_loi'),
+    ('wp1525_extract_khong_tran', ('                if con <= 0:\n                    vuot.append(ten)', '                if False:\n                    vuot.append(ten)'), 'ca_r35_lop_loi'),
     ('wp1525_pham_vi_bo_gioi_han', ("""                "diem danh so dang 'N.' 'N)' '(N)' trung hinh dang so khoan — co the bi nhan thanh khoan rieng; "\n""", ""), 'ca_r35_lop_loi'),
     # r36 (§2.38): danh sách cho phép đầu dòng — mỗi điều kiện một đột biến riêng.
     ('wp1525_cho_phep_bo_chot', ('    loai = [dau_dong_cho_phep(ln) for ln in dong]', '    loai = [dau_dong_cho_phep(ln) or ("than",) for ln in dong]'), 'ca_r35_lop_loi'),

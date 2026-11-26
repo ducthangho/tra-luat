@@ -70,8 +70,8 @@
   "recorded_by": "Claude Code packet-coordinator session 015Gtxrc7FyN7pfoD4bfrbsW for wp1494; not executor, not reviewer",
   "recorder_is_executor": false,
   "leased_at_utc": "2026-11-25T18:30:00Z",
-  "lease_until": "2026-11-27T06:30:00Z",
-  "lease_expires_at_utc": "2026-11-27T06:30:00Z",
+  "lease_until": "2026-11-26T02:25:00Z",
+  "lease_expires_at_utc": "2026-11-26T02:25:00Z",
   "heartbeat_required_minutes": 360,
   "heartbeat_at": null,
   "limits": {
@@ -107,7 +107,7 @@
     "ruleset_change",
     "push_before_owner_exact_head_audit"
   ],
-  "current_head": "dac537eb7fdb75fb74e1f0cfa17a67dc4ec69cae",
+  "current_head": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
   "attempts_used": 5,
   "start_from_tree": "b09ec579523ad20492c4160850d6bb349445c0d0",
   "start_from_note": "H of attempt 5 (lease wp1494-r5-g4-claude), reviewed by Codex source review 4 (changes_requested, 1 P2: RV4-F01); local only, never pushed; base unchanged",
@@ -130,5 +130,11 @@
     "nguon": "ops/specs/wp1494-r1/SPEC.md r5 @ a819291bb08af5e72cdd833b86544ea48d97b1fd, mục Kích thước, chép tóm theo bốn trường; nguyên văn ở đặc tả"
   },
   "d134_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7157619068",
-  "residual_risk_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7162892740"
+  "residual_risk_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7162892740",
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-27T06:30:00Z",
+    "han_moi_utc": "2026-11-26T02:25:00Z",
+    "chi_thi": "Chỉ thị điều phối Mission (phiên 015Gtxrb3cuZ7Nm935R8yA5W): sau merge rút hạn lease kèm thu_hoi_bang_rut_han, rồi ai-dang-giu sau hạn, M8, đóng Issue.",
+    "ly_do": "Packet #1494 B2 đã MERGE: PR #1536, merge commit 4a96ccd2774b67406b8cd4110f7e574cfa82bc6d lúc 2026-11-26T02:08:37Z (merged_by ducthangho), H 6ffb936e465c36ceba774442d8252f81a8f4ff7d (tree a263444f41b92769bd5e5407b200c8fc441f2b71); kiem-merge rc 0 trên H. Không còn việc ghi nào trên write set."
+  }
 }

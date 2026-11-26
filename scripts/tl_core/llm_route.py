@@ -508,8 +508,25 @@ def _tok(i):
 # kết bằng `.` `)` (dính thân được), gạch (sau là khoảng trắng hay dấu mở trích dẫn/ngoặc), hoặc — chỉ khi đã có dấu nối giữa các
 # placeholder — kết ngay sau chữ số. Nhãn chỉ có khoảng trắng (`a tổ chức`) không phân biệt được với chữ ⇒ ngoài miền (§2.28 B1).
 _NOI = rf"{_KC}[.)(\-–]{_KC}"   # r27 (lượt 26 C1): mọi dấu `lvlText` cho phép giữa hai placeholder (`1(1)`, `a)b)`)
-# r27 (lượt 26 C1): dòng mở bằng chữ số, (đệm), một dấu nối, (đệm), chữ số — số nhiều cấp ở bất kỳ dạng nào.
-_RE_NHIEU_CAP = re.compile(rf"^\(?{_KC}\d+{_NOI}\d")
+# r27 (lượt 26 C1) → r28 (lượt 27 D1): NHÃN NHIỀU THÀNH PHẦN ở đầu dòng — hai placeholder (số, hoặc chữ cái lặp đứng riêng — không
+# dính chữ cái khác) nối bằng MỘT HAY NHIỀU dấu `lvlText` (có đệm), hoặc số và chữ cái liền nhau kèm dấu (`1a.`, `a1)`). Một ngữ pháp cho
+# mọi kiểu placeholder (`1.1`, `1. 1`, `1(1)`, `1-1`, `1).1`, `1.a.`, `a-b`, `1a.`).
+_NOI_NHIEU = rf"(?:{_KC}[.)(\-–])+{_KC}"
+
+
+def _chu_rieng(i):
+    """r28 (lượt 27 D1): placeholder chữ cái — một chữ lặp, KHÔNG dính thêm chữ cái khác (`Hồ` không phải placeholder)."""
+    return f"(?:(?P<r{i}>[a-zđ])(?P=r{i})*|(?P<R{i}>[A-ZĐ])(?P=R{i})*)(?![^\\W\\d_])"
+
+
+_RE_NHIEU_CAP = re.compile("^\\(?" + _KC + "(?:" + "|".join([
+    # số rồi chữ: chữ phải có dấu `lvlText` theo sau (`1.a.`) — `1. A là …` là khoản số 1 có thân mở bằng `A`.
+    rf"\d+{_NOI_NHIEU}(?:\d+|{_chu_rieng(2)}{_KC}[.)(\-–])",
+    rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\d+|{_chu_rieng(5)})",
+    # số–chữ liền nhau phải có dấu `lvlText` ngay sau (`1a.`, `a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
+    rf"\d+{_chu_rieng(3)}{_KC}[.)(\-–]",
+    rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
+]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
 _RE_DIEM = re.compile("^(?:" + "|".join([
     rf"\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",

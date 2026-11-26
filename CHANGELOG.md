@@ -68,6 +68,8 @@
   ngắt trong run gạch bị bỏ không còn làm cả Điều bị từ chối; khoá thêm ca `xml:space`.
 - r27 (sau cross-review lượt 26 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r27.md`): dòng mở bằng số nhiều cấp ⇒ chặn trước nhánh số
   khoản; ký hiệu trong run gạch bị bỏ không còn làm cả Điều bị từ chối.
+- r28 (sau cross-review lượt 27 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r28.md`): một ngữ pháp nhãn nhiều thành phần (số–số,
+  số–chữ, chữ–số, nhiều dấu nối) xét trước mọi cửa nhận số đơn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

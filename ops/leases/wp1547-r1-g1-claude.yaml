@@ -58,7 +58,7 @@ recorder_ghi_chu: 'Phiên này ghi lease và thi công theo chỉ thị trực t
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'lease wp1488 đã hết hạn, không khai bia mộ.'
 leased_at_utc: '2026-11-26T08:33:05Z'
-heartbeat_at: '2026-11-26T08:33:05Z'
+heartbeat_at: '2026-11-26T08:38:28Z'
 lease_until: '2026-11-26T16:33:05Z'
 lease_expires_at_utc: '2026-11-26T16:33:05Z'
 lease_until_ghi_chu: '8h; rút hạn sau land.'

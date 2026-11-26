@@ -1,0 +1,46 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1529
+packet_id: px-loc-markup
+revision: 4
+generation: 2
+lease_id: px-loc-markup-r4-g2-claude
+role: executor
+reviewer: 'Codex offline qua launcher.py truoc push (ADR-0060 M5/M12) + connector Codex tren PR khi con draft'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 4a96ccd2774b67406b8cd4110f7e574cfa82bc6d
+target_hosts: []
+live_change: 'Khong co. Sua module proxima-control trong kho; 0 thao tac VM, 0 loi goi inference. Harness chay tren may Windows cua chu kho (N6).'
+spec_path: ops/specs/px-loc-markup-r4.md
+spec_hash: a346d4542153cb7dff5ebcf1ce0bf2d1a2bbd88cfea8a1d19267f3cf73f9c51e
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/scripts/ProximaControl.psm1
+- .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+- ops/acceptance/px-loc-markup/r4/RESULTS.md
+- ops/leases/px-loc-markup-r4-g1-claude.yaml
+- ops/specs/px-loc-markup-r4.md
+write_set_hash: f91dae01ca5d367abe99450a82aba5886e391f576fd53d1e8c3683e1bc8eafd7
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+nang_tran:
+  ai_nang: ducthangho (chủ kho, thẩm quyền §2 protocol; ghi hộ issuecomment-7172063543)
+  can_cu: 'Chép từ đặc tả r4 (giữ quyết định r2): 5 tệp mã của module + 3 tệp sổ sách; ứng viên r3 cuối d0edb21 đo 8 tệp / 432 dòng thêm.'
+  tran_cu: 6 tệp / 450 dòng thêm (ADR-0053)
+  tran_moi: 8 tệp / 450 dòng thêm
+branch: ops/px-loc-markup-r4
+base_sha: 4a96ccd2774b67406b8cd4110f7e574cfa82bc6d
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 26-11-2026 "Dong y, lam di" (cap lease ke nhiem, ghi RESULTS N6, merge PR #1542); ghi ho https://github.com/ducthangho/tra-luat/issues/1529#issuecomment-7186765839'
+recorded_by: 'phien executor (vai executor cua packet px-loc-markup)'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Khong bia mo: lease g1 (px-loc-markup-r4-g1-claude) het han 2026-11-26T06:32:09Z, khong con la nguoi giu. ai-dang-giu NGUOI_GIU 0 cho 8 duong dan write set + duong dan lease g2 luc 08:37:15Z. Lease nay dat tren nhanh rieng ops/px-loc-markup-r4-g2-lease de diff PR #1542 giu dung write_set cua dac ta (N8); baseline nghiem thu giu 4a96ccd (§4). Khong chep so comment da dang cua g1.'
+leased_at_utc: '2026-11-26T08:37:39Z'
+heartbeat_at: '2026-11-26T08:37:39Z'
+lease_until: '2026-11-26T12:37:39Z'
+lease_expires_at_utc: '2026-11-26T12:37:39Z'
+max_lease_hours: 4
+native_runs_limit_per_host: 0
+inference_calls_limit_per_host: 0

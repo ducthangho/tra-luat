@@ -1,0 +1,24 @@
+BAT_DAU 2026-11-21T04:56:07Z python /usr/bin/python3
+OK  e_policy_them_sau_B                    rc=1 (đòi 1) policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate theo  
+OK  e_policy_them_sau_B_sau_dang           rc=1 (đòi 1) policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate theo  
+OK  e_schema_them_sau_B_sau_dang           rc=1 (đòi 1) policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/schemas/change-impact.v1.schema.json'] — re 
+OK  e_policy_xoa_sau_B                     rc=1 (đòi 1) policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate the 
+OK  e_policy_them_roi_xoa_sau_B            rc=1 (đòi 1) policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate the 
+OK  e_policy_qua_nhanh_phu_merge           rc=1 (đòi 1) policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate the 
+OK  e_policy_xoa_trong_commit_gop          rc=1 (đòi 1) policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate the 
+OK  e_khong_lien_quan_sau_B                rc=0 (đòi 0) TIỀN KIỂM: ĐẠT 
+OK  e_khong_lien_quan_sau_dang             rc=0 (đòi 0) TIỀN KIỂM: ĐẠT 
+OK  f_khong_I_pythonpath_clone             rc=0 (đòi 0) đánh dấu=không TIỀN KIỂM: ĐẠT 
+OK  f_khong_I_script_trong_clone           rc=0 (đòi 0) đánh dấu=không TIỀN KIỂM: ĐẠT 
+OK  f_khong_I_pyc_khong_nguon              rc=0 (đòi 0) đánh dấu=không TIỀN KIỂM: ĐẠT 
+OK  f_pth_yaml_trong_clone                 rc=1 (đòi 1) đánh dấu=không KHÔNG ĐO ĐƯỢC: PyYAML sẽ nạp từ ['/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/r7/t 
+OK  f_pth_import_module_clone              rc=1 (đòi 1) KHÔNG ĐO ĐƯỢC: module nạp ngoài stdlib/site-packages hay trong clone, cwd, thư mục script: ["tk_probe_r7: ['/tmp/claude- 
+OK  f_pth_chi_duong_dan                    rc=0 (đòi 0) TIỀN KIỂM: ĐẠT 
+OK  f_thieu_pyyaml                         rc=1 (đòi 1) KHÔNG ĐO ĐƯỢC: PyYAML vắng; phải nằm trong stdlib hay site-packages của trình thông dịch, ngoài clone, cwd và thư mục sc 
+OK  g_git_trong_clone                      rc=1 (đòi 1) đánh dấu=không KHÔNG ĐO ĐƯỢC: chương trình git '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/r7/tm 
+OK  g_git_cay_chinh_tu_worktree_phu        rc=1 (đòi 1) KHÔNG ĐO ĐƯỢC: chương trình git /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/r7/tmp (git ngoài cwd chạy ở T1 rồi mới bị chặn: mục 18)
+OK  v_graft_qua_bien_moi_truong            rc=1 (đòi 1) B=c6ed74663fda937a41c84891fa7065eb65667a22 giải ra c6ed74663fda937a41c84891fa7065eb65667a22: không phải master của máy c 
+OK  v_graft_trong_clone                    rc=1 (đòi 1) B=c6ed74663fda937a41c84891fa7065eb65667a22 giải ra c6ed74663fda937a41c84891fa7065eb65667a22: không phải master của máy c 
+OK  t6_may_chu_doi_trong_luc_do            rc=1 (đòi 1) máy chủ đổi trong lúc đo (ls-remote cuối khác ảnh chụp T1): làm mới ref rồi chạy lại (số lần hỏi máy chủ: 2)
+TONG 21 kịch bản r7: đúng 21 · sai 0
+KET_THUC 2026-11-21T04:56:26Z

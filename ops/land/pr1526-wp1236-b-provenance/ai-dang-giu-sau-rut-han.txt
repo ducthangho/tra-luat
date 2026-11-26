@@ -1,0 +1,15 @@
+# ai-dang-giu sau rut han lease wp1236-b (clone moi, fetch '+refs/heads/*', 2026-11-25T18:34:46Z); so nhanh may chu=348 cuc bo=348
+## ops/land_evidence_nguon.py
+HẾT_HẠN	wp1236-b-r12-g1-claude-20261124	refs/heads/ops/wp1236-bc-lease:ops/leases/wp1236-b-r12-g1-claude-20261124.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	land-evidence-l7-r1-g1-claude-remote-20261027	refs/heads/ops/wp748-r28-l7-lease:ops/leases/land-evidence-l7-r1-g1-claude-remote-20261027.yaml
+NGƯỜI_GIỮ 0: không có
+rc_tail_khong_dung=0
+## ops/land_evidence_nguon_test.py
+HẾT_HẠN	wp1236-b-r12-g1-claude-20261124	refs/heads/ops/wp1236-bc-lease:ops/leases/wp1236-b-r12-g1-claude-20261124.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	land-evidence-l7-r1-g1-claude-remote-20261027	refs/heads/ops/wp748-r28-l7-lease:ops/leases/land-evidence-l7-r1-g1-claude-remote-20261027.yaml
+NGƯỜI_GIỮ 0: không có
+rc_tail_khong_dung=0
+rc ai-dang-giu ops/land_evidence_nguon.py = 0
+rc ai-dang-giu ops/land_evidence_nguon_test.py = 0

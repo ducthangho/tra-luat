@@ -1,0 +1,15 @@
+# nghiem thu doc lap tren merge d0868db (Linux, phien land, clone sach, core.abbrev 7)
+HEAD d0868dbf7f6324755aa4ed0f3e02d4efa84866f0 tree 86d2c21e7a7f707b38dea258fda3b557abb58ab9 cha 434846a154ef42711e79d0c9b376b1cb15b21180 bca55c1cd09c57180d60b05d5ca1813828ae1d10
+87	1	ops/land_evidence_nguon.py
+419	10	ops/land_evidence_nguon_test.py
+blob ops/land_evidence_nguon.py merge=1e42090fa05f4dfc84f20d48b840fce5cfaa48ca head=1e42090fa05f4dfc84f20d48b840fce5cfaa48ca
+blob ops/land_evidence_nguon_test.py merge=0c6d5e681d823104a00be4491cf58e74a3cfa77d head=0c6d5e681d823104a00be4491cf58e74a3cfa77d
+diff-check rc=0
+land_evidence_nguon: 152 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 177
+TỔNG: ĐẠT
+land_evidence_nguon rc=0
+CA: 38/38 dat
+DOT BIEN: 145/145 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+release-verify --strict ok True expected 187 checked 187 failed []

@@ -32,8 +32,8 @@ BASE_P3 = "8f123b27b338e5e173a668209eb4904f49dd611b"   # base của lease wp1089
 BASE = "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"   # base của lease wp1039 — vế âm L6a
 BASE_PD = "ded5d41b1754ef05d87815f20c48203e6b00e58d"   # base của lease wp1334 — vế âm N1/N5b
 LA_WINDOWS = os.name == "nt"
-SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r1.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
-SPEC_SHA256 = "67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81"
+SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r2.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
+SPEC_SHA256 = "c43c08cd71e1f1580beb5abfc0cb9c57fe16c8ee9fe80e9035cca558e2ed8ee2"
 class TinHieuChotCa(AssertionError):
     """Chỉ `bang()` ném lớp này ⇒ phân biệt giết thật (chốt) với chết vì lỗi vô can."""
 class BoQua(Exception):
@@ -185,7 +185,7 @@ def a8_nap_luon_rc0():
     k = chay_nap({}, argv=("nap", "--la"))
     bang(k.rc == 2 and len(k.nk) == 0, f"`nap --la`: rc={k.rc}, tl.py chạy {len(k.nk)} lần")
 # ---------- B/C/D: `cai-agy` ----------
-NOI_DUNG = b'#!/bin/sh\n[ -n "$CAC_AGY_NK" ] && echo "$*" >> "$CAC_AGY_NK"\necho antigravity 1.4.12\n'
+NOI_DUNG = b'#!/bin/sh\n[ -n "$CAC_AGY_NK" ] && echo "$*" >> "$CAC_AGY_NK"\necho antigravity 1.5.16\n'
 def _tar(muc):   # (tên, byte | None = symlink tới /etc/passwd)
     with tarfile.open(fileobj=(b := io.BytesIO()), mode="w:gz") as tf:
         for ten, du in muc:
@@ -228,7 +228,8 @@ def b2_sha512_lech_khong_ghi():
         bang(s.agy.read_bytes() == truoc, "bản cũ bị đổi dù sha512 lệch")
 def b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay():   # B3 (đếm 0) + B4 (đếm 1, tệp được thay)
     _posix()
-    for cu, n in ((("antigravity 1.4.12", 0), 0), (("antigravity 1.4.13", 0), 1), (("antigravity 1.4.12", 1), 1), (("\\0377", 0), 1), (("antigravity 1.4.120", 0), 1), (("antigravity 1.4.12rc1", 0), 1), (("antigravity 1.4.12beta", 0), 1)):
+    for cu, n in ((("antigravity 1.5.16", 0), 0), (("antigravity 1.6.0", 0), 0), (("antigravity 1.5.15", 0), 1), (("antigravity 1.5.16", 1), 1), (("\\0377", 0), 1),
+                  (("antigravity 1.4.120", 0), 1), (("antigravity 1.5.16rc1", 0), 1), (("antigravity 1.5.16beta", 0), 1)):   # spec r2: SÀN, bản mới hơn được giữ
         with san_agy(agy_cu=cu) as s:
             s.chay()
             bang(len(s.dem) == n and (n == 0 or s.agy.read_bytes() == NOI_DUNG), f"{cu}: tải {len(s.dem)} lần (mong {n}) / không thay tệp")
@@ -265,7 +266,7 @@ def b8_hang_ghim_dung_spec():
     m, b = nap_mod(), SPEC.read_bytes()
     bang(hashlib.sha256(b).hexdigest() == SPEC_SHA256, "spec đóng băng đổi băm")
     bang(len(spec := dict((k, (u, h)) for k, u, h in re.findall(r"^\| `(\w+)` \| `(https://\S+)` \| `([0-9a-f]{128})` \|$", b.decode("utf-8"), re.M))) == 6, "spec phải có 6 nền")
-    bang(m.AGY_VER == "1.4.12" and sorted(m.NEN) == sorted(spec), f"AGY_VER={m.AGY_VER} khoá={sorted(m.NEN)}")
+    bang(m.AGY_VER == "1.5.16" and sorted(m.NEN) == sorted(spec), f"AGY_VER={m.AGY_VER} khoá={sorted(m.NEN)}")
     for k, v in spec.items():
         bang(tuple(m.NEN[k]) == v, f"hằng ghim {k} lệch spec")
 def _goi_doi_kieu(f, *a):
@@ -291,11 +292,429 @@ def c2_settings_khong_phai_object_khong_dung():
             truoc = hashlib.sha256(s.settings.read_bytes()).hexdigest()
             rc, ra = s.chay()
             bang(rc == 0 and hashlib.sha256(s.settings.read_bytes()).hexdigest() == truoc and "agy: ⚠" in ra, f"{nd!r}: tệp bị đổi / không cảnh báo")
-def d1_env_file_dung_mot_dong():
+def d1_env_file_khong_dung():   # spec r2 D1': bật tự cập nhật ⇒ `cai-agy` không đụng CLAUDE_ENV_FILE
     with tempfile.TemporaryDirectory() as t, san_agy(nen="freebsd_amd64", env_them={"CLAUDE_ENV_FILE": str(f := Path(t) / "env.sh")}) as s:
-        _ghi(f, "export FOO=1\n"), s.chay(), s.chay()
-        dong = f.read_text(encoding="utf-8").splitlines()
-        bang(dong.count("export AGY_CLI_DISABLE_AUTO_UPDATE=1") == 1 and "export FOO=1" in dong, f"env file: {dong}")
+        _ghi(f, "export FOO=1\n")
+        truoc, _, _ = f.read_bytes(), s.chay(), s.chay()
+        bang(f.read_bytes() == truoc, f"env file bị đổi: {f.read_bytes()!r}")
+# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) — MỘT HỢP ĐỒNG QUAN SÁT trên vòng đời tiến trình THẬT, lớp `ghim-output-oracle` (cross-review #1505 lượt 1–4) ----------
+# Mỗi LỜI GỌI CLI là MỘT tiến trình con `python -I -B` chạy mã sản phẩm như `__main__` tới khi THOÁT THẬT (`sys.exit` của chính nó,
+# `threading._shutdown`, atexit, finalizer, dọn module). rc, stdout, stderr lấy từ HỆ ĐIỀU HÀNH. Không có bản ghi "hoàn tất" nào:
+# tiến trình cha chỉ đọc bằng chứng SAU KHI con đã chết (F01-t).
+#   (1) audit hook của CPython sống tới hết vòng đời; mỗi sự kiện bị đẩy NGAY ra kênh riêng bằng `os.write` trên fd mở TRƯỚC khi
+#       hook tồn tại (`os.write` không phát audit). Sự kiện ngoài `SU_KIEN_LANH` (danh sách CHO PHÉP) ⇒ ghi nhận rồi TỪ CHỐI.
+#       `open` chỉ được coi là đọc khi chế độ ⊆ {r,b,t} VÀ cờ ⊆ `CO_DOC_CHO_PHEP` (danh sách CHO PHÉP, `g4` chứng minh từng cờ trên
+#       runtime đang chạy); mọi cờ khác — kể cả `O_TEMPORARY` xoá-khi-đóng — là tác động tệp (F01-v).
+#   (2) trạng thái ĐẦY ĐỦ của cwd/HOME/TEMP (có tệp mồi): chụp trước khi sinh con và sau khi con chết; thêm/mất/byte đổi đều ĐỎ.
+#   (3) transport: `urllib`/`http.client` THẬT chạy nguyên (Request, opener, kiểm header/body, `socket.settimeout`); chỉ giả đúng biên
+#       KẾT NỐI (ổ cắm trong bộ nhớ). Lời gọi nào thư viện thật bác thì vào `sai`; harness không tự viết lại luật của thư viện (F01-u).
+#       Oracle URL/phương thức đọc từ BYTE TRÊN DÂY, độc lập với mã sản phẩm.
+# Hai kiểu lời gọi, cùng một người quan sát: "lenh" (mã chạy như `__main__`, mọi ca) và "nap" (chỉ nạp module, một lần trong g1).
+# MỘT hàm hậu điều `_hau_dieu_chung` cho MỌI lời gọi (rc 0/1/2). Oracle nền -> tên tài sản chép từ bảng spec r2 Thay đổi 1, ĐỘC LẬP
+# với `TAI_SAN_AGY` (F01-g). So TOÀN transcript theo byte (F01-e/f). Ma trận lỗi chạy cho CẢ latest lẫn `--ban` (F01-s).
+from concurrent.futures import ThreadPoolExecutor  # noqa: E402 — 72 tiến trình con của g2 chạy song song, mỗi cái vẫn một vòng đời riêng
+ORACLE_TAI_SAN = {"linux_amd64": "agy_cli_linux_x64.tar.gz", "linux_arm64": "agy_cli_linux_arm64.tar.gz",
+                  "linux_amd64_musl": "agy_cli_linux_x64_musl.tar.gz", "linux_arm64_musl": "agy_cli_linux_arm64_musl.tar.gz",
+                  "darwin_amd64": "agy_cli_mac_x64.tar.gz", "darwin_arm64": "agy_cli_mac_arm64.tar.gz"}
+KHOA_6 = tuple(ORACLE_TAI_SAN)
+_API = "https://api.github.com/repos/google-antigravity/antigravity-cli/releases/"
+HONG_TAI_SAN = ("lech", "thieu", "hai_tep", "ten_sai", "khong_thuong")   # F01-k/l/m/o/p, đặt ở TỪNG nền
+LOI_CHUNG = ("release", "json", "tai")   # mạng hỏng khi đọc release · release không phải JSON · mạng hỏng ở lượt tải tài sản THỨ HAI
+CHE_DO = (("ghim-agy",), ("ghim-agy", "--ban", "2.3.4"))   # F01-s: MỌI hàng âm chạy ở cả hai chế độ
+ARGV_SAI = (("--ban", "../x"), ("--ban",), ("--ban", "2.3"), ("--ban", "v2.3.4"), ("--ban", "2.3.4", "thua"), ("thua",))
+# Danh sách CHO PHÉP sự kiện audit: không cái nào tự nó ghi đĩa/sinh tiến trình/mở ổ cắm. Tên nào ngoài đây ⇒ ĐỎ (fail-closed).
+SU_KIEN_LANH = ("compile", "exec", "import", "marshal.loads", "os.listdir", "os.scandir", "sys._getframe", "sys._getframemodulename",
+                "object.__getattr__", "object.__setattr__", "object.__delattr__", "builtins.id", "code.__new__", "function.__new__",
+                "sys.excepthook", "sys.unraisablehook", "time.sleep", "urllib.Request", "http.client.send",   # hai cái sau: transport THẬT nói vào ổ cắm GIẢ
+                "cpython.PyInterpreterState_Clear", "cpython._PySys_ClearAuditHooks")   # trình thông dịch tự phát khi tắt
+# Danh sách CHO PHÉP cờ của `open` đọc: đúng các cờ mà `open(p)`/`os.open(p, O_RDONLY)` của CPython dùng trên Windows và POSIX.
+CO_DOC_CHO_PHEP = ("O_RDONLY", "O_BINARY", "O_NOINHERIT", "O_CLOEXEC")
+# Nạp TRƯỚC khi hook tồn tại. Danh sách CỐ ĐỊNH, không suy từ nguồn đang thử — bản đột biến không quyết định được cái gì chạy ngoài tầm đo.
+LAM_NONG = ("base64", "contextlib", "ctypes", "gzip", "hashlib", "io", "json", "math", "os", "pathlib", "platform", "re", "shutil",
+            "signal", "subprocess", "tarfile", "tempfile", "threading", "time", "urllib.request")
+MOI_NHU, MOI_BYTE = "moi-nhu.txt", b"moi nhu\n"   # tệp mồi đặt sẵn ở cwd/HOME/TEMP của từng lời gọi: mất hay đổi byte đều bị thấy
+CON_GHIM = r'''"""Tiến trình con của harness `ghim-agy` (sinh từ ops/cloud_agent_creds_test.py). argv: <viec.json> <kênh>.
+MỘT lời gọi CLI = MỘT tiến trình này. Sau dòng `mo`, tệp này không còn quyết định gì: mã sản phẩm chạy như `__main__` và tiến trình
+thoát bằng đúng đường của nó; hook và kênh sống tới khi trình thông dịch gỡ hook."""
+import base64, functools, http.client, importlib, io, json, os, socket, ssl, sys, types, urllib.error, urllib.request  # noqa: E401
+sys.dont_write_bytecode = True
+VIEC = json.loads(open(sys.argv[1], encoding="utf-8").read())
+for _ten in VIEC["lam_nong"]:
+    importlib.import_module(_ten)
+KENH = os.open(sys.argv[2], os.O_WRONLY | os.O_APPEND | os.O_CREAT)
+def tao_ghi(viet=os.write, kenh=KENH, ma_hoa=ascii):
+    def ghi(loai, noi_dung):   # một dòng = một bản ghi, ra đĩa NGAY; chỉ dùng thứ đã buộc sẵn nên chạy được cả khi module đang bị dọn
+        viet(kenh, (loai + "\t" + ma_hoa(noi_dung) + "\n").encode("ascii"))
+    return ghi
+GHI = tao_ghi()
+MIEN = [0]   # > 0: CHÍNH harness đang cố ý làm một việc có phát audit (tạo ổ cắm CHƯA NỐI để hỏi `settimeout` thật)
+class TuChoi(BaseException):
+    """Không phải `Exception` ⇒ `except Exception` của mã sản phẩm không nuốt được; có nuốt bằng `except BaseException` thì dấu vẫn ở kênh."""
+class LoiMangGia(OSError):
+    """Lỗi MẠNG do fixture dựng — không phải lỗi đối số, không vào `sai`."""
+CO_DOC = 0
+for _co in VIEC["co_doc"]:
+    CO_DOC |= getattr(os, _co, 0)
+def tao_canh(ghi=GHI, lanh=frozenset(VIEC["lanh"]), co_doc=CO_DOC, mien=MIEN, tu_choi=TuChoi,
+             ban=[False], che_do_doc=frozenset("rbt"), len=len, type=type, set=set, repr=repr, int=int, str=str):
+    def canh(ten, ds):
+        if mien[0] or ban[0] or ten in lanh:
+            return
+        if (ten == "open" and len(ds) >= 3 and type(ds[2]) is int and not ds[2] & ~co_doc
+                and (ds[1] is None or (type(ds[1]) is str and "r" in ds[1] and set(ds[1]) <= che_do_doc))):
+            return   # đọc: chế độ ⊆ {r,b,t} và KHÔNG cờ nào ngoài danh sách cho phép
+        ban[0] = True   # `repr` của đối số không được tái nhập hook
+        try:
+            mo_ta = ten + "(" + ", ".join([repr(x)[:120] for x in ds]) + ")"
+        except Exception as e:
+            mo_ta = ten + "(<repr lỗi " + type(e).__name__ + ">)"
+        finally:
+            ban[0] = False
+        ghi("sk", mo_ta)
+        raise tu_choi(mo_ta)
+    return canh
+# ----- transport: thư viện THẬT, ổ cắm GIẢ -----
+BAN = VIEC["ban"]
+class OngHong:
+    """Phản hồi đứt giữa chừng: lỗi nổ khi http.client ĐỌC dòng trạng thái, như một kết nối thật bị ngắt."""
+    def __init__(self, loi):
+        self.loi = loi
+    def readline(self, *a):
+        raise self.loi
+    read = readinto = readline
+    def close(self):
+        pass
+    flush = close
+class OcGia:
+    def __init__(self, kn, luoc_do):
+        self.kn, self.luoc_do, self.vao = kn, luoc_do, b""
+    def sendall(self, du, *a):
+        self.vao += memoryview(du).cast("B")
+    def makefile(self, *a, **kw):   # http.client đọc phản hồi ⇒ lúc này yêu cầu đã nằm trọn trong `vao`
+        dau = self.vao.split(b"\r\n\r\n", 1)[0].decode("iso-8859-1").split("\r\n")
+        pt, duong = dau[0].split(" ")[:2]
+        tieu_de = dict(d.split(": ", 1) for d in dau[1:] if ": " in d)
+        url = self.luoc_do + "://" + tieu_de.get("Host", self.kn.host) + duong
+        han = self.kn.timeout
+        GHI("nk", json.dumps({"url": url, "pt": pt, "han": None if han is socket._GLOBAL_DEFAULT_TIMEOUT else repr(han), "tieu_de": tieu_de}))
+        muc = BAN.get(url)
+        if pt != "GET":
+            GHI("sai", "phương thức " + pt + " tới " + repr(url) + " — đọc release/tải tài sản là GET")
+            return io.BytesIO(b"HTTP/1.1 405 Method Not Allowed\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+        if muc is None:
+            GHI("sai", "URL ngoài bảng phục vụ: " + repr(url))
+            return io.BytesIO(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+        if "nem" in muc:
+            return OngHong(LoiMangGia(muc["nem"]))
+        than = base64.b64decode(muc["than"])
+        return io.BytesIO(b"HTTP/1.1 200 OK\r\nContent-Length: " + str(len(than)).encode("ascii") + b"\r\nConnection: close\r\n\r\n" + than)
+    def close(self):
+        pass
+def ket_noi_gia(self):
+    """Thay `HTTP(S)Connection.connect`. Thứ duy nhất của biên kết nối thật còn giữ: `sock.settimeout(timeout)` mà
+    `socket.create_connection` gọi — hỏi CHÍNH `socket` thật trên một ổ cắm chưa nối (không DNS, không gói tin)."""
+    han, https = self.timeout, isinstance(self, http.client.HTTPSConnection)
+    if han is not socket._GLOBAL_DEFAULT_TIMEOUT:
+        MIEN[0] += 1   # miễn ĐÚNG một sự kiện: `socket.__new__` của ổ cắm thử
+        try:
+            thu = socket.socket()
+        finally:
+            MIEN[0] -= 1
+        try:
+            thu.settimeout(han)
+            khong_chan = thu.gettimeout() == 0
+        finally:
+            thu.close()
+        if khong_chan:
+            raise BlockingIOError("timeout=0: ổ cắm không chặn, connect() thật chưa xong đã trả lỗi")
+    if https and not isinstance(self._context, ssl.SSLContext):
+        raise AttributeError(repr(type(self._context).__name__) + " object has no attribute 'wrap_socket'")
+    self.sock = OcGia(self, "https" if https else "http")
+http.client.HTTPConnection.connect = ket_noi_gia
+http.client.HTTPSConnection.connect = ket_noi_gia
+def bao_sai(e):
+    """Lời gọi bị thư viện THẬT bác (không phải lỗi mạng giả, không phải TuChoi, không phải 404/405 đã ghi ở ổ cắm) ⇒ một bản ghi `sai`."""
+    for x in (e, getattr(e, "reason", None)):
+        if isinstance(x, (LoiMangGia, TuChoi, urllib.error.HTTPError, SystemExit)) or getattr(x, "_cac_da_bao", False):
+            break
+    else:
+        GHI("sai", "thư viện thật bác lời gọi: " + type(e).__name__ + ": " + str(e)[:200])
+    try:
+        e._cac_da_bao = True
+    except Exception:
+        pass
+def quan_sat(that):   # chỉ NHÌN: gọi nguyên hàm thật, ghi lại ngoại lệ nó ném, rồi ném tiếp
+    @functools.wraps(that)
+    def boc(*a, **kw):
+        try:
+            return that(*a, **kw)
+        except BaseException as e:
+            bao_sai(e)
+            raise
+    return boc
+urllib.request.urlopen = quan_sat(urllib.request.urlopen)
+urllib.request.OpenerDirector.open = quan_sat(urllib.request.OpenerDirector.open)
+http.client.HTTPConnection.request = quan_sat(http.client.HTTPConnection.request)
+# ----- mã sản phẩm: kiểu "lenh" = chạy như `__main__` (đúng lệnh CLI); kiểu "nap" = chỉ NẠP module (đường mà mọi nơi import nó đi) -----
+MA = VIEC["ma"]
+TEN = "__main__" if VIEC["kieu"] == "lenh" else "cloud_agent_creds_duoi_test"
+MODULE = types.ModuleType(TEN)
+MODULE.__file__ = MA
+sys.modules[TEN] = MODULE
+sys.argv = [MA] + list(VIEC["argv"])
+MA_DA_DICH = compile(open(MA, encoding="utf-8").read(), MA, "exec")   # lỗi cú pháp của bản đột biến nổ Ở ĐÂY, trước `mo` ⇒ lỗi harness
+sys.addaudithook(tao_canh())
+GHI("mo", "")
+try:
+    exec(MA_DA_DICH, MODULE.__dict__)
+except SystemExit:
+    GHI("roi", "SystemExit")
+    raise
+except BaseException as e:
+    GHI("roi", type(e).__name__ + ": " + str(e)[:300])
+    raise
+GHI("roi", "het-tep")
+'''
+_TAR_NHO = {}
+def _tar_nen(ban, k, hong=None):
+    if (ban, k, hong) not in _TAR_NHO:
+        _TAR_NHO[ban, k, hong] = (_tar([("antigravity", NOI_DUNG), ("khac", b"y")]) if hong == "hai_tep" else _tar([("khac", NOI_DUNG)]) if hong == "ten_sai"
+                                  else _tar([("antigravity", None)]) if hong == "khong_thuong"
+                                  else _tar([("antigravity", NOI_DUNG + f"{ban}/{k}".encode())]))   # sáu nền × hai phiên bản: byte KHÁC nhau
+    return _TAR_NHO[ban, k, hong]
+def _goi(ten, argv=("ghim-agy",), hong=None, loi=None, kieu="lenh"):
+    """Mô tả MỘT lời gọi CLI: tên hàng, argv, {nền: kiểu hỏng}, lỗi chung. `pb` = phiên bản mà lời gọi phải ra. `kieu="nap"`: chỉ nạp module."""
+    argv = tuple(argv)
+    return SimpleNamespace(ten=ten, argv=argv, hong=dict(hong or {}), loi=loi, kieu=kieu, pb=argv[2] if len(argv) == 3 else "9.8.7",
+                           duong=_API + (f"tags/{argv[2]}" if len(argv) == 3 else "latest"))
+def _ban_phuc_vu(hong, loi):
+    """Bảng URL -> phản hồi cho MỘT lời gọi (luôn phục vụ CẢ hai phiên bản) và kỳ vọng {phiên bản: {nền: (url, sha512)}}."""
+    ban, mong = {}, {}
+    for pb, duong in (("9.8.7", ("latest", "tags/9.8.7")), ("2.3.4", ("tags/2.3.4",))):
+        ts = {k: (f"https://gia.invalid/{pb}/{ten}", _tar_nen(pb, k, hong.get(k))) for k, ten in ORACLE_TAI_SAN.items()}
+        rel = json.dumps({"tag_name": pb, "assets": [
+            {"name": ORACLE_TAI_SAN[k], "browser_download_url": u, "digest": "sha256:" + ("0" * 64 if hong.get(k) == "lech" else hashlib.sha256(b).hexdigest())}
+            for k, (u, b) in ts.items() if hong.get(k) != "thieu"]}).encode("utf-8")
+        for d in duong:
+            ban[_API + d] = {"nem": "giả lập mạng hỏng"} if loi == "release" else {"than": b"{khong phai json" if loi == "json" else rel}
+        for i, (u, b) in enumerate(ts.values()):
+            ban[u] = {"nem": "giả lập tải hỏng"} if loi == "tai" and i == 1 else {"than": b}
+        mong[pb] = {k: (u, hashlib.sha512(b).hexdigest()) for k, (u, b) in ts.items()}
+    return {u: ({"than": base64.b64encode(m["than"]).decode("ascii")} if "than" in m else m) for u, m in ban.items()}, mong
+def _chup(goc):
+    """Trạng thái ĐẦY ĐỦ của một cây: mỗi mục -> (loại, quyền[, cỡ, mtime_ns, sha256] | đích liên kết)."""
+    kq = {}
+    for d, thu_muc, tep in os.walk(goc):
+        for x in thu_muc + tep:
+            p = Path(d, x)
+            st = p.lstat()
+            kq[p.relative_to(goc).as_posix()] = (("l", os.readlink(p)) if p.is_symlink() else ("d", st.st_mode) if p.is_dir()
+                                                 else ("f", st.st_mode, st.st_size, st.st_mtime_ns, hashlib.sha256(p.read_bytes()).hexdigest()))
+    return kq
+def _so_trang_thai(truoc, sau):
+    return sorted([f"thêm {k}" for k in sau.keys() - truoc.keys()] + [f"mất {k}" for k in truoc.keys() - sau.keys()]
+                  + [f"đổi {k}" for k in truoc.keys() & sau.keys() if truoc[k] != sau[k]])
+def _van(b):   # văn bản như mã in ra: giải mã, đổi xuống dòng của nền về "\n" (so byte nguyên vẹn nằm ở `ra_tho`)
+    return b.decode("utf-8", "backslashreplace").replace(os.linesep, "\n")
+def _mot_loi_goi(t, i, g, ban, mong, ma):
+    """MỘT lời gọi = MỘT tiến trình con. Chỉ sau khi con CHẾT mới đọc kênh (tới hết tệp) và chụp lại trạng thái."""
+    d = t / str(i)
+    for x in ("cwd", "home", "tmp"):
+        (d / "dung" / x).mkdir(parents=True)
+        (d / "dung" / x / MOI_NHU).write_bytes(MOI_BYTE)
+    (d / "viec.json").write_text(json.dumps({"ma": str(ma), "argv": g.argv, "kieu": g.kieu, "ban": ban, "lanh": SU_KIEN_LANH, "co_doc": CO_DOC_CHO_PHEP,
+                                             "lam_nong": LAM_NONG}), encoding="utf-8")
+    nha, tam, truoc = str(d / "dung" / "home"), str(d / "dung" / "tmp"), _chup(d / "dung")
+    moi_truong = {k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy")}   # proxy của máy không được chen vào transport
+    r = subprocess.run([sys.executable, "-I", "-B", "-X", "utf8", str(t / "con.py"), str(d / "viec.json"), str(d / "kenh")], cwd=str(d / "dung" / "cwd"),
+                       env=dict(moi_truong, HOME=nha, USERPROFILE=nha, TEMP=tam, TMP=tam, TMPDIR=tam, no_proxy="*"),
+                       stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
+    kenh = {"mo": [], "roi": [], "sk": [], "sai": [], "nk": []}
+    for dong in ((d / "kenh").read_text(encoding="ascii").splitlines() if (d / "kenh").is_file() else ()):
+        loai, _, nd = dong.partition("\t")
+        kenh[loai].append(ast.literal_eval(nd))
+    if not kenh["mo"]:   # chưa tới được mã sản phẩm: hỏng ở phần dựng (kể cả lỗi cú pháp của bản đột biến) ⇒ lỗi harness, thoát 4
+        raise RuntimeError(f"{g.ten}: tiến trình con hỏng trước khi mở tầm đo (rc={r.returncode}): {_van(r.stderr)[-400:]}")
+    return SimpleNamespace(ten=g.ten, goi=g, mong=mong, rc=r.returncode, ra_tho=r.stdout, ra=_van(r.stdout), loi=_van(r.stderr), sk=kenh["sk"], sai=kenh["sai"],
+                           nk=[json.loads(x) for x in kenh["nk"]], roi=(kenh["roi"] or [None])[-1], doi=_so_trang_thai(truoc, _chup(d / "dung")))
+def _chay_ghim(ds, ma=None):
+    """Chạy từng lời gọi của `ds` trong tiến trình con RIÊNG (song song, kết quả giữ thứ tự)."""
+    viec = [(i, g, *_ban_phuc_vu(g.hong, g.loi)) for i, g in enumerate(ds)]
+    with tempfile.TemporaryDirectory(prefix="cac_ghim_") as t:
+        t = Path(t).resolve()
+        (t / "con.py").write_text(CON_GHIM, encoding="utf-8", newline="\n")
+        with ThreadPoolExecutor(min(8, os.cpu_count() or 2)) as nhom:
+            return list(nhom.map(lambda v: _mot_loi_goi(t, v[0], v[1], v[2], v[3], ma or MA), viec))
+def _hau_dieu_chung(kq, stderr_tu_do=False):
+    """Hậu điều của MỌI lời gọi `ghim-agy`, bất kể rc: không tác động tệp/tiến trình/mạng trong CẢ vòng đời (F01-n/r/t/v), transport đúng (F01-q/u)."""
+    bang(not kq.sk, f"{kq.ten}: sự kiện ngoài danh sách cho phép trong vòng đời tiến trình — ghi đĩa/tiến trình/mạng ({len(kq.sk)} lần): {kq.sk[:5]}")
+    bang(not kq.doi, f"{kq.ten}: trạng thái cwd/HOME/TEMP đổi sau khi tiến trình chết: {kq.doi}")
+    bang(not kq.sai, f"{kq.ten}: transport — thư viện thật bác lời gọi / sai phương thức / URL ngoài bảng: {kq.sai}")
+    if kq.roi not in ("SystemExit", "het-tep"):   # không dấu ghi, không sai transport mà rời bằng ngoại lệ/`os._exit` ⇒ lỗi VÔ CAN (thoát 4)
+        raise RuntimeError(f"{kq.ten}: mã rời tiến trình không qua SystemExit: {kq.roi!r} (rc={kq.rc}) {kq.loi[-300:]}")
+    bang(stderr_tu_do or kq.loi == "", f"{kq.ten}: stderr không rỗng: {kq.loi!r}")
+def _transcript_mong(ban, mong):
+    d = mong[ban]
+    return ([f'AGY_VER = "{ban}"', "NEN = {"] + [f'    "{k}": ("{u}", "{h}"),' for k, (u, h) in d.items()] + ["}", ""]
+            + [f"| `{k}` | `{u}` | `{h}` |" for k, (u, h) in d.items()])
+def _bang_thanh_cong(kq):
+    _hau_dieu_chung(kq)
+    bang(kq.rc == 0, f"{kq.ten}: rc={kq.rc}, mong 0 — stdout={kq.ra!r}")
+    bang(kq.ra_tho == "".join(d + os.linesep for d in _transcript_mong(kq.goi.pb, kq.mong)).encode("utf-8"), f"{kq.ten}: transcript lệch hợp đồng: {kq.ra!r}")
+    bang([x["url"] for x in kq.nk] == [kq.goi.duong] + [kq.mong[kq.goi.pb][k][0] for k in KHOA_6], f"{kq.ten}: nhật ký mạng {[x['url'] for x in kq.nk]}")
+def _bang_tu_choi(kq):
+    _hau_dieu_chung(kq)
+    dong, url, d = kq.ra.splitlines(), [x["url"] for x in kq.nk], kq.mong[kq.goi.pb]
+    bang(kq.rc == 1 and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗") and kq.ra.endswith("\n"), f"{kq.ten}: rc={kq.rc} stdout={kq.ra!r}")
+    bang(url[:1] == [kq.goi.duong] and set(url[1:]) <= {u for u, _ in d.values()}, f"{kq.ten}: nhật ký mạng {url}")
+    for k, h in kq.goi.hong.items():   # bằng chứng nguyên nhân: không thể biết digest/tarball hỏng nếu chưa tải chính tài sản ấy
+        bang(h == "thieu" or d[k][0] in url, f"{kq.ten}: từ chối mà chưa tải tài sản {k} — không phải vì kiểu hỏng đang thử ({url})")
+    bang(kq.goi.loi != "tai" or d[KHOA_6[1]][0] in url, f"{kq.ten}: chưa tới lượt tải bị làm hỏng ({url})")
+def _bang_argv_sai(kq):   # F01-r: rc 2 KHÔNG miễn hậu điều chung; usage ở stderr được phép, stdout (kênh dữ liệu) phải rỗng, không tải gì
+    _hau_dieu_chung(kq, stderr_tu_do=True)
+    bang(kq.rc == 2 and kq.nk == [] and kq.ra_tho == b"", f"{kq.ten}: rc={kq.rc} tải={[x['url'] for x in kq.nk]} stdout={kq.ra!r}")
+def g1_ghim_in_dung_sau_cap():   # release latest: đủ sáu tải đúng nền đúng thứ tự, transcript ĐÚNG từng byte, không ghi
+    lenh, nap = _chay_ghim([_goi("latest"), _goi("nạp module (không chạy lệnh)", (), kieu="nap")])
+    _bang_thanh_cong(lenh)
+    # Lệnh thật `sys.exit` ngay trong guard `__main__` nên không bao giờ chạy tới mã mức module đứng SAU guard; đường NẠP thì có.
+    _hau_dieu_chung(nap)
+    bang((nap.rc, nap.ra_tho, nap.nk, nap.roi) == (0, b"", [], "het-tep"), f"nạp module mà có đầu ra/tải/thoát: rc={nap.rc} stdout={nap.ra!r} nk={nap.nk} roi={nap.roi!r}")
+def g3_ghim_ban_chi_dinh():   # F01-h/i: `--ban` hợp lệ đi xuống `tags/<ban>` và ra đúng phiên bản ấy
+    _bang_thanh_cong(_chay_ghim([_goi("--ban 2.3.4", CHE_DO[1])])[0])
+def g2_ghim_tu_choi_khi_sai():   # (năm kiểu hỏng × sáu nền + mạng/JSON/tải) × (latest, --ban) ⇒ rc 1, ĐÚNG một dòng; argv sai ⇒ rc 2, không tải
+    ds = []
+    for argv in CHE_DO:
+        nhan = " ".join(argv[1:]) or "latest"
+        ds += [_goi(f"{nhan}: {h}@{k}", argv, hong={k: h}) for h in HONG_TAI_SAN for k in KHOA_6]
+        ds += [_goi(f"{nhan}: {loi} hỏng", argv, loi=loi) for loi in LOI_CHUNG]
+    n_loi = len(ds)
+    ds += [_goi("argv sai " + " ".join(map(repr, a)), ("ghim-agy",) + a) for a in ARGV_SAI]
+    kq = _chay_ghim(ds)
+    bang(n_loi == len(CHE_DO) * (len(HONG_TAI_SAN) * len(KHOA_6) + len(LOI_CHUNG)) == 66, f"ma trận lỗi phải đủ 66 hàng, có {n_loi}")
+    for x in kq[:n_loi]:
+        _bang_tu_choi(x)
+    for x in kq[n_loi:]:
+        _bang_argv_sai(x)
+# Tự kiểm của CHÍNH harness, HAI CHIỀU: một CLI GIẢ làm đúng từng việc bị cấm ⇒ hậu điều chung PHẢI đỏ; việc hợp lệ (kể cả những thứ
+# harness lượt trước bác oan) ⇒ PHẢI xanh. Chạy bằng đúng đường của g1/g2/g3: một tiến trình con mỗi ca, sống tới khi thoát thật.
+MA_THU = r'''import atexit, os, socket, subprocess, sys, tempfile, threading, urllib.request  # noqa: E401
+from pathlib import Path
+U, MOI = "https://gia.invalid/9.8.7/agy_cli_linux_x64.tar.gz", "moi-nhu.txt"
+YC = urllib.request.Request
+class GhiKhiHuy:   # lúc module bị dọn `builtins.open` đã bị gỡ (CPython thật cũng vậy) ⇒ finalizer muốn ghi phải giữ sẵn os.open
+    def __del__(self, mo=os.open, dong=os.close, co=os.O_WRONLY | os.O_CREAT):
+        dong(mo("g.txt", co))
+def main(argv):
+    ca, tam, mo = argv[0], os.environ["TEMP"], urllib.request.urlopen
+    if ca == "lanh":   # đọc, liệt kê, mở CHỈ ĐỌC, callback lúc tắt KHÔNG ghi, sáu dạng lời gọi transport mà thư viện thật nhận
+        open(__file__, encoding="utf-8").read(), os.listdir("."), Path(MOI).read_bytes(), os.close(os.open(MOI, os.O_RDONLY))
+        threading._register_atexit(lambda: None), atexit.register(lambda: None)
+        __import__("time").sleep(0), threading.Event().wait(0)   # F01-x: chờ thuần không phải tác động tệp
+        with mo(U, timeout=30) as r:
+            r.read()
+        mo(YC(U, headers={"User-Agent": "x"}), None, 2.5).read(), mo(U).read(), mo(U, timeout=True).read(), mo(U, timeout=None).read()
+        urllib.request.build_opener().open(U, timeout=1).read()
+        mo(YC(U, data=[b"A"], method="GET", headers={"Content-Length": "1"}), timeout=30).read()   # F01-w: body iterable bytes hợp lệ
+        mo(YC(U, data=[b"A"], method="GET"), timeout=30).read()   # F01-w: chunked hợp lệ
+        print("ok")
+    elif ca == "path_tuyet_doi":
+        Path(tam, "a.txt").write_text("x", encoding="utf-8")
+    elif ca == "os_open":
+        os.close(os.open(os.path.join(tam, "b.bin"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC))
+    elif ca == "temporaryfile":
+        tempfile.TemporaryFile().close()
+    elif ca == "tao_roi_xoa":
+        Path("c.txt").write_text("x", encoding="utf-8"), Path("c.txt").unlink()
+    elif ca == "nuot_loi":
+        try:
+            open("d.txt", "w").close()
+        except BaseException:
+            pass
+    elif ca == "them_vao":
+        open(MOI, "a").close()
+    elif ca == "doc_ghi":
+        open(MOI, "r+").close()
+    elif ca == "mkdir":
+        os.mkdir("e")
+    elif ca == "doi_ten":
+        os.replace(MOI, "khac.txt")
+    elif ca == "xoa":
+        os.remove(MOI)
+    elif ca == "xoa_khi_dong":   # Windows: O_RDONLY|O_TEMPORARY xoá tệp lúc đóng; POSIX không có cờ ấy ⇒ O_RDONLY|O_TRUNC cắt tệp về 0
+        os.close(os.open(MOI, os.O_RDONLY | getattr(os, "O_TEMPORARY", os.O_TRUNC)))
+    elif ca == "fdopen":
+        os.fdopen(1, "w", closefd=False)
+    elif ca == "tien_trinh":
+        subprocess.run([sys.executable, "-c", "pass"])
+    elif ca == "o_cam_tho":
+        socket.socket().close()
+    elif ca == "hen_luc_thoat":   # main trả 0 sạch sẽ; việc ghi chỉ xảy ra khi tiến trình thoát ...
+        atexit.register(lambda: open("f.txt", "w").close())
+    elif ca == "tat_luong_ghi":   # ... hoặc trong `threading._shutdown`, TRƯỚC cả atexit (F01-t) ...
+        threading._register_atexit(lambda: open("t.txt", "w").close())
+    elif ca == "ghi_khi_huy":   # ... hoặc khi module bị dọn
+        globals()["_giu"] = GhiKhiHuy()
+    elif ca == "luong":
+        threading.Thread(target=lambda: open("h.txt", "w").close()).start()
+    else:   # lời gọi transport SAI: nuốt lỗi như `ghim_agy` vẫn làm ⇒ chỉ nhật ký `sai` mới tố được
+        try:
+            {"timeout_chuoi": lambda: mo(U, timeout="30"), "timeout_am": lambda: mo(U, timeout=-1), "timeout_khong": lambda: mo(U, timeout=0),
+             "req_sai_kieu": lambda: mo(U.encode()), "doi_so_la": lambda: mo(U, thoi_han=3), "post": lambda: mo(U, b"x"),
+             "url_la": lambda: mo(U + "?x=1"), "tieu_de_none": lambda: mo(YC(U, headers={"User-Agent": None})),
+             "than_chuoi_get": lambda: mo(YC(U, data="than", method="GET")), "ngu_canh_chu": lambda: mo(U, context="chu")}[ca]()
+        except Exception:
+            pass
+    return 0
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
+'''
+# (ca, mảnh phải có trong sự kiện ĐẦU TIÊN). Ca nào cũng phải để nguyên ba tệp mồi: người quan sát TỪ CHỐI chứ không chỉ ghi nhận.
+THU_GHI = (("path_tuyet_doi", "a.txt"), ("os_open", "b.bin"), ("temporaryfile", "open("), ("tao_roi_xoa", "c.txt"), ("nuot_loi", "d.txt"),
+           ("them_vao", MOI_NHU), ("doc_ghi", MOI_NHU), ("mkdir", "os.mkdir"), ("doi_ten", "os.rename"), ("xoa", "os.remove"), ("xoa_khi_dong", MOI_NHU),
+           ("fdopen", "open(1"), ("tien_trinh", "subprocess.Popen"), ("o_cam_tho", "socket."), ("hen_luc_thoat", "f.txt"), ("tat_luong_ghi", "t.txt"),
+           ("ghi_khi_huy", "g.txt"), ("luong", "_thread.start"))
+THU_SAI = ("timeout_chuoi", "timeout_am", "timeout_khong", "req_sai_kieu", "doi_so_la", "post", "url_la", "tieu_de_none", "than_chuoi_get", "ngu_canh_chu")
+def _bi_chot(kq):
+    try:
+        _hau_dieu_chung(kq)
+    except TinHieuChotCa:
+        return True
+    return False
+def g4_quan_sat_va_transport_co_rang():   # F01-n/q/t/u/v: đối chứng dương VÀ đối chứng âm của người quan sát, transport và nhân chứng trạng thái
+    with tempfile.TemporaryDirectory(prefix="cac_thu_") as t:
+        (ma := Path(t) / "ma_thu.py").write_text(MA_THU, encoding="utf-8", newline="\n")
+        kq = {x.ten: x for x in _chay_ghim([_goi(ten, (ten,)) for ten in ("lanh",) + tuple(c for c, _ in THU_GHI) + THU_SAI], ma=ma)}
+        # nhân chứng trạng thái, đo thẳng: mất · byte đổi (cùng cỡ) · thêm đều phải hiện; không đổi gì thì phải im
+        (cay := Path(t) / "cay").mkdir()
+        for ten in ("mat.txt", "doi.txt", "yen.txt"):
+            (cay / ten).write_bytes(b"1234")
+        truoc = _chup(cay)
+        bang(_so_trang_thai(truoc, _chup(cay)) == [], "nhân chứng trạng thái tự báo động khi không ai đụng")
+        (cay / "mat.txt").unlink(), (cay / "doi.txt").write_bytes(b"4321"), (cay / "them.txt").write_bytes(b"")
+        bang(_so_trang_thai(truoc, _chup(cay)) == ["mất mat.txt", "thêm them.txt", "đổi doi.txt"], f"nhân chứng trạng thái mù: {_so_trang_thai(truoc, _chup(cay))}")
+        # danh sách CHO PHÉP cờ đọc, chứng minh trên CHÍNH runtime này: cờ được phép không đổi gì; cờ ngoài danh sách có tác động thật
+        (thu := cay / "co.txt").write_bytes(b"1234")
+        truoc = _chup(cay)
+        for co in CO_DOC_CHO_PHEP:
+            os.close(os.open(thu, os.O_RDONLY | getattr(os, co, 0)))
+            bang(_so_trang_thai(truoc, _chup(cay)) == [], f"cờ {co} trong danh sách cho phép mà làm đổi tệp")
+        ngoai = "O_TEMPORARY" if hasattr(os, "O_TEMPORARY") else "O_TRUNC"
+        os.close(os.open(thu, os.O_RDONLY | getattr(os, ngoai)))
+        bang(ngoai not in CO_DOC_CHO_PHEP and _so_trang_thai(truoc, _chup(cay)) == [("mất" if ngoai == "O_TEMPORARY" else "đổi") + " co.txt"],
+             f"đối chứng {ngoai}: {_so_trang_thai(truoc, _chup(cay))}")
+    x = kq["lanh"]
+    bang(not _bi_chot(x) and (x.rc, x.ra, x.loi, x.roi) == (0, "ok\n", "", "SystemExit"), f"việc hợp lệ bị chốt oan: sk={x.sk} sai={x.sai} doi={x.doi} rc={x.rc} {x.loi!r}")
+    bang([(n["url"], n["pt"], n["han"]) for n in x.nk] == [("https://gia.invalid/9.8.7/agy_cli_linux_x64.tar.gz", "GET", h) for h in ("30", "2.5", None, "True", "None", "1", "30", "30")],
+         f"nhật ký transport (đọc từ byte trên dây) lệch: {x.nk}")
+    bang(x.nk[1]["tieu_de"].get("User-Agent") == "x", f"header không tới dây: {x.nk[1]}")
+    for ten, dau in THU_GHI:
+        x = kq[ten]
+        bang(x.sk and dau in x.sk[0] and not x.doi and not x.sai and _bi_chot(x), f"{ten}: người quan sát mù, không từ chối, hoặc hậu điều không đỏ — sk={x.sk} doi={x.doi}")
+    for ten in ("nuot_loi", "hen_luc_thoat", "tat_luong_ghi", "ghi_khi_huy"):   # main về 0 và tiến trình thoát mã 0: CHỈ kênh sự kiện tố được
+        bang((kq[ten].rc, kq[ten].roi) == (0, "SystemExit"), f"{ten}: phải là ca mà mã che được lỗi, lại thấy rc={kq[ten].rc} roi={kq[ten].roi!r}")
+    for ten in THU_SAI:
+        x = kq[ten]
+        bang(x.sai and not x.sk and not x.doi and (x.rc, x.roi) == (0, "SystemExit") and _bi_chot(x), f"{ten}: lời gọi sai mà không vào `sai` — sai={x.sai} sk={x.sk} rc={x.rc}")
 # ---------- H: khối trong hook ----------
 MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
 PY_GIA = "#!{exe}\nimport json, sys\nopen({log!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n"   # argv nguyên danh sách (F09)
@@ -332,6 +751,42 @@ def h3_ten_nang_luc():
                for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
     bang({"agent-creds-bootstrap", "agy-ghim"} <= moi, f"thiếu tên năng lực mới: {moi}")
     bang(cu <= moi, f"mất tên cũ: {cu - moi}")
+# ---------- H4 (#1523, spec ops/specs/hook-apt-thu-lai-1-r1.md §3): khối `cong-cu-ban-ke` gọi trình cài với 1 lần thử lại apt ----------
+MO_CC, DONG_CC = "# >>> cong-cu-ban-ke (wp1474)", "# <<< cong-cu-ban-ke (wp1474)"
+def _h4_chay(t, env_them):
+    """Chạy RIÊNG khối: một công cụ `chuan_bi` thiếu; `cai_cong_cu.sh` giả GHI biến `CAI_CONG_CU_THU_LAI` nó nhận rồi đặt DAT; `PY` giả
+    bắt `-m ruff`/`-m pip` (không cài gì thật). Trả (rc, stdout, các giá trị trình cài nhận)."""
+    bash = bash_nen.tim_bash()[0]
+    bang(bash, "POSIX mà không có bash dùng được — không được bỏ qua")
+    than = HOOK.read_text(encoding="utf-8")
+    i, j, co = than.find(MO_CC), than.find(DONG_CC), re.search(r"^co\(\) \{.*\}$", than, re.M)
+    bang(0 <= i < j and co, "không tách được khối cong-cu-ban-ke (hoặc hàm co) của hook")
+    g = Path(t)
+    (g / "ops").mkdir(); (g / ".github" / "workflows").mkdir(parents=True)
+    tt, nhan = g / "tt", g / "nhan"
+    _ghi(tt, "THIEU")
+    _ghi(g / "ops" / "cong_cu.yaml", '{"cong_cu": {"sc": {"bat_buoc": false, "chuan_bi": true}}}')
+    _ghi(g / "ops" / "cong_cu.py", f"import json\nprint(json.dumps({{'cong_cu': [{{'ten': 'sc', 'trang_thai': open({str(tt)!r}).read()}}]}}))\n")
+    _ghi(g / "ops" / "cai_cong_cu.sh", f'#!/bin/sh\nprintf "%s\\n" "${{CAI_CONG_CU_THU_LAI-VANG}}" >> \'{nhan}\'\nprintf DAT > \'{tt}\'\n', True)
+    _ghi(g / ".github" / "workflows" / "ci.yml", "      - run: python -m pip install --quiet ruff==0.15.15\n")
+    _ghi(py := g / "pygia", f'#!/bin/sh\n[ "$1" = -m ] && [ "$2" = ruff ] && {{ echo "ruff 0.15.15"; exit 0; }}\n[ "$1" = -m ] && [ "$2" = pip ] && exit 0\nexec {sys.executable!r} "$@"\n', True)
+    kich = ('set -euo pipefail; PY="$1"; GOC="$2"; PATH_GOC="$PATH"\n' + co.group(0) + "\n" + than[i:j + len(DONG_CC)]
+            + '\necho "SAU=${CAI_CONG_CU_THU_LAI-VANG}"\n')
+    env = {k: v for k, v in os.environ.items() if k not in ("BASH_ENV", "ENV", "CAI_CONG_CU_THU_LAI") and not k.startswith("BASH_FUNC_")}
+    r = subprocess.run([bash, "-c", kich, "h4", str(py), t], capture_output=True, text=True, timeout=120, env={**env, **env_them})
+    return r.returncode, r.stdout, (nhan.read_text(encoding="utf-8").split() if nhan.exists() else [])
+def h4_cong_cu_ban_ke_thu_lai_apt_mot_lan():
+    _posix()
+    for env_them, mong, sau in (({}, ["1"], "SAU=VANG"), ({"CAI_CONG_CU_THU_LAI": "3"}, ["3"], "SAU=3"),
+                                ({"CAI_CONG_CU_THU_LAI": "0"}, ["0"], "SAU=0"),
+                                # Codex lượt 1 F1523-01: rỗng ⇒ `:-1` cho 1, cha vẫn rỗng; không phải số ⇒ chuyển NGUYÊN VĂN (trình cài tự lo)
+                                ({"CAI_CONG_CU_THU_LAI": ""}, ["1"], "SAU="), ({"CAI_CONG_CU_THU_LAI": "abc"}, ["abc"], "SAU=abc")):
+        with tempfile.TemporaryDirectory() as t:
+            rc, ra, nhan = _h4_chay(t, env_them)
+        bang(rc == 0 and nhan == mong and "cong-cu-ban-ke: DAT (1 cong cu)" in ra and sau in ra.split("\n"),
+             f"{env_them}: rc={rc} trinh cai nhan {nhan} (mong {mong}), {sau!r} | {ra[-400:]!r}")
+    dong = next(x for x in HOOK.read_text(encoding="utf-8").splitlines() if x.startswith("# hook-nang-luc:"))
+    bang("cong-cu-apt-thu-lai-1" in dong.split()[2:], "dòng hook-nang-luc thiếu tên cong-cu-apt-thu-lai-1")
 # ---------- P3 (#1089): `ghi-nguoc` — A/C in-process, Drive giả GIỮ TRẠNG THÁI ----------
 SEN_KHOA, SEN_RT, SEN_ENV = "SENTINEL-khoa-p3-abcdefghijklmnop", "SENTINEL-refresh-p3-77c1", "SENTINEL-env-p3-claude"
 LR_CU, LR_MOI, TEN_DAU, TIEN_TO = "2026-10-27T11:35:54.511Z", "2026-11-01T02:00:00.000Z", ".tra-luat-agent-creds-dau.json", "agent_creds_ghi_nguoc: "
@@ -740,28 +1195,88 @@ DOT_BIEN = (
     ("B1_khong_ghi", "ma", "        _ghi_nguyen_tu(agy, tf.extractfile(tv[0]).read(), 0o755)", "        pass", "b1_chua_co_thi_tai_va_ghi"),
     ("B2_bo_kiem_sha", "ma", "    if hashlib.sha512(du_lieu).hexdigest() != muc[1]:", "    if False:", "b2_sha512_lech_khong_ghi"),
     ("B3_luon_tai", "ma", "    if _ban_khop(agy):", "    if False:", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and AGY_VER in", '    return p.returncode == 0 and ra.encode("ascii") and AGY_VER in', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and any(", '    return p.returncode == 0 and ra.encode("ascii") and any(', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B4_qua_han_chi_giet_cha", "ma", "        return _giet_nhom(p)[0] and False", "        return p.kill() or False", "b10_version_treo_giet_ca_nhom"),
-    ("B4_so_chuoi_con", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', "AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_bien_chi_chan_so", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', 're.search(r"(?<![\\d.])" + re.escape(AGY_VER) + r"(?!\\.?\\d)", ra) is not None', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_so_chuoi_con", "ma", ' and any(re.fullmatch(r"\\d+\\.\\d+\\.\\d+", t) and _bo_so(t) >= _bo_so(AGY_VER)\n                                     for t in re.split(r"[\\s,;()]+", ra))', " and AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_bang_thay_san", "ma", "_bo_so(t) >= _bo_so(AGY_VER)", "_bo_so(t) == _bo_so(AGY_VER)", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_san_thanh_tran", "ma", "_bo_so(t) >= _bo_so(AGY_VER)", "_bo_so(t) <= _bo_so(AGY_VER)", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B4_chi_kiem_co_mat", "ma", "    if _ban_khop(agy):", "    if agy.is_file():", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B5_roi_ve_linux_amd64", "ma", "    muc = NEN.get(k)", '    muc = NEN.get(k) or NEN["linux_amd64"]', "b5_nen_ngoai_bang"),
     ("B6_extractall", "ma", "        tv = tf.getmembers()\n", '        tf.extractall(agy.parent, filter="fully_trusted")\n        tv = tf.getmembers()\n', "b6_tarball_doc_tu_choi"),
     ("B7_goi_agy_install", "ma", '    print(f"agy: ✓ đã cài', '    subprocess.run([str(agy), "install"], capture_output=True, timeout=15)\n    print(f"agy: ✓ đã cài', "b7_khong_goi_agy_install"),
-    ("B8_doi_mot_ky_tu_sha", "ma", '"ea01c73b77', '"fa01c73b77', "b8_hang_ghim_dung_spec"),
+    ("B8_doi_mot_ky_tu_sha", "ma", '"3dee9f26e2', '"4dee9f26e2', "b8_hang_ghim_dung_spec"),
     ("B9_bo_musl", "ma", ' + ("_musl" if he == "linux" and musl else "")', "", "b9_luat_chon_nen"),
     ("C1_ghi_de_ca_tep", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {"modelProvider": "gemini"}', "c13_gop_model_provider_khong_ghi_khoa"),
     ("C2_ghi_de_khi_parse_loi", "ma", 'return print(f"agy: ⚠ settings.json không đọc được', 'd = {}; print(f"', "c2_settings_khong_phai_object_khong_dung"),
     ("C3_ghi_api_key", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {**d, "modelProvider": "gemini", "apiKey": os.environ.get("GEMINI_API_KEY", "")}', "c13_gop_model_provider_khong_ghi_khoa"),
-    ("D2_ghi_cwd_khi_khong_dat_bien", "ma", '    if env.get("CLAUDE_ENV_FILE"):\n        p = Path(env["CLAUDE_ENV_FILE"])', '    if True:\n        p = Path(env.get("CLAUDE_ENV_FILE") or "env.sh")', "d2_khong_env_file_khong_tao_tep"),
-    ("D1_noi_moi_luot", "ma", "        if cu.count(DONG_ENV) != 1:\n            _ghi_nguyen_tu(p, (\"\\n\".join([x for x in cu if x != DONG_ENV] + [DONG_ENV])",
-     "        if True:\n            _ghi_nguyen_tu(p, (\"\\n\".join(cu + [DONG_ENV])", "d1_env_file_dung_mot_dong"),
+    ("D2_ghi_cwd_khi_khong_dat_bien", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: open(env.get("CLAUDE_ENV_FILE") or "env.sh", "a").write("x\\n")):', "d2_khong_env_file_khong_tao_tep"),
+    ("D1_ghi_lai_dong_tat", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: env.get("CLAUDE_ENV_FILE") and open(env["CLAUDE_ENV_FILE"], "a").write("export AGY_CLI_DISABLE_AUTO_UPDATE=1\\n")):', "d1_env_file_khong_dung"),
+    ("G1_sha256_thay_sha512", "ma", 'a["browser_download_url"], hashlib.sha512(du).hexdigest()))', 'a["browser_download_url"], hashlib.sha256(du).hexdigest()))', "g1_ghim_in_dung_sau_cap"),
+    ("G1_nen_python_rong", "ma", """        print(f'    "{k}": ("{u}", "{h}"),')""", "        pass", "g1_ghim_in_dung_sau_cap"),
+    ("G1_cat_bam_python", "ma", """        print(f'    "{k}": ("{u}", "{h}"),')""", """        print(f'    "{k}": ("{u}", "{h[:64]}"),')""", "g1_ghim_in_dung_sau_cap"),
+    ("G1_tai_mot_lan_dung_lai", "ma", '            du = tai(a["browser_download_url"])', '            du = du if dong else tai(a["browser_download_url"])', "g1_ghim_in_dung_sau_cap"),
+    ("G2_in_nen_truoc_kiem", "ma", "        dong = []", '        dong = []; print("NEN = {}")', "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 2 (F01-e…p): mỗi biểu hiện một đột biến SẢN PHẨM, chết ở chốt hợp đồng đúng ca
+    ("F01e_khoi_thua_sau_dong", "ma", '    print("}")', '    print("}"); print("NEN = {}")', "g1_ghim_in_dung_sau_cap"),
+    ("F01f_thieu_dong_dong", "ma", '    print("}")', "    pass", "g1_ghim_in_dung_sau_cap"),
+    ("F01g_doi_cho_ten_tai_san", "ma", '"darwin_amd64": "mac_x64", "darwin_arm64": "mac_arm64"}', '"darwin_amd64": "mac_arm64", "darwin_arm64": "mac_x64"}', "g1_ghim_in_dung_sau_cap"),
+    ("F01h_bo_ban_chi_dinh", "ma", "return ghim_agy(argv[2] if len(argv) == 3 else None)", "return ghim_agy(None)", "g3_ghim_ban_chi_dinh"),
+    ("F01i_luon_latest", "ma", '(f"tags/{ban}" if ban else "latest")', '"latest"', "g3_ghim_ban_chi_dinh"),
+    ("F01j_loi_mang_rc0", "ma", 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 0', "g2_ghim_tu_choi_khi_sai"),
+    ("F01k_thieu_chi_kiem_cuoi", "ma", """            if a is None:
+                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1""", """            if a is None and k != "darwin_arm64":
+                continue
+            if a is None:
+                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1""", "g2_ghim_tu_choi_khi_sai"),
+    ("F01l_digest_chi_kiem_cuoi", "ma", '!= a.get("digest"):', '!= a.get("digest") and k == "darwin_arm64":', "g2_ghim_tu_choi_khi_sai"),
+    ("F01m_tarball_chi_kiem_cuoi", "ma", 'if len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg():',
+     'if (len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg()) and k == "darwin_arm64":', "g2_ghim_tu_choi_khi_sai"),
+    ("F01n_ghi_tep", "ma", "        dong = []", '        dong = []; open("ghim-agy.log", "a").close()', "g1_ghim_in_dung_sau_cap"),
+    ("F01o_bo_kiem_ten_member", "ma", ' or tvg[0].name != "antigravity"', "", "g2_ghim_tu_choi_khi_sai"),
+    ("F01p_bo_kiem_tep_thuong", "ma", " or not tvg[0].isreg()", "", "g2_ghim_tu_choi_khi_sai"),
+    ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
+    ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
+    ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 5 (F01-w): socket giả phải giữ buffer protocol như socket thật
+    ("F01w_body_phan_tu_int", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy", "Content-Length": "1"}, data=[1], method="GET")', "g1_ghim_in_dung_sau_cap"),
+    ("F01w_body_phan_tu_list", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy", "Content-Length": "1"}, data=[[65]], method="GET")', "g1_ghim_in_dung_sau_cap"),
+    ("F01w_body_khong_lien_tuc", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"}, data=memoryview(b"ABCD")[::2], method="GET")', "g1_ghim_in_dung_sau_cap"),
+    # Lớp `ghim-output-oracle` lượt 3 (F01-n/q/r/s): đột biến SẢN PHẨM, mỗi cái chỉ chết được ở hậu điều chung của đúng ca
+    ("F01n_path_write_text_tuyet_doi", "ma", "        dong = []", '        dong = []; Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.txt").write_text("x", encoding="utf-8")', "g1_ghim_in_dung_sau_cap"),
+    ("F01n_os_open", "ma", "        dong = []", '        dong = []; os.close(os.open(os.path.join(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.bin"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC))', "g3_ghim_ban_chi_dinh"),
+    ("F01n_temporaryfile", "ma", "        dong = []", "        dong = []; tempfile.TemporaryFile().close()", "g1_ghim_in_dung_sau_cap"),
+    ("F01n_tao_roi_xoa", "ma", "        dong = []", '        dong = []; Path("ghim-agy-tam.txt").write_text("x", encoding="utf-8"); Path("ghim-agy-tam.txt").unlink()', "g1_ghim_in_dung_sau_cap"),
+    ("F01n_ghi_roi_nuot_loi", "ma", "        dong = []", '        dong = []\n        try:\n            open("ghim-agy.log", "a").close()\n        except BaseException:\n            pass', "g3_ghim_ban_chi_dinh"),
+    ("F01n_ghi_o_nhanh_loi", "ma", '        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', '        Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-loi.txt").write_text(type(e).__name__, encoding="utf-8")\n        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', "g2_ghim_tu_choi_khi_sai"),
+    ("F01q_timeout_chuoi_release", "ma", "timeout=30) as r:", 'timeout="30") as r:', "g3_ghim_ban_chi_dinh"),
+    ("F01q_timeout_chuoi_tai", "ma", "timeout=300) as r:", 'timeout="300") as r:', "g1_ghim_in_dung_sau_cap"),
+    ("F01r_argv_sai_ghi_tep", "ma", '    return print("dùng: cloud_agent_creds.py', '    open("ghim-agy-argv.log", "a").close()\n    return print("dùng: cloud_agent_creds.py', "g2_ghim_tu_choi_khi_sai"),
+    ("F01r_argv_sai_van_tai", "ma", '    return print("dùng: cloud_agent_creds.py', '    try:\n        doc_release()\n    except Exception:\n        pass\n    return print("dùng: cloud_agent_creds.py', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', '    if ban is None and "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_tarball", "ma", 'if len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg():', 'if ban is None and (len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg()):', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_thieu", "ma", '            if a is None:\n                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1', '            if a is None and ban is not None:\n                continue\n            if a is None:\n                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_loi_rc0", "ma", 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or (0 if ban else 1)', "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 4 (F01-t/u/v): vòng đời tiến trình thật · validation của urllib thật · cờ `open` theo danh sách cho phép
+    ("F01t_ghi_luc_tat_luong", "ma", "        dong = []", '        dong = []; threading._register_atexit(lambda: open("ghim-agy-tat.log", "a").close())', "g1_ghim_in_dung_sau_cap"),
+    ("F01t_ghi_luc_atexit_nhanh_loi", "ma", '        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', '        __import__("atexit").register(lambda: open("ghim-agy-thoat.log", "a").close())\n        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', "g2_ghim_tu_choi_khi_sai"),
+    ("F01u_tieu_de_none", "ma", 'headers={"User-Agent": "tra-luat-ghim-agy"}', 'headers={"User-Agent": None}', "g3_ghim_ban_chi_dinh"),
+    ("F01u_get_kem_than_chuoi", "ma", 'headers={"User-Agent": "tra-luat-ghim-agy"})', 'headers={"User-Agent": "tra-luat-ghim-agy"}, data="than", method="GET")', "g2_ghim_tu_choi_khi_sai"),
+    ("F01v_mo_doc_co_tac_dong_tep", "ma", "        dong = []", '        dong = []; os.close(os.open("moi-nhu.txt", os.O_RDONLY | getattr(os, "O_TEMPORARY", os.O_TRUNC)))', "g1_ghim_in_dung_sau_cap"),
+    ("F01n_ghi_muc_module_truoc_guard", "ma", "def main(argv):", 'open("ghim-agy-dau.log", "a").close()\ndef main(argv):', "g3_ghim_ban_chi_dinh"),
+    ("F01n_ghi_muc_module_sau_guard", "ma", None, lambda s: s + 'open("ghim-agy-nap.log", "a").close()\n', "g1_ghim_in_dung_sau_cap"),
     ("H1_doi_khoi_ra_sau_doctor", "hook", None, _doi_khoi_ra_sau, "h1_vi_tri_khoi_trong_hook"),
     ("H1_khoi_ngay_sau_tieu_de_truoc_pip", "hook", None, _doi_khoi_len_tieu_de, "h1_vi_tri_khoi_trong_hook"),
     ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),
     ("H2_gop_doi_so", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_va_cham_ngoac", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py][nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_bo_qua_nap", "hook", 'MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap', 'MA_AC=0; : "$PY" "$GOC/ops/cloud_agent_creds.py" nap', "h2_khoi_song_sot_set_e"),
+    ("H4_bo_env_thu_lai", "hook", 'env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash', 'bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_ep_cung_1", "hook", 'CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash', 'CAI_CONG_CU_THU_LAI=1 bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_export_ra_hook", "hook", '    ma=0; _cc_chay_tran "$con" env CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}" bash',
+     '    export CAI_CONG_CU_THU_LAI="${CAI_CONG_CU_THU_LAI:-1}"; ma=0; _cc_chay_tran "$con" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_rong_khong_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"${CAI_CONG_CU_THU_LAI-1}" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_ep_khong_phai_so_ve_1", "hook", '"${CAI_CONG_CU_THU_LAI:-1}" bash', '"$(case "${CAI_CONG_CU_THU_LAI:-1}" in *[!0-9]*) echo 1;; *) echo "${CAI_CONG_CU_THU_LAI:-1}";; esac)" bash', "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
+    ("H4_xoa_ten_nang_luc", "hook", " cong-cu-apt-thu-lai-1\n", "\n", "h4_cong_cu_ban_ke_thu_lai_apt_mot_lan"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
     ("P3A1_bo_kiem_remote", "ma", '    if env.get("CLAUDE_CODE_REMOTE") != "true":\n        kq["v"] = ("BỎ QUA", "không phải phiên cloud")\n    elif', "    if", "p3a1_khong_phai_cloud"),
     ("P3A2_nguong_31", "ma", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN or", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN - 1 or", "p3a2_khoa_yeu"),
@@ -809,6 +1324,11 @@ DOT_BIEN = (
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_qua_except_doi_kieu", "ma", "    he = he.lower()\n", "    raise AttributeError('vo can')\n", "b9_luat_chon_nen", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "ma", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10\n", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10  # vo hai\n", "a5_doc_timeout", "SONG_SOT"),
+    ("vo_can_trong_tien_trinh_con", "ma", '    if argv == ["ghim-agy"] or (', '    ten_khong_ton_tai\n    if argv == ["ghim-agy"] or (', "g1_ghim_in_dung_sau_cap", "TIN_DUNG_GIA"),
+    ("callback_tat_luong_khong_ghi", "ma", "        dong = []", "        dong = []; threading._register_atexit(lambda: None)", "g1_ghim_in_dung_sau_cap", "SONG_SOT"),
+    ("mo_chi_doc_thuan", "ma", "        dong = []", '        dong = []; os.close(os.open("moi-nhu.txt", os.O_RDONLY))', "g1_ghim_in_dung_sau_cap", "SONG_SOT"),
+    ("timeout_bool_thu_vien_that_nhan", "ma", "timeout=30) as r:", "timeout=True) as r:", "g3_ghim_ban_chi_dinh", "SONG_SOT"),
+    ("loi_cu_phap_la_loi_dung_harness", "ma", "def main(argv):", "def main(argv:", "g1_ghim_in_dung_sau_cap", "TIN_DUNG_GIA"),
 )
 def phan_hang(rc, ra, ten_ca):
     """GIET chỉ khi con thoát 3 VÀ có dòng `DO:<đúng ca đích>:` — `AssertionError` trần hay ca khác là tín dụng giả."""

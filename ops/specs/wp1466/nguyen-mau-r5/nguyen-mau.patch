@@ -1,0 +1,532 @@
+diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py
+index 3db1aba..9eda583 100644
+--- a/.claude/dev/packet_loop.py
++++ b/.claude/dev/packet_loop.py
+@@ -1707,6 +1707,76 @@ def _doc_nguon_protocol(root: Path) -> list[str]:
+     return tu
+ 
+ 
++# --- ADR-0068: bảy đơn vị khoá của protocol (§1, §1.1, §8, §8.3, §12) -----------------------------------------------
++# Chữ của luật ở protocol, KHÔNG chép vào đây. Mỗi đơn vị có một ĐỊA CHỈ (băm đường tiêu đề của mục chứa nó + thứ tự
++# khối trong mục, 0 = trọn mục) và một băm trên BYTE THÔ của tệp. Không chuẩn hoá: chỉ dòng RỖNG (0 byte) là biên.
++INV_KHOA_PROTOCOL = (  # (nhãn, băm đường tiêu đề, thứ tự, băm byte của đơn vị)
++    ("K01", "b1bf0e6593f0ee411de10da15913f372e31eae598f0667f5a0b614ceb84b8274", 0, "607431f20721e3700adb72ba501b5220cab4e2ff96864ff8bbe9094bb4740531"),
++    ("K02", "378875000caedbfb13ee65bb8c5eae1786e3905b7deaf58b14350200595ccfa7", 3, "e67103c29f0a0fea824a4089291008044aad3ed9e8bc93b8fbaa5fa0398dad0a"),
++    ("K03", "919d5bc058fbba64ee8f10647c2b201de7f7aec4b78db5b24e8b694ce1d01d83", 0, "22716893ace46188ae892ee1f58ac2acad8bdd731dbaaeeafed9bc9f2d5b71df"),
++    ("K04", "1ffd90f8e0a0a65de259727b151c9629b38fa20bf1e6fc00266eb81addeb7206", 12, "6faf0af7b34cd8e8a5b4033a3efbd6c5b8a003d68e624e5e9290b4b289a1ee73"),
++    ("K05", "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70", 8, "31820977356049aac3c810dbf26933fd93ee491e9f3bfda0ad875a81289776b9"),
++    ("K06", "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70", 9, "8e35ce2dc3bb5cac3dbd9855d35bc80a558b47bce8cafaaeff3de9a9ba0a9f51"),
++    ("K07", "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70", 10, "3188510c14bb84bb6cc4a881e2bd190e01bc863f55a869b12adcfb884f9671ef"),
++)
++_INV_ID_TRAN = r"INV-[0-9]{2}(?![0-9A-Za-z-])"
++
++
++def _inv_muc(d: list, c: list) -> list:
++    """Các mục: (băm đường tiêu đề, [(băm, dòng đầu, dòng sau cuối) của trọn mục, khối 1, …], dòng đầu, dòng sau cuối).
++
++    `d`: các dòng BYTE thô; `c`: cùng các dòng ấy đã che vùng không render. Tiêu đề (dòng mở bằng `#`) và cấp đọc trên
++    `c`; băm luôn trên `d`. Dòng rỗng là dòng 0 byte; dòng chỉ có dấu cách, tab hay `\\r` là dòng có nội dung.
++    """
++    bam = lambda a, b: hashlib.sha256(b"\n".join(d[a:b])).hexdigest()  # noqa: E731
++    dau, ra, duong = [i for i, x in enumerate(c) if x.startswith("#")] + [len(c)], [], []
++    for a, b in zip(dau, dau[1:]):
++        cap = len(c[a]) - len(c[a].lstrip("#"))
++        duong = [x for x in duong if x[0] < cap] + [(cap, d[a])]
++        e = max(i + 1 for i in range(a, b) if d[i])
++        bien = [i for i in range(a + 1, b + 1) if i == b or not d[i]]
++        khoi = [(bam(s + 1, t), s + 1, t) for s, t in zip([a] + bien, bien) if t > s + 1]
++        ra.append((hashlib.sha256(b"\n".join(h for _, h in duong)).hexdigest(), [(bam(a, e), a, e)] + khoi, a, b))
++    return ra
++
++
++def _inv_kiem_protocol(root: Path) -> list:
++    """Lỗi của bảy đơn vị khoá trong protocol DƯỚI `root`; rỗng là sạch. Không đo được cũng là lỗi."""
++    p = root / "docs" / "PROTOCOL_DA_PHIEN.md"
++    try:
++        if not p.resolve(strict=True).is_relative_to(root.resolve(strict=True)):
++            return [f"KHÔNG ĐO ĐƯỢC: {p} trỏ ra ngoài --root"]
++        tho = p.read_bytes()
++        che, van_de = _che_khong_render(tho.decode("utf-8"))
++    except (OSError, UnicodeDecodeError, ValueError) as e:
++        return [f"KHÔNG ĐO ĐƯỢC: không đọc được {p}: {e}"]
++    d, c = tho.split(b"\n"), che.split("\n")
++    if len(d) != len(c):
++        return [f"KHÔNG ĐO ĐƯỢC: phép che đổi số dòng của {p}"]
++    loi = [f"KHÔNG ĐO ĐƯỢC: {x}" for x in van_de]
++    loi += [f"KHÔNG ĐO ĐƯỢC: protocol dòng {i}: dòng mở bằng `<` — cổng không phân tích khối HTML"
++            for i, x in enumerate(c, 1) if re.match(r" {0,3}<", x)]
++    hien = [x == y.decode("utf-8") for x, y in zip(c, d)]  # dòng không bị che byte nào
++    muc, vung = _inv_muc(d, c), (0, 0)
++    for so, duong, thu_tu, bam in INV_KHOA_PROTOCOL:
++        o = [m for m in muc if m[0] == duong]
++        if len(o) != 1:
++            loi.append(f"đơn vị khoá {so} : mục chứa nó phải có đúng 1 lần, thấy {len(o)}")
++            continue
++        vung = (o[0][2], o[0][3]) if so == INV_KHOA_PROTOCOL[0][0] else vung
++        dv = o[0][1][thu_tu] if thu_tu < len(o[0][1]) else ("", 0, 0)
++        so_ban = sum(k[0] == bam and all(hien[k[1]:k[2]]) for m in muc for k in (m[1][:1] if thu_tu == 0 else m[1][1:]))
++        if dv[0] != bam or not all(hien[dv[1]:dv[2]]):
++            loi.append(f"đơn vị khoá {so} : không còn nguyên, hoặc bị che, ở đúng địa chỉ của nó")
++        elif so_ban != 1:
++            loi.append(f"đơn vị khoá {so} : có {so_ban} bản hiển thị trong protocol, phải đúng 1")
++    nhin = lambda x: "".join(k for k in unicodedata.normalize("NFKC", x) if unicodedata.category(k) != "Cf")  # noqa: E731
++    lac = [i + 1 for i, x in enumerate(c) if "|" in nhin(x) and re.search(_INV_ID_TRAN, nhin(x)) and not vung[0] <= i < vung[1]]
++    if lac:
++        loi.append(f"ID bất biến trên dòng bảng nằm ngoài tiểu mục §1.1: dòng {lac[:5]}")
++    return loi
++
++
+ def cmd_doctrine_scan(a, state_dir: Path) -> int:
+     root = Path(a.root)
+     muc_tieu: list[Path] = []
+@@ -1723,6 +1793,11 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
+         muc_tieu.append(Path(extra))
+ 
+     proto_words = _doc_nguon_protocol(root)
++    loi_inv = _inv_kiem_protocol(root)
++    if loi_inv:
++        for x in loi_inv:
++            print(f"doctrine-scan: {x}", file=sys.stderr)
++        _die(RC_ADR, f"{len(loi_inv)} chỗ đơn vị khoá của protocol lệch mã cổng (ADR-0068)")
+     proto_cache: dict[int, set[tuple[str, ...]]] = {}
+ 
+     dinh: list[tuple[str, str, str, int]] = []
+@@ -6970,7 +7045,7 @@ def build_parser() -> argparse.ArgumentParser:
+             "Mã thoát: 0 ok · 2 sai đối số · 3 chạm trần · 4 sai provider · "
+             "5 dấu vết comment không hợp lệ · 6 adapter chép doctrine · "
+             "7 hành vi bị chặn cứng · 8 trạng thái không hợp lệ · "
+-            "9 bảng ADR §20 lệch với docs/adr/ · 12 gate không xanh trên head."
++            "9 bảng ADR §20 hoặc bất biến protocol lệch · 12 gate không xanh trên head."
+         ),
+     )
+     p.add_argument("--state-dir", default=".claude/.packet_state", help="nơi giữ state cục bộ")
+diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py
+index 30ccc22..ce4a61b 100644
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -1490,6 +1490,31 @@ _PROTO_TRUNG_TINH = ("man xanh luc bao phu trien doi thoai nguyen so bay muoi ha
+                      "cau chuyen ve mot chiec thuyen go tren song vang " * 20)
+ 
+ 
++_PROTO_CO_KHOA = []
++
++
++def _proto_co_khoa() -> str:
++    """Nguồn trung tính + bảy đơn vị khoá của protocol THẬT đặt ĐÚNG ĐỊA CHỈ (khối đứng trước là khối đệm)."""
++    if not _PROTO_CO_KHOA:
++        sp = importlib.util.spec_from_file_location("pl1466_khoa", CANONICAL)
++        m = importlib.util.module_from_spec(sp)
++        sp.loader.exec_module(m)
++        tho = (ROOT / "docs" / "PROTOCOL_DA_PHIEN.md").read_bytes()
++        d, c = tho.split(b"\n"), m._che_khong_render(tho.decode("utf-8"))[0].split("\n")
++        can, ra, mo = {}, [_PROTO_TRUNG_TINH], []
++        for _, duong, thu_tu, _ in m.INV_KHOA_PROTOCOL:
++            can.setdefault(duong, set()).add(thu_tu)
++        for duong, dv, a, _ in m._inv_muc(d, c):
++            cap, tieu_de = len(c[a]) - len(c[a].lstrip("#")), d[a].decode("utf-8")
++            mo = [x for x in mo if x[0] < cap] + [(cap, tieu_de, duong in can)]
++            if duong in can:
++                lay = [b"\n".join(d[s:e]).decode("utf-8") for _, s, e in dv]
++                ra += [t for _, t, co in mo[:-1] if not co and t not in ra]
++                ra += [lay[0]] if 0 in can[duong] else [tieu_de] + [lay[i] if i in can[duong] else f"khối đệm {i}" for i in range(1, max(can[duong]) + 1)]
++        _PROTO_CO_KHOA.append("\n\n".join(ra) + "\n\n## Hết\n")
++    return _PROTO_CO_KHOA[0]
++
++
+ def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None) -> Path:
+     """Cây giả cho `doctrine-scan`, NAY luôn có nguồn đối chiếu dưới `--root`.
+ 
+@@ -1509,7 +1534,7 @@ def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None)
+     (d / "SKILL.md").write_text(noi_dung, encoding="utf-8", newline="\n")
+     (r / "docs").mkdir(parents=True, exist_ok=True)
+     (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+-        protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding="utf-8", newline="\n")
++        protocol if protocol is not None else _proto_co_khoa(), encoding="utf-8", newline="\n")
+     return r
+ 
+ 
+@@ -19303,5 +19328,142 @@ CASES += [("wp1342_pure_spawn_fx_mo_rong", _wp1342a1ii_s6),
+           ("wp1342_native_job_long", _native1342("wp1342_native_job_long", _wp1342a1ii_j12))]
+ 
+ 
++# --- wp1466 / ADR-0068: bảy đơn vị khoá của protocol trong `doctrine-scan` ---------------------------------------------
++# Mọi ca mang tiền tố `doctrine_inv_`: `_la_ho_doctrine` nhận chúng, nên đối chứng khác họ lấy từ họ máy trạng thái
++# (không chạy `doctrine-scan`). Fixture: bản sao protocol THẬT, đổi đúng MỘT yếu tố; đọc và ghi bằng BYTE.
++def _inv_doan(goc: str, dau: str) -> str:
++    """Trọn khối văn bản (tới dòng trống kế) bắt đầu bằng `dau`; phải có đúng một."""
++    m = re.findall(r"(?ms)^" + re.escape(dau) + r".*?(?=\n[ \t]*\n)", goc)
++    if len(m) != 1:
++        raise AssertionError(f"fixture: cần đúng một khối mở bằng {dau!r}, thấy {len(m)}")
++    return m[0]
++
++
++def _inv_ca(doi, rc: int, ly_do: str = "", lien_ket: str = ""):
++    def ca(c: Ctx):
++        goc = (ROOT / "docs" / "PROTOCOL_DA_PHIEN.md").read_bytes().decode("utf-8")
++        moi, r = doi(goc), c.tmp / "r"
++        (r / "docs").mkdir(parents=True, exist_ok=True)
++        if not lien_ket and moi == goc:
++            raise AssertionError("fixture không đổi gì so với protocol thật")
++        dich = r / "docs" / "PROTOCOL_DA_PHIEN.md"
++        if dich.is_symlink() or dich.exists():
++            dich.unlink()
++        if lien_ket:
++            that = (c.tmp / "ngoai.md") if lien_ket == "ngoai" else (r / "docs" / "that.md")
++            that.write_bytes(moi.encode("utf-8"))
++            try:
++                os.symlink(that, dich)
++            except OSError as ex:
++                raise BoQua(f"nền không tạo được liên kết tượng trưng: {ex}") from ex
++        else:
++            dich.write_bytes(moi.encode("utf-8"))
++        ma, _, e = run(c.script, ["doctrine-scan", "--root", r])
++        if rc:
++            _doi_ly_do(rc, ma, e, ly_do, "đơn vị khoá phải ĐỎ đúng lý do")
++        else:
++            _doi(0, ma, e, "đổi ngoài đơn vị khoá phải XANH")
++    return ca
++
++
++_K = {"K01": "### 1.1 ", "K02": "1. Mỗi work packet", "K03": "### 8.3 ", "K04": "Từ lượt review thứ HAI trở đi",
++      "K05": "**Tín hiệu không hội tụ theo lớp.**", "K06": "Báo riêng các lớp mới tại r+1", "K07": "Checkpoint vì tín hiệu không hội tụ"}
++_inv_lay = lambda g, so: re.search(r"(?ms)^" + re.escape(_K[so]) + r".*?(?=^#)", g)[0] if _K[so][0] == "#" else _inv_doan(g, _K[so])  # noqa: E731
++_inv_than = lambda g, so: _inv_lay(g, so).rstrip("\n")  # noqa: E731
++_inv_cho = lambda so: f"đơn vị khoá {so} "  # noqa: E731
++_HANG7 = lambda g: [d for d in g.split("\n") if d.startswith("| `INV-07`")][0]  # noqa: E731
++_inv_o2 = lambda hang: (lambda g: g.replace("\n## 2. Thành phần và quyền\n", "\n## 2. Thành phần và quyền\n\n" + hang + "\n", 1))  # noqa: E731
++_INV_CA = {
++    "xoa_cau_cat_scope": (lambda g: g.replace("Thiếu quan sát, cắt acceptance hoặc chuyển biểu hiện ra ngoài scope không được\ntính là vá.", "", 1), "K03"),
++    "xoa_cau_bang_noi_slug": (lambda g: g.replace("Tách/gộp lớp cần bảng nối slug nguồn, lý do và phép\nđối chiếu trên cùng tập finding;", "", 1), "K03"),
++    "xoa_cau_hai_chuyen_tiep": (lambda g: g.replace("Hai chuyển tiếp liên tiếp có tỷ lệ <50% thì dừng vòng\nvá và đưa bằng chứng tới Review Rescue Checkpoint bên dưới.", "", 1), "K05"),
++    "doi_mot_ky_tu": (lambda g: g.replace("không vào tử số F.", "không vào tử số U.", 1), "K06"),
++    "ngat_dong_lai": (lambda g: g.replace(_inv_lay(g, "K05"), _inv_lay(g, "K05").replace(" ", "\n", 5).replace("\n", " ", 2), 1), "K05"),
++    "khoi_thut_tab": (lambda g: g.replace(_inv_lay(g, "K05"), "\t" + _inv_lay(g, "K05").replace("\n", "\n\t"), 1), "K05"),
++    "khoi_trong_rao_ma": (lambda g: g.replace(_inv_lay(g, "K05"), "```\n" + _inv_lay(g, "K05") + "\n```", 1), "K05"),
++    "bang_tach_dong_trong": (lambda g: g.replace(_HANG7(g), "\n" + _HANG7(g), 1), "K01"),
++    "bang_them_khoang_trang": (lambda g: g.replace(_HANG7(g), _HANG7(g).replace("| `INV-07` |", "|  `INV-07`   |"), 1), "K01"),
++    "doi_cho_K01_sang_phu_luc": (lambda g: g.replace(_inv_lay(g, "K01"), "", 1) + "\n## Phụ lục\n\n" + _inv_lay(g, "K01"), "K01"),
++    "doi_cho_K04": (lambda g: g.replace(_inv_lay(g, "K04") + "\n\n", "", 1).replace("\n### 8.1 ", "\n" + _inv_lay(g, "K04") + "\n\n### 8.1 ", 1), "K04"),
++    "nhan_doi_K04": (lambda g: g + "\n" + _inv_lay(g, "K04") + "\n", "K04"),
++    "hai_tieu_muc_1_1": (lambda g: g.replace("\n## 2. Thành phần và quyền\n", "\n### 1.1 Bảng bất biến protocol\n\n## 2. Thành phần và quyền\n", 1), "K01"),
++    # r5 (F05.f/g của review lượt 4): mọi byte trong khoảng dòng của đơn vị đều được băm; chỉ dòng RỖNG là biên
++    "u2028_thay_xuong_dong": (lambda g: g.replace(_inv_than(g, "K05"), _inv_than(g, "K05").replace("\n", "\u2028", 1), 1), "K05"),
++    "ff_giua_khoi": (lambda g: g.replace(_inv_than(g, "K02"), _inv_than(g, "K02").replace(" ", " \x0c", 1), 1), "K02"),
++    "tab_cuoi_muc": (lambda g: g.replace(_inv_than(g, "K03"), _inv_than(g, "K03") + "\t", 1), "K03"),
++    "nbsp_cuoi_muc": (lambda g: g.replace(_inv_than(g, "K01"), _inv_than(g, "K01") + "\u00a0", 1), "K01"),
++    "cr_cuoi_muc": (lambda g: g.replace(_inv_than(g, "K01"), _inv_than(g, "K01") + "\r", 1), "K01"),
++    "dong_khoang_trang_sau_khoi": (lambda g: g.replace(_inv_than(g, "K05"), _inv_than(g, "K05") + "\n   ", 1), "K05"),
++    "che_K04_ban_hien_noi_khac": (lambda g: g.replace("\n\n" + _inv_than(g, "K04") + "\n\n", " <!--\n\n" + _inv_than(g, "K04") + "\n\n-->", 1) + "\n" + _inv_than(g, "K04") + "\n", "K04"),
++}
++CASES += [(f"doctrine_inv_xoa_{so}", _inv_ca(lambda g, so=so: g.replace(_inv_lay(g, so), "", 1), 9, _inv_cho(so))) for so in _K]
++CASES += [(f"doctrine_inv_crlf_{so}", _inv_ca(lambda g, so=so: g.replace(_inv_than(g, so), _inv_than(g, so).replace("\n", "\r\n", 1), 1), 9, _inv_cho(so))) for so in _K]
++CASES += [(f"doctrine_inv_cach_cuoi_{so}", _inv_ca(lambda g, so=so: g.replace(_inv_than(g, so), _inv_than(g, so) + " ", 1), 9, _inv_cho(so))) for so in _K]
++CASES += [(f"doctrine_inv_{ten}", _inv_ca(doi, 9, _inv_cho(so))) for ten, (doi, so) in _INV_CA.items()]
++CASES += [
++    ("doctrine_inv_rao_khong_dong", _inv_ca(lambda g: g + "\n```\nrào không đóng\n", 9, "không được đóng")),
++    ("doctrine_inv_dong_html", _inv_ca(lambda g: g.replace("\n### 8.3 ", "\n<div>\n\n### 8.3 ", 1), 9, "khối HTML")),
++    ("doctrine_inv_dong_inv_ngoai_dang_chuan", _inv_ca(_inv_o2("| `INV-99` | x | y | chưa đo |"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_dong_inv_ngoai_khong_backtick", _inv_ca(_inv_o2("|INV-99|x|y|chưa đo|"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_dong_inv_ngoai_khong_gach_dau", _inv_ca(_inv_o2("INV-99 | x | y | chưa đo"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_dong_inv_ngoai_ky_tu_vo_hinh", _inv_ca(_inv_o2("| `INV-\u200b99` | x | y | chưa đo |"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_dong_inv_ngoai_gach_mem", _inv_ca(_inv_o2("| INV\u00ad-99 | x | y | chưa đo |"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_dong_inv_ngoai_so_toan_khoang", _inv_ca(_inv_o2("| `INV-\uff19\uff19` | x | y | chưa đo |"), 9, "nằm ngoài tiểu mục")),
++    ("doctrine_inv_lien_ket_ra_ngoai", _inv_ca(lambda g: g, 9, "trỏ ra ngoài --root", lien_ket="ngoai")),
++    ("doctrine_inv_dong_cr_giua_hai_khoi", _inv_ca(lambda g: g.replace(_inv_than(g, "K05") + "\n\n", _inv_than(g, "K05") + "\n\r\n", 1), 9, _inv_cho("K05"))),
++    ("doctrine_inv_lien_ket_noi_bo_van_xanh", _inv_ca(lambda g: g, 0, lien_ket="trong")),
++    ("doctrine_inv_ban_sao_trong_rao_ma_van_xanh", _inv_ca(lambda g: g + "\n```\n\n" + _inv_than(g, "K04") + "\n\n```\n", 0)),
++    ("doctrine_inv_sua_ngoai_don_vi_van_xanh", _inv_ca(lambda g: g.replace("Mặc định: 3 attempt/packet", "Mặc định : 3 attempt/packet", 1), 0)),
++    ("doctrine_inv_them_dong_rong_giua_khoi_van_xanh", _inv_ca(lambda g: g.replace(_inv_than(g, "K05") + "\n\n", _inv_than(g, "K05") + "\n\n\n", 1), 0)),
++]
++
++
++def case_doctrine_inv_fixture_trung_tinh_thuan(c: Ctx):
++    r = _repo_gia(c.tmp, SACH, ten="inv_tt", protocol=_PROTO_TRUNG_TINH)
++    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
++    _doi_ly_do(9, rc, e, _inv_cho("K01"), "nguồn trung tính thuần không mang đơn vị khoá nào")
++
++
++def case_doctrine_inv_chep_doctrine_van_rc_6(c: Ctx):
++    r = _repo_gia(c.tmp, SACH + f"\nGhi chú: {CUM_TU_THU[0]}\n", ten="inv_rc6")
++    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
++    _doi_ly_do(6, rc, e, "chép doctrine", "fixture mặc định mang đủ đơn vị khoá ⇒ chép doctrine vẫn là rc 6")
++
++
++CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_doctrine_inv_")]
++_inv_cua = lambda so: [f"doctrine_inv_{t}_{so}" for t in ("xoa", "crlf", "cach_cuoi")] + [f"doctrine_inv_{t}" for t, (_, k) in _INV_CA.items() if k == so and t not in ("doi_cho_K04", "nhan_doi_K04", "hai_tieu_muc_1_1")]  # noqa: E731
++_INV_NGOAI = ["doctrine_inv_dong_inv_ngoai_dang_chuan", "doctrine_inv_dong_inv_ngoai_khong_backtick", "doctrine_inv_dong_inv_ngoai_khong_gach_dau"]
++_INV_NGOAI_AN = ["doctrine_inv_dong_inv_ngoai_ky_tu_vo_hinh", "doctrine_inv_dong_inv_ngoai_gach_mem", "doctrine_inv_dong_inv_ngoai_so_toan_khoang"]
++_INV_XANH = ["doctrine_inv_sua_ngoai_don_vi_van_xanh", "doctrine_inv_lien_ket_noi_bo_van_xanh", "doctrine_inv_ban_sao_trong_rao_ma_van_xanh", "doctrine_inv_them_dong_rong_giua_khoi_van_xanh"]
++MUTANTS.update({
++    "inv_bo_kiem_duoi_goc": ("        if not p.resolve(strict=True).is_relative_to(root.resolve(strict=True)):", "        if False:", ["doctrine_inv_lien_ket_ra_ngoai"]),
++    "inv_bo_che_khong_render": ('        che, van_de = _che_khong_render(tho.decode("utf-8"))', '        che, van_de = tho.decode("utf-8"), []',
++                                ["doctrine_inv_rao_khong_dong", "doctrine_inv_ban_sao_trong_rao_ma_van_xanh"]),
++    "inv_bo_chan_html": ('            for i, x in enumerate(c, 1) if re.match(r" {0,3}<", x)]', '            for i, x in enumerate(c, 1) if False]', ["doctrine_inv_dong_html"]),
++    "inv_bo_kiem_mot_muc": ("        if len(o) != 1:", "        if not o:", ["doctrine_inv_hai_tieu_muc_1_1"]),
++    "inv_bo_dia_chi": ("        if dv[0] != bam or not all(hien[dv[1]:dv[2]]):", "        if so_ban == 0:", ["doctrine_inv_doi_cho_K04"]),
++    "inv_bo_hien_o_dia_chi": ("        if dv[0] != bam or not all(hien[dv[1]:dv[2]]):", "        if dv[0] != bam:", ["doctrine_inv_che_K04_ban_hien_noi_khac"]),
++    "inv_bo_kiem_duy_nhat": ("        elif so_ban != 1:", "        elif False:", ["doctrine_inv_nhan_doi_K04"]),
++    "inv_duy_nhat_lech_so": ("        elif so_ban != 1:", "        elif so_ban != 2:", _INV_XANH + ["doctrine_scan_repo_that_sach"]),
++    "inv_dem_ban_ca_vung_che": ("k[0] == bam and all(hien[k[1]:k[2]])", "k[0] == bam", ["doctrine_inv_ban_sao_trong_rao_ma_van_xanh"]),
++    "inv_doc_qua_text": ("        tho = p.read_bytes()", '        tho = p.read_text(encoding="utf-8").encode("utf-8")',
++                         [f"doctrine_inv_crlf_{so}" for so in _K] + ["doctrine_inv_cr_cuoi_muc", "doctrine_inv_dong_cr_giua_hai_khoi"]),
++    "inv_tach_dong_splitlines": ('    d, c = tho.split(b"\\n"), che.split("\\n")', '    d, c = [x.encode("utf-8") for x in tho.decode("utf-8").splitlines()], che.splitlines()',
++                                 ["doctrine_inv_u2028_thay_xuong_dong"] + [f"doctrine_inv_crlf_{so}" for so in _K]),
++    "inv_cat_cuoi_muc": ("[(bam(a, e), a, e)]", '[(hashlib.sha256(b"\\n".join(d[a:e]).decode("utf-8").rstrip().encode("utf-8")).hexdigest(), a, e)]',
++                         ["doctrine_inv_cach_cuoi_K01", "doctrine_inv_cach_cuoi_K03", "doctrine_inv_tab_cuoi_muc", "doctrine_inv_nbsp_cuoi_muc", "doctrine_inv_cr_cuoi_muc"]),
++    "inv_dong_trang_la_khoang_trang": ("if i == b or not d[i]]", "if i == b or not d[i].strip()]", ["doctrine_inv_dong_khoang_trang_sau_khoi", "doctrine_inv_dong_cr_giua_hai_khoi"]),
++    "inv_khoi_rong_tinh_la_khoi": ("if t > s + 1]", "if t > s + 1 or s > a]", ["doctrine_inv_them_dong_rong_giua_khoi_van_xanh"]),
++    "inv_bo_kiem_id_ngoai": ("    if lac:", "    if False:", _INV_NGOAI + _INV_NGOAI_AN),
++    "inv_id_chi_dang_chuan": ('if "|" in nhin(x) and re.search(_INV_ID_TRAN, nhin(x)) and', 'if x.startswith("| `INV-") and', _INV_NGOAI[1:]),
++    "inv_id_khong_chuan_hoa": ('    nhin = lambda x: "".join(k for k in unicodedata.normalize("NFKC", x) if unicodedata.category(k) != "Cf")', "    nhin = lambda x: x", _INV_NGOAI_AN),
++    "inv_doctrine_scan_bo_goi": ("    if loi_inv:\n", "    if False:\n", [n for n, _ in CASES if n.startswith("doctrine_inv_") and n not in _INV_XANH + ["doctrine_inv_chep_doctrine_van_rc_6"]]),
++})
++MUTANTS.update({f"inv_bo_khoa_{so}": (f'    ("{so}", ', f'    # ("{so}", ', _inv_cua(so)) for so in _K})
++MUTANTS.update({"t1466_fixture_ve_trung_tinh": ("        protocol if protocol is not None else _proto_co_" + "khoa(), encoding=", "        protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding=",
++                                                ["doctrine_inv_chep_doctrine_van_rc_6", "doctrine_scan_sach_xanh"])})
++MUTANTS_NHAM_TEST |= {"t1466_fixture_ve_trung_tinh"}
++
++
+ if __name__ == "__main__":
+     sys.exit(main())
+diff --git a/docs/PROTOCOL_DA_PHIEN.md b/docs/PROTOCOL_DA_PHIEN.md
+index edcb6a1..325beea 100644
+--- a/docs/PROTOCOL_DA_PHIEN.md
++++ b/docs/PROTOCOL_DA_PHIEN.md
+@@ -41,6 +41,45 @@ Các bất biến không được hạ chuẩn:
+ 9. Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực.
+ 10. GitHub durable facts và deterministic reconciler single-writer là authority cho transition; model, adapter,
+     workflow trigger và prompt chỉ là worker/client có thể thay thế, không tự cấp quyền hoặc tự nối chuỗi vai trò.
++11. Mọi lượt review — mã, đặc tả và kế hoạch — theo §8.3: mỗi finding một `class_slug`, mỗi lượt một bảng lớp kể cả
++    lượt approve, từ lượt hai đối chiếu từng finding của lượt trước bằng bốn nhãn của §8 (`ADR-0068`).
++12. Mỗi bất biến của protocol có ID ổn định ở bảng §1.1 và khai cổng máy đọc nó; bất biến chưa có cổng mang nhãn kỷ
++    luật kèm một nợ có tên (`ADR-0068`).
++
++### 1.1 Bảng bất biến protocol
++
++Mỗi dòng là một bất biến có ID ổn định. Dòng lấy nguồn từ §1 chép NGUYÊN VĂN mục ấy; dòng khác mang một tên gọi ngắn, và cột `nguồn` mới là nơi có đủ từng vế. Ô `cổng` mang đúng một trong ba dạng: `cổng: <tệp> <chốt> · ca: <tệp ca>::<tên ca> · còn nợ: <TÊN-NỢ>` (có cổng máy và ca phản chứng; lặp lại được ` · ca: …` và ` · còn nợ: …`; ô dạng này LUÔN mang ít nhất một `còn nợ`, vì chưa cổng nào được chứng minh là đọc trọn bất biến của nó) · `kỷ luật, 0 cổng · nợ: <TÊN-NỢ>` (chỉ sống bằng kỷ luật đọc) · `chưa đo`. Mọi nợ được trỏ là một mục của mục *Nợ* trong `ADR-0068`. Tiểu mục này bị khoá theo băm byte ghi trong mã cổng: `python .claude/dev/packet_loop.py doctrine-scan --root .` đỏ khi nó lệch băm ấy, khi nó không còn ở đúng chỗ này, hay khi có bản thứ hai; nên thêm, bỏ hay sửa một dòng luôn đi qua một packet có review sửa băm (`ADR-0068`).
++
++| INV | bất biến | nguồn | cổng |
++|---|---|---|---|
++| `INV-01` | Mỗi work packet có đúng một executor ghi và một lease generation còn hiệu lực. | §1 (1) | cổng: `.claude/dev/packet_loop.py` `record-lease --lease-ref` I2(Đ) · ca: `.claude/dev/packet_loop_test.py::r812_nguoi_giu_khac` · còn nợ: `CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC` |
++| `INV-02` | Mỗi lần chạy có branch/worktree riêng; không có hai lease với effective write set giao nhau trên toàn repo. | §1 (2) | cổng: `.claude/dev/packet_loop.py` `record-lease --lease-ref` I2(Đ) · ca: `.claude/dev/packet_loop_test.py::r812_nguoi_giu_prefix_giao_nhau` · còn nợ: `INV-02-NHANH-WORKTREE-RIENG` · còn nợ: `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE` · còn nợ: `CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC` |
++| `INV-03` | Worker không ghi canonical, không bump version, không deploy và không có credential LIVE. | §1 (3) | chưa đo |
++| `INV-04` | Canonical chỉ đổi qua operation `land apply` được người có thẩm quyền gọi cho đúng mission/head SHA; mọi skill, comment hoặc workflow chỉ là client. Deploy là cổng riêng. | §1 (5) | cổng: `.claude/dev/packet_loop.py` `kiem-merge` K0 · ca: `.claude/dev/packet_loop_test.py::cong_c_k0_pr_head` · còn nợ: `INV-04-UY-QUYEN-LAND-VA-DEPLOY` |
++| `INV-05` | Mọi text tracked dùng LF, trừ `*.cmd`/`*.bat` dùng CRLF; binary/golden byte fixture không normalize. | §1 (6) | cổng: `.github/workflows/ci.yml` bước `eol-policy survey` · ca: `.githooks/eol_policy_test.py::case_khong_chi_so_voi_head` · còn nợ: `INV-DO-PHU-CA-CHUA-REVIEW-RIENG` |
++| `INV-06` | Một phiên chỉ giữ một vai trò trên một đơn vị công việc: execute một Packet, review một PR hoặc land một exact head. Substep nằm trong cùng Packet Spec không bị tách vụn; việc ngoài spec sang successor Packet. | §1 (8) | cổng: `.claude/dev/packet_loop.py` `init` · ca: `.claude/dev/packet_loop_test.py::init_cung_provider_thoat_4` · còn nợ: `INV-06-PHIEN-VA-VAI` |
++| `INV-07` | Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực. | §1 (9) | cổng: `.claude/dev/packet_loop.py` `kiem-merge` K0 và K4 · ca: `.claude/dev/packet_loop_test.py::cong_c_k0_pr_head` · ca: `.claude/dev/packet_loop_test.py::cong_c_k4_head` · còn nợ: `INV-DO-PHU-CA-CHUA-REVIEW-RIENG` |
++| `INV-08` | Packet Spec đóng băng bằng `spec_hash`; đổi hợp đồng thì revision mới | §3.2 | cổng: `.claude/dev/packet_loop.py` `kiem-merge` K1 · ca: `.claude/dev/packet_loop_test.py::cong_c_k1_hash` · còn nợ: `INV-DO-PHU-CA-CHUA-REVIEW-RIENG` |
++| `INV-09` | Diff ngoài effective write set bị từ chối | §5 | kỷ luật, 0 cổng · nợ: `INV-09-DIFF-NGOAI-WRITE-SET` |
++| `INV-10` | Handoff mang bằng chứng dương và `tested_sha` bằng head đưa ra review | §7 | kỷ luật, 0 cổng · nợ: `INV-10-HANDOFF-KHONG-CO-CONG` |
++| `INV-11` | Assurance tính theo họ model thực sự phục vụ; class `sensitive` cần `cross_approved` hoặc `human_audited` | §8 | cổng: `ops/bien_nhan_v2.py` chốt tách họ model · ca: `ops/bien_nhan_v2_test.py::c49_cross_approved_cung_ho_model_phai_bi_tu_choi` · còn nợ: `INV-11-K4-KHONG-DOC-HO-MODEL` |
++| `INV-12` | Mọi lượt review (mã, đặc tả, kế hoạch) xuất verdict theo lớp: mỗi finding một `class_slug`, bảng lớp, đối chiếu lượt trước bằng bốn nhãn | §7, §8, §8.3, §12 | kỷ luật, 0 cổng · nợ: `INV-12-CONG-VERDICT-THEO-LOP` |
++| `INV-13` | Review Class tính fail-closed; executor không hạ lớp | §8 | cổng: `ops/lease_publish.py` `_kiem_lop_review` · ca: `ops/lease_publish_test.py::t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA` · còn nợ: `INV-13-LEASE-SCHEMA-CU` |
++| `INV-14` | Reviewer chỉ đọc: không ghi vào nhánh packet hay checkout được giao | §8, §8.2 | cổng: `.claude/dev/launcher.py` `run --chup-workspace` · ca: `.claude/dev/launcher_test.py::r1252_ghi_trong_git` · còn nợ: `INV-14-CHUP-WORKSPACE-TUY-CHON` |
++| `INV-15` | `landed` đòi đủ bốn mốc provenance của §10.2.2 | §10.2.2 | cổng: `.claude/dev/packet_loop.py` `kiem-dong-wp` D2 · ca: `.claude/dev/packet_loop_test.py::cong_c_d2_not_measured` · còn nợ: `INV-15-D2-DOC-NHAN-KHONG-DOC-NGUON` |
++| `INV-16` | Trần lời gọi Codex, vòng review và attempt là stop condition; đổi prompt hay phiên không reset bộ đếm | §12 | cổng: `.claude/dev/packet_loop.py` `record-codex-call` · ca: `.claude/dev/packet_loop_test.py::pl_m3_codex` · còn nợ: `INV-16-BO-DEM-NGOAI-TRUC-LOI-GOI` |
++| `INV-17` | Agent chỉ hỏi chủ kho theo danh sách đóng E1–E5 | §12 | kỷ luật, 0 cổng · nợ: `INV-17-DANH-SACH-DONG-0-CONG` |
++| `INV-18` | Registry chỉ ghi qua GAS webapp; không thêm đường ghi thứ ba | `CLAUDE.md` | kỷ luật, 0 cổng · nợ: `INV-18-DUONG-GHI-REGISTRY-0-CONG` |
++| `INV-19` | Dispatcher tuần tự là bên duy nhất chuyển state/cấp lease/merge vào mission integration branch. | §1 (4) | cổng: `ops/lease_publish.py` chốt `granted_by` · ca: `ops/lease_publish_test.py::t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN` · ca: `.claude/dev/packet_loop_test.py::tu_cap_lease_bang_ten_provider_bi_chan` · còn nợ: `INV-19-TEN-KHAI-KHONG-PHAI-DANH-TINH` · còn nợ: `INV-22-AUTHORITY-CHUYEN-STATE` |
++| `INV-20` | Adapter và `CLAUDE.md` chỉ trỏ protocol, không chép doctrine | §13 | cổng: `.claude/dev/packet_loop.py` `doctrine-scan` · ca: `.claude/dev/packet_loop_test.py::doctrine_scan_chep_tron_5_1_bi_chan` · còn nợ: `INV-20-CHI-DO-CHEP-NGUYEN-VAN` |
++| `INV-21` | Finding P0, P1, P2 còn mở chặn merge; P3 phải đóng có bằng chứng hoặc được miễn neo SHA | §8 | cổng: `.claude/dev/packet_loop.py` `kiem-merge` K3 và K5 · ca: `.claude/dev/packet_loop_test.py::cong_c_k3_p1` · ca: `.claude/dev/packet_loop_test.py::cong_c_k5_p3_khong_mien` · còn nợ: `INV-12-CONG-VERDICT-THEO-LOP` |
++| `INV-22` | GitHub durable facts và deterministic reconciler single-writer là authority cho transition; model, adapter, workflow trigger và prompt chỉ là worker/client có thể thay thế, không tự cấp quyền hoặc tự nối chuỗi vai trò. | §1 (10) | kỷ luật, 0 cổng · nợ: `INV-22-AUTHORITY-CHUYEN-STATE` |
++| `INV-23` | Chat history, label, assignee và board không phải nguồn sự thật. | §1 (7) | kỷ luật, 0 cổng · nợ: `INV-23-NGUON-SU-THAT` |
++| `INV-24` | Bất biến (a) — cổng tại chỗ trước push chính | §12 (a) | kỷ luật, 0 cổng · nợ: `INV-24-CONG-TAI-CHO-TRUOC-PUSH` |
++| `INV-25` | Bất biến (b) — push thêm vì CI đỏ | §12 (b) | kỷ luật, 0 cổng · nợ: `INV-25-PUSH-THEM` |
++| `INV-26` | Bất biến (c) — nhánh sổ sách | §12 (c) | kỷ luật, 0 cổng · nợ: `INV-26-NHANH-SO-SACH` |
++| `INV-27` | Trong rollout Thin Orchestration, tối đa hai Executor writer chạy đồng thời và chỉ khi effective write set không giao. | §8 | kỷ luật, 0 cổng · nợ: `INV-27-HAI-WRITER` |
++| `INV-28` | Packet vượt trần kích thước dừng trước review; nâng trần cần khối `nang_tran` kèm số đo | §20 (`ADR-0044`, `ADR-0053`) | kỷ luật, 0 cổng · nợ: `INV-28-TRAN-KICH-THUOC` |
+ 
+ ## 2. Thành phần và quyền
+ 
+@@ -811,6 +850,8 @@ nếu tiêu chí cho phép nợ nền. Không dùng nhãn chung “Ruff passed
+ 
+ ### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu
+ 
++Mục này là bất biến `INV-12` và áp cho mọi lượt review: mã, đặc tả và kế hoạch (`ADR-0068`).
++
+ Giữ stable slug theo lớp nguyên nhân/đơn vị nghĩa qua các lượt; một finding tách thành nhiều
+ biểu hiện vẫn phải nối lớp cũ. Reviewer tự dựng thước kiểm acceptance và soi cả câu cũ trái
+ tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối chiếu ghi nguồn lượt/SHA,
+@@ -836,7 +877,8 @@ tổng suite xanh không thay bằng chứng cho đúng tính chất của từn
+ Open P0 luôn chặn approval. Với P1/P2/P3, đối chiếu điều kiện severity của Packet,
+ Review Class và assurance §8 riêng với bảng đối chiếu; hết finding hoặc tỷ lệ vá cao
+ không tự tạo approval, không miễn exact-SHA audit/gate. Các nghĩa vụ bảng lớp/đọc nghĩa
+-ở đây là kỷ luật review; scanner xanh không chứng minh chúng đã được máy cưỡng chế.
++ở đây là bất biến `INV-12`; cổng máy đọc chúng ghi ở ô cổng của dòng ấy trong bảng §1.1, và
++chừng nào ô ấy còn nhãn kỷ luật thì scanner xanh không chứng minh chúng đã được máy cưỡng chế.
+ 
+ Hồ sơ kế thừa #523 trong WP538 giữ N1–N8/M16 ở spec nguồn bất biến và bốn lớp **unresolved**:
+ 
+@@ -1142,7 +1184,8 @@ cut không reset lịch sử đó, không tự cấp thêm review call hoặc at
+ 
+ Checkpoint vì tín hiệu không hội tụ, hay vì một lớp hoặc một hình dạng lỗi lặp lần thứ ba, là điểm dừng của phiên,
+ không phải điểm hỏi chủ kho. Phiên đang giữ việc dừng vá và xét lại cách làm; lý do của hướng mới đi vào revision kế
+-tiếp hay handoff. Phiên chỉ hỏi chủ kho khi rơi vào E1 hay E3 của `ADR-0067`.
++tiếp hay handoff. Phiên chỉ hỏi chủ kho khi rơi vào E1 hay E3 của `ADR-0067`. Mỗi lần xét lại cách làm ghi một mục sổ
++`xet_lai_cach_lam` theo `ADR-0067`; luật này áp cả cho review đặc tả và review kế hoạch (`ADR-0068`).
+ 
+ Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
+ blocked, tối đa 20 packet,
+@@ -1560,6 +1603,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` 
+ | `ADR-0065` | Model/effort phục vụ của reviewer là trường ghi nếu đo được; `KHONG_DO_DUOC` không chặn assurance §8.1 hay `landed`; họ model theo identity provider; hồi tố ở packet riêng | Accepted | `ops/land_evidence_nguon.py` (L7) |
+ | `ADR-0066` | Admission thu-hoi: bỏ 'S tổ tiên H', thay bằng cổng vùng bằng nhau ở mọi merge-base | Accepted — hiệu lực từ land `THU-HOI-ADMISSION-MERGE-BASE-B` | 0 cổng (đo lúc land A); sau land B: `ops/lease_publish.py` `kiem-thu-hoi-github` |
+ | `ADR-0067` | Danh sách đóng E1–E5: agent chỉ hỏi chủ kho trong năm tình huống; đóng băng đặc tả sau review độc lập, audit uỷ quyền, tự merge packet không chạm E4/E5, uỷ quyền thường trực cấp lease có hạn; sổ quyết định uỷ quyền, bản tin hằng ngày, comment ghi hộ có nhãn | Accepted — cơ chế cần cổng mã có hiệu lực khi cổng ấy đổi (bảng chuyển tiếp trong ADR) | **0 cổng**; đo lúc land trên sáu vị trí cổng (mục Cưỡng chế của ADR) |
++| `ADR-0068` | Bất biến protocol có ID và ô cổng ở bảng §1.1; review theo lớp (§8.3) là bất biến cho mọi lượt review: mã, đặc tả, kế hoạch | Accepted — đối chiếu ngữ nghĩa ô cổng và cổng verdict theo lớp có hiệu lực khi packet đổi cổng land (bảng chuyển tiếp trong ADR) | `packet_loop.py` `doctrine-scan` (bảy đơn vị khoá của §1, §1.1, §8, §8.3, §12: đúng địa chỉ, duy nhất, đúng băm byte); đối chiếu ngữ nghĩa ô cổng và verdict theo lớp: **0 cổng** lúc land, nợ `INV-BANG-DOI-CHIEU-NGU-NGHIA` và `INV-12-CONG-VERDICT-THEO-LOP` |
+ 
+ ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
+ 
+diff --git a/docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md b/docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+new file mode 100644
+index 0000000..57ae9f1
+--- /dev/null
++++ b/docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md
+@@ -0,0 +1,149 @@
++# ADR-0068 — Bất biến protocol có ID và ô cổng; review theo lớp là bất biến cho mọi lượt review
++
++- **Trạng thái:** Proposed (cây thử, chưa duyệt)
++
++## Bối cảnh
++
++Audit ngày 20-11-2026 trên phiên điều phối Mission #1172 ghi 23 điểm lệch protocol. Gốc chung theo audit: phiên đọc
++protocol lần đầu lúc 17:17Z và không nạp adapter nào, trong khi các nghĩa vụ review chỉ sống bằng kỷ luật đọc. Đo cùng
++ngày trên `origin/master` `48d372e14f190dae83a75ccbca8ee9a0b25635c5`:
++
++- §8.3 tự ghi các nghĩa vụ bảng lớp là *kỷ luật review*. `bang_lop` có 7 dòng trong `.claude/dev/packet_loop.py`, không
++  dòng nào thuộc điều kiện K4 của `kiem-merge`, đường mặc định theo `ADR-0062`; K4 chỉ đọc dòng `KET_LUAN`. `class_slug`
++  có 0 dòng trên cả sáu vị trí cổng của §20; 0 trong 352 biên nhận `ops/reviews/**/*.receipt.yaml` có khoá `bang_lop`.
++- Review đặc tả và review kế hoạch không đi qua `kiem-merge`; không vị trí cổng nào tiêu thụ verdict của chúng.
++- Bảng §20 định tuyến theo ADR, không theo nguyên tắc: một nguyên tắc của §1 không có chỗ nào khai cổng máy đọc nó.
++
++Ngày 20-11-2026 chủ kho quyết: những nguyên tắc quan trọng nhất của protocol phải thành bất biến có ID, mỗi bất biến
++khai cổng của nó, bắt đầu từ §8.3.
++
++## Quyết định
++
++**Q1 — Review theo lớp là bất biến `INV-12`, áp cho mọi lượt review: mã, đặc tả và kế hoạch.** Luật chi tiết ở protocol
++§8, §8.3 và §12; ADR này đổi phạm vi và mức ràng buộc của chúng, không chép chúng:
++
++1. mỗi finding mang đúng một `class_slug` ổn định qua các lượt;
++2. reviewer khái quát mỗi biểu hiện thành lớp và quét mọi biểu hiện cùng lớp trên candidate trước khi báo;
++3. lượt nào cũng có bảng lớp, kể cả lượt approve;
++4. từ lượt hai, verdict đối chiếu TỪNG finding của lượt liền trước bằng đúng bốn nhãn của §8, rồi mới kết luận theo lớp;
++5. bản vá đi theo lớp; vá riêng từng biểu hiện chỉ khi verdict ghi lý do cơ chế;
++6. tín hiệu hội tụ |F|/|U| của §12 tính theo lớp; revision hay cắt phạm vi không reset lịch sử lớp;
++7. một lớp xuất hiện ở ba lượt review khác nhau là checkpoint do phiên đang giữ việc tự quyết: phiên dừng vá, xét lại
++   cách làm và ghi một mục sổ `uy_quyen_quyet_dinh.v1` với `loai: xet_lai_cach_lam` theo `ADR-0067`. Đây không phải điểm
++   hỏi chủ kho; phiên chỉ hỏi khi rơi vào E1 hay E3 của `ADR-0067`.
++
++**Q2 — Mỗi bất biến của protocol có một ID và khai cổng của nó.** Protocol §1.1 giữ bảng bất biến: mỗi dòng có ID ổn định
++`INV-NN`, một câu phát biểu, mục nguồn và ô cổng mang đúng một trong ba giá trị: cổng máy kèm ca phản chứng; nhãn *kỷ
++luật, 0 cổng* kèm một nợ có tên; hoặc *chưa đo*. Bảng ấy là chỗ ở duy nhất của danh sách; ADR này không chép nó. Một bất
++biến chỉ được ghi *có cổng* khi cổng ấy đọc đúng điều bất biến nói. Chưa cổng nào được chứng minh là đọc trọn bất biến
++của nó, nên ô dạng cổng LUÔN mang ít nhất một `còn nợ: <TÊN-NỢ>`; bỏ một `còn nợ` là sửa bảng. Mọi nợ được trỏ là một mục
++của mục *Nợ* dưới đây.
++
++**Q3 — Cổng canh luật.** `packet_loop.py doctrine-scan` canh bảy ĐƠN VỊ KHOÁ của protocol: trọn tiểu mục §1.1 (cả bảng),
++khối danh sách bất biến của §1, trọn tiểu mục §8.3, đoạn *đối chiếu lượt trước* của §8, và ba đoạn về hội tụ theo lớp
++của §12. Mỗi đơn vị có một ĐỊA CHỈ: đường tiêu đề đầy đủ của mục chứa nó và thứ tự của nó trong mục ấy. Cổng đọc BYTE
++THÔ của tệp; biên của mục và của khối chỉ là dòng rỗng, tức dòng không có byte nào. Cổng đỏ khi mục ấy không có đúng một
++lần, khi đơn vị ở địa chỉ ấy lệch băm byte ghi trong mã hay có dòng nằm trong vùng không render, và khi còn một bản hiển
++thị khác mang cùng những byte ấy. Cổng không chọn câu đại diện và không nhận dạng viết tương đương: đổi, thêm hay bớt một
++byte trong khoảng dòng của một đơn vị là đỏ. Nó cũng đỏ khi một ID bất biến, so trên dạng hiển thị của dòng, đứng trên
++một dòng bảng ngoài tiểu mục §1.1. Sửa một đơn vị khoá vì thế luôn đi qua một packet có review sửa mã cổng. Không đọc
++được nguồn, hay nguồn có vùng mà cổng không phân tích được, là không đo được, và làm cổng đỏ.
++
++## Hiệu lực và chuyển tiếp
++
++ADR này có hiệu lực từ commit land của nó trên first-parent master và không hồi tố: lượt review bắt đầu trước mốc ấy không
++bị xét lại. Cơ chế cần cổng mã chỉ có hiệu lực từ commit land của packet đổi cổng; trước đó nó là kỷ luật.
++
++| cơ chế | cổng | hiệu lực |
++|---|---|---|
++| Q1, luật review theo lớp cho mọi lượt review | chưa có, kỷ luật | từ land ADR này |
++| Q2 và Q3, bảng bất biến và các đơn vị khoá | `packet_loop.py doctrine-scan` | từ land ADR này (cùng packet) |
++| đối chiếu ngữ nghĩa ô cổng: tệp cổng, ca và nợ được trỏ còn tồn tại | chưa có | từ land packet đổi cổng (Issue #1469) |
++| verdict máy đọc theo lớp cho review mã, đặc tả và kế hoạch | chưa có | từ land packet đổi cổng (Issue #1470); packet ấy định hình dạng bản ghi và vị từ chuyển tiếp |
++
++Bộ kiểm tạm `kiem_verdict_lop.py` của phiên điều phối Mission #1172 không phải cổng của kho. Từ land ADR này nó phải
++dùng đúng bốn nhãn của §8, đúng chữ.
++
++## Cưỡng chế
++
++Đo trên commit ứng viên của packet thi hành, một dòng cho từng vị trí cổng mà §20 của protocol liệt kê, bằng
++`git show <H>:<tệp> | grep -cE 'ADR-0068|INV_|_inv_'`:
++
++- `ops/lease_publish.py`: 0 dòng.
++- `.claude/dev/packet_loop.py`: 11 dòng.
++- `.claude/dev/launcher.py`: 0 dòng.
++- `.claude/dev/gate_lifecycle.py`: 0 dòng.
++- `.github/workflows/ci.yml`: 0 dòng.
++- `.github/workflows/ops-publish-lease.yml`: 0 dòng.
++
++Cổng nằm trong `doctrine-scan`. Bộ ca của nó ở `.claude/dev/packet_loop_test.py`, tức trong check bắt buộc
++`gate-packet-loop`, và có ca chạy trên cây thật. Ngoài cổng ấy, lúc land ADR này là kỷ luật executor và reviewer.
++
++## Nợ
++
++- `CONG-TREN-DUONG-STATE-KHONG-BAT-BUOC`: `record-lease`, `init`, `record-codex-call` chỉ chạy khi phiên dùng state máy;
++  `kiem-merge`, đường mặc định theo `ADR-0062`, không đọc state.
++- `INV-02-NHANH-WORKTREE-RIENG`: I2(Đ) đọc giao write set; không cổng nào đòi mỗi lần chạy có branch và worktree riêng.
++- `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`: trước khi cấp lease chỉ có `ai-dang-giu`, so chuỗi đường dẫn bằng nhau; I2(Đ)
++  chỉ chạy trên lease ĐÃ đăng; kho chưa có phép tính closure nào của §5.
++- `INV-04-UY-QUYEN-LAND-VA-DEPLOY`: K0 chỉ đọc quan hệ tổ tiên của base và head hiện hành của PR; không đọc uỷ quyền land,
++  không kiểm deploy.
++- `INV-06-PHIEN-VA-VAI`: `init` chỉ so nhãn provider của executor và reviewer; không đọc ID phiên, không chặn một phiên
++  đổi vai; K4 không so danh tính reviewer với executor.
++- `INV-09-DIFF-NGOAI-WRITE-SET`: không vị trí cổng nào so diff của ứng viên với effective write set.
++- `INV-10-HANDOFF-KHONG-CO-CONG`: không vị trí cổng nào đọc handoff hay `tested_sha`.
++- `INV-11-K4-KHONG-DOC-HO-MODEL`: chốt tách họ model đọc biên nhận trong `ops/reviews/`; K4 không đọc họ model hay mức
++  assurance của lượt review.
++- `INV-12-CONG-VERDICT-THEO-LOP`: chưa cổng nào đọc bảng lớp hay bảng đối chiếu của verdict; K3 và K5 chỉ đọc finding
++  của connector và danh sách P3 do người gọi đưa vào. Giao cho Issue #1470.
++- `INV-13-LEASE-SCHEMA-CU`: `_kiem_lop_review` chỉ cảnh báo với lease `schema_version` nhỏ hơn 2.
++- `INV-14-CHUP-WORKSPACE-TUY-CHON`: cờ `--chup-workspace` là tuỳ chọn; ảnh chụp đầu cuối không thấy thao tác ghi rồi
++  hoàn nguyên.
++- `INV-15-D2-DOC-NHAN-KHONG-DOC-NGUON`: D2 đọc bốn nhãn của `moc_10_2_2`; không xác minh nguồn provenance của từng mốc.
++- `INV-16-BO-DEM-NGOAI-TRUC-LOI-GOI`: `record-codex-call` chỉ đếm lời gọi được ghi vào state; không gì đọc dòng khai
++  trần của đặc tả, và không ca nào đo việc đổi phiên hay thư mục state.
++- `INV-17-DANH-SACH-DONG-0-CONG`: không cổng nào đọc mã E hay sổ `uy_quyen_quyet_dinh.v1` (`ADR-0067` tự ghi 0 cổng).
++- `INV-18-DUONG-GHI-REGISTRY-0-CONG`: luật ở `CLAUDE.md`, ngoài sáu vị trí cổng; không cổng nào canh.
++- `INV-19-TEN-KHAI-KHONG-PHAI-DANH-TINH`: cổng so TÊN ghi ở `granted_by` với danh sách cho phép; phiên agent chạy bằng
++  credential của chủ kho nên tên khai không chứng minh ai quyết (`ADR-0067`, mục *Giới hạn*).
++- `INV-20-CHI-DO-CHEP-NGUYEN-VAN`: `doctrine-scan` bắt cụm cấm và chuỗi chép nguyên văn từ 10 từ liền; diễn đạt lại khác
++  chữ thì không thấy (protocol §8.3 giữ nợ `phep-do-doctrine-khong-du-rang`).
++- `INV-22-AUTHORITY-CHUYEN-STATE`: `kiem-merge` chỉ nhận dòng miễn từ comment của chủ kho; ngoài chỗ ấy không cổng nào
++  buộc một bước chuyển state dựa trên durable fact, và reconciler của §3.3 chưa có.
++- `INV-23-NGUON-SU-THAT`: không cổng nào từ chối một quyết định chỉ có trong chat, label, assignee hay board.
++- `INV-24-CONG-TAI-CHO-TRUOC-PUSH`: hook `pre-push` chỉ chạy selftest cho lần đẩy vào `refs/heads/master`, ở clone đã bật
++  `core.hooksPath`; lần đẩy ứng viên lên nhánh packet không qua cổng tại chỗ nào, và CI chạy sau khi đã đẩy.
++- `INV-25-PUSH-THEM`: K0 đến K7 không đếm số lần push và không phân biệt bản vá CI với bản vá finding.
++- `INV-26-NHANH-SO-SACH`: không cổng nào phân loại nhánh sổ sách với nhánh có tệp thuộc write set code.
++- `INV-27-HAI-WRITER`: không cổng nào đếm số Executor writer đang chạy.
++- `INV-28-TRAN-KICH-THUOC`: `ADR-0044` và `ADR-0053` tự ghi 0 cổng; không gì đọc `git diff --numstat` hay khối `nang_tran`.
++- `INV-BANG-DOI-CHIEU-NGU-NGHIA`: băm bảng không cho biết tệp cổng, ca hay nợ mà một ô trỏ tới còn tồn tại; đổi tên một
++  ca ở tệp khác không làm cổng đỏ. Giao cho Issue #1469.
++- `INV-DO-PHU-CA-CHUA-REVIEW-RIENG`: với ô chỉ mang nợ này, chưa có khoảng hở cụ thể nào được đo; nhưng ca phản chứng được
++  trỏ mới được chứng minh là CÓ MẶT, chưa được review riêng là đo đủ mọi vế của bất biến.
++- `COT-CONG-20-CHUA-CO-CONG`: ô cổng của bảng §20 (theo ADR) chưa được máy kiểm; nhóm B của §20 không có cột cổng.
++
++## Giới hạn
++
++- Băm chứng minh một đơn vị khoá không đổi kể từ lần sửa có review gần nhất; nó không chứng minh một ca đo đúng bất biến.
++- Cổng không chặn một câu ở NGOÀI các đơn vị khoá nói ngược một câu ở trong; phần còn lại của §7, §8 và §12 không bị khoá.
++- Địa chỉ dùng thứ tự khối: thêm hay bớt một đoạn ĐỨNG TRƯỚC một đơn vị khoá trong cùng mục cũng làm cổng đỏ, và
++  phải sửa địa chỉ trong mã cổng ở cùng PR.
++- Số dòng rỗng không thuộc đơn vị nào: thêm hay bớt một dòng rỗng giữa hai khối, hay ở cuối một mục, không đổi đơn vị
++  nào và không đổi thứ tự khối, nên cổng xanh. Một dòng chỉ có dấu cách, tab hay CR không phải dòng rỗng.
++- Cột *nguồn* và phần *chốt* của ô cổng là chữ; máy không đối chiếu chúng với mục hay hàm được nêu.
++- `INV-03` ở *chưa đo*: ruleset `20856202` của kho buộc nhánh mặc định đi qua PR và các check bắt buộc (đo 20-11-2026),
++  nhưng không có ca phản chứng trong kho, và phiên agent chạy bằng credential của chủ kho.
++
++## Phương án bị loại
++
++- Một lệnh riêng cho các đơn vị khoá, không nối vào `doctrine-scan`: `doctrine-scan --root .` là lệnh mà bốn adapter và bước
++  đường nhanh của `ci.yml` gọi; đo trên cây thử, xoá trọn §8.3 thì nó vẫn trả `sạch`.
++- Tìm đơn vị theo băm ở bất kỳ đâu trong tệp: dời một đơn vị khỏi mục của nó, hay nhân đôi nó, vẫn qua.
++- Chuẩn hoá khoảng trắng trước khi băm: một khối thụt bằng tab thành khối mã mà băm không đổi.
++- Đọc tệp qua lớp văn bản rồi cắt khoảng trắng cuối mục: lớp ấy đổi CR LF thành LF và bỏ dấu cách cuối dòng, nên bảy
++  biến thể CR LF và hai biến thể dấu cách cuối qua được cổng (review đặc tả lượt 4).
++- Chọn một số câu làm neo: hai lượt review đặc tả liên tiếp đều tìm ra câu luật bị sót; khoá trọn đơn vị thì không còn
++  phép chọn nào để sót.
++- Liệt kê ID trong mã thay cho băm cả bảng: sửa hay để trống một ô mà giữ ID thì không đỏ.
++- Một packet cho cả luật, băm bảng, đối chiếu ngữ nghĩa ô cổng và cổng verdict: vượt trần kích thước của `ADR-0053`.

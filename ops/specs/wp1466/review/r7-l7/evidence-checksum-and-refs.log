@@ -1,0 +1,10 @@
+UTC 2026-11-21T05:16:40.820599+00:00
+UNMODIFIED out/hunt.py True
+UNMODIFIED out/followup.py True
+UNMODIFIED out/sc/fx_tien_kiem.py True
+ADR 0053-tran-kich-thuoc-sensitive-len-sau-tep.md
+ADR 0055-tran-loi-goi-codex-len-muoi.md
+REF_COUNT 393
+VERSION git 0 git version 2.43.0
+VERSION python3 0 Python 3.13.18
+VERSION ruff 0 ruff 0.16.9

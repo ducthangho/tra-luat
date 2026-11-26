@@ -1,0 +1,7 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/cay-kho/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+base REGISTER 1582 1582 LINUX 1581 DIFF ['wp1174_windows_claim_rejected']
+OLD_CASES_BYTE_MATCH True
+BASE_MARKER {'moc_dot_bien_phai_khop_DUNG_MOT_CHO': None}
+GATE base doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+GATE base adr-song 0 adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])

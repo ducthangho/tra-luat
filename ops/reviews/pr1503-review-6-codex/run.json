@@ -1,0 +1,443 @@
+{
+  "version": "1.6.2",
+  "run_id": "1f1d7fddbbc1407aa41c86e3cf842921",
+  "short_id": "1f1d7fdd",
+  "ten": "pr1503-review-6-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "f4a80dea44d4e3af"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-24T13:52:31.302668+00:00",
+  "ket_thuc_utc": "2026-11-24T14:02:16.207311+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 3143,
+  "khoa_danh_tinh": "linux:415565",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/a745ce50-1c6b-5672-94ea-c1fee1d128db/scratchpad/review6/rv",
+  "head": "9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "62e8c39cf114fe72a7a4e8d12511b53e61dfe3d5",
+    "7555af0cca8c0a403ec17aece820af28e1c311a0",
+    "66cfac97e69015d5eb89d0aeaf754a63db91ee35",
+    "7657ca0277ae4d96422e476192874faca7069a80",
+    "3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f",
+    "e7cb455319f9b650d3eff0551afe56c4974ea014"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "25474b46c3f7b6ad2e985d350fbdaa7feecd3cae7f6a9957e278bc84d7193df2",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "probe_da_chay": [
+    "ghi",
+    "spawn",
+    "workspace"
+  ],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "0e0c66f50074965a40cbd12f625b0a35963baf41bbd8c201a93e32fddbe2e073",
+  "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "thuc_thi_ly_do": null,
+  "thuc_thi_ung_vien_sau": [],
+  "agent_da_khai": "codex",
+  "agent_suy_ra": "codex",
+  "probe_bo_qua": [
+    "claude_trust"
+  ],
+  "chup_workspace": false,
+  "checkpoint_sha256": "3ab81d9d2edb63c91e8af2c2cec8e92c8ef60314a2efbbe84e0663f5ea968e74",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/a745ce50-1c6b-5672-94ea-c1fee1d128db/scratchpad/review6/run/1f1d7fdd/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596a68c8487d1ac2ac888339ba90b",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596a851f887d18fd8aed96dad3625",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596af4eec87d18955a9ba4265d2be",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596b4bbc487d19d354de70e2649b8",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596b80cd087d1b21f642bbaa9f0a7",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596bf837c87d18b9ae0d6039ce245",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596c758e487d18fe3208e836360eb",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596d30fe887d181c73f53c28c96ff",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596e549e487d1844afd40112b0b8f",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0596f0395887d1b88cee67b7f83bdc",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0597028f4087d1885faf99e251ffdc",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05970f0bc087d1a604234b70d6d5c0",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05971842cc87d1b7c2ca031a143388",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059767369887d1bfb31f288ebe8c24",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059778dc0c87d1b02f29d5024bcbbf",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05977d4b9c87d1b6466dc28788bfc8",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05978ee82087d1824f8287ab460fdb",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0597be3aa887d1baf55fb5f0c9376d",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0597c597cc87d1bc9baf09e4d8669e",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0597daea5887d180b902ee52ae184c",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0597e552ec87d1af3b49bf45f29a12",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059811ca3887d1a0c3e3fd680ddb5c",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059821e4ec87d1b94a7fddffe3cdd8",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05982a0f9487d1a49b39b6f7b1a9cf",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059835617087d1aefb4db60a83890e",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b05983c33a887d1a232934f85d73a9a",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059852f39487d1b534f159bba1a231",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b059866071087d1811e214624848989",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0598a57d0887d18bc317df954487fe",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0598b129b487d19c5f0f233c3c3b76",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0598b7578087d1824b3097671e96e5",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0598c6a6f887d1b78e3455cf62c91e",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0a2277dd1cf487ac016b0598e0004487d18294269f08d50e83",
+      "model": "gpt-6.2-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 308320,
+  "stderr_bo_byte": 29543167,
+  "effort_phuc_vu": [
+    "xhigh"
+  ],
+  "effort_phuc_vu_trang_thai": "DO_DUOC",
+  "sandbox_quan_sat": [
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--command-cwd=workspace",
+        "--sandbox-policy-cwd=workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 30
+    },
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--cap-drop=ALL",
+        "--die-with-parent",
+        "--new-session",
+        "--unshare-ipc",
+        "--unshare-net",
+        "--unshare-pid",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "/"
+        ],
+        [
+          "--bind",
+          "/tmp"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--bind",
+          "workspace"
+        ],
+        [
+          "--ro-bind",
+          "trong_workspace"
+        ],
+        [
+          "--ro-bind",
+          "trong_workspace"
+        ]
+      ],
+      "so_lan": 27
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--apply-seccomp-then-exec",
+        "--command-cwd=workspace",
+        "--sandbox-policy-cwd=workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ],
+          [
+            "trong_workspace",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 23
+    },
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--cap-drop=ALL",
+        "--die-with-parent",
+        "--new-session",
+        "--unshare-ipc",
+        "--unshare-net",
+        "--unshare-pid",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ]
+      ],
+      "so_lan": 5
+    }
+  ],
+  "sandbox_lech": {
+    "chuyen_cha_trong_cay": 0,
+    "chuyen_cha_ngoai_cay": 0,
+    "cha_con_song": 0,
+    "tai_dung": 0,
+    "to_tien_doi": 0
+  },
+  "sandbox_trang_thai": "DO_DUOC",
+  "sandbox_gioi_han": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Lech danh tinh tien trinh (#1105): chuyen cha khi cha cu da mat/Z va cha moi la to tien da xac thuc thi duoc tha; moi lech khac (ke ca chuyen ra ngoai cay hay PID 1) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "log_bam_cay_da_chet": true,
+  "log_bam_cho_giay": 0.005,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 584.905,
+  "log_bam_luc_utc": "2026-11-24T14:02:16.212884+00:00",
+  "stdout_byte": 683,
+  "stdout_sha256": "b0edcb7d63033719c3434cc37aea9574a5375c24bac7c458bc06e00c5c9429af",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

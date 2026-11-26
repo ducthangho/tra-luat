@@ -1,0 +1,44 @@
+CI_PR docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md'")
+CI_PR docs/PROTOCOL_DA_PHIEN.md ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/PROTOCOL_DA_PHIEN.md'")
+CI_PR .claude/dev/packet_loop.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop.py'")
+CI_PR .claude/dev/packet_loop_test.py ('chay', "PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop_test.py'")
+CI_PUSH ('chay', 'PACKET_LOOP: chay vi push nhanh mac dinh: chay bo ca packet-loop hau merge')
+DIRECT_GATE cay-kho doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+DIRECT_GATE cay-kho adr-song 0 adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+DIRECT_GATE prototype doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+DIRECT_GATE prototype adr-song 0 adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) 
+WP1460_WRITESET ## Write set
+- Nhánh `ops/wp1460-r1` (đặc tả, không thuộc PR giao nộp): `ops/specs/wp1460-r1/SPEC.md`, hai tệp `hop_dong/` ở mục 1, `ops/leases/wp1460-*.yaml`.
+- PR giao nộp, đúng BỐN tệp: `.github/workflows/ci-dot-bien-du.yml` · `.claude/dev/ci_dang_ky_test.py` · hai tệp `hop_dong/` ở mục 1 (chép nguyên byte từ nhánh đặc tả, executor không soạn và không sửa).
+
+Không tệp thứ năm. Không đặt được lệnh thu trong `ci_dang_ky_test.py` ⇒ DỪNG và báo.
+
+## Kích thước
+- Trần là trần MẶC ĐỊNH của lớp `sensitive` theo `ADR-0053`: **≤ 6 tệp và ≤ 450 dòng thêm** theo `git diff --numstat` so base. Lease cấp theo trần ấy. Đặc tả không xin, không ước lượng, không cấp ngoại lệ.
+- Đã đo: hai tệp `hop_dong/` chiếm 34 + 161 = 195 dòng thêm (đếm dòng trên chính hai tệp đã ghim băm); còn 255 dòng trong trần cho workflow, lệnh thu, ca và đột biến.
+- Executor đo `git diff --numstat <base>...HEAD` trên đúng bốn tệp giao nộp trong lúc thi công và trước MỖI lần xin review; ghi số đo vào PR.
+- Theo `ADR-0044`: ứng viên giao nộp vượt trần ⇒ DỪNG TRƯỚC review; không cắt ca, fixture hay đột biến để lọt trần; báo điều phối kèm numstat đã đo và phần việc còn thiếu.
+- Khi ấy điều phối xin chủ kho một khối `nang_tran` đúng `ADR-0053` (bốn trường `ai_nang`, `can_cu` có numstat ĐÃ ĐO, `tran_cu`, `tran_moi`); chủ kho duyệt; khối vào một revision đặc tả (chỉ đổi dòng `revision`, đoạn Trạng thái, mục này, bảng Thay đổi) và chép nguyên vào lease. Executor chỉ tiếp tục sau khi lease mang khối ấy.
+COMPILE ma clean OK MODULE_OLD_STORES [('STORE_NAME', 'RC_ADR', False)] CLASS_GLOBAL_STORES []
+COMPILE ma new_function_default_binding OK MODULE_OLD_STORES [('STORE_NAME', 'RC_ADR', False), ('STORE_NAME', 'RC_ADR', False)] CLASS_GLOBAL_STORES []
+COMPILE ma new_function_decorator_binding OK MODULE_OLD_STORES [('STORE_NAME', 'RC_ADR', False), ('STORE_NAME', 'RC_ADR', False)] CLASS_GLOBAL_STORES []
+COMPILE ma new_class_body_binding OK MODULE_OLD_STORES [('STORE_GLOBAL', 'RC_ADR', False)] CLASS_GLOBAL_STORES [('STORE_GLOBAL', 'RC_ADR')]
+COMPILE ma new_function_annotation_binding SYNTAX_ERROR named expression cannot be used within an annotation (ma-new_function_annotation_binding.py, line 1778)
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv4.5JKr/out/n8/test-clean.py:3809: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+COMPILE test clean OK MODULE_OLD_STORES [('STORE_NAME', 'ROOT', False)] CLASS_GLOBAL_STORES []
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv4.5JKr/out/n8/test-new_function_default_binding.py:3809: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+COMPILE test new_function_default_binding OK MODULE_OLD_STORES [('STORE_NAME', 'ROOT', False), ('STORE_NAME', 'ROOT', False)] CLASS_GLOBAL_STORES []
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv4.5JKr/out/n8/test-new_function_decorator_binding.py:3809: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+COMPILE test new_function_decorator_binding OK MODULE_OLD_STORES [('STORE_NAME', 'ROOT', False), ('STORE_NAME', 'ROOT', False)] CLASS_GLOBAL_STORES []
+BASE_CLI_DOCTRINE_STRING 21
+ADAPTERS 4 ['.claude/skills/work-packet/SKILL.md', '.claude/skills/land-packets/SKILL.md', '.claude/skills/cross-review/SKILL.md', '.agents/skills/work-packet/SKILL.md']
+CI_WORKFLOW_CALLS 1
+BASE_N8_ANCHOR     proto_words = _doc_nguon_protocol(root) 1
+BASE_N8_ANCHOR 9 bảng ADR §20 lệch với docs/adr/ 1
+BASE_N8_ANCHOR protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding= 1
+AUTHOR_LOG_HASH mu.log True
+AUTHOR_LOG_HASH cu.log True
+R3_VERDICT_HASH c12b80e93a6bdc84787dfbc087006f967a119d1c8acba3eb90ae2535c3bb4a6d

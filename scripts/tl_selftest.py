@@ -22773,7 +22773,9 @@ def run() -> int:
         # KÊ KHAI SLOT (packet #1134): 198 → **184** = − 14 `changelog.d/*.md` (thư mục `changelog.d` vào `_RELEASE_EXCLUDE_DIRS`). Trần Package 200 còn 16 khe.
         # Docs-only rollout: +references/WORKING_METHOD.md, 184 -> 185; Package cap 200 unchanged.
         # KÊ KHAI SLOT (BUNDLED-TACH-MANH): 185 → **186** = + scripts/tl_test_fragments_bundled_2.py. Trần Package 200 (ZIP 187 entry).
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
+        # KÊ KHAI SLOT (r380 — `tl llm-order`/`llm-khai-niem`, PR #1503): 186 → **187** = + `scripts/tl_core/llm_route.py`
+        # (lõi RUNTIME, không loại được; bộ test `llm_route_test.py` vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE`). Trần 200 còn 13 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22835,7 +22837,9 @@ def run() -> int:
             # KÊ KHAI SLOT (packet #1089): 197 → **198** = + `references/Code.2.21.2q.gs` (webapp agent_creds_put). Trần Package 200 còn 2 khe.
             # KÊ KHAI SLOT (packet #1134): 198 → **184** = − 14 `changelog.d/*.md` (thư mục `changelog.d` vào `_RELEASE_EXCLUDE_DIRS`). Trần Package 200 còn 16 khe.
             # KÊ KHAI SLOT (BUNDLED-TACH-MANH): 185 → **186** = + scripts/tl_test_fragments_bundled_2.py. Trần Package 200 (ZIP 187 entry).
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
+            # KÊ KHAI SLOT (r380 — `tl llm-order`/`llm-khai-niem`, PR #1503): 186 → **187** = + `scripts/tl_core/llm_route.py`
+            # (lõi RUNTIME, không loại được; bộ test `llm_route_test.py` vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE`). Trần 200 còn 13 khe.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
@@ -32138,6 +32142,210 @@ def run() -> int:
                 and _cov.get("total_leaf_commands") == _leaf
                 and _cov.get("coverage_percent") == _pct)
     _t110("r332_registry_coverage_duong_san_xuat", _c332_registry_coverage_duong_san_xuat)
+
+    # v1.36.71 r380 — `tl llm-order` / `tl llm-khai-niem` (gọi Claude cho script: subscription ↔ API key).
+    # Tệp thứ tự trỏ vào thư mục TẠM qua `TL_LLM_ORDER_FILE` — không bao giờ đụng ~/.tra_luat_llm.json thật.
+    import tempfile as _tf378, io as _io378, contextlib as _ctx378, types as _ty378
+    _tlm380, _os380 = globals()["_TL_MODULE"], globals()["os"]   # tên tĩnh cho ruff (tiền lệ l972a F03)
+    from pathlib import Path as _P378
+
+    def _c380_llm_order_luu_doi_xoa():
+        with _tf378.TemporaryDirectory() as _d:
+            _tep = _P378(_d) / "llm.json"
+            _sv = _env110({"TL_LLM_ORDER_FILE": str(_tep), "TL_LLM_ORDER": None})
+            try:
+                _lr = _tlm380._tl_core_import("llm_route")
+                _mac = _lr.thu_tu_hieu_luc()
+                _os380.environ["TL_LLM_ORDER"] = "api,sub"
+                _env = _lr.thu_tu_hieu_luc()
+
+                def _goi(**k):
+                    _ns = _ty378.SimpleNamespace(thu_tu=None, reset=False, json=True)
+                    for kk, vv in k.items():
+                        setattr(_ns, kk, vv)
+                    _o, _e = _io378.StringIO(), _io378.StringIO()
+                    with _ctx378.redirect_stdout(_o), _ctx378.redirect_stderr(_e):
+                        _rc = _tlm380.cmd_llm_order(_ns)
+                    return _rc, _o.getvalue()
+
+                _rc1, _o1 = _goi(thu_tu="api")                      # tệp thắng biến môi trường
+                _j1 = json.loads(_o1)
+                _rc_sai, _ = _goi(thu_tu="openai")                  # sai ⇒ rc 2, tệp GIỮ nguyên
+                _giu = json.loads(_tep.read_text(encoding="utf-8"))["thu_tu"] == "api"
+                _cli = _lr.thu_tu_hieu_luc("sub")                   # cờ thắng tệp
+                _rc2, _o2 = _goi(reset=True)                        # xoá ⇒ về biến môi trường
+                _j2 = json.loads(_o2)
+                _tep.write_text("{hong", encoding="utf-8")          # tệp hỏng ⇒ fail-closed, KHÔNG lùi mặc định
+                _rc3, _ = _goi()
+                return (_mac == (("sub", "api"), "mac dinh") and _env == (("api", "sub"), "bien TL_LLM_ORDER")
+                        and _rc1 == 0 and _j1["thu_tu"] == ["api"] and _j1["nguon"].startswith("tep ")
+                        and _rc_sai == 2 and _giu and _cli == (("sub",), "co --thu-tu")
+                        and _rc2 == 0 and _j2["thu_tu"] == ["api", "sub"] and _j2["nguon"] == "bien TL_LLM_ORDER"
+                        and _rc3 == 2)
+            finally:
+                _env110_restore(_sv)
+    _t110("r380_llm_order_luu_doi_xoa", _c380_llm_order_luu_doi_xoa)
+
+    def _c380_llm_khai_niem_tu_tep_qua_sub():
+        _vb = ("Điều 3. Giải thích từ ngữ\nTrong Luật này, các từ ngữ dưới đây được hiểu như sau:\n"
+               "Trí tuệ nhân tạo là việc thực hiện bằng điện tử các năng lực trí tuệ.")
+        _kn = [{"stt": 1, "thuat_ngu": "Trí tuệ nhân tạo",
+                "dinh_nghia": "là việc thực hiện bằng điện tử các năng lực trí tuệ."}]
+        _lr = _tlm380._tl_core_import("llm_route")
+        _sav = _lr.duong_sub
+        _goi_sub = []
+
+        def _sub_gia(he, nd, schema, model, env):
+            _goi_sub.append(model)
+            return {"duong": "sub", "nguon_key": None, "model": model, "data": {"khai_niem": [dict(x) for x in _kn]},
+                    "usage": {"input": 2, "output": 50, "cache_doc": 0, "cache_ghi": 1900}, "usd_uoc_tinh": 0.0004}
+
+        with _tf378.TemporaryDirectory() as _d:
+            _tep = _P378(_d) / "dieu.txt"
+            _tep.write_text(_vb, encoding="utf-8")
+            _sv = _env110({"TL_LLM_ORDER_FILE": str(_P378(_d) / "khong_co.json"), "TL_LLM_ORDER": None,
+                           "TL_ANTHROPIC_API_KEY": None, "ANTHROPIC_API_KEY": None})
+            try:
+                _lr.duong_sub = _sub_gia
+                _ns = _ty378.SimpleNamespace(sohieu=None, dieu=None, tep=str(_tep), thu_tu=None,
+                                             model="claude-haiku-5-5", out=None, nhat_ky=None, json=True)
+                _o, _e = _io378.StringIO(), _io378.StringIO()
+                with _ctx378.redirect_stdout(_o), _ctx378.redirect_stderr(_e):
+                    _rc = _tlm380.cmd_llm_khai_niem(_ns)
+                _j = json.loads(_o.getvalue())
+                # Định nghĩa bị diễn giải ⇒ rc 5 (kiểm nguyên văn theo CỤM, không theo mảnh)
+                _kn[0]["dinh_nghia"] = "việc mô phỏng trí tuệ bằng máy."
+                with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
+                    _rc5 = _tlm380.cmd_llm_khai_niem(_ns)
+            finally:
+                _lr.duong_sub = _sav
+                _env110_restore(_sv)
+        return (_rc == 0 and _goi_sub and _j["duong"] == "sub" and _j["thu_tu"] == ["sub", "api"]
+                and _j["khai_niem"][0]["dinh_nghia"] == "việc thực hiện bằng điện tử các năng lực trí tuệ."
+                and _j["tong_token"] == 1952 and _rc5 == 5
+                # Lượt 11 (quyết định chủ kho): ranh giới khoản KHÔNG được chứng minh ⇒ luôn cần người duyệt.
+                and _j["can_nguoi_duyet"] is True and "KHONG chung minh ranh gioi" in _j["pham_vi_kiem"])
+    _t110("r380_llm_khai_niem_tu_tep_qua_sub", _c380_llm_khai_niem_tu_tep_qua_sub)
+
+    # Cross-review PR #1503 lượt 1 (Codex): F4 --out không đè khi rc 5 · F5 chuyển tiếp --config ·
+    # F11 số Điều từ tiêu đề tệp, cấm ghép số hiệu · F12 tệp không UTF-8 ⇒ rc 2 · F9 `llm-order ""` ⇒ rc 2.
+    def _c380_llm_khai_niem_bien_dau_vao():
+        _lr = _tlm380._tl_core_import("llm_route")
+        _sav_sub, _sav_ex = _lr.duong_sub, _lr.lay_dieu_qua_extract
+        _kn = [{"stt": 1, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu do cơ quan lập."}]
+        _them_bat = []
+
+        _goi_model = []
+
+        def _sub_gia(he, nd, schema, model, env):
+            _goi_model.append(model)
+            return {"duong": "sub", "nguon_key": None, "model": model, "data": {"khai_niem": [dict(x) for x in _kn]},
+                    "usage": {"input": 1, "output": 1, "cache_doc": 0, "cache_ghi": 0}, "usd_uoc_tinh": None}
+
+        def _ex_gia(so_hieu, dieu, tl_py, chay=None, them=()):
+            _them_bat.append(list(them))
+            return ("Điều " + str(dieu) + ". Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.", "")
+
+        def _chay(**k):
+            _ns = _ty378.SimpleNamespace(sohieu=None, dieu=None, tep=None, thu_tu="sub", model="claude-haiku-5-5",
+                                         out=None, nhat_ky=None, json=True, config=None, profile=None)
+            for kk, vv in k.items():
+                setattr(_ns, kk, vv)
+            _o = _io378.StringIO()
+            with _ctx378.redirect_stdout(_o), _ctx378.redirect_stderr(_io378.StringIO()):
+                _rc = _tlm380.cmd_llm_khai_niem(_ns)
+            return _rc, _o.getvalue()
+
+        with _tf378.TemporaryDirectory() as _d:
+            _d = _P378(_d)
+            _sv = _env110({"TL_LLM_ORDER_FILE": str(_d / "o.json"), "TL_LLM_ORDER": None})
+            try:
+                _lr.duong_sub, _lr.lay_dieu_qua_extract = _sub_gia, _ex_gia
+                _t15 = _d / "d15.txt"
+                _t15.write_text("Điều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.", encoding="utf-8")
+                _rc_a, _o_a = _chay(tep=str(_t15))
+                _dieu_tep = json.loads(_o_a)["dieu"] if _rc_a == 0 else None
+                _rc_lech, _ = _chay(tep=str(_t15), dieu="7")
+                _rc_ghep, _ = _chay(tep=str(_t15), sohieu="94/2099/QH99")
+                _cu = _d / "cu.txt"
+                _cu.write_bytes(b"H\xf4 s\xff l\xe0 t\xe0i li\xeau")   # byte KHÔNG hợp lệ UTF-8 (mã cũ)
+                _rc_ma, _ = _chay(tep=str(_cu))
+                _rc_cfg, _ = _chay(sohieu="94/2099/QH99", config="yeu_cau.json", profile="Demo")
+                _out = _d / "kq.json"
+                _out.write_text('{"cu": true}', encoding="utf-8")
+                _kn[0]["dinh_nghia"] = "bản diễn giải."
+                _rc5, _ = _chay(tep=str(_t15), out=str(_out))
+                _giu = json.loads(_out.read_text(encoding="utf-8")) == {"cu": True}
+                _ns_o = _ty378.SimpleNamespace(thu_tu="", reset=False, json=True)
+                with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
+                    _rc_rong = _tlm380.cmd_llm_order(_ns_o)
+                # Lượt 2 N3: BOM UTF-8 không được che tiêu đề `Điều 15`.
+                _kn[0]["dinh_nghia"] = "tài liệu do cơ quan lập."
+                _bom = _d / "bom.txt"
+                _bom.write_bytes("\ufeffĐiều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.".encode("utf-8"))
+                _rc_bom_lech, _ = _chay(tep=str(_bom), dieu="7")
+                _rc_bom, _o_bom = _chay(tep=str(_bom))
+                _dieu_bom = json.loads(_o_bom)["dieu"] if _rc_bom == 0 else None
+                # Lượt 2 N5: `--out` là thư mục ⇒ rc 2 TRƯỚC khi gọi model; ghi đè giữ quyền 0644.
+                _n_truoc = len(_goi_model)
+                _rc_outdir, _ = _chay(tep=str(_t15), out=str(_d))
+                _khong_goi = len(_goi_model) == _n_truoc
+                _out2 = _d / "kq2.json"
+                _out2.write_text("{}", encoding="utf-8")
+                _os380.chmod(_out2, 0o644)
+                _rc_ghi, _ = _chay(tep=str(_t15), out=str(_out2))
+                _giu_quyen = (_out2.stat().st_mode & 0o777) == 0o644 and json.loads(_out2.read_text(encoding="utf-8"))["dieu"] == "15"
+                # Lượt 3 M5: `--out` và `--nhat-ky` cùng một tệp ⇒ rc 2 TRƯỚC khi gọi model, byte cũ giữ nguyên.
+                _trung = _d / "trung.json"
+                _trung.write_text('{"cu": 1}', encoding="utf-8")
+                _n_truoc2 = len(_goi_model)
+                _rc_trung, _ = _chay(tep=str(_t15), out=str(_trung), nhat_ky=str(_d / "." / "trung.json"))
+                _trung_ok = (_rc_trung == 2 and len(_goi_model) == _n_truoc2
+                             and _trung.read_text(encoding="utf-8") == '{"cu": 1}')
+                # Lượt 4 Q5: `--nhat-ky` là thư mục ⇒ rc 2 TRƯỚC model; lỗi I/O nhật ký muộn ⇒ rc 2, `--out` vẫn đã ghi.
+                _n_truoc3 = len(_goi_model)
+                _rc_nkdir, _ = _chay(tep=str(_t15), nhat_ky=str(_d))
+                _nkdir_ok = _rc_nkdir == 2 and len(_goi_model) == _n_truoc3
+                _sav_nk = _lr.ghi_nhat_ky
+
+                def _nk_hong(*_a, **_k):
+                    raise OSError(28, "No space left on device")
+                _out3 = _d / "kq3.json"
+                try:
+                    _lr.ghi_nhat_ky = _nk_hong
+                    _rc_nkmuon, _ = _chay(tep=str(_t15), out=str(_out3), nhat_ky=str(_d / "u.jsonl"))
+                finally:
+                    _lr.ghi_nhat_ky = _sav_nk
+                _nkmuon_ok = _rc_nkmuon == 2 and _out3.is_file()
+                # Lượt 5 R5: `--out` và `--nhat-ky` khác tệp trong CÙNG một thư mục mới ⇒ rc 0, cả hai được tạo; cha bị một
+                # TỆP chắn ⇒ rc 2 trước model.
+                _moi = _d / "moi" / "con"
+                _rc_moi, _ = _chay(tep=str(_t15), out=str(_moi / "kq.json"), nhat_ky=str(_moi / "u.jsonl"))
+                _moi_ok = _rc_moi == 0 and (_moi / "kq.json").is_file() and (_moi / "u.jsonl").is_file()
+                (_d / "chan").write_text("x", encoding="utf-8")
+                _n_truoc4 = len(_goi_model)
+                _rc_chan, _ = _chay(tep=str(_t15), nhat_ky=str(_d / "chan" / "u.jsonl"))
+                _chan_ok = _rc_chan == 2 and len(_goi_model) == _n_truoc4
+                # Lượt 6 S3: `--out` và `--nhat-ky` có quan hệ cha–con (cả hai chưa tồn tại), HAI chiều ⇒ rc 2 trước model.
+                _cc = _d / "chacon"
+                _n_truoc5 = len(_goi_model)
+                _rc_cc1, _ = _chay(tep=str(_t15), out=str(_cc / "a"), nhat_ky=str(_cc / "a" / "u.jsonl"))
+                _rc_cc2, _ = _chay(tep=str(_t15), out=str(_cc / "b" / "kq.json"), nhat_ky=str(_cc / "b"))
+                _chacon_ok = _rc_cc1 == 2 and _rc_cc2 == 2 and len(_goi_model) == _n_truoc5 and not _cc.exists()
+                _os380.environ["TL_LLM_ORDER_FILE"] = str(_d)            # tệp thứ tự là THƯ MỤC
+                _ns_o2 = _ty378.SimpleNamespace(thu_tu="sub", reset=False, json=True)
+                with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
+                    _rc_order_dir = _tlm380.cmd_llm_order(_ns_o2)
+            finally:
+                _lr.duong_sub, _lr.lay_dieu_qua_extract = _sav_sub, _sav_ex
+                _env110_restore(_sv)
+        return (_rc_a == 0 and _dieu_tep == "15" and _rc_lech == 2 and _rc_ghep == 2 and _rc_ma == 2
+                and _rc_cfg == 0 and _them_bat and _them_bat[-1][:2] == ["--config", "yeu_cau.json"]
+                and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
+                and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
+                and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok
+                and _nkdir_ok and _nkmuon_ok and _moi_ok and _chan_ok and _chacon_ok)
+    _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
     # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.

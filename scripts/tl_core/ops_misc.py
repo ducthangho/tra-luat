@@ -2935,3 +2935,208 @@ INSTRUCTION_REQUIRED = {
     "source id": "Instruction phải neo về source id/drive_id.",
     "Điều": "Instruction phải neo về Điều/khoản/điểm.",
 }
+
+
+# ───────────────────────── v1.36.71 r380 — gọi Claude cho script: SUBSCRIPTION ↔ API key ─────────────────────────
+# Lõi THUẦN ở `tl_core/llm_route.py` (không bind). Hai handler dưới đây được re-home về namespace tl
+# (bẫy I11) nên tên mới PHẢI khai trong `_STUB_MAP["ops_misc"]` của tl.py.
+
+def _llm_in_trang_thai(lr, thu_tu, nguon, tt):
+    api, sub = tt["api"], tt["sub"]
+    print(f"thu tu hieu luc: {','.join(thu_tu)}  (nguon: {nguon})")
+    print(f"  sub: claude CLI={'co' if sub['claude_cli'] else 'KHONG'}  — tinh vao han muc subscription")
+    print(f"  api: key={'co (' + api['bien_key'] + ')' if api['bien_key'] else 'KHONG'} · "
+          f"sdk anthropic={'co' if api['sdk'] else 'KHONG'}  — tinh vao credit API")
+    print(f"  doi: tl llm-order sub,api | api,sub | sub | api   ·   ve mac dinh: tl llm-order --reset "
+          f"(mac dinh {','.join(lr.THU_TU_MAC_DINH)})")
+    print("  CO MAT != DUNG DUOC — so du credit chi xem o Claude Console > Billing")
+
+
+def _cung_dich(a, b) -> bool:
+    pa, pb = Path(a), Path(b)
+    try:
+        ra, rb = pa.resolve(), pb.resolve()
+        # Lượt 6 S3: quan hệ TỔ TIÊN–HẬU DUỆ cũng là "chung đích": đích trên sẽ phải vừa là tệp vừa là thư mục, nên lần
+        # ghi thứ hai LUÔN hỏng sau khi đã tốn model.
+        if ra == rb or ra in rb.parents or rb in ra.parents:
+            return True
+        return pa.exists() and pb.exists() and os.path.samefile(pa, pb)
+    except OSError:
+        return True   # không đo được ⇒ coi như trùng (fail-closed)
+
+
+def _ghi_nguyen_tu_giu_quyen(dich, noi_dung) -> None:
+    """Tệp tạm CÙNG thư mục → fsync → os.replace. Đích có sẵn thì GIỮ quyền của nó (lượt 2 N5: mkstemp tạo
+    0600, thay thẳng là đổi 0644 → 0600 sau lưng tiến trình khác đang đọc). Lỗi giữa chừng: dọn tệp tạm."""
+    dich.parent.mkdir(parents=True, exist_ok=True)
+    quyen = (dich.stat().st_mode & 0o7777) if dich.is_file() else None   # không dùng `stat`: tl.py không có tên ấy (I11)
+    fd, tam = tempfile.mkstemp(prefix=dich.name + ".", suffix=".tmp", dir=str(dich.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(noi_dung)
+            f.flush()
+            os.fsync(f.fileno())
+        if quyen is not None:
+            os.chmod(tam, quyen)
+        os.replace(tam, dich)
+    except BaseException:
+        try:
+            os.unlink(tam)
+        except OSError:
+            pass
+        raise
+
+
+def cmd_llm_order(a) -> int:
+    """Xem / đặt / xoá thứ tự đường gọi Claude (lưu bền ở tệp, đổi được bất cứ lúc nào)."""
+    lr = _tl_core_import("llm_route")
+    try:
+        if getattr(a, "reset", False):
+            if getattr(a, "thu_tu", None) is not None:
+                print("--reset khong di cung gia tri thu tu", file=sys.stderr)
+                return 2
+            da_xoa = lr.xoa_thu_tu()
+            print(("da xoa " if da_xoa else "khong co ") + f"tep thu tu {lr.tep_thu_tu()}", file=sys.stderr)
+        elif getattr(a, "thu_tu", None) is not None:   # "" là giá trị SAI (rc 2), không phải "chỉ xem" — F9
+            thu_tu, tep = lr.luu_thu_tu(a.thu_tu)
+            print(f"da luu thu tu {','.join(thu_tu)} -> {tep}", file=sys.stderr)
+        thu_tu, nguon = lr.thu_tu_hieu_luc()
+    except (ValueError, OSError) as e:   # OSError: tệp thứ tự là thư mục/không ghi được (lượt 2 N5)
+        print(f"[tl] {type(e).__name__}: {e}" if isinstance(e, OSError) else f"[tl] {e}", file=sys.stderr)
+        return 2
+    tt = lr.trang_thai_duong()
+    if getattr(a, "json", False):
+        print(_json_dumps({"ok": True, "thu_tu": list(thu_tu), "nguon": nguon,
+                           "tep": str(lr.tep_thu_tu()), "mac_dinh": list(lr.THU_TU_MAC_DINH),
+                           "duong": tt}))
+    else:
+        _llm_in_trang_thai(lr, thu_tu, nguon, tt)
+    return 0
+
+
+def cmd_llm_khai_niem(a) -> int:
+    """Tách khái niệm của một Điều 'Giải thích từ ngữ' bằng Claude, kiểm nguyên văn theo cụm."""
+    lr = _tl_core_import("llm_route")
+    try:
+        thu_tu, nguon = lr.thu_tu_hieu_luc(getattr(a, "thu_tu", None))
+    except ValueError as e:
+        print(f"[tl] {e}", file=sys.stderr)
+        return 2
+    so_hieu = getattr(a, "sohieu", None) or None
+    dieu = getattr(a, "dieu", None)
+    if getattr(a, "tep", None):
+        # F11 (PR #1503): tệp local KHÔNG mang số hiệu/Điều xác minh được ⇒ không cho gắn số hiệu tay, và
+        # số Điều lấy từ chính tiêu đề tệp; `--dieu` lệch tiêu đề ⇒ rc 2 (không dán nhãn sai).
+        if so_hieu:
+            print("[tl] chon MOT nguon: <so_hieu> (qua tl extract) HOAC --tep — khong ghep so hieu vao tep local",
+                  file=sys.stderr)
+            return 2
+        try:
+            # `utf-8-sig`: gỡ BOM đầu tệp — để nguyên thì U+FEFF che tiêu đề `Điều N` (lượt 2 N3).
+            van_ban = Path(a.tep).read_text(encoding="utf-8-sig").strip()
+        except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
+            print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
+            return 2
+        except OSError as e:
+            print(f"[tl] khong doc duoc {a.tep}: {e}", file=sys.stderr)
+            return 2
+        dieu_tep = lr.so_dieu_tu_tieu_de(van_ban)
+        if dieu is not None and dieu_tep is not None and str(dieu) != dieu_tep:
+            print(f"[tl] --dieu {dieu} lech tieu de tep (Dieu {dieu_tep})", file=sys.stderr)
+            return 2
+        dieu = dieu_tep if dieu_tep is not None else dieu
+        nguon_vb = str(a.tep)
+    else:
+        if not so_hieu:
+            print("[tl] can <so_hieu> --dieu N, hoac --tep <tep van ban>", file=sys.stderr)
+            return 2
+        dieu = "3" if dieu is None else str(dieu)
+        # F5: chuyển tiếp CẢ `--config` lẫn `--profile` — hai cờ gốc quyết định nguồn của `tl extract`.
+        them = []
+        if getattr(a, "config", None):
+            them += ["--config", str(a.config)]
+        if getattr(a, "profile", None):
+            them += ["--profile", str(a.profile)]
+        try:
+            van_ban, loi_extract = lr.lay_dieu_qua_extract(so_hieu, dieu, HERE / "tl.py", them=them)
+        except (ValueError, OSError, subprocess.SubprocessError) as e:
+            print(f"[tl] khong lay duoc nguyen van: {e}", file=sys.stderr)
+            return 2
+        for dong in loi_extract.splitlines():
+            if dong.startswith("[tl] canonical:") or "DỰ THẢO" in dong or "[markup]" in dong:
+                print(dong, file=sys.stderr)
+        nguon_vb = f"tl extract {so_hieu} --dieu {dieu}"
+    if not van_ban:
+        print("[tl] van ban rong", file=sys.stderr)
+        return 2
+    if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
+        print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
+        return 2
+    if getattr(a, "nhat_ky", None):
+        # Lượt 4 Q5: nhật ký trỏ thư mục từng ném traceback SAU khi đã ghi `--out` — kiểm TRƯỚC model. Lượt 5 R5: thư mục
+        # cha CHƯA có thì được tạo khi ghi (như `--out`); chỉ chặn khi tổ tiên gần nhất đang tồn tại không phải thư mục.
+        _nk = Path(a.nhat_ky)
+        _to = next((x for x in _nk.absolute().parents if x.exists()), None)
+        if _nk.is_dir() or _to is None or not _to.is_dir():
+            print(f"[tl] --nhat-ky {a.nhat_ky}: la thu muc, hoac duong dan cha bi chan boi mot tep — can duong dan tep",
+                  file=sys.stderr)
+            return 2
+    if getattr(a, "out", None) and getattr(a, "nhat_ky", None) and _cung_dich(a.out, a.nhat_ky):
+        # Lượt 3 M5: nhật ký JSONL nối vào CHÍNH tệp `--out` ⇒ JSON đã xác minh hỏng (`Extra data`), kể cả khi rc 5
+        # (byte cũ bị nối thêm). So theo đường dẫn tuyệt đối đã giải symlink VÀ theo định danh tệp nếu đã tồn tại.
+        print(f"[tl] --out va --nhat-ky tro cung mot tep ({a.out}) — dung hai tep khac nhau", file=sys.stderr)
+        return 2
+    print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
+    try:
+        kq = lr.tach_khai_niem(van_ban, so_hieu or "", a.model, thu_tu)
+    except lr.HetDuong as e:
+        print("[tl] HET DUONG — moi duong deu hong phia duong:", file=sys.stderr)
+        for d, ly_do in e.lan_thu:
+            print(f"  {d}: {ly_do}", file=sys.stderr)
+        return 3
+    except lr.Dung as e:
+        print(f"[tl] DUNG (loi phia yeu cau, khong thu duong khac): {e}", file=sys.stderr)
+        return 4
+    # Lượt 11 (quyết định chủ kho): phép kiểm chỉ chứng minh "thuật ngữ + định nghĩa khớp nguyên văn TỪNG KHOẢN THEO
+    # PHÂN ĐOẠN CỦA BỘ QUÉT" — ranh giới khoản tách từ văn bản THÔ không chứng minh được (11 lượt review liên tiếp tìm
+    # ra một cách phân đoạn sai mới). Kết quả luôn mang cờ cần người duyệt ranh giới.
+    ket = {"so_hieu": so_hieu, "dieu": dieu, "nguon": nguon_vb, "khai_niem": kq["khai_niem"],
+           "can_nguoi_duyet": True, "pham_vi_kiem": lr.PHAM_VI_KIEM}
+    # F4 (PR #1503): `--out` CHỈ ghi khi kết quả QUA kiểm nguyên văn, và ghi nguyên tử — kết quả bị từ
+    # chối (rc 5) không được đè lên bản đã xác minh trước đó.
+    if getattr(a, "out", None) and not kq["lech"]:
+        try:
+            _ghi_nguyen_tu_giu_quyen(Path(a.out), json.dumps(ket, ensure_ascii=False, indent=2) + "\n")
+        except OSError as e:   # lượt 2 N5: lỗi I/O ⇒ rc 2 có thông báo, không traceback
+            print(f"[tl] khong ghi duoc --out {a.out}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
+    if getattr(a, "nhat_ky", None):
+        try:
+            lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
+        except OSError as e:   # lượt 4 Q5: lỗi I/O muộn ⇒ rc 2 có kiểm soát, nói rõ phần nào ĐÃ xong
+            da_ghi = f"--out {a.out} DA ghi; " if getattr(a, "out", None) and not kq["lech"] else ""
+            print(f"[tl] {da_ghi}khong ghi duoc --nhat-ky {a.nhat_ky}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
+    u = kq["usage"]
+    if getattr(a, "json", False):
+        print(_json_dumps({"ok": not kq["lech"], **ket, "duong": kq["duong"], "model": kq["model"],
+                           "thu_tu": list(thu_tu), "nguon_thu_tu": nguon, "usage": u,
+                           "tong_token": lr.tong_token(u), "usd_uoc_tinh": kq["usd_uoc_tinh"],
+                           "lan_thu": kq["lan_thu"], "lech_nguyen_van": kq["lech"]}))
+    else:
+        print(_json_dumps(ket))
+    for d, ly_do in kq["lan_thu"]:
+        print(f"[chuyen duong] {d}: {ly_do}", file=sys.stderr)
+    print(f"DUONG: {kq['duong']}" + (f" (key tu {kq['nguon_key']})" if kq["nguon_key"] else
+                                     " (subscription — tinh vao han muc goi)"), file=sys.stderr)
+    print(f"MODEL: {kq['model']}", file=sys.stderr)
+    print(f"TOKEN: input={u['input']} output={u['output']} cache_doc={u['cache_doc']} "
+          f"cache_ghi={u['cache_ghi']} tong={lr.tong_token(u)}", file=sys.stderr)
+    if kq["usd_uoc_tinh"] is not None:
+        print(f"USD (CLI uoc tinh): {kq['usd_uoc_tinh']:.6f}", file=sys.stderr)
+    if kq["lech"]:
+        print(f"LECH NGUYEN VAN o khoan {kq['lech']} — KHONG dung ket qua nay", file=sys.stderr)
+        return 5
+    print(f"NGUYEN VAN: DAT ({len(kq['khai_niem'])} khai niem khop nguyen van tung khoan theo phan doan cua bo quet) "
+          f"— CAN NGUOI DUYET ranh gioi khoan", file=sys.stderr)
+    return 0

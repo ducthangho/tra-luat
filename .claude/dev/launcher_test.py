@@ -4481,6 +4481,95 @@ def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
     bang(tt == "CHUA_XAC_THUC", f"kiem song loi phai tra CHUA_XAC_THUC: {tt}")
 
 
+@ca
+def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
+    """Đường API key cho script (`llm_route.py`): mặc định KHÔNG gọi mạng; `--kiem-song` chỉ
+    2xx mới DUNG_DUOC; hết credit / bị từ chối ⇒ CHUA_XAC_THUC; không bao giờ lộ key."""
+    import io as _io
+    import urllib.error as _ue
+    m = _tai_launcher_thu()
+    bang(len([k for k in m.KHA_NANG if k["ten"] == "anthropic-api"]) == 1, "KHA_NANG thieu anthropic-api")
+    key = "sk-ant-GIA-KHONG-DUOC-IN-0123456789"
+    goi = []
+
+    def mo_cam(req, timeout=None):
+        raise TinHieuChotCa("mac dinh KHONG duoc goi mang")
+
+    tt, mo_ta = m._do_anthropic_api({}, False, mo=mo_cam)
+    bang(tt == "THIEU", f"khong key phai THIEU (tuy chon, khong canh bao): {tt}")
+    tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": "  "}, True, mo=mo_cam)
+    bang(tt == "THIEU", f"bien rong khong phai key: {tt}")
+    tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, False, mo=mo_cam)
+    bang(tt == "CO_CREDENTIAL", f"co key mac dinh phai CO_CREDENTIAL: {tt}")
+
+    class _R:
+        status = 200
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def __init__(self, than=b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
+            self._than = than
+        def read(self): return self._than
+
+    def mo_200(req, timeout=None):
+        goi.append(req)
+        return _R()
+
+    tt, mo_ta = m._do_anthropic_api({"ANTHROPIC_API_KEY": "khac", "TL_ANTHROPIC_API_KEY": key}, True, mo=mo_200)
+    bang(tt == "DUNG_DUOC", f"200 phai DUNG_DUOC: {tt} {mo_ta}")
+    bang(goi and goi[0].get_header("X-api-key") == key, "phai uu tien TL_ANTHROPIC_API_KEY")
+    bang(goi[0].full_url.endswith("/v1/messages"), f"sai endpoint: {goi[0].full_url}")
+
+    def mo_loi(ma, than):
+        def _mo(req, timeout=None):
+            raise _ue.HTTPError(req.full_url, ma, "x", {}, _io.BytesIO(than))
+        return _mo
+
+    for ma, than, ky_vong, dau in (
+            (402, b'{"error": {"type": "billing_error", "message": "x"}}', "CHUA_XAC_THUC", "HET CREDIT"),
+            (400, b'{"error": {"type": "invalid_request_error", "message": "Your credit balance is too low"}}',
+             "CHUA_XAC_THUC", "HET CREDIT"),
+            (401, b'{"error": {"type": "authentication_error", "message": "x"}}', "CHUA_XAC_THUC", "tu choi"),
+            (429, b'{"error": {"type": "rate_limit_error", "message": "x"}}', "KHONG_DO_DUOC", "429"),
+            (400, b'{"error": {"type": "invalid_request_error", "message": "bad"}}', "KHONG_DO_DUOC", "400")):
+        tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(ma, than))
+        bang(tt == ky_vong and dau in mo_ta, f"HTTP {ma}: ky vong {ky_vong}/{dau}, duoc {tt}: {mo_ta}")
+        bang(key not in mo_ta, "gia tri key lot vao mo ta")
+
+    # F8 (cross-review PR #1503): 2xx KHÔNG phải Message có usage ⇒ KHONG_DO_DUOC, không DUNG_DUOC;
+    # JSON không phải object ở cả hai đường không được ném AttributeError.
+    # Lượt 2 N8: mỗi điều kiện một mẫu RIÊNG — thiếu `type`, model khác, token âm (cùng usage hợp lệ).
+    for than in (b"", b'{"status": "ok"}', b"[]", b'{"type": "message", "usage": {"input_tokens": "8"}}',
+                 # Mỗi mẫu là khung Message ĐẦY ĐỦ, chỉ hỏng ĐÚNG trường nó đo — kẻo chốt khác che (lượt 3).
+                 b'{"id": "msg_01", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "other-model", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": -1}}',
+                 # Lượt 3 M6: thiếu khung Message (id/role/content) và usage 0+0.
+                 b'{"type": "message", "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 0, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": true, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": 5}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 # Lượt 5 R4: khối `tool_use` thiếu trường bắt buộc (probe không khai tools).
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "tool_use"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "tool_use", "text": "x"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 # Lượt 4 Q4: mỗi trường khung một mẫu hỏng RIÊNG (khung còn lại đầy đủ) + khối nội dung sai kiểu.
+                 b'{"id": "abc", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "user", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [null], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": 5}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 0}}'):
+        tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=lambda r, timeout=None, _t=than: _R(_t))
+        bang(tt == "KHONG_DO_DUOC", f"2xx {than!r} khong chung minh dung duoc, duoc {tt}: {mo_ta}")
+    tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(401, b"[]"))
+    bang(tt == "CHUA_XAC_THUC", f"401 than JSON mang van phai CHUA_XAC_THUC: {tt}")
+
+    def mo_dut(req, timeout=None):
+        raise _ue.URLError("dut")
+
+    tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_dut)
+    bang(tt == "KHONG_DO_DUOC", f"mat mang phai KHONG_DO_DUOC (None != False): {tt}")
+
+
 # ------------------------------------------------- bridge SessionStart (GLS-B1)
 #
 # VÌ SAO — incident 2026-08-15 (docs/incidents/2026-08-15-launcher-codex-github-toolchain.md),
@@ -17750,6 +17839,66 @@ DOT_BIEN = [
      ('        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":\n            # Finding 1: models rc=0 nhưng không có đầu ra -> KHONG_DO_DUOC (không làm tròn thành CO_MAT hay DUNG_DUOC)\n            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong co dau ra (rc=0 nhung khong co bang chung xac thuc){duoi_path}")',
       '        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":\n            co_mat_str = ("CO_MAT", f"chua dang nhap{duoi_path}")'),
      ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    # llm_route (24-11-2026): phép đo đường API key cho script.
+    ("anthropic_api_goi_mang_mac_dinh",
+     ('    if not kiem_song:\n        return ("CO_CREDENTIAL", f"co key ({ten}) · chua chung minh dung duoc, them --kiem-song")',
+      '    if False:\n        return ("CO_CREDENTIAL", f"co key ({ten}) · chua chung minh dung duoc, them --kiem-song")'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_het_credit_thanh_khong_do",
+     ('        if e.code == 402 or kieu == "billing_error" or (e.code == 400 and "credit balance" in tb.lower()):',
+      '        if e.code == 402:'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_uu_tien_bien_chuan",
+     ('ANTHROPIC_KEY_BIEN = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")',
+      'ANTHROPIC_KEY_BIEN = ("ANTHROPIC_API_KEY", "TL_ANTHROPIC_API_KEY")'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_moi_2xx",
+     ('            if not (la_message and dung_model and co_usage and co_dau_ra):\n', '            if False:\n'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_type",
+     ('            co_type = la_dict and than_tl.get("type") == "message"',
+      '            co_type = la_dict'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_model",
+     ('            dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG',
+      '            dung_model = isinstance(than_tl, dict)'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_token_bool",
+     ('                isinstance(u.get(k), int) and not isinstance(u.get(k), bool)\n',
+      '                isinstance(u.get(k), int)\n'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_id",
+     ('            co_id = la_dict and isinstance(than_tl.get("id"), str) and than_tl["id"].startswith("msg_")',
+      '            co_id = la_dict'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_role",
+     ('            co_role = la_dict and than_tl.get("role") == "assistant"',
+      '            co_role = la_dict'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_content_rong",
+     ('            co_content = isinstance(noi_dung, list) and len(noi_dung) > 0 and all(',
+      '            co_content = isinstance(noi_dung, list) and all('),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_kieu_khoi",
+     ('                isinstance(kh, dict) and kh.get("type") == "text"\n',
+      '                isinstance(kh, dict)\n'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_text_khoi",
+     ('                and isinstance(kh.get("text"), str) for kh in noi_dung)',
+      '                for kh in noi_dung)'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_0_dau_ra",
+     ('            if not (la_message and dung_model and co_usage and co_dau_ra):',
+      '            if not (la_message and dung_model and co_usage):'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_0_token",
+     ('for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0',
+      'for k in ("input_tokens", "output_tokens"))'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_mat_mang_thanh_chua_xac_thuc",
+     ('        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")',
+      '        return ("CHUA_XAC_THUC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("agy_windows_bo_fallback_localappdata",
      ('        elif c["ten"] == "agy" and local:',
       '        elif False:'),

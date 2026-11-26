@@ -1,0 +1,447 @@
+import _frozen_importlib # frozen
+import _imp # builtin
+import '_thread' # <class '_frozen_importlib.BuiltinImporter'>
+import '_warnings' # <class '_frozen_importlib.BuiltinImporter'>
+import '_weakref' # <class '_frozen_importlib.BuiltinImporter'>
+import '_io' # <class '_frozen_importlib.BuiltinImporter'>
+import 'marshal' # <class '_frozen_importlib.BuiltinImporter'>
+import 'posix' # <class '_frozen_importlib.BuiltinImporter'>
+import '_frozen_importlib_external' # <class '_frozen_importlib.FrozenImporter'>
+# installing zipimport hook
+import 'time' # <class '_frozen_importlib.BuiltinImporter'>
+import 'zipimport' # <class '_frozen_importlib.FrozenImporter'>
+# installed zipimport hook
+# /usr/lib/python3.13/encodings/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/encodings/__init__.py
+# code object from '/usr/lib/python3.13/encodings/__pycache__/__init__.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/codecs.cpython-313.pyc matches /usr/lib/python3.13/codecs.py
+# code object from '/usr/lib/python3.13/__pycache__/codecs.cpython-313.pyc'
+import '_codecs' # <class '_frozen_importlib.BuiltinImporter'>
+import 'codecs' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d607d0>
+# /usr/lib/python3.13/encodings/__pycache__/aliases.cpython-313.pyc matches /usr/lib/python3.13/encodings/aliases.py
+# code object from '/usr/lib/python3.13/encodings/__pycache__/aliases.cpython-313.pyc'
+import 'encodings.aliases' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d62210>
+import 'encodings' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224cdd2b0>
+# /usr/lib/python3.13/encodings/__pycache__/utf_8.cpython-313.pyc matches /usr/lib/python3.13/encodings/utf_8.py
+# code object from '/usr/lib/python3.13/encodings/__pycache__/utf_8.cpython-313.pyc'
+import 'encodings.utf_8' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d51e00>
+import '_signal' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/io.cpython-313.pyc matches /usr/lib/python3.13/io.py
+# code object from '/usr/lib/python3.13/__pycache__/io.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/abc.cpython-313.pyc matches /usr/lib/python3.13/abc.py
+# code object from '/usr/lib/python3.13/__pycache__/abc.cpython-313.pyc'
+import '_abc' # <class '_frozen_importlib.BuiltinImporter'>
+import 'abc' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d0e330>
+import 'io' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d52060>
+Python 3.13.18 (main, Oct 26 2026, 15:28:15) [GCC 13.3.0] on linux
+# /usr/lib/python3.13/__pycache__/os.cpython-313.pyc matches /usr/lib/python3.13/os.py
+# code object from '/usr/lib/python3.13/__pycache__/os.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/stat.cpython-313.pyc matches /usr/lib/python3.13/stat.py
+# code object from '/usr/lib/python3.13/__pycache__/stat.cpython-313.pyc'
+import '_stat' # <class '_frozen_importlib.BuiltinImporter'>
+import 'stat' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224be0f50>
+# /usr/lib/python3.13/__pycache__/_collections_abc.cpython-313.pyc matches /usr/lib/python3.13/_collections_abc.py
+# code object from '/usr/lib/python3.13/__pycache__/_collections_abc.cpython-313.pyc'
+import '_collections_abc' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224be1050>
+# /usr/lib/python3.13/__pycache__/posixpath.cpython-313.pyc matches /usr/lib/python3.13/posixpath.py
+# code object from '/usr/lib/python3.13/__pycache__/posixpath.cpython-313.pyc'
+import 'errno' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/genericpath.cpython-313.pyc matches /usr/lib/python3.13/genericpath.py
+# code object from '/usr/lib/python3.13/__pycache__/genericpath.cpython-313.pyc'
+import 'genericpath' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224bd87d0>
+import 'posixpath' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224bd85f0>
+import 'os' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d37460>
+# /usr/lib/python3.13/__pycache__/datetime.cpython-313.pyc matches /usr/lib/python3.13/datetime.py
+# code object from '/usr/lib/python3.13/__pycache__/datetime.cpython-313.pyc'
+import '_datetime' # <class '_frozen_importlib.BuiltinImporter'>
+import 'datetime' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c04f30>
+# /usr/lib/python3.13/importlib/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/importlib/__init__.py
+# code object from '/usr/lib/python3.13/importlib/__pycache__/__init__.cpython-313.pyc'
+import 'importlib' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c05010>
+# /usr/lib/python3.13/importlib/__pycache__/util.cpython-313.pyc matches /usr/lib/python3.13/importlib/util.py
+# code object from '/usr/lib/python3.13/importlib/__pycache__/util.cpython-313.pyc'
+# /usr/lib/python3.13/importlib/__pycache__/_abc.cpython-313.pyc matches /usr/lib/python3.13/importlib/_abc.py
+# code object from '/usr/lib/python3.13/importlib/__pycache__/_abc.cpython-313.pyc'
+import 'importlib._abc' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224cedcd0>
+# /usr/lib/python3.13/__pycache__/types.cpython-313.pyc matches /usr/lib/python3.13/types.py
+# code object from '/usr/lib/python3.13/__pycache__/types.cpython-313.pyc'
+import 'types' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224cedfd0>
+import 'importlib.util' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d928f0>
+# /usr/lib/python3.13/pathlib/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/pathlib/__init__.py
+# code object from '/usr/lib/python3.13/pathlib/__pycache__/__init__.cpython-313.pyc'
+# /usr/lib/python3.13/pathlib/__pycache__/_abc.cpython-313.pyc matches /usr/lib/python3.13/pathlib/_abc.py
+# code object from '/usr/lib/python3.13/pathlib/__pycache__/_abc.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/functools.cpython-313.pyc matches /usr/lib/python3.13/functools.py
+# code object from '/usr/lib/python3.13/__pycache__/functools.cpython-313.pyc'
+# /usr/lib/python3.13/collections/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/collections/__init__.py
+# code object from '/usr/lib/python3.13/collections/__pycache__/__init__.cpython-313.pyc'
+import 'itertools' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/keyword.cpython-313.pyc matches /usr/lib/python3.13/keyword.py
+# code object from '/usr/lib/python3.13/__pycache__/keyword.cpython-313.pyc'
+import 'keyword' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224d031d0>
+# /usr/lib/python3.13/__pycache__/operator.cpython-313.pyc matches /usr/lib/python3.13/operator.py
+# code object from '/usr/lib/python3.13/__pycache__/operator.cpython-313.pyc'
+import '_operator' # <class '_frozen_importlib.BuiltinImporter'>
+import 'operator' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c34550>
+# /usr/lib/python3.13/__pycache__/reprlib.cpython-313.pyc matches /usr/lib/python3.13/reprlib.py
+# code object from '/usr/lib/python3.13/__pycache__/reprlib.cpython-313.pyc'
+import 'reprlib' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c34ed0>
+import '_collections' # <class '_frozen_importlib.BuiltinImporter'>
+import 'collections' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c219f0>
+import '_functools' # <class '_frozen_importlib.BuiltinImporter'>
+import 'functools' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c21630>
+# /usr/lib/python3.13/__pycache__/glob.cpython-313.pyc matches /usr/lib/python3.13/glob.py
+# code object from '/usr/lib/python3.13/__pycache__/glob.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/contextlib.cpython-313.pyc matches /usr/lib/python3.13/contextlib.py
+# code object from '/usr/lib/python3.13/__pycache__/contextlib.cpython-313.pyc'
+import 'contextlib' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224beb620>
+# /usr/lib/python3.13/re/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/re/__init__.py
+# code object from '/usr/lib/python3.13/re/__pycache__/__init__.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/enum.cpython-313.pyc matches /usr/lib/python3.13/enum.py
+# code object from '/usr/lib/python3.13/__pycache__/enum.cpython-313.pyc'
+import 'enum' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c46090>
+# /usr/lib/python3.13/re/__pycache__/_compiler.cpython-313.pyc matches /usr/lib/python3.13/re/_compiler.py
+# code object from '/usr/lib/python3.13/re/__pycache__/_compiler.cpython-313.pyc'
+import '_sre' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/re/__pycache__/_parser.cpython-313.pyc matches /usr/lib/python3.13/re/_parser.py
+# code object from '/usr/lib/python3.13/re/__pycache__/_parser.cpython-313.pyc'
+# /usr/lib/python3.13/re/__pycache__/_constants.cpython-313.pyc matches /usr/lib/python3.13/re/_constants.py
+# code object from '/usr/lib/python3.13/re/__pycache__/_constants.cpython-313.pyc'
+import 're._constants' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abce90>
+import 're._parser' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abccb0>
+# /usr/lib/python3.13/re/__pycache__/_casefix.cpython-313.pyc matches /usr/lib/python3.13/re/_casefix.py
+# code object from '/usr/lib/python3.13/re/__pycache__/_casefix.cpython-313.pyc'
+import 're._casefix' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abce30>
+import 're._compiler' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c474d0>
+# /usr/lib/python3.13/__pycache__/copyreg.cpython-313.pyc matches /usr/lib/python3.13/copyreg.py
+# code object from '/usr/lib/python3.13/__pycache__/copyreg.cpython-313.pyc'
+import 'copyreg' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abcb90>
+import 're' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c46030>
+# /usr/lib/python3.13/__pycache__/fnmatch.cpython-313.pyc matches /usr/lib/python3.13/fnmatch.py
+# code object from '/usr/lib/python3.13/__pycache__/fnmatch.cpython-313.pyc'
+import 'fnmatch' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224c46390>
+import 'glob' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224bebf50>
+import 'pathlib._abc' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224cfe780>
+# /usr/lib/python3.13/pathlib/__pycache__/_local.cpython-313.pyc matches /usr/lib/python3.13/pathlib/_local.py
+# code object from '/usr/lib/python3.13/pathlib/__pycache__/_local.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/ntpath.cpython-313.pyc matches /usr/lib/python3.13/ntpath.py
+# code object from '/usr/lib/python3.13/__pycache__/ntpath.cpython-313.pyc'
+import 'ntpath' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abde50>
+# /usr/lib/python3.13/__pycache__/warnings.cpython-313.pyc matches /usr/lib/python3.13/warnings.py
+# code object from '/usr/lib/python3.13/__pycache__/warnings.cpython-313.pyc'
+import 'warnings' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224abe570>
+import 'pwd' # <class '_frozen_importlib.BuiltinImporter'>
+import 'grp' # <class '_frozen_importlib.BuiltinImporter'>
+import 'pathlib._local' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224bba990>
+import 'pathlib' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224cfec50>
+# /usr/lib/python3.13/__pycache__/shutil.cpython-313.pyc matches /usr/lib/python3.13/shutil.py
+# code object from '/usr/lib/python3.13/__pycache__/shutil.cpython-313.pyc'
+import 'zlib' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/bz2.cpython-313.pyc matches /usr/lib/python3.13/bz2.py
+# code object from '/usr/lib/python3.13/__pycache__/bz2.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/_compression.cpython-313.pyc matches /usr/lib/python3.13/_compression.py
+# code object from '/usr/lib/python3.13/__pycache__/_compression.cpython-313.pyc'
+import '_compression' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1dbb0>
+# extension module '_bz2' loaded from '/usr/lib/python3.13/lib-dynload/_bz2.cpython-313-x86_64-linux-gnu.so'
+# extension module '_bz2' executed from '/usr/lib/python3.13/lib-dynload/_bz2.cpython-313-x86_64-linux-gnu.so'
+import '_bz2' # <_frozen_importlib_external.ExtensionFileLoader object at 0x7fe224b2c590>
+import 'bz2' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1cbf0>
+# /usr/lib/python3.13/__pycache__/lzma.cpython-313.pyc matches /usr/lib/python3.13/lzma.py
+# code object from '/usr/lib/python3.13/__pycache__/lzma.cpython-313.pyc'
+# extension module '_lzma' loaded from '/usr/lib/python3.13/lib-dynload/_lzma.cpython-313-x86_64-linux-gnu.so'
+# extension module '_lzma' executed from '/usr/lib/python3.13/lib-dynload/_lzma.cpython-313-x86_64-linux-gnu.so'
+import '_lzma' # <_frozen_importlib_external.ExtensionFileLoader object at 0x7fe224b04550>
+import 'lzma' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1d9d0>
+import 'shutil' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224bb80b0>
+# /usr/lib/python3.13/__pycache__/site.cpython-313.pyc matches /usr/lib/python3.13/site.py
+# code object from '/usr/lib/python3.13/__pycache__/site.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/_sitebuiltins.cpython-313.pyc matches /usr/lib/python3.13/_sitebuiltins.py
+# code object from '/usr/lib/python3.13/__pycache__/_sitebuiltins.cpython-313.pyc'
+import '_sitebuiltins' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1eed0>
+import 'site' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1d970>
+# /usr/lib/python3.13/__pycache__/subprocess.cpython-313.pyc matches /usr/lib/python3.13/subprocess.py
+# code object from '/usr/lib/python3.13/__pycache__/subprocess.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/locale.cpython-313.pyc matches /usr/lib/python3.13/locale.py
+# code object from '/usr/lib/python3.13/__pycache__/locale.cpython-313.pyc'
+import '_locale' # <class '_frozen_importlib.BuiltinImporter'>
+import 'locale' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1f8f0>
+# /usr/lib/python3.13/__pycache__/signal.cpython-313.pyc matches /usr/lib/python3.13/signal.py
+# code object from '/usr/lib/python3.13/__pycache__/signal.cpython-313.pyc'
+import 'signal' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1fcb0>
+# /usr/lib/python3.13/__pycache__/threading.cpython-313.pyc matches /usr/lib/python3.13/threading.py
+# code object from '/usr/lib/python3.13/__pycache__/threading.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/_weakrefset.cpython-313.pyc matches /usr/lib/python3.13/_weakrefset.py
+# code object from '/usr/lib/python3.13/__pycache__/_weakrefset.cpython-313.pyc'
+import '_weakrefset' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e5670>
+import 'threading' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e5430>
+import 'fcntl' # <class '_frozen_importlib.BuiltinImporter'>
+import '_posixsubprocess' # <class '_frozen_importlib.BuiltinImporter'>
+import 'select' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/selectors.cpython-313.pyc matches /usr/lib/python3.13/selectors.py
+# code object from '/usr/lib/python3.13/__pycache__/selectors.cpython-313.pyc'
+import 'math' # <class '_frozen_importlib.BuiltinImporter'>
+import 'selectors' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e5df0>
+import 'subprocess' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1edb0>
+# /usr/lib/python3.13/sysconfig/__pycache__/__init__.cpython-313.pyc matches /usr/lib/python3.13/sysconfig/__init__.py
+# code object from '/usr/lib/python3.13/sysconfig/__pycache__/__init__.cpython-313.pyc'
+import 'sysconfig' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe224b1f890>
+# /usr/lib/python3.13/__pycache__/tempfile.cpython-313.pyc matches /usr/lib/python3.13/tempfile.py
+# code object from '/usr/lib/python3.13/__pycache__/tempfile.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/random.cpython-313.pyc matches /usr/lib/python3.13/random.py
+# code object from '/usr/lib/python3.13/__pycache__/random.cpython-313.pyc'
+# /usr/lib/python3.13/__pycache__/bisect.cpython-313.pyc matches /usr/lib/python3.13/bisect.py
+# code object from '/usr/lib/python3.13/__pycache__/bisect.cpython-313.pyc'
+import '_bisect' # <class '_frozen_importlib.BuiltinImporter'>
+import 'bisect' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e7c50>
+import '_random' # <class '_frozen_importlib.BuiltinImporter'>
+import 'random' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e7890>
+# /usr/lib/python3.13/__pycache__/weakref.cpython-313.pyc matches /usr/lib/python3.13/weakref.py
+# code object from '/usr/lib/python3.13/__pycache__/weakref.cpython-313.pyc'
+import 'weakref' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e7a10>
+import 'tempfile' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e74d0>
+import 'unicodedata' # <class '_frozen_importlib.BuiltinImporter'>
+# /usr/lib/python3.13/__pycache__/_sysconfigdata__x86_64-linux-gnu.cpython-313.pyc matches /usr/lib/python3.13/_sysconfigdata__x86_64-linux-gnu.py
+# code object from '/usr/lib/python3.13/__pycache__/_sysconfigdata__x86_64-linux-gnu.cpython-313.pyc'
+import '_sysconfigdata__x86_64-linux-gnu' # <_frozen_importlib_external.SourceFileLoader object at 0x7fe2248e7d70>
+import 'atexit' # <class '_frozen_importlib.BuiltinImporter'>
+TIỀN KIỂM: DỪNG
+  KHÔNG ĐO ĐƯỢC: PyYAML vắng; phải nằm trong stdlib hay site-packages của trình thông dịch, ngoài clone, cwd và thư mục script
+# clear sys.path_importer_cache
+# clear sys.path_hooks
+# clear builtins._
+# clear sys.path
+# clear sys.argv
+# clear sys.ps1
+# clear sys.ps2
+# clear sys.last_exc
+# clear sys.last_type
+# clear sys.last_value
+# clear sys.last_traceback
+# clear sys.__interactivehook__
+# clear sys.meta_path
+# restore sys.stdin
+# restore sys.stdout
+# restore sys.stderr
+# cleanup[2] removing sys
+# cleanup[2] removing builtins
+# cleanup[2] removing _frozen_importlib
+# cleanup[2] removing _imp
+# cleanup[2] removing _thread
+# cleanup[2] removing _warnings
+# cleanup[2] removing _weakref
+# cleanup[2] removing _io
+# cleanup[2] removing marshal
+# cleanup[2] removing posix
+# cleanup[2] removing _frozen_importlib_external
+# cleanup[2] removing time
+# cleanup[2] removing zipimport
+# destroy zipimport
+# cleanup[2] removing _codecs
+# cleanup[2] removing codecs
+# cleanup[2] removing encodings.aliases
+# cleanup[2] removing encodings
+# cleanup[2] removing encodings.utf_8
+# cleanup[2] removing _signal
+# cleanup[2] removing _abc
+# cleanup[2] removing abc
+# cleanup[2] removing io
+# cleanup[2] removing __main__
+# destroy __main__
+# cleanup[2] removing _stat
+# cleanup[2] removing stat
+# cleanup[2] removing _collections_abc
+# cleanup[2] removing errno
+# cleanup[2] removing genericpath
+# cleanup[2] removing posixpath
+# cleanup[2] removing os.path
+# cleanup[2] removing os
+# cleanup[2] removing _datetime
+# cleanup[2] removing datetime
+# cleanup[2] removing importlib._bootstrap
+# cleanup[2] removing importlib._bootstrap_external
+# cleanup[2] removing importlib
+# cleanup[2] removing importlib._abc
+# cleanup[2] removing types
+# cleanup[2] removing importlib.util
+# cleanup[2] removing collections.abc
+# cleanup[2] removing itertools
+# cleanup[2] removing keyword
+# destroy keyword
+# cleanup[2] removing _operator
+# cleanup[2] removing operator
+# cleanup[2] removing reprlib
+# destroy reprlib
+# cleanup[2] removing _collections
+# cleanup[2] removing collections
+# cleanup[2] removing _functools
+# cleanup[2] removing functools
+# cleanup[2] removing contextlib
+# cleanup[2] removing enum
+# cleanup[2] removing _sre
+# cleanup[2] removing re._constants
+# cleanup[2] removing re._parser
+# cleanup[2] removing re._casefix
+# cleanup[2] removing re._compiler
+# cleanup[2] removing copyreg
+# cleanup[2] removing re
+# cleanup[2] removing fnmatch
+# cleanup[2] removing glob
+# destroy glob
+# cleanup[2] removing pathlib._abc
+# cleanup[2] removing ntpath
+# cleanup[2] removing warnings
+# cleanup[2] removing pwd
+# cleanup[2] removing grp
+# cleanup[2] removing pathlib._local
+# cleanup[2] removing pathlib
+# cleanup[2] removing zlib
+# cleanup[2] removing _compression
+# cleanup[2] removing _bz2
+# cleanup[2] removing bz2
+# destroy bz2
+# cleanup[2] removing _lzma
+# cleanup[2] removing lzma
+# destroy lzma
+# cleanup[2] removing shutil
+# cleanup[2] removing _sitebuiltins
+# cleanup[2] removing site
+# cleanup[2] removing _locale
+# cleanup[2] removing locale
+# cleanup[2] removing signal
+# cleanup[2] removing _weakrefset
+# destroy _weakrefset
+# cleanup[2] removing threading
+# cleanup[2] removing fcntl
+# cleanup[2] removing _posixsubprocess
+# cleanup[2] removing select
+# cleanup[2] removing math
+# cleanup[2] removing selectors
+# cleanup[2] removing subprocess
+# cleanup[2] removing sysconfig
+# cleanup[2] removing _bisect
+# cleanup[2] removing bisect
+# destroy bisect
+# cleanup[2] removing _random
+# cleanup[2] removing random
+# destroy random
+# cleanup[2] removing weakref
+# cleanup[2] removing tempfile
+# cleanup[2] removing unicodedata
+# cleanup[2] removing _sysconfigdata__x86_64-linux-gnu
+# destroy _sysconfigdata__x86_64-linux-gnu
+# cleanup[2] removing atexit
+# destroy _datetime
+# destroy pathlib._abc
+# destroy pathlib._local
+# destroy importlib._abc
+# destroy importlib.util
+# destroy enum
+# destroy re._constants
+# destroy re._casefix
+# destroy re._compiler
+# destroy copyreg
+# destroy _sre
+# destroy re._parser
+# destroy zlib
+# destroy _bz2
+# destroy operator
+# destroy pwd
+# destroy grp
+# destroy fnmatch
+# destroy collections
+# destroy _lzma
+# destroy _compression
+# destroy _sitebuiltins
+# destroy encodings
+# destroy _locale
+# destroy _signal
+# destroy atexit
+# destroy datetime
+# destroy importlib
+# destroy pathlib
+# destroy re
+# destroy site
+# destroy subprocess
+# destroy sysconfig
+# destroy tempfile
+# destroy unicodedata
+# destroy _functools
+# destroy locale
+# destroy signal
+# destroy threading
+# destroy contextlib
+# destroy fcntl
+# destroy _posixsubprocess
+# destroy selectors
+# destroy ntpath
+# destroy functools
+# destroy io
+# destroy shutil
+# destroy types
+# destroy weakref
+# destroy _collections_abc
+# destroy select
+# cleanup[3] wiping _random
+# cleanup[3] wiping _bisect
+# cleanup[3] wiping math
+# cleanup[3] wiping warnings
+# cleanup[3] wiping _collections
+# cleanup[3] wiping _operator
+# cleanup[3] wiping itertools
+# cleanup[3] wiping importlib._bootstrap_external
+# cleanup[3] wiping importlib._bootstrap
+# destroy _frozen_importlib_external
+# cleanup[3] wiping os
+# destroy abc
+# destroy posixpath
+# cleanup[3] wiping genericpath
+# cleanup[3] wiping errno
+# cleanup[3] wiping stat
+# cleanup[3] wiping _stat
+# destroy _stat
+# cleanup[3] wiping _abc
+# cleanup[3] wiping encodings.utf_8
+# cleanup[3] wiping encodings.aliases
+# cleanup[3] wiping codecs
+# cleanup[3] wiping _codecs
+# cleanup[3] wiping time
+# cleanup[3] wiping posix
+# cleanup[3] wiping marshal
+# destroy marshal
+# cleanup[3] wiping _io
+# cleanup[3] wiping _weakref
+# destroy _weakref
+# cleanup[3] wiping _warnings
+# destroy _warnings
+# cleanup[3] wiping _thread
+# cleanup[3] wiping _imp
+# destroy _imp
+# cleanup[3] wiping _frozen_importlib
+# cleanup[3] wiping sys
+# cleanup[3] wiping builtins
+# destroy sys.monitoring
+# destroy errno
+# destroy stat
+# destroy genericpath
+# clear sys.meta_path
+# clear sys.modules
+# destroy _frozen_importlib
+# destroy codecs
+# destroy encodings.aliases
+# destroy encodings.utf_8
+# destroy warnings
+# destroy time
+# destroy math
+# destroy _bisect
+# destroy os
+# destroy _random
+# destroy _thread
+# destroy builtins
+# destroy itertools
+# destroy _collections
+# destroy posix
+# destroy _operator
+# destroy sys
+# destroy _codecs
+# destroy _abc
+# destroy _io
+# clear sys.audit hooks

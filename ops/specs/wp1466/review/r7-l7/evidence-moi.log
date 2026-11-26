@@ -1,0 +1,52 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/prototype/.claude/dev/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+CA MOI 57 HO CU 132 CASES 1639 TEN KHAC NHAU 1639 MUTANTS 1890
+DOT BIEN MOI 26
+nền: 60/60 đạt · BỎ QUA: 0
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+  ok  inv_bo_kiem_duoi_goc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_che_khong_render → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_chan_html → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_kiem_mot_muc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_dia_chi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_hien_o_dia_chi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_kiem_duy_nhat → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_duy_nhat_lech_so → giết 5 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_dem_ban_ca_vung_che → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_doc_qua_text → giết 9 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_tach_dong_splitlines → giết 8 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_cat_cuoi_muc → giết 5 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_dong_trang_la_khoang_trang → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_khoi_rong_tinh_la_khoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_kiem_id_ngoai → giết 6 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_id_chi_dang_chuan → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_id_khong_chuan_hoa → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_doctrine_scan_bo_goi → giết 52 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K01 → giết 8 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K02 → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K03 → giết 6 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K04 → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K05 → giết 9 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K06 → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K07 → giết 3 ca đích · 3 đối chứng khác họ còn sống
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/tmp/regression/moi/packet_loop_test_o92rqa7l/mut_c04b5dc35cac52f2/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  t1466_fixture_ve_trung_tinh → giết 2 ca đích · 3 đối chứng khác họ còn sống
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 37 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1638
+  đột biến         : 1890
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+KET QUA manh.chay: (0, 60, False, 25) giay 268

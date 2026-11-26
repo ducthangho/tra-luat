@@ -1,0 +1,2749 @@
+{
+  "total_count": 22,
+  "jobs": [
+    {
+      "id": 139480220712,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatEKA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480220712",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480220712",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T21:02:07Z",
+      "name": "dot-bien-du",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Force LF checkout (hash parity với manifest)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:36Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:36Z",
+          "completed_at": "2026-11-25T20:09:36Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:09:36Z",
+          "completed_at": "2026-11-25T20:09:38Z"
+        },
+        {
+          "name": "cài actionlint cho G5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T20:09:38Z",
+          "completed_at": "2026-11-25T20:09:38Z"
+        },
+        {
+          "name": "cài shellcheck cho G5 (cài xong đo lại)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T20:09:38Z",
+          "completed_at": "2026-11-25T20:09:41Z"
+        },
+        {
+          "name": "cài rg cho G5 (cài xong đo lại)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-25T20:09:41Z",
+          "completed_at": "2026-11-25T20:09:45Z"
+        },
+        {
+          "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-25T20:09:45Z",
+          "completed_at": "2026-11-25T20:09:46Z"
+        },
+        {
+          "name": "cài Ruff 0.15.15 và in probe dương",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-25T20:09:46Z",
+          "completed_at": "2026-11-25T20:09:47Z"
+        },
+        {
+          "name": "test registry (phạm vi + các bộ chưa được nối)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-25T20:09:47Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480220712",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062246,
+      "runner_name": "GitHub Actions 1000062246",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221096,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatFqA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221096",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221096",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:33:35Z",
+      "name": "dot-bien-manh (7)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:33:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:33:31Z",
+          "completed_at": "2026-11-25T20:33:32Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:33:32Z",
+          "completed_at": "2026-11-25T20:33:32Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:33:32Z",
+          "completed_at": "2026-11-25T20:33:33Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:33:33Z",
+          "completed_at": "2026-11-25T20:33:33Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221096",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062247,
+      "runner_name": "GitHub Actions 1000062247",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221277,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatGXQ",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221277",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221277",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:37Z",
+      "name": "dot-bien-manh (4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:34Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:34Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221277",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062248,
+      "runner_name": "GitHub Actions 1000062248",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221292,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatGbA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221292",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221292",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:37:33Z",
+      "name": "dot-bien-manh (1)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:37:30Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:30Z",
+          "completed_at": "2026-11-25T20:37:30Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:37:30Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:37:31Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:37:31Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221292",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062249,
+      "runner_name": "GitHub Actions 1000062249",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221319,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatGhw",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221319",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221319",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:37:28Z",
+      "name": "dot-bien-manh (5)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:37:23Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:23Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221319",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062251,
+      "runner_name": "GitHub Actions 1000062251",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221359,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatGrw",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221359",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221359",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:41Z",
+      "name": "dot-bien-manh (6)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:25Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:25Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:38Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:38Z",
+          "completed_at": "2026-11-25T20:34:39Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:39Z",
+          "completed_at": "2026-11-25T20:34:39Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:39Z",
+          "completed_at": "2026-11-25T20:34:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:40Z",
+          "completed_at": "2026-11-25T20:34:40Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221359",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062252,
+      "runner_name": "GitHub Actions 1000062252",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221405,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatG3Q",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221405",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221405",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:56Z",
+      "name": "dot-bien-manh (3)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:34:52Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:52Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221405",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062253,
+      "runner_name": "GitHub Actions 1000062253",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221425,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatG8Q",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221425",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221425",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:36:14Z",
+      "name": "dot-bien-manh (2)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:36:10Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:36:10Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221425",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062250,
+      "runner_name": "GitHub Actions 1000062250",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139480221462,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgeatHFg",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139480221462",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139480221462",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:09:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:46Z",
+      "name": "dot-bien-manh (0)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:43Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:43Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139480221462",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062254,
+      "runner_name": "GitHub Actions 1000062254",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139495997112,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAgepv-uA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139495997112",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139495997112",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T20:37:33Z",
+      "started_at": "2026-11-25T20:37:35Z",
+      "completed_at": "2026-11-25T20:37:49Z",
+      "name": "dot-bien-gop",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:37:35Z",
+          "completed_at": "2026-11-25T20:37:37Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:37:37Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:43Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:37:43Z",
+          "completed_at": "2026-11-25T20:37:43Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:37:43Z",
+          "completed_at": "2026-11-25T20:37:45Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:45Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "biên nhận mảnh phải đủ, đúng SHA sự kiện, job mảnh success (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "gom mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-25T20:37:47Z",
+          "completed_at": "2026-11-25T20:37:47Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139495997112",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062318,
+      "runner_name": "GitHub Actions 1000062318",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509227364,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAge2XfZA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509227364",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509227364",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-25T21:02:07Z",
+      "started_at": "2026-11-25T21:02:09Z",
+      "completed_at": "2026-11-25T21:02:27Z",
+      "name": "bien-nhan-audit",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T21:02:10Z",
+          "completed_at": "2026-11-25T21:02:11Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T21:02:11Z",
+          "completed_at": "2026-11-25T21:02:17Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T21:02:17Z",
+          "completed_at": "2026-11-25T21:02:17Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T21:02:17Z",
+          "completed_at": "2026-11-25T21:02:17Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T21:02:17Z",
+          "completed_at": "2026-11-25T21:02:18Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T21:02:18Z",
+          "completed_at": "2026-11-25T21:02:18Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T21:02:18Z",
+          "completed_at": "2026-11-25T21:02:20Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T21:02:20Z",
+          "completed_at": "2026-11-25T21:02:21Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T21:02:21Z",
+          "completed_at": "2026-11-25T21:02:22Z"
+        },
+        {
+          "name": "REST của lượt (wp1460; mỗi điểm ghi .json hoặc .loi, không dừng giữa chừng)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T21:02:22Z",
+          "completed_at": "2026-11-25T21:02:24Z"
+        },
+        {
+          "name": "thu biên nhận audit (wp1460)",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 11,
+          "started_at": "2026-11-25T21:02:24Z",
+          "completed_at": "2026-11-25T21:02:24Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-25T21:02:24Z",
+          "completed_at": "2026-11-25T21:02:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 23,
+          "started_at": "2026-11-25T21:02:25Z",
+          "completed_at": "2026-11-25T21:02:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-25T21:02:25Z",
+          "completed_at": "2026-11-25T21:02:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-25T21:02:25Z",
+          "completed_at": "2026-11-25T21:02:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509227364",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062399,
+      "runner_name": "GitHub Actions 1000062399",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509805461,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge26xlQ",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509805461",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509805461",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:46Z",
+      "name": "dot-bien-manh (0)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:43Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:43Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:44Z",
+          "completed_at": "2026-11-25T20:34:44Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509805461",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062254,
+      "runner_name": "GitHub Actions 1000062254",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509806254,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge260rg",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509806254",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509806254",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T21:02:07Z",
+      "name": "dot-bien-du",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Force LF checkout (hash parity với manifest)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:34Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:34Z",
+          "completed_at": "2026-11-25T20:09:36Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:36Z",
+          "completed_at": "2026-11-25T20:09:36Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:09:36Z",
+          "completed_at": "2026-11-25T20:09:38Z"
+        },
+        {
+          "name": "cài actionlint cho G5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T20:09:38Z",
+          "completed_at": "2026-11-25T20:09:38Z"
+        },
+        {
+          "name": "cài shellcheck cho G5 (cài xong đo lại)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T20:09:38Z",
+          "completed_at": "2026-11-25T20:09:41Z"
+        },
+        {
+          "name": "cài rg cho G5 (cài xong đo lại)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-25T20:09:41Z",
+          "completed_at": "2026-11-25T20:09:45Z"
+        },
+        {
+          "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-25T20:09:45Z",
+          "completed_at": "2026-11-25T20:09:46Z"
+        },
+        {
+          "name": "cài Ruff 0.15.15 và in probe dương",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-25T20:09:46Z",
+          "completed_at": "2026-11-25T20:09:47Z"
+        },
+        {
+          "name": "test registry (phạm vi + các bộ chưa được nối)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-25T20:09:47Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-11-25T21:02:04Z",
+          "completed_at": "2026-11-25T21:02:04Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509806254",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062246,
+      "runner_name": "GitHub Actions 1000062246",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509806397,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge261PQ",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509806397",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509806397",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T21:03:13Z",
+      "completed_at": "2026-11-25T21:03:31Z",
+      "name": "bien-nhan-audit",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T21:03:13Z",
+          "completed_at": "2026-11-25T21:03:14Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T21:03:14Z",
+          "completed_at": "2026-11-25T21:03:20Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T21:03:20Z",
+          "completed_at": "2026-11-25T21:03:20Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T21:03:20Z",
+          "completed_at": "2026-11-25T21:03:20Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T21:03:20Z",
+          "completed_at": "2026-11-25T21:03:21Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T21:03:21Z",
+          "completed_at": "2026-11-25T21:03:21Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T21:03:21Z",
+          "completed_at": "2026-11-25T21:03:24Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T21:03:24Z",
+          "completed_at": "2026-11-25T21:03:25Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T21:03:25Z",
+          "completed_at": "2026-11-25T21:03:25Z"
+        },
+        {
+          "name": "REST của lượt (wp1460; mỗi điểm ghi .json hoặc .loi, không dừng giữa chừng)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T21:03:25Z",
+          "completed_at": "2026-11-25T21:03:29Z"
+        },
+        {
+          "name": "thu biên nhận audit (wp1460)",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 11,
+          "started_at": "2026-11-25T21:03:29Z",
+          "completed_at": "2026-11-25T21:03:29Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-25T21:03:29Z",
+          "completed_at": "2026-11-25T21:03:30Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 23,
+          "started_at": "2026-11-25T21:03:30Z",
+          "completed_at": "2026-11-25T21:03:30Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-25T21:03:30Z",
+          "completed_at": "2026-11-25T21:03:30Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-25T21:03:30Z",
+          "completed_at": "2026-11-25T21:03:30Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509806397",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062400,
+      "runner_name": "GitHub Actions 1000062400",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509806736,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge262kA",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509806736",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509806736",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:37:28Z",
+      "name": "dot-bien-manh (5)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:37:23Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:23Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:37:25Z",
+          "completed_at": "2026-11-25T20:37:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509806736",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062251,
+      "runner_name": "GitHub Actions 1000062251",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509807612,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge265_A",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509807612",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509807612",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:33:35Z",
+      "name": "dot-bien-manh (7)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:33:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:33:31Z",
+          "completed_at": "2026-11-25T20:33:32Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:33:32Z",
+          "completed_at": "2026-11-25T20:33:32Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:33:32Z",
+          "completed_at": "2026-11-25T20:33:33Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:33:33Z",
+          "completed_at": "2026-11-25T20:33:33Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509807612",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062247,
+      "runner_name": "GitHub Actions 1000062247",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509808679,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge26-Jw",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509808679",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509808679",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:11Z",
+      "started_at": "2026-11-25T20:37:35Z",
+      "completed_at": "2026-11-25T20:37:49Z",
+      "name": "dot-bien-gop",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:37:35Z",
+          "completed_at": "2026-11-25T20:37:37Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:37:37Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:42Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:37:42Z",
+          "completed_at": "2026-11-25T20:37:43Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:37:43Z",
+          "completed_at": "2026-11-25T20:37:43Z"
+        },
+        {
+          "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:37:43Z",
+          "completed_at": "2026-11-25T20:37:45Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:45Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "biên nhận mảnh phải đủ, đúng SHA sự kiện, job mảnh success (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "gom mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-25T20:37:46Z",
+          "completed_at": "2026-11-25T20:37:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-25T20:37:47Z",
+          "completed_at": "2026-11-25T20:37:47Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509808679",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062318,
+      "runner_name": "GitHub Actions 1000062318",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509863306,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge2-Tig",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509863306",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509863306",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:16Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:36:14Z",
+      "name": "dot-bien-manh (2)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:22Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:36:10Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:36:10Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:36:11Z",
+          "completed_at": "2026-11-25T20:36:11Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509863306",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062250,
+      "runner_name": "GitHub Actions 1000062250",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509875164,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge2_B3A",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509875164",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509875164",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:18Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:56Z",
+      "name": "dot-bien-manh (3)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:34:52Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:52Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:53Z",
+          "completed_at": "2026-11-25T20:34:53Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509875164",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062253,
+      "runner_name": "GitHub Actions 1000062253",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509888435,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge2_1sw",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509888435",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509888435",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:19Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:41Z",
+      "name": "dot-bien-manh (6)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:25Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:25Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:38Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:38Z",
+          "completed_at": "2026-11-25T20:34:39Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:39Z",
+          "completed_at": "2026-11-25T20:34:39Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:39Z",
+          "completed_at": "2026-11-25T20:34:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:40Z",
+          "completed_at": "2026-11-25T20:34:40Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509888435",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062252,
+      "runner_name": "GitHub Actions 1000062252",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509896250,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge3AUOg",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509896250",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509896250",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:20Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:34:37Z",
+      "name": "dot-bien-manh (4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:34:34Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:34:34Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:34:35Z",
+          "completed_at": "2026-11-25T20:34:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509896250",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062248,
+      "runner_name": "GitHub Actions 1000062248",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 139509898563,
+      "run_id": 45692182836,
+      "workflow_name": "đột biến đủ (hằng tuần)",
+      "head_branch": "agent/wp1494-r5-g5-fable",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/45692182836",
+      "run_attempt": 2,
+      "node_id": "CR_kwDOTNeRjc8AAAAge3AdQw",
+      "head_sha": "6ffb936e465c36ceba774442d8252f81a8f4ff7d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/139509898563",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/45692182836/job/139509898563",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-25T21:03:21Z",
+      "started_at": "2026-11-25T20:09:20Z",
+      "completed_at": "2026-11-25T20:37:33Z",
+      "name": "dot-bien-manh (1)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-25T20:09:20Z",
+          "completed_at": "2026-11-25T20:09:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-25T20:09:21Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "checkout phải đúng SHA sự kiện (wp1166)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:26Z"
+        },
+        {
+          "name": "dấu job (wp1460)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-25T20:09:26Z",
+          "completed_at": "2026-11-25T20:09:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-25T20:09:27Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:09:28Z"
+        },
+        {
+          "name": "đột biến một mảnh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-25T20:09:28Z",
+          "completed_at": "2026-11-25T20:37:30Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-25T20:37:30Z",
+          "completed_at": "2026-11-25T20:37:30Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-25T20:37:30Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-25T20:37:31Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-25T20:37:31Z",
+          "completed_at": "2026-11-25T20:37:31Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/139509898563",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000062249,
+      "runner_name": "GitHub Actions 1000062249",
+      "runner_group_id": null,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

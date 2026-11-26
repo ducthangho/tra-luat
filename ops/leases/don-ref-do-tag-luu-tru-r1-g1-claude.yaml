@@ -1,0 +1,65 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1532
+packet_id: DON-REF-DO-TAG-LUU-TRU
+revision: 1
+generation: 1
+lease_id: don-ref-do-tag-luu-tru-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+pham_vi_e: 'cham E5 (ADR-0067): sua luat cua ops-don-ref.yml; chu kho da duyet bam dac ta (issuecomment-7171755446).'
+reviewed_sha_required: c289a17389d71358466680ae98efcc66a54d904f
+reviewed_sha_required_nghia: 'chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+spec_path: ops/specs/don-ref-do-tag-luu-tru-r1.md
+spec_hash: 7ae7733c3adf8cba87ddc7f2d8b85af215f20a5a92b5d90c241733fe2198e160
+spec_ref: refs/heads/ops/don-ref-do-tag-luu-tru-spec@9836bf89fa55a0803be840da8922e2b1c31af1c5
+spec_approval: https://github.com/ducthangho/tra-luat/issues/1532#issuecomment-7171755446
+write_set:
+- .github/workflows/ops-don-ref.yml
+- CLAUDE.md
+- ops/acceptance/don-ref-do-tag-luu-tru/r1/VERDICT.md
+- ops/don_ref_chot_test.sh
+- ops/leases/don-ref-do-tag-luu-tru-r1-g1-claude.yaml
+- ops/specs/don-ref-do-tag-luu-tru-r1.md
+write_set_hash: 16160aff4deb2dae3f1d95322a27ad76a6beb4f8af065c3de492dc48c618c4d7
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'CLAUDE.md CHI muc "Day ref tu phien Claude Code tren web" (muc tieu 7 cua dac ta).'
+branch: agent/don-ref-do-tag-luu-tru-g1-claude
+branch_ownership: exclusive
+base_sha: c289a17389d71358466680ae98efcc66a54d904f
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 25-11-2026 trong phien session_015GtxrcJ94fBLh2n3he2BcS: "cấp lease và bắt đầu đi" (sau khi duyet bam tai issuecomment-7171755446).'
+recorded_by: 'phien session_015GtxrcJ94fBLh2n3he2BcS'
+recorder_is_executor: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-25T19:06:02Z'
+  goc_quet: 'origin/master c289a17; fetch +refs/heads/*; ls-remote so TAP ten voi for-each-ref: thieu 0; nhanh cuc bo tut sau da fast-forward truoc khi quet'
+  ket_qua: 'ca 3 duong dan code (ops-don-ref.yml, don_ref_chot_test.sh, CLAUDE.md): NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc.'
+leased_at_utc: '2026-11-25T19:06:02Z'
+heartbeat_at: '2026-11-25T20:28:52Z'
+lease_until: '2026-11-25T20:28:52Z'
+lease_expires_at_utc: '2026-11-25T20:28:52Z'
+max_lease_hours: 8
+review_calls_limit: 10
+review_calls_basis: 'ADR-0055 (dong khai tran_loi_goi_codex trong dac ta).'
+inference_calls_limit: 0
+nang_tran: []
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land do chu kho.'
+push_policy: 'ADR-0060 M5/M12: chi day nhanh thi cong sau khi review offline approve va verdict da dang len Issue #1532; mo PR draft.'
+withdrawn_at_utc: '2026-11-25T20:28:52Z'
+withdrawn_by: 'phien session_015GtxrcJ94fBLh2n3he2BcS (chu kho duyet thu hoi 25-11-2026)'
+withdrawn_reason: 'packet land: PR #1537 merge 2026-11-25T20:28:52Z boi ducthangho, merge commit c4d707e2a3b513f57467f1f396f018d5c0c13620. Cross-review Codex offline 4/10 loi goi, luot 4 approve, 0 finding mo (ops/acceptance/don-ref-do-tag-luu-tru/r1/VERDICT.md); connector Codex tren b6c825f khong finding; CI 41/41. Kiem sau land: run 45695408308 thu kho ops/wp1475-r1-g1-lease => cho phep. Han cu 2026-11-26T03:06:02Z.'

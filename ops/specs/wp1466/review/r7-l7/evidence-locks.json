@@ -1,0 +1,79 @@
+{
+ "K01": {
+  "duong": "b1bf0e6593f0ee411de10da15913f372e31eae598f0667f5a0b614ceb84b8274",
+  "thu_tu": 0,
+  "bam": "607431f20721e3700adb72ba501b5220cab4e2ff96864ff8bbe9094bb4740531",
+  "dong": [
+   49,
+   82
+  ],
+  "hien": true,
+  "tieu_de": "### 1.1 Bảng bất biến protocol"
+ },
+ "K02": {
+  "duong": "378875000caedbfb13ee65bb8c5eae1786e3905b7deaf58b14350200595ccfa7",
+  "thu_tu": 3,
+  "bam": "e67103c29f0a0fea824a4089291008044aad3ed9e8bc93b8fbaa5fa0398dad0a",
+  "dong": [
+   31,
+   47
+  ],
+  "hien": true,
+  "tieu_de": "## 1. Mục tiêu và bất biến"
+ },
+ "K03": {
+  "duong": "919d5bc058fbba64ee8f10647c2b201de7f7aec4b78db5b24e8b694ce1d01d83",
+  "thu_tu": 0,
+  "bam": "22716893ace46188ae892ee1f58ac2acad8bdd731dbaaeeafed9bc9f2d5b71df",
+  "dong": [
+   851,
+   894
+  ],
+  "hien": true,
+  "tieu_de": "### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu"
+ },
+ "K04": {
+  "duong": "1ffd90f8e0a0a65de259727b151c9629b38fa20bf1e6fc00266eb81addeb7206",
+  "thu_tu": 12,
+  "bam": "6faf0af7b34cd8e8a5b4033a3efbd6c5b8a003d68e624e5e9290b4b289a1ee73",
+  "dong": [
+   747,
+   751
+  ],
+  "hien": true,
+  "tieu_de": "## 8. Review phân tầng"
+ },
+ "K05": {
+  "duong": "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70",
+  "thu_tu": 8,
+  "bam": "31820977356049aac3c810dbf26933fd93ee491e9f3bfda0ad875a81289776b9",
+  "dong": [
+   1170,
+   1176
+  ],
+  "hien": true,
+  "tieu_de": "## 12. Stop conditions và budget"
+ },
+ "K06": {
+  "duong": "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70",
+  "thu_tu": 9,
+  "bam": "8e35ce2dc3bb5cac3dbd9855d35bc80a558b47bce8cafaaeff3de9a9ba0a9f51",
+  "dong": [
+   1178,
+   1183
+  ],
+  "hien": true,
+  "tieu_de": "## 12. Stop conditions và budget"
+ },
+ "K07": {
+  "duong": "a269e3af7b2d36a8183d16c912c5ddbcfae33e923d3b2d45cbd888b59b362b70",
+  "thu_tu": 10,
+  "bam": "3188510c14bb84bb6cc4a881e2bd190e01bc863f55a869b12adcfb884f9671ef",
+  "dong": [
+   1185,
+   1188
+  ],
+  "hien": true,
+  "tieu_de": "## 12. Stop conditions và budget"
+ }
+}

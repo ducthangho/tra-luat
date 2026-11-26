@@ -1,0 +1,24 @@
+policy 3A_BASE f1f3c931339b753f82399ca3e96eb425b845f303 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+policy_3E_before_master_change rc 0 base f1f3c931339b753f82399ca3e96eb425b845f303 = f1f3c931339b · master V = f1f3c931339b · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+policy PAIRS_EQUAL_BEFORE_3E True
+policy_3E_old_B_after_master_change rc 1 base f1f3c931339b753f82399ca3e96eb425b845f303 = f1f3c931339b · master V = ed96476861ce · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1+1 · 136 module | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate theo §5 (revision đặc tả) |   policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate theo §5 (revision đặc tả)
+policy_3E_current_master_after_master_change rc 1 base origin/master = ed96476861ce · master V = ed96476861ce · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1+0 · 136 module | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/change-impact.v1.json'] — re-evaluate theo §5 (revision đặc tả)
+schema 3A_BASE 2503b8444908e30cb7552b3b4397a2a96a807ab1 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+schema_3E_before_master_change rc 0 base 2503b8444908e30cb7552b3b4397a2a96a807ab1 = 2503b8444908 · master V = 2503b8444908 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+schema PAIRS_EQUAL_BEFORE_3E True
+schema_3E_old_B_after_master_change rc 1 base 2503b8444908e30cb7552b3b4397a2a96a807ab1 = 2503b8444908 · master V = c80a263b5a04 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1+1 · 136 module | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/schemas/change-impact.v1.schema.json'] — re-evaluate theo §5 (revision đặc tả) |   policy change-impact đổi giữa B và master của ảnh chụp: ['.github/coordination/schemas/change-impact.v1.schema.json'] — re-evaluate theo §5 (revision đặc tả)
+schema_3E_current_master_after_master_change rc 1 base origin/master = c80a263b5a04 · master V = c80a263b5a04 · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 1+0 · 136 module | TIỀN KIỂM: DỪNG |   policy change-impact có mặt trên master của ảnh chụp: ['.github/coordination/schemas/change-impact.v1.schema.json'] — re-evaluate theo §5 (revision đặc tả)
+irrelevant 3A_BASE e73bc791312b87f31ee4b6c6df151a12b20ae7c0 3D_INITIAL_RC 0 TIỀN KIỂM: ĐẠT
+irrelevant_3E_before_master_change rc 0 base e73bc791312b87f31ee4b6c6df151a12b20ae7c0 = e73bc791312b · master V = e73bc791312b · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+irrelevant PAIRS_EQUAL_BEFORE_3E True
+irrelevant_3E_old_B_after_master_change rc 0 base e73bc791312b87f31ee4b6c6df151a12b20ae7c0 = e73bc791312b · master V = e04760d22d7f · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+irrelevant_3E_current_master_after_master_change rc 0 base origin/master = e04760d22d7f · master V = e04760d22d7f · 2 nhánh máy chủ = 2 ref kho tạm · 1 bản ghi lease · 1 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+imports_clean_local_script rc 0 base origin/master = e68fa65c8482 · master V = e68fa65c8482 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+imports_clean_local_script LOCAL_DEPENDENCY False TRACE []
+imports_clean_local_script_isolated rc 0 base origin/master = e68fa65c8482 · master V = e68fa65c8482 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+imports_clean_local_script_isolated LOCAL_DEPENDENCY False TRACE []
+imports_clean_external_pythonpath rc 0 base origin/master = e68fa65c8482 · master V = e68fa65c8482 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+imports_clean_external_pythonpath LOCAL_DEPENDENCY False TRACE []
+imports_clean_external_pythonpath_isolated rc 0 base origin/master = e68fa65c8482 · master V = e68fa65c8482 · 1 nhánh máy chủ = 1 ref kho tạm · 0 bản ghi lease · 0 còn hiệu lực · 0 liên kết tượng trưng · policy 0+0 · 136 module | TIỀN KIỂM: ĐẠT
+imports_clean_external_pythonpath_isolated LOCAL_DEPENDENCY False TRACE []
+ALTERNATES_REFSET_EXACT True REF_COUNT 2 PRIVATE_OBJECT_READABLE commit PRIVATE_REF_VISIBLE False

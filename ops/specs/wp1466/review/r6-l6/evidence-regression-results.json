@@ -1,0 +1,196 @@
+[
+  {
+    "name": "locks",
+    "rc": 0,
+    "utc": "2026-11-21T04:18:51.010235+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/khoa_tu_tinh.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype/docs/PROTOCOL_DA_PHIEN.md",
+      "--json",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/locks.json"
+    ]
+  },
+  {
+    "name": "bytes",
+    "rc": 0,
+    "utc": "2026-11-21T04:18:51.056156+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/probes_r5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/locks.json",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/bytes"
+    ]
+  },
+  {
+    "name": "n8-ma",
+    "rc": 0,
+    "utc": "2026-11-21T04:18:51.057156+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/thu_pv5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out",
+      "ma",
+      "2"
+    ]
+  },
+  {
+    "name": "n8-test",
+    "rc": 0,
+    "utc": "2026-11-21T04:18:51.058170+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/thu_pv5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out",
+      "test",
+      "2"
+    ]
+  },
+  {
+    "name": "registry",
+    "rc": 0,
+    "utc": "2026-11-21T04:19:55.748475+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/so_dang_ky.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype"
+    ]
+  },
+  {
+    "name": "ca",
+    "rc": 0,
+    "utc": "2026-11-21T04:20:05.298814+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/chay5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/regression",
+      "ca"
+    ]
+  },
+  {
+    "name": "adr",
+    "rc": 0,
+    "utc": "2026-11-21T04:20:50.840573+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/chay5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/regression",
+      "adr"
+    ]
+  },
+  {
+    "name": "moi",
+    "rc": 0,
+    "utc": "2026-11-21T04:21:02.108457+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/chay5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/regression",
+      "moi"
+    ]
+  },
+  {
+    "name": "cu",
+    "rc": 0,
+    "utc": "2026-11-21T04:21:10.337437+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/chay5.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/tmp/regression",
+      "cu"
+    ]
+  },
+  {
+    "name": "base-doctrine-scan",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:41.541328+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base"
+    ]
+  },
+  {
+    "name": "base-adr-song",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:42.024604+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base/.claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base"
+    ]
+  },
+  {
+    "name": "prototype-doctrine-scan",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:42.249737+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype"
+    ]
+  },
+  {
+    "name": "prototype-adr-song",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:42.789158+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype/.claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/prototype"
+    ]
+  },
+  {
+    "name": "master-doctrine-scan",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:43.051774+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/master/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/master"
+    ]
+  },
+  {
+    "name": "master-adr-song",
+    "rc": 0,
+    "utc": "2026-11-21T04:26:43.613159+00:00",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/master/.claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/master"
+    ]
+  }
+]

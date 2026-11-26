@@ -40,6 +40,12 @@ LUẬT:
       #1240 (ADR-0065, `ops/specs/assurance-81-model-effort-tuy-chon-r1.md`) NỚI: chỉ `sandbox_mode` (`L7_KHOA`) còn bắt buộc
       là lời khai measured. `model`, `effort` (`L7_KHOA_TUY_CHON`) là trường ghi nếu đo được: được VẮNG; có mặt thì phải là
       chuỗi khớp `RE_KHAI_DO` hoặc `RE_KHAI_KHONG_DO` (`not_measured …`). Rỗng, `DAT`, null, sai kiểu ⇒ vẫn ĐỎ.
+  L8  (#1236 đợt B, `ops/specs/wp1236-r12.md`) Chạy SAU chốt L5: hồ sơ được L5 miễn thì L8 không chạy. Mỗi vi phạm của
+      `kiem_ho_so(dữ liệu ĐÃ NẠP, <hồ sơ>-provenance/)` trong `ops/gate_output_doi_chieu.py` CỦA GỐC ĐANG KIỂM (`--root`) là một
+      vi phạm `L8 <đường dẫn>: <lý do>`: lời khai `gate_output` dương phải trích tệp `danh-gia-gate-output-<run>.txt` khớp
+      provenance, hồ sơ landed phải có ≥ 1 lời khai hợp lệ (luật và giới hạn: docstring module ấy). Module không nạp được, ném,
+      hay trả thứ không phải list ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ ĐẠT. `MIEN_TRU_L8` = hồ sơ L8 cho ĐỎ trên base đợt B, cơ chế
+      như L7 (chỉ miễn L8). Lời khai văn xuôi dưới khoá không chứa `gateoutput` KHÔNG được đọc (tiền lệ L7).
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
@@ -52,6 +58,7 @@ import argparse
 import datetime
 import glob
 import hashlib
+import importlib.util
 import json
 import re
 import sys
@@ -117,6 +124,66 @@ MIEN_TRU_L7 = {
     "pr924-wp923-land-evidence.yaml": "f246000294972947543a1afb3d9122b43ea11f8e540c4927ebda8d7a202d8f5b",
     "pr931-wp835-land-evidence.yaml": "31c8ce908aa08631a58993b1e431d4653b01b23b87ed59926181f2df4df485da",
     "pr950-wp834-land-evidence.yaml": "b0ae6da9f1f919d1f6ae785ad6950b94dd37f99c0a2852d31d5aaee645a6a080",
+}
+# L8 — đo 2026-11-24 trên `f602325` (base đợt B): 56 hồ sơ L8 cho ĐỎ khi chưa miễn (174 = 25 miễn L5 + 56 ĐỎ + 43 ĐẠT + 50 không
+# lời khai, không landed); cùng tập tên và byte với phép đo của đặc tả trên `8048551`. KHÔNG thêm tên mới, KHÔNG tự chụp lại băm.
+MIEN_TRU_L8 = {
+    "pr1023-wp1009-r4-land-evidence.yaml": "be6a19a854be2163322d216c1e1d8d725a20a55f97e795aa5428727f57b214f8",
+    "pr1029-windows-local-r2-land-evidence.yaml": "f2cb15c6006f8cbbfb4b9445bd5e914bf54a9cbc26bf0454ef20d1dd7b7a9fa0",
+    "pr1040-wp1021-land-evidence.yaml": "3526c8eec297f89e4c96c1c34d42f6e227dd2a005bad876160f925af87df9e58",
+    "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml": "55c25b0cdcbf6eb1c30faff36fcd778345f58a57e1defc9d7d43d6bc76e0bc54",
+    "pr1046-wp1030-r6-land-evidence.yaml": "6a4e8fc85abb568b71fc7fe83e143a50c638e7ac80ab906cd5e44127cf1ecd8c",
+    "pr1048-claude-md-powershell-land-evidence.yaml": "a588e59f6f94dc1fab3637ac1361c7c99e49eca44d6eb819985e4d64ae1f5462",
+    "pr1051-wp1006-t27-land-evidence.yaml": "8a39302482b8edad44a30ac80f7221658dc4686a68ecf3bdb1f6f6fc81f697c8",
+    "pr1055-wp1052-land-evidence.yaml": "b3d0f73dc7ccd9fa9fea86912dcb1cd88edd036ac34c1279ba27c01155adc751",
+    "pr1063-wp1038-r1-land-evidence.yaml": "072d584fb37b74ae2fcfaf11f83c8540a2cd9060fe4fc4c060d357b655ab4c69",
+    "pr1064-windows-local-r3-land-evidence.yaml": "34000573791672b926ace93ac19c6848acbc877c315b1f332fc1b15c27924408",
+    "pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml": "1b0259db0719808c5c2afd46cde0e462bd80866c9c860bfe1311be9cc9431ecb",
+    "pr1073-wp1039-r1-land-evidence.yaml": "7458eaa90cdcd3cb02eaebda8de7f2b3b798265dbfa03682b6386f89e861dd3b",
+    "pr1080-wp1077-land-evidence.yaml": "66901a2781d2976c65c8242b9488767bf55e324fd21e20cf6febacd084a89b32",
+    "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml": "b49d10f34a579e098a740ce88857382250e622c8321b3217304d392568a4f681",
+    "pr1097-wp1078-land-evidence.yaml": "7faaf52e686d5e88f137ef606257a9c59621b48cc8623f2d75c3c990a9e4d649",
+    "pr1100-wp1089-r2-land-evidence.yaml": "e9abffb678cbe96b45cb10a7dfc0bcf69327fa972d0ed78747403db94e957e47",
+    "pr1115-wp1079-land-evidence.yaml": "fcb4f136997a75716f5197302f97999247285325b3cf93014059593f6a28752c",
+    "pr1118-ghi-so-bo-sung-1065-land-evidence.yaml": "6f0fd219c02813ae278df250b9f3ae351c861fcfccc8976c12923055246ad476",
+    "pr1127-wp1120-land-evidence.yaml": "c36037061e11f29423a950b69428673fd1f87d01bf3ac2909b224b8302f7ca6c",
+    "pr1128-wp1113-land-evidence.yaml": "7ececaadbe05de1036814b0308ba106508e61d4ae91d3a0ea725525e3f16b15b",
+    "pr1130-wp1122-land-evidence.yaml": "4e06624080b12659c554e506451c327f746d0ff2b21e964fca8d64531d19acdf",
+    "pr1137-wp1134-land-evidence.yaml": "55597684a48fdb506938a2590ef299209834a677467e1faf9d0d202e84fb0da3",
+    "pr1141-wp1132-land-evidence.yaml": "5f049978fbcc5e05642d75f400db50bd7ace59ddaadd792e63fa93727be91f85",
+    "pr1155-wp1143-land-evidence.yaml": "be22b4655d42d11265f2298c39dbdfef6c5d955ede1366f39fa81e1a70a9e7d5",
+    "pr1192-wp1147-land-evidence.yaml": "432343e2ef39c9a6cece8b748029e303f4486bd38319cc8e0894411ad9b511a8",
+    "pr1193-wp1189-land-evidence.yaml": "90808ecc1552f35bf22030f5ce10fcd9d2a40c46fcbd050c7f968eae1b9da698",
+    "pr1197-wp1099-land-evidence.yaml": "65d161b8b326c93b09f7bcee836c71afad6284353383c3de6a7f3af6ef7482ce",
+    "pr1340-wp1315-land-evidence.yaml": "4ad7a3b6cc2e6c402a0038f47048b5afd616b685e21b9734688fec42f84981b5",
+    "pr1344-wp1343-land-evidence.yaml": "4307a59ec7e39a3cd424d639f93f378c7bcb579c6de23ba423d186c5377efa15",
+    "pr1347-wp1345-land-evidence.yaml": "d38da3b69f8db30c7ee5f8afb32bd0786de6fc5980d855a4c38b878e5e40fc58",
+    "pr1352-wp1350-land-evidence.yaml": "3f87c56642f76ffad40cd106b52df90205814b45f3bbf433e77d73a4a89bb922",
+    "pr1392-wp1389-land-evidence.yaml": "eeb7a942279b3c45147fa44f6e9e053d420f6159f2c92b304f24c7444b8b4c2c",
+    "pr1394-wp433-land-evidence.yaml": "c42246505396d0e1a1fa39e9a1320663e4539f981f74bc6d4d2c1c8990e2f0fb",
+    "pr1406-wp1404-land-evidence.yaml": "51bd90f4c7bd63a418c8828b8b11f2512a21ffa1d62a6e917871f9bf4e8076e3",
+    "pr1415-wp433-land-evidence.yaml": "49e60d048fbaae3d8e7ece058fa248cb1a4b9e3ad1714efc0af168e0e7c3a389",
+    "pr1421-wp433-land-evidence.yaml": "24dc762fc65cbd175b7f10306941959531baad3d03d53faee79c1663fc90f22e",
+    "pr1425-wp433-land-evidence.yaml": "c0a8ff8ac82b06680ba452fa298623b0658711f8fed83455172a1d1797b6aaad",
+    "pr1431-wp433-land-evidence.yaml": "23bbaf40f3d57a7e1605ed588b87d3ba0d6bbce2637934c9597058d672b9916c",
+    "pr1441-wp433-land-evidence.yaml": "b0ebd7cd0d3bab37f0ee5ab66d27231a32c94b2a1d38548624847e0dec55f624",
+    "pr1453-wp433-land-evidence.yaml": "39cbe4e7b873f125f335d84d31929fae9e596fb94099d8ef9445326f44eee7c0",
+    "pr631-doctrine-rest-land-evidence.yaml": "24888a097f35c247c1454cb012bc8ff2c1a34f542e05dbc29136fd4f119e2c85",
+    "pr679-wp678-land-evidence.yaml": "e187218be88849b78b26bb12d1a1b53f4aac8c2eefd7cd636c21d61fdb916c67",
+    "pr778-wp773-land-evidence.yaml": "4cee82ae07a401b668318a496d9dd7893c79b34ad93511ef37c8108316f0ac1a",
+    "pr791-wp782-land-evidence.yaml": "a5de49cbe980b376c62097ac72da28f2f443a8e871e00d418702d4c1bd5cc863",
+    "pr793-wp784-land-evidence.yaml": "97dd66d0b47d7eb19dc4d42bb18939f5bef645b6c279ce53aff730462181aff9",
+    "pr864-wp858-land-evidence.yaml": "28b9e354a7400770c9a15fed7c9dfcd4a4292bdbf15c918506fd9f49c46a2fa8",
+    "pr870-claude-md-bai-hoc-c-land-evidence.yaml": "91f46fb32d8fbc66481206c7fb7c3be64088926394d82c8ef8772f1c8186aa9b",
+    "pr881-wp852-land-evidence.yaml": "43764b48699f47c6c79e0e870c4419d659e40bd5fa375479f038489b007c77df",
+    "pr889-claude-md-bai-hoc-c-land-evidence.yaml": "07d9fab52fdda088e37a3106b11440ea17b4a40e90617322b0d8252bebaf134a",
+    "pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml": "fbb4b34d4ed74ceee3facc7c47a3438ffaa0775d19da2b87e328e0203b9489fc",
+    "pr924-wp923-land-evidence.yaml": "3857723bc79f9f7b6ac45e3c3a3619ed2514186d6f2eeab2fcafdf302515502f",
+    "pr931-wp835-land-evidence.yaml": "2b8ed5d20ee89c535a4fbf59a2281f146978d05b18a54a0d3702f9737e15569c",
+    "pr945-wp899-land-evidence.yaml": "7be4cac3e343d586dc861b4280b517a797139ead2cab1a6356f1b1cdb9275976",
+    "pr950-wp834-land-evidence.yaml": "56cdd2456608633c1f1a2ec407723dcf549a660dca36c4ce90b129e631cb5482",
+    "pr963-wp943-land-evidence.yaml": "81395ff671200dcdcff2e0aa570be534559ede6ce02555f3da517426df428212",
+    "pr997-wp978-land-evidence.yaml": "1c9a724d993e7424feae93f9281749495e3c81a8334832e8e5b9caa80230a65a",
 }
 
 
@@ -337,7 +404,26 @@ def kiem_ho_so(tep, byte, goc, yaml):
             ghi.append(f"L7 {d}: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất")
         else:
             vp.append(f"L7 {d}: khai DAT mà không có khối $.assurance_81 cấp gốc có thuc_thi")
-    return vp, ghi
+    vp8, ghi8 = l8(tep, byte, du_lieu, prov, goc)
+    return vp + vp8, ghi + ghi8
+
+
+def l8(tep, byte, du_lieu, prov, goc):
+    """(vi_pham, ghi_chu) của L8 trên dữ liệu ĐÃ NẠP từ `byte`. Module đối chiếu lấy từ `goc` (gốc đang kiểm), không từ thư mục
+    của tệp này, và phải nạp được TRƯỚC khi xét miễn trừ (hồ sơ được miễn cũng không ĐẠT trên gốc thiếu module). Miễn trừ gắn
+    TÊN + băm của chính `byte`. Ném KhongDoDuoc khi module không nạp được, ném (kể cả SystemExit), hay trả thứ không phải list."""
+    nguon = goc / "ops/gate_output_doi_chieu.py"
+    try:
+        mod = importlib.util.module_from_spec(importlib.util.spec_from_file_location(nguon.stem, nguon))
+        exec(compile(nguon.read_bytes(), str(nguon), "exec"), mod.__dict__)   # không qua .pyc: không đọc bản cũ, không ghi vào gốc
+        if MIEN_TRU_L8.get(tep.name) == hashlib.sha256(byte).hexdigest():
+            return [], ["L8 miễn trừ (băm khớp ảnh chụp base đợt B)"]
+        kq = mod.kiem_ho_so(du_lieu, prov)
+        if not isinstance(kq, list):
+            raise TypeError(f"kiem_ho_so trả {type(kq).__name__}")
+    except (Exception, SystemExit) as e:   # module gọi sys.exit(0) lúc nạp không được biến thành mã thoát 0
+        raise KhongDoDuoc(f"L8 không nạp/chạy được {nguon.name}: {type(e).__name__}: {e}")
+    return [f"L8 {x}" for x in kq], ["L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ"] if tep.name in MIEN_TRU_L8 else []
 
 
 def _khoa_81(nut, duong="$"):

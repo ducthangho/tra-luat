@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """`nap` (bootstrap + ĐÚNG MỘT dòng `agent_creds:` kể cả khi bootstrap thoát sớm/quá hạn/sai hợp đồng) và `cai-agy` (agy ghim,
-sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). `ghi-nguoc [--neu-doi]` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2): ghi
+sha512, settings) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039) + r2 (bản ghim là SÀN, `ghim-agy`). `ghi-nguoc [--neu-doi]` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2): ghi
 NGƯỢC auth.json Codex vào tl_agent_creds.enc qua webapp `agent_creds_put` (CAS md5). Cả ba luôn rc 0. Test: *_test.py."""
 import base64, contextlib, ctypes, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, threading, time, urllib.request  # noqa: E401
 from pathlib import Path
@@ -8,18 +8,20 @@ from pathlib import Path
 GOC = Path(__file__).resolve().parent.parent
 TRANG_THAI = ("ĐÃ NẠP", "KHÔNG CẤU HÌNH", "KHÔNG ĐO ĐƯỢC")
 TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10
-DONG_ENV = "export AGY_CLI_DISABLE_AUTO_UPDATE=1"
-# Hằng ghim — chép NGUYÊN VĂN spec r1 mục "Hằng ghim agy". Đổi bản ⇒ revision mới của spec, không sửa tại chỗ.
-AGY_VER = "1.4.12"
-_U = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.4.12-4768735748292608/"
+# Hằng ghim — chép NGUYÊN VĂN spec r2 mục "Thay đổi 1". Là SÀN: bản cài sẵn mới hơn (agy tự cập nhật) được giữ.
+# Ghim lại: `cloud_agent_creds.py ghim-agy` in khối mới ⇒ dán vào revision đặc tả kế tiếp rồi vào đây.
+AGY_VER = "1.5.16"
+_U = "https://github.com/google-antigravity/antigravity-cli/releases/download/1.5.16/"
 NEN = {
-    "linux_amd64": (_U + "linux-x64/cli_linux_x64.tar.gz", "ea01c73b772187bca928852cf96235f0d846d6da5ebdac188b9ae719597465737f325540d483ee5f3f62d151029001713344972a187ddfb98cc7b97f7204b7f4"),
-    "linux_arm64": (_U + "linux-arm/cli_linux_arm64.tar.gz", "7cae317fb6a02eb387982f06bfb234b366879cf9a80ad8969b571e5a55d1e37a6a5a49cd6b703c0443bb417937cf5e3b14a8c80cb26917ad79eef723a9f374c7"),
-    "linux_amd64_musl": (_U + "linux-x64-musl/cli_linux_x64_musl.tar.gz", "60a2705b9d0446a88fe2a685a044e0f9ec65f9742492d96e6fa3a87c9c477d3fddd9c4d7f22bca7bdb2a99d6dd5833de9d6e690eb8fd9e77ebe25794fdb4555a"),
-    "linux_arm64_musl": (_U + "linux-arm-musl/cli_linux_arm64_musl.tar.gz", "767902b8569d08e7283139f3aba05eacdc0070b96d940ca4d2fad863ea6c2f3c35bb79ab079fcfeb87f6f79272bb4c0b666af8829873883dc1c9798321dd28f6"),
-    "darwin_amd64": (_U + "darwin-x64/cli_mac_x64.tar.gz", "1d78368cd5a136dc4c7cc71cfe4649d1b1e643630d79327ff3c4efd4b19a90d5603e2cf65a54f80c7eaef973dd09f854dae8a8228b4edd4c6466c679ded9babf"),
-    "darwin_arm64": (_U + "darwin-arm/cli_mac_arm64.tar.gz", "e858cfc02fb5bb500a760643da270accd2847aa986b7e2973da97ad1928b99d62f62bad28c039e25b65e1ca073d27b2f30b13ed0919d0329774eb1e0ee5b4748"),
+    "linux_amd64": (_U + "agy_cli_linux_x64.tar.gz", "3dee9f26e298156db673f6ce2a0f5dfed5b30006e04ceb9809c68070e7b717587b33a3da0f8bc2eda45af81a50bc8b14c82b28ae5832bcfe3e7fd49397117b31"),
+    "linux_arm64": (_U + "agy_cli_linux_arm64.tar.gz", "23c193151499a4986fd5fa0d8132665cc8ffbad6cc0b3ff4fd53a2cb68abb76b149a992b836d53063443cd89add335f14d8134fb02abdcecbf6e1eaef6c53d33"),
+    "linux_amd64_musl": (_U + "agy_cli_linux_x64_musl.tar.gz", "9f868c13f308557192b8c3fa30f1251283167b7e551e9f0f05ed0fa2640e91e02accaeacd41692a0422e8de90c1cc0b6e327f2b6befbd11080a4881d45bf61b1"),
+    "linux_arm64_musl": (_U + "agy_cli_linux_arm64_musl.tar.gz", "4bc5c802c97ca19404c666136f1e74dc880a3b0346e7c6950ad4e217056c6cc86ae5afa633aa5989a260600f49cb6e71db438558c4f2d44e5f5bdab8bb38980c"),
+    "darwin_amd64": (_U + "agy_cli_mac_x64.tar.gz", "b3eae073ee633032e9d473cdc7725c30bdfe2e09436bc36cfb3422e7e5fa3733de9591a7f78d02362294e7bf87e345d70e5d839689e526129a6f3fc041857a05"),
+    "darwin_arm64": (_U + "agy_cli_mac_arm64.tar.gz", "33f5617dc74fea606d47b2483c6d271c850c9f3c9c55b724c664c3c0d4b82100d819fbcf55714f851765f6628d4296883ac8939b4fdeb55d5e6b9ce923135d18"),
 }
+TAI_SAN_AGY = {"linux_amd64": "linux_x64", "linux_arm64": "linux_arm64", "linux_amd64_musl": "linux_x64_musl",
+               "linux_arm64_musl": "linux_arm64_musl", "darwin_amd64": "mac_x64", "darwin_arm64": "mac_arm64"}
 def doc_timeout(gia_tri):
     try:   # rác/âm/0/inf/nan và > 1 ngày (Popen.communicate tràn — F02) ⇒ mặc định
         return v if math.isfinite(v := float(gia_tri)) and 0 < v <= 86400 else TIMEOUT_MAC_DINH
@@ -116,7 +118,9 @@ def khoa_nen_hien_tai():
 def tai(url):
     with urllib.request.urlopen(url, timeout=300) as r:
         return r.read()
-def _ban_khop(agy):   # `agy --version` rc 0 và có TOKEN đúng bằng AGY_VER (1.4.120, 1.4.12rc1 ⇒ lệch); thiếu/hỏng ⇒ False
+def _bo_so(ban):
+    return tuple(int(x) for x in ban.split("."))
+def _ban_khop(agy):   # spec r2: rc 0 và có TOKEN đúng dạng X.Y.Z (không hậu tố rc/beta) với bộ số >= AGY_VER; thiếu/hỏng ⇒ False
     try:
         _dat_subreaper()
         p = subprocess.Popen([str(agy), "--version"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
@@ -127,7 +131,8 @@ def _ban_khop(agy):   # `agy --version` rc 0 và có TOKEN đúng bằng AGY_VER
         ra = p.communicate(timeout=HAN_VERSION)[0].decode("utf-8", "replace")
     except Exception:  # noqa: BLE001 — quá 15 s: giết CẢ NHÓM (tiến trình con của agy), không chỉ cha (F01)
         return _giet_nhom(p)[0] and False
-    return p.returncode == 0 and AGY_VER in re.split(r"[\s,;()]+", ra)
+    return p.returncode == 0 and any(re.fullmatch(r"\d+\.\d+\.\d+", t) and _bo_so(t) >= _bo_so(AGY_VER)
+                                     for t in re.split(r"[\s,;()]+", ra))
 def _ghi_nguyen_tu(p, du_lieu, quyen=None):
     p.parent.mkdir(parents=True, exist_ok=True)
     fd, tam = tempfile.mkstemp(dir=str(p.parent), prefix=f".{p.name}.")
@@ -143,7 +148,7 @@ def _ghi_nguyen_tu(p, du_lieu, quyen=None):
 def cai_dat_agy(home):
     agy = home / ".local" / "bin" / "agy"
     if _ban_khop(agy):
-        return print(f"agy: ✓ đã có {AGY_VER} — không tải")
+        return print(f"agy: ✓ đã có bản >= {AGY_VER} — không tải")
     k = khoa_nen_hien_tai()
     muc = NEN.get(k)
     if muc is None:
@@ -171,21 +176,49 @@ def gop_settings(home):
     d = {**d, "modelProvider": "gemini"}
     _ghi_nguyen_tu(p, (json.dumps(d, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
     print("agy: settings.json modelProvider = gemini")
-def dat_env_file(env):   # `CLAUDE_ENV_FILE` có ĐÚNG MỘT dòng DONG_ENV (chạy lại không nhân bản); giữ dòng khác và quyền tệp
-    if env.get("CLAUDE_ENV_FILE"):
-        p = Path(env["CLAUDE_ENV_FILE"])
-        cu = p.read_text(encoding="utf-8").splitlines() if p.exists() else []
-        if cu.count(DONG_ENV) != 1:
-            _ghi_nguyen_tu(p, ("\n".join([x for x in cu if x != DONG_ENV] + [DONG_ENV]) + "\n").encode("utf-8"),
-                           p.stat().st_mode & 0o777 if p.exists() else None)
-        print("agy: CLAUDE_ENV_FILE có AGY_CLI_DISABLE_AUTO_UPDATE=1")
 def cai_agy(env=os.environ):
     home = Path(env.get("HOME") or Path.home())
-    for buoc in (lambda: cai_dat_agy(home), lambda: gop_settings(home), lambda: dat_env_file(env)):
+    for buoc in (lambda: cai_dat_agy(home), lambda: gop_settings(home)):
         try:
             buoc()
         except Exception as e:  # noqa: BLE001 — mục tiêu 2: lỗi mạng/ghi chỉ là MỘT dòng `agy: …`, rc 0
             print(f"agy: ✗ lỗi {type(e).__name__}")
+    return 0
+# ---------- ghim-agy (spec r2 Thay đổi 3): in khối ghim mới, KHÔNG ghi tệp ----------
+_REL = "https://api.github.com/repos/google-antigravity/antigravity-cli/releases/"
+def doc_release(ban=None):
+    url = _REL + (f"tags/{ban}" if ban else "latest")
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"}), timeout=30) as r:
+        return json.load(r)
+def ghim_agy(ban=None):
+    try:
+        rel = doc_release(ban)
+        tag, tai_san = str(rel["tag_name"]).lstrip("v"), {a["name"]: a for a in rel["assets"]}
+        if not re.fullmatch(r"\d+\.\d+\.\d+", tag):
+            return print(f"ghim-agy: ✗ tag lạ {tag!r}") or 1
+        dong = []
+        for k, t in TAI_SAN_AGY.items():
+            a = tai_san.get(f"agy_cli_{t}.tar.gz")
+            if a is None:
+                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1
+            du = tai(a["browser_download_url"])
+            if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):
+                return print(f"ghim-agy: ✗ sha256 lệch digest GitHub ({k})") or 1
+            with tarfile.open(fileobj=io.BytesIO(du), mode="r:gz") as tf:
+                tvg = tf.getmembers()
+            if len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg():
+                return print(f"ghim-agy: ✗ tarball {k} không đúng MỘT tệp thường `antigravity`") or 1
+            dong.append((k, a["browser_download_url"], hashlib.sha512(du).hexdigest()))
+    except Exception as e:  # noqa: BLE001 — mạng/JSON hỏng ⇒ một dòng, rc 1
+        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1
+    print(f'AGY_VER = "{tag}"')
+    print("NEN = {")
+    for k, u, h in dong:
+        print(f'    "{k}": ("{u}", "{h}"),')
+    print("}")
+    print()
+    for k, u, h in dong:
+        print(f"| `{k}` | `{u}` | `{h}` |")
     return 0
 # ---------- ghi-nguoc (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2 mục tiêu 2–3) ----------
 TEN_DAU, HAN_GHI_NGUOC, LAN_CAS, BAN_TOI_THIEU = ".tra-luat-agent-creds-dau.json", 25.0, 3, (2, 21, 2, "q")
@@ -313,8 +346,10 @@ def main(argv):
     [s.reconfigure(encoding="utf-8", errors="backslashreplace") for s in (sys.stdout, sys.stderr)]
     if argv in (["nap"], ["cai-agy"]):
         return {"nap": nap, "cai-agy": cai_agy}[argv[0]]()
+    if argv == ["ghim-agy"] or (len(argv) == 3 and argv[:2] == ["ghim-agy", "--ban"] and re.fullmatch(r"\d+\.\d+\.\d+", argv[2])):
+        return ghim_agy(argv[2] if len(argv) == 3 else None)
     if argv in (["ghi-nguoc"], ["ghi-nguoc", "--neu-doi"]):
         return ghi_nguoc(neu_doi=len(argv) == 2)
-    return print("dùng: cloud_agent_creds.py nap | cai-agy | ghi-nguoc [--neu-doi]", file=sys.stderr) or 2
+    return print("dùng: cloud_agent_creds.py nap | cai-agy | ghim-agy [--ban X.Y.Z] | ghi-nguoc [--neu-doi]", file=sys.stderr) or 2
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

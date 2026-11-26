@@ -2,7 +2,7 @@
 
 **Căn cứ:** đặc tả `ops/specs/px-trien-khai-vm-r1.md` (sha256 `9fc895a1da0a56185b53bc471abc890ca3aaee52856c3a765d6da5bc6c5a6243`,
 duyệt https://github.com/ducthangho/tra-luat/issues/1562#issuecomment-7198340124), lease `ops/leases/px-trien-khai-vm-r1-g1-operator.yaml`,
-Issue #1562. Hiện vật đã lược (log, băm, mốc giờ): `issuecomment-7198874574` (B0–B3) và `issuecomment-7199996503` (bổ sung).
+Issue #1562. Hiện vật đã lược (log, băm, mốc giờ): `issuecomment-7198874574` (B0–B3), `7199996503` và `7200134021` (bổ sung).
 Bí danh: `D` = thư mục làm việc của packet trên VM (ngoài `<base>`), `BAK` = thư mục sao lưu `control.bak-*`, Q1/Q2 = hai lời gọi.
 
 ## 1. Kết luận
@@ -18,8 +18,8 @@ với tần suất nào (N4 không đòi). Inference: **2/2**. Có hai lệch đ
 | B1/B2 lượt 1 | ~17:15:42 | dừng ở bước kiểm băm NGUỒN (hàm `H` trùng alias `Get-History`), trước tiền điều kiện, trước sao lưu, trước mọi ghi | `B12.log` `f637d12c…a43b` |
 | B1/B2 lượt 2 | 17:17:40–41 | nguồn = clone kho public `HEAD 4f954fec…`, băm nguồn khớp; `control\` còn y B0; sao lưu `BAK` khớp B0; `control\` = đúng 3 tệp 2.2.0 | `B12b.log` `16720128…26db` |
 | B3 | ~17:19:14 | clone sạch, 4 tệp module khớp; cấu hình Local `6d8c4098…9721`; `px config` ok; `px status` ⇒ `RuntimeUnverified` | `B3.log` `e0f821da…a0e7f` |
-| B4 lần 1 (chủ kho, admin, RDP) | 17:32:51–53 | `R1.ps1` bản `b1bc95a9…13c8`: dừng ở kiểm phiên bản (`Get-Module` báo `0.0` vì `Run-Px` nạp thẳng `.psm1`); không `status`/`models`/`ask`; không tệp đánh dấu; `px-active` vẫn 164, mới nhất 11:13:01 | `r1-vm.lan1.json` `9407a1d5…33c0` |
-| B4 lần 2 (chủ kho, admin, RDP) | 17:37:13–17:37:28 | `R1.ps1` bản `9a622246…d7ce` (kiểm `ModuleVersion` của `.psd1` cạnh tệp đã nạp + băm `.psm1`); admin, session 3, PS 7.6.9; manifest `2.2.0`, đường dẫn nạp đúng; `status` HTTP 200; `models gemini` có `gemini:auto`; WhatIf; Q1; Q2 | `r1-vm.json` `3d304b87…88c7` |
+| B4 lần 1 (chủ kho, admin, RDP) | `started_utc` 17:32:51; bước cuối `module` 17:32:53.62 | `R1.ps1` bản `b1bc95a9…13c8`: `identity`, `config` ok, rồi dừng ở kiểm phiên bản (`Get-Module` báo `0.0` vì `Run-Px` nạp thẳng `.psm1`); không `status`/`models`/`ask`; không tệp đánh dấu; `px-active` vẫn 164, mới nhất 11:13:01 | `r1-vm.lan1.json` `9407a1d5…33c0` |
+| B4 lần 2 (chủ kho, admin, RDP) | `started_utc` 17:37:07; `config` 17:37:09; `ask_q2` 17:37:28.81 | `R1.ps1` bản `9a622246…d7ce` (kiểm `ModuleVersion` của `.psd1` cạnh tệp đã nạp + băm `.psm1`); admin, session 3, PS 7.6.9; `config` ok; manifest `2.2.0`, đường dẫn nạp đúng; `status` HTTP 200; `models gemini` có `gemini:auto`; WhatIf; Q1 (17:37:21); Q2 | `r1-vm.json` `3d304b87…88c7` |
 
 Số chủ kho dán sau mỗi lần B4 khớp băm phiên đo lại qua Desktop Commander. Tệp đánh dấu của lần 2: `17:37:13.6691616Z`.
 
@@ -30,13 +30,13 @@ Số chủ kho dán sau mỗi lần B4 khớp băm phiên đo lại qua Desktop 
 | Q2 câu tóm tắt Luật Ban hành VBQPPL | ok | 200 | `gemini:auto` | `gemini` | `none` / 0 | 354 | một bản mới, `completed` |
 
 - Câu trả lời Q1 (dữ liệu không tin cậy): `OK`. Câu trả lời Q2 không chép vào kho (chỉ độ dài).
-- `reportedModel` = `gemini`: id này có trong danh sách `models gemini` của chính lần chạy ⇒ đúng luật 2.2.0.
+- `reportedModel` = `gemini`: mỗi lời gọi `ask` tự lấy danh sách `GET /v1/models` và chỉ trả `model` của phản hồi khi khớp Ordinal một id trong danh sách ấy và `answerMarkup` khác `removed`; hai kết quả mang `gemini` qua chính bộ lọc ấy (mã đúng băm). Danh sách của lệnh `models gemini` riêng chỉ là quan sát bổ trợ.
 - `px-active`: 164 → 166, đúng hai bản ghi mới (mốc 17:37:21 và 17:37:28), mỗi bản ghép đúng `recordId` của một kết quả.
 
 ## 4. Nghiệm thu
 | tiêu chí | trạng thái |
 |---|---|
-| N1 cửa sổ | **đạt** — mốc `LastWriteTimeUtc` lớn nhất của `px-active` là 11:13:01 ở B0 và vẫn 11:13:01 ở phép đọc lại sau B4 lần 1; mọi lần ghi nâng mốc ấy ⇒ không hoạt động nào bao trọn lần ghi đầu 17:17:40 (cách 364,6 phút) |
+| N1 cửa sổ | **đạt theo câu chữ đặc tả** — phép đo B0 (17:12:24, 5 phút 16 giây trước lần ghi đầu 17:17:40) ghi mục mới nhất 11:13:01, cách 359,4 phút. **Tại đúng lúc ghi: chưa đo được** — phép đọc lại sau B4 lần 1 cho cùng 164 mục và cùng mốc 11:13:01, nhưng hai ảnh chụp không loại trừ được một mục tạo rồi bị xoá ở khoảng giữa |
 | N2 sao lưu | **đạt** — `BAK`, băm từng tệp = B0 |
 | N3 triển khai (tĩnh Remote) | **đạt** — băm `control\ProximaControl.psm1`/`ProximaConfig.psm1` = 2.2.0; `control\` chỉ thêm `ProximaConfig.psm1` |
 | N4 chạy thật | **đạt** — 2/2 `ask_ok`, mỗi lời gọi đúng một bản ghi `px.active.v1` mới |

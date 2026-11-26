@@ -507,10 +507,11 @@ def _tok(i):
 # r26 (lượt 25 B1): miền nhãn = mọi nhãn `_nhan` dựng được — các placeholder nối bằng `.` / `-` / `–` (có đệm), mở bằng `(` tuỳ chọn,
 # kết bằng `.` `)` (dính thân được), gạch (sau là khoảng trắng hay dấu mở trích dẫn/ngoặc), hoặc — chỉ khi đã có dấu nối giữa các
 # placeholder — kết ngay sau chữ số. Nhãn chỉ có khoảng trắng (`a tổ chức`) không phân biệt được với chữ ⇒ ngoài miền (§2.28 B1).
-_NOI = rf"{_KC}[.\-–]{_KC}"
+_NOI = rf"{_KC}[.)(\-–]{_KC}"   # r27 (lượt 26 C1): mọi dấu `lvlText` cho phép giữa hai placeholder (`1(1)`, `a)b)`)
+# r27 (lượt 26 C1): dòng mở bằng chữ số, (đệm), một dấu nối, (đệm), chữ số — số nhiều cấp ở bất kỳ dạng nào.
+_RE_NHIEU_CAP = re.compile(rf"^\(?{_KC}\d+{_NOI}\d")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
 _RE_DIEM = re.compile("^(?:" + "|".join([
-    rf"\(?{_KC}\d+(?:{_NOI}\d+)+(?=\s|[^\W\d_]|[“\"‘'(])",
     rf"\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",
     rf"\(?{_KC}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",
     r"[-–•+]",
@@ -1094,7 +1095,7 @@ def _phan_tich_doan(p, kieu):
                 hl[t] = dem[t] == 1
         # r26 (lượt 25 B3): trạng thái NGẮT của run chỉ ghi vào đoạn SAU khi biết run còn hiệu lực (run gạch bị bỏ trọn — kể cả
         # ngắt của nó, §2.25 Y1).
-        chu_run, chu_sau_ngat, ngat_mem, sau_trang = [], False, False, kq["sau_ngat_trang"]
+        chu_run, chu_sau_ngat, ngat_mem, sau_trang, la_run = [], False, False, kq["sau_ngat_trang"], False
         for c in r:
             ten = c.tag[len(_W):] if c.tag.startswith(_W) else None
             if ten in _CON_RUN_CHU:
@@ -1117,7 +1118,8 @@ def _phan_tich_doan(p, kieu):
             elif ten in _CON_RUN_BO_QUA:
                 continue
             else:
-                kq["la"] = True   # B4: phần tử hiển thị chưa hiểu ⇒ không biết chữ thật
+                la_run = True   # B4: phần tử hiển thị chưa hiểu ⇒ không biết chữ thật; r27 (lượt 26 C2): ghi vào đoạn SAU khi biết run còn
+                # hiệu lực (run gạch bị bỏ TRỌN — phần tử lạ trong nó đã được `_ruot_bi_bo` tính là nội dung)
         if hl["strike"] or hl["dstrike"]:
             # r5 (lượt 4 D3): chữ GẠCH NGANG hiệu lực (gạch đơn/kép, mọi tầng, theo namespace) là chữ ĐÃ BỎ của dự thảo ⇒ bỏ,
             # như `tl extract --markup strip` — nhưng lọc theo CÂY, không qua regex của `docx_markup` (regex có thể nuốt ranh
@@ -1128,6 +1130,8 @@ def _phan_tich_doan(p, kieu):
             if ruot and not ruot.strip():
                 kq["phan"].append(ruot)
             return
+        if la_run:
+            kq["la"] = True
         if ngat_mem:
             kq["ngat"] = True
         kq["sau_ngat_trang"] = sau_trang
@@ -1402,6 +1406,10 @@ def tach_khoan(van_ban):
             # Danh sách CHO PHÉP hình dạng tiêu đề, thay cho dò chữ "là" (bỏ sót khoản dùng từ nối khác và "là" sát dấu câu).
             return None
         dong = dong[1:]
+    if any(_RE_NHIEU_CAP.match(ln) for ln in dong):
+        # r27 (lượt 26 C1): dòng mở bằng số NHIỀU CẤP (`1.1`, `1. 1`, `1(2)`, `1-1`…) — nhãn điểm đa cấp hay số khoản + thân mở bằng số,
+        # không phân biệt được bằng hình dạng ⇒ từ chối CẢ nguồn, TRƯỚC khi nhánh số khoản (`_RE_SO_KHOAN`) kịp nhận `1.`.
+        return None
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
     for i_dong, ln in enumerate(dong):

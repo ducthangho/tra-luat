@@ -700,7 +700,10 @@ def ca_khoan_mat_so_co_diem_dat(m):
               # r26 (lượt 25 B1): gạch nối các cấp, nhãn sát dấu mở trích dẫn, gạch nối chữ cái.
               sach.replace("Dữ liệu", "1-1. Dữ liệu"), sach.replace("Dữ liệu", "1.1-“Dữ liệu” là"), sach.replace("Dữ liệu", "1.1“Dữ liệu” là"),
               sach.replace("Dữ liệu", "a-b. Dữ liệu"), sach.replace("Dữ liệu", "1-1 Dữ liệu"),
-              sach.replace("Dữ liệu là thông tin.", "a-“Dữ liệu” là thông tin.")):
+              sach.replace("Dữ liệu là thông tin.", "a-“Dữ liệu” là thông tin."),
+              # r27 (lượt 26 C1): số nhiều cấp có đệm / ngoặc, cả trên nguồn CÓ số (nhánh số khoản không được nhận trước).
+              sach.replace("Dữ liệu", "1. 1 Dữ liệu"), sach.replace("Dữ liệu", "1(1) Dữ liệu"),
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2. 1 Dữ liệu là thông tin."):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
@@ -1470,6 +1473,10 @@ def ca_cau_truc_docx_dat(m):
     bang(cap43 == [(1, "Hồ sơ làtài liệu.")], f"ruot bi bo khong preserve van giu trang: {cap43}")
     _, cap44, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t><w:delText> </w:delText><w:t>tài liệu.</w:t></w:r>')))
     bang(cap44 == [(1, "Hồ sơ làtài liệu.")], f"delText lac khong preserve van giu trang: {cap44}")
+    # r27 C2: ký hiệu (`w:sym`) chỉ nằm trong run GẠCH bị bỏ trọn không làm cả Điều bị từ chối.
+    _, cap47, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là </w:t></w:r><w:r><w:rPr><w:strike/></w:rPr>'
+                                                '<w:t>cũ</w:t><w:sym w:font="S" w:char="F0B7"/></w:r><w:r><w:t>tài liệu.</w:t></w:r>')))
+    bang(cap47 == [(1, "Hồ sơ là tài liệu.")], f"ky hieu trong run gach bi bo lam chan: {cap47}")
     # r26 B3: ngắt mềm / ngắt trang trong run GẠCH bị bỏ trọn không làm cả Điều bị từ chối.
     _, cap45, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là </w:t></w:r><w:r><w:rPr><w:strike/></w:rPr>'
                                                 '<w:t>cũ</w:t><w:br/></w:r><w:r><w:t>tài liệu.</w:t></w:r>')))
@@ -1887,7 +1894,7 @@ DOT_BIEN = [
     ('wp1525_nhan_tieu_de_dinh_than', ('    if not _RE_TIEU_DE_TRON.match(doan[i0]["chu"]):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_tieu_de_la', ('    if doan[i0]["la"]:\n', '    if False:\n'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_phan_tu_la_vung', ('    if any(d["la"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_phan_tu_la', ('            else:\n                kq["la"] = True   # B4', '            else:\n                pass   # B4'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_phan_tu_la', ('                la_run = True   # B4', '                pass   # B4'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_ngat_mem_vung', ('    if any(d["ngat"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_doan_so_rong', ('    if any(d["so"] is not None and not d["chu"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_style_trong_dieu', ('    if any(d["so_tu_style"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
@@ -1906,11 +1913,13 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r27 (lượt 26 C1/C2).
+    ('wp1525_bo_chan_nhieu_cap', ('    if any(_RE_NHIEU_CAP.match(ln) for ln in dong):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_la_ghi_truoc_gach', ('                la_run = True   # B4', '                kq["la"] = True   # B4'), 'ca_cau_truc_docx_dat'),
     # r26 (lượt 25 B1–B3): mỗi nhánh ngữ pháp nhãn một đột biến; trạng thái ngắt; `xml:space` đặt lại / ruột / delText.
-    ('wp1525_diem_bo_thap_phan', ('    rf"\\(?{_KC}\\d+(?:{_NOI}\\d+)+(?=\\s|[^\\W\\d_]|[“\\"‘\'(])",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_cham_ngoac', ('    rf"\\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_diem_bo_dang_gach', ('    rf"\\(?{_KC}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_noi_chi_cham', ('_NOI = rf"{_KC}[.\\-–]{_KC}"', '_NOI = rf"{_KC}[.]{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_noi_chi_cham', ('_NOI = rf"{_KC}[.)(\\-–]{_KC}"', '_NOI = rf"{_KC}[.]{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_mo_than_chi_khoang_trang', ('_MO_THAN = "(?=\\\\s|[“\\"‘\'(])"', '_MO_THAN = "(?=\\\\s)"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_chu_sau_ngat_trang', ('                if sau_trang and chu.strip():', '                if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ngat_ghi_truoc_gach', ('                    ngat_mem = True', '                    kq["ngat"] = True'), 'ca_cau_truc_docx_dat'),

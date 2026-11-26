@@ -66,6 +66,8 @@
   hiệu lực (quy tắc Word); nhãn thập phân nhiều cấp kết bằng gạch ⇒ chặn.
 - r26 (sau cross-review lượt 25 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r26.md`): miền nhãn điểm thô = miền nhãn dựng từ `lvlText`;
   ngắt trong run gạch bị bỏ không còn làm cả Điều bị từ chối; khoá thêm ca `xml:space`.
+- r27 (sau cross-review lượt 26 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r27.md`): dòng mở bằng số nhiều cấp ⇒ chặn trước nhánh số
+  khoản; ký hiệu trong run gạch bị bỏ không còn làm cả Điều bị từ chối.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

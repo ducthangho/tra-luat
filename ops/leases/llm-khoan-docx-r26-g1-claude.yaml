@@ -180,3 +180,5 @@ revision_ly_do: 'Cross-review luot 25 (APPROVE, 0 P1, B1-B3 P2); chu kho doi het
 review_calls_limit: 26
 review_calls_used_truoc: 25
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r27-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 26; revision r27 (ops/specs/llm-khoan-docx-r27.md), tran 27.'

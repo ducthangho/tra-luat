@@ -108,5 +108,6 @@
   "start_from_note": "H lượt 2 (lease g2), cục bộ, chưa đẩy; base không đổi 1260fa0.",
   "start_from_tree": "d53fce1bb3a5015da96cdc37f07d14d7a7d2bfc1",
   "limits_note": "executor 2/3 used (lượt 1 dừng §12, lượt 2 ra d0e08eb); Codex review mã 1/3 (blocked); connector 0/2; PR Ubuntu CI 0/3; K7 0/1; full_M9 0/1",
-  "executor_cli_note": "Chỉ thị chủ kho 26-11 qua điều phối Mission: executor chạy `claude -p` (không subagent), env -u các biến CLAUDE*/CLAUDECODE/CCR_*/ANTHROPIC_* + ANTHROPIC_API_KEY=$TL_ANTHROPIC_API_KEY; ghi đường đã dùng (api/subscription) vào handoff."
+  "executor_cli_note": "Chỉ thị chủ kho 26-11 qua điều phối Mission: executor chạy `claude -p` (không subagent), env -u các biến CLAUDE*/CLAUDECODE/CCR_*/ANTHROPIC_* + ANTHROPIC_API_KEY=$TL_ANTHROPIC_API_KEY; ghi đường đã dùng (api/subscription) vào handoff.",
+  "da_bi_thay_the": "wp1463-r16-g4-claude"
 }

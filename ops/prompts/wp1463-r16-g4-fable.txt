@@ -1,0 +1,42 @@
+Bạn là EXECUTOR của packet wp1463 (PR2 #1463, Mission #1172), kho ducthangho/tra-luat. Trả lời và ghi chú bằng tiếng Việt. Đây là LƯỢT 4/4, lượt CUỐI (chủ kho cấp thêm 1 lượt cho revision 16).
+
+ĐỌC TRƯỚC: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §5, §7, §12, §13), .claude/skills/work-packet/SKILL.md.
+
+ĐẶC TẢ ĐÓNG BĂNG (nguồn sự thật duy nhất; đọc TOÀN BỘ, nhất là mục "Thay đổi so với revision 15" với R16-1…R16-3, và mục "Thay đổi so với revision 14" với R15-1…R15-4 vẫn hiện hành):
+- `git show 2662fba22104106b7ba7ed6e25fe527342cf20d2:ops/specs/wp1463-r1/SPEC.md`
+- sha256 PHẢI bằng `c45c0703fbc268e62556e6826b15eef88f9b52b46b306dc0098d647fcc97477a`, lệch ⇒ DỪNG.
+- Chủ kho đã duyệt băm: https://github.com/ducthangho/tra-luat/issues/1463#issuecomment-7187804625
+
+REVIEW MÃ LƯỢT 2 (hai P2 cần xử lý, kèm bằng chứng, probe đã dùng và gợi ý sửa): `git show 2662fba22104106b7ba7ed6e25fe527342cf20d2:ops/specs/wp1463-r1/reviews/wp1463-code-review-2.json`. Đọc kỹ `suggested_fix` và `locking_test` của PR2-C05 và PR2-C06, và cả các `notes`.
+
+LEASE: `wp1463-r16-g4-claude`; base `1260fa0cba89353911e2f97188b2c04dab8139d7`; nhánh `agent/wp1463-r16-g4-fable`, tạo từ H của lượt 3 `9333dd968340446a88a5ac195a02a4fe5341b3c8` (commit cục bộ trong kho này, nhánh `wp1463-H-g3`). Hãy tự xác minh: `git show origin/ops/wp1463-r1:ops/leases/wp1463-r16-g4-claude.yaml`.
+
+WRITE SET (đúng bốn tệp, không có tệp thứ năm):
+1. `ops/ci_provenance_test.py`
+2. `.claude/dev/ci_dang_ky_test.py` (CHỈ bốn thay đổi dữ liệu của mục 3, đã có; không đổi thêm)
+3. `ops/specs/wp1463-r1/do/do_pr2.py`
+4. `ops/specs/wp1463-r1/do/KET_QUA.md`
+Cần tệp thứ năm, hoặc thấy đặc tả mâu thuẫn ⇒ DỪNG (§12) và báo, không tự sửa đặc tả.
+
+VIỆC:
+- R16-1: giải đường dẫn thực thi của Python con theo ngữ cảnh khởi chạy thật (cwd lúc khởi chạy, kể cả `cwd=` riêng), ghi đủ dữ liệu ngay lúc hook ghi sự kiện; KHÔNG mở rộng biểu thức tên. Ca khoá symlink tuyệt đối + tương đối từ cwd khác, cho từng phép trong ba phép đo vùng, con duy nhất `-I` ⇒ không đo được; đối chứng có hook ⇒ ngoài vùng; đột biến bỏ phần giải theo ngữ cảnh chết ở ca symlink tương đối.
+- R16-2: mọi đường ra của `chay_quan_sat` và bộ chạy `tu-kiem` sau khi sinh con (bình thường, hết giờ, ngoại lệ, KeyboardInterrupt khi đang chờ) đều dọn nhóm do hàm sở hữu (TERM rồi KILL, có trần) trước khi nhả danh tính ấy; không bắn tín hiệu vào PGID/PID có thể đã bị cấp lại; ném lại ngoại lệ gốc. Ca khoá cha bị ngắt khi con gốc đã thoát và cháu cùng nhóm (có cháu bỏ qua TERM) hẹn ghi dấu; tiến trình đối chứng ngoài nhóm phải sống; đối chứng khoẻ; nhánh `DON KHONG HET` có ca. Đột biến: bỏ dọn ở đường ngắt; bỏ KILL.
+- R16-3: ghi giới hạn tách nhóm (`GIOI_HAN_QUAN_SAT` cạnh kết quả, và trong `KET_QUA.md`), ca đối chứng cháu tự `setsid` chỉ ghi giới hạn; KHÔNG khai vá phần này.
+- Mọi ca/đột biến đã có (R15-1…R15-4, T1–T48, D1–D12, c78–c86, tu-kiem) giữ nguyên răng. Mỗi đột biến mới phải chết đúng ca, đúng lý do (không tín dụng giả).
+- Chạy lại đủ Nghiệm thu 1–9 trên mã mới và cập nhật `KET_QUA.md` bằng đầu ra thật.
+
+QUY TRÌNH:
+- Sửa tối thiểu; giữ idiom chú thích của kho.
+- `python3 -m ruff check --select F` trên các tệp .py đã đổi: DELTA so với base phải = 0.
+- Cần `actionlint` VÀ `shellcheck`.
+- `core.abbrev 7`. Không in hay đọc bí mật. Không viết nguyên văn dấu bỏ-qua-CI vào commit message.
+- Trần kích thước (nang_tran r16): ≤ 6 tệp và ≤ 2100 dòng thêm theo `git diff --numstat 1260fa0 HEAD`. Đo trước khi báo xong; vượt ⇒ DỪNG (ADR-0044), không cắt ca hay đột biến cho vừa trần.
+- COMMIT CỤC BỘ, KHÔNG PUSH. Chủ kho phải audit exact-H trước lần đẩy đầu.
+
+BÁO CÁO CUỐI (handoff §7), in ra ở cuối đầu ra:
+- SHA H, cây H, SHA base, numstat từng tệp;
+- dòng kết luận của các lệnh trong Nghiệm thu 1–5 cùng `tu-kiem` và `tu-kiem --dot-bien` (số N/N và M/M);
+- với từng R16-x: tên ca khoá, tên đột biến, kết quả đo;
+- ruff delta;
+- danh sách chỗ chưa đo được;
+- mọi chỗ đặc tả chưa rõ mà bạn đã chọn cách hiểu.

@@ -85,3 +85,5 @@ requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
 dieu_kien_ap_dung: 'ADR-0060 (mặc định theo ADR-0062): M1 0 P0–P2, P3 đóng có xác nhận reviewer; M2 review theo lớp; M3 Windows required (diff chạm *.sh, .claude/dev/**); M5 push một lần; M6 draft + @codex review; M9 full_mutant_audit; M12 hồ sơ trên Issue #1488.'
+da_bi_thay_the: wp1488-r6-g7-claude
+da_bi_thay_the_ghi_chu: 'đặc tả đổi sang r6 lúc 2026-11-26T17:48:08Z (chủ kho duyệt, issuecomment-7199661828); g6 chưa push nhánh code.'

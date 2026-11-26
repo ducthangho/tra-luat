@@ -1,0 +1,83 @@
+1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c  ops/reviews/wp1236-r10-soan/quet_dot_bien.py
+b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38  ops/gate_output_doi_chieu.py
+752d463b8ae587b67e6ec5e219b52ffda1d9137afd3f0ac3c474bc4cc708adc8  ops/gate_output_doi_chieu_test.py
+191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740  /tmp/claude-0/-home-user-tra-luat/03a850e9-78c2-574c-a645-5c57b9a98621/scratchpad/l5/luat9/kho_A.jsonl
+HOI_QUY 201 · AP_DUNG 148 · KHONG_AP_DUNG 53
+KHONG_AP_DUNG kho:delete_return_227 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:identity_72_67 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:ref_any_run neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:ref_no_boundary neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:ref_txt_wild neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_40 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_44 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_45 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_46 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_58 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_59 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_delimiter_8212 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:token_no_whitespace neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_header_run_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_header_attempt_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_job_id_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_skip_old_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_skip_new_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_moc_numerator_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_moc_denominator_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_landed_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_token_leading_space neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_token_separator_space neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r9b_reason_no_spaces neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_url_digits_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_date_year_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_date_month_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_date_day_ascii neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_reason_ascii_nonspace neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_url_ascii_nonspace neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_token_leading_horizontal neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_token_separator_horizontal neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_header_run_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_header_attempt_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_job_id_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_skip_old_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_skip_new_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_moc_numerator_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_moc_denominator_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r10_landed_two_blocks neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_url_bmp_only neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_url_no_zero_width neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_url_no_combining neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_url_no_control neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_reason_bmp_only neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_reason_no_zero_width neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_reason_no_combining neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_reason_no_control neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_word_ascii_first neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_word_ascii_last neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_token_single_ws neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_token_no_nel neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+KHONG_AP_DUNG kho:r11_run_no_arabic neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo
+SONG j1:_la_so:85:11 
+SONG j1:_kiem_tep:126:7 
+SONG k3:_kiem_tep:128:7 
+SONG j1:_kiem_tep:131:7 
+SONG j1:_kiem_tep:154:11 
+SONG j1:kiem_mien:264:25 
+SONG j1:kiem_ho_so:273:11 
+SONG i7:doc_danh_gia:66:16 
+SONG e:error:303:25 
+SONG j1:kiem_ho_so:287:19 
+SONG j1:doc_danh_gia:72:43 
+SONG h2:BO_SINH 
+SONG h2:PHI_LOI_KHAI 
+SONG h2:TOKEN 
+SONG i4:RE_TOKEN:luong_tu@13 +→* 
+SONG kho:identity_126_7 
+SONG kho:identity_131_7 
+SONG kho:identity_154_11 
+SONG kho:identity_262_25 
+SONG kho:identity_271_11 
+SONG kho:identity_285_19 
+SONG kho:identity_85_11 
+SONG kho:r11_consumer_ascii_conclusion 
+TONG 946 · GIET 923 · SONG_SACH 23 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0
+HOAN_TAT neo={"cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c", "goc": "b8e9d66ac08c6aee9bd282353a227e4092caa691d493ec1e05058fa5b037fa38", "kho": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740", "manifest": "2a2484eb81abf4c391f56903a6824396f7b84ddd424314ff0d403208f07c473b", "python": "3.13.18", "test": "752d463b8ae587b67e6ec5e219b52ffda1d9137afd3f0ac3c474bc4cc708adc8"}

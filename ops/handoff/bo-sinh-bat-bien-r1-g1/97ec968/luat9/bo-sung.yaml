@@ -1,0 +1,38 @@
+schema_version: 1
+# Handoff BO SUNG cho luot 4: buoc 8 (luat 9) tren DUNG ung vien 97ec968. Khong doi ma, khong doi SHA.
+packet_id: bo-sinh-bat-bien
+packet_issue: 1539
+revision: 1
+generation: 1
+luot_handoff: 4
+bo_sung_cho: ops/handoff/bo-sinh-bat-bien-r1-g1/97ec968/handoff.yaml
+head_sha: 97ec9686184fdf55dc1736007e6fdcb186122465
+base_sha: a89c83acf998008caecba9084a7d295845bf1976
+buoc_8:
+  status: passed
+  cong_cu: 'ops/reviews/wp1236-r10-soan/quet_dot_bien.py do, sha256 1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c (in o dau moi do.log); Python 3.13.18; --song-song 4'
+  cap_B:
+    module: ops/land_evidence_nguon.py
+    test: ops/land_evidence_nguon_test.py
+    kho: 'rong (0 byte)'
+    nen: {tong: 624, GIET: 438, SONG: 173, VO_CAN: 13, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0}
+    sau: {tong: 624, GIET: 438, SONG: 173, VO_CAN: 13, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0}
+    GIET_sang_hang_khac: 0
+    doi_hang_bat_ky: 0
+    doi_ca_giet: 0
+  cap_A:
+    module: ops/gate_output_doi_chieu.py
+    test: ops/gate_output_doi_chieu_test.py
+    kho: 'kho_dot_bien_luot6_7_8_9_10_11.jsonl @ e767abc (201 ID, sha256 191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740): HOI_QUY 201 · AP_DUNG 148 · KHONG_AP_DUNG 53 o ca hai ve'
+    nen: {tong: 946, GIET: 923, SONG: 23, VO_CAN: 0, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0}
+    sau: {tong: 946, GIET: 923, SONG: 23, VO_CAN: 0, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0}
+    GIET_sang_hang_khac: 0
+    doi_hang_bat_ky: 0
+    doi_ca_giet: 0
+  so_sanh: 'luat9/so-A.md, luat9/so-B.md (cong-cu/so_base_head.py): inventory trung tung id va sha256, cung neo cong_cu/goc/manifest/kho/python; KET LUAN ca hai: KHONG HOI QUY'
+  no_co_san_ngoai_pham_vi: 'cap B: 173 SONG va 13 VO_CAN (giong o base); cap A: 23 SONG va 53 dong kho KHONG_AP_DUNG (giong o base). Khong gop, khong tinh la GIET'
+  le_trinh: 'luat9/tong.log: B-sau 16:13:16Z -> 17:28:50Z · B-nen 17:28:50Z -> 17:30:38Z · A-sau 17:30:38Z -> 18:55:20Z · A-nen 18:55:20Z -> 18:57:19Z (2026-11-26)'
+  hai_luot_nen_dung_lai_ket_qua: 'tep test va module o base khong doi so voi cac luot truoc nen thu muc ra B-nen, A-nen dat san kq.jsonl cua luot truoc; cong cu ghim van chay BASELINE day du tren base roi dung lai ket qua vi neo va (id, sha256) khop. kq.jsonl moi cua hai luot nen trung TUNG BYTE voi luot 1 (da cmp). Hai luot sau chay moi hoan toan tren 97ec968.'
+  ba_luot_mat_truoc_do: 'luot bat dau 14:18Z va 15:38Z deu mat giua chung vi container cua phien executor bi thu hoi khi phien ranh (uptime 0 phut luc 16:13Z); cong cu chi ghi kq.jsonl khi xong nen khong co ket qua nao tu cac luot ay duoc dung'
+  hien_vat: 'luat9/<cap>-<ve>/{do.log,kq.jsonl,SHA256SUMS-D}; manifest.jsonl va tat_ca.jsonl khong dua vao (13-21 MB), chi ghi bam; da cmp: nen == sau o ca hai cap'
+con_chua_do: ['ci-dot-bien-du.yml tren head (M9)', 'CI tren PR', 'connector', 'audit uy quyen', 'kiem-merge']

@@ -1,0 +1,687 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "generation": null,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "db910d45ebad43fcac651bddef582b20",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "db910d45ebad43fcac651bddef582b20",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "source": "Supplied runs/db910d45/run.json identifies openai_codex/codex_cli/machine; serving-model/effort fields absent. No GitHub actor inference."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "a2c46a5fc2a966b3fec3255b927185016224d1c0",
+  "reviewed_tree": "e833a6d25d3fe2f645ad75b737d1633803019c11",
+  "reviewed_file_sha256": "b9aafbed592de5be6e22db2a02fe38e5e68b9e3ff1f427120cf7ab8e1cbfa2fa",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "name": "exact-object-preflight",
+      "status": "passed",
+      "evidence": {
+        "command": "git status --short; git rev-parse HEAD HEAD^{tree} origin/master; sha256sum ops/specs/wp1463-r1/SPEC.md",
+        "exit_code": 0,
+        "observed_output": "Clean detached a2c46a5fc2a966b3fec3255b927185016224d1c0; tree e833a6d25d3fe2f645ad75b737d1633803019c11; expected spec SHA-256 matches."
+      }
+    },
+    {
+      "name": "K8-predicate-and-rollback",
+      "status": "passed",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/checks.py",
+        "exit_code": 0,
+        "observed_output": "Both verbatim predicate lines occur once. Installed and complete rollback true/true; NHE-only false/false; NHE+MAU_NHE false/true; other entries unchanged, fallback day_du 30/30. Source-drift controls: A1 or M2 expression changed => rejected; indentation-only => accepted.",
+        "artifact": "/tmp/wp1463-review12-db910d45/k8.json",
+        "source_drift_artifact": "/tmp/wp1463-review12-db910d45/source-drift-controls.json"
+      }
+    },
+    {
+      "name": "aggregate-child-coverage-counterexample",
+      "status": "failed",
+      "meaning": "Required coverage property fails; probe itself exits zero.",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/checks.py",
+        "exit_code": 0,
+        "observed_output": "All three variants: rc=0; READ_OK 26576; Python spawns=1, child hook starts=1; hidden_read_observed=false. The aggregate test passes.",
+        "artifact": "/tmp/wp1463-review12-db910d45/checks.log"
+      }
+    },
+    {
+      "name": "legacy-floor-mutation-observability",
+      "status": "failed",
+      "meaning": "Advertised T8/T18 repair fails in the focused behavior prototype; no full suite executed.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/checks.py",
+          "exit_code": 0,
+          "observed_output": "Exact master ten_kh/du/ok expressions and immutable T8/T18/T19 replacements: T8 and T18 have identical final outcomes to control on all seven c66 result lists; T19 makes the healthy outcome non-green.",
+          "artifact": "/tmp/wp1463-review12-db910d45/floor.json"
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/floor_target.py",
+          "exit_code": 0,
+          "observed_output": "Bounded prototype executing master main/c66 with the independent identity check plus legacy floor and a nonempty healthy TU_KIEM mock: control rc=0; T8 rc=0 SONG_SOT; T18 rc=0 SONG_SOT; T19 rc=3 GIET. Every mutation anchor occurs exactly once. This is a focused prototype, not an implementation or full H gate.",
+          "artifact": "/tmp/wp1463-review12-db910d45/floor-target.json"
+        }
+      ]
+    },
+    {
+      "name": "fixture-selector-regex-and-seven-removals",
+      "status": "passed",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/extra_checks.py",
+        "exit_code": 0,
+        "observed_output": "30/30 rows; exact fixture hash; Z=11; seven removals all detected. Light/full regexes exclusive; zero M, incomplete CA and failed TU rejected; full env removes flag.",
+        "artifact": "/tmp/wp1463-review12-db910d45/extra.json"
+      }
+    },
+    {
+      "name": "real-phan-chung-timing-and-per-spawner-audit",
+      "status": "passed",
+      "evidence": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/tmp/wp1463-review12-db910d45/hook AUDIT_OPEN_LOG=/tmp/wp1463-review12-db910d45/real-audit.tsv python -B /tmp/wp1463-review12-db910d45/probe.py /tmp/wp1463-review12-db910d45/master",
+        "exit_code": 0,
+        "observed_output": "PHẢN CHỨNG: 1677/1677 đỏ đúng; ok=true; elapsed=297.371225316 s. Exactly one real call. Audit: 79 Python spawn events, 91 child hook starts; parents 47 and 49 each spawn 1 child with 0 corresponding starts. Seven tracked opens, ci.yml witness present, no outside-Z file, no unresolved dir_fd.",
+        "artifacts": [
+          "/tmp/wp1463-review12-db910d45/real-phan-chung.log",
+          "/tmp/wp1463-review12-db910d45/real-audit-summary.json"
+        ],
+        "limits": "Timing includes hook overhead. One observation, not executor 5/5 replication. Scratch archive has no .git. Real call uses unmodified master registry (all four PR2 keys absent), matching restored rollback state; no full installed-H gate claimed."
+      }
+    },
+    {
+      "name": "full-ci-provenance-suite",
+      "status": "not_run",
+      "evidence": "Explicitly prohibited by assignment; no full 12-minute suite invoked."
+    },
+    {
+      "name": "live-GitHub-authority-CI-Windows-and-serving-model",
+      "status": "not_run",
+      "evidence": "No GitHub writes/dispatch, no remote authority claims, no Windows execution; serving model/effort telemetry unavailable. Model family follows codex provider under ADR-0065."
+    },
+    {
+      "name": "bare-Ruff-and-Ruff-contract",
+      "status": "not_run",
+      "evidence": "Spec review only; no repository code edits. No Ruff pass claimed."
+    },
+    {
+      "name": "A3-old-formula-synthetic-controls",
+      "status": "passed",
+      "evidence": {
+        "command": "python -B /tmp/wp1463-review12-db910d45/a3_controls.py",
+        "exit_code": 0,
+        "observed_output": "Frozen dat/ten_kh/du/xau/loi_tk/ok ASTs match current master. Ten focused controls satisfy tong_hai_chieu: healthy and valid equivalent green; infrastructure, timeout and missing results non-green; killed equivalence and failed CA red.",
+        "artifact": "/tmp/wp1463-review12-db910d45/a3-controls.json",
+        "limits": "Specification interpretation, not future implementation validation. For a coherent healthy run, step 3 cannot turn green to non-green: nonempty exact plans, passed CA, accepted grades and matched TU imply ok_cu_E=true."
+      }
+    },
+    {
+      "name": "review-checkout-end-snapshot",
+      "status": "passed",
+      "evidence": {
+        "command": "Python hash snapshot of git ls-files cached/other/ignored; git rev-parse HEAD HEAD^{tree}; git diff --binary; git diff --cached --binary",
+        "exit_code": 0,
+        "observed_output": "17708 files at both endpoints, zero hash deltas; exact HEAD/tree unchanged; both diffs empty. Pre-existing ignored .codex/ observed.",
+        "artifact": "/tmp/wp1463-review12-db910d45/snapshot-summary.json"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR2-S13",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 225
+      },
+      "claim": "Revision 12 restores the aggregate rule already disproved in round 11. Disclosing its masking limitation does not close the prior finding: a phase can pass every aggregate-coverage condition while a directly spawned Python child reads a tracked out-of-zone file unobserved. This is an accepted-observation boundary proposal, not a repaired full-zone proof; protocol §8.3 prohibits recording an acceptance cut as ĐÃ VÁ THẬT. The r11 per-spawner alternative also rejects the measured healthy real registry; it must not be reinstated unchanged.",
+      "hostile_input": "Read the in-zone ci.yml witness, start an ordinary hooked Python via /bin/sh, then directly start Python with -S, -I or -E to read tracked CONTEXT.md (outside Z and excluded by GOC). All commands exit zero. The shell child supplies the surplus observer start that conceals the isolated direct child.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/checks.py",
+          "exit_code": 0,
+          "observed_output": "All three variants: rc=0; READ_OK 26576; Python spawns=1, child hook starts=1; hidden_read_observed=false. The aggregate test passes.",
+          "artifact": "/tmp/wp1463-review12-db910d45/checks.log"
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/tmp/wp1463-review12-db910d45/hook AUDIT_OPEN_LOG=/tmp/wp1463-review12-db910d45/real-audit.tsv python -B /tmp/wp1463-review12-db910d45/probe.py /tmp/wp1463-review12-db910d45/master",
+          "exit_code": 0,
+          "observed_output": "PHẢN CHỨNG: 1677/1677 đỏ đúng; ok=true; elapsed=297.371225316 s. Exactly one real call. Audit: 79 Python spawn events, 91 child hook starts; parents 47 and 49 each spawn 1 child with 0 corresponding starts. Seven tracked opens, ci.yml witness present, no outside-Z file, no unresolved dir_fd.",
+          "artifacts": [
+            "/tmp/wp1463-review12-db910d45/real-phan-chung.log",
+            "/tmp/wp1463-review12-db910d45/real-audit-summary.json"
+          ],
+          "limits": "Timing includes hook overhead. One observation, not executor 5/5 replication. Scratch archive has no .git. Real call uses unmodified master registry (all four PR2 keys absent), matching restored rollback state; no full installed-H gate claimed."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Acceptance 4 coverage contract, residual-risk/authority record, and S13 history. The defect is in the current acceptance rule, not merely in the retired helper.",
+        "how": "Keep S13 unresolved. For a full-zone claim, use observation tied to each relevant child/read and distinguish successfully started processes from spawn attempts; any exclusion for deliberately killed registry fixtures needs evidence that excluded executions cannot read tracked inputs. Alternatively obtain a specific owner decision accepting the reduced guarantee, record the unresolved scope and successor, and stop describing this as a coverage repair.",
+        "locking_test_and_mutant": "Retain mixed shell/direct -S/-I/-E probes for every phase and a healthy real-registry control. A mutant replacing child-associated evidence with total counts must fail; also test killed-before-hook fixtures so a proposed repair does not reject every healthy registry run.",
+        "regression_risk": "A naive per-parent/PID count rejects intentionally killed descendants; an aggregate fallback reopens the same hole. OS tracing may require capabilities not yet provisioned."
+      }
+    },
+    {
+      "id": "PR2-S17",
+      "class_slug": "legacy-mutation-observability-shadowed",
+      "severity": "P2",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 164,
+        "related": [
+          "ops/specs/wp1463-r1/SPEC.md:200",
+          "ops/specs/wp1463-r1/SPEC.md:214",
+          "ops/specs/wp1463-r1/SPEC.md:490"
+        ]
+      },
+      "claim": "The new runtime floor does not make T8 and T18 change TONG as claimed. Step 2 already rejects every missing, duplicated or reordered mutation result on which these weakening mutants change legacy ok/du; when step 2 permits execution, those legacy predicates are already true. T19 is distinguishable on the healthy case, but T8/T18 need an independent observation of the legacy calculation. The advertised remedy is incomplete, not proof that I-a/Acceptance 1 can be met by adding the floor alone.",
+      "hostile_input": "Use the real c66 mutation-result cases: missing one result, empty results, a duplicated name, reversed names, or an extra result. Keep every recorded grade GIET and healthy CA/TU_KIEM. T8 can turn legacy ok true and T18 can turn du true, while A+3 step 2 still returns khong_ket_luan in both original and mutant.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/checks.py",
+          "exit_code": 0,
+          "observed_output": "Exact master ten_kh/du/ok expressions and immutable T8/T18/T19 replacements: T8 and T18 have identical final outcomes to control on all seven c66 result lists; T19 makes the healthy outcome non-green.",
+          "artifact": "/tmp/wp1463-review12-db910d45/floor.json"
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1463-review12-db910d45/floor_target.py",
+          "exit_code": 0,
+          "observed_output": "Bounded prototype executing master main/c66 with the independent identity check plus legacy floor and a nonempty healthy TU_KIEM mock: control rc=0; T8 rc=0 SONG_SOT; T18 rc=0 SONG_SOT; T19 rc=3 GIET. Every mutation anchor occurs exactly once. This is a focused prototype, not an implementation or full H gate.",
+          "artifact": "/tmp/wp1463-review12-db910d45/floor-target.json"
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Section 4 step 3 and the c66 adaptation/Acceptance 2 obligations, because I-a fixes the mutation tuples and their c66 target.",
+        "how": "Remove the false assertion that the floor alone makes all three change TONG. Preserve the immutable mutation tuples and require c66 to observe the legacy evaluator independently as well as the composed result (for example via one shared pure evaluator used at runtime). An isolated legacy false-versus-true assertion can distinguish T8/T18 without weakening A+3 identity checks.",
+        "locking_test_and_mutant": "On the healthy original, c66 must pass. Apply each unchanged T8/T18/T19 tuple and require rc=3 with DO:c66 and GIET; specifically missing results must change the isolated T8 decision and reordered same-length results the isolated T18 decision. Also retain final TONG non-green for those malformed results and green for healthy runs.",
+        "regression_risk": "Do not bypass step 2 to manufacture kills, duplicate the legacy expression (which breaks unique anchors), test source text instead of behavior, or change the immutable tuples. A direct legacy-unit observation is feasible; no claim is made that every possible implementation is unkillable."
+      }
+    },
+    {
+      "id": "PR2-S08",
+      "class_slug": "budget-authority-revision-misattributed",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 310
+      },
+      "claim": "The active cumulative-budget paragraph still declares author 11/11 (revision 11 này) and review 10/11, while the same paragraph declares limits 12/12, lists completed round 11, schedules round 12, and states author used 12/12. These are mutually inconsistent current counters, not a separately labelled historical snapshot.",
+      "hostile_input": "A dispatcher reads the active Đã dùng counters before the last spec review and infers two reviews remain from 10/12 or one from 10/11; the assigned current round is 12 of 12, leaving none after this run.",
+      "evidence": [
+        {
+          "command": "sed -n '310p' ops/specs/wp1463-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "One active paragraph contains tác giả 11/11 (revision 11 này), review đặc tả 10/11, mức hiện hành ... 12 ... 12, and Tác giả đã dùng 12/12. Prompt assigns this review round 12 of 12."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "The single active Hai bộ đếm paragraph; historical revision sections may retain dated old values.",
+        "how": "State author used 12/12 and spec review used 11/12 before this call / 12/12 including this call. Move old 11/11 and 10/11 values into explicitly dated history or delete the stale active fragments. Preserve author, spec-review and code-review axes separately.",
+        "locking_test_and_mutant": "Walk the enumerated calls including no-verdict calls and compare with the one active total at admission and completion. Reintroducing 10/11 as current must be detected; no review budget remains after round 12.",
+        "regression_risk": "Do not omit no-verdict rounds or count the waived r11 review as an executed additional round; do not borrow from code-review/connector budgets."
+      }
+    },
+    {
+      "id": "PR2-S18",
+      "class_slug": "revision12-stale-active-contract",
+      "severity": "P3",
+      "location": {
+        "path": "ops/specs/wp1463-r1/SPEC.md",
+        "line": 65,
+        "related": [
+          "ops/specs/wp1463-r1/SPEC.md:314",
+          "ops/specs/wp1463-r1/SPEC.md:347"
+        ]
+      },
+      "claim": "Active statements outside the dated change log contradict the r12 replacements: section 3 says K8 calls real phan_chung and its opens belong to the suite; rollback says K8 measures phan_chung passing; chua_do_duoc still calls 450 lines the cap. R12 K8 explicitly forbids that call and the active size contract is 1500. The seven-path zone and four-file write set themselves remain consistent.",
+      "hostile_input": "An executor follows section 3/rollback and reintroduces a real phan_chung call into K8, violating the new performance contract; or treats the active 450-line unknown as a current limit despite the 1500-line nang_tran.",
+      "evidence": [
+        {
+          "command": "sed -n '65p;191p;258,264p;314p;347p' ops/specs/wp1463-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "Section 3: ca K8 gọi phan_chung() THẬT; rollback: K8 đo (phan_chung đạt...); K8: KHÔNG gọi phan_chung(); current size <=1500; chua_do_duoc asks whether additions fit trần 450."
+        }
+      ],
+      "suggested_fix": {
+        "where_and_why": "Section 3 zone rationale, active rollback paragraph, and chua_do_duoc size statement. These are current operational descriptions, unlike dated r3/r7 measurement history.",
+        "how": "Make K8 refer to the two predicates and source-drift guard; attribute full phan_chung observation to the independent vung probes and registry gate. Update the current unmeasured implementation-fit question to 1500, retaining 450 only as the old cap in nang_tran/history.",
+        "locking_test_and_mutant": "Read one end-to-end K8/vung/rollback sequence and one size decision at +515 and +1501 lines. The first must not require a K8 phan_chung call or reject +515 solely for exceeding 450; +1501 must still stop.",
+        "regression_risk": "Do not shrink Z just because K8 no longer calls phan_chung: independent probes still require its tracked inputs. Raising a cap does not expand the four-file write set."
+      }
+    }
+  ],
+  "verdict": "blocked",
+  "content_disposition": "changes_requested",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "class_table": [
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-S13"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "common_fix": "Keep unresolved coverage/authority scope explicit; child-associated evidence or independently observed reads must separate hidden readers from intentional killed fixtures.",
+      "closure_test": "Mixed shell/direct -S/-I/-E plus healthy real registry; aggregate-count mutant must fail.",
+      "manifestation_count": 1
+    },
+    {
+      "class_slug": "legacy-mutation-observability-shadowed",
+      "finding_ids": [
+        "PR2-S17"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 12,
+      "source_sha": "a2c46a5fc2a966b3fec3255b927185016224d1c0",
+      "common_fix": "Retain floor and identity guards; expose one legacy calculation to c66 independently, preserving immutable tuples and unique anchors.",
+      "closure_test": "Original healthy c66 passes; unchanged T8/T18/T19 each produce rc3 DO:c66, GIET.",
+      "manifestation_count": 2
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "finding_ids": [
+        "PR2-S08"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "common_fix": "One current author total and one current review total; date old counters.",
+      "closure_test": "Author 12/12; review 11/12 before this call, 12/12 including it; no remaining spec-review call.",
+      "manifestation_count": 2
+    },
+    {
+      "class_slug": "revision12-stale-active-contract",
+      "finding_ids": [
+        "PR2-S18"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 12,
+      "source_sha": "a2c46a5fc2a966b3fec3255b927185016224d1c0",
+      "common_fix": "Reconcile active K8, rollback and size prose with two predicates, independent probes and the 1500-line limit.",
+      "closure_test": "No real phan_chung inside K8; +515 is within raised line limit, +1501 stops; four-file write set unchanged.",
+      "manifestation_count": 3
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "PR2-S13",
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "label": "CHƯA VÁ",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "evidence": "All three mixed-child probes rerun successfully conceal tracked out-of-zone reads. R12 deliberately drops association and admits the gap; this is an acceptance reduction, not closure."
+    },
+    {
+      "id": "PR2-S16",
+      "class_slug": "prelease-zone-gate-stale-active-contract",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "evidence": "Active lines 249, 308 and 349 consistently place blob-only before lease and vung after lease/on H; the former pre-lease fixture/Số đo mandate is removed."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [
+        "PR2-S01"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Structured exception classifier, strict child-result identity, ordered composition and cached baseline status remain explicit. No observed specification relapse; future code must execute these controls.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [
+        "PR2-S02"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Step 2 retains duplicate, order, cardinality, empty-plan and unexpected-equivalence-key checks in both modes.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [
+        "PR2-S03"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "A+3 elements retain verbatim reason and confirming identity keyed by mutation name, including killed equivalence claims.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Acceptance 2 is byte-identical to r6: full tuples, raw cu, nine independent predicates and E-aware controls. Focused synthetic controls passed. S17 is a different observability mechanism.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [
+        "PR2-S05"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Current-master prototype deletes all four keys in place; other suites unchanged; full fallback 30/30; A1/M2 discriminate both partial removals. Real unmodified registry also passes.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [
+        "PR2-S06"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Read active predecessor conditions: landed requires four provenance anchors and bookkeeping; lease exclusion remains separate. No live predecessor authorization asserted.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [
+        "PR2-S07"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Current default applicability paragraph equals r6: no opt-in bypass; exact-H Windows evidence/waiver and K7 retained.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "finding_ids": [
+        "PR2-S08"
+      ],
+      "status": "VÁ HỜ",
+      "scope": "Reopened: contradictory active totals at line 310 (PR2-S08).",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [
+        "PR2-S09"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Five-decision ledger section equals r6 and retains exact original references. No new decision or live receipt verified.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [
+        "PR2-S10"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Z includes both workflows and both B1a fixture paths; all seven removal mutants detected. Real registry opened seven tracked in-zone files. Full H suite closure remains unmeasured.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-S11"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Specification-level boundary only: separate phase witnesses/rc and explicit fingerprints retained; stale pre-lease directives removed. No claim retired helper or future H implementation is repaired.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "finding_ids": [
+        "PR2-S12"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Read combined-evidence path: preserve collector not_measured; supplemental source must match run/attempt/head/job/log identity and positive evidence. No single-collector-only relapse.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "zone-audit-open-coverage-incomplete",
+      "finding_ids": [
+        "PR2-S13"
+      ],
+      "status": "CHƯA VÁ",
+      "scope": "r12 explicitly restores aggregate matching and narrows acceptance. Mixed-child proof rerun; disclosure is not closure under §8.3.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "zone-mutation-count-stale",
+      "finding_ids": [
+        "PR2-S14"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Current table hash matches 30 rows, Z=11, seven VUNG_THEM entries and seven detectable removals.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "registry-unchanged-evidence-overclaim",
+      "finding_ids": [
+        "PR2-S15"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "scope": "Dated drift section correctly distinguishes eleven unchanged definitions from changed MOI; current master blobs were separately compared with lease base.",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f"
+    },
+    {
+      "class_slug": "prelease-zone-gate-stale-active-contract",
+      "finding_ids": [
+        "PR2-S16"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 11,
+      "source_sha": "0b46bcb7087e0517a241ec6b9c53af01ebd0bb5f",
+      "scope": "All three cited active locations now say blob-only before lease, conditional early vung after lease, and final vung on H. B1a/B2 landed and exclusion prerequisites retained."
+    }
+  ],
+  "executor_reported_contradictions": [
+    {
+      "name": "K8 full phan_chung cost",
+      "status": "verified; K8 redesign works within its two-predicate scope",
+      "evidence": "One real call 297.371 s, rc0, 1677/1677. Three such calls exceed the 300-second case budget. Both literal predicates, source anchors, complete rollback and two partial removals verified on current master. S18 retains stale K8 prose."
+    },
+    {
+      "name": "per-spawner rule rejects real registry",
+      "status": "verified; aggregate workaround retains S13",
+      "evidence": "Actual positive run: 79 spawns/91 hook starts, two per-parent 1/0 deficits. Explicitly matches the killed-grandchild fixture shape, not proof of the exact instant each child was killed. Three mixed-child escapes still pass the aggregate condition."
+    },
+    {
+      "name": "old mutation formula becomes unobservable",
+      "status": "partially addressed",
+      "evidence": "T19 killed in focused prototype; T8/T18 survive through final TONG. Their isolated legacy values differ, so a separate behavior observation is feasible. Healthy controls and E-aware implication stay consistent. S17."
+    },
+    {
+      "name": "size cap insufficient",
+      "status": "new cap structurally valid; partial-head size not independently measurable",
+      "evidence": "nang_tran supplies ai_nang/can_cu/tran_cu/tran_moi; 6 files/1500 additions cap, exactly four writable paths. eb3b291 object absent (git cat-file rc128), so +515 cannot be remeasured. Old active 450 reference is S18."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Object/authority/surface",
+      "result": "Exact object and assignment match; no executor lease assumed for spec review."
+    },
+    {
+      "direction": "K8 complete/partial rollback and drift",
+      "result": "Current predicates verified; partial states distinguished; stale whole-spec call claims found."
+    },
+    {
+      "direction": "Descendant observation and hostile interpreter flags",
+      "result": "Real registry per-parent false rejection verified; mixed shell/direct masking reproduced for -S/-I/-E."
+    },
+    {
+      "direction": "A+3 ordered rules and legacy mutants",
+      "result": "T8/T18 floor masking reproduced; T19 distinguishable; isolated observer suggested."
+    },
+    {
+      "direction": "Zone table/data selector/regex",
+      "result": "30 rows hash verified, all seven removal mutants detected, environment and positive/negative regex controls passed."
+    },
+    {
+      "direction": "Old preservation/identity/child-result classes",
+      "result": "Read entire contract; nine-predicate acceptance unchanged versus r6; structured states and ordered composition retained."
+    },
+    {
+      "direction": "Dependencies/pre-lease ordering/provenance",
+      "result": "S16 repaired; combined evidence and landed/exclusion distinctions retained; remote live status not asserted."
+    },
+    {
+      "direction": "Budget/size/write-set consistency",
+      "result": "S08 reopens; stale 450 found; six-file ceiling does not authorize fifth file."
+    },
+    {
+      "direction": "Risk of source-only/tautological evidence",
+      "result": "All executable prototypes labelled bounded; full suite, future H and unmeasured receipts not claimed passed."
+    }
+  ],
+  "measure_table": [
+    {
+      "property": "exact-object-preflight",
+      "status": "passed",
+      "evidence_ref": "tests.exact-object-preflight"
+    },
+    {
+      "property": "K8-predicate-and-rollback",
+      "status": "passed",
+      "evidence_ref": "tests.K8-predicate-and-rollback"
+    },
+    {
+      "property": "aggregate-child-coverage-counterexample",
+      "status": "failed",
+      "evidence_ref": "tests.aggregate-child-coverage-counterexample"
+    },
+    {
+      "property": "legacy-floor-mutation-observability",
+      "status": "failed",
+      "evidence_ref": "tests.legacy-floor-mutation-observability"
+    },
+    {
+      "property": "fixture-selector-regex-and-seven-removals",
+      "status": "passed",
+      "evidence_ref": "tests.fixture-selector-regex-and-seven-removals"
+    },
+    {
+      "property": "real-phan-chung-timing-and-per-spawner-audit",
+      "status": "passed",
+      "evidence_ref": "tests.real-phan-chung-timing-and-per-spawner-audit"
+    },
+    {
+      "property": "full-ci-provenance-suite",
+      "status": "not_run",
+      "evidence_ref": "tests.full-ci-provenance-suite"
+    },
+    {
+      "property": "live-GitHub-authority-CI-Windows-and-serving-model",
+      "status": "not_run",
+      "evidence_ref": "tests.live-GitHub-authority-CI-Windows-and-serving-model"
+    },
+    {
+      "property": "bare-Ruff-and-Ruff-contract",
+      "status": "not_run",
+      "evidence_ref": "tests.bare-Ruff-and-Ruff-contract"
+    },
+    {
+      "property": "A3-old-formula-synthetic-controls",
+      "status": "passed",
+      "evidence_ref": "tests.A3-old-formula-synthetic-controls"
+    },
+    {
+      "property": "review-checkout-end-snapshot",
+      "status": "passed",
+      "evidence_ref": "tests.review-checkout-end-snapshot"
+    }
+  ],
+  "environment": {
+    "os": "Linux",
+    "sandbox_mode": "workspace-write (repository held read-only by task; scratch /tmp)",
+    "master_sha": "1260fa0cba89353911e2f97188b2c04dab8139d7",
+    "base_sha": "4a96ccd2774b67406b8cd4110f7e574cfa82bc6d",
+    "master_note": "Registry, suite and product blobs are identical between lease base and local origin/master; all behavioral probes use scratch archive of origin/master, not old code at spec-branch HEAD.",
+    "scratch": "/tmp/wp1463-review12-db910d45",
+    "python": "3.13.18",
+    "cpu_count": 4,
+    "actionlint": "/root/.local/bin/actionlint",
+    "shellcheck": "/usr/bin/shellcheck",
+    "scratch_copy_kind": "git archive origin/master; no .git in measurement copy"
+  },
+  "budget": {
+    "author_used": 12,
+    "author_limit": 12,
+    "spec_review_round": 12,
+    "spec_review_limit": 12,
+    "remaining_after_this_round": 0
+  },
+  "notes": [
+    "Whole-spec review, not only r12 delta. Four open classes (2 P2, 2 P3); approval requires zero findings.",
+    "Verdict blocked because this is the last 12/12 spec-review round and S13 remains recurrent; content disposition changes_requested. Human checkpoint under protocol §12, not automatic round 13.",
+    "PR2-S16 is closed at specification level. S13 is not closed by explicitly reducing acceptance (§8.3). No owner waiver of this finding is asserted.",
+    "No repository edit, commit, push, GitHub write or workflow dispatch. Scratch prototypes are bounded evidence, not executor patches. Full ci_provenance_test.py suite was not run.",
+    "The +515 partial head is unavailable; actual final implementation fit within 1500 lines and all exact-H gates remain unmeasured. A six-file ceiling does not authorize writing a fifth file.",
+    "Model/effort serving telemetry unavailable; ADR-0065 permits family inference from Codex provider. Launcher terminal rc, final stdout hash and durable delivery receipt can only be closed by the dispatcher after this run; this JSON is not merge authority."
+  ],
+  "checkpoint_written_at_utc": "2026-11-26T03:55:49.537815+00:00",
+  "completed_at_utc": "2026-11-26T03:59:49.533876+00:00",
+  "first_complete_verdict_elapsed_seconds": 446.822532,
+  "snapshot": {
+    "head_before": "a2c46a5fc2a966b3fec3255b927185016224d1c0",
+    "head_after": "a2c46a5fc2a966b3fec3255b927185016224d1c0",
+    "tree_before": "e833a6d25d3fe2f645ad75b737d1633803019c11",
+    "tree_after": "e833a6d25d3fe2f645ad75b737d1633803019c11",
+    "files_before": 17708,
+    "files_after": 17708,
+    "changed_file_hashes": 0,
+    "tracked_diff_empty": true,
+    "index_diff_empty": true,
+    "ignored_paths_observed": [
+      ".codex/"
+    ],
+    "artifact": "/tmp/wp1463-review12-db910d45/snapshot-summary.json",
+    "limitation": "Endpoint hashes show no observed delta, not absence of transient writes; only supplied checkout in scope, not external executor workspace."
+  },
+  "setup_corrections": [
+    {
+      "status": "failed_then_corrected",
+      "command": "python -B /tmp/wp1463-review12-db910d45/extra_checks.py",
+      "exit_code": 1,
+      "reason": "Probe used nonexistent CHE_DO_DAY_DU; replaced by literal day_du. Subsequent run rc0. This was a reviewer setup error, not a product finding."
+    },
+    {
+      "status": "invalid_control_then_corrected",
+      "command": "python -B /tmp/wp1463-review12-db910d45/floor_target.py",
+      "exit_code": 0,
+      "reason": "First prototype lacked the mock for added TU_KIEM control, so baseline c66 failed. Discarded that measurement; supplied healthy mock, reran with control rc0, then counted mutant outcomes."
+    }
+  ],
+  "finding_counts": {
+    "cause_classes": 4,
+    "manifestations": 8,
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 2
+  }
+}

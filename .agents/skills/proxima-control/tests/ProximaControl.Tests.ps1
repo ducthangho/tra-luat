@@ -1101,16 +1101,16 @@ Invoke-Case 'X5-11' {
         Clear-Journal $Tg.Pos.Base
         $global:PxcT.Chat = (@{ model = $c[5]; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
         $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' })
-        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok') { Add-Fail "MARKUP_ANSWER[$($c[0])]"; continue }
+        if (-not $x.R -or $x.R.outcome -isnot [string] -or -not [string]::Equals($x.R.outcome, 'ok', [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]"; continue }
         $d = $x.R.data; $ans = $d['answer']
         if ($ans -isnot [string] -or -not [string]::Equals($ans, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
-        if ($d['answerMarkup'] -isnot [string] -or $d['answerMarkup'] -cne $c[3] -or $d['answerMarkupRemoved'] -isnot [int] -or $d['answerMarkupRemoved'] -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
+        if ($d['answerMarkup'] -isnot [string] -or -not [string]::Equals($d['answerMarkup'], [string]$c[3], [StringComparison]::Ordinal) -or $d['answerMarkupRemoved'] -isnot [int] -or $d['answerMarkupRemoved'] -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
         $rm = $d['reportedModel']
         if ($(if ($null -eq $c[6]) { $null -ne $rm } else { $rm -isnot [string] -or -not [string]::Equals($rm, [string]$c[6], [StringComparison]::Ordinal) })) { Add-Fail "MARKUP_REPORTED_MODEL[$($c[0])]" }
         $rp = "$($Tg.Pos.Base)\results\px-active\$($d['recordId']).json"
         $want = $u8.GetBytes('{"schema":"px.active.v1","action":"ask","targetFingerprint":"' + $fp + '","requestedModel":"prov/m2","state":"completed"}')
         $got = $(if ([IO.File]::Exists($rp)) { [IO.File]::ReadAllBytes($rp) } else { [byte[]]@() })
-        if ($got.Length -ne $want.Length -or [Convert]::ToBase64String($got) -cne [Convert]::ToBase64String($want)) { Add-Fail "MARKUP_JOURNAL[$($c[0])]" }
+        if ($got.Length -ne $want.Length -or -not [string]::Equals([Convert]::ToBase64String($got), [Convert]::ToBase64String($want), [StringComparison]::Ordinal)) { Add-Fail "MARKUP_JOURNAL[$($c[0])]" }
     }
     $global:PxcT.Chat = ''
 }

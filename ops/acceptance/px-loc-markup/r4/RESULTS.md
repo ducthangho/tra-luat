@@ -10,7 +10,8 @@ Issue #1529.
   `c4e9711` 4/5 (`7172718120`), lượt 3 `86fc431` 1/3 (`7173165528`), lượt 4 `8060930` 0/3 (`7173867201`); dừng §12 + E1 (`7173867678`).
 - r3: đặc tả `ebf6f277…` (duyệt `7174094220`), ứng viên `d0edb21`; review lượt 5 1/3 (`7174610534`); dừng §12 lần hai + E1 (`7174610982`),
   chủ kho chọn A (`7180137523`).
-- r4: đặc tả `a346d454…` (duyệt `7180863540`). Nhánh `ops/px-loc-markup-r4`, rebase lên `origin/master` `4a96ccd` (19 commit mới, không
+- r4: đặc tả `a346d454…` (duyệt `7180863540`). Review lượt 6 `90e7a78` 4/5 (`7181155845`): còn lớp `markup-leak-test-loses-evidence`
+  (F3m–n, so `-cne` để lọt chuỗi có NUL); xét lại cách làm ghi sổ `7181159360`, vá chung: mọi phép so chuỗi trong `X5-11` là Ordinal. Nhánh `ops/px-loc-markup-r4`, rebase lên `origin/master` `4a96ccd` (19 commit mới, không
   commit nào chạm module). `ai-dang-giu` cho 8 đường dẫn r4 lúc 02:31:48Z: `NGƯỜI_GIỮ 0`. Lease r4 cấp 02:32:09Z. Đặc tả/lease/RESULTS
   r1–r3 gỡ khỏi nhánh trước push.
 
@@ -40,6 +41,7 @@ Issue #1529.
 ## 4. Phép đo phụ trong phiên Linux (PowerShell 7.4.6; không thay N6)
 - `[Parser]::ParseFile`: `ProximaControl.psm1`, `ProximaControl.Tests.ps1`, `ProximaManifest.Tests.ps1` — 0 lỗi.
 - `ProximaControl.psm1` và `ProximaControl.Tests.ps1` chỉ chứa byte ASCII (`grep -cP '[^\x00-\x7F]'` ⇒ 0).
+- `X5-11` không còn `-cne` trên chuỗi; `"r"+NUL+"emoved" -cne "removed"` cho `False` (coi là bằng), `[string]::Equals(…, Ordinal)` cho `False`.
 - `Remove-PxcElicitation` qua `Import-Module` (script tạm ngoài kho, không mạng/dịch vụ): 14/14 ca đúng.
 - Luật `reportedModel` (đúng hai dòng của module, chạy trong phạm vi module): 7/7 ca đúng — đã bỏ khối với model quảng bá và với model
   trùng nhãn ⇒ `$null`; `none`/`unterminated` với id quảng bá ⇒ chuỗi; id không quảng bá, khác hoa/thường, không phải chuỗi ⇒ `$null`.

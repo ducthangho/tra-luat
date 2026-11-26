@@ -1,0 +1,9 @@
+== nen a89c83acf998008caecba9084a7d295845bf1976 tree=1f5c8276008d5708f09ac77d6b4272c04c4f2298 ban=0 shallow=false
+== sau ded412862fba5181fc59e8482ff40cb31162f577 tree=bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd ban=0 shallow=false
+nen | test-b | rc=0 | 349.0s | CA: 38/38 dat~DOT BIEN: 145/145 bi giet dung ly do~TU KIEM PHAN HANG: DAT (2 dot bien)~TONG: DAT~
+sau | test-b | rc=0 | 342.4s | CA: 40/40 dat~DOT BIEN: 145/145 bi giet dung ly do~TU KIEM PHAN HANG: DAT (2 dot bien)~TONG: DAT~
+nen | test-a | rc=0 | 342.8s | CA: 51/51 dat~DOT BIEN: 158/158 bi giet dung ly do~TU KIEM PHAN HANG: DAT (2 dot bien)~TONG: DAT~
+sau | test-a | rc=0 | 343.4s | CA: 53/53 dat~DOT BIEN: 158/158 bi giet dung ly do~TU KIEM PHAN HANG: DAT (2 dot bien)~TONG: DAT~
+   nen ban sau khi chay: 0
+   sau ban sau khi chay: 0
+XONG TRON VEN thoi-gian

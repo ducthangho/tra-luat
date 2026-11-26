@@ -1,0 +1,13 @@
+== nen a89c83acf998008caecba9084a7d295845bf1976 tree=1f5c8276008d5708f09ac77d6b4272c04c4f2298 ban=0 shallow=false
+== sau ded412862fba5181fc59e8482ff40cb31162f577 tree=bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd ban=0 shallow=false
+nen | land-evidence | rc=0 | 8.7s |   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (băm khớp ảnh chụp base đợt B)~ĐẠT ops/land/pr997-wp978-land-evidence.yaml~land_evidence_nguon: 153 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯ�
+nen | ci-dang-ky | rc=0 | 371.7s | ĐỘT BIẾN p643-A4-bo-env: ĐỎ đúng~ĐỘT BIẾN p643-A4-hai-buoc-registry: ĐỎ đúng~PHẢN CHỨNG: 1677/1677 đỏ đúng~TỔNG: ĐẠT~
+nen | selftest | rc=0 | 361.9s |   [OK] r380_llm_khai_niem_tu_tep_qua_sub~  [OK] r380_llm_khai_niem_bien_dau_vao~  [OK] wp42_complete_runtime_test_ids_unique~== tl selftest 1789/1789 ==~
+nen | ruff | rc=0 | 0.0s | All checks passed!~
+sau | land-evidence | rc=0 | 7.8s |   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (băm khớp ảnh chụp base đợt B)~ĐẠT ops/land/pr997-wp978-land-evidence.yaml~land_evidence_nguon: 153 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯ�
+sau | ci-dang-ky | rc=0 | 373.3s | ĐỘT BIẾN p643-A4-bo-env: ĐỎ đúng~ĐỘT BIẾN p643-A4-hai-buoc-registry: ĐỎ đúng~PHẢN CHỨNG: 1677/1677 đỏ đúng~TỔNG: ĐẠT~
+sau | selftest | rc=0 | 354.9s |   [OK] r380_llm_khai_niem_tu_tep_qua_sub~  [OK] r380_llm_khai_niem_bien_dau_vao~  [OK] wp42_complete_runtime_test_ids_unique~== tl selftest 1789/1789 ==~
+sau | ruff | rc=0 | 0.0s | All checks passed!~
+   nen ban sau khi chay: 0
+   sau ban sau khi chay: 0
+XONG TRON VEN con-lai

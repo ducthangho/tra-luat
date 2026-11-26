@@ -1,0 +1,7 @@
+Đã hoàn tất review và lưu [VERDICT.md](../work/VERDICT.md), [VERDICT.json](../work/VERDICT.json). Bộ kiểm trả `HOP_LE`, rc 0.
+
+Còn **C05 P2**: symlink trỏ đúng tệp có dấu `\` trong tên vẫn được chấp nhận, trái luật đã giao. Đã tái hiện trên Linux Python 3.12 và 3.13.
+
+17/17 ca D2b và 17/17 đột biến K2 đạt; repository không thay đổi.
+
+KET_LUAN: changes_requested

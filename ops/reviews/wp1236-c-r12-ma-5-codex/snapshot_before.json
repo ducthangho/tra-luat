@@ -1,0 +1,99 @@
+{
+  "('rev-parse', 'HEAD', 'HEAD^{tree}', 'HEAD^')": {
+    "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}",
+      "HEAD^"
+    ],
+    "rc": 0,
+    "stdout": "8aab9dabb6f3f150e4ab1872e37757c2620912c3\n5474259bbb71e3be6e3f7d3eaf4661142906ca0d\nd5a7d8510af03e0d08545f677ad5de687e0264f4\n",
+    "stderr": ""
+  },
+  "('remote', 'get-url', 'origin')": {
+    "cmd": [
+      "git",
+      "remote",
+      "get-url",
+      "origin"
+    ],
+    "rc": 0,
+    "stdout": "https://github.com/ducthangho/tra-luat\n",
+    "stderr": ""
+  },
+  "('status', '--porcelain=v1', '--untracked-files=all', '--ignored=matching')": {
+    "cmd": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "rc": 0,
+    "stdout": "!! .codex/\n",
+    "stderr": ""
+  },
+  "('diff', '--binary')": {
+    "cmd": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "('diff', '--cached', '--binary')": {
+    "cmd": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "('diff', '--numstat', 'f602325', 'HEAD')": {
+    "cmd": [
+      "git",
+      "diff",
+      "--numstat",
+      "f602325",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "95\t1\t.claude/dev/packet_loop.py\n334\t12\t.claude/dev/packet_loop_test.py\n",
+    "stderr": ""
+  },
+  "('diff', '--check', 'f602325', 'HEAD')": {
+    "cmd": [
+      "git",
+      "diff",
+      "--check",
+      "f602325",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "('config', '--get', 'core.abbrev')": {
+    "cmd": [
+      "git",
+      "config",
+      "--get",
+      "core.abbrev"
+    ],
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "spec_blob_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "tracked_hashes": {
+    ".claude/dev/packet_loop.py": "696ba313ad12f482d594fd7614ccf43638d4e5f267f1fb57e115034ffcf9ff22",
+    ".claude/dev/packet_loop_test.py": "3a3cb2de401398517eae1bb707a084a09e05a52639ca02b43fa94790fa27c63d"
+  }
+}

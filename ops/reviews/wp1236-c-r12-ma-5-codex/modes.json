@@ -1,0 +1,44 @@
+[
+  {
+    "scenario": "gitlink",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: D2b OSError('b\u1ea3n bung git archive kh\u00f4ng kh\u1edbp danh m\u1ee5c c\u00e2y c\u1ee7a oid')\n",
+    "tree": "040000 tree 2e69d9a9e207528a9b3c7bd6f756ff46f5655cc8\tops\n040000 tree bcd37bb34ed66f59751bbea070ca189f2b926d12\tops/land\n040000 tree 8a1d8a331c69c00a606970ea36610f811805a993\tops/land/pr1440-wp1319-provenance\n040000 tree b013a03f7b5233cbf98a0b6c558f25e7451283b9\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob 1e87aa3f9255c6ef5cf433e8649cff13d34cd662\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob 1e1df30eae3fe2a336180597d03cf3c6b5e20de7\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n120000 blob f8526ecd5a0b252ca265c37f6fed85e3f27ea88f\tops/land/pr1440-wp1319-provenance/link\n160000 commit 3545ba6abde1bae90604c16e786f95e993f3cd3c\tops/land/pr1440-wp1319-provenance/module\n100644 blob 19826d71a6a4c101206f95deacd4fb14aec4e136\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json"
+  },
+  {
+    "scenario": "backslash_nested",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@fdf7299f43c1314f85f8241e5d951c13d6f1ef59\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge 19750cd8223bb77cda70438ecdfba60a6c2d35c5\n",
+    "stderr": "",
+    "tree": "040000 tree 328ea6dab3016619d5efa2244a21818d0c0ecf4f\tops\n040000 tree 634148b2e22cb1f02e220cff6b713125eed6c944\tops/land\n040000 tree 61fd626b79a22f3183c08393ee1fa745d8eb9a7e\tops/land/pr1440-wp1319-provenance\n040000 tree 39759586be31ce9fc0fcffaa1579cad16f54b719\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob 4f98c21817025c8345ba015bf2e2c100528ca9c8\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob b84791c7f4979e7e6908722eb3ab6987493d4f96\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n100644 blob 93565b3ba61a5dfad993f6236c589cd50695b45c\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json\n040000 tree 4cc0e003443723e1b53de7351ddcceee9419a75a\tops/land/pr1440-wp1319-provenance/sub\n100644 blob c1b0730e0133447badcfd47fd144e254807b06e1\t\"ops/land/pr1440-wp1319-provenance/sub/a\\\\b.txt\"\n120000 blob babd68981da859405ba969c6733184e2c1adedc1\tops/land/pr1440-wp1319-provenance/sub/link"
+  },
+  {
+    "scenario": "backslash_directory",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@6221714482841529669262bf85300f7a5fe5ac66\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge c2c0f39e444dd27a7477f3db41adff295a0292bd\n",
+    "stderr": "",
+    "tree": "040000 tree e299398d2b4380440e028b4e2a32afb79c43051a\tops\n040000 tree 3f8900c1bc11a5c6d48427461ccfd4685bb1382b\tops/land\n040000 tree 6e9a7e9551d491e72a6eb2330a1ef4214f0aaceb\tops/land/pr1440-wp1319-provenance\n040000 tree b1140f98f130cab0c87eaf311a3ea27f5fdc160f\t\"ops/land/pr1440-wp1319-provenance/a\\\\b\"\n100644 blob c1b0730e0133447badcfd47fd144e254807b06e1\t\"ops/land/pr1440-wp1319-provenance/a\\\\b/x.txt\"\n040000 tree 165dbbb58b3b92f17d7b0fc396f3a98ff1da422a\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob b3dd0f8fbacbc4e5db51db5145bf5bbae4fdf41a\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob 71a104e9ab64f2cd1296c3cd3ff9cd6326852666\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n120000 blob 2fbd24941e7b2637dc972cdf35e8f2a14dcc1a7a\tops/land/pr1440-wp1319-provenance/link\n100644 blob dd9dc3dacc2f0dc5b5462e7e9f43d65d00868b9a\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json"
+  },
+  {
+    "scenario": "backslash_executable",
+    "rc": 0,
+    "stdout": "D2b \u0110\u1ea0T ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@8c2d106b3717b33dce2c9046fdd95056ed0d647b\n\u0110\u00d3NG \u0110\u01af\u1ee2C WP P \u2014 merge c2c0f39e444dd27a7477f3db41adff295a0292bd\n",
+    "stderr": "",
+    "tree": "040000 tree fe41d0545c7386afb7ba3e3b035dfb3ebdc2b34c\tops\n040000 tree 3bccd3a3c9255cae8068f769774e4a5704724d01\tops/land\n040000 tree dbef407658140b282e5245baea4d73b3248a99b7\tops/land/pr1440-wp1319-provenance\n100755 blob c1b0730e0133447badcfd47fd144e254807b06e1\t\"ops/land/pr1440-wp1319-provenance/a\\\\b.txt\"\n040000 tree 165dbbb58b3b92f17d7b0fc396f3a98ff1da422a\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob b3dd0f8fbacbc4e5db51db5145bf5bbae4fdf41a\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob 71a104e9ab64f2cd1296c3cd3ff9cd6326852666\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n120000 blob babd68981da859405ba969c6733184e2c1adedc1\tops/land/pr1440-wp1319-provenance/link\n100644 blob dd9dc3dacc2f0dc5b5462e7e9f43d65d00868b9a\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json"
+  },
+  {
+    "scenario": "yaml_link",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "tree": "040000 tree cc54ebe99b324d5e2c3e5a31c2129c6b8474dd5c\tops\n040000 tree 7803ee1abb0c1afa1c3b1faa6da687ca30036a00\tops/land\n040000 tree e4adbdd81c0a6906155ae70bd28b9a98756fe2be\tops/land/pr1440-wp1319-provenance\n040000 tree 53f14eb969de3fd9d2a0ffaacbc66a7f3067235a\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob ced2a58135f3c2f864825050e376395fdb1cddba\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob 40202ac5880cb095588a8d9e52d368532a37bba4\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n120000 blob 5ef2f07219e9778bc697b47b11acb0d807837eb9\tops/land/pr1440-wp1319-provenance/link.yaml\n100644 blob c1b0730e0133447badcfd47fd144e254807b06e1\tops/land/pr1440-wp1319-provenance/ordinary.txt\n100644 blob f5d224c8a4685520981ad924004ea9ee50937476\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json"
+  },
+  {
+    "scenario": "symlink_before_k1",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THI\u1ebeU  D2b kiem_tep:not_measured:symlink\nCH\u01afA \u0110\u00d3NG \u0110\u01af\u1ee2C WP: thi\u1ebfu D2b\n",
+    "tree": "040000 tree 5183fe1302ae686743f452ccf67ac4a63b05e0f2\tops\n040000 tree 8d91196e3e33dfb7a124cbcc244e50fa64b374c3\tops/land\n040000 tree e567b00b894138966fc2c103b4c6da91cc3b3109\tops/land/pr1440-wp1319-provenance\n040000 tree 3aea96bc4d5446e541a7d9bfdcf17e438036becf\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916\n100644 blob d62e7afc2064e89271a9972c69c9336198f8959e\tops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml\n100644 blob fa2c3e3c712b321be55750e7067db54602651b86\tops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt\n120000 blob 6eab79a6ce25b19851f591e3e974e192c6858cf6\tops/land/pr1440-wp1319-provenance/link\n100644 blob 25ef4e0f04c1bf11a8e95a0124acdb725a7eab3b\tops/land/pr1440-wp1319-provenance/readback-wp-issuecomment-7.json"
+  }
+]

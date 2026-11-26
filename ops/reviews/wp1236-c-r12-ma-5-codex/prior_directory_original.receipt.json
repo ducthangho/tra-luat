@@ -1,0 +1,1 @@
+{"command": ["python3", "-B", "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/probe_case_directory.py"], "rc": 1, "explanation": "Historical probe asserts vulnerable rc12/rc0; expected failure on fixed collision check. Current outcomes separately recorded by do_probe_l2.py."}

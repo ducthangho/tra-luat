@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "--output-format",
+      "json",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/base/packet_loop.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/base/packet_loop_test.py"
+    ],
+    "rc": 1,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "check",
+      "--no-cache",
+      "--select",
+      "F",
+      "--output-format",
+      "json",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/repo/.claude/dev/packet_loop.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/repo/.claude/dev/packet_loop_test.py"
+    ],
+    "rc": 1,
+    "stderr": ""
+  }
+]

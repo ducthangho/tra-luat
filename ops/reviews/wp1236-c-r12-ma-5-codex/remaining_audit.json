@@ -1,0 +1,125 @@
+{
+  "corpus_oid": "8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+  "corpus_scope": "HEAD data, synthetic origin/master in scratch bare repo only; not actual remote authority",
+  "corpus_equal": true,
+  "ops_land_modes": {
+    "100644": 10084,
+    "100755": 2
+  },
+  "ruff_counts": [
+    16,
+    16
+  ],
+  "ruff_new": [],
+  "ruff_removed": [],
+  "legacy": {
+    "base": {
+      "cong_c_dong_du": null,
+      "cong_c_d2_not_measured": null,
+      "cong_c_d2_landed_false": null,
+      "cong_c_d2_nghiem_thu": null,
+      "cong_c_d2_ci_master": null,
+      "cong_c_d1_generation_bool": null,
+      "cong_c_d1_nghiem_thu_rong": null,
+      "cong_c_d3_cha": null,
+      "cong_c_d4_tuong_lai": null,
+      "cong_c_d1_khoa_trung": null,
+      "cong_c_d4_khong_nhay": null,
+      "cong_c_d1_tag_hong": null,
+      "cong_c_d3_git_loi": null,
+      "cong_c_fixture_crlf": null
+    },
+    "head": {
+      "cong_c_dong_du": null,
+      "cong_c_d2_not_measured": null,
+      "cong_c_d2_landed_false": null,
+      "cong_c_d2_nghiem_thu": null,
+      "cong_c_d2_ci_master": null,
+      "cong_c_d1_generation_bool": null,
+      "cong_c_d1_nghiem_thu_rong": null,
+      "cong_c_d3_cha": null,
+      "cong_c_d4_tuong_lai": null,
+      "cong_c_d1_khoa_trung": null,
+      "cong_c_d4_khong_nhay": null,
+      "cong_c_d1_tag_hong": null,
+      "cong_c_d3_git_loi": null,
+      "cong_c_fixture_crlf": null
+    }
+  },
+  "receipts": [
+    {
+      "command": [
+        "git",
+        "clone",
+        "--bare",
+        "--shared",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/repo",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus.git"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "git",
+        "--git-dir",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus.git",
+        "update-ref",
+        "refs/remotes/origin/master",
+        "8aab9dabb6f3f150e4ab1872e37757c2620912c3"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/bang_chung/cong_cu/do_kho_that.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/previous/packet_loop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus.git",
+        "8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus_previous.tsv"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/bang_chung/cong_cu/do_kho_that.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/repo/.claude/dev/packet_loop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus.git",
+        "8aab9dabb6f3f150e4ab1872e37757c2620912c3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c6-5-codex/work/corpus_head.tsv"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "git",
+        "ls-tree",
+        "-r",
+        "HEAD",
+        "--",
+        "ops/land"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import runpy; m=runpy.run_path('.claude/dev/ci_dang_ky_test.py'); e,n=m['loi_ruff_ci'](); print('RUFF_CONTRACT',n,e); raise SystemExit(bool(e) or n==0)"
+      ],
+      "rc": 0
+    }
+  ]
+}

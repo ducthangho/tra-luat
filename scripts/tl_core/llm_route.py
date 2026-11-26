@@ -1434,6 +1434,8 @@ def doc_dieu_docx(nguon, dieu):
         except (NotImplementedError, RuntimeError, EOFError, zipfile.BadZipFile, zlib.error) as e:
             # r41 (lượt 40): lỗi MỞ GÓI / MỞ MEMBER của `zipfile` (kiểu nén hay phiên bản ZIP không hỗ trợ ⇒ NotImplementedError; member
             # mã hoá ⇒ RuntimeError; dữ liệu nén hỏng) quy về MỘT lỗi nguồn có chẩn đoán ⇒ CLI rc 2, không traceback.
+            if isinstance(e, RecursionError):
+                raise   # độ sâu do `_xml_cay` chốt TRƯỚC — không được che bằng lỗi nguồn (giữ đo được chốt ấy)
             raise ValueError(f"goi .docx khong doc duoc: {type(e).__name__}: {e}") from e
 
 
@@ -1986,7 +1988,7 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
             loi.append(e)
 
     def thu_hoi():
-        if not _LA_WINDOWS:
+        if os.name != "nt":   # POSIX: nhóm tiến trình
             import signal
             with contextlib.suppress(Exception):
                 os.killpg(p.pid, signal.SIGKILL)   # cả nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF

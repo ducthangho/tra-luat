@@ -608,7 +608,7 @@ def ca_extract_cham_tran(m):
     try:
         m.lay_dieu_qua_extract("1/2025/QH15", "3", "/x/tl.py", chay=chay)
     except ValueError as e:
-        bang("cache-build" in str(e), f"thong bao phai chi duong no-cap: {e}")
+        bang("--tep" in str(e) and ".docx" in str(e), f"thong bao phai chi duong .docx: {e}")
         return
     raise TinHieuChotCa("nguon cham tran phai dung TRUOC khi goi model")
 
@@ -684,7 +684,10 @@ def ca_khoan_mat_so_co_diem_dat(m):
     except ValueError:
         pass
     # r20 (lượt 19 V4): nhãn điểm `a.` / `(a)` trên nguồn mất số ⇒ chặn; chữ viết tắt dính chữ không phải nhãn.
-    for x in (sach.replace("Dữ liệu", "a. Dữ liệu"), sach.replace("Dữ liệu", "(a) Dữ liệu")):
+    for x in (sach.replace("Dữ liệu", "a. Dữ liệu"), sach.replace("Dữ liệu", "(a) Dữ liệu"),
+              # r21 (lượt 20 W4): chữ hoa, chữ lặp (nhãn Word sau z).
+              sach.replace("Dữ liệu", "A. Dữ liệu"), sach.replace("Dữ liệu", "B) Dữ liệu"), sach.replace("Dữ liệu", "aa. Dữ liệu"),
+              sach.replace("Dữ liệu", "BB) Dữ liệu"), sach.replace("Dữ liệu", "(B) Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
@@ -1326,10 +1329,10 @@ def ca_cau_truc_docx_dat(m):
     ngoai = numbering(_lvl(0, "decimal", "%1."), _lvl(0, "upperRoman", "%1."),
                       nums=[(1, 0, ""), (3, 1, '<w:lvlOverride w:ilvl="0"><w:lvl w:ilvl="0"/></w:lvlOverride>')])
     _doc_hop_le(m, lam_docx(H, A, numbering=ngoai))
-    # Từ nối dò CHỈ ở đầu khoản — "là" của một điểm nhãn `A)` không được thành từ nối cấp khoản.
-    hoa = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "upperLetter", "%2)"))
+    # Từ nối dò CHỈ ở đầu khoản — "là" của một điểm nhãn ngoài `_RE_DIEM` (`A-`) không được thành từ nối cấp khoản.
+    hoa = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "upperLetter", "%2-"))
     vb7, _, k7 = _doc_hop_le(m, lam_docx(H, p_docx("Thiết bị gồm", 1), p_docx("máy là công cụ.", 1, 1), numbering=hoa))
-    bang(m.lech_nguyen_van([{"stt": 1, "thuat_ngu": "Thiết bị gồm\nA) máy", "dinh_nghia": "công cụ."}], vb7, k7) == [1],
+    bang(m.lech_nguyen_van([{"stt": 1, "thuat_ngu": "Thiết bị gồm\nA- máy", "dinh_nghia": "công cụ."}], vb7, k7) == [1],
          "tu noi cua diem bi lay lam tu noi cap khoan")
     # Dấu nối không ngắt và tab căn lề (r7 F6) là chữ hiển thị.
     _, cap8, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài</w:t><w:noBreakHyphen/><w:t>liệu</w:t><w:ptab/>'
@@ -1427,6 +1430,16 @@ def ca_cau_truc_docx_dat(m):
                                                 '<w:permStart w:id="5" w:edGrp="everyone"/><w:r><w:t>chính (45°) § 1.</w:t></w:r>'
                                                 '<w:permEnd w:id="5"/>')))
     bang(cap31 == [(1, "Hồ sơ là tài liệu “gốc” – bản chính (45°) § 1.")], f"dau in an / permStart bi chan oan: {cap31}")
+    # r21 W2 (chính sách r222): run gạch / `w:del` chỉ có khoảng trắng giữ khoảng trắng — hai từ không dính lại.
+    _, cap34, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t></w:r><w:r><w:rPr><w:strike/></w:rPr><w:t xml:space="preserve"> </w:t>'
+                                                '</w:r><w:r><w:t>tài liệu.</w:t></w:r>')))
+    bang(cap34 == [(1, "Hồ sơ là tài liệu.")], f"dau cach bi gach lam dinh chu: {cap34}")
+    _, cap35, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là</w:t></w:r><w:del w:id="9" w:author="x"><w:r>'
+                                                '<w:delText xml:space="preserve"> </w:delText></w:r></w:del><w:r><w:t>tài liệu.</w:t></w:r>')))
+    bang(cap35 == [(1, "Hồ sơ là tài liệu.")], f"dau cach trong w:del lam dinh chu: {cap35}")
+    # r21 W5 đối chứng (A5): cấp trùng ở danh sách KHÔNG dùng không chặn.
+    ngoai4 = numbering(_lvl(0, "decimal", "%1."), _lvl(0, "decimal", "%1.") + _lvl(0, "decimal", "%1.", start=3), nums=[(1, 0, ""), (5, 1, "")])
+    _doc_hop_le(m, lam_docx(H, A, numbering=ngoai4))
     # r20 V2 đối chứng: mặc định đoạn KHÔNG có numPr (chỉ giãn dòng) vẫn đạt.
     kgd = (f'<w:styles {_WNS}><w:docDefaults><w:pPrDefault><w:pPr><w:spacing w:after="120"/></w:pPr></w:pPrDefault>'
            '</w:docDefaults></w:styles>')
@@ -1602,6 +1615,13 @@ def ca_cau_truc_docx_chan(m):
     kmd = (f'<w:styles {_WNS}><w:docDefaults><w:pPrDefault><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>'
            '</w:pPr></w:pPrDefault></w:docDefaults></w:styles>')
     chan(lam_docx(H, A, styles=kmd), "danh so o mac dinh doan")
+    # r21 W5: hai `w:lvl` cùng cấp / hai `lvlOverride` cùng cấp ở danh sách ĐANG DÙNG ⇒ chặn.
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)")
+                                                                     + _lvl(1, "lowerLetter", "%2)", start=3))), "lvl cung cap trung")
+    chan(lam_docx(H, A, numbering=numbering(_lvl(0, "decimal", "%1."),
+                                            nums=[(1, 0, '<w:lvlOverride w:ilvl="0"><w:startOverride w:val="1"/></w:lvlOverride>'
+                                                         '<w:lvlOverride w:ilvl="0"><w:startOverride w:val="1"/></w:lvlOverride>')])),
+         "lvlOverride cung cap trung")
     # r16 R2: số gõ tay ngoặc KÍN dính thân bắt đầu bằng chữ số.
     chan(lam_docx(H, p_docx("(1)5 lần là hệ số.", 1)), "so go tay ngoac kin dinh chu so")
     # r14 N3: khối trùng tên cục bộ `p`/`sdt`/`customXml` nhưng NGOÀI namespace Word ⇒ khối lạ (trước và trong Điều).
@@ -1794,8 +1814,15 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_diem_bo_dang_cham', ('r"^(\\(?[a-zđ]\\)|[a-zđ]\\.|[-–•+])\\s*"', 'r"^(\\(?[a-zđ]\\)|[-–•+])\\s*"'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_ngoac_mo', ('r"^(\\(?[a-zđ]\\)|', 'r"^([a-zđ]\\)|'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_dang_cham', ('|(?:([a-zđ])\\4*|([A-ZĐ])\\5*)\\.|', '|'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_ngoac_mo', ('r"^(\\(?(?:', 'r"^((?:'), 'ca_khoan_mat_so_co_diem_dat'),
+    # r21 (lượt 20 W2/W4/W5).
+    ('wp1525_diem_bo_chu_hoa', ('(?:([a-zđ])\\2*|([A-ZĐ])\\3*)\\)', '(?:([a-zđ])\\2*|([a-zđ])\\3*)\\)'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_chu_lap', ('(?:([a-zđ])\\4*|([A-ZĐ])\\5*)\\.', '(?:([a-zđ])|([A-ZĐ]))\\.'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_gach_bo_ca_khoang_trang', ('            if ruot and not ruot.strip():\n                kq["phan"].append(ruot)\n            return', '            return'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_del_bo_ca_khoang_trang', ('                if ruot and not ruot.strip():\n                    kq["phan"].append(ruot)\n                continue', '                continue'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_lvl_trung_ghi_de', ('            if il in muc:   # r20→r21', '            if False:   # r20→r21'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_override_trung_ghi_de', ('            if il in da_ov:   # r21', '            if False:   # r21'), 'ca_cau_truc_docx_chan'),
     # r19 (lượt 18 U1): số mũ ngoài danh sách cho phép.
     ('wp1525_nhan_so_mu', ('    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№")', '    ds |= set("đĐ\\u00a0\\t“”‘’–—…«»§°±×÷≤≥€₫‰•·№¹²³")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_extract_strip_chung', ('    return out.split(dau, 1)[1].strip(" \\t\\r\\n"), p.stderr or ""', '    return out.split(dau, 1)[1].strip(), p.stderr or ""'), 'ca_khoan_mat_so_co_diem_dat'),

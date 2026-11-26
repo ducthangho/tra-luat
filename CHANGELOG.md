@@ -53,6 +53,9 @@
 - r20 (sau cross-review lượt 19, đặc tả `ops/specs/llm-khoan-docx-r20.md`): đường `<số hiệu>` chạy `tl extract --markup-strict`;
   đánh số ở mặc định đoạn `.docx` ⇒ chặn; nhãn điểm `a.` / `(a)` trên nguồn thô ⇒ chặn; khai giới hạn bộ cắt Điều của `tl extract`
   (dòng dẫn chiếu đầu dòng làm mất khoản cuối) theo quyết định chủ kho.
+- r21 (sau cross-review lượt 20, đặc tả `ops/specs/llm-khoan-docx-r21.md`): run gạch / `w:del` chỉ có khoảng trắng giữ khoảng trắng
+  (chính sách r222); nhãn điểm thô gồm chữ hoa và chữ lặp; cấp / `lvlOverride` trùng trong danh sách đang dùng ⇒ chặn; khai giới
+  hạn bộ lọc markup và bộ chuyển chữ của `tl extract` (theo quyết định chủ kho); thông báo trần CAP chỉ đường `.docx`.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -150,3 +150,5 @@ revision_ly_do: 'Cross-review luot 19 (V1-V3 P1, V4 P2); chu kho chon giu duong 
 review_calls_limit: 20
 review_calls_used_truoc: 19
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r21-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 20 (W1-W5); revision r21 (ops/specs/llm-khoan-docx-r21.md), tran 21.'

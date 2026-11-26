@@ -491,7 +491,9 @@ def chuan_hoa_khai_niem(khai_niem):
 _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 # r20 (lượt 19 V4): một quy tắc nhãn điểm cho mọi nguồn thô — `a)`, `(a)`, `a.` (dạng `%N.` của cấp con lowerLetter trong .docx)
 # và dấu đầu dòng. Chữ viết tắt nhiều chữ cái (`Tp.`, `e-mail`) không khớp; một chữ cái + dấu chấm ở đầu dòng luôn coi là nhãn.
-_RE_DIEM = re.compile(r"^(\(?[a-zđ]\)|[a-zđ]\.|[-–•+])\s*")
+# r21 (lượt 20 W4): cùng miền nhãn với cấp con `.docx` — chữ thường HOẶC chữ hoa, đơn HOẶC lặp (`aa`, `BB`, nhãn Word sau z),
+# với `)` / `.` / `(…)`.
+_RE_DIEM = re.compile(r"^(\(?(?:([a-zđ])\2*|([A-ZĐ])\3*)\)|(?:([a-zđ])\4*|([A-ZĐ])\5*)\.|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 # Câu dẫn của Điều "Giải thích từ ngữ" — r6 (lượt 6 F2, Review Rescue sau sáu lượt cùng lớp): DANH SÁCH CHO PHÉP NGUYÊN DÒNG.
@@ -739,6 +741,9 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             except ValueError as e:
                 loi = loi or f"lvl: {e}"
                 continue
+            if il in muc:   # r20→r21 (lượt 20 W5): hai `w:lvl` cùng cấp ⇒ định nghĩa mâu thuẫn (chặn KHI DÙNG — A5)
+                loi = loi or f"lvl cap {il} trung"
+                continue
             if not 0 <= il <= 8:   # r6 (lượt 5 E6): miền cấp OOXML 0–8
                 loi = loi or f"ilvl {il} ngoai mien 0-8"
                 continue
@@ -776,6 +781,7 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             continue
         muc, loi = truu_tuong[_so_id(aid.get(_W + "val"))]
         muc = dict(muc)
+        da_ov = set()
         for ov in num.findall(_W + "lvlOverride"):
             try:   # r13 (lượt 12 M2): `w:ilvl` bắt buộc ở `lvlOverride`
                 il = _so_nguyen(ov.get(_W + "ilvl"))
@@ -785,6 +791,10 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             if not 0 <= il <= 8:
                 loi = loi or f"lvlOverride ilvl {il} ngoai mien 0-8"
                 continue
+            if il in da_ov:   # r21 (lượt 20 W5): hai `lvlOverride` cùng cấp ⇒ mâu thuẫn
+                loi = loi or f"lvlOverride cap {il} trung"
+                continue
+            da_ov.add(il)
             if [c.tag for c in ov] != [_W + "startOverride"]:
                 loi = loi or f"lvlOverride cap {il} ngoai startOverride"
                 continue
@@ -988,6 +998,11 @@ def _phan_tich_doan(p, kieu):
             # r5 (lượt 4 D3): chữ GẠCH NGANG hiệu lực (gạch đơn/kép, mọi tầng, theo namespace) là chữ ĐÃ BỎ của dự thảo ⇒ bỏ,
             # như `tl extract --markup strip` — nhưng lọc theo CÂY, không qua regex của `docx_markup` (regex có thể nuốt ranh
             # giới đoạn khi run rỗng tự đóng đứng trước run gạch).
+            # r21 (lượt 20 W2; chính sách r222 của `docx_markup`): run gạch mà ruột CHỈ có khoảng trắng là tàn dư định dạng — giữ
+            # khoảng trắng, kẻo hai từ hiệu lực hai bên DÍNH thành một chữ không có trong văn bản.
+            ruot = "".join(chu_run)
+            if ruot and not ruot.strip():
+                kq["phan"].append(ruot)
             return
         if chu_sau_ngat:
             kq["ngat"] = True   # có chữ HIỆU LỰC sau ngắt trang/cột ⇒ có thể che số khoản gõ tay ⇒ như ngắt mềm
@@ -1007,7 +1022,12 @@ def _phan_tich_doan(p, kieu):
                 else:
                     duyet(nd)
             elif ten in ("del", "moveFrom"):
-                continue   # nội dung đã xoá/chuyển đi — không vào nguyên văn
+                # nội dung đã xoá/chuyển đi — không vào nguyên văn; r21 (lượt 20 W2, chính sách r222): ruột CHỈ có khoảng trắng
+                # ⇒ giữ khoảng trắng (không để hai từ hai bên dính lại).
+                ruot = "".join((e.text or "") for e in c.iter() if e.tag in (_W + "delText", _W + "t"))
+                if ruot and not ruot.strip():
+                    kq["phan"].append(ruot)
+                continue
             elif ten in _CON_DOAN_BO_QUA or ten in ("customXmlPr", "smartTagPr", "sdtPr", "sdtEndPr"):
                 continue
             else:
@@ -1505,9 +1525,11 @@ def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
     # tìm Điều N+1 — lượt 3 (M4) đo được lần đọc thứ hai có thể là bản khác (nguồn được resolve/cập nhật giữa hai
     # lần), tức cấp bằng chứng cho bản bị cắt. Chặn oan (P2) rẻ hơn nhận nhầm (P1): quay về chặn mọi Điều, chỉ
     # đường `tl cache-build` (no-cap). Muốn nới phải lấy ranh giới từ CHÍNH snapshot của lần extract này.
+    # r21 (lượt 20 W3): đường `tl cache-build` rồi chạy lại cũng đi `--markup-strict` (r20) và có thể bị chặn ⇒ chỉ đường
+    # chắc chắn là tệp `.docx` của riêng Điều.
     if MAU_CAP_EXTRACT in (p.stderr or ""):
         raise ValueError(f"nguon cua {so_hieu} cham tran export (~200k ky tu) — Dieu {dieu} co the bi CAT; "
-                         f"chay `tl cache-build {so_hieu}` (no-cap) roi chay lai")
+                         f"chep Dieu {dieu} sang mot tep .docx rieng roi chay `--tep <tep.docx> --dieu {dieu}`")
     # r18 (lượt 17 T2): chỉ bỏ phần bao do `tl extract` in ra (dòng mốc + khoảng trắng ASCII) — `str.strip()` tổng quát còn nuốt
     # NEL, U+3000… ở biên trước khi `tach_khoan` kịp kiểm.
     return out.split(dau, 1)[1].strip(" \t\r\n"), p.stderr or ""

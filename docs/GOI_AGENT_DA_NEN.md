@@ -386,7 +386,7 @@ biến môi trường của environment.
   hay dòng tiếp mở bằng "là" ⇒ chặn cả nguồn — mỗi khoản phải đúng một dòng (#1525); khoản có điểm đi đường `.docx`); phép so giữ nguyên xuống dòng của
   các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
-  (`--tep`) hoặc dựng `tl cache-build` trước.
+  (`--tep`), tốt nhất là tệp `.docx` của riêng Điều.
 - **Đường `.docx` (#1525):** `tl llm-khai-niem --tep <tệp.docx> --dieu N` đọc ranh giới khoản từ danh sách đánh số TỰ
   ĐỘNG của Word/Google Doc (`w:numPr`). **Tệp phải chỉ chứa ĐÚNG Điều cần đọc**: đoạn có nội dung đầu tiên là tiêu đề
   `Điều N.` / `Điều N. Giải thích từ ngữ`, mọi đoạn sau thuộc Điều ấy (chép Điều sang một Google Doc/.docx riêng rồi tải
@@ -410,11 +410,13 @@ biến môi trường của environment.
   ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
   không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
   Word. Đánh số khai ở mặc định đoạn (`docDefaults/pPrDefault/numPr`) cũng bị chặn. Đường `<số hiệu>` (qua `tl extract`) vẫn
-  là văn bản thô, chạy `tl extract --markup-strict` (nguồn dự thảo chưa chứng minh được đã lọc chữ gạch bỏ ⇒ rc 2, kể cả nguồn
+  là văn bản thô (GIỚI HẠN ĐÃ KHAI theo quyết định chủ kho), chạy `tl extract --markup-strict` (nguồn dự thảo chưa chứng minh được đã lọc chữ gạch bỏ ⇒ rc 2, kể cả nguồn
   chỉ đọc được qua text/plain), và có GIỚI HẠN ĐÃ KHAI: bộ cắt Điều của `tl extract` dừng ở dòng đầu tiên mở bằng `Điều <số>`
   — một dòng dẫn chiếu như vậy làm MẤT các khoản phía sau mà phép so không thấy; ký tự điều khiển bộ đọc đã xoá trước khi lưu
-  cache cũng không tới được chốt. Cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Đường thô coi một chữ cái + `)` / `.`
-  hay `(a)` ở đầu dòng là nhãn điểm ⇒ nguồn bị chặn.
+  cache cũng không tới được chốt; bộ lọc markup của `tl extract` chỉ xét gạch TRỰC TIẾP trên run (chữ gạch qua style có thể còn
+  trong văn bản dù `--markup-strict` cho qua) và chặn cả bản export sạch không có dấu sửa; bộ chuyển XML→chữ của nó có thể bỏ
+  `w:tab`/`w:br`. Cần ranh giới và nguyên văn chắc chắn thì dùng `--tep <tệp .docx>`. Đường thô coi một chữ cái + `)` / `.`
+  hay `(a)` ở đầu dòng — chữ thường hoặc chữ HOA, đơn hoặc lặp (`aa.`, `BB)`) — là nhãn điểm ⇒ nguồn bị chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

@@ -205,3 +205,5 @@ revision_ly_do: 'Cross-review luot 30 (G1 P1, G2 P2); theo quyen dung cua chu kh
 review_calls_limit: 31
 review_calls_used_truoc: 30
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r32-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 31; revision r32 (ops/specs/llm-khoan-docx-r32.md), tran 32.'

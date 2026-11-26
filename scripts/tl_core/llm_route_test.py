@@ -714,7 +714,9 @@ def ca_khoan_mat_so_co_diem_dat(m):
               # r30 (lượt 29 F1): một placeholder rồi nhiều dấu, kể cả khi số trùng số khoản kế.
               "Điều 3.\n1. Hồ sơ là tài liệu.\n2.. Dữ liệu là thông tin.", sach.replace("Dữ liệu", "a). Dữ liệu"),
               # r31 (lượt 30 G2): số + dấu dính chữ cái (`1.a`), nhãn có đệm `1. a.`.
-              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2. a. Dữ liệu là thông tin."):
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2. a. Dữ liệu là thông tin.",
+              # r32 (lượt 31 H2): đệm TRƯỚC dấu nối, chữ dính sau dấu.
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2 .a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2 )b Dữ liệu là thông tin."):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
@@ -1525,6 +1527,13 @@ def ca_cau_truc_docx_dat(m):
            '</w:docDefaults></w:styles>')
     _, cap33, _ = _doc_hop_le(m, lam_docx(H, A, styles=kgd))
     bang(cap33 == [(1, "Hồ sơ là tài liệu.")], f"mac dinh doan khong danh so bi chan oan: {cap33}")
+    # r32 H1: style đoạn mặc định KHÔNG khai `w:type` (ngầm paragraph) mang gạch — đoạn không `pStyle` bị lọc theo nó.
+    kmd0 = (f'<w:styles {_WNS}><w:style w:default="1" w:styleId="MD"><w:rPr><w:strike/></w:rPr></w:style>'
+            '<w:style w:type="paragraph" w:styleId="TD"/></w:styles>')
+    _, cap48, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3.", kieu="TD"),
+                                          p_tho('<w:r><w:rPr><w:strike w:val="0"/></w:rPr><w:t>Hồ sơ là tài liệu.</w:t></w:r>'
+                                                '<w:r><w:t xml:space="preserve"> CŨ</w:t></w:r>'), styles=kmd0))
+    bang(cap48 == [(1, "Hồ sơ là tài liệu.")], f"style mac dinh khong khai type khong duoc ap: {cap48}")
     # r19 U1 đối chứng: số thập phân sát dấu chấm trong thân vẫn đạt.
     _, cap32, _ = _doc_hop_le(m, lam_docx(H, p_docx("Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.", 1)))
     bang(cap32 == [(1, "Hệ số là 1.5 lần mức chuẩn theo Điều 5 của Luật này.")], f"so thap phan bi chan oan: {cap32}")
@@ -1726,6 +1735,9 @@ def ca_cau_truc_docx_chan(m):
     kloai3 = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="PG"/><w:style w:type="character" w:styleId="KC">'
               '<w:basedOn w:val="PG"/></w:style></w:styles>')
     chan(lam_docx(H, A, styles=kloai3), "basedOn doi loai")
+    # r32 H3: styleId trùng miền khoá nội bộ (`#…`, rỗng) ⇒ từ chối có chẩn đoán (không traceback), kể cả style không dùng.
+    for sid_la in ("#numPr_mac_dinh", "#loai", ""):
+        chan(lam_docx(H, A, styles=f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="{sid_la}"/></w:styles>'), f"styleId noi bo {sid_la!r}")
     # r24 Z4: metadata content control đơn trị — mỗi ca vi phạm đúng MỘT trường.
     chan(lam_docx(H, f'<w:sdt><w:sdtPr/><w:sdtPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtPr")
     chan(lam_docx(H, f'<w:sdt><w:sdtEndPr/><w:sdtEndPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtEndPr")
@@ -1950,7 +1962,10 @@ DOT_BIEN = [
     # r30 (lượt 29 F1/F2) → r31 (lượt 30 G1/G2).
     ('wp1525_mot_cho_hai_dau', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)\\-–]){2,}",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_hai_dau_nhan_ngoac_mo', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)(\\-–])+",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_bo_so_dinh_chu_rieng', ('    rf"\\d+[.)(\\-–]+{_chu_rieng(9)}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_bo_so_dinh_chu_rieng', ('    rf"\\d+{_KC}[.)(\\-–]+{_chu_rieng(9)}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_so_dinh_chu_khong_dem', ('    rf"\\d+{_KC}[.)(\\-–]+{_chu_rieng(9)}",', '    rf"\\d+[.)(\\-–]+{_chu_rieng(9)}",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_mac_dinh_loai_tho', ('        if (st.get(_W + "type") or "paragraph") == "paragraph" and', '        if st.get(_W + "type") == "paragraph" and'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_style_id_noi_bo', ('        if not st.get(_W + "styleId") or st.get(_W + "styleId").startswith("#"):', '        if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_pstyle_dut_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(psid not in kieu)'), 'ca_cau_truc_docx_chan'),
     ('wp1525_pstyle_vang_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(loai_kieu.get(psid, "paragraph") != "paragraph")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_rstyle_sai_loai', ('                kq["la"] = True   # r31', '                pass   # r31'), 'ca_cau_truc_docx_chan'),

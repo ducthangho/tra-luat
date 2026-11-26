@@ -533,7 +533,7 @@ _RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
     # r31 (lượt 30 G2): dấu thứ hai trở đi KHÔNG gồm `(` — `1. (Hồ sơ) là …` là khoản có thân mở bằng cụm ngoặc, không phải nhãn.
     rf"(?:\d+|{_chu_rieng(6)}){_KC}[.)(\-–](?:{_KC}[.)\-–])+",
     # r31 (lượt 30 G2): số + dấu DÍNH chữ cái đứng riêng (`1.a …`, `2)b …`) — khác `1. a …` (có đệm: khoản thân mở bằng chữ cái).
-    rf"\d+[.)(\-–]+{_chu_rieng(9)}",
+    rf"\d+{_KC}[.)(\-–]+{_chu_rieng(9)}",   # r32 (lượt 31 H2): cho phép đệm TRƯỚC dấu (`1 .a`); chữ vẫn phải DÍNH sau dấu
     rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
@@ -915,11 +915,15 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
             except ValueError:
                 il = "!"
         rpr = st.find(_W + "rPr")
+        if not st.get(_W + "styleId") or st.get(_W + "styleId").startswith("#"):
+            # r32 (lượt 31 H3): ID rỗng/vắng hay mở bằng `#` trùng miền KHOÁ NỘI BỘ của bảng (`""`, `#numPr_mac_dinh`, `#loai`) ⇒ từ chối.
+            raise ValueError(f"styles: styleId {st.get(_W + 'styleId')!r} khong hop le (trung khoa noi bo) — khong ho tro")
         if st.get(_W + "styleId") in kq:   # r23 (lượt 22 Y2): hai style cùng `styleId` ⇒ định nghĩa sau ghi đè ngầm
             raise ValueError(f"styles: styleId {st.get(_W + 'styleId')!r} khai nhieu lan — khong ho tro")
         kq[st.get(_W + "styleId")] = (b.get(_W + "val") if b is not None else None, nid, il,
                                       gach(rpr, "strike"), gach(rpr, "dstrike"))
-        if st.get(_W + "type") == "paragraph" and st.get(_W + "default") in ("1", "true", "on"):
+        # r32 (lượt 31 H1): loại HIỆU LỰC (vắng `w:type` ⇒ paragraph) — cùng quy tắc với bảng loại dưới.
+        if (st.get(_W + "type") or "paragraph") == "paragraph" and st.get(_W + "default") in ("1", "true", "on"):
             mac_dinh_doan = st.get(_W + "styleId")
     dd = goc.find(f"{_W}docDefaults/{_W}rPrDefault/{_W}rPr")
     kq[""] = (gach(dd, "strike"), gach(dd, "dstrike"), mac_dinh_doan)

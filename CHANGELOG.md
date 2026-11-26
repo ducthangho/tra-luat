@@ -75,6 +75,8 @@
   nhiều dấu (`1..`, `a).`) ⇒ chặn trước nhánh số khoản.
 - r31 (sau cross-review lượt 30, đặc tả `ops/specs/llm-khoan-docx-r31.md`): style phân giải theo loại (`pStyle`/`rStyle` sai loại,
   `basedOn` đổi loại ⇒ chặn); nhãn `1.a …` ⇒ chặn, khoản `1. (…) là …` không còn bị chặn oan.
+- r32 (sau cross-review lượt 31, đặc tả `ops/specs/llm-khoan-docx-r32.md`): style mặc định không khai `w:type` được nhận đúng; nhãn
+  `2 .a …` ⇒ chặn; styleId trùng khoá nội bộ ⇒ chặn có chẩn đoán.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

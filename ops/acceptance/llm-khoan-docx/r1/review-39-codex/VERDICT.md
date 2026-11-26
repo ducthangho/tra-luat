@@ -115,4 +115,3 @@ Exact head và tree cuối lượt khớp mốc đầu. Diff tracked và diff in
 P2_mo: 2
 P3_mo: 2
 VERDICT: APPROVE
-

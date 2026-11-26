@@ -419,7 +419,7 @@ biến môi trường của environment.
   hay `(a)` ở đầu dòng — chữ thường hoặc chữ HOA, đơn hoặc lặp (`aa.`, `BB)`), kể cả `a- …` / `A – …` — là nhãn điểm ⇒ nguồn bị
   chặn (kể cả có khoảng đệm `a . …`, `( a ) …`, nhãn nhiều cấp nối bằng `.`/`-` như `1.1. …`, `1-1 …`, `a-b. …`). Nhãn chỉ ngăn bằng
   khoảng trắng (`a tổ chức`) không phân biệt được với chữ — thuộc bước duyệt ranh giới. Dòng mở bằng nhãn nhiều thành phần (`1.1`,
-  `1. 1`, `1(1)`, `1).1`, `1.a.`, `1a.`, `a-b`) chặn cả nguồn, kể cả khoản có thân mở bằng một số (`2. 1 năm là …`); `1. A là …` và
+  `1. 1`, `1(1)`, `1).1`, `1.a.`, `1a.`, `a-b`, kể cả có dấu đứng đầu như `.1.1.`, `.a`) chặn cả nguồn, kể cả khoản có thân mở bằng một số (`2. 1 năm là …`); `1. A là …` và
   `A1 là …` vẫn đọc được. `.docx` khai một trường đơn trị nhiều lần
   (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên ⇒ chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

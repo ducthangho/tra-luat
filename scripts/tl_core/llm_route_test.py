@@ -707,12 +707,17 @@ def ca_khoan_mat_so_co_diem_dat(m):
               # r28 (lượt 27 D1): số–chữ, nhiều dấu nối liền, số và chữ dính nhau, chữ trước.
               sach.replace("Dữ liệu", "1.a. Dữ liệu"), sach.replace("Dữ liệu", "1).1 Dữ liệu"), sach.replace("Dữ liệu", "1a. Dữ liệu"),
               sach.replace("Dữ liệu", "a1) Dữ liệu"), sach.replace("Dữ liệu", "a1. Dữ liệu"), sach.replace("Dữ liệu", "a-b Dữ liệu"),
-              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a. Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2).1 Dữ liệu là thông tin."):
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a. Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2).1 Dữ liệu là thông tin.",
+              # r29 (lượt 28 E1): dấu ở ĐẦU nhãn (`.1.1.`, `.1`, `(.a)`, `.a`).
+              sach.replace("Dữ liệu", ".1.1. Dữ liệu"), sach.replace("Dữ liệu", ".1 Dữ liệu"), sach.replace("Dữ liệu", "(.a) Dữ liệu"),
+              sach.replace("Dữ liệu", ".a Dữ liệu")):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
          "ma hang A1/B2 bi chan oan")
     bang(m.tach_khoan("Điều 3.\n1. A là x.\n2. B là y.") == [(1, "A là x."), (2, "B là y.")], "khoan so than mo bang chu cai bi chan oan")
+    # r29 đối chứng: dòng mở bằng dấu rồi CHỮ (không phải placeholder đứng riêng) không phải nhãn.
+    bang(m.tach_khoan("Điều 3.\n(Hồ sơ) là tài liệu.\nDữ liệu là thông tin.") is not None, "dong mo bang ngoac + chu bi nhan lam nhan")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
     bang(m.tach_khoan(vt) == [(None, "e-mail là thư điện tử."), (None, "Tp. Hồ Chí Minh là thành phố.")],
          f"chu viet tat dau dong bi chan oan: {m.tach_khoan(vt)}")
@@ -1353,10 +1358,10 @@ def ca_cau_truc_docx_dat(m):
     ngoai = numbering(_lvl(0, "decimal", "%1."), _lvl(0, "upperRoman", "%1."),
                       nums=[(1, 0, ""), (3, 1, '<w:lvlOverride w:ilvl="0"><w:lvl w:ilvl="0"/></w:lvlOverride>')])
     _doc_hop_le(m, lam_docx(H, A, numbering=ngoai))
-    # Từ nối dò CHỈ ở đầu khoản — "là" của một điểm nhãn ngoài `_RE_DIEM` (`.A`) không được thành từ nối cấp khoản.
-    hoa = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "upperLetter", ".%2"))
+    # Từ nối dò CHỈ ở đầu khoản — "là" của một điểm nhãn ngoài `_RE_DIEM` (`A` — nhãn chỉ ngăn bằng khoảng trắng) không được thành từ nối cấp khoản.
+    hoa = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "upperLetter", "%2"))
     vb7, _, k7 = _doc_hop_le(m, lam_docx(H, p_docx("Thiết bị gồm", 1), p_docx("máy là công cụ.", 1, 1), numbering=hoa))
-    bang(m.lech_nguyen_van([{"stt": 1, "thuat_ngu": "Thiết bị gồm\n.A máy", "dinh_nghia": "công cụ."}], vb7, k7) == [1],
+    bang(m.lech_nguyen_van([{"stt": 1, "thuat_ngu": "Thiết bị gồm\nA máy", "dinh_nghia": "công cụ."}], vb7, k7) == [1],
          "tu noi cua diem bi lay lam tu noi cap khoan")
     # Dấu nối không ngắt và tab căn lề (r7 F6) là chữ hiển thị.
     _, cap8, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài</w:t><w:noBreakHyphen/><w:t>liệu</w:t><w:ptab/>'
@@ -1921,6 +1926,9 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
+    # r29 (lượt 28 E1): tiền tố dấu của nhãn.
+    ('wp1525_tien_to_chi_ngoac', ('_TIEN_TO = rf"(?:{_KC}[.)(\\-–])*{_KC}"', '_TIEN_TO = rf"\\(?{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_bo_nhan_dau_dau', ('    rf"{_TIEN_TO_DAU}(?:\\d+|{_chu_rieng(7)})', '    r"(?!)(?:\\d+|{_chu_rieng(7)})'), 'ca_khoan_mat_so_co_diem_dat'),
     # r28 (lượt 27 D1): ngữ pháp nhãn nhiều thành phần — mỗi nhánh một đột biến.
     ('wp1525_nhieu_cap_noi_chi_cham', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.])+{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_nhieu_cap_mot_dau', ('_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–])+{_KC}"', '_NOI_NHIEU = rf"(?:{_KC}[.)(\\-–]){_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
@@ -1933,8 +1941,8 @@ DOT_BIEN = [
     ('wp1525_bo_chan_nhieu_cap', ('    if any(_RE_NHIEU_CAP.match(ln) for ln in dong):', '    if False:'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_la_ghi_truoc_gach', ('                la_run = True   # B4', '                kq["la"] = True   # B4'), 'ca_cau_truc_docx_dat'),
     # r26 (lượt 25 B1–B3): mỗi nhánh ngữ pháp nhãn một đột biến; trạng thái ngắt; `xml:space` đặt lại / ruột / delText.
-    ('wp1525_diem_bo_cham_ngoac', ('    rf"\\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_diem_bo_dang_gach', ('    rf"\\(?{_KC}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_cham_ngoac', ('    rf"{_TIEN_TO}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_diem_bo_dang_gach', ('    rf"{_TIEN_TO}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_mo_than_chi_khoang_trang', ('_MO_THAN = "(?=\\\\s|[“\\"‘\'(])"', '_MO_THAN = "(?=\\\\s)"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_chu_sau_ngat_trang', ('                if sau_trang and chu.strip():', '                if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ngat_ghi_truoc_gach', ('                    ngat_mem = True', '                    kq["ngat"] = True'), 'ca_cau_truc_docx_dat'),

@@ -519,7 +519,11 @@ def _chu_rieng(i):
     return f"(?:(?P<r{i}>[a-zđ])(?P=r{i})*|(?P<R{i}>[A-ZĐ])(?P=R{i})*)(?![^\\W\\d_])"
 
 
-_RE_NHIEU_CAP = re.compile("^\\(?" + _KC + "(?:" + "|".join([
+# r29 (lượt 28 E1): TIỀN TỐ nhãn = mọi dấu `lvlText` (`.` `)` `(` `-` `–`, có đệm) đứng TRƯỚC placeholder đầu (`.1.1.`, `(.a)`, `-1.1`) —
+# cùng vị trí dấu mà `_nhan` cho phép (đầu · giữa · cuối). `_TIEN_TO_DAU` bắt buộc có ít nhất một dấu.
+_TIEN_TO = rf"(?:{_KC}[.)(\-–])*{_KC}"
+_TIEN_TO_DAU = rf"(?:{_KC}[.)(\-–])+{_KC}"
+_RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
     # số rồi chữ: chữ phải có dấu `lvlText` theo sau (`1.a.`) — `1. A là …` là khoản số 1 có thân mở bằng `A`.
     rf"\d+{_NOI_NHIEU}(?:\d+|{_chu_rieng(2)}{_KC}[.)(\-–])",
     rf"{_chu_rieng(1)}{_NOI_NHIEU}(?:\d+|{_chu_rieng(5)})",
@@ -529,8 +533,10 @@ _RE_NHIEU_CAP = re.compile("^\\(?" + _KC + "(?:" + "|".join([
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
 _RE_DIEM = re.compile("^(?:" + "|".join([
-    rf"\(?{_KC}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",
-    rf"\(?{_KC}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",
+    rf"{_TIEN_TO}{_tok(3)}(?:{_NOI}{_tok(4)})*{_KC}[.)]",
+    rf"{_TIEN_TO}{_tok(5)}(?:{_NOI}{_tok(6)})*{_KC}[-–]{_MO_THAN}",
+    # r29 (lượt 28 E1): nhãn có dấu ở ĐẦU rồi placeholder, kết ngay sau placeholder (`.1 …`, `(a …`).
+    rf"{_TIEN_TO_DAU}(?:\d+|{_chu_rieng(7)})(?:{_NOI}(?:\d+|{_chu_rieng(8)}))*(?=\s|[“\"‘'(]|[^\W\d_])",
     r"[-–•+]",
 ]) + r")\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")

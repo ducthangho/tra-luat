@@ -416,7 +416,8 @@ biến môi trường của environment.
   cache cũng không tới được chốt; bộ lọc markup của `tl extract` chỉ xét gạch TRỰC TIẾP trên run (chữ gạch qua style có thể còn
   trong văn bản dù `--markup-strict` cho qua) và chặn cả bản export sạch không có dấu sửa; bộ chuyển XML→chữ của nó có thể bỏ
   `w:tab`/`w:br`. Cần ranh giới và nguyên văn chắc chắn thì dùng `--tep <tệp .docx>`. Đường thô coi một chữ cái + `)` / `.`
-  hay `(a)` ở đầu dòng — chữ thường hoặc chữ HOA, đơn hoặc lặp (`aa.`, `BB)`) — là nhãn điểm ⇒ nguồn bị chặn.
+  hay `(a)` ở đầu dòng — chữ thường hoặc chữ HOA, đơn hoặc lặp (`aa.`, `BB)`), kể cả `a- …` / `A – …` — là nhãn điểm ⇒ nguồn bị
+  chặn. `.docx` khai một trường đơn trị nhiều lần (hai `numPr`, hai `start`, hai `basedOn`…) ⇒ chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

@@ -493,7 +493,8 @@ _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 # và dấu đầu dòng. Chữ viết tắt nhiều chữ cái (`Tp.`, `e-mail`) không khớp; một chữ cái + dấu chấm ở đầu dòng luôn coi là nhãn.
 # r21 (lượt 20 W4): cùng miền nhãn với cấp con `.docx` — chữ thường HOẶC chữ hoa, đơn HOẶC lặp (`aa`, `BB`, nhãn Word sau z),
 # với `)` / `.` / `(…)`.
-_RE_DIEM = re.compile(r"^(\(?(?:([a-zđ])\2*|([A-ZĐ])\3*)\)|(?:([a-zđ])\4*|([A-ZĐ])\5*)\.|[-–•+])\s*")
+# r22 (lượt 21 X3): thêm nhãn chữ + gạch (`a-`, `a –`, lvlText `%N-`/`%N –`) khi sau gạch là khoảng trắng — từ ghép `e-mail` không khớp.
+_RE_DIEM = re.compile(r"^(\(?(?:([a-zđ])\2*|([A-ZĐ])\3*)\)|(?:([a-zđ])\4*|([A-ZĐ])\5*)\.|(?:([a-zđ])\6*|([A-ZĐ])\7*) ?[-–](?=\s)|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 # Câu dẫn của Điều "Giải thích từ ngữ" — r6 (lượt 6 F2, Review Rescue sau sáu lượt cùng lớp): DANH SÁCH CHO PHÉP NGUYÊN DÒNG.
@@ -612,6 +613,25 @@ _CON_RUN_CHU = {"t": None, "tab": " ", "ptab": " ", "noBreakHyphen": "-", "softH
 _CON_RUN_BO_QUA = {"rPr", "lastRenderedPageBreak", "commentReference", "annotationRef"}
 _TAT_OOXML = ("0", "false", "off")
 _MC = "{http://schemas.openxmlformats.org/markup-compatibility/2006}"
+
+
+# r22 (lượt 21 X2): TRƯỜNG ĐƠN TRỊ — mọi phần tử con mà bộ đọc lấy bằng `.find()` (phần tử ĐẦU) phải xuất hiện ≤ 1 lần; khai nhiều
+# lần ⇒ mâu thuẫn, không đoán Word chọn cái nào. Part chính và styles ⇒ ValueError cả tệp; numbering ⇒ `loi` của định nghĩa (A5).
+_DON_TRI_DOCUMENT = {"p": ("pPr",), "r": ("rPr",), "pPr": ("pStyle", "numPr", "rPr"), "numPr": ("numId", "ilvl"),
+                     "rPr": ("rStyle", "strike", "dstrike")}
+_DON_TRI_STYLES = {"style": ("basedOn", "pPr", "rPr"), "pPr": ("numPr",), "numPr": ("numId", "ilvl"),
+                   "rPr": ("strike", "dstrike"), "docDefaults": ("rPrDefault", "pPrDefault"), "rPrDefault": ("rPr",),
+                   "pPrDefault": ("pPr",)}
+_DON_TRI_LVL = ("start", "numFmt", "lvlText", "lvlRestart", "isLgl", "pStyle")
+
+
+def _kiem_don_tri(goc, bang, ten_part):
+    """r22 (lượt 21 X2): ValueError khi một phần tử con đơn trị (theo `bang`) xuất hiện nhiều lần."""
+    for el in goc.iter():
+        ten = str(el.tag)[len(_W):] if str(el.tag).startswith(_W) else None
+        for con in bang.get(ten, ()):
+            if len(el.findall(_W + con)) > 1:
+                raise ValueError(f"{ten_part}: {ten} khai {con} nhieu lan — khong ho tro")
 
 
 def _chan_mc(goc, ten_part):
@@ -747,6 +767,9 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             if not 0 <= il <= 8:   # r6 (lượt 5 E6): miền cấp OOXML 0–8
                 loi = loi or f"ilvl {il} ngoai mien 0-8"
                 continue
+            if any(len(lvl.findall(_W + t)) > 1 for t in _DON_TRI_LVL):   # r22 (lượt 21 X2): trường đơn trị khai nhiều lần
+                loi = loi or f"cap {il}: truong don tri khai nhieu lan"
+                continue
             fmt = lvl.find(_W + "numFmt")
             txt = lvl.find(_W + "lvlText")
             st = lvl.find(_W + "start")
@@ -775,6 +798,9 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
             continue
         if nid in kq:
             kq[nid] = {"muc": {}, "loi": f"numId {nid} trung sau chuan hoa"}
+            continue
+        if len(num.findall(_W + "abstractNumId")) > 1:   # r22 (lượt 21 X2)
+            kq[nid] = {"muc": {}, "loi": f"numId {nid} khai abstractNumId nhieu lan"}
             continue
         if aid is None or _so_id(aid.get(_W + "val")) not in truu_tuong:
             kq[nid] = {"muc": {}, "loi": "numId khong tro abstractNum hop le"}
@@ -818,6 +844,7 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
     if goc is None:
         return {"": (None, None, None)}
     _chan_mc(goc, "styles")
+    _kiem_don_tri(goc, _DON_TRI_STYLES, "styles")   # r22 (lượt 21 X2)
 
     def gach(rpr, ten):
         e = rpr.find(_W + ten) if rpr is not None else None
@@ -936,6 +963,21 @@ def _doan_trong(cha, trong_bang=False):
             yield ("la", el, trong_bang)
 
 
+def _ruot_bi_bo(el):
+    """r22 (lượt 21 X1, chính sách r222 `chunk_payload`): chữ HIỂN THỊ của nội dung bị bỏ (`w:del`/`w:moveFrom`) — `t`/`delText` theo chữ,
+    `tab`/`ptab`/`br`/`cr` là khoảng trắng, `noBreakHyphen` là `-`; phần tử khác bỏ qua."""
+    phan = []
+    for e in el.iter():
+        ten = e.tag[len(_W):] if isinstance(e.tag, str) and e.tag.startswith(_W) else None
+        if ten in ("t", "delText"):
+            phan.append(e.text or "")
+        elif ten in ("tab", "ptab", "br", "cr"):
+            phan.append(" ")
+        elif ten == "noBreakHyphen":
+            phan.append("-")
+    return "".join(phan)
+
+
 def _phan_tich_doan(p, kieu):
     """dict của một đoạn (XML GỐC — r5 lọc chữ đã bỏ ngay tại đây): chu, so (numId, ilvl)|None, so_tu_style, ngat, la.
 
@@ -989,7 +1031,11 @@ def _phan_tich_doan(p, kieu):
                 else:
                     kq["sau_ngat_trang"] = True   # r8 (lượt 7 G4): ngắt TRANG/CỘT ở CUỐI đoạn là trình bày
             elif ten in ("delText",):
-                continue   # chữ đã xoá (track changes) — không vào nguyên văn
+                # chữ đã xoá (track changes) — không vào nguyên văn; r22 (lượt 21 X1, lưới phụ r222): `delText` lạc chỉ có khoảng
+                # trắng ⇒ giữ khoảng trắng.
+                if c.text and not c.text.strip():
+                    chu_run.append(c.text)
+                continue
             elif ten in _CON_RUN_BO_QUA:
                 continue
             else:
@@ -1024,7 +1070,7 @@ def _phan_tich_doan(p, kieu):
             elif ten in ("del", "moveFrom"):
                 # nội dung đã xoá/chuyển đi — không vào nguyên văn; r21 (lượt 20 W2, chính sách r222): ruột CHỈ có khoảng trắng
                 # ⇒ giữ khoảng trắng (không để hai từ hai bên dính lại).
-                ruot = "".join((e.text or "") for e in c.iter() if e.tag in (_W + "delText", _W + "t"))
+                ruot = _ruot_bi_bo(c)   # r22 (lượt 21 X1): tab/ngắt trong ruột cũng là phân cách
                 if ruot and not ruot.strip():
                     kq["phan"].append(ruot)
                 continue
@@ -1083,6 +1129,7 @@ def doc_dieu_docx(nguon, dieu):
         raise ValueError("styles co danh so o mac dinh doan (docDefaults/pPrDefault/numPr) — khong ho tro")   # r20 (lượt 19 V2)
     goc_cay = ET.fromstring(goc_xml)
     _chan_mc(goc_cay, "document")
+    _kiem_don_tri(goc_cay, _DON_TRI_DOCUMENT, "document")   # r22 (lượt 21 X2)
     if goc_cay.tag != _W + "document":
         # r5 (lượt 4 D5): .docx Strict (namespace purl.oclc.org) hay tệp lạ — giới hạn đã khai.
         raise ValueError("document.xml khong phai WordprocessingML Transitional (vd .docx Strict) — luu lai dang Word Document")

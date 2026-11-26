@@ -56,6 +56,8 @@
 - r21 (sau cross-review lượt 20, đặc tả `ops/specs/llm-khoan-docx-r21.md`): run gạch / `w:del` chỉ có khoảng trắng giữ khoảng trắng
   (chính sách r222); nhãn điểm thô gồm chữ hoa và chữ lặp; cấp / `lvlOverride` trùng trong danh sách đang dùng ⇒ chặn; khai giới
   hạn bộ lọc markup và bộ chuyển chữ của `tl extract` (theo quyết định chủ kho); thông báo trần CAP chỉ đường `.docx`.
+- r22 (sau cross-review lượt 21, đặc tả `ops/specs/llm-khoan-docx-r22.md`): tab/ngắt trong nội dung bị bỏ và `delText` lạc chỉ có
+  khoảng trắng giữ phân cách; trường đơn trị khai nhiều lần ⇒ chặn; nhãn điểm thô `a-` / `A –` ⇒ chặn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

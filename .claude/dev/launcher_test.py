@@ -11726,7 +11726,11 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
         for kw in hong_ghi:
             with San() as s:
                 p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], **kw)
-                bang(p.returncode != 0, f"{nen}/{ten}: ghi GITHUB_PATH hong ({kw}) ma installer rc=0 {p.stderr[-200:]}")
+                # wp1488 r6: `_tl1488_doc` KHÔNG gán đầu ra khi `cygpath -u` lỗi, nên rc ≠ 0 tự nó không phân biệt "trả lỗi ngay"
+                # với "đi tiếp các ứng viên rồi mới hết" — đòi bộ chọn DỪNG ở lời gọi hỏng (không tới dòng hết ứng viên).
+                dung_ngay = not (kw.get("env_them") or {}).get("CYGPATH_U_HONG") or "khong thu muc nao co" not in p.stderr
+                bang(p.returncode != 0 and dung_ngay,
+                     f"{nen}/{ten}: ghi GITHUB_PATH hong ({kw}) ma installer rc={p.returncode} / khong dung ngay {p.stderr[-200:]}")
         # Tên trần đã DAT ⇒ không đổi PATH, không ghi GITHUB_PATH (ghi thì đẩy thư mục ấy lên trước bước sau).
         with San() as s:
             p, gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], dau="tot")
@@ -13010,6 +13014,12 @@ def r868_hinh_dang_kenh_ket_qua():
                 '    _tl1488_doc KET_QUA_CAI cat -- "$TAM_CAI/stdout" || {', '  *) echo "cai_cong_cu: kenh ket qua hong',
                 'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
         bang(can in than, f"cai_cong_cu.sh thieu chot kenh ket qua {can!r}")
+    # wp1488 r6 B7: thân hàm đọc giữ byte (định nghĩa TRƯỚC bộ chọn, ngoài lát `than`) — lỗi vế nào cũng là lỗi đọc,
+    # sentinel giữ LF đuôi, gỡ export dưới allexport.
+    for can in ('\n_tl1488_doc() {  # <ten bien dich> <lenh> [doi so]...\n',
+                '  _tl1488_v="$("$@" | tr \'\\000\' \'\\001\' && printf x)" || return 1\n',
+                '  printf -v "$_tl1488_ten" \'%s\' "${_tl1488_v%x}"\n}\nexport -nf _tl1488_doc\n'):
+        bang(sh.count(can) == 1, f"cai_cong_cu.sh thieu ham doc giu byte {can!r}")
     bang("$(eval" not in than and "KET_QUA_CAI=\"$(eval" not in sh, "cong thuc lai chay trong $( ) (cho EOF stdout)")
     bang(re.findall(r"^\s*trap\b.*$", sh, re.M) == ["trap 'rm -rf -- \"$TAM_CAI\"' EXIT"],
          "trap EXIT don kenh phai la DUY NHAT, khong bi go/ghi de")

@@ -712,12 +712,17 @@ def ca_khoan_mat_so_co_diem_dat(m):
               sach.replace("Dữ liệu", ".1.1. Dữ liệu"), sach.replace("Dữ liệu", ".1 Dữ liệu"), sach.replace("Dữ liệu", "(.a) Dữ liệu"),
               sach.replace("Dữ liệu", ".a Dữ liệu"),
               # r30 (lượt 29 F1): một placeholder rồi nhiều dấu, kể cả khi số trùng số khoản kế.
-              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.. Dữ liệu là thông tin.", sach.replace("Dữ liệu", "a). Dữ liệu")):
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.. Dữ liệu là thông tin.", sach.replace("Dữ liệu", "a). Dữ liệu"),
+              # r31 (lượt 30 G2): số + dấu dính chữ cái (`1.a`), nhãn có đệm `1. a.`.
+              "Điều 3.\n1. Hồ sơ là tài liệu.\n2.a Dữ liệu là thông tin.", "Điều 3.\n1. Hồ sơ là tài liệu.\n2. a. Dữ liệu là thông tin."):
         bang(m.tach_khoan(x) is None, f"nhan diem tren nguon mat so phai bi chan: {x!r}")
     # r28 đối chứng: `A1 là …` (mã/hạng), `1. A là …` (khoản số 1 thân mở bằng chữ cái) không phải nhãn nhiều thành phần.
     bang(m.tach_khoan("Điều 3.\nA1 là hạng giấy phép.\nB2 là hạng khác.") == [(None, "A1 là hạng giấy phép."), (None, "B2 là hạng khác.")],
          "ma hang A1/B2 bi chan oan")
     bang(m.tach_khoan("Điều 3.\n1. A là x.\n2. B là y.") == [(1, "A là x."), (2, "B là y.")], "khoan so than mo bang chu cai bi chan oan")
+    # r31 (lượt 30 G2) đối chứng: khoản có thân mở bằng cụm ngoặc `(…)` không phải nhãn nhiều dấu.
+    bang(m.tach_khoan("Điều 3.\n1. (Hồ sơ) là tài liệu.\n2. Dữ liệu là thông tin.") == [(1, "(Hồ sơ) là tài liệu."), (2, "Dữ liệu là thông tin.")],
+         "khoan than mo bang ngoac bi chan oan")
     # r29 đối chứng: dòng mở bằng dấu rồi CHỮ (không phải placeholder đứng riêng) không phải nhãn.
     bang(m.tach_khoan("Điều 3.\n(Hồ sơ) là tài liệu.\nDữ liệu là thông tin.") is not None, "dong mo bang ngoac + chu bi nhan lam nhan")
     vt = "Điều 3.\ne-mail là thư điện tử.\nTp. Hồ Chí Minh là thành phố."
@@ -1382,7 +1387,7 @@ def ca_cau_truc_docx_dat(m):
                                                 '<w:r><w:t>tài liệu.</w:t></w:r></w:sdtContent></w:sdt>')))
     bang(cap13 == [(1, "Hồ sơ là tài liệu.")], f"sdt noi dong bi chan: {cap13}")
     # Tắt gạch TRỰC TIẾP trên run là tuyệt đối.
-    kg = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    kg = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     _, cap14, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:rPr><w:rStyle w:val="G"/><w:strike w:val="0"/></w:rPr>'
                                                 '<w:t>Hồ sơ là tài liệu.</w:t></w:r>'), styles=kg))
     bang(cap14 == [(1, "Hồ sơ là tài liệu.")], f"tat gach truc tiep bi chan oan: {cap14}")
@@ -1404,7 +1409,7 @@ def ca_cau_truc_docx_dat(m):
             '<Relationship Id="r1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="kieu.xml"/>'
             '<Relationship Id="r2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" '
             'Target="numbering.xml"/></Relationships>')
-    kgk = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    kgk = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     _, cap18, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr>'
                                                 '<w:t> CŨ</w:t></w:r>'),
                                           them={"word/_rels/document.xml.rels": rels, "word/kieu.xml": kgk}))
@@ -1438,7 +1443,7 @@ def ca_cau_truc_docx_dat(m):
                '<Relationship Id="r1" Type="http://example.com/ext/styles" Target="ngoai.xml"/>'
                '<Relationship Id="r2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" '
                'Target="numbering.xml"/></Relationships>')
-    kng = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    kng = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     _, cap27, _ = _doc_hop_le(m, lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr>'
                                                 '<w:t xml:space="preserve"> Thêm.</w:t></w:r>'),
                                           them={"word/_rels/document.xml.rels": rels_mr, "word/ngoai.xml": kng}))
@@ -1647,7 +1652,7 @@ def ca_cau_truc_docx_chan(m):
     mc = 'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"'
     chan(lam_docx(H, p_tho(f'<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><mc:AlternateContent {mc}><mc:Choice Requires="w14">'
                            '<w:strike/></mc:Choice></mc:AlternateContent></w:rPr><w:t> CŨ</w:t></w:r>')), "mc trong rPr cua run")
-    kmc = (f'<w:styles {_WNS} {mc}><w:style w:styleId="G"><w:rPr><mc:AlternateContent><mc:Choice Requires="w14"><w:strike/>'
+    kmc = (f'<w:styles {_WNS} {mc}><w:style w:type="character" w:styleId="G"><w:rPr><mc:AlternateContent><mc:Choice Requires="w14"><w:strike/>'
            '</mc:Choice></mc:AlternateContent></w:rPr></w:style></w:styles>')
     chan(lam_docx(H, A, styles=kmc), "mc trong styles")
     chan(lam_docx(H, f'<w:p><w:pPr><mc:AlternateContent {mc}/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>'
@@ -1705,12 +1710,22 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(H, f'<w:sdt><w:sdtContent>{A}</w:sdtContent><w:p/></w:sdt>'), "sdt co con la")
     chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là </w:t></w:r><w:sdt><w:sdtContent><w:r><w:t>tài liệu.</w:t></w:r></w:sdtContent><w:r/></w:sdt>')),
          "sdt noi dong co con la")
-    kst = f'<w:styles {_WNS}><w:style w:styleId="G"/><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    kst = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G"/><w:style w:type="character" w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     chan(lam_docx(H, A, styles=kst), "styleId khai hai lan")
     # r30 F2: `pStyle` trỏ style KHÔNG CÓ (style đoạn mặc định mang gạch) ⇒ chặn, không đoán fallback.
     kdut = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:default="1" w:styleId="MD"><w:rPr><w:strike/></w:rPr></w:style>'
             '<w:style w:type="paragraph" w:styleId="TD"/></w:styles>')
     chan(lam_docx(p_docx("Điều 3.", kieu="TD"), p_docx("Hồ sơ là tài liệu.", 1, kieu="KhongCo"), styles=kdut), "pStyle tro style vang")
+    # r31 G1: tham chiếu style SAI LOẠI — `pStyle` trỏ character style, `rStyle` trỏ paragraph style; `basedOn` đổi loại.
+    kloai = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:default="1" w:styleId="MD"><w:rPr><w:strike/></w:rPr></w:style>'
+             '<w:style w:type="paragraph" w:styleId="TD"/><w:style w:type="character" w:styleId="KT"/></w:styles>')
+    chan(lam_docx(p_docx("Điều 3.", kieu="TD"), p_docx("Hồ sơ là tài liệu.", 1, kieu="KT"), styles=kloai), "pStyle tro character style")
+    kloai2 = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="PG"><w:rPr><w:strike/></w:rPr></w:style></w:styles>')
+    chan(lam_docx(H, p_tho('<w:r><w:t xml:space="preserve">Hồ sơ là </w:t></w:r><w:r><w:rPr><w:rStyle w:val="PG"/></w:rPr><w:t>tài liệu.</w:t></w:r>'),
+                  styles=kloai2), "rStyle tro paragraph style")
+    kloai3 = (f'<w:styles {_WNS}><w:style w:type="paragraph" w:styleId="PG"/><w:style w:type="character" w:styleId="KC">'
+              '<w:basedOn w:val="PG"/></w:style></w:styles>')
+    chan(lam_docx(H, A, styles=kloai3), "basedOn doi loai")
     # r24 Z4: metadata content control đơn trị — mỗi ca vi phạm đúng MỘT trường.
     chan(lam_docx(H, f'<w:sdt><w:sdtPr/><w:sdtPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtPr")
     chan(lam_docx(H, f'<w:sdt><w:sdtEndPr/><w:sdtEndPr/><w:sdtContent>{A}</w:sdtContent></w:sdt>'), "sdt hai sdtEndPr")
@@ -1831,8 +1846,8 @@ def ca_cau_truc_docx_chan(m):
                   numbering=numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerLetter", "%2)", start=999))), "so thu tu vuot tran")
     chan(lam_docx(H, A, B, numbering=numbering(_lvl(0, "decimal", "%1."), nums=[(1, 0, ""), ("01", 0, "")])), "numId trung sau chuan hoa")
     # Markup không giải được.
-    k22 = (f'<w:styles {_WNS}><w:style w:styleId="Cha"><w:rPr><w:strike/></w:rPr></w:style>'
-           '<w:style w:styleId="Con"><w:basedOn w:val="Cha"/><w:rPr><w:strike/></w:rPr></w:style></w:styles>')
+    k22 = (f'<w:styles {_WNS}><w:style w:type="character" w:styleId="Cha"><w:rPr><w:strike/></w:rPr></w:style>'
+           '<w:style w:type="character" w:styleId="Con"><w:basedOn w:val="Cha"/><w:rPr><w:strike/></w:rPr></w:style></w:styles>')
     chan(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu</w:t></w:r><w:r><w:rPr><w:rStyle w:val="Con"/></w:rPr><w:t xml:space="preserve"> số.</w:t></w:r>'),
                   styles=k22), "gach toggle bat hai tang")
     gop = ('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:rPr><w:del w:id="9" w:author="x"/></w:rPr></w:pPr>'
@@ -1852,14 +1867,14 @@ def ca_cau_truc_docx_chan(m):
     x = 'xmlns:x="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
     bo(lam_docx(H, p_tho(f'<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><x:r {x}><x:rPr><x:strike/></x:rPr><x:t> CŨ</x:t></x:r>')),
        "gach ngang tien to khac")
-    kg = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    kg = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
     bo(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr><w:t> CŨ</w:t></w:r>'),
                 styles=kg), "gach ngang theo style")
-    k2 = f'<w:styles {_WNS}><w:style w:styleId="G2"><w:rPr><w:dstrike/></w:rPr></w:style></w:styles>'
+    k2 = f'<w:styles {_WNS}><w:style w:type="character" w:styleId="G2"><w:rPr><w:dstrike/></w:rPr></w:style></w:styles>'
     bo(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G2"/><w:strike w:val="0"/></w:rPr>'
                          '<w:t> CŨ</w:t></w:r>'), styles=k2), "gach kep theo style bi che boi tat gach don")
-    kc = (f'<w:styles {_WNS}><w:style w:styleId="Cha"><w:rPr><w:strike/></w:rPr></w:style>'
-          '<w:style w:styleId="Con"><w:basedOn w:val="Cha"/><w:rPr><w:strike w:val="0"/></w:rPr></w:style></w:styles>')
+    kc = (f'<w:styles {_WNS}><w:style w:type="character" w:styleId="Cha"><w:rPr><w:strike/></w:rPr></w:style>'
+          '<w:style w:type="character" w:styleId="Con"><w:basedOn w:val="Cha"/><w:rPr><w:strike w:val="0"/></w:rPr></w:style></w:styles>')
     bo(lam_docx(H, p_tho('<w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="Con"/></w:rPr><w:t> CŨ</w:t></w:r>'),
                 styles=kc), "gach toggle: style con tat khong tat gach cua cha")
 
@@ -1932,9 +1947,14 @@ DOT_BIEN = [
     ('wp1525_extract_bo_markup_strict', ('str(dieu), "--markup-strict", *them]', 'str(dieu), *them]'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_chan_numpr_mac_dinh', ('    if kieu.get("#numPr_mac_dinh"):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_numpr_mac_dinh_qua_rong', ('/{_W}pPr/{_W}numPr") is not None', '/{_W}pPr") is not None'), 'ca_cau_truc_docx_dat'),
-    # r30 (lượt 29 F1/F2).
-    ('wp1525_mot_cho_hai_dau', ('{_chu_rieng(6)})(?:{_KC}[.)(\\-–]){{2,}}",', '{_chu_rieng(6)})(?:{_KC}[.)(\\-–]){{3,}}",'), 'ca_khoan_mat_so_co_diem_dat'),
-    ('wp1525_pstyle_dut_khong_chan', ('"la": ps is not None and psid not in kieu,', '"la": False,'), 'ca_cau_truc_docx_chan'),
+    # r30 (lượt 29 F1/F2) → r31 (lượt 30 G1/G2).
+    ('wp1525_mot_cho_hai_dau', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)\\-–]){2,}",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_hai_dau_nhan_ngoac_mo', ('(?:{_KC}[.)\\-–])+",', '(?:{_KC}[.)(\\-–])+",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_bo_so_dinh_chu_rieng', ('    rf"\\d+[.)(\\-–]+{_chu_rieng(9)}",', '    r"(?!)",'), 'ca_khoan_mat_so_co_diem_dat'),
+    ('wp1525_pstyle_dut_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(psid not in kieu)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_pstyle_vang_khong_chan', ('(psid not in kieu or loai_kieu.get(psid) != "paragraph")', '(loai_kieu.get(psid, "paragraph") != "paragraph")'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_rstyle_sai_loai', ('                kq["la"] = True   # r31', '                pass   # r31'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_basedon_doi_loai', ('        if goc_sid in loai and loai[goc_sid] != ten_loai:', '        if False:'), 'ca_cau_truc_docx_chan'),
     # r29 (lượt 28 E1): tiền tố dấu của nhãn.
     ('wp1525_tien_to_chi_ngoac', ('_TIEN_TO = rf"(?:{_KC}[.)(\\-–])*{_KC}"', '_TIEN_TO = rf"\\(?{_KC}"'), 'ca_khoan_mat_so_co_diem_dat'),
     ('wp1525_bo_nhan_dau_dau', ('    rf"{_TIEN_TO_DAU}(?:\\d+|{_chu_rieng(7)})', '    r"(?!)(?:\\d+|{_chu_rieng(7)})'), 'ca_khoan_mat_so_co_diem_dat'),

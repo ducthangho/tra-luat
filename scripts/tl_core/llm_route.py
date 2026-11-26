@@ -530,7 +530,10 @@ _RE_NHIEU_CAP = re.compile("^" + _TIEN_TO + "(?:" + "|".join([
     # số–chữ liền nhau phải có dấu `lvlText` ngay sau (`1a.`, `a1)`) — `A1 là …` (tên hạng, mã) không phải nhãn.
     rf"\d+{_chu_rieng(3)}{_KC}[.)(\-–]",
     # r30 (lượt 29 F1): MỘT placeholder rồi HAI dấu `lvlText` trở lên (`1..`, `1.)`, `a).`) — nhãn, không phải số khoản `1.`.
-    rf"(?:\d+|{_chu_rieng(6)})(?:{_KC}[.)(\-–]){{2,}}",
+    # r31 (lượt 30 G2): dấu thứ hai trở đi KHÔNG gồm `(` — `1. (Hồ sơ) là …` là khoản có thân mở bằng cụm ngoặc, không phải nhãn.
+    rf"(?:\d+|{_chu_rieng(6)}){_KC}[.)(\-–](?:{_KC}[.)\-–])+",
+    # r31 (lượt 30 G2): số + dấu DÍNH chữ cái đứng riêng (`1.a …`, `2)b …`) — khác `1. a …` (có đệm: khoản thân mở bằng chữ cái).
+    rf"\d+[.)(\-–]+{_chu_rieng(9)}",
     rf"{_chu_rieng(4)}\d+{_KC}[.)(\-–]",
 ]) + ")")
 _MO_THAN = "(?=\\s|[“\"‘'(])"
@@ -923,6 +926,14 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
     # r20 (lượt 19 V2): đánh số khai ở MẶC ĐỊNH ĐOẠN (`docDefaults/pPrDefault/pPr/numPr`) — bộ đọc chỉ giải style → trực tiếp, nên số
     # kế thừa từ mặc định không vào bộ đếm ⇒ đánh dấu để `doc_dieu_docx` dừng (không đoán thứ tự hiệu lực của Word).
     kq["#numPr_mac_dinh"] = goc.find(f"{_W}docDefaults/{_W}pPrDefault/{_W}pPr/{_W}numPr") is not None
+    # r31 (lượt 30 G1): LOẠI style (`w:type`, mặc định `paragraph`). Chuỗi `basedOn` đổi loại ⇒ ValueError (không đoán Word bỏ qua hay
+    # không); điểm vào đoạn/run kiểm loại tại `_phan_tich_doan`.
+    loai = {st.get(_W + "styleId"): (st.get(_W + "type") or "paragraph") for st in goc.findall(_W + "style")}
+    for sid, ten_loai in loai.items():
+        goc_sid = kq[sid][0]
+        if goc_sid in loai and loai[goc_sid] != ten_loai:
+            raise ValueError(f"styles: {sid!r} ({ten_loai}) basedOn {goc_sid!r} ({loai[goc_sid]}) khac loai — khong ho tro")
+    kq["#loai"] = loai
     return kq
 
 
@@ -1097,7 +1108,10 @@ def _phan_tich_doan(p, kieu):
                for k, t in ((0, "strike"), (1, "dstrike"))}
     # r30 (lượt 29 F2): `pStyle` trỏ style KHÔNG CÓ trong part styles — Word lùi về style đoạn mặc định (có thể mang gạch), bộ đọc thì
     # coi như không style ⇒ chữ gạch có thể lọt. Không đoán fallback: đoạn ấy là "lạ" (chặn nếu nằm trong Điều).
-    kq = {"phan": [], "ngat": False, "la": ps is not None and psid not in kieu, "sau_ngat_trang": False}
+    # r31 (lượt 30 G1): ID có mà SAI LOẠI (không phải paragraph style) cũng là tham chiếu không phân giải được.
+    loai_kieu = kieu.get("#loai", {})
+    kq = {"phan": [], "ngat": False, "la": ps is not None and (psid not in kieu or loai_kieu.get(psid) != "paragraph"),
+          "sau_ngat_trang": False}
 
     def run(r):
         rpr = r.find(_W + "rPr")
@@ -1105,6 +1119,8 @@ def _phan_tich_doan(p, kieu):
         truc_tiep = {}
         if rpr is not None:
             rs = rpr.find(_W + "rStyle")
+            if rs is not None and rs.get(_W + "val") in loai_kieu and loai_kieu[rs.get(_W + "val")] != "character":
+                kq["la"] = True   # r31 (lượt 30 G1): `rStyle` trỏ style KHÁC loại character ⇒ không đoán Word áp hay bỏ
             if rs is not None:
                 for t, ci in (("strike", 3), ("dstrike", 4)):
                     dem[t] += _dem_bat_trong_chuoi(kieu, rs.get(_W + "val"), ci)

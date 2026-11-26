@@ -73,6 +73,8 @@
 - r29 (sau cross-review lượt 28 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r29.md`): nhãn có dấu đứng ĐẦU (`.1.1.`, `.a`, `(.a)`) ⇒ chặn.
 - r30 (sau cross-review lượt 29, đặc tả `ops/specs/llm-khoan-docx-r30.md`): `pStyle` trỏ style không có ⇒ chặn; nhãn một placeholder
   nhiều dấu (`1..`, `a).`) ⇒ chặn trước nhánh số khoản.
+- r31 (sau cross-review lượt 30, đặc tả `ops/specs/llm-khoan-docx-r31.md`): style phân giải theo loại (`pStyle`/`rStyle` sai loại,
+  `basedOn` đổi loại ⇒ chặn); nhãn `1.a …` ⇒ chặn, khoản `1. (…) là …` không còn bị chặn oan.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

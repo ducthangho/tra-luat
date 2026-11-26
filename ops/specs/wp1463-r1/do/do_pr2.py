@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r15. KHÔNG phải `*_test.py`, không đăng ký vào registry. Chạy bằng `python3 -B`:
+"""wp1463 (PR2) — bằng chứng đo trước merge của SPEC r16. KHÔNG phải `*_test.py`, không đăng ký vào registry. Chạy bằng `python3 -B`:
   do_pr2.py vung [--root KHO] [--luu DIR]            Nghiệm thu 4 (rc 0 SACH · 4 NGOAI_VUNG · 3 KHONG_DO_DUOC)
   do_pr2.py ab <SHA_BASE> [--root KHO] [--luu DIR]   Nghiệm thu 1, 2, 5 (hai clone dựng trong MỘT lệnh; chín phép của bộ so)
   do_pr2.py registry [--root KHO] [--tu DIR]         Nghiệm thu 3 (`--tu` = thư mục `--luu` của `ab`, khỏi chạy lại bộ)
   do_pr2.py tu-kiem [--dot-bien] [--root KHO]        tự kiểm bộ so, phép đo vùng và bộ chạy (không cần cây git)
 Hook và probe của `vung` được GHI RA thư mục tạm ngoài kho rồi nạp qua PYTHONPATH (tệp này được theo dõi; chạy probe từ chính nó sẽ
-đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r15 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
+đưa nó vào tập quan sát). Giới hạn của `vung`, khai thẳng (SPEC r16 "Bảo đảm giảm"): tiến trình KHÔNG phải Python, Python gọi qua shell,
 lần đọc không phát sự kiện audit `open`, Python con không hook bị che bởi dòng khởi động thừa, và Python con KHÔNG NHẬN RA ĐƯỢC theo
 `la_python` (bản sao/bản đổi tên của trình thông dịch chạy không hook — PR2-C04, giao packet NO-PR2-VUNG-CAP-HDH) đều KHÔNG bị quan sát.
+Cũng KHÔNG bị đếm: lần sinh Python không phát sự kiện audit (`multiprocessing` spawn/forkserver gọi thẳng `_posixsubprocess.fork_exec`) và tệp chạy
+tương đối mà `preexec_fn` đổi thư mục trước exec (hook chỉ thấy `cwd=` và cwd của tiến trình sinh — R16-1).
+Giới hạn của `chay_quan_sat` (R16-3): xem `GIOI_HAN_QUAN_SAT` — hậu duệ tự rời nhóm tiến trình/phiên có thể sống sót sau bước dọn; bộ chạy bị
+SIGTERM/SIGKILL (không phải ngoại lệ Python) thì không có đường dọn; `chay_bo` của `ab`/`registry` KHÔNG sở hữu nhóm (không thuộc R16-2).
 """
 import ast
 import contextlib
@@ -18,6 +22,7 @@ import io
 import json
 import os
 import re
+import select
 import shutil
 import signal
 import subprocess
@@ -73,7 +78,8 @@ _RE_PY = re.compile(r"python[0-9.]*(\.exe)?$")
 
 # Hook cho MỌI tiến trình Python thừa kế PYTHONPATH. Mỗi dòng nhật ký: JSON [pid, ppid, kiểu, dữ liệu]. Kiểu: BAT_DAU
 # (dữ liệu = [starttime, sys.orig_argv]) · MO/THAT (đường dẫn theo chữ / sau realpath) · DIRFD (os.open tên tương đối
-# với dir_fd, giải theo /proc/self/fd/<fd>) · DIRFD_KHONG_GIAI · SINH (argv của tiến trình con sắp tạo; pid = tiến trình sinh).
+# với dir_fd, giải theo /proc/self/fd/<fd>) · DIRFD_KHONG_GIAI · SINH (argv của tiến trình con sắp tạo; pid = tiến trình sinh; `that` =
+# realpath của tệp chạy, giải NGAY lúc ghi sự kiện trong ngữ cảnh khởi chạy thật của con — R16-1).
 HOOK_SRC = r'''
 import json, os, sys, threading
 _LOG = os.environ.get("WP1463_VUNG_LOG")
@@ -98,6 +104,22 @@ if _LOG:
             return [os.fsdecode(a) for a in x] if isinstance(x, (list, tuple)) else [os.fsdecode(x)]
         except Exception:
             return [repr(x)]
+    def _that(x, cwd, tim):
+        # R16-1 (PR2-C06): realpath của tệp chạy trong NGỮ CẢNH KHỞI CHẠY THẬT của con, giải ngay lúc này (về sau symlink có thể đã mất): tên
+        # chứa `/` giải theo cwd mà CON được khởi chạy (`cwd=` riêng của lời gọi, không thì cwd HIỆN TẠI của tiến trình sinh — không phải cwd
+        # của bộ đọc nhật ký); tên trần thì dò PATH của chính lời gọi như execvpe (trúng đầu tiên). Không giải được ⇒ None.
+        try:
+            x, goc = os.fsdecode(x), os.path.abspath(os.fsdecode(cwd)) if cwd is not None else os.getcwd()
+            for u in ([x] if os.path.dirname(x) or tim is None else [os.path.join(os.fsdecode(d), x) for d in tim()]):
+                u = os.path.join(goc, u)
+                if os.path.isfile(u) and os.access(u, os.X_OK):
+                    return os.path.realpath(u)
+        except Exception:
+            pass
+        return None
+    def _sinh(exe, argv, cwd=None, tim=None):
+        exe, argv = (_argv(exe)[0] if exe else None), _argv(argv)
+        _ghi("SINH", {"exe": exe, "argv": argv, "that": sorted({t for t in (_that(x, cwd, tim) for x in (exe, *argv[:1]) if x) if t})})
     def _hook(ev, args):
         if getattr(_tl, "trong", False):
             return
@@ -105,10 +127,12 @@ if _LOG:
         try:
             if ev == "open" and args and isinstance(args[0], (str, bytes)) and not getattr(_tl, "dirfd", False):
                 _ghi_duong("MO", os.path.abspath(os.fsdecode(args[0])))
-            elif ev == "subprocess.Popen":
-                _ghi("SINH", {"exe": os.fsdecode(args[0]) if args[0] else None, "argv": _argv(args[1])})
-            elif ev in ("os.posix_spawn", "os.exec"):
-                _ghi("SINH", {"exe": os.fsdecode(args[0]), "argv": _argv(args[1])})
+            elif ev == "subprocess.Popen":   # (executable, args, cwd, env): con chdir(cwd) TRƯỚC khi exec; tên trần dò PATH của env ấy
+                _sinh(args[0], args[1], args[2], lambda: os.get_exec_path(args[3]))
+            elif ev == "os.posix_spawn":     # audit không phân biệt posix_spawn (nguyên đường dẫn) với posix_spawnp (dò PATH của tiến trình sinh)
+                _sinh(args[0], args[1], None, lambda: ["", *os.get_exec_path()])
+            elif ev == "os.exec":            # execv*: nguyên đường dẫn theo cwd hiện tại (execvp* tự dò PATH rồi gọi lại với đường dẫn đủ)
+                _sinh(args[0], args[1])
             elif ev == "os.system":
                 _ghi("SINH", {"exe": "/bin/sh", "argv": ["sh", "-c", os.fsdecode(args[0])]})
         finally:
@@ -164,12 +188,12 @@ print("PROBE_KQ " + json.dumps(kq, ensure_ascii=False), flush=True)
 '''
 
 def la_python(sinh):
-    """Python con NHẬN RA ĐƯỢC (SPEC r15 Nghiệm thu 4, R15-4): `exe` hoặc `argv[0]` có tên cơ sở khớp `_RE_PY`, hoặc có realpath trùng
-    realpath của trình thông dịch đang chạy. CỐ Ý không mở rộng biểu thức tên: bản sao/bản đổi tên ở đường dẫn khác thuộc PHẦN CÒN HỞ."""
-    for x in (sinh.get("exe"), (sinh.get("argv") or [None])[0]):
-        if x and (_RE_PY.search(os.path.basename(x)) or os.path.realpath(x) == os.path.realpath(sys.executable)):
-            return True
-    return False
+    """Python con NHẬN RA ĐƯỢC (SPEC r16 Nghiệm thu 4, R15-4, R16-1): `exe` hoặc `argv[0]` có tên cơ sở khớp `_RE_PY`, hoặc có realpath trùng
+    realpath của trình thông dịch đang chạy. Realpath ấy là `that` do HOOK giải ngay lúc ghi sự kiện, trong ngữ cảnh khởi chạy thật của con;
+    ở đây KHÔNG giải lại theo cwd của bộ đọc (PR2-C06). CỐ Ý không mở rộng biểu thức tên: bản sao/bản đổi tên không trỏ về trình thông dịch
+    đang chạy thuộc PHẦN CÒN HỞ."""
+    ten = [x for x in (sinh.get("exe"), (sinh.get("argv") or [None])[0]) if x]
+    return any(_RE_PY.search(os.path.basename(x)) for x in ten) or os.path.realpath(sys.executable) in (sinh.get("that") or ())
 
 def doc_log(log, root, tracked, pid_goc):
     """Nhật ký của MỘT phép → quan sát. `tap` = tệp được theo dõi khớp đường dẫn theo chữ HOẶC sau realpath.
@@ -281,48 +305,111 @@ def lenh_phep(ten, root, tam):
         return [sys.executable, "-B", K]
     return [sys.executable, "-B", os.path.join(tam, "probe_vung.py"), root, CHE_DO_PROBE[ten], json.dumps([[n, d] for n, d, _e in BANG])]
 
-def don_nhom(p, tran):
-    """R15-3: kết thúc rồi THU HỒI nhóm tiến trình do `chay_quan_sat` tự sinh (`start_new_session` ⇒ PGID == p.pid). Tới sau lệnh KILL `p`
-    CHƯA được thu hồi, nên PID ấy (cũng là PGID) không thể được cấp lại: tín hiệu không bao giờ tới nhóm tiến trình khác. TERM, chờ `p` thoát
-    tối đa tran/2 giây, KILL cả nhóm, rồi đọc nốt đầu ra tới EOF (mọi tiến trình còn giữ ống đã hết) trong tối đa tran/2 giây. Trả (mô tả, byte
-    đã bắt). Giới hạn khai thẳng: hậu duệ tự rời nhóm (`setsid`/`setpgid`) không bị tín hiệu chạm; nền không có nhóm kiểu POSIX chỉ giết được con."""
-    if p.returncode is None and hasattr(os, "killpg"):   # đã thu hồi thì PGID hết được ghim ⇒ không gửi tín hiệu nào nữa
-        for th in (signal.SIGTERM, signal.SIGKILL):
-            try:
-                os.killpg(p.pid, th)
-                het = time.monotonic() + tran / 2
-                while th == signal.SIGTERM and time.monotonic() < het and os.waitid(os.P_PID, p.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
-                    time.sleep(0.02)
-            except (OSError, AttributeError):   # nền POSIX không có `os.waitid`: bỏ khoảng chờ, KILL ngay
-                pass
-    elif p.returncode is None:
-        p.kill()
+GIOI_HAN_QUAN_SAT = ("GIOI_HAN_QUAN_SAT (SPEC r16 R16-3, bao dam GIAM, chu kho chap nhan): `chay_quan_sat` chi don hau due CON O trong nhom tien trinh/phien no tao;"
+                     " hau due tu roi nhom (setsid, setpgid, double-fork sang phien khac) co the SONG SOT sau buoc don — con giu ong dau ra thi bao `DON KHONG HET`"
+                     " (khong do duoc), da dong ong thi KHONG phat hien duoc (giao packet NO-PR2-QUAN-SAT-CAY-HDH).")
+
+def goc_da_thoat(pid):
+    """Trạng thái con gốc mà KHÔNG thu hồi nó (`WNOWAIT`): None = còn chạy · True = đã thoát, còn là zombie của ta nên PID (cũng là PGID/SID) vẫn
+    được GHIM · False = `ECHILD`, đã bị thu hồi ở nơi khác (vd SIGCHLD bị bỏ qua) nên danh tính số ấy KHÔNG còn được ghim."""
     try:
-        out, _ = p.communicate(timeout=tran / 2)
-        return f"da ket thuc va thu hoi nhom tien trinh {p.pid} (rc={p.returncode})", out or b""
-    except subprocess.TimeoutExpired as e:   # còn tiến trình NGOÀI nhóm giữ ống: vẫn thu hồi `p`, và nói thẳng là dọn không hết
-        p.poll()
-        return f"DON KHONG HET trong {tran} s (nhom tien trinh {p.pid}, rc={p.returncode})", e.output or b""
+        return os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None or None
+    except ChildProcessError:
+        return False
+
+def thanh_vien_song(pgid):
+    """Số tiến trình CÒN SỐNG (zombie không tính) của nhóm tiến trình `pgid`, đếm ở `/proc/<pid>/stat`. None = không đọc được `/proc` ⇒ KHÔNG
+    xác nhận được nhóm đã hết (bên gọi coi như còn)."""
+    try:
+        n = 0
+        for x in filter(str.isdigit, os.listdir("/proc")):
+            try:
+                with open(f"/proc/{x}/stat") as f:
+                    tt, _cha, nhom = f.read().rsplit(")", 1)[1].split()[:3]
+            except (OSError, ValueError, IndexError):
+                continue                                     # tiến trình vừa hết giữa lúc quét
+            n += tt not in "ZX" and nhom == str(pgid)
+        return n
+    except OSError:
+        return None
+
+def chon(fd, cho):   # có dữ liệu (hoặc EOF) để đọc trong `cho` giây?
+    po = select.poll()
+    po.register(fd, select.POLLIN)
+    return bool(po.poll(max(0.0, cho) * 1000))
+
+def _doc(fd, buf, cho, eof):
+    """Chờ tối đa `cho` giây, đọc ống đầu ra nếu có dữ liệu. Trả True khi ống đã EOF (mọi tiến trình còn giữ đầu ghi đã hết)."""
+    if eof:
+        time.sleep(max(0.0, cho))
+    elif chon(fd, cho):
+        b = os.read(fd, 1 << 16)
+        buf.append(b)
+        eof = not b
+    return eof
+
+def don_nhom(p, buf, eof, het, tran):
+    """R15-3, R16-2: dọn nhóm tiến trình/phiên do `chay_quan_sat` tự tạo (`start_new_session` ⇒ PGID == SID == p.pid) TRƯỚC khi nhả danh tính của
+    nó. Danh tính được GHIM bằng chính con gốc CHƯA thu hồi: trước hàm này không lời gọi nào thu hồi `p` (không `communicate`/`wait`/`poll`;
+    chỉ `waitid(WNOWAIT)`), nên dù con gốc đã thoát, PID của nó — cũng là PGID — không thể được cấp lại, và `killpg` chỉ tới các thành viên CÒN
+    LẠI của đúng nhóm ấy. Mất ghim (`goc_da_thoat` False, hoặc SIGCHLD đang bị bỏ qua) ⇒ KHÔNG gửi tín hiệu nào. TERM, chờ nhóm hết thành viên sống tới `het - tran/2`; KILL,
+    chờ tới `het`; đọc nốt ống tới EOF; rồi mới thu hồi `p`. Hạn `het` là TUYỆT ĐỐI nên gọi lại (bị ngắt giữa lúc dọn) không kéo dài việc dọn.
+    Trả (sạch, mô tả): sạch = còn ghim VÀ nhóm không còn thành viên sống VÀ ống đã EOF; không sạch ⇒ `DON KHONG HET` ⇒ bên gọi trả không đo
+    được. Giới hạn khai thẳng (R16-3, `GIOI_HAN_QUAN_SAT`): hậu duệ tự rời nhóm (`setsid`/`setpgid`/double-fork) không bị tín hiệu chạm."""
+    ghim = goc_da_thoat(p.pid) is not False and signal.getsignal(signal.SIGCHLD) != signal.SIG_IGN   # SIGCHLD bị bỏ qua ⇒ không có zombie nào ghim PID
+    for th, han in ((signal.SIGTERM, het - tran / 2), (signal.SIGKILL, het)) if ghim else ():
+        with contextlib.suppress(OSError):
+            os.killpg(p.pid, th)
+        while thanh_vien_song(p.pid) != 0 and time.monotonic() < han:
+            time.sleep(0.02)
+    con = thanh_vien_song(p.pid) if ghim else None
+    while not eof and time.monotonic() < het:
+        eof = _doc(p.stdout.fileno(), buf, min(0.05, het - time.monotonic()), eof)
+    p.poll()                                                 # THU HỒI con gốc = nhả danh tính, sau khi nhóm đã hết (hoặc hết hạn dọn)
+    if ghim and con == 0 and eof:
+        return True, f"da don va thu hoi nhom tien trinh {p.pid} (rc={p.returncode})"
+    ly_do = [x for x, c in (("con goc da bi thu hoi o noi khac nen KHONG gui tin hieu", not ghim), ("khong doc duoc /proc", ghim and con is None),
+                            (f"con {con} thanh vien song", bool(con)), ("ong dau ra chua EOF: con tien trinh NGOAI nhom giu ong", not eof)) if c]
+    return False, f"DON KHONG HET trong {tran} s (nhom tien trinh {p.pid}, rc={p.returncode}): {'; '.join(ly_do)}"
 
 def chay_quan_sat(cmd, cwd, log, tam, timeout=7200, tran_don=20.0):
-    """Chạy MỘT phép dưới hook, trong phiên/nhóm tiến trình RIÊNG mà hàm này sở hữu. Quá hạn (hoặc bị ngắt) ⇒ `don_nhom` rồi mới trả không
-    đo được, kèm lý do hết giờ và đầu ra đã bắt (R15-3)."""
+    """Chạy MỘT phép dưới hook, trong phiên/nhóm tiến trình RIÊNG mà hàm này sở hữu (R15-3). R16-2: MỌI đường ra sau khi đã sinh con — trả bình
+    thường, quá hạn, ngoại lệ, bị ngắt (`KeyboardInterrupt`) lúc đang chờ — đều qua `don_nhom` trước khi nhả danh tính của nhóm; ngoại lệ GỐC
+    được ném lại sau khi dọn; quá hạn hoặc dọn không hết ⇒ trả không đo được kèm lý do và đầu ra đã bắt. Chờ bằng `poll` + `waitid(WNOWAIT)`
+    (không `communicate`: nó thu hồi con gốc khi bị ngắt, làm mất ghim trước khi kịp dọn — PR2-C05)."""
+    if not (hasattr(os, "killpg") and hasattr(os, "waitid")):
+        return None, None, "LOI_CHAY: KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX (killpg/waitid)"
     env = {k: v for k, v in os.environ.items() if k != "CI_PROVENANCE_KHONG_DOT_BIEN"}
     env["PYTHONPATH"] = tam + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
     env.update(WP1463_VUNG_LOG=log, PYTHONDONTWRITEBYTECODE="1")
     open(log, "w").close()
+    p, buf, eof, loi, het = None, [], False, None, time.monotonic() + timeout
     try:
         p = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
-    except OSError as e:   # không chạy được ⇒ không đo được
-        return None, None, f"LOI_CHAY: {type(e).__name__}: {e}"
-    try:
-        out, _ = p.communicate(timeout=timeout)
-        return p.pid, p.returncode, out.decode("utf-8", "replace")
-    except BaseException as e:   # quá hạn hay bị ngắt: nhóm do TA sinh phải hết trước khi rời hàm
-        mo_ta, out = don_nhom(p, tran_don)
-        if not isinstance(e, subprocess.TimeoutExpired):
-            raise
-        return None, None, f"LOI_CHAY: TimeoutExpired: qua han {timeout} s · {mo_ta}\n" + out.decode("utf-8", "replace")
+        while not eof or goc_da_thoat(p.pid) is None:        # xong = ống EOF VÀ con gốc đã thoát (chưa thu hồi)
+            if time.monotonic() >= het:
+                raise subprocess.TimeoutExpired(cmd, timeout)
+            eof = _doc(p.stdout.fileno(), buf, min(0.05, het - time.monotonic()), eof)
+    except BaseException as e:   # quá hạn, ngoại lệ hay bị ngắt: giữ lại, DỌN đã rồi mới ném/trả
+        loi = e
+    if p is None:   # chưa sinh được con ⇒ không có gì để dọn; không chạy được ⇒ không đo được
+        if not isinstance(loi, OSError):
+            raise loi
+        return None, None, f"LOI_CHAY: {type(loi).__name__}: {loi}"
+    het_don = time.monotonic() + tran_don
+    while True:   # bị ngắt LẦN NỮA giữa lúc dọn thì dọn tiếp (hạn dọn tuyệt đối), giữ ngắt ấy để ném lại
+        try:
+            sach, mo_ta = don_nhom(p, buf, eof, het_don, tran_don)
+            break
+        except KeyboardInterrupt as e:
+            loi = e if loi is None or isinstance(loi, subprocess.TimeoutExpired) else loi
+    p.stdout.close()
+    out = b"".join(buf).decode("utf-8", "replace")
+    if loi is not None and not isinstance(loi, subprocess.TimeoutExpired):
+        raise loi
+    if loi is not None or not sach:
+        return None, None, f"LOI_CHAY: {'TimeoutExpired: qua han %s s' % timeout if loi is not None else 'khong qua han'} · {mo_ta}\n" + out
+    return p.pid, p.returncode, out
 
 def do_cay(root, tracked, luu=None):
     """Chạy ba phép trên cây `root` (mỗi phép một tiến trình con, một nhật ký riêng). Trả (kết luận, chi tiết, quan sát)."""
@@ -367,9 +454,11 @@ def in_vung(kl, ct, obs):
     for c in ct:
         for x in c["ly_do"]:
             print(f"  KHONG DO DUOC ({c['ten']}): {x}")
-    print(f"GIOI_HAN_VUNG (SPEC r15 R15-4, bao dam GIAM, chu kho chap nhan): Python con chi duoc DEM khi NHAN RA DUOC — exe/argv[0] co ten co so khop"
-          f" {_RE_PY.pattern} hoac realpath trung trinh thong dich dang chay; ban sao/ban doi ten cua trinh thong dich chay KHONG hook thi KHONG bi do"
+    print(f"GIOI_HAN_VUNG (SPEC r16 R15-4, bao dam GIAM, chu kho chap nhan): Python con chi duoc DEM khi NHAN RA DUOC — exe/argv[0] co ten co so khop"
+          f" {_RE_PY.pattern} hoac realpath (hook giai trong ngu canh khoi chay cua con, R16-1) trung trinh thong dich dang chay; ban sao/ban doi ten"
+          " khong tro ve trinh thong dich dang chay ma chay KHONG hook thi KHONG bi do"
           " (PR2-C04, giao packet NO-PR2-VUNG-CAP-HDH).")
+    print(GIOI_HAN_QUAN_SAT)
     print(f"KET_LUAN_VUNG: {kl}")
 
 def git_tracked(root):
@@ -662,6 +751,16 @@ def gay(phep):   # hành vi của ca tự kiểm, CHỈ ở phép bị nhắm
         os.symlink(os.path.abspath(X), os.environ["WP_LK"])
         open(os.environ["WP_LK"]).read()
         os.unlink(os.environ["WP_LK"])
+    elif CA.startswith("lk_"):
+        # R16-1: CÙNG trình thông dịch qua symlink WP_LKPY (tên KHÔNG khớp biểu thức), khởi chạy từ cwd KHÁC cwd của bộ đọc; `_I` = con DUY NHẤT, không hook.
+        # tuyetdoi: đường dẫn tuyệt đối, `cwd=` riêng · cwd: `./tên` với `cwd=` riêng của lời gọi · chdir: `./tên` sau khi tiến trình CHA đổi thư mục · path: tên trần, chỉ PATH của lời gọi dẫn tới
+        dang, (d, ten), cu = CA.split("_")[1], os.path.split(os.environ["WP_LKPY"]), os.getcwd()
+        lenh = [{"tuyetdoi": os.environ["WP_LKPY"], "path": ten}.get(dang, "./" + ten), *["-I"] * CA.endswith("_I"), "-c", f"open({os.path.abspath(X)!r}).read()"]
+        os.chdir(d if dang == "chdir" else cu)
+        try:
+            subprocess.run(lenh, check=True, cwd=d if dang in ("tuyetdoi", "cwd") else None, env=dict(os.environ, PATH=d) if dang == "path" else None)
+        finally:
+            os.chdir(cu)
     elif CA == "rc_sau":
         atexit.register(lambda: os._exit(42))
     elif CA == "log_rong":
@@ -689,8 +788,9 @@ if not (PH == "bo_day_du" and CA == "thieu_nhan_chung"):
 gay("bo_day_du")
 print("TONG: DO" if PH == "bo_day_du" and CA == "tong_do" else "TONG: DAT", flush=True)
 """
-CA_VUNG = {**dict.fromkeys(("doc_thang", "doc_con", "doc_dirfd", "doc_symlink", "doc_con_doi_ten"), NGOAI),
-           **dict.fromkeys(("con_I", "con_S", "con_E", "rc_sau", "log_rong", "thieu_nhan_chung"), KDD)}
+DANG_LK = ("tuyetdoi", "cwd", "chdir", "path")   # R16-1: bốn cách khởi chạy CÙNG trình thông dịch qua symlink, từ cwd khác cwd của bộ đọc
+CA_VUNG = {**dict.fromkeys(("doc_thang", "doc_con", "doc_dirfd", "doc_symlink", "doc_con_doi_ten", *(f"lk_{x}_hook" for x in DANG_LK)), NGOAI),
+           **dict.fromkeys(("con_I", "con_S", "con_E", "rc_sau", "log_rong", "thieu_nhan_chung", *(f"lk_{x}_I" for x in DANG_LK)), KDD)}
 
 def tu_kiem_vung():
     """[(tên đầu vào, kết quả mong, kết quả được)]. Phần THUẦN trên quan sát tổng hợp; phần THẬT chạy ba phép trên cây giả, mỗi ca
@@ -732,21 +832,22 @@ def tu_kiem_vung():
     kq.append(("thuan_la_python_tu_choi_ten_khac", False, la_python({"exe": "/bin/bash", "argv": ["bash", "-c", "python3 x.py"]})))
     with tempfile.TemporaryDirectory(prefix="wp1463-gia-") as tam:
         root, lk, ban = os.path.join(tam, "kho"), os.path.join(tam, "thong_dich_lk"), os.path.join(tam, "thong_dich_x")   # hai tên KHÔNG khớp biểu thức
-        os.symlink(sys.executable, lk)
+        os.symlink(os.path.relpath(os.path.realpath(sys.executable), os.path.realpath(tam)), lk)   # đích TƯƠNG ĐỐI: realpath phải theo đúng thư mục của symlink
         shutil.copy2(os.path.realpath(sys.executable), ban)   # bản sao byte-nguyên của trình thông dịch ở đường dẫn khác
-        kq.append(("that_la_python_realpath_trung", True, la_python({"exe": lk, "argv": ["x"]})))
-        kq.append(("that_la_python_ban_sao_doi_ten_KHONG_nhan_ra", False, la_python({"exe": ban, "argv": [ban]})))   # phần CÒN HỞ, khai thẳng
+        kq.append(("that_la_python_realpath_trung", True, la_python({"exe": lk, "argv": ["x"], "that": [os.path.realpath(lk)]})))
+        kq.append(("that_la_python_ban_sao_doi_ten_KHONG_nhan_ra", False, la_python({"exe": ban, "argv": [ban], "that": [os.path.realpath(ban)]})))   # phần CÒN HỞ, khai thẳng
+        kq.append(("that_la_python_khong_giai_lai_theo_cwd_bo_doc", False, la_python({"exe": os.path.relpath(lk), "argv": ["x"], "that": []})))   # R16-1: chỉ tin `that` của hook
         tep = {".claude/dev/ci_dang_ky_test.py": REG_GIA, K: BO_GIA, "ops/ci_provenance.py": "", ".github/workflows/ci.yml": "", "ops/x_ngoai.txt": "x"}
         for p, nd in tep.items():
             os.makedirs(os.path.dirname(os.path.join(root, p)), exist_ok=True)
             with open(os.path.join(root, p), "w", encoding="utf-8") as f:
                 f.write(nd)
         def that(ca, phep):
-            os.environ.update(WP_CA=ca, WP_PHEP=phep or "", WP_LK=os.path.join(tam, "lk"), WP_PY=ban)
+            os.environ.update(WP_CA=ca, WP_PHEP=phep or "", WP_LK=os.path.join(tam, "lk"), WP_PY=ban, WP_LKPY=lk)
             try:
                 kl, ct, _ = do_cay(root, set(tep))
             finally:
-                for k in ("WP_CA", "WP_PHEP", "WP_LK", "WP_PY"):
+                for k in ("WP_CA", "WP_PHEP", "WP_LK", "WP_PY", "WP_LKPY"):
                     os.environ.pop(k, None)
             return kl, tuple(c["ket_luan"] for c in ct)
         kq.append(("that_khoe", (SACH, (SACH,) * 3), that("khoe", None)))
@@ -770,25 +871,45 @@ DOT_BIEN_VUNG = [
     ("phep_go_chay_ban_nap_cua_phep_khac", 'CHE_DO_PROBE[ten], ¦json.dumps([[n, d]', '"nguyen", json.dumps([[n, d]', "that_khoe"),
     ("go_khong_go_khoa", "getattr(m, t).pop(¦K, None)", "getattr(m, t).get(K, None)", "that_khoe"),
     # SPEC r15 R15-4: hàm phân loại đúng như câu bảo đảm (không hẹp hơn, không rộng hơn), và bản đổi tên CÓ hook vẫn bị quan sát
-    ("phan_loai_bo_realpath", "_RE_PY.search(os.path.basename(x)) ¦or os.path.realpath(x) == os.path.realpath(sys.executable)", "_RE_PY.search(os.path.basename(x))", "that_la_python_realpath_trung"),
+    ("phan_loai_bo_realpath", 'for x in ten) or os.path.realpath(sys.executable) ¦in (sinh.get("that") or ())', "for x in ten)", "that_la_python_realpath_trung"),
     ("phan_loai_nhan_moi_ten", '_RE_PY = re.compile(¦r"python[0-9.]*(\\.exe)?$")', '_RE_PY = re.compile(r"")', "that_la_python_ban_sao_doi_ten_KHONG_nhan_ra"),
-    ("hook_chi_cai_theo_ten_trinh_thong_dich", '_LOG = os.environ.get("WP1463_VUNG_LOG")\n¦if _LOG:', '_LOG = os.environ.get("WP1463_VUNG_LOG")\nif _LOG and "python" in os.path.basename(sys.executable):', "that_doc_con_doi_ten_bo_day_du")]
+    ("hook_chi_cai_theo_ten_trinh_thong_dich", '_LOG = os.environ.get("WP1463_VUNG_LOG")\n¦if _LOG:', '_LOG = os.environ.get("WP1463_VUNG_LOG")\nif _LOG and "python" in os.path.basename(sys.executable):', "that_doc_con_doi_ten_bo_day_du"),
+    # SPEC r16 R16-1 (PR2-C06): bỏ phần giải theo ngữ cảnh khởi chạy ⇒ chết ở ca symlink TƯƠNG ĐỐI (ca symlink tuyệt đối vẫn đạt dưới cả ba đột biến)
+    ("la_python_giai_lai_theo_cwd_bo_doc", 'os.path.realpath(sys.executable) ¦in (sinh.get("that") or ())', "os.path.realpath(sys.executable) in map(os.path.realpath, ten)", "that_lk_chdir_I_bo_day_du"),
+    ("hook_bo_qua_cwd_rieng_cua_loi_goi", "os.path.abspath(os.fsdecode(cwd)) ¦if cwd is not None else os.getcwd()", "os.getcwd()", "that_lk_cwd_I_phan_chung_nguyen"),
+    ("hook_khong_do_PATH_cua_loi_goi", "[os.path.join(os.fsdecode(d), x) ¦for d in tim()]", "[x]", "that_lk_path_I_phan_chung_go_bon_khoa")]
 
-# ====================================================================== tự kiểm BỘ CHẠY: rc của `ab`/`registry --tu` (R15-1), quá hạn của `chay_quan_sat` (R15-3)
-MA_QS = r'''
-import os, subprocess, sys, time
+# ====================================================================== tự kiểm BỘ CHẠY: rc của `ab`/`registry --tu` (R15-1), `chay_quan_sat` sở hữu nhóm nó sinh (R15-3, R16-2, R16-3)
+MA_QS = r"""
+import os, signal, subprocess, sys, time
 d, tre, vai = sys.argv[1], float(sys.argv[2]), sys.argv[3]
-if vai == "con":
-    subprocess.Popen([sys.executable, __file__, d, sys.argv[2], "chau"])   # cháu cùng nhóm tiến trình, cùng ống đầu ra
+os.environ.setdefault("WP_QS_GOC", str(os.getpid()))
+for v in sys.argv[4:]:   # con gốc sinh từng cháu: cùng nhóm tiến trình, cùng ống đầu ra
+    subprocess.Popen([sys.executable, __file__, d, sys.argv[2], v])
+if "li" in vai:      # cháu BỎ QUA TERM (chỉ KILL kết thúc được); báo sẵn sàng để lần ngắt chỉ tới SAU đó
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    open(os.path.join(d, "san"), "w").close()
+if "dong" in vai:    # cháu Ở LẠI nhóm nhưng không giữ ống đầu ra
+    os.dup2(os.open(os.devnull, os.O_WRONLY), 1)
+    os.dup2(1, 2)
+if "tach" in vai:    # cháu TỰ RỜI phiên/nhóm, vẫn giữ ống (giới hạn R16-3)
+    os.setsid()
 print("DA_CHAY " + vai, flush=True)
+if "ngat" in vai:    # SIGINT THẬT vào bộ quan sát, SAU khi con gốc đã thoát và cháu bỏ qua TERM đã sẵn sàng
+    while os.getppid() == int(os.environ["WP_QS_GOC"]) or not os.path.exists(os.path.join(d, "san")):
+        time.sleep(0.01)
+    os.kill(int(os.environ["WP_QS_PID"]), signal.SIGINT)
+if "thoat" in vai:   # con gốc thoát NGAY, để lại các cháu
+    sys.exit(0)
 time.sleep(tre)
 open(os.path.join(d, "dau_" + vai), "w").close()   # dấu hẹn ghi SAU `tre` giây
-'''
+"""
 
 def tu_kiem_chay(bo, root):
     """[(tên, mong, được)]. (i) `do_ab` THẬT trên nền khoẻ (base = H = `root`, không cần git) với bộ chạy giả trả đầu ra KHOẺ kèm rc 42 ở ĐÚNG
     MỘT trong ba ranh giới ⇒ lệnh thất bại mà chín phép vẫn 9/9; đối chứng rc 0 ⇒ DAT. (ii) `registry --tu` đọc rc ĐÃ LƯU. (iii) `chay_quan_sat`
-    quá hạn với con và cháu THẬT hẹn ghi dấu sau hạn ⇒ trả thất bại, giữ đầu ra đã bắt, và KHÔNG dấu nào xuất hiện sau khi dọn."""
+    quá hạn với con và cháu THẬT hẹn ghi dấu sau hạn ⇒ trả thất bại, giữ đầu ra đã bắt, và KHÔNG dấu nào xuất hiện sau khi dọn. (iv) R16-2/R16-3:
+    mọi đường ra khác của `chay_quan_sat` (bị ngắt, trả bình thường, dọn không hết, mất ghim) và ca chỉ GHI giới hạn tách nhóm — tiến trình THẬT."""
     kq, v, cay = [], xem(bo), {"base": root, "H": os.path.join(root, "")}   # hai cách viết của CÙNG cây: bộ chạy giả phân biệt base với H
     def ab(bom, luu=None):
         def chay(r, nhe):
@@ -801,13 +922,38 @@ def tu_kiem_chay(bo, root):
     def reg(tu):
         with contextlib.redirect_stdout(io.StringIO()):
             return lenh_registry(root, tu)
-    def qs(tam, tre, han):
-        if not hasattr(os, "killpg"):
-            return "KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX"
-        d, t0 = tempfile.mkdtemp(dir=tam), time.monotonic()
-        _pid, rc, txt = chay_quan_sat([sys.executable, "-B", os.path.join(tam, "qs.py"), d, str(tre), "con"], tam, os.path.join(d, "log"), d, timeout=han, tran_don=2.0)
-        time.sleep(max(0.0, t0 + min(han, 2.0) + tre + 0.5 - time.monotonic()))   # nhìn dấu SAU mọi thời điểm hẹn ghi (tiến trình sinh trước hạn ghi muộn nhất ở hạn + tre)
-        return rc, txt.startswith("LOI_CHAY: TimeoutExpired"), [x for x in ("DA_CHAY chau", "DA_CHAY con") if x in txt], sorted(x for x in os.listdir(d) if x.startswith("dau_"))
+    def qs(tam, tre, han, vai=("con", "chau"), tran=2.0, gia=None, bo_chld=False, ghi_dau=False):
+        """Một lần `chay_quan_sat` THẬT → (rc | "KeyboardInterrupt", nhãn, dòng DA_CHAY, dấu có mặt SAU mọi thời điểm hẹn ghi, đối chứng ngoài nhóm còn sống)."""
+        if not (hasattr(os, "killpg") and hasattr(os, "waitid")):
+            return ("KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX",) * 2 if ghi_dau else "KHONG_DO_DUOC: nen khong co nhom tien trinh kieu POSIX"
+        d, moc, tv_goc = tempfile.mkdtemp(dir=tam), [], thanh_vien_song
+        def khi_ngat(*_):   # SIGINT thật ⇒ KeyboardInterrupt (đúng việc `signal.default_int_handler` làm), ghi thêm thời điểm
+            moc.append(time.monotonic())
+            raise KeyboardInterrupt
+        def tv_ngat(pgid):   # ngắt LẦN NỮA đúng lúc đang dọn (lần quét đầu), các lần sau quét thật
+            if not moc[1:]:
+                moc.append(time.monotonic())
+                raise KeyboardInterrupt
+            return tv_goc(pgid)
+        ngoai = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"])   # đối chứng KHÔNG thuộc nhóm mà `chay_quan_sat` sở hữu
+        cu = signal.signal(signal.SIGINT, khi_ngat), signal.signal(signal.SIGCHLD, signal.SIG_IGN if bo_chld else signal.SIG_DFL)
+        globals()["thanh_vien_song"] = {"mu": lambda pgid: None, "ngat": tv_ngat}.get(gia, tv_goc)
+        os.environ["WP_QS_PID"] = str(os.getpid())
+        try:
+            try:
+                _pid, rc, txt = chay_quan_sat([sys.executable, "-B", os.path.join(tam, "qs.py"), d, str(tre), *vai], tam, os.path.join(d, "log"), d, timeout=han, tran_don=tran)
+                nhan = tuple(x for x in ("TimeoutExpired", "DON KHONG HET") if txt.startswith("LOI_CHAY: ") and x in txt.split("\n")[0])
+            except KeyboardInterrupt:   # ngắt được NÉM LẠI; `trong tran` = từ lúc ngắt tới lúc hàm rời đi không quá trần dọn (+0,5 s)
+                rc, txt, nhan = "KeyboardInterrupt", "", ("trong tran" if time.monotonic() - moc[0] <= tran + 0.5 else "QUA tran",)
+            finally:
+                globals()["thanh_vien_song"] = tv_goc
+                signal.signal(signal.SIGINT, cu[0]), signal.signal(signal.SIGCHLD, cu[1]), os.environ.pop("WP_QS_PID")
+            time.sleep(tre + 0.5)   # nhìn dấu SAU mọi thời điểm hẹn ghi (tiến trình sinh trước lúc hàm rời đi ghi muộn nhất ở lúc ấy + tre)
+            dau, song = sorted(x for x in os.listdir(d) if x.startswith("dau_")), ngoai.poll() is None
+        finally:   # bộ chạy tự kiểm cũng dọn tiến trình CỦA NÓ ở mọi đường ra
+            ngoai.kill(), ngoai.wait()
+        kq = (rc, nhan, sorted(x for x in txt.splitlines() if x.startswith("DA_CHAY ")), "KHONG KHANG DINH" if ghi_dau else dau, song)
+        return (kq, f"dau cua chau tu roi nhom SAU buoc don = {dau}") if ghi_dau else kq
     with tempfile.TemporaryDirectory(prefix="wp1463-chay-") as tam:
         kq.append(("ab_rc0_doi_chung", (0, "KET_LUAN_AB: DAT", "9/9"), ab(None, tam)))
         kq += [(f"ab_rc42_{ten}_{che}", (1, "KET_LUAN_AB: DO", "9/9"), ab((ten, che))) for ten, che in LUOT_AB]
@@ -817,16 +963,36 @@ def tu_kiem_chay(bo, root):
         kq.append(("registry_tu_rc42_luot_nhe", 1, reg(tam)))
         with open(os.path.join(tam, "qs.py"), "w", encoding="utf-8") as f:
             f.write(MA_QS)
-        day_du = ["DA_CHAY chau", "DA_CHAY con"]
-        kq.append(("quan_sat_khoe_doi_chung", (0, False, day_du, ["dau_chau", "dau_con"]), qs(tam, 0.0, 60)))
-        kq.append(("quan_sat_qua_han_con_va_chau_khong_de_dau", (None, True, day_du, []), qs(tam, 2.0, 2.0)))
+        day_du, hai_dau, ngat, han, het = ["DA_CHAY chau", "DA_CHAY con"], ["dau_chau", "dau_con"], ("goc_thoat", "chau_ngat", "chau_li"), ("TimeoutExpired",), ("DON KHONG HET",)
+        kq.append(("quan_sat_khoe_doi_chung", (0, (), day_du, hai_dau, True), qs(tam, 0.0, 60)))
+        kq.append(("quan_sat_qua_han_con_va_chau_khong_de_dau", (None, han, day_du, [], True), qs(tam, 3.0, 2.0)))
+        # R16-2: cha bị NGẮT lúc đang chờ, con gốc ĐÃ thoát, hai cháu cùng nhóm hẹn ghi dấu (một cháu bỏ qua TERM) ⇒ ngắt được ném lại, trong trần, không dấu nào
+        kq.append(("quan_sat_ngat_goc_da_thoat_chau_bo_qua_TERM_khong_de_dau", ("KeyboardInterrupt", ("trong tran",), [], [], True), qs(tam, 2.0, 60, ngat, 1.0)))
+        kq.append(("quan_sat_ngat_lan_nua_giua_luc_don_van_don_het", ("KeyboardInterrupt", ("trong tran",), [], [], True), qs(tam, 2.0, 60, ngat, 1.0, gia="ngat")))
+        kq.append(("quan_sat_tra_binh_thuong_chau_cung_nhom_da_dong_ong_khong_de_dau", (0, (), ["DA_CHAY goc_thoat"], [], True), qs(tam, 1.0, 60, ("goc_thoat", "chau_dong"))))
+        # nhánh `DON KHONG HET` ⇒ không đo được: (i) không xác nhận được nhóm đã hết; (ii) con gốc bị thu hồi ở nơi khác ⇒ KHÔNG bắn tín hiệu (cháu còn sống ghi được dấu)
+        kq.append(("quan_sat_khong_xac_nhan_duoc_nhom_da_het_la_khong_do_duoc", (None, het, day_du, hai_dau, True), qs(tam, 0.0, 60, tran=0.4, gia="mu")))
+        kq.append(("quan_sat_mat_ghim_khong_ban_tin_hieu_va_khong_do_duoc", (None, het, ["DA_CHAY goc_thoat"], ["dau_chau_dong"], True), qs(tam, 1.0, 60, ("goc_thoat", "chau_dong"), 0.4, bo_chld=True)))
+        # R16-3 (bảo đảm GIẢM): cháu TỰ `setsid` còn giữ ống ⇒ `DON KHONG HET`, không đo được; ca CHỈ GHI giới hạn (dấu của cháu ấy), KHÔNG khẳng định dọn được
+        kq.append(("quan_sat_chau_tu_setsid_giu_ong_DON_KHONG_HET_chi_ghi_gioi_han", (None, han + het, ["DA_CHAY chau_tach", "DA_CHAY goc_thoat"], "KHONG KHANG DINH", True),
+                   *qs(tam, 2.5, 1.0, ("goc_thoat", "chau_tach"), 0.6, ghi_dau=True)))
     return kq
 
+_GOI_DON = "don_nhom(p, buf, eof, het_don, tran_don)"
+_DON = "sach, mo_ta = ¦" + _GOI_DON
 DOT_BIEN_CHAY = [(f"ab_bo_chot_rc_luot_{ten}_{che}", "hong = [k for k, v in rc_luot ¦if v != 0]", f'hong = [k for k, v in rc_luot if v != 0 and k != "{ten}/{che}"]',
                   f"ab_rc42_{ten}_{che}") for ten, che in LUOT_AB] + [
     ("registry_tu_mac_dinh_rc_0", "ra[che] = (¦int(g.read()), f.read())", "ra[che] = (0, f.read())", "registry_tu_rc42_luot_nhe"),
-    ("quan_sat_bo_buoc_don", "mo_ta, out = ¦don_nhom(p, tran_don)", 'mo_ta, out = "khong don", getattr(e, "output", None) or b""', "quan_sat_qua_han_con_va_chau_khong_de_dau"),
-    ("quan_sat_chi_ket_thuc_con_khong_ket_thuc_nhom", "os.killpg(¦p.pid, th)", "p.send_signal(th)", "quan_sat_qua_han_con_va_chau_khong_de_dau")]
+    ("quan_sat_bo_buoc_don", _DON, 'sach, mo_ta = True, "khong don"', "quan_sat_qua_han_con_va_chau_khong_de_dau"),
+    ("quan_sat_chi_ket_thuc_con_khong_ket_thuc_nhom", "os.killpg(¦p.pid, th)", "p.send_signal(th)", "quan_sat_qua_han_con_va_chau_khong_de_dau"),
+    # SPEC r16 R16-2: mỗi đường ra đều dọn (ngắt · trả bình thường · ngắt lần nữa giữa lúc dọn), có bước KILL, mất ghim thì không bắn, dọn không hết thì không đo được
+    ("quan_sat_bo_don_o_duong_ngat", _DON, f'sach, mo_ta = (True, "khong don") if isinstance(loi, KeyboardInterrupt) else {_GOI_DON}', "quan_sat_ngat_goc_da_thoat_chau_bo_qua_TERM_khong_de_dau"),
+    ("quan_sat_bo_buoc_KILL", "for th, han in ((signal.SIGTERM, het - tran / 2), ¦(signal.SIGKILL, het)) if ghim else ():", "for th, han in ((signal.SIGTERM, het - tran / 2),) if ghim else ():",
+     "quan_sat_ngat_goc_da_thoat_chau_bo_qua_TERM_khong_de_dau"),
+    ("quan_sat_bo_don_tiep_khi_bi_ngat_lan_nua", "loi = e ¦if loi is None or isinstance(loi, subprocess.TimeoutExpired) else loi", "raise", "quan_sat_ngat_lan_nua_giua_luc_don_van_don_het"),
+    ("quan_sat_bo_don_o_duong_tra_binh_thuong", _DON, f'sach, mo_ta = (True, "khong don") if loi is None else {_GOI_DON}', "quan_sat_tra_binh_thuong_chau_cung_nhom_da_dong_ong_khong_de_dau"),
+    ("quan_sat_bo_nhanh_DON_KHONG_HET", "if loi is not None ¦or not sach:", "if loi is not None:", "quan_sat_khong_xac_nhan_duoc_nhom_da_het_la_khong_do_duoc"),
+    ("quan_sat_ban_tin_hieu_khi_mat_ghim", "ghim = goc_da_thoat(p.pid) ¦is not False and signal.getsignal(signal.SIGCHLD) != signal.SIG_IGN", "ghim = True", "quan_sat_mat_ghim_khong_ban_tin_hieu_va_khong_do_duoc")]
 
 def lenh_tu_kiem(root, dot_bien):
     bo = nap_tep(os.path.join(root, K), "cpt_tu_kiem")
@@ -841,8 +1007,9 @@ def lenh_tu_kiem(root, dot_bien):
     print(f"TU_KIEM_SO: {len(so) - len(so_sai)}/{len(so)} dat · moi phep co dau vao am: {not thieu}")
     print(f"TU_KIEM_VUNG: {sum(x[1] == x[2] for x in vung)}/{len(vung)} dat")
     for x in chay:
-        print(f"CHAY {x[0]}: mong {x[1]} · duoc {x[2]}")
+        print(f"CHAY {x[0]}: mong {x[1]} · duoc {x[2]}" + "".join(f" · GHI GIOI HAN (khong khang dinh): {g}" for g in x[3:]))
     print(f"TU_KIEM_CHAY: {sum(x[1] == x[2] for x in chay)}/{len(chay)} dat")
+    print(GIOI_HAN_QUAN_SAT)
     ok, bat = not (so_sai or vung_sai or thieu), 0
     if dot_bien and ok:
         with open(os.path.abspath(__file__), encoding="utf-8") as f:
@@ -864,7 +1031,7 @@ def lenh_tu_kiem(root, dot_bien):
                         mo_ta = "; ".join(f"{t}: {p} {'DUNG' if truoc else 'SAI'}→{'DUNG' if sau else 'SAI'}" for t, p, truoc, sau in lech[:4])
                     else:      # phải đổi kết quả ở ĐÚNG đầu vào tương ứng
                         lech = [x for x in (m.tu_kiem_vung() if nhom == "VUNG" else m.tu_kiem_chay(bo, root)) if x[1] != x[2] and x[0] == dich]
-                        mo_ta = "; ".join(f"{t}: mong {a} duoc {b}" for t, a, b in lech)
+                        mo_ta = "; ".join(f"{x[0]}: mong {x[1]} duoc {x[2]}" for x in lech)
                     bat += bool(lech)
                     print(f"DB_{nhom} {ten}: {'BAT' if lech else 'SONG'} · {mo_ta}")
         tong = len(DOT_BIEN_SO) + len(DOT_BIEN_VUNG) + len(DOT_BIEN_CHAY)

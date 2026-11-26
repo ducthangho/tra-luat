@@ -1,0 +1,72 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1554
+packet_id: wp1554
+spec_packet_id: CI-DUONG-NHANH-TEST-WINDOWS
+mission_issue: 1236
+revision: 1
+generation: 1
+lease_id: wp1554-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+environment_ghi_chu: 'mã + gate Linux trong container cloud; đo ADR-0060 M3 trên Windows local DESKTOP-T9R33P2 qua Desktop Commander theo ADR-0057/0058/0059.'
+windows: required
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1554-r1.md
+spec_ref: 'ops/wp1554-spec @ b5d26485c83070c8bcdd1ba5c583050baf0d1d45, blob b9e07de4212e9977ce840e8427140408007c51c7'
+spec_hash: a692afa472778108817f52d21f7f49896bd5a741eab607f7918b2008b1d176df
+spec_sha256_required: a692afa472778108817f52d21f7f49896bd5a741eab607f7918b2008b1d176df
+spec_duyet: 'chủ kho trả lời "Tôi đồng ý duyệt băm như trên và cấp lease" trong chat phiên session_015Gtxra5FakNRRqyfJZHg8X, 26-11-2026 ~16:53Z, sau đề xuất băm https://github.com/ducthangho/tra-luat/issues/1554#issuecomment-7198083783 (băm a692afa4).'
+write_set:
+- ops/ci_duong_nhanh_test.py
+- ops/leases/wp1554-r1-g1-claude.yaml
+write_set_hash: 7353f31a5ad752570caeda1010026beb4456c5f53fdc199ed6b5f7a451a0c624
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+effective_write_set_ghi_chu: 'đặc tả khai một tệp mã; tệp lease là sổ sách của chính lease (ADR-0062 N4).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-26T16:46:19Z'
+  goc_quet: 'git fetch đủ refs/heads/* (không shallow); ls-remote / for-each-ref 375/375, thiếu 0, thừa 0; python3 ops/lease_publish.py ai-dang-giu ops/ci_duong_nhanh_test.py'
+  ket_qua: 'rc 0, NGƯỜI_GIỮ 0 (các lease wp1448 r6–r7 chạm tệp này đều HẾT_HẠN).'
+branch: claude/wp1554-ci-duong-nhanh-windows
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: b1db69429d272cfde43681b4a9de1184c452c0f1
+start_from_sha: b1db69429d272cfde43681b4a9de1184c452c0f1
+reviewed_sha_required: b1db69429d272cfde43681b4a9de1184c452c0f1
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1554
+granted_on_instruction_readback: 'chủ kho 26-11: "Tất cả Q1-Q6: theo khuyến nghị" rồi "Tôi đồng ý duyệt băm như trên và cấp lease".'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa ngoài write set (packet_loop_test*.py, ci_duong_nhanh.py, ci.yml).'
+recorded_by: 'phiên session_015Gtxra5FakNRRqyfJZHg8X'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này ghi lease và thi công theo chỉ thị trực tiếp của chủ kho trong chat; lease KHÔNG tự cấp.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'không có lease trước của wp1554; các lease wp1448 chạm cùng tệp đã hết hạn, không khai bia mộ.'
+leased_at_utc: '2026-11-26T16:54:00Z'
+heartbeat_at: '2026-11-26T16:54:00Z'
+lease_until: '2026-11-27T00:54:00Z'
+lease_expires_at_utc: '2026-11-27T00:54:00Z'
+lease_until_ghi_chu: '8h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 0, reserved: 2, limit: 10}
+budget_ghi_chu: 'trần 10 theo dòng khai ADR-0055 hợp lệ của đặc tả (ba phép đo 16:5xZ: m1 rc 0, m2 rc 128, m3 rc 0); reserved 2 theo ADR-0041.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; packet chạm E5 (khai fail-closed) nên merge cần chủ kho audit đúng head.'

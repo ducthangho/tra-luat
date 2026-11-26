@@ -83,3 +83,5 @@ nang_tran:
 requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
+da_bi_thay_the: wp1488-r5-g6-claude
+da_bi_thay_the_ghi_chu: 'generation g6 thay g5 lúc 2026-11-26T16:50:32Z: PR #1489 vượt ADR-0060 M5 (26 lần push), đóng PR, push đúng một lần trên agent/wp1488-g6-claude.'

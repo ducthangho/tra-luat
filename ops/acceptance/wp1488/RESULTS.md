@@ -312,3 +312,21 @@ Cổng trên `bcd23b312082708ff1de89d6472313cfda7a5bb4` (mã cuối g7; commit s
 Hai vế dựng trong CÙNG một lệnh (clone + checkout + `core.abbrev 7`, `core.autocrlf false`, `core.eol lf`), 18:34Z–19:03Z,
 `/tmp/.git` không tồn tại. `git diff --check b1db694..HEAD` rc 0; ruff `--select F` 5 F841 và shellcheck 1 SC1090 giống master;
 `doctrine-scan` rc 0. Windows thật (M3 `required`): chưa đo tại thời điểm ghi mục này.
+
+### 11.1 Sau Codex lượt 9 (F1488-L9-01, checkpoint M1)
+
+Codex lượt 9 (`c6b7092`, `run_id` `c2dbbeb8…`) `changes_requested`, 0 P0–P2: F1488-L9-01 (lớp `phep-do-khong-do-dieu-khai`)
+và phần lịch sử stdout-LF của F1488-L8-01 C. Số lớp P3 chưa đóng 2 → 2 ⇒ checkpoint M1; chủ kho chọn "Vá L9-01, miễn
+stdout-LF" (issuecomment-7205822618). Bản vá `02ddc74` chỉ đổi `.claude/dev/launcher_test.py`:
+
+- (T) lỗi vế `tr` của `_tl1488_doc` ở bốn điểm gọi × hai kiểu (không in / chuyển đủ rồi thoát 45); `tr` giả chỉ hỏng ở điểm
+  đang thử; ca đòi dấu `TR_LOI_GIA`, đúng mã (kênh 7, stdout 1, `cygpath` khác 0), dòng báo của điểm ấy, tệp đích rỗng.
+- (V-path) stdout chỉ tới thư mục có 0x01 trong tên chứa `rm` giả ghi dấu ⇒ rc 7 và `rm` giả KHÔNG được gọi.
+- (X) C và K3 dùng `_r1488_json`.
+- Đột biến: `wp1488_sh_tr_nuot_loi` chết ở (T-kenh-rong); `wp1488_sh_chot_stdout_sau_path` (dời chốt qua `export PATH`)
+  chết ở (V-path) — rc 7 nhưng `rm` giả đã gọi. Bản đầu của (V-path) đặt `rm` giả sai chỗ (khoá `ung_vien` ngoài `dau/` là
+  thư mục + `/rg`) nên đột biến dời chốt sống; sửa trước khi commit.
+
+Cổng trên `02ddc74da4cb6af2c7527b280dd04e61bdea5e6e` (mã cuối; commit sau chỉ đổi tệp này), hai vế cùng một lệnh
+23:49Z–00:17Z: master `b1db694` 455/455 · 801/801; `02ddc74` 456/456 · **840/840** (cùng 7 không đo được); `tl.py --selftest`
+1789/1789 rc 0; `git diff --check` rc 0; ruff/shellcheck/doctrine-scan như master.

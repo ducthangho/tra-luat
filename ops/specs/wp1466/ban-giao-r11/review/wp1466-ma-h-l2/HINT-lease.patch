@@ -1,0 +1,22 @@
+--- a/ops/leases/wp1466-r11-g3-claude.yaml
++++ b/ops/leases/wp1466-r11-g3-claude.yaml
+@@ -77,11 +77,14 @@
+ mien_dieu_kien_3d: 'Nhanh nhap claude/wp1507-don-rac-a (26bc9b9) co tep docs/adr/0068-don-rac-...; chu kho da quyet wp1466 giu 0068, wp1507 doi sang 0069 (issuecomment-7130100252); chu kho chap nhan 3d (issuecomment-7188435673)'
+ tran_kich_thuoc: '<= 6 tep / <= 500 dong them theo khoi nang_tran duoi day (ADR-0053; khoi chi hieu luc khi vuot 450); do git diff --numstat 6a4f52d <head> truoc moi lan xin review va truoc lan day; vuot 500 hay qua 6 tep => DUNG'
+ nang_tran:
+-  ai_nang: ducthangho
+-  ai_nang_ghi_chu: 'chu kho, protocol §2; quyet dinh E2 Nang tran len 500 dong, ghi ho o issuecomment-7201538748'
+-  can_cu: 'Dong lop P3 ca-id-chi-do-mot-gia-tri bang ca G8 cho ID that va bien cung dot bien thu hep mien so (dac ta r11 muc 8.3 dong G8). Do 26-11-2026 tren nen 695916e: H da4e876 4 tep +443 -4, con 7 dong toi 450. Khong tach duoc: ca va dot bien kiem chinh chot ID cua cong ma wp1466 them; dac ta muc 1 doi moi P3 dong trong packet.'
+-  tran_cu: 'ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tep / <= 450 dong them'
+-  tran_moi: '<= 6 tep / <= 500 dong them (write set van dung 4 tep)'
++  ai_nang: ducthangho   # chủ kho, protocol §2; quyết định E2 "Nâng trần lên 500 dòng (Recommended)", ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201538748
++  can_cu: >-
++    Đóng lớp P3 `ca-id-chi-do-mot-gia-tri` của review mã exact-H lượt 1 bằng ca G8 cho ID thật và các biên cùng một đột
++    biến thu hẹp miền số (mục 8.3, dòng G8). Đo 26-11-2026, nền `695916e`: H `da4e876` là 4 tệp, +443 −4, chỉ còn 7 dòng
++    tới 450. Không tách được: ca và đột biến ấy kiểm chính chốt ID của cổng mà wp1466 thêm, và §1 của đặc tả đòi mọi P3
++    của packet phải đóng trong packet, không được miễn.
++  tran_cu: "ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tệp / <= 450 dòng thêm"
++  tran_moi: "<= 6 tệp / <= 500 dòng thêm (write set của wp1466 vẫn đúng 4 tệp)"
+ tran_loi_goi_codex: 'ADR-0055 nang tran 10 -> 13 (E2, issuecomment-7192181084); da dung 12 (11 = review ma exact-H da4e876 blocked, 12 = review dac ta r10 changes_requested); con 1: review ma exact-H cua luot 4; can them => hoi chu kho TRUOC khi goi'
+ windows: '<H> mien — chu kho mien Windows (C3, E2, issuecomment-7058374374); rui ro con lai: ca G1 symlink chua do tren Windows; KHONG workflow_dispatch'
+ coordination_paths:

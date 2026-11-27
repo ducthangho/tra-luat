@@ -1968,27 +1968,27 @@ def trang_thai_duong(env=None, tim=shutil.which) -> dict:
 # ----------------------------------------------------------------- lấy nguyên văn Điều
 
 def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
-    """r38 → r39 (lượt 38, `can-tai-nguyen-doc-nguon`): chạy tiến trình con, đọc stdout + stderr THEO KHỐI với trần byte mỗi ống. MỘT
-    hạn chót phủ từ lúc đọc tới khi tiến trình KẾT THÚC (cả `wait`); vượt trần, quá hạn hay lỗi đọc ⇒ giết + thu hồi CÓ GIỚI HẠN, rồi
-    ném (ValueError / `subprocess.TimeoutExpired`) TRƯỚC model. Mỗi lần đọc tối đa phần còn lại + 1 byte (biết vượt mà không nạp thêm).
-    Trả đối tượng có `returncode`/`stdout`/`stderr` (chuỗi UTF-8, `errors=replace`) như `subprocess.run(text=True)`."""
+    """r38 → r45 (lượt 38–44, `can-tai-nguyen-doc-nguon`): chạy tiến trình con, đọc stdout + stderr THEO KHỐI với trần byte mỗi ống, MỘT
+    hạn chót tới khi tiến trình kết thúc. HỢP ĐỒNG VÒNG ĐỜI (r45): SỔ hai mục `out`/`err` dựng TRƯỚC `Popen`; cả hai ống gắn vào sổ NGAY
+    sau `Popen`, trước khi dựng luồng nào. Mỗi mục có một khoá QUYỀN DÙNG ỐNG: luồng đọc chỉ chạm ống sau khi giành quyền (`chu =
+    "reader"`); bước thu hồi giành quyền trước (`chu = "thu_hoi"`) thì luồng đọc — kể cả luồng khởi động muộn sau một lần ngắt giữa
+    `start` — tự rút, nên KHÔNG bao giờ có `close` tranh với `read1`. Mọi lối thoát bất thường đi qua `_thu_hoi` (không ném). Lỗi vận
+    hành (start/wait/đọc ống: `RuntimeError`/`OSError`) ⇒ `ValueError` giữ nguyên văn + `__cause__`; quá hạn ⇒ `TimeoutExpired`; ngắt
+    giữ nguyên. Báo cáo thu hồi gắn vào lỗi. Trả đối tượng có `returncode`/`stdout`/`stderr` như `subprocess.run(text=True)`."""
     import threading
     import types
     tran = TRAN_BYTE_TEP if tran is None else tran
     han = time.monotonic() + timeout
-    # r41 (lượt 40): trên POSIX con chạy ở SESSION riêng để thu hồi được CẢ CÂY (cháu còn giữ bản sao đầu ghi của ống thì luồng đọc không
-    # bao giờ nhận EOF). Windows: chỉ giết tiến trình trực tiếp (giới hạn đã khai — `taskkill /T` không đáng tin, xem CLAUDE.md).
-    # r43 (lượt 42): sổ và bộ đệm dựng TRƯỚC khi spawn — không còn khe giữa `Popen` và khối thu hồi.
-    buf, vuot, loi, luong = {"out": bytearray(), "err": bytearray()}, [], [], []
+    so = {ten: {"ong": None, "luong": None, "khoa": threading.Lock(), "chu": None, "xong": False} for ten in ("out", "err")}
+    buf, vuot, loi = {"out": bytearray(), "err": bytearray()}, [], []
+    # r41 (lượt 40): trên POSIX con chạy ở SESSION riêng để thu hồi được CẢ CÂY. Windows: chỉ giết tiến trình trực tiếp (giới hạn đã khai).
     p = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          start_new_session=not _LA_WINDOWS)
     try:
-        return _so_huu_tien_trinh(p, args, timeout, tran, han, buf, vuot, loi, luong, threading, types)
+        so["out"]["ong"], so["err"]["ong"] = p.stdout, p.stderr   # r45: sổ nhận CẢ HAI ống trước mọi bước có thể lỗi
+        return _cho_ket_qua(p, args, timeout, tran, han, so, buf, vuot, loi, threading, types)
     except BaseException as e:
-        # r42 → r44: MỌI lối thoát bất thường sau `Popen` đi qua CÙNG một điểm thu hồi; báo cáo thu hồi gắn vào lỗi. Lỗi VẬN HÀNH
-        # (khởi động luồng, `wait`, OSError) quy về `ValueError` chứa nguyên văn lỗi gốc (chuỗi `__cause__` giữ nguyên) ⇒ CLI rc 2;
-        # quá hạn giữ `TimeoutExpired`; ngắt (KeyboardInterrupt/SystemExit) giữ nguyên ngữ nghĩa.
-        bao_cao = _thu_hoi(p, luong)
+        bao_cao = _thu_hoi(p, so)
         them = f" — thu hoi: {'; '.join(bao_cao)}" if bao_cao else ""
         if isinstance(e, (RuntimeError, OSError)):
             raise ValueError(f"tl extract loi van hanh: {type(e).__name__}: {e}{them}") from e
@@ -1997,78 +1997,95 @@ def _chay_gioi_han(args, timeout=600, tran=None, **_kw):
         raise
 
 
-def _thu_hoi(p, luong):
-    """r43 → r44 (lượt 43): thu hồi theo SỔ — mỗi mục của `luong` là `[thread, ống, trạng_thái]` với trạng thái `"chua_giao"` (chưa gọi
-    `start`), `"dang_khoi_dong"` (đang trong `start`, có thể bị ngắt giữa bootstrap) hoặc `"da_giao"` (start đã trả). Giết (nhóm trên
-    POSIX) + chờ có hạn; chờ MỌI luồng đã được gọi `start` trong ngân sách riêng, mỗi `join` có hàng rào riêng (lỗi ghi vào báo cáo,
-    không ném, không che lỗi gốc); đóng TỪNG ống mà không luồng nào còn giữ. Trả danh sách dòng báo cáo (rỗng = thu hồi sạch)."""
+def _thu_hoi(p, so):
+    """r45 (lượt 44): thu hồi THEO SỔ, không ném. Giết (nhóm trên POSIX) + chờ có hạn; với từng ống: giành quyền dùng ống (khoá có hạn) —
+    nếu luồng đọc CHƯA giành ⇒ thu hồi giữ quyền và đóng ống (luồng nào khởi động muộn sẽ tự rút); nếu luồng đọc đang giữ ⇒ chờ nó trong
+    ngân sách riêng rồi chỉ đóng khi nó đã XONG, không thì báo ống còn bị giữ. Mỗi bước có hàng rào riêng: lỗi (kể cả ngắt lần hai) vào
+    báo cáo; tiến trình/nhóm đã biến mất (`ProcessLookupError`) không phải lỗi. Trả danh sách dòng báo cáo (rỗng = thu hồi sạch)."""
     bao_cao = []
-    if os.name != "nt":   # POSIX: nhóm tiến trình
+
+    def buoc(ten, f):
+        try:
+            return f()
+        except ProcessLookupError:
+            return None   # đã biến mất — đúng điều muốn
+        except BaseException as e:  # noqa: BLE001 — thu hồi không được ném, kể cả ngắt lần hai
+            bao_cao.append(f"{ten}: {type(e).__name__}")
+            return None
+    if os.name != "nt":   # POSIX: nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF
         import signal
-        with contextlib.suppress(Exception):
-            os.killpg(p.pid, signal.SIGKILL)   # cả nhóm tiến trình — cháu giữ ống cũng chết ⇒ luồng đọc nhận EOF
-    with contextlib.suppress(Exception):
-        p.kill()
-    try:
-        p.wait(timeout=5)
-    except Exception as e:  # noqa: BLE001 — thu hồi không được ném
-        bao_cao.append(f"tien trinh chua thu hoi duoc trong 5 giay ({type(e).__name__})")
-    het = time.monotonic() + 2.0   # ngân sách RIÊNG cho việc chờ luồng đọc kết thúc sau thu hồi
-    for muc in luong:
-        t, ong, tt = muc
-        if tt != "chua_giao":
+        buoc("killpg", lambda: os.killpg(p.pid, signal.SIGKILL))
+    buoc("kill", p.kill)
+    buoc("wait", lambda: p.wait(timeout=5))
+    het = time.monotonic() + 2.0   # ngân sách RIÊNG cho phần ống/luồng
+    for ten, muc in so.items():
+        if muc["ong"] is None:
+            continue
+
+        def gianh(muc=muc):
+            if not muc["khoa"].acquire(timeout=max(0.0, het - time.monotonic())):
+                return "khoa"
             try:
-                t.join(max(0.0, het - time.monotonic()))
-            except Exception as e:  # noqa: BLE001 — luồng bị ngắt giữa `start` (chưa `_started`) ⇒ `join` ném: ghi, không che lỗi gốc
-                bao_cao.append(f"khong cho duoc luong {t.name} ({type(e).__name__})")
-        giu = tt != "chua_giao" and t.is_alive()
-        if giu:
-            bao_cao.append(f"luong doc {t.name} con giu ong sau ngan sach")
-        else:
-            with contextlib.suppress(Exception):
-                ong.close()   # chỉ đóng ống KHÔNG luồng nào còn giữ (đóng khi luồng đang đọc có thể chờ khoá vô hạn)
+                if muc["chu"] is None:
+                    muc["chu"] = "thu_hoi"
+                return muc["chu"]
+            finally:
+                muc["khoa"].release()
+        chu = buoc(f"gianh ong {ten}", gianh)
+        if chu == "reader":
+            t = muc["luong"]
+            buoc(f"cho luong {ten}", lambda t=t: t.join(max(0.0, het - time.monotonic())))
+            if not muc["xong"]:
+                bao_cao.append(f"luong doc {ten} con giu ong sau ngan sach")
+                continue
+        elif chu != "thu_hoi":
+            bao_cao.append(f"khong gianh duoc quyen ong {ten}")
+            continue
+        buoc(f"dong ong {ten}", muc["ong"].close)
     return bao_cao
 
 
-def _so_huu_tien_trinh(p, args, timeout, tran, han, buf, vuot, loi, luong, threading, types):
-    """Phần đọc–chờ của `_chay_gioi_han` (r43: tách để khối thu hồi bọc NGAY sau `Popen`)."""
-
-    def doc(ong, ten):
+def _cho_ket_qua(p, args, timeout, tran, han, so, buf, vuot, loi, threading, types):
+    """r45: phần đọc–chờ của `_chay_gioi_han`. Luồng đọc GIÀNH quyền dùng ống trước khi chạm nó; mất quyền (thu hồi đã giữ) thì rút."""
+    def doc(ten):
+        muc = so[ten]
+        with muc["khoa"]:
+            if muc["chu"] is not None:
+                muc["xong"] = True
+                return   # thu hồi đã giữ quyền — không chạm ống
+            muc["chu"] = "reader"
         try:
             while True:
                 con = tran + 1 - len(buf[ten])
                 if con <= 0:
                     vuot.append(ten)   # đã đọc quá trần: KHÔNG được coi lần đọc 0 byte kế tiếp là hết dữ liệu
                     return
-                k = ong.read1(min(65536, con))
+                k = muc["ong"].read1(min(65536, con))
                 if not k:
                     return
                 buf[ten] += k
         except Exception as e:  # noqa: BLE001 — lỗi đọc phải về người gọi, không được trả dữ liệu đọc dở như đã đủ
             loi.append(e)
-    return _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types)
-
-
-def _cho_ket_qua(p, args, timeout, tran, han, buf, vuot, loi, doc, luong, threading, types):
-    """r42: phần đọc–chờ của `_chay_gioi_han`, tách ra để MỌI lối thoát bất thường của nó đi qua một `except` thu hồi ở người gọi."""
-    for ten, ong in (("out", p.stdout), ("err", p.stderr)):
-        muc = [threading.Thread(target=doc, args=(ong, ten), daemon=True, name=f"doc-{ten}"), ong, "chua_giao"]
-        luong.append(muc)   # r44: ghi sổ TRƯỚC khi start, cùng ống và trạng thái bàn giao
-        muc[2] = "dang_khoi_dong"
-        muc[0].start()
-        muc[2] = "da_giao"
+        finally:
+            muc["xong"] = True
+    for ten in ("out", "err"):
+        so[ten]["luong"] = threading.Thread(target=doc, args=(ten,), daemon=True, name=f"doc-{ten}")
+        so[ten]["luong"].start()
+    luong = [so[t]["luong"] for t in ("out", "err")]
 
     def con_lai():
         return max(0.0, han - time.monotonic())   # r40 (lượt 39): MỘT nguồn thời gian còn lại cho mọi lần chờ
-    while any(m[0].is_alive() for m in luong) and not vuot and not loi and con_lai() > 0:
-        for m in luong:
-            m[0].join(min(0.05, con_lai()))
-    if vuot or loi:
-        ten = "stdout" if (vuot or ["out"])[0] == "out" else "stderr"
-        raise ValueError(f"tl extract in qua {tran} byte ra {ten} — vuot ngan sach doc" if vuot
-                         else f"loi doc ong cua tl extract: {type(loi[0]).__name__}")
-    if any(m[0].is_alive() for m in luong):
-        raise subprocess.TimeoutExpired(args, timeout)   # thu hồi ở `except` của người gọi (r42)
+    while any(t.is_alive() for t in luong) and not vuot and not loi and con_lai() > 0:
+        for t in luong:
+            t.join(min(0.05, con_lai()))
+    if vuot:
+        ten = "stdout" if vuot[0] == "out" else "stderr"
+        raise ValueError(f"tl extract in qua {tran} byte ra {ten} — vuot ngan sach doc")
+    if loi:
+        # r45 (lượt 44): GIỮ nguyên văn và nguyên nhân của lỗi đọc.
+        raise ValueError(f"loi doc ong cua tl extract: {type(loi[0]).__name__}: {loi[0]}") from loi[0]
+    if any(t.is_alive() for t in luong):
+        raise subprocess.TimeoutExpired(args, timeout)   # thu hồi ở `except` của người gọi
     p.wait(timeout=con_lai())
     if time.monotonic() > han:
         # r40 (lượt 39): MỘT nơi quyết nhận thành công — qua hạn thì không nhận, kể cả khi tiến trình vừa kết thúc

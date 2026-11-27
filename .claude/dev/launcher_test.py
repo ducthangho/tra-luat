@@ -16134,7 +16134,83 @@ def r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc():
         bang(not f(*doi), f"r1509 phải ĐỎ: {ten_ca}")
 
 
+@ca
+def r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha():
+    """r1511 (#1511 K2a): ACE CodexSandboxUsers THỪA KẾ trên tệp được NHẬN DIỆN để chỉ dẫn; lệnh sửa cấp lại
+    tường minh theo SID; lý do in ra chỉ là thông điệp của _KhoCodex. Nhận diện KHÔNG có nghĩa là tha."""
+    m = _tai_launcher_thu()
+    u = "S-1-5-21-1-2-3-1001"
+    g = "S-1-5-21-1-2-3-1003"
+    f = m._ace_sandbox_codex_thua_ke_tren_tep
+    bang(f("ID", "A", "0x1200a9", g, "CodexSandboxUsers", 4, u), "ca thật đo 26-11 (A;ID;0x1200a9) phải nhận ra")
+    for ten_ca, doi in (("tường minh", ("", "A", "0x1200a9", g, "CodexSandboxUsers", 4, u)),
+                        ("ghi", ("ID", "A", "0x1201bf", g, "CodexSandboxUsers", 4, u)),
+                        ("tên khác", ("ID", "A", "0x1200a9", g, "Users", 4, u)),
+                        ("miền khác", ("ID", "A", "0x1200a9", "S-1-5-21-9-9-9-1003", "CodexSandboxUsers", 4, u))):
+        bang(not f(*doi), f"r1511 không được nhận nhầm: {ten_ca}")
+    lenh = m._lenh_sua_acl_tep(u)
+    bang("/inheritance:r" in lenh and f'"*{u}:F"' in lenh and '"*S-1-5-18:F"' in lenh
+         and '"*S-1-5-32-544:F"' in lenh and "/grant:r" in lenh, f"lệnh sửa phải gỡ thừa kế VÀ cấp lại: {lenh}")
+    bang("%USERNAME%" not in lenh, "lệnh phải theo SID, không phụ thuộc cú pháp biến của shell")
+    ly = m._ly_do_kho_codex(OSError("credential ACL inherits CodexSandboxUsers read; fix: x"))
+    bang(ly.startswith("credential ACL inherits"), f"lý do của _KhoCodex phải đi tới thông báo: {ly}")
+    bang(m._ly_do_kho_codex(OSError('{"tokens": "bimat"}')) == "OSError", "thông điệp lạ chỉ in TÊN lớp")
+    bang(m._ly_do_kho_codex(OSError("credential x" + chr(10) + "bimat")) == "OSError", "thông điệp nhiều dòng chỉ in TÊN lớp")
+    nguon = Path(m.__file__).read_text(encoding="utf-8")
+    dong = nguon.splitlines()
+    i = [k for k, d in enumerate(dong) if 'raise OSError("credential ACL inherits CodexSandboxUsers' in d]
+    bang(len(i) == 1 and dong[i[0] - 1].rstrip().endswith("self.sid):"),
+         "ca thừa kế phải NÉM ngay trong nhánh if (fail-closed), không continue/bỏ qua")
+
+
+@ca
+def r1511_doctor_khong_snapshot_van_noi_ly_do_acl():
+    """r1511 (cross-review #1534 lượt 1, P2): KHÔNG có CODEX_AUTH_JSON (auth.json do `codex login` ghi) mà kho đọc
+    lỗi ACL ⇒ _do_codex vẫn CHUA_XAC_THUC (fail-closed) NHƯNG mang nguyên nhân + lệnh icacls, không chỉ "CHỜ snapshot"."""
+    m = _tai_launcher_thu()
+    thong_diep = ("credential ACL inherits CodexSandboxUsers read from the Codex home (Codex rewrote the file); "
+                  "fix: " + m._lenh_sua_acl_tep("S-1-5-21-1-2-3-1001"))
+
+    class KhoHong:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            raise OSError(thong_diep)
+
+        def __exit__(self, *a):
+            return False
+
+    with tempfile.TemporaryDirectory() as tam:
+        m._KhoCodex = KhoHong
+        ly = m._ly_do_cho_snapshot(Path(tam))
+        bang(ly is not None and m._dang_cho_snapshot(Path(tam)), "lỗi đọc kho phải vẫn là CHẶN (fail-closed)")
+        bang("inherits CodexSandboxUsers" in ly and "/grant:r" in ly, f"lý do ACL phải tới người dùng: {ly!r}")
+        m.shutil.which = lambda ten: "codex"
+        m._co_chan_codex = lambda: None
+        m._codex_home_hieu_luc = lambda: Path(tam)
+        nhan, chi_tiet = m._do_codex()[:2]
+        bang(nhan == "CHUA_XAC_THUC" and "inherits CodexSandboxUsers" in chi_tiet and "icacls" in chi_tiet,
+             f"doctor không snapshot phải nói lý do ACL: {nhan} {chi_tiet!r}")
+
+
 DOT_BIEN = [
+    ("r1511_nuot_ly_do_khong_snapshot", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return _CHO_SNAPSHOT'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
+    ("r1511_doctor_bo_ly_do", ('        return ("CHUA_XAC_THUC", _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)', '        return ("CHUA_XAC_THUC", _CHO_SNAPSHOT)'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
+    ("r1511_loi_doc_kho_thanh_tha", ('        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"', '        return None'),
+     ["r1511_doctor_khong_snapshot_van_noi_ly_do_acl"]),
+    # r1511: mỗi chốt một đột biến.
+    ("r1511_nhan_ca_tuong_minh", ('    return "ID" in flags and _ace_sandbox', '    return True and _ace_sandbox'),
+     ["r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha"]),
+    ("r1511_lenh_chi_go_thua_ke", ("""/inheritance:r /grant:r "*{user_sid}:F" "*S-1-5-18:F" "*S-1-5-32-544:F"')""", """/inheritance:r')"""),
+     ["r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha"]),
+    ("r1511_in_moi_ly_do", ('    return t if t.startswith("credential ") and chr(10) not in t else type(e).__name__', '    return t'),
+     ["r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha"]),
+    ("r1511_tha_ca_thua_ke", ('                raise OSError("credential ACL inherits CodexSandboxUsers', '                continue' + chr(10) + '                raise OSError("credential ACL inherits CodexSandboxUsers'),
+     ["r1511_acl_tep_thua_ke_sandbox_codex_chi_dan_khong_tha"]),
+
     # r1509: nới danh sách cho phép phải làm ca đích ĐỎ.
     ("r1509_tha_ca_tep", ("    if not directory or loai != \"A\":", "    if loai != \"A\":"),
      ["r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc"]),

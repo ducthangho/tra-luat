@@ -2692,10 +2692,11 @@ def lenh_run(a) -> int:
         ket = chuan_bi_xac_thuc(that_su=True, snapshot=snapshot)
         snapshot = ""
         if not ket or not all(x.get("ok") for x in ket):
-            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
+            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child"
+                       + "".join(f" — {x.get('cach')}" for x in (ket or ()) if not x.get("ok")))
     if _la_codex(qd):
         if _cho_snapshot_hoac_chan():
-            raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
+            raise Chan(MA_CHUA_XAC_THUC, _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)
     try:
         probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd, dinh_danh)
     except Chan as e:
@@ -3850,7 +3851,8 @@ def _chuan_bi_va_bo_snapshot() -> None:
     try:
         ket = chuan_bi_xac_thuc(that_su=True)
         if not ket or not all(x.get("ok") for x in ket):
-            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
+            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child"
+                       + "".join(f" — {x.get('cach')}" for x in (ket or ()) if not x.get("ok")))
     finally:
         os.environ.pop("CODEX_AUTH_JSON", None)
 
@@ -3914,6 +3916,27 @@ def _ace_sandbox_codex_duoc_phep(directory: bool, loai: str, rights: str, sid: s
     may = user_sid.rsplit("-", 1)[0]
     return (sid.startswith("S-1-5-21-") and sid.rsplit("-", 1)[0] == may
             and sid != user_sid)
+
+
+# r1511 (đo 26-11-2026, issue #1511 K2a): `codex login` tạo auth.json MỚI (File ID mới), DACL chỉ còn
+# ACE THỪA KẾ từ `~/.codex`, gồm `(A;ID;0x1200a9;;;<CodexSandboxUsers>)` ⇒ chốt tệp đỏ đúng, nhưng
+# thông báo cũ chung chung. Chỉ NHẬN DIỆN để chỉ dẫn — KHÔNG tha: ca này vẫn ném OSError.
+def _ace_sandbox_codex_thua_ke_tren_tep(flags: str, loai: str, rights: str, sid: str,
+                                        ten: str, kieu: int, user_sid: str) -> bool:
+    """r1511: ACE đọc của nhóm sandbox Codex, THỪA KẾ (cờ ID), xuất hiện trên một TỆP."""
+    return "ID" in flags and _ace_sandbox_codex_duoc_phep(True, loai, rights, sid, ten, kieu, user_sid)
+
+
+def _lenh_sua_acl_tep(user_sid: str) -> str:
+    """r1511: lệnh gỡ thừa kế VÀ cấp lại tường minh (chỉ `/inheritance:r` trên tệp toàn ACE thừa kế
+    để lại DACL RỖNG). Cấp theo SID nên chạy được cả cmd lẫn PowerShell."""
+    return (f'icacls <file> /inheritance:r /grant:r "*{user_sid}:F" "*S-1-5-18:F" "*S-1-5-32-544:F"')
+
+
+def _ly_do_kho_codex(e: BaseException) -> str:
+    """r1511: lý do an toàn để in — chỉ thông điệp do _KhoCodex tự soạn (bắt đầu 'credential'), không bao giờ byte credential."""
+    t = str(e)
+    return t if t.startswith("credential ") and chr(10) not in t else type(e).__name__
 
 
 class _KhoCodex:
@@ -4181,14 +4204,15 @@ class _KhoCodex:
             sid = self._win_sid(fields[5])
             if fields[0] == "A" and sid in allowed | {"S-1-3-4"}:
                 continue
-            if directory and fields[0] == "A":
-                ten, kieu = self._win_ten_sid(sid)
-                if _ace_sandbox_codex_duoc_phep(True, fields[0], fields[2], sid, ten, kieu, self.sid):
-                    continue
+            ten, kieu = self._win_ten_sid(sid) if fields[0] == "A" else ("", 0)
+            if directory and _ace_sandbox_codex_duoc_phep(True, fields[0], fields[2], sid, ten, kieu, self.sid):
+                continue
+            if not directory and _ace_sandbox_codex_thua_ke_tren_tep(fields[1], fields[0], fields[2], sid,
+                                                                     ten, kieu, self.sid):
+                raise OSError("credential ACL inherits CodexSandboxUsers read from the Codex home "
+                              f"(Codex rewrote the file); fix: {_lenh_sua_acl_tep(self.sid)}")
             raise OSError("credential ACL grants access to another principal"
-                          + (f" ({sid}); fix: icacls <file> /inheritance:r /grant:r "
-                             "\"%USERNAME%:F\" \"*S-1-5-18:F\" \"*S-1-5-32-544:F\""
-                             if not directory else f" ({sid})"))
+                          + (f" ({sid}); fix: {_lenh_sua_acl_tep(self.sid)}" if not directory else f" ({sid})"))
 
     def _win_ten_sid(self, sid_text):
         """(tên, SID_NAME_USE) của một SID cục bộ; lỗi ⇒ ("", 0) để chốt đỏ."""
@@ -4296,16 +4320,26 @@ def _danh_dau_auth_hong(home: Path, da_probe: bytes | None = None) -> bool:
         return False
 
 
-def _dang_cho_snapshot(home: Path) -> bool:
+_CHO_SNAPSHOT = "CHỜ snapshot Codex mới; không lặp credential đã thất bại"
+
+
+def _ly_do_cho_snapshot(home: Path):
+    """None = không phải chờ; chuỗi = lý do chặn. r1511 (cross-review #1534 lượt 1, P2): lỗi đọc kho KHÔNG
+    snapshot (auth.json do `codex login` ghi) từng bị nuốt thành câu "CHỜ snapshot" — mất nguyên nhân ACL."""
     try:
         with _KhoCodex(home) as store:
             rejected, _ = _doc_rejected(store)
             data = store.read()
-            return data is not None and _credential_id(data) in rejected
+            return _CHO_SNAPSHOT if data is not None and _credential_id(data) in rejected else None
     except FileNotFoundError:
-        return False
-    except (OSError, ValueError, UnicodeError):
-        return True  # unreadable recovery state is not permission to retry
+        return None
+    except (OSError, ValueError, UnicodeError) as e:
+        # unreadable recovery state is not permission to retry
+        return f"{_CHO_SNAPSHOT} — {_ly_do_kho_codex(e)}"
+
+
+def _dang_cho_snapshot(home: Path) -> bool:
+    return _ly_do_cho_snapshot(home) is not None
 
 
 def _probe_snapshot(data: bytes):
@@ -4410,8 +4444,9 @@ def chuan_bi_xac_thuc(that_su: bool = True, snapshot=None) -> list[dict]:
             store.write("auth.json", data, old)
             result.update(ok=True, doi=True, cach="đã chuẩn bị credential an toàn" if old is None else "probe đạt; đã promote")
             return [result]
-    except (OSError, ValueError, UnicodeError):
-        result["cach"] = "HỎNG: không đọc/ghi an toàn được credential hoặc state; không chạy child"
+    except (OSError, ValueError, UnicodeError) as e:
+        result["cach"] = ("HỎNG: không đọc/ghi an toàn được credential hoặc state; không chạy child"
+                          f" — {_ly_do_kho_codex(e)}")
         return [result]
 
 
@@ -4616,8 +4651,8 @@ def _do_codex(kiem_song: bool = False,
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
-    if _dang_cho_snapshot(_codex_home_hieu_luc()):
-        return ("CHUA_XAC_THUC", "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
+    if _dang_cho_snapshot(_codex_home_hieu_luc()):   # cổng boolean giữ nguyên (ca cũ thay nó bằng giả)
+        return ("CHUA_XAC_THUC", _ly_do_cho_snapshot(_codex_home_hieu_luc()) or _CHO_SNAPSHOT)
     try:
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy

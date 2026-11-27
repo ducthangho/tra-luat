@@ -111,6 +111,9 @@
   trình) trả rc 2 kèm báo cáo thu hồi; chỉ đóng ống khi không luồng nào còn giữ.
 - r45 (sau review offline lượt 44, đặc tả `ops/specs/llm-khoan-docx-r45.md`): bộ chạy `tl extract` theo một hợp đồng vòng đời —
   ống ghi sổ ngay sau khi chạy tiến trình, luồng đọc và bước thu hồi giành quyền dùng ống qua một khoá; lỗi đọc giữ nguyên văn.
+- r46 (sau review offline lượt 45, đặc tả `ops/specs/llm-khoan-docx-r46.md`): lớp vòng đời bộ chạy `tl extract` chuyển sang
+  packet kế nhiệm #1571 kèm miễn trừ chủ kho, runner giữ nguyên; sửa mô tả đầu dòng thô và bộ duyệt bảng `.docx`;
+  hồ sơ lượt 44 ghim liên kết vào blob tại SHA đã review.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

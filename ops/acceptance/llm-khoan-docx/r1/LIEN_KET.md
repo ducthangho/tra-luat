@@ -13,6 +13,6 @@ Từ lượt 41 (r44), liên kết được viết lại NGAY khi lưu: mã và 
 `reviewed_sha` (`https://github.com/ducthangho/tra-luat/blob/<reviewed_sha>/<đường dẫn>#L<n>` — dòng đúng như reviewer đọc,
 không trôi theo checkout); hồ sơ `ops/` giữ đường dẫn tương đối trong kho; `run.json`/`PROMPT.md` cùng thư mục; mọi đích scratch
 hay ngoài kho trỏ neo `#nhat-ky-scratch` — mục cuối mỗi verdict liệt kê các đích ấy. Đã đọc ngược từng liên kết của lượt
-41–43: blob tồn tại tại SHA, số dòng nằm trong tệp, tệp đồng gói có mặt, neo có thật. Các lượt trước giữ nguyên chữ của reviewer (không biên nhận nào neo byte
+41–44 (lượt 44 viết lại ở r46 theo P3 lượt 45; lượt 45 không có liên kết): blob tồn tại tại SHA, số dòng nằm trong tệp, tệp đồng gói có mặt, neo có thật. Các lượt trước giữ nguyên chữ của reviewer (không biên nhận nào neo byte
 các tệp ấy); đọc chúng theo bảng này. Nội dung đánh giá không đổi; chỉ đích liên kết đổi.
 Liên kết blob chỉ mở được trên GitHub khi commit ấy đã được push; trước đó đọc bằng `git show <reviewed_sha>:<đường dẫn>`.

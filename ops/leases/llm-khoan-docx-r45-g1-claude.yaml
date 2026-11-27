@@ -279,3 +279,5 @@ review_calls_limit: 46
 review_calls_used_truoc: 45
 inference_calls_limit: 0
 review_calls_ghi_chu: 'r34 dung 2; r35 dung 1 (bi ngat); r36-r44 moi ban 1; tong da dung 45. Tran 46 theo quyet dinh chu kho 27-11-2026 (Chon 1 sau luot 44).'
+da_bi_thay_the: llm-khoan-docx-r46-g1-claude
+da_bi_thay_the_ly_do: 'Review offline luot 45; revision r46 (ops/specs/llm-khoan-docx-r46.md): cat P2 sang Issue #1571, va hai P3.'

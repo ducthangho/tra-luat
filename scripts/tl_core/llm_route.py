@@ -1164,8 +1164,8 @@ def _nhan(muc, ilvl, bo_dem):
 
 
 def _doan_trong(cha, trong_bang=False):
-    """Duyệt khối theo THỨ TỰ tài liệu (r2, lượt 1 A1/A2): `w:p` ⇒ ("p", el, trong_bang); `w:tbl` ⇒ ("bang", …) rồi các
-    đoạn trong ô (để ĐẾM số); `w:sdt`/`w:customXml` ⇒ đi vào nội dung; khối lạ ⇒ ("la", …) — không bỏ nội dung nào."""
+    """Duyệt khối theo THỨ TỰ tài liệu (r2, lượt 1 A1/A2): `w:p` ⇒ ("p", el, trong_bang); `w:tbl` ⇒ ("bang", …) và KHÔNG
+    đi vào ô (r7: bảng ở bất kỳ đâu chặn cả tệp — r46, lượt 45 P3 `huong-dan-docx`); `w:sdt`/`w:customXml` ⇒ đi vào nội dung; khối lạ ⇒ ("la", …) — không bỏ nội dung nào."""
     for el in cha:
         # r14 (lượt 13 N3): so QName ĐẦY ĐỦ — khối ngoài namespace Word (kể cả trùng tên cục bộ `p`/`sdt`/`customXml`) ⇒ khối lạ.
         ten = el.tag[len(_W):] if isinstance(el.tag, str) and el.tag.startswith(_W) else None
@@ -1521,7 +1521,8 @@ def _doc_dieu_docx_goi(z_cm, dieu, doc_gioi_han):
     body = goc_cay.find(_W + "body")
     if body is None:
         raise ValueError("document.xml khong co w:body")
-    # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số (kể cả trong bảng/sdt) — bộ đếm Word chạy suốt tài liệu theo numId.
+    # Đi theo thứ tự tài liệu, ĐẾM số ở MỌI đoạn đánh số NGOÀI bảng (kể cả trong sdt) — bộ đếm Word chạy suốt tài liệu theo numId;
+    # bảng chỉ phát dấu "bang" và chặn cả tệp (r7), nên không đoạn nào trong ô được đếm (r46, lượt 45 P3).
     bo_dem_tl = {}
     doan = []   # dict: chu, so (numId, ilvl)|None, dem, loai ("p"|"bang"|"la"), trong_bang, ngat, la, so_tu_style
     tong_doan = [0]

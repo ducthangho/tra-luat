@@ -3095,7 +3095,8 @@ def cmd_llm_khai_niem(a) -> int:
         try:
             van_ban, loi_extract = lr.lay_dieu_qua_extract(so_hieu, dieu, HERE / "tl.py", them=them)
         except (ValueError, OSError, subprocess.SubprocessError) as e:
-            print(f"[tl] khong lay duoc nguyen van: {e}", file=sys.stderr)
+            _ghi = "".join(f" | {x}" for x in getattr(e, "__notes__", ()))   # r44: in cả chẩn đoán thu hồi (add_note)
+            print(f"[tl] khong lay duoc nguyen van: {e}{_ghi}", file=sys.stderr)
             return 2
         for dong in loi_extract.splitlines():
             if dong.startswith("[tl] canonical:") or "DỰ THẢO" in dong or "[markup]" in dong:

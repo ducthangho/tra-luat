@@ -1,0 +1,29 @@
+# nghiem thu doc lap tren merge e209579 — 2026-11-27T01:27:53Z
+HEAD e209579adfca823926cdfad87579f360b7bacb26 TREE 59ff10383a68d8460c676f7e22920162dc129b59 shallow=false python=Python 3.13.18
+blob land_evidence_nguon_test.py 611ee99507b80644ea1b5054bfc9cd754d2a3dd3 / 97ec968 611ee99507b80644ea1b5054bfc9cd754d2a3dd3
+blob gate_output_doi_chieu_test.py a864a96542d6eddde3f6d6cc1ba085130b843a69 / 97ec968 a864a96542d6eddde3f6d6cc1ba085130b843a69
+numstat e209579^1..e209579:
+98	0	ops/gate_output_doi_chieu_test.py
+176	9	ops/land_evidence_nguon_test.py
+diff --check rc=0
+== ops/land_evidence_nguon.py --root .
+ĐẠT ops/land/pr997-wp978-land-evidence.yaml
+land_evidence_nguon: 156 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 181
+TỔNG: ĐẠT
+rc=0
+== ops/land_evidence_nguon_test.py
+CA: 40/40 dat
+DOT BIEN: 145/145 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+rc=0
+== ops/gate_output_doi_chieu_test.py
+CA: 53/53 dat
+DOT BIEN: 158/158 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+rc=0
+== release-verify --strict
+(dong tren in sai ten khoa; chay lai cung lenh tren cung clone e209579, rc=0:)
+ok True expected_file_count 187 checked_file_count 187 failed [] extra_files [] package_hash_match True
+# xong 2026-11-27T01:36:25Z

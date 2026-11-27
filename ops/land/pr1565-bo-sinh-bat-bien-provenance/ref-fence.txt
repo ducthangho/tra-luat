@@ -1,0 +1,7 @@
+# rao ref quanh merge PR #1565 — git ls-remote origin truoc (00:01:14Z) va sau merge; script refdiff.py (chep tu .claude/skills/land-packets/SKILL.md)
+REFS 2148 4b02221e83acd71f90c27f2218d94bb4361c35520c1d255c6f7d905de7044ca5
+REFS 2147 536f8656ac92cd4dc28c542ab755e4919abc4d77e054c65191f3f9c07fb730bc
+HEAD	91737a8d0dd45f673e62c4be5d63e0f2ae6e7718	e209579adfca823926cdfad87579f360b7bacb26
+refs/heads/master	91737a8d0dd45f673e62c4be5d63e0f2ae6e7718	e209579adfca823926cdfad87579f360b7bacb26
+refs/pull/1565/merge	28b724ecaaeb812879bca7908d9d96553a6cd36a	ABSENT
+rc=1 (1 = co khac biet, liet ke tren)

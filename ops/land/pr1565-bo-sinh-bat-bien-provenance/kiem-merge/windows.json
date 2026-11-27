@@ -1,0 +1,8 @@
+{"sha": "97ec9686184fdf55dc1736007e6fdcb186122465", "os": "Windows", "may": "DESKTOP-T9R33P2", "bien_nhan": "https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7196524386",
+ "ghi_chu": "scripts/tl.py --selftest do san tren Windows o CA nen a89c83a lan ung 97ec968 (1788/1789, cung mot ca do r380_llm_khai_niem_bien_dau_vao, khong thuoc write set), tap do ung = nen, delta 0 (ADR-0060 M3 b); khong liet ke duoi day vi khong o trang thai passed. ci_dang_ky_test chay trong venv rieng cua phien (jsonschema 4.26.0).",
+ "tests": [
+  {"id": "ops/land_evidence_nguon_test.py (CA 40/40, DOT BIEN 145/145)", "ket_qua": "passed"},
+  {"id": "ops/gate_output_doi_chieu_test.py (CA 53/53, DOT BIEN 149/149)", "ket_qua": "passed"},
+  {"id": "ops/land_evidence_nguon.py --root . (178 ho so, TONG DAT)", "ket_qua": "passed"},
+  {"id": ".claude/dev/ci_dang_ky_test.py (1654/1654)", "ket_qua": "passed"}
+ ]}

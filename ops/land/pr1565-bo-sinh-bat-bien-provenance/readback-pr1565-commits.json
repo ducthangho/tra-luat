@@ -1,0 +1,330 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ded412862fba5181fc59e8482ff40cb31162f577/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-25T21:12:05Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-25T21:12:05Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "test(l8): chot mien bo sinh ky tu va o cau truc cua bang dot A (#1539, no WP1236-B02)\n\nc36: san dem A_CA thay bang so DUNG (o cau truc + so lan x mien bo sinh, hang\nchep tu dac ta bo-sinh-bat-bien r1); them chot tap general category va ky tu\nngoai BMP tren cac phan tu DA qua main -> L8.\nc37: vu tru ky tu dung 158 (128 ASCII + 29 category tru Cs + mot ngoai BMP),\nso o la hang 648, kiem TRUOC vong o.\nc39, c40: phan chung P1-P6 chay CHINH c37/c36 voi bo sinh / ca a129 bi sua\ntrong bo nho; moi chot mot bien the rieng.\nTest dot A: kiem_bo_sinh + a135 (nam bo doi so), a136 (P7, sau bo sinh gia).\n\nKhong sua module san pham.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW",
+   "tree": {
+    "sha": "bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ded412862fba5181fc59e8482ff40cb31162f577",
+   "verification": {
+    "payload": "tree bcb8e5e85ae95e305274d0b5c82c32bd8c7ff0dd\nparent a89c83acf998008caecba9084a7d295845bf1976\nauthor Claude <noreply@anthropic.com> 1795641125 +0000\ncommitter Claude <noreply@anthropic.com> 1795641125 +0000\n\ntest(l8): chot mien bo sinh ky tu va o cau truc cua bang dot A (#1539, no WP1236-B02)\n\nc36: san dem A_CA thay bang so DUNG (o cau truc + so lan x mien bo sinh, hang\nchep tu dac ta bo-sinh-bat-bien r1); them chot tap general category va ky tu\nngoai BMP tren cac phan tu DA qua main -> L8.\nc37: vu tru ky tu dung 158 (128 ASCII + 29 category tru Cs + mot ngoai BMP),\nso o la hang 648, kiem TRUOC vong o.\nc39, c40: phan chung P1-P6 chay CHINH c37/c36 voi bo sinh / ca a129 bi sua\ntrong bo nho; moi chot mot bien the rieng.\nTest dot A: kiem_bo_sinh + a135 (nam bo doi so), a136 (P7, sau bo sinh gia).\n\nKhong sua module san pham.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQNieUa8s\nvRXZyEGtKIg/s+lCTq+yQTaGqNvXnqs+pNfUVS6DRVtO/mbLmltXJChaIlhQHXFijYhzlVpb0TXB\nCwk=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T19:04:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ded412862fba5181fc59e8482ff40cb31162f577",
+  "node_id": "C_kwDOTNeRjdoAKGRlZDQxMjg2MmZiYTUxODFmYzU5ZTg0ODJmZjQwY2IzMTE2MmY1Nzc",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/a89c83acf998008caecba9084a7d295845bf1976",
+    "sha": "a89c83acf998008caecba9084a7d295845bf1976",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a89c83acf998008caecba9084a7d295845bf1976"
+   }
+  ],
+  "sha": "ded412862fba5181fc59e8482ff40cb31162f577",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ded412862fba5181fc59e8482ff40cb31162f577"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ef82ed9a7c26f085fa567021fea1d0baaf15c75b/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-26T04:32:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-26T04:32:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "test(l8): chot so phan tu KHAC NHAU va phan chung rieng cho tong 158 / 648 (#1539, review ma luot 1)\n\nR1-02: c36 them chot thu tu — so phan tu khac nhau (ho so + moi tep provenance,\nso tung byte) = so phan tu tru so gap lai co chu y (hang, co dan giai tung ca).\nMot o cau truc bi thay bang BAN SAO o khac nay DO o ca tam ca; c40 chay dung\ncap nguon/dich cua reviewer tren a129 va mot cap tuong tu tren a126.\nR1-01: c39 them bien the lap CHINH ky tu ngoai BMP cuoi (chi menh de tong 158\nbat) va c37 mat MOT o roi qua ban sao trong bo nho (chi chot 648 bat); ky8 trong\nc39 nay DEM o: phan chung 0 o, ban nguyen ven dung 648 o.\nc40: doi chung a129 nguyen ven di cung duong nho dem; nho dem yaml theo doi so\ndung chung cho moi bien the.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW",
+   "tree": {
+    "sha": "30d8b599d30f7552e5b1c00b51008d4efec09c66",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/30d8b599d30f7552e5b1c00b51008d4efec09c66"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+   "verification": {
+    "payload": "tree 30d8b599d30f7552e5b1c00b51008d4efec09c66\nparent ded412862fba5181fc59e8482ff40cb31162f577\nauthor Claude <noreply@anthropic.com> 1795667533 +0000\ncommitter Claude <noreply@anthropic.com> 1795667533 +0000\n\ntest(l8): chot so phan tu KHAC NHAU va phan chung rieng cho tong 158 / 648 (#1539, review ma luot 1)\n\nR1-02: c36 them chot thu tu — so phan tu khac nhau (ho so + moi tep provenance,\nso tung byte) = so phan tu tru so gap lai co chu y (hang, co dan giai tung ca).\nMot o cau truc bi thay bang BAN SAO o khac nay DO o ca tam ca; c40 chay dung\ncap nguon/dich cua reviewer tren a129 va mot cap tuong tu tren a126.\nR1-01: c39 them bien the lap CHINH ky tu ngoai BMP cuoi (chi menh de tong 158\nbat) va c37 mat MOT o roi qua ban sao trong bo nho (chi chot 648 bat); ky8 trong\nc39 nay DEM o: phan chung 0 o, ban nguyen ven dung 648 o.\nc40: doi chung a129 nguyen ven di cung duong nho dem; nho dem yaml theo doi so\ndung chung cho moi bien the.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQFq77T7N\nFf7IRd67fs98QEQZ3bWYKGbfrydNfnAc6E2ADuQEAXzOvI8n2eXdW/OH2fS0z5JPpbXpEu06z/eG\nFAc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T19:04:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+  "node_id": "C_kwDOTNeRjdoAKGVmODJlZDlhN2MyNmYwODVmYTU2NzAyMWZlYTFkMGJhYWYxNWM3NWI",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ded412862fba5181fc59e8482ff40cb31162f577",
+    "sha": "ded412862fba5181fc59e8482ff40cb31162f577",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ded412862fba5181fc59e8482ff40cb31162f577"
+   }
+  ],
+  "sha": "ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ef82ed9a7c26f085fa567021fea1d0baaf15c75b"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/485387fb1e0e6e49837623ba9df7843d5dca782f/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-26T08:48:33Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-26T08:48:33Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "test(l8): phan chung cho TUNG chieu sai cua moi chot moi (#1539, review ma luot 2)\n\nR2-01: c40 them \"them mot ban sao o dau\" tren a126 (53 phan tu, 52 khac nhau)\nde khoa chieu THUA cua chot so phan tu; them \"ky vong gap lai +1\" de khoa chieu\nthua cua chot so phan tu khac nhau; hai phia bien BMP (U+FFFF do, U+10000 xanh).\nc39: c37 thua mot o roi (649), hai phia bien BMP cua vu tru, nap_sua phai do khi\nneo xuat hien 0 lan / nhieu lan.\na136: bo sinh rong, thua mot ngoai BMP, ngoai BMP sai vi tri voi cuoi la U+FFFF,\ndai dien U+007F, cuoi la U+10000 (xanh).\nThoi gian: nho dem PyYAML theo doi so chuyen vao c36 (dung chung so voi moi luot\nc40 chay lai c36); a136 nho dem bo sinh.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW",
+   "tree": {
+    "sha": "dd18e43c2781f3ec0d227832083c5f46d40a14cd",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/dd18e43c2781f3ec0d227832083c5f46d40a14cd"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/485387fb1e0e6e49837623ba9df7843d5dca782f",
+   "verification": {
+    "payload": "tree dd18e43c2781f3ec0d227832083c5f46d40a14cd\nparent ef82ed9a7c26f085fa567021fea1d0baaf15c75b\nauthor Claude <noreply@anthropic.com> 1795682913 +0000\ncommitter Claude <noreply@anthropic.com> 1795682913 +0000\n\ntest(l8): phan chung cho TUNG chieu sai cua moi chot moi (#1539, review ma luot 2)\n\nR2-01: c40 them \"them mot ban sao o dau\" tren a126 (53 phan tu, 52 khac nhau)\nde khoa chieu THUA cua chot so phan tu; them \"ky vong gap lai +1\" de khoa chieu\nthua cua chot so phan tu khac nhau; hai phia bien BMP (U+FFFF do, U+10000 xanh).\nc39: c37 thua mot o roi (649), hai phia bien BMP cua vu tru, nap_sua phai do khi\nneo xuat hien 0 lan / nhieu lan.\na136: bo sinh rong, thua mot ngoai BMP, ngoai BMP sai vi tri voi cuoi la U+FFFF,\ndai dien U+007F, cuoi la U+10000 (xanh).\nThoi gian: nho dem PyYAML theo doi so chuyen vao c36 (dung chung so voi moi luot\nc40 chay lai c36); a136 nho dem bo sinh.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJWluywL\nHBOUJuIjayp7FjxxJRrxpC7iJnhIgpgiYHMx0YBAu6h9Tlp94zDacuDlh+fGj+jJz8zxOBIevyZL\nfAU=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T19:04:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/485387fb1e0e6e49837623ba9df7843d5dca782f",
+  "node_id": "C_kwDOTNeRjdoAKDQ4NTM4N2ZiMWUwZTZlNDk4Mzc2MjNiYTlkZjc4NDNkNWRjYTc4MmY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+    "sha": "ef82ed9a7c26f085fa567021fea1d0baaf15c75b",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ef82ed9a7c26f085fa567021fea1d0baaf15c75b"
+   }
+  ],
+  "sha": "485387fb1e0e6e49837623ba9df7843d5dca782f",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/485387fb1e0e6e49837623ba9df7843d5dca782f"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/97ec9686184fdf55dc1736007e6fdcb186122465/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-26T12:43:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-26T12:43:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "test(l8): chot danh tinh mien doi so cua bo sinh, phan chung tung bo, doi chung a131 (#1539, review ma luot 3)\n\nR3-01: kiem_bo_sinh ghi lai cac bo doi so da kiem va so voi tap (cam, bo_loai)\ndoc bang AST tu chinh cac loi goi bo sinh trong cac ca cua dot A (doc lap voi\nBO_SINH_MONG), dung nam bo. a136 them nam bo sinh gia moi cai chi sai tai dung\nmot bo, va BO_SINH_MONG bi bo / lap / thay mot bo hoac cac ca dung sau bo.\nR3-02: c40 them doi chung a131 nguyen ven (ca khong goi bo sinh) de nhanh\n`if tru is not None` khong roi vao loi vo can.\nR3-03: a135 va a136 dung chung bo nho dem ket qua bo sinh that, khoa theo chinh\ndoi tuong ham nen bo sinh gia cua a136 khong bi che.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW",
+   "tree": {
+    "sha": "9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/97ec9686184fdf55dc1736007e6fdcb186122465",
+   "verification": {
+    "payload": "tree 9f8123cc4de66c59968a1b8a3c8d8ef05be0b5eb\nparent 485387fb1e0e6e49837623ba9df7843d5dca782f\nauthor Claude <noreply@anthropic.com> 1795696999 +0000\ncommitter Claude <noreply@anthropic.com> 1795696999 +0000\n\ntest(l8): chot danh tinh mien doi so cua bo sinh, phan chung tung bo, doi chung a131 (#1539, review ma luot 3)\n\nR3-01: kiem_bo_sinh ghi lai cac bo doi so da kiem va so voi tap (cam, bo_loai)\ndoc bang AST tu chinh cac loi goi bo sinh trong cac ca cua dot A (doc lap voi\nBO_SINH_MONG), dung nam bo. a136 them nam bo sinh gia moi cai chi sai tai dung\nmot bo, va BO_SINH_MONG bi bo / lap / thay mot bo hoac cac ca dung sau bo.\nR3-02: c40 them doi chung a131 nguyen ven (ca khong goi bo sinh) de nhanh\n`if tru is not None` khong roi vao loi vo can.\nR3-03: a135 va a136 dung chung bo nho dem ket qua bo sinh that, khoa theo chinh\ndoi tuong ham nen bo sinh gia cua a136 khong bi che.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrabSZAwhhMamwUmUFW\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQO95JZNU\nWoJ+CDwWMifcISjuNlyxXmeDqvFwkxb4NO+stGg1q7jCMooOQUwmm1h0aXSeGSpGE8a9MGKjk03b\nKw0=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-26T19:04:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/97ec9686184fdf55dc1736007e6fdcb186122465",
+  "node_id": "C_kwDOTNeRjdoAKDk3ZWM5Njg2MTg0ZmRmNTVkYzE3MzYwMDdlNmZkY2IxODYxMjI0NjU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/485387fb1e0e6e49837623ba9df7843d5dca782f",
+    "sha": "485387fb1e0e6e49837623ba9df7843d5dca782f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/485387fb1e0e6e49837623ba9df7843d5dca782f"
+   }
+  ],
+  "sha": "97ec9686184fdf55dc1736007e6fdcb186122465",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/97ec9686184fdf55dc1736007e6fdcb186122465"
+ }
+]

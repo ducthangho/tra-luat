@@ -1,0 +1,90 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1539
+packet_id: bo-sinh-bat-bien
+packet_slug: BO-SINH-BAT-BIEN
+revision: 1
+generation: 1
+lease_id: bo-sinh-bat-bien-r1-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet. Lease code dot B wp1236 (wp1236-b-r12-g1-claude-20261124) da rut han 2026-11-25T18:33:55Z, khong can bia mo; ai-dang-giu NGUOI_GIU 0 tren 354 nhanh luc 2026-11-25T20:45:28Z cho ca hai tep.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7174327296
+authority_url: https://github.com/ducthangho/tra-luat/issues/1539#issuecomment-7174327296
+authority_ghi_chu: 'Chu kho ra lenh mo packet va phien rieng de tra no WP1236-B02 (nguyen van trong comment ghi ho)'
+authority_caveat: 'Ghi ho quyet dinh chu kho (ADR-0067) qua app claude; loi chu kho trong phien session_015Gtxraj8uybNKhrrYZSKtB'
+recorded_by: claude_code_session_015Gtxraj8uybNKhrrYZSKtB
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi cua packet nay: soan dac ta, cap lease, goi review Codex offline; KHONG viet ma cua packet. Phien nay la executor cua wp1236 dot B (da land).'
+executor_session: 'phien Claude cloud moi do dieu phoi tao (create_session); id ghi vao Issue #1539'
+executor_ghi_chu: 'Chot mien bo sinh ky tu va o cau truc trong ops/land_evidence_nguon_test.py (c36, c37) va ops/gate_output_doi_chieu_test.py (ca moi)'
+leased_at_utc: '2026-11-25T20:55:00Z'
+heartbeat_at: '2026-11-25T20:55:00Z'
+lease_until: '2026-11-27T20:55:00Z'
+lease_expires_at_utc: '2026-11-27T20:55:00Z'
+max_lease_hours: 48
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: 'claude_code chi khai machine/local (packet_loop); phien thuc thi la container cloud remote Linux'
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'hai tep la bo test cua cong land; pham_vi_e khai E1-E5 khong (chi sua tep test)'
+assurance_target: delegated_audited
+assurance_ghi_chu: 'Codex review offline doc lap (§8.3); audit uy quyen ADR-0067 quyet dinh 3 truoc merge; thay cham E4/E5 thi hoi chu kho'
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine/local
+reviewer_independence: 'Codex CLI do phien dieu phoi goi qua launcher.py run, read-only tren exact head; executor KHONG tu review'
+spec_path: ops/specs/bo-sinh-bat-bien-r1.md
+spec_ref: refs/heads/ops/bo-sinh-bat-bien-lease@d22fe11f9bf35517c70333c567481be460173eee
+spec_source_oid: d22fe11f9bf35517c70333c567481be460173eee
+spec_blob: a47f5bfb9648181f489a20d59c326caf300ab1ef
+spec_hash: bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577
+spec_sha256: bdde0a9bdba79a19fbbc77cfee8311e209b0c91cc16612bb8029167cca186577
+spec_ref_ghi_chu: 'dac ta nam tren nhanh ops/bo-sinh-bat-bien-lease, chua vao master; thu dinh danh tep la BAM, khong phai ten nhanh'
+branch: claude/bo-sinh-bat-bien-r1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: a89c83acf998008caecba9084a7d295845bf1976
+start_from_sha: a89c83acf998008caecba9084a7d295845bf1976
+reviewed_sha_required: a89c83acf998008caecba9084a7d295845bf1976
+write_set:
+- ops/gate_output_doi_chieu_test.py
+- ops/land_evidence_nguon_test.py
+write_set_hash: d348c53a7b73b6e4685972b138e50cf09fef9fe3c966c92d473477dbfe824dd7
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: 'Dung hai tep test theo muc 7 cua dac ta; khong sua module san pham'
+closure_status: 'Da quet ai-dang-giu NGUOI_GIU 0 truoc khi dang'
+tran_kich_thuoc: '<= 2 tep / <= 320 dong them, do git diff --numstat a89c83a...<head>; vuot => DUNG truoc review (E2)'
+tran_loi_goi_codex: '4 loi goi Codex review ma (tran rieng cua packet, duoi tran ADR-0055); luot bi cat van tinh; cham tran ma chua approve => dung, hoi E2'
+review_calls_limit: 4
+inference_calls_limit: 0
+windows: 'ADR-0060 M3 phan loai khi review ma theo dong them that; neu required => Windows LOCAL do phien dieu phoi chay tren base va head'
+coordination_paths:
+- ops/leases/bo-sinh-bat-bien-r1-g1-claude.yaml
+- ops/specs/bo-sinh-bat-bien-r1.md
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- push_truoc_review_approve
+- write_outside_effective_write_set
+- workflow_dispatch
+- sua_ci_yml
+land_authority_note: 'audit uy quyen ADR-0067 tren exact head truoc merge; dieu phoi merge khi kiem-merge rc=0; cham E4/E5 thi chu kho duyet'

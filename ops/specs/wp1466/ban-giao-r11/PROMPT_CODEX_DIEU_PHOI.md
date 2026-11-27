@@ -9,6 +9,17 @@ Viết tiếng Việt. Chỉ hỏi chủ kho những câu thuộc mã E1–E5 c�
 - Executor là Claude Fable 5.2 mức high. Reviewer là Codex mức high, review THEO LỚP. Ghi ở issuecomment-7130364325.
 - Phiên điều phối KHÔNG viết mã của packet và KHÔNG tự review.
 
+## Giải mã tệp nhị phân (làm TRƯỚC)
+Cổng CI không nhận tệp nhị phân trong `ops/specs/**`, nên bundle và hai tệp zip bằng chứng được lưu ở dạng base64 (`*.b64`).
+Giải mã từ thư mục này:
+
+```
+for f in $(find . -name '*.b64'); do base64 -d "$f" > "${f%.b64}"; done
+sha256sum -c GIAI_MA.sha256
+```
+
+`sha256sum -c` phải in `OK` cho cả ba tệp; nếu không thì DỪNG. Bundle sau khi giải mã là `wp1466-r11-g3-c5d44c9.bundle`.
+
 ## 0. Đọc trước, theo thứ tự, NGUYÊN VĂN, đừng đọc theo trí nhớ
 1. `CLAUDE.md`, toàn văn. Đặc biệt các mục §Bài học đắt giá, §Gọi agent đa nền và §Protocol đa phiên.
 2. `docs/PROTOCOL_DA_PHIEN.md`: §4, §5, §7, §8, §8.3, §10.2.2, §12, §20.

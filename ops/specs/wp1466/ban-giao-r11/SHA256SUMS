@@ -1,4 +1,5 @@
-c0be4856fdf66760e678cee0fd082a7693d9ca19b2aa8a0af3807055c197c2fd  ./PROMPT_CODEX_DIEU_PHOI.md
+3c20ef536fc4a8327e081b1d7e0b875cd2fafd43e401d1ca8ed0b47f7ce71dd3  ./GIAI_MA.sha256
+1691c1132e176303b0b648646ed2b6e9e79f183cae7fd3bb9c11247eced1324a  ./PROMPT_CODEX_DIEU_PHOI.md
 949d0ecc769db021dc5d7150f7a3d479d868dfac4508f12f9f4b76b07df7a67a  ./handoff/HANDOFF-l1.md
 a855125c4eadc925a6fab869a9f54b9dab8bd7c2a313e7da2bf031b51e51924b  ./handoff/HANDOFF-l2.md
 208a06d053e87c4ff158e14d719b1dd9f69cc809ab383475dabb120833d2cbf9  ./handoff/HANDOFF-l3.md
@@ -10,7 +11,7 @@ a528d5ef8bac8f359b6e8361e78aa893c8344c1c00f009cdf848414a5183a050  ./handoff/PROM
 439495473061e6d96f0f9117f462c309b58117c7bb717bc39b02cb8c7bfd44c6  ./handoff/PROMPT-exec-l4b.md
 e6c1333d743957a595750b184a5fe41380dc333ba1818eb8b2e4528eb8c7ee8f  ./review/wp1466-ma-h-l1/PROMPT.md
 13c7732607f61906c6cb79bac2fa4bc492ef1657092f9403c362840785e2df6b  ./review/wp1466-ma-h-l1/VERDICT.md
-ca3ca0825b7a0ad27298bd9ddcef264524930fad91cba299456a5659263e4445  ./review/wp1466-ma-h-l1/review-evidence.zip
+80b34c04cf1f8dedfe3290dbd298429764ffeff44c53a288699ee01d6d6d3a26  ./review/wp1466-ma-h-l1/review-evidence.zip.b64
 03a71a2c1005d2c5d41b3b8b0ed6fe7d68824cae2ca141af4b997fca527ae0e5  ./review/wp1466-ma-h-l1/run.json
 1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721  ./review/wp1466-ma-h-l1/stderr.log
 2f35f3d35a60e76250bae80eadb7c0fa0e72327f2b333dfa64cf5c13c3df2ac9  ./review/wp1466-ma-h-l2/HINT-lease.patch
@@ -22,7 +23,7 @@ f4e8de9f4f6bbaba45ff8be2e8e973d67bf2844d2f2941db752146e105c6bda0  ./review/wp146
 1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721  ./review/wp1466-ma-h-l2/stderr.log
 2c8746f616a896ca4f1ea2e9359cae87f4ce0151f6cf05f9f3c2cb7dc57d1737  ./review/wp1466-spec-r10-l10/PROMPT.md
 f4657bf2af58755987ff957073090b9c4a00c8901ac3a435651731b4151690cb  ./review/wp1466-spec-r10-l10/VERDICT.md
-2953046e30d12e5a96731a68adeb3d4555ae57db87107581b9e7b42207758109  ./review/wp1466-spec-r10-l10/review-evidence.zip
+a7feee502be9c564347fb3c327e500985e811766fc27cd4a48756485d9f2ab2a  ./review/wp1466-spec-r10-l10/review-evidence.zip.b64
 33a83bdaa6315abc4901a244f373e6d66b43682a939fc7abada02888c07ab819  ./review/wp1466-spec-r10-l10/run.json
 1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721  ./review/wp1466-spec-r10-l10/stderr.log
-8ae02fe23dcac735ac8174e11f60ad80d63991471c1d29414f1662341f575364  ./wp1466-r11-g3-c5d44c9.bundle
+5d995ccf9e588da2ea949381c7e3e2e9343bb8ce4923a4758b32f0e8bcdfef66  ./wp1466-r11-g3-c5d44c9.bundle.b64

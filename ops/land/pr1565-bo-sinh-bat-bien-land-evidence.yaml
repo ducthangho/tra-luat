@@ -59,8 +59,9 @@ pre_merge_checks:
     nguon: [readback-runs-head-97ec968.json, readback-checkruns-head-97ec968.json]
     ghi_chu: >-
       measured — readback-runs-head-97ec968.json: ci.yml pull_request 45881667279 success, lease-pr 45881667277 success, thu-hoi
-      45881667207 va 45914278228 success, ops-open-pr 45880796264 skipped. readback-checkruns-head-97ec968.json: 38 check run, 36 success,
-      2 skipped, 0 failure.
+      45881667207 va 45914278228 success, ops-open-pr 45880796264 skipped. readback-checkruns-head-97ec968.json (doc 2026-11-27T01:2xZ,
+      sau merge): 39 check run, 37 success, 2 skipped, 0 failure. Check run them so voi luc kiem-merge la thu-hoi 140229637845 (success,
+      bat 00:01:21Z khi bo draft); kiem-merge/check-runs.json la anh chup TRUOC bo draft: 38 check run, 36 success, 2 skipped.
   - name: 'M9 full_mutant_audit tren head'
     sha: 97ec9686184fdf55dc1736007e6fdcb186122465
     conclusion: success

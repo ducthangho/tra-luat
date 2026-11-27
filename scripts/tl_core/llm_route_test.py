@@ -2438,7 +2438,10 @@ CA = [ca_r35_lop_loi, ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_
 DOT_BIEN = [
     ('wp1525_thu_hoi_khong_dong_ong', ('        buoc(f"dong ong {ten}", muc["ong"].close)', '        pass'), 'ca_r35_lop_loi'),
     # r45 (lượt 44): hợp đồng vòng đời bộ chạy extract — mỗi chốt một đột biến.
-    ('wp1525_so_ong_sau_popen', ('        so["out"]["ong"], so["err"]["ong"] = p.stdout, p.stderr', '        pass'), 'ca_r35_lop_loi'),
+    ('wp1525_so_ong_sau_popen', [('        so["out"]["ong"], so["err"]["ong"] = p.stdout, p.stderr', '        pass'),
+                                  ('        so[ten]["luong"] = threading.Thread(target=doc, args=(ten,), daemon=True, name=f"doc-{ten}")',
+                                   '        so[ten]["luong"] = threading.Thread(target=doc, args=(ten,), daemon=True, name=f"doc-{ten}")\n        so[ten]["ong"] = p.stdout if ten == "out" else p.stderr')],
+     'ca_r35_lop_loi'),
     ('wp1525_thu_hoi_dong_khi_reader_giu', ('            if not muc["xong"]:\n                bao_cao.append(f"luong doc {ten} con giu ong', '            if False:\n                bao_cao.append(f"luong doc {ten} con giu ong'), 'ca_r35_lop_loi'),
     ('wp1525_loi_doc_mat_cause', ('{type(loi[0]).__name__}: {loi[0]}") from loi[0]', '{type(loi[0]).__name__}") from None'), 'ca_r35_lop_loi'),
     ('wp1525_thu_hoi_nuot_loi', ('            bao_cao.append(f"{ten}: {type(e).__name__}")\n            return None', '            return None'), 'ca_r35_lop_loi'),

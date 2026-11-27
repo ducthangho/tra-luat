@@ -65,3 +65,5 @@ push_policy: 'ADR-0060 M5/M12: day nhanh thi cong MOT lan sau khi review offline
 start_from_sha: 9f0b0dd7ae4332e8e7b2dee3c32dccca6d554231
 start_from_note: 'H luot 2 cua g1, chi co cuc bo (chua push theo ADR-0060 M5). Thiet ke g2: POSIX os.execv sang bash; Windows subprocess; ca p1540 theo tieu chi qua wrapper = chay truc tiep.'
 p3_mien: 'a4-khai-sai-ve-giet-dot-bien: chu kho cho mien (ADR-0060 M1); comment mien ghi ho se neo SHA ung vien cuoi cua g2; dinh chinh vao ban ghi M8; no sua A4 o revision sau.'
+da_bi_thay_the: don-ref-test-vao-ci-r2-g3-claude
+da_bi_thay_the_ghi_chu: 'same_failure_limit (§12) cham lan hai trong g2; chu kho chon g3 (ghi ho issuecomment-7207415356).'

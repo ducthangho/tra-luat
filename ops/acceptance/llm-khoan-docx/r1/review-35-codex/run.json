@@ -1,0 +1,73 @@
+{
+  "version": "1.6.2",
+  "run_id": "db0f1b9b0b67455cbaea22514060f35d",
+  "short_id": "db0f1b9b",
+  "ten": "wp1525-r35-review-35-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "53424b7d9fdf96e1"
+  },
+  "trang_thai": "dang_chay",
+  "bat_dau_utc": "2026-11-26T15:33:24.331915+00:00",
+  "ket_thuc_utc": null,
+  "ma_thoat": null,
+  "ly_do_dung": null,
+  "pid": 20059,
+  "khoa_danh_tinh": "linux:1962922",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/a745ce50-1c6b-5672-94ea-c1fee1d128db/scratchpad/wp1525-r35/rv",
+  "head": "8b6782620a6a365d7e5c890481d19a0077609f2e",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "62e8c39cf114fe72a7a4e8d12511b53e61dfe3d5",
+    "7555af0cca8c0a403ec17aece820af28e1c311a0",
+    "66cfac97e69015d5eb89d0aeaf754a63db91ee35",
+    "7657ca0277ae4d96422e476192874faca7069a80",
+    "3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f",
+    "e7cb455319f9b650d3eff0551afe56c4974ea014"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "b1a683594c019e6db5a5ae6a65832c7f4e6779923ac9e3bdf55be3235eab1a9d",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "probe_da_chay": [
+    "ghi",
+    "spawn",
+    "workspace"
+  ],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "0e0c66f50074965a40cbd12f625b0a35963baf41bbd8c201a93e32fddbe2e073",
+  "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "thuc_thi_ly_do": null,
+  "thuc_thi_ung_vien_sau": [],
+  "agent_da_khai": "codex",
+  "agent_suy_ra": "codex",
+  "probe_bo_qua": [
+    "claude_trust"
+  ],
+  "chup_workspace": false,
+  "checkpoint_sha256": "b399986ed54fc52ad6b412cf6d38f370becf7eb754ac511d2e180ed084ff4e0f",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/a745ce50-1c6b-5672-94ea-c1fee1d128db/scratchpad/wp1525-r35/run/db0f1b9b/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown"
+}

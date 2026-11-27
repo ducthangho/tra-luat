@@ -1,3 +1,149 @@
+# ★ (chưa phát hành) — packet #1525 LLM-KHOAN-DOCX r1: ranh giới khoản từ cấu trúc danh sách .docx
+
+Đặc tả `ops/specs/llm-khoan-docx-r1.md`, lease `ops/leases/llm-khoan-docx-r1-g1-claude.yaml`. Không bump VERSION.
+- `tl llm-khai-niem --tep <tệp.docx> --dieu N`: ranh giới khoản đọc từ danh sách đánh số TỰ ĐỘNG (`w:numPr`) — khoản có
+  điểm đọc được mà không phải đoán; chữ gạch ngang của dự thảo bị lọc như `tl extract`; cấu trúc mơ hồ ⇒ rc 2; Điều không
+  có đánh số tự động ⇒ đường văn bản thô.
+- Đường văn bản thô chỉ nhận khoản đúng một dòng: dòng điểm hay tiếp dòng "là" ⇒ chặn ở mọi nguồn (đóng K1 của #1514).
+- `pham_vi_kiem` nói rõ nguồn ranh giới; `can_nguoi_duyet: true` giữ nguyên.
+- r2 (sau cross-review lượt 1, đặc tả `ops/specs/llm-khoan-docx-r2.md`): duyệt khối theo thứ tự tài liệu (sdt, bảng được đếm);
+  đánh số qua style được đếm; `lvlRestart`/`isLgl`/nhãn khoản khác `%N.` ⇒ chặn; từ nối chỉ dò ở đầu khoản; chữ gạch ngang còn sót
+  (tiền tố khác, theo style) và sửa đổi dấu đoạn ⇒ chặn; chỉ xác thực danh sách mà Điều dùng; điểm gõ tay dính thân được nhận.
+- r3 (sau cross-review lượt 2, đặc tả `ops/specs/llm-khoan-docx-r3.md`): danh sách CHO PHÉP phần tử trong đoạn/run (ký hiệu,
+  trường, hình ⇒ chặn; dấu nối không ngắt giữ); tiêu đề Điều phải đúng hình dạng; ngắt mềm/đoạn số rỗng/khối lạ ⇒ chặn; bảng
+  lồng đếm một lần; gạch đơn/kép tính riêng qua mọi tầng; đánh số qua style trong Điều ⇒ chặn.
+- r4 (sau cross-review lượt 3, đặc tả `ops/specs/llm-khoan-docx-r4.md`): chỉ cắt vùng tại Điều KẾ TIẾP; hàng/ô bọc wrapper
+  được đếm; nhãn chữ sau z kiểu Word; chốt dấu phân cách mơ hồ áp cho đường cấu trúc; gạch theo style là toggle (bảo thủ);
+  content control nội dòng đọc được.
+- r5 (sau cross-review lượt 4, đặc tả `ops/specs/llm-khoan-docx-r5.md`): Điều không đánh số tự động ⇒ dừng (bỏ lùi về đường
+  thô); danh sách khoản còn tiếp sau điểm cắt ⇒ chặn; lọc chữ gạch ngang/đã xoá theo CÂY XML (không qua regex); đánh số lại
+  sau ngắt section và .docx Strict ⇒ chặn có chẩn đoán.
+- r6 (sau cross-review lượt 5, đặc tả `ops/specs/llm-khoan-docx-r6.md`): tiêu đề ranh giới phải duy nhất và không kết `:`;
+  gạch toggle đếm theo tầng (nhiều tầng ⇒ chặn); hàng/ô bảng sửa đổi ⇒ chặn, `tcPr` hợp lệ; cấp danh sách ngoài 0–8 ⇒ chặn.
+- r7 (sau cross-review lượt 6, đặc tả `ops/specs/llm-khoan-docx-r7.md`): tệp `.docx` phải chỉ chứa ĐÚNG Điều cần đọc (bỏ mọi
+  luật đoán điểm kết thúc Điều); điểm phải đánh số tự động (điểm gõ tay ⇒ chặn); ID danh sách chuẩn hoá số; số thứ tự trên 999
+  ⇒ chặn; `ptab` đọc được; mốc phạm vi move phải cân.
+- r8 (sau cross-review lượt 7, đặc tả `ops/specs/llm-khoan-docx-r8.md`): ID danh sách phải là số nguyên; điểm nhảy cấp ⇒ chặn;
+  part numbering/styles theo `document.xml.rels`; ngắt trang/cột được nhận; tiêu đề viết hoa được nhận.
+- r9 (sau cross-review lượt 8, đặc tả `ops/specs/llm-khoan-docx-r9.md`): part chính theo `_rels/.rels`; tiêu đề Điều viết hoa trong
+  vùng ⇒ chặn; ngắt trang có chữ sau ⇒ chặn; numId lỗi qua style ⇒ chặn.
+- r10 (sau cross-review lượt 9, đặc tả `ops/specs/llm-khoan-docx-r10.md`): style mang `ilvl` cũng là đánh số qua style;
+  `mc:AlternateContent` trong định dạng ⇒ chặn; `lvlText` có chữ ⇒ chặn; chữ gạch sau ngắt trang không còn làm chặn oan.
+- r11 (sau cross-review lượt 10, đặc tả `ops/specs/llm-khoan-docx-r11.md`): phần tử `mc:` ở bất kỳ part nào ⇒ chặn; tiêu đề
+  `Phần thứ …` nhận diện được; `lvlText` theo danh sách cho phép toàn chuỗi.
+- r12 (sau cross-review lượt 11, đặc tả `ops/specs/llm-khoan-docx-r12.md`): quan hệ OOXML so URI đầy đủ; tiêu đề Điều thiếu dấu
+  ⇒ chặn; số thứ tự chữ/La Mã chặt hơn (không nuốt thuật ngữ); giá trị số thiếu ⇒ lỗi có kiểm soát; part chính đọc theo mã hoá khai.
+- r13 (sau cross-review lượt 12, đặc tả `ops/specs/llm-khoan-docx-r13.md`): tiêu đề Điều thiếu dấu xét riêng tiền tố và dấu câu CUỐI
+  (dấu câu giữa tên không còn lọt); `ilvl`/mốc move thiếu giá trị ⇒ lỗi có kiểm soát (rc 2) thay vì `TypeError`.
+- r14 (sau cross-review lượt 13, đặc tả `ops/specs/llm-khoan-docx-r14.md`): đổi sang CẤM TIỀN TỐ — mọi đoạn trong thân mở bằng
+  `Điều <số>` ⇒ chặn (kể cả dẫn chiếu đầu đoạn); ID danh sách chuẩn hoá bằng chuỗi (ID quá dài ở định nghĩa không dùng không còn
+  làm hỏng lần đọc); khối/wrapper ngoài namespace Word ⇒ khối lạ.
+- r15 (sau cross-review lượt 14, đặc tả `ops/specs/llm-khoan-docx-r15.md`): một bản chiếu ký tự cho mọi tiền tố cấu trúc (NFC, bỏ
+  ký tự định dạng vô hình, ký tự không phải chữ/số thành khoảng trắng) — ký tự vô hình và gạch dưới không còn che tiêu đề hay số
+  gõ tay; hướng dẫn bỏ lời khuyên sửa câu chữ nguồn để lách chốt.
+- r16 (sau cross-review lượt 15, đặc tả `ops/specs/llm-khoan-docx-r16.md`): đổi từ chuẩn hoá sang TỪ CHỐI — chữ của Điều (.docx và
+  văn bản thô) có ký tự vô hình, dấu tổ hợp lạ, bộ chọn biến thể hay không ở dạng NFC ⇒ dừng; số gõ tay `(1)` dính thân chữ số ⇒ chặn.
+- r17 (sau cross-review lượt 16, đặc tả `ops/specs/llm-khoan-docx-r17.md`): đảo danh sách cấm nhóm Unicode thành DANH SÁCH CHO PHÉP
+  ký tự, kiểm trên chữ gốc trước khi tách dòng / gộp khoảng trắng; đúng một BOM; khoảng trắng trong `lvlText` chỉ là dấu cách.
+- r18 (sau cross-review lượt 17, đặc tả `ops/specs/llm-khoan-docx-r18.md`): số mũ `¹²³` tính là chữ số ở mọi chốt cú pháp; CLI
+  `--tep` giải mã `utf-8` thường (một tầng gỡ BOM) và chặn ký tự ngoài danh sách TRƯỚC khi gọi model (rc 2); đường `<số hiệu>` chỉ
+  bỏ phần bao của `tl extract`.
+- r19 (sau cross-review lượt 18, đặc tả `ops/specs/llm-khoan-docx-r19.md`): bỏ số mũ `¹²³` khỏi danh sách cho phép (mọi chữ số tới
+  chốt là ASCII); khai giới hạn đường `<số hiệu>`: ký tự bộ đọc `tl extract` đã xoá/thay trước khi lưu cache không tới được chốt.
+- r20 (sau cross-review lượt 19, đặc tả `ops/specs/llm-khoan-docx-r20.md`): đường `<số hiệu>` chạy `tl extract --markup-strict`;
+  đánh số ở mặc định đoạn `.docx` ⇒ chặn; nhãn điểm `a.` / `(a)` trên nguồn thô ⇒ chặn; khai giới hạn bộ cắt Điều của `tl extract`
+  (dòng dẫn chiếu đầu dòng làm mất khoản cuối) theo quyết định chủ kho.
+- r21 (sau cross-review lượt 20, đặc tả `ops/specs/llm-khoan-docx-r21.md`): run gạch / `w:del` chỉ có khoảng trắng giữ khoảng trắng
+  (chính sách r222); nhãn điểm thô gồm chữ hoa và chữ lặp; cấp / `lvlOverride` trùng trong danh sách đang dùng ⇒ chặn; khai giới
+  hạn bộ lọc markup và bộ chuyển chữ của `tl extract` (theo quyết định chủ kho); thông báo trần CAP chỉ đường `.docx`.
+- r22 (sau cross-review lượt 21, đặc tả `ops/specs/llm-khoan-docx-r22.md`): tab/ngắt trong nội dung bị bỏ và `delText` lạc chỉ có
+  khoảng trắng giữ phân cách; trường đơn trị khai nhiều lần ⇒ chặn; nhãn điểm thô `a-` / `A –` ⇒ chặn.
+- r23 (sau cross-review lượt 22, đặc tả `ops/specs/llm-khoan-docx-r23.md`): một phép đọc ruột cho mọi nội dung bị bỏ; `body`/`sdtContent`
+  /`styleId` đơn trị, `w:sdt` thiếu nội dung hay có con lạ ⇒ chặn; ngữ pháp nhãn điểm thô có khoảng đệm và nhãn thập phân nhiều cấp.
+- r24 (sau cross-review lượt 23, đặc tả `ops/specs/llm-khoan-docx-r24.md`): ruột bị bỏ đọc theo danh sách cho phép (ký hiệu là nội
+  dung); member ZIP trùng tên ⇒ chặn; nhãn thập phân nhiều cấp trong ngoặc / dính thân ⇒ chặn.
+- r25 (sau cross-review lượt 24, đặc tả `ops/specs/llm-khoan-docx-r25.md`): khoảng trắng biên của `w:t`/`w:delText` theo `xml:space`
+  hiệu lực (quy tắc Word); nhãn thập phân nhiều cấp kết bằng gạch ⇒ chặn.
+- r26 (sau cross-review lượt 25 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r26.md`): miền nhãn điểm thô = miền nhãn dựng từ `lvlText`;
+  ngắt trong run gạch bị bỏ không còn làm cả Điều bị từ chối; khoá thêm ca `xml:space`.
+- r27 (sau cross-review lượt 26 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r27.md`): dòng mở bằng số nhiều cấp ⇒ chặn trước nhánh số
+  khoản; ký hiệu trong run gạch bị bỏ không còn làm cả Điều bị từ chối.
+- r28 (sau cross-review lượt 27 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r28.md`): một ngữ pháp nhãn nhiều thành phần (số–số,
+  số–chữ, chữ–số, nhiều dấu nối) xét trước mọi cửa nhận số đơn.
+- r29 (sau cross-review lượt 28 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r29.md`): nhãn có dấu đứng ĐẦU (`.1.1.`, `.a`, `(.a)`) ⇒ chặn.
+- r30 (sau cross-review lượt 29, đặc tả `ops/specs/llm-khoan-docx-r30.md`): `pStyle` trỏ style không có ⇒ chặn; nhãn một placeholder
+  nhiều dấu (`1..`, `a).`) ⇒ chặn trước nhánh số khoản.
+- r31 (sau cross-review lượt 30, đặc tả `ops/specs/llm-khoan-docx-r31.md`): style phân giải theo loại (`pStyle`/`rStyle` sai loại,
+  `basedOn` đổi loại ⇒ chặn); nhãn `1.a …` ⇒ chặn, khoản `1. (…) là …` không còn bị chặn oan.
+- r32 (sau cross-review lượt 31, đặc tả `ops/specs/llm-khoan-docx-r32.md`): style mặc định không khai `w:type` được nhận đúng; nhãn
+  `2 .a …` ⇒ chặn; styleId trùng khoá nội bộ ⇒ chặn có chẩn đoán.
+- r33 (sau cross-review lượt 32 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r33.md`): tra cứu style chỉ trên ID đã xác thực (không
+  traceback với tham chiếu tới khoá nội bộ); nhãn `1.ab.` ⇒ chặn.
+- r34 (sau cross-review lượt 33 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r34.md`): một nhánh "số + dải chữ + dấu kết" thời gian tuyến
+  tính (bỏ lặp lồng nhau gây backtracking); `1. e-mail là …` không còn bị chặn oan.
+- r35 (sau cross-review lượt 34 theo LỚP, đặc tả `ops/specs/llm-khoan-docx-r35.md`): một bộ quét nhãn đầu dòng chung cho nguồn có số
+  và mất số (thân số khoản mở bằng nhãn ⇒ chặn; `1. Tp. Hồ Chí Minh là …` nay đọc được); ngân sách đọc nguồn (văn bản thô, số khoản,
+  độ sâu XML, độ dài nhãn, tổng chữ) — vượt ⇒ dừng có kiểm soát, CLI dừng trước model; kiểm ký tự gốc trên mọi đoạn `.docx` kể cả
+  đoạn trắng trước tiêu đề.
+- r36 (Review Rescue §12 sau lượt 35, đặc tả `ops/specs/llm-khoan-docx-r36.md`): đường thô đổi sang DANH SÁCH CHO PHÉP đầu dòng
+  (số khoản + từ có dấu tiếng Việt hoặc từ ASCII đứng trước từ khác) thay cho danh sách cấm nhãn — `Tp.`, `e-mail`, `A1` nay bị chặn
+  có chủ đích; đọc `--tep` có giới hạn byte; số đầu dòng quá 4 chữ số dừng trước model; XML đếm độ sâu và số nút ngay khi parse.
+- r37 (sau cross-review lượt 36 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r37.md`): khai giới hạn nhãn điểm số trùng số khoản trên
+  văn bản thô (chủ kho quyết) và ghi vào `pham_vi_kiem`; `Đa dạng …` được nhận; tiền kiểm cùng quy tắc dòng/BOM; trần byte và số
+  member của gói `.docx`; phân giải style có nhớ; số thứ tự âm bị chặn; ngân sách nhãn và tổng chữ trừ dần.
+- r38 (sau cross-review lượt 37 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r38.md`): danh sách cho phép đòi từ đầu là TỪ TRỌN —
+  nhãn điểm gõ tay `đ)`, `(đ)` bị chặn; `tl extract` đọc có trần và bị dừng khi vượt; gói `.docx` đếm entry trước khi mở ZIP; số
+  thứ tự âm bị chặn ở mọi kiểu cấp.
+- r39 (sau cross-review lượt 38 APPROVE, đặc tả `ops/specs/llm-khoan-docx-r39.md`): đường thô TỪ CHỐI cả Điều khi phần mở đầu
+  khoản có hình dạng nhãn điểm nhiều vế (chủ kho quyết thu hẹp miền), hai phía miền ghi trong `pham_vi_kiem`; gói `.docx` đếm số entry thật trước khi mở ZIP; bộ chạy `tl extract` có
+  hạn chót tới khi tiến trình kết thúc và báo lỗi đọc.
+- r40 (sau review offline lượt 39, đặc tả `ops/specs/llm-khoan-docx-r40.md`): đường thô chặn mọi mở đầu dạng nhãn nhiều vế (mọi số
+  vế, gạch dài, `là` trong ngoặc không thoát); locator ZIP64 kiểm ở vị trí tuyệt đối; bộ chạy `tl extract` một hạn chót, qua hạn
+  không nhận; hướng dẫn tách quy tắc `pStyle`/`rStyle`/`basedOn`.
+- r41 (sau review offline lượt 40, đặc tả `ops/specs/llm-khoan-docx-r41.md`): đường thô quét TOÀN phần đầu khoản (tới từ nối "là")
+  để chặn nhãn nhiều vế kể cả khi bọc nháy/ngoặc; lỗi mở ZIP quy về rc 2; `tl extract` quá hạn thu hồi cả nhóm tiến trình (POSIX).
+- r42 (sau review offline lượt 41, đặc tả `ops/specs/llm-khoan-docx-r42.md`): đường thô dùng MỘT máy trạng thái ngoặc/nháy và MỘT
+  từ nối cho cả chốt đầu dòng lẫn phép so; lỗi đọc member ZIP (LZMA hỏng) quy về rc 2; mọi lối thoát bất thường của `tl extract`
+  đều thu hồi tiến trình.
+- r43 (sau review offline lượt 42, đặc tả `ops/specs/llm-khoan-docx-r43.md`): một bộ chuyển trạng thái ngoặc/nháy dùng chung cho mọi
+  chốt đường thô; gói `.docx` chỉ nhận nén stored/deflate, không mã hoá (kiểm trước khi mở); `tl extract` thu hồi đúng và giữ lỗi gốc.
+- r44 (sau review offline lượt 43, đặc tả `ops/specs/llm-khoan-docx-r44.md`): `tl extract` lỗi vận hành (khởi động luồng, chờ tiến
+  trình) trả rc 2 kèm báo cáo thu hồi; chỉ đóng ống khi không luồng nào còn giữ.
+- r45 (sau review offline lượt 44, đặc tả `ops/specs/llm-khoan-docx-r45.md`): bộ chạy `tl extract` theo một hợp đồng vòng đời —
+  ống ghi sổ ngay sau khi chạy tiến trình, luồng đọc và bước thu hồi giành quyền dùng ống qua một khoá; lỗi đọc giữ nguyên văn.
+- r46 (sau review offline lượt 45, đặc tả `ops/specs/llm-khoan-docx-r46.md`): lớp vòng đời bộ chạy `tl extract` chuyển sang
+  packet kế nhiệm #1571 kèm miễn trừ chủ kho, runner giữ nguyên; sửa mô tả đầu dòng thô và bộ duyệt bảng `.docx`;
+  hồ sơ lượt 44 ghim liên kết vào blob tại SHA đã review.
+
+# ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
+
+Đặc tả `ops/specs/llm-ranh-gioi-khoan-r1.md`, lease `ops/leases/llm-ranh-gioi-khoan-r1-g1-claude.yaml`. Không bump VERSION.
+- `_dong_mo_ho`: dòng có từ 3 dấu `"` trở lên ⇒ nguồn mơ hồ (X2: hai tầng trích dẫn bị làm phẳng).
+- `tach_khoan`: mỗi khoản phải kết thúc bằng dấu câu kết `.` `;` `!` `?` — `:` không kết câu (X3b dòng gãy ở nguồn mất
+  số; X3c tiểu mục đánh số sau `:` hoặc sau khoản chưa kết câu).
+- Câu dẫn chỉ được bỏ khi khớp `… được hiểu/được giải thích như sau:` (X3).
+- `_gon` gộp khoảng trắng TRONG dòng, giữ ranh giới dòng (X4: định nghĩa dồn các dòng điểm thành một dòng nay lệch).
+- `can_nguoi_duyet: true` giữ nguyên.
+- r2 (sau cross-review lượt 2, đặc tả `ops/specs/llm-ranh-gioi-khoan-r2.md`): `;` không kết khoản (A2a); thân khoản có
+  đánh số nội dòng ⇒ mơ hồ (A2b); tiêu đề Điều có chữ "là" ⇒ mơ hồ (A2c). Cùng lượt: câu dẫn có từ nối không bị bỏ
+  (A1); bỏ cả dải đuôi khoảng trắng + dấu đóng khi xét kết câu (A3); test Điều 3 THẬT 8 khoản + ba kết quả đã lưu (A4).
+- r3 (sau cross-review lượt 3, đặc tả `ops/specs/llm-ranh-gioi-khoan-r3.md`): dòng tiêu đề chỉ được bỏ khi cả dòng đúng hình
+  dạng `Điều N.` / `Điều N. Giải thích từ ngữ` — danh sách cho phép thay cho dò chữ "là" (C1); chốt đánh số nội dòng chỉ xét trong
+  một dòng (C2).
+- r4 (sau cross-review lượt 4 + đo Windows, đặc tả `ops/specs/llm-ranh-gioi-khoan-r4.md`): chốt đánh số nội dòng nhận mọi
+  khoảng trắng trừ xuống dòng, gồm U+00A0 (D1); chỉ câu dẫn ở dòng đầu được bỏ (D3); khai giới hạn tiêu đề viết HOA / tên xuống
+  dòng (D2); selftest `r380_llm_khai_niem_bien_dau_vao` chỉ kiểm giữ quyền 0644 trên POSIX (đỏ trên Windows bản địa, run 45542712141).
+- r5 (sau cross-review lượt 5, đặc tả `ops/specs/llm-ranh-gioi-khoan-r5.md`): chốt đánh số nội dòng nhận cả dấu số dính
+  thân `… 2.Abc` như bộ nhận số đầu dòng (E1); câu dẫn phải có đúng một dấu `:` và không có chữ "là" ở bất kỳ đâu (E2).
+- r6 (sau cross-review lượt 6, đặc tả `ops/specs/llm-ranh-gioi-khoan-r6.md`): đổi sang DANH SÁCH CHO PHÉP — câu dẫn chỉ được
+  bỏ khi CẢ dòng đúng câu dẫn chuẩn (F2); chốt đánh số nội dòng phủ trọn cú pháp số đầu dòng, gồm `1 .` và `1."` (F1).
+- r7 (sau cross-review lượt 7, đặc tả `ops/specs/llm-ranh-gioi-khoan-r7.md`): nguồn mất số có dòng đầu kết `:` mà không phải câu
+  dẫn chuẩn ⇒ chặn cả nguồn, không gom các dòng điểm vào nó (G1).
+- r8 (sau cross-review lượt 8, đặc tả `ops/specs/llm-ranh-gioi-khoan-r8.md`): thay chốt theo dấu `:` của r7 bằng chốt VAI TRÒ —
+  nguồn mất số không có câu dẫn chuẩn mà dòng đầu có dòng điểm nối vào ⇒ chặn, bất kể dấu kết dòng (H1: `：` U+FF1A lọt chốt r7).
+- r9 (sau cross-review lượt 9, đặc tả `ops/specs/llm-ranh-gioi-khoan-r9.md`): nguồn mất số có BẤT KỲ dòng điểm nào ⇒ chặn — lời dẫn
+  nhóm và khoản có điểm cùng hình dạng trong văn bản thô (J1); khoản có điểm cần nguồn có số khoản.
+
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 
 Chủ kho cần chạy tác vụ trích xuất bằng Claude ngay trong skill (cả Cowork), dùng subscription hoặc API key

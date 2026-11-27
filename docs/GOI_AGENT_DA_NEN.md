@@ -369,16 +369,67 @@ biến môi trường của environment.
   nghĩa khớp nguyên văn TỪNG KHOẢN theo phân đoạn của bộ quét; ranh giới khoản tách từ văn bản THÔ thì không chứng
   minh được — 11 lượt cross-review (PR #1503) lượt nào cũng tìm ra một cách phân đoạn sai mới. Kết quả luôn mang
   `"can_nguoi_duyet": true` kèm `pham_vi_kiem`; người dùng phải duyệt số khoản và ranh giới trước khi dùng. Các lỗ
-  đã biết mà chưa vá (trích dẫn hai tầng bị làm phẳng thành `"`, khoản dài ngắt dòng trước một mệnh đề có "là" ở
-  nguồn mất số, tiểu mục đánh số trùng số khoản kế tiếp, xuống dòng của điểm bị gộp khi so) ghi nợ ở issue riêng.
-- **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
-  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
-  thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản. Nguồn có BẤT KỲ dòng nào mà
+  đã biết của #1512 được chặn bảo thủ ở packet #1514 (xem gạch dưới); cờ `can_nguoi_duyet` vẫn giữ.
+- **Kiểm nguyên văn là fail-closed; đường văn bản THÔ chỉ nhận khoản ĐÚNG MỘT DÒNG** (#1525; không đoán theo chữ
+  "là"): nguồn có số thì mỗi khoản là một dòng mang số, số liên tục từ 1; nguồn mất số (Google Doc) thì mỗi dòng là
+  một khoản. Dòng điểm (`a)`, `-`) hay dòng tiếp mở bằng "là" ⇒ chặn — khoản có điểm đi đường `.docx` (gạch dưới). Nguồn có BẤT KỲ dòng nào mà
   ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
   kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
-  nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Packet #1514 thêm: dòng có từ 3 dấu `"`
+  trở lên; khoản không kết thúc bằng `.` `!` `?` (`;` và `:` không kết khoản); thân khoản có đánh số nội dòng
+  (`… 1. …`, `… (2) …`, `… 1.chữ`, `… 1 .`, `… 1."…`: mọi dạng số theo sau bởi ký tự khác chữ số, trong phạm vi một dòng —
+  kể cả mã biểu mẫu kiểu `… 2.A …`); dòng tiêu đề Điều có phần dư ngoài `Điều N.` / `Điều N. Giải thích
+  từ ngữ` (tiêu đề tên khác, tiền tố viết HOA `ĐIỀU 3.`, hay tên xuống dòng riêng đều bị chặn); câu dẫn chỉ được bỏ khi
+  nằm ở dòng ĐẦU và CẢ dòng đúng câu dẫn chuẩn `Trong|Tại <Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư
+  liên tịch|Quyết định> này, <các|những> <từ ngữ|thuật ngữ> <dưới đây|sau đây> được <hiểu|giải thích> như sau:` (phân biệt hoa
+  thường; câu dẫn khác — vd thiếu `Trong … này,` — ⇒ nguồn bị chặn; đường văn bản THÔ có BẤT KỲ dòng điểm nào (`a)`, `-`)
+  hay dòng tiếp mở bằng "là" ⇒ chặn cả nguồn — mỗi khoản phải đúng một dòng (#1525); khoản có điểm đi đường `.docx`); phép so giữ nguyên xuống dòng của
+  các điểm. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
-  (`--tep`) hoặc dựng `tl cache-build` trước.
+  (`--tep`), tốt nhất là tệp `.docx` của riêng Điều.
+- **Đường `.docx` (#1525):** `tl llm-khai-niem --tep <tệp.docx> --dieu N` đọc ranh giới khoản từ danh sách đánh số TỰ
+  ĐỘNG của Word/Google Doc (`w:numPr`). **Tệp phải chỉ chứa ĐÚNG Điều cần đọc**: đoạn có nội dung đầu tiên là tiêu đề
+  `Điều N.` / `Điều N. Giải thích từ ngữ`, mọi đoạn sau thuộc Điều ấy (chép Điều sang một Google Doc/.docx riêng rồi tải
+  về). Đoạn cấp khoản (`%N.`/`%N)`, định dạng `decimal`) mở khoản; điểm phải là cấp con TỰ ĐỘNG cùng danh sách (điểm gõ
+  tay `a)`, `-` bị chặn). Chữ gạch ngang hiệu lực (đơn/kép, trực tiếp hay theo style; gạch theo style là bật/tắt — bật ở
+  một tầng ⇒ gạch, nhiều tầng ⇒ không giải được ⇒ chặn) và chữ đã xoá/đã chuyển đi bị LỌC khỏi nguyên văn. Chặn (rc 2):
+  nội dung trước tiêu đề hay thêm tiêu đề Điều/Chương/Mục/Phần trong tệp, Điều không có đánh số tự động (dùng `--tep`
+  tệp văn bản), đoạn không số sau khoản đầu, hai danh sách ở cấp khoản, số khoản không liên tục từ 1, số gõ tay lẫn số
+  tự động, đánh số qua style (kể cả style chỉ mang `ilvl`), nhãn cấp (`lvlText`, trừ định dạng `bullet` luôn thành `-`) ngoài
+  `%N` + dấu `.` `)` `(` `-` `–` + khoảng trắng, phần tử tương thích `mc:` ở bất kỳ đâu, MỌI đoạn trong thân mở bằng
+  `Điều <số>` (mọi hình dạng: `Điều 4 Phạm vi`, `Điều4`, `Điều 4_…`, sau nháy/ký hiệu đầu đoạn — kể cả điểm/khoản MỞ BẰNG dẫn
+  chiếu `Điều 5 của Luật này;` — KHÔNG sửa câu chữ văn bản nguồn để lách chốt (nguyên văn phải đúng bản đã ban hành): Điều có
+  điểm/khoản như vậy phải tách khái niệm thủ công), khối/wrapper ngoài namespace Word, chữ có ký tự NGOÀI danh
+  sách cho phép — ASCII in được, chữ tiếng Việt dựng sẵn, chữ Latin-1, NBSP, tab và các dấu `“ ” ‘ ’ – — … « » § ° ± × ÷ ≤ ≥ € ₫ ‰
+  • · №` (ký tự vô hình, dấu tổ hợp tách rời, số mũ như `m²`, chữ Hán/Nga, ký hiệu toán khác… đều bị chặn; áp cả cho văn bản thô `--tep` /
+  `<số hiệu>`, kiểm trước khi tách dòng), số gõ tay dạng `(1)` dính thân, thuộc tính cấp (`ilvl`) thiếu giá trị, `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style/`numStyleLink`/
+  `styleLink`/đánh số lại sau ngắt section, cấp danh sách ngoài 0–8, điểm nhảy cấp (cấp trên chưa có mục), ID danh sách
+  không phải số nguyên, số thứ tự trên 999, định dạng số ngoài
+  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, bảng/khối lạ, ngắt dòng mềm (ngắt trang/cột
+  được nhận khi đứng CUỐI đoạn), part chính/numbering/styles khai sai trong tệp quan hệ,
+  ký hiệu/trường/hình/chú thích, dấu ngoặc/trích dẫn ngoài `(` `)` `“` `”` `"`, sửa đổi dấu đoạn, mốc phạm vi move
+  không cân, `.docx` Strict (lưu lại dạng Word Document). Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft
+  Word. Đánh số khai ở mặc định đoạn (`docDefaults/pPrDefault/numPr`) cũng bị chặn. Đường `<số hiệu>` (qua `tl extract`) vẫn
+  là văn bản thô (GIỚI HẠN ĐÃ KHAI theo quyết định chủ kho), chạy `tl extract --markup-strict` (nguồn dự thảo chưa chứng minh được đã lọc chữ gạch bỏ ⇒ rc 2, kể cả nguồn
+  chỉ đọc được qua text/plain), và có GIỚI HẠN ĐÃ KHAI: bộ cắt Điều của `tl extract` dừng ở dòng đầu tiên mở bằng `Điều <số>`
+  — một dòng dẫn chiếu như vậy làm MẤT các khoản phía sau mà phép so không thấy; ký tự điều khiển bộ đọc đã xoá trước khi lưu
+  cache cũng không tới được chốt; bộ lọc markup của `tl extract` chỉ xét gạch TRỰC TIẾP trên run (chữ gạch qua style có thể còn
+  trong văn bản dù `--markup-strict` cho qua) và chặn cả bản export sạch không có dấu sửa; bộ chuyển XML→chữ của nó có thể bỏ
+  `w:tab`/`w:br`. Cần ranh giới và nguyên văn chắc chắn thì dùng `--tep <tệp .docx>`. Từ r36 (danh sách CHO PHÉP) đường thô chỉ nhận dòng mà đầu dòng là: số khoản `N.` / `N)` / `(N)` (tối đa 4 chữ số, có thể không
+  có), một dấu mở `“` `"` `(` tuỳ chọn (`‘` qua bước đầu dòng nhưng nguồn có `‘`/`’` vẫn bị từ chối CẢ nguồn ở chốt ngoặc/trích dẫn phía trên), rồi một TỪ TRỌN đứng trước một từ khác hoặc chữ số — từ có chữ mang dấu tiếng Việt (`Hồ sơ`, `Dữ liệu`) hoặc từ
+  ASCII dài ≥ 2 và không phải một chữ lặp (`Quy trình`, `Ban hành`; `aa …`, `BB …` là nhãn Word sau `z` nên bị chặn); nhãn điểm gõ tay như `đ)`, `(đ)`, `đ.` vì thế bị chặn. Mọi đầu dòng khác — `Tp. …`, `e-mail …`, `A1 …`, `1. A là …`, `ASEAN (…)`, chữ số, ký
+  hiệu, dấu đầu dòng, mọi nhãn điểm — chặn CẢ nguồn: dùng `--tep <tệp .docx>`. Nhãn dính thân không có dấu phân biệt (`aHồ…`) và nhãn
+  chỉ ngăn bằng khoảng trắng (`ab Hồ …`) không phân biệt được với thân — thuộc bước duyệt ranh giới. Điểm đánh số dạng `N.` / `N)` / `(N)` trùng hình
+  dạng số khoản: nếu dãy số sau khi mất cấp vẫn liên tục từ 1, một điểm có thể bị nhận thành khoản riêng — `pham_vi_kiem` của
+  đường thô nêu rõ điều này; cần ranh giới chắc chắn thì dùng `--tep <tệp .docx>`. Dòng mà phần mở đầu có hình dạng nhãn điểm nhiều vế
+  (`ab c. …`, `Ban a) …`, `(Hồ sơ) là …`, kể cả nhãn bọc nháy/ngoặc như `“ab c”. …`, `ab (c). …` — xét trên toàn phần
+  trước từ nối "là") làm đường thô TỪ CHỐI cả Điều — dùng `.docx` có cấp danh sách; cụm từ đứng trước "là"
+  (`Hồ sơ là …`) vẫn được nhận; mở đầu dạng `… - …` (`kinh tế - xã hội …`) cũng bị chặn. Ngân sách đọc: văn bản thô quá
+  400 000 ký tự (tệp quá 1 600 000 byte không được đọc), hay số đầu dòng quá 4 chữ số, hay `tl extract` in quá 1 600 000 byte ⇒ dừng trước model (rc 2); `.docx` có cây XML sâu quá 128 tầng hay quá 2 000 000 nút, gói quá 64 MiB hay quá 2000 member, số thứ tự âm, gói ZIP dùng kiểu nén ngoài stored/deflate (chuẩn Word/Google Docs) hay member mã hoá, nhãn mở rộng dài quá 64
+  ký tự, hay Điều dựng ra quá 400 000 ký tự ⇒ chặn — Điều dài hơn thì đọc thủ công. `.docx` khai một trường đơn trị nhiều lần
+  (hai `numPr`, hai `start`, hai `basedOn`, hai `body`/`sdtContent`, hai style cùng `styleId`…) hay gói ZIP có member trùng tên, ⇒ chặn. Tham chiếu style: `pStyle` trỏ style KHÔNG CÓ hoặc khác loại paragraph ⇒ chặn; `rStyle` trỏ style khác loại
+  character ⇒ chặn, còn `rStyle` trỏ style không có thì Word bỏ qua và bộ đọc cũng bỏ qua; chuỗi `basedOn` gặp ID không có thì
+  dừng ở đó, nối hai style khác loại thì chặn.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

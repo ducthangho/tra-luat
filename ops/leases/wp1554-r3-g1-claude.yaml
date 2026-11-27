@@ -1,0 +1,72 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1554
+packet_id: wp1554
+spec_packet_id: CI-DUONG-NHANH-TEST-WINDOWS
+mission_issue: 1236
+revision: 3
+generation: 1
+lease_id: wp1554-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+environment_ghi_chu: 'mã + gate Linux trong container cloud; đo ADR-0060 M3 trên Windows local DESKTOP-T9R33P2 qua Desktop Commander theo ADR-0057/0058/0059.'
+windows: required
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1554-r3.md
+spec_ref: 'ops/wp1554-spec @ 4ef9ac3b61c404730e7bfc39544e7f8e207f3521, blob 32003b3d5f353542fa9f81ac976e238c600d90d4'
+spec_hash: 188d4eb85d9de7a81b890a655da30e8ab2c5cd120002bb40fa993519b55b6de1
+spec_sha256_required: 188d4eb85d9de7a81b890a655da30e8ab2c5cd120002bb40fa993519b55b6de1
+spec_duyet: 'chủ kho trả lời "Tôi đồng ý duyệt băm của đặc tả r3: 188d4eb85d9de7a81b890a655da30e8ab2c5cd120002bb40fa993519b55b6de1" trong chat phiên session_015Gtxra5FakNRRqyfJZHg8X, 27-11-2026 ~01:35Z, sau đề xuất băm https://github.com/ducthangho/tra-luat/issues/1554#issuecomment-7207399947.'
+write_set:
+- ops/ci_duong_nhanh_test.py
+- ops/leases/wp1554-r3-g1-claude.yaml
+write_set_hash: 4243471b801198734af7e7f07782339a567f2c915e1a2143761999e7f47cbfa0
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+effective_write_set_ghi_chu: 'đặc tả khai một tệp mã; tệp lease là sổ sách của chính lease (ADR-0062 N4).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-27T01:34:05Z'
+  goc_quet: 'git fetch đủ refs/heads/* (không shallow); ls-remote / for-each-ref 381/381, thiếu 0, thừa 0; python3 ops/lease_publish.py ai-dang-giu ops/ci_duong_nhanh_test.py'
+  ket_qua: 'rc 11, NGƯỜI_GIỮ 1: wp1554-r2-g1-claude — chính lease r2 của packet này, được thay bằng lease này (bia mộ hai chiều).'
+branch: claude/wp1554-ci-duong-nhanh-windows
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: b1db69429d272cfde43681b4a9de1184c452c0f1
+start_from_sha: b1db69429d272cfde43681b4a9de1184c452c0f1
+reviewed_sha_required: b1db69429d272cfde43681b4a9de1184c452c0f1
+reviewed_sha_required_nghia: 'Chưa có head ứng viên đã push; mọi verdict neo exact head THẬT. Ứng viên cục bộ chưa push lúc cấp: 7ddbe5137e4023cf00611a5bee82e91a2ac5b52c (đã bỏ đồ giả theo phương án (C)).'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1554
+granted_on_instruction_readback: 'chủ kho 27-11: "Chọn theo khuyến nghị" (checkpoint E1 → (C)), "Các câu Q1-Q8: theo khuyến nghị", rồi "Tôi đồng ý duyệt băm của đặc tả r3: 188d4eb8…".'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa ngoài write set (packet_loop_test*.py, ci_duong_nhanh.py, ci.yml).'
+recorded_by: 'phiên session_015Gtxra5FakNRRqyfJZHg8X'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này ghi lease và thi công theo chỉ thị trực tiếp của chủ kho trong chat; lease KHÔNG tự cấp.'
+thay_the_cho: [wp1554-r2-g1-claude]
+thay_the_cho_ghi_chu: 'lease r2 còn hạn (tới 2026-11-27T02:02:30Z) nên thu hồi bằng bia mộ hai chiều: tệp r2 mang da_bi_thay_the: wp1554-r3-g1-claude. Revision mới theo §3.2 vì checkpoint E1 (lớp ca-gia-dinh-so-ca-va-carrier-cua-nen-linux tái diễn lượt review thứ ba, run 06afb1a3), chủ kho chọn (C). Lease r1 đã bị thay ở r2.'
+leased_at_utc: '2026-11-27T01:36:17Z'
+heartbeat_at: '2026-11-27T01:36:17Z'
+lease_until: '2026-11-27T09:36:17Z'
+lease_expires_at_utc: '2026-11-27T09:36:17Z'
+lease_until_ghi_chu: '8h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 3, reserved: 2, limit: 10}
+budget_ghi_chu: 'trần 10 theo dòng khai ADR-0055 hợp lệ (r3 giữ nguyên dòng khai); đã dùng 3 lời gọi (review offline lượt 1–3: run 43674ea3, 32262a61, 06afb1a3), mang sang theo §3.2/§12; reserved 2 theo ADR-0041. Trần vòng 10 theo ADR-0048.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; packet chạm E5 (khai fail-closed) nên merge cần chủ kho audit đúng head.'

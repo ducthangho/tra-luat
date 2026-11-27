@@ -70,3 +70,5 @@ budget_ghi_chu: 'trần 10 theo dòng khai ADR-0055 hợp lệ của đặc tả
 requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; packet chạm E5 (khai fail-closed) nên merge cần chủ kho audit đúng head.'
+da_bi_thay_the: wp1554-r3-g1-claude
+da_bi_thay_the_ghi_chu: 'revision 3 theo §3.2 (checkpoint E1, phương án (C)); chủ kho duyệt băm r3 188d4eb8… lúc ~01:35Z 27-11-2026.'

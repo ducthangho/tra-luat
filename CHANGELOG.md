@@ -109,6 +109,8 @@
   chốt đường thô; gói `.docx` chỉ nhận nén stored/deflate, không mã hoá (kiểm trước khi mở); `tl extract` thu hồi đúng và giữ lỗi gốc.
 - r44 (sau review offline lượt 43, đặc tả `ops/specs/llm-khoan-docx-r44.md`): `tl extract` lỗi vận hành (khởi động luồng, chờ tiến
   trình) trả rc 2 kèm báo cáo thu hồi; chỉ đóng ống khi không luồng nào còn giữ.
+- r45 (sau review offline lượt 44, đặc tả `ops/specs/llm-khoan-docx-r45.md`): bộ chạy `tl extract` theo một hợp đồng vòng đời —
+  ống ghi sổ ngay sau khi chạy tiến trình, luồng đọc và bước thu hồi giành quyền dùng ống qua một khoá; lỗi đọc giữ nguyên văn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

@@ -274,3 +274,5 @@ review_calls_limit: 45
 review_calls_used_truoc: 44
 inference_calls_limit: 0
 review_calls_ghi_chu: 'r34 dung 2; r35 dung 1 (bi ngat); r36-r43 moi ban 1; tong da dung 44. Tran 45. Chu kho 27-11-2026 chon dung loi goi cuoi; con P2 thi DUNG va bao.'
+da_bi_thay_the: llm-khoan-docx-r45-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 44; revision r45 (ops/specs/llm-khoan-docx-r45.md), tran 46 (quyet dinh chu kho).'

@@ -1,0 +1,23 @@
+# ai-dang-giu sau rut han lease bo-sinh-bat-bien-r1-g1-claude — 2026-11-27T01:31:11Z, clone moi, fetch '+refs/heads/*:refs/heads/*', HEAD master e209579adfca823926cdfad87579f360b7bacb26
+may chu 381 nhanh (ten+SHA) · cuc bo 381 · may chu co ma cuc bo thieu/lech: 0 · cuc bo thua: 0
+## ops/land_evidence_nguon_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp773-r1-g1-claude-20261016	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/wp773-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp773-r1-g1x-claude-20261018	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/wp773-r1-g1x-claude-20261018.yaml
+HẾT_HẠN	bo-sinh-bat-bien-r1-g1-claude	refs/heads/ops/bo-sinh-bat-bien-lease:ops/leases/bo-sinh-bat-bien-r1-g1-claude.yaml
+HẾT_HẠN	wp1236-b-r12-g1-claude-20261124	refs/heads/ops/wp1236-bc-lease:ops/leases/wp1236-b-r12-g1-claude-20261124.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/heads/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	land-evidence-l7-r1-g1-claude-remote-20261027	refs/heads/ops/wp748-r28-l7-lease:ops/leases/land-evidence-l7-r1-g1-claude-remote-20261027.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/gate_output_doi_chieu_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	bo-sinh-bat-bien-r1-g1-claude	refs/heads/ops/bo-sinh-bat-bien-lease:ops/leases/bo-sinh-bat-bien-r1-g1-claude.yaml
+HẾT_HẠN	wp1236-a1-r7-g1-claude-remote-20261106	refs/heads/ops/wp1236-a1-r7-g1-lease:ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
+HẾT_HẠN	wp1236-a-r10-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r10-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r11-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r11-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g2-codex-20261122	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g2-codex-20261122.yaml
+HẾT_HẠN	wp1236-a-r9-g1-claude-20261120	refs/heads/ops/wp1236-r9-a-lease:ops/leases/wp1236-a-r9-g1-claude-20261120.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

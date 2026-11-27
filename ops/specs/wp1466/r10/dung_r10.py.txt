@@ -1,0 +1,56 @@
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+t = open(src, encoding="utf-8").read()
+def rep(old, new, n=1):
+    global t
+    c = t.count(old); assert c == n, (old[:100], c); t = t.replace(old, new)
+NO = "INV-KHOA-BAN-SAO-DINH-CHU"
+rep("# wp1466 r9 —", "# wp1466 r10 —")
+rep("\nrevision: 9\n", "\nrevision: 10\n")
+rep("r9 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 9*. Lịch sử 18 lớp finding ở mục 19.",
+    "r9 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 9*. Revision 10 soạn ngày 26-11-2026, cùng người soạn, trên `origin/master` `695916ea3bfffdd7b2e8fcb94b0740b3c421fe70`, sau review mã exact-H lượt 1 (H `da4e876`, verdict `blocked`, ghi ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201334017) và sau hai quyết định của chủ kho ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201538748; r10 chỉ đổi những gì nêu ở mục 0, đoạn *Revision 10*. Lịch sử lớp finding ở mục 19.")
+# §0 lời hứa 3
+rep("có ĐÚNG MỘT bản hiển thị trong cả tệp, và đúng băm trên BYTE THÔ ghi trong mã",
+    "có ĐÚNG MỘT bản hiển thị đứng thành đơn vị cùng loại (trọn mục, hay khối) trong cả tệp, và đúng băm trên BYTE THÔ ghi trong mã")
+# bảng việc không thuộc wp1466: thêm dòng nợ mới
+old_row = "| verdict máy đọc theo lớp: lược đồ v2"
+rep(old_row, f"| đếm bản sao nguyên byte của một đơn vị khoá khi bản sao không đứng thành đơn vị cùng loại: dính chữ trên hay dưới, cách bằng dòng chỉ có khoảng trắng, trọn mục kèm đoạn nối, thẻ HTML giữa dòng | Issue #1469 | `{NO}` |\n" + old_row)
+# M3
+rep("không có đúng một bản hiển thị", "không có đúng một bản hiển thị đứng thành đơn vị cùng loại")
+# 8.3: phần đầu tệp trích hệ quả, và hệ quả chính
+rep('trái với hệ quả "nhân đôi nó ở chỗ hiển thị bất kỳ thì hỏng phép (3)"',
+    'trái với hệ quả "nhân đôi nó thành một đơn vị cùng loại ở chỗ hiển thị bất kỳ thì hỏng phép (3)"')
+rep("nhân đôi nó ở chỗ hiển thị bất kỳ thì hỏng phép (3).",
+    f"nhân đôi nó thành một đơn vị cùng loại (trọn mục, hay khối) ở chỗ hiển thị bất kỳ thì hỏng phép (3). Giới hạn, khai thẳng từ r10: bản sao nguyên byte KHÔNG đứng thành đơn vị cùng loại (dính chữ trên hay dưới trong cùng khối, cách bằng một dòng chỉ có khoảng trắng, trọn mục kèm một đoạn nối, thẻ HTML giữa dòng) không bị đếm, nên cổng xanh với nó; đó là nợ `{NO}`, giao cho Issue #1469 theo quyết định chủ kho. Không ca nào của wp1466 được đòi đỏ ở các dạng ấy.")
+# N4
+rep("nhân đôi nó ở chỗ hiển thị, hay đổi,", "nhân đôi nó thành một đơn vị cùng loại ở chỗ hiển thị, hay đổi,")
+# ADR khối: Q3 và Nợ
+rep("lần, khi đơn vị ở địa chỉ ấy lệch băm byte ghi trong mã hay có dòng nằm trong vùng không render, và khi còn một bản hiển\nthị khác mang cùng những byte ấy.",
+    "lần, khi đơn vị ở địa chỉ ấy lệch băm byte ghi trong mã hay có dòng nằm trong vùng không render, và khi còn một bản hiển\nthị khác mang cùng những byte ấy đứng thành đơn vị cùng loại (trọn mục, hay khối). Bản sao không đứng thành đơn vị cùng\nloại không bị đếm (nợ `" + NO + "`).")
+rep("  ca ở tệp khác không làm cổng đỏ. Giao cho Issue #1469.\n",
+    "  ca ở tệp khác không làm cổng đỏ. Giao cho Issue #1469.\n"
+    f"- `{NO}`: phép đếm bản sao của `doctrine-scan` chỉ thấy bản sao đứng thành trọn mục hay trọn khối; bản sao nguyên\n"
+    "  byte dính chữ trên hay dưới, cách bằng dòng chỉ có khoảng trắng, trọn mục kèm đoạn nối, hay thẻ HTML giữa dòng, không\n"
+    "  bị đếm. Giao cho Issue #1469.\n")
+# số tên nợ 27 -> 28
+rep("mục *Nợ* có 27 tên", "mục *Nợ* có 28 tên")
+rep("28 dòng bất biến, 27 tên nợ", "28 dòng bất biến, 28 tên nợ")
+# trần 450 -> 500
+rep("tổng dòng thêm ≤ 450;", "tổng dòng thêm ≤ 500 (`nang_tran` ADR-0053, quyết định E2 ở issuecomment-7201538748);")
+rep("hoặc tổng lớn hơn 450 ⇒", "hoặc tổng lớn hơn 500 ⇒")
+rep("Kích thước, đối chiếu `ADR-0053` (≤ 6 tệp, ≤ 450 dòng thêm).",
+    "Kích thước, đối chiếu `ADR-0053` (≤ 6 tệp, ≤ 450 dòng thêm; từ r10 trần dòng thêm của wp1466 là 500 theo `nang_tran` E2 ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201538748, phần nới để đóng lớp P3 `ca-id-chi-do-mot-gia-tri`).")
+# G8: yêu cầu ID thật + biên + đột biến chỉ nhận 99
+rep("`inv_bo_kiem_id_ngoai` → 6 · `inv_id_chi_dang_chuan` → 2 · `inv_id_khong_chuan_hoa` → 3 |",
+    "`inv_bo_kiem_id_ngoai` → 6 · `inv_id_chi_dang_chuan` → 2 · `inv_id_khong_chuan_hoa` → 3 · từ r10: thêm ca G8 cho ID thật (`INV-01`…`INV-28`) và các biên `00`, `01`, `09`, `10`, `28`, `98`, cùng một đột biến thu hẹp miền số của `_INV_ID_TRAN` về đúng `99` phải bị giết bởi các ca mới ấy (lớp P3 `ca-id-chi-do-mot-gia-tri`) |")
+# mục 0: đoạn Revision 10
+rep("\n## 1. `packet_id`",
+    "\n**Revision 10, sau review mã exact-H lượt 1: hai quyết định của chủ kho.** Review mã Codex lượt 1 trên H `da4e876` cho `blocked`: lớp P2 `phep-dem-ban-sao-khong-phu-ca-tep` (23 trên 43 biến thể bản sao nguyên byte không đứng thành đơn vị cho rc 0, trong khi ADR và đặc tả hứa \"ở chỗ hiển thị bất kỳ\"; đây là câu Q3 executor nêu từ lượt 1) và lớp P3 `ca-id-chi-do-mot-gia-tri` (sáu ca G8 đều dùng `INV-99`; đột biến chỉ nhận 99 sống). Hai quyết định, ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7201538748:\n\n"
+    f"1. Q3 (E3), \"Thu hẹp lời hứa, chuyển #1469 (Recommended)\": ADR-0068 (khối `adr`, đoạn Q3 và mục *Nợ*) và đặc tả (mục 0, M3, mục 8.3, N4) nói đúng phép (3) đo: bản hiển thị đứng thành đơn vị cùng loại. Phần bản sao không đứng thành đơn vị là nợ có tên `{NO}`, giao cho Issue #1469 (bảng đầu mục này). Mã của phép (3) không đổi. Theo protocol §8.3, chuyển biểu hiện ra ngoài phạm vi KHÔNG được tính là vá: lớp này sang bảng (ii) với thẩm quyền là quyết định trên.\n"
+    "2. E2, \"Nâng trần lên 500 dòng (Recommended)\": `nang_tran` ADR-0053 cho wp1466 lên 500 dòng thêm (mục 10, N12), để đóng lớp P3 bằng ca G8 cho ID thật và các biên cùng một đột biến thu hẹp miền số (mục 8.3, bảng G, dòng G8).\n\n"
+    "Những gì r10 không đổi: sáu khối protocol và bảy băm khoá (protocol không đổi so với r9), khối `do-pham-vi`, khối `so-dang-ky`, write set. Khối `adr` đổi ở đoạn Q3 và thêm một mục *Nợ*; dòng Trạng thái phải dẫn lần duyệt băm r10 (mục 8.1).\n\n## 1. `packet_id`")
+# mục 19
+rep("Hai đường vào, cả hai đã gặp: L12 ở bảng r8, L8 ở bản nháp của câu thêm ở r9.",
+    "Hai đường vào, cả hai đã gặp: L12 ở bảng r8, L8 ở bản nháp của câu thêm ở r9.\n\n"
+    f"**Review mã exact-H lượt 1 (H `da4e876`) và r10.** Verdict `blocked`. `phep-dem-ban-sao-khong-phu-ca-tep` · P2 (slug executor đặt ở lượt 1; cùng họ `khoa-khong-neo-vi-tri-va-duy-nhat`): chuyển sang bảng (ii), Issue #1469, nợ `{NO}`, thẩm quyền E3; KHÔNG ghi là đã vá. `ca-id-chi-do-mot-gia-tri` · P3 (mới): phải đóng trong wp1466 bằng ca và đột biến của dòng G8 (mục 8.3); không miễn. Theo §12 lớp đầu đã lặp trong họ của nó, nên cách làm đổi theo quyết định chủ kho thay vì vá tiếp.")
+open(dst, "w", encoding="utf-8").write(t)

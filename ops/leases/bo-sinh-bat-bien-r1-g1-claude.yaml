@@ -20,8 +20,8 @@ executor_session: 'phien Claude cloud moi do dieu phoi tao (create_session); id 
 executor_ghi_chu: 'Chot mien bo sinh ky tu va o cau truc trong ops/land_evidence_nguon_test.py (c36, c37) va ops/gate_output_doi_chieu_test.py (ca moi)'
 leased_at_utc: '2026-11-25T20:55:00Z'
 heartbeat_at: '2026-11-25T20:55:00Z'
-lease_until: '2026-11-27T20:55:00Z'
-lease_expires_at_utc: '2026-11-27T20:55:00Z'
+lease_until: '2026-11-27T01:31:00Z'
+lease_expires_at_utc: '2026-11-27T01:31:00Z'
 max_lease_hours: 48
 role: executor
 provider: claude
@@ -88,3 +88,13 @@ prohibited_actions:
 - workflow_dispatch
 - sua_ci_yml
 land_authority_note: 'audit uy quyen ADR-0067 tren exact head truoc merge; dieu phoi merge khi kiem-merge rc=0; cham E4/E5 thi chu kho duyet'
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi/land Claude session_015Gtxraj8uybNKhrrYZSKtB). Codex review ma: 5/5 loi goi (tran lease 4, chu kho nang them mot luot xac nhan issues/1539#issuecomment-7197354187; luot 5 approve 97ec968, issuecomment-7197552662). Kich thuoc 2 tep, +274 dong (tran 320). Windows local M3 xanh (issuecomment-7196524386).'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-27T20:55:00Z'
+  han_moi_utc: '2026-11-27T01:31:00Z'
+  chi_thi: 'Lan duyet M7 cua chu kho (ghi ho) issues/1539#issuecomment-7206098855: gom merge, thu bang chung hau merge, ghi so, nha lease, dong WP.'
+  ly_do: >-
+    Packet bo-sinh-bat-bien r1 g1 (#1539) da MERGE: PR #1565 (head 97ec9686184fdf55dc1736007e6fdcb186122465) merge commit e209579adfca823926cdfad87579f360b7bacb26 luc 2026-11-27T00:01:25Z; CI master 45914294573 tren e209579 success, bon moc §10.2.2 passed.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi Claude session_015Gtxraj8uybNKhrrYZSKtB'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

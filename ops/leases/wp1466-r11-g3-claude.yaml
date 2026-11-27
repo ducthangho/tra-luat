@@ -11,6 +11,7 @@ generation: 3
 lease_id: wp1466-r11-g3-claude
 thay_the_cho:
 - wp1466-r9-g2-claude
+da_bi_thay_the: wp1466-r11-g4-claude
 thay_the_cho_ghi_chu: 'Thay lease g2 (con han toi 2026-11-29T17:05Z) vi dac ta doi r9 -> r11 (PR #1566, merge 6a4f52d); g2 mang bia mo da_bi_thay_the; nhanh lease g1 va g2 duoc tua toi commit nay de moi ref mang bia mo'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7206141143

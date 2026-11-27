@@ -1,0 +1,28 @@
+{
+  "spec_mapping": {
+    "ai_nang": "ducthangho",
+    "can_cu": "Đóng lớp P3 `ca-id-chi-do-mot-gia-tri` của review mã exact-H lượt 1 bằng ca G8 cho ID thật và các biên cùng một đột biến thu hẹp miền số (mục 8.3, dòng G8). Đo 26-11-2026, nền `695916e`: H `da4e876` là 4 tệp, +443 −4, chỉ còn 7 dòng tới 450. Không tách được: ca và đột biến ấy kiểm chính chốt ID của cổng mà wp1466 thêm, và §1 của đặc tả đòi mọi P3 của packet phải đóng trong packet, không được miễn.",
+    "tran_cu": "ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tệp / <= 450 dòng thêm",
+    "tran_moi": "<= 6 tệp / <= 500 dòng thêm (write set của wp1466 vẫn đúng 4 tệp)"
+  },
+  "lease_mapping": {
+    "ai_nang": "ducthangho",
+    "ai_nang_ghi_chu": "chu kho, protocol §2; quyet dinh E2 Nang tran len 500 dong, ghi ho o issuecomment-7201538748",
+    "can_cu": "Dong lop P3 ca-id-chi-do-mot-gia-tri bang ca G8 cho ID that va bien cung dot bien thu hep mien so (dac ta r11 muc 8.3 dong G8). Do 26-11-2026 tren nen 695916e: H da4e876 4 tep +443 -4, con 7 dong toi 450. Khong tach duoc: ca va dot bien kiem chinh chot ID cua cong ma wp1466 them; dac ta muc 1 doi moi P3 dong trong packet.",
+    "tran_cu": "ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tep / <= 450 dong them",
+    "tran_moi": "<= 6 tep / <= 500 dong them (write set van dung 4 tep)"
+  },
+  "mapping_equal": false,
+  "value_diff_keys": [
+    "can_cu",
+    "tran_cu",
+    "tran_moi"
+  ],
+  "extra_keys": [
+    "ai_nang_ghi_chu"
+  ],
+  "candidate_matches_spec": true,
+  "other_fields_unchanged": true,
+  "authority_same": true,
+  "numeric_limits_same": false
+}

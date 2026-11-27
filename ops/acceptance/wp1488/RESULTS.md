@@ -330,3 +330,20 @@ stdout-LF" (issuecomment-7205822618). Bản vá `02ddc74` chỉ đổi `.claude/
 Cổng trên `02ddc74da4cb6af2c7527b280dd04e61bdea5e6e` (mã cuối; commit sau chỉ đổi tệp này), hai vế cùng một lệnh
 23:49Z–00:17Z: master `b1db694` 455/455 · 801/801; `02ddc74` 456/456 · **840/840** (cùng 7 không đo được); `tl.py --selftest`
 1789/1789 rc 0; `git diff --check` rc 0; ruff/shellcheck/doctrine-scan như master.
+
+### 11.2 Sau Codex lượt 10 (F1488-L10-01, checkpoint M1/§12)
+
+Codex lượt 10 (`f29d5e7`, `run_id` `b7a52a79…`) `changes_requested`, 0 P0–P2: F1488-L9-01 A/B/C xác nhận ĐÃ VÁ THẬT; mới
+F1488-L10-01 (lớp `phep-do-khong-do-dieu-khai`): ca R/U chỉ kiểm kết quả từ chối cuối, chưa bắt dùng dữ liệu trước chốt ở
+kênh và `cygpath -u`. Tỷ lệ đóng lớp 0/2 hai chuyển tiếp ⇒ checkpoint; chủ kho chọn "Vá theo ma trận, lượt 11"
+(issuecomment-7207009931). Bản vá `56eb938` chỉ đổi `.claude/dev/launcher_test.py`:
+
+- (G) ma trận nguồn × consumer: dữ liệu bị từ chối chỉ tới thư mục THẬT (NUL sau `tr` thành 0x01 trùng đúng tên) chứa công
+  cụ ghi dấu — kênh (`rm`, trap EXIT tìm qua PATH): 2 nhãn × NUL/SOH × `$GITHUB_PATH` đặt/rỗng/vắng; `cygpath -u` (`rg`, bộ
+  chọn thử công cụ): NUL/SOH/LF. Mỗi ô đòi đúng mã từ chối, tệp đích rỗng, dấu VẮNG.
+- Đột biến của reviewer: `wp1488_sh_kenh_dung_truoc_chot` chết ở (G-kenh-DICH-NUL-dat) — rc 7 đúng mà dấu có;
+  `wp1488_sh_u_dung_truoc_chot` chết ở (G-u-NUL) — rc 1 đúng mà dấu có.
+
+Cổng trên `56eb9380f5d57f433985d2970053ac5ba9f58f5c` (mã cuối; commit sau chỉ đổi tệp này), hai vế cùng một lệnh
+01:09Z–01:39Z: master `b1db694` 455/455 · 801/801; `56eb938` 456/456 · **842/842** (cùng 7 không đo được); `tl.py --selftest`
+1789/1789 rc 0; `git diff --check` rc 0; ruff/shellcheck/doctrine-scan như master.
